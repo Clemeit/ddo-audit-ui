@@ -1,7 +1,7 @@
-import React from "react";
+import React from "react"
 
 const FakePage3 = () => {
-	return <div>FakePage3</div>;
-};
+    return <div>FakePage3</div>
+}
 
-export default FakePage3;
+export default FakePage3
