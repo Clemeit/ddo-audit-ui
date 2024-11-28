@@ -25,7 +25,7 @@ const Banner = ({ title, subtitle, showButtons, miniature, hideOnMobile }) => {
     }
 
     return isMobile && hideOnMobile ? null : (
-        <div className={`banner ${miniature === true && "miniature"}`}>
+        <div className={`banner ${miniature ? "miniature" : ""}`}>
             <div className="content">
                 <h1 className="title">{title}</h1>
                 <h2 className="subtitle">{subtitle}</h2>

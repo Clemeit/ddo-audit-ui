@@ -4,14 +4,17 @@ import { RouterProvider } from "react-router-dom"
 import "./index.css"
 import reportWebVitals from "./reportWebVitals"
 import browserRouter from "./browserRouter.tsx"
-import { ThemeProvider } from "./components/app/ThemeContext.tsx"
+import { ThemeProvider } from "./contexts/ThemeContext.tsx"
+import { HelmetProvider } from "react-helmet-async"
 
 const root = ReactDOM.createRoot(document.getElementById("root")!)
 root.render(
     <React.StrictMode>
-        <ThemeProvider>
-            <RouterProvider router={browserRouter} />
-        </ThemeProvider>
+        <HelmetProvider>
+            <ThemeProvider>
+                <RouterProvider router={browserRouter} />
+            </ThemeProvider>
+        </HelmetProvider>
     </React.StrictMode>
 )
 

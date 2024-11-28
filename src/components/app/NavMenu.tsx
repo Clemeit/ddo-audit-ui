@@ -1,4 +1,5 @@
-import React from "react"
+import React, { useState, useEffect } from "react"
+import { useLocation } from "react-router-dom"
 import { Link } from "react-router-dom"
 import "./NavMenu.css"
 import { ReactComponent as HomeSVG } from "../../assets/svg_icons/home.svg"
@@ -10,8 +11,19 @@ import { ReactComponent as WhoSVG } from "../../assets/svg_icons/who.svg"
 import { ReactComponent as GroupingSVG } from "../../assets/svg_icons/grouping.svg"
 
 const NavMenu = () => {
+    const location = useLocation()
+    const [scrollPosition, setScrollPosition] = useState(0)
+
+    useEffect(() => {
+        const handleScroll = () => setScrollPosition(window.scrollY)
+        window.addEventListener("scroll", handleScroll)
+        return () => window.removeEventListener("scroll", handleScroll)
+    }, [])
+
+    useEffect(() => {}, [location])
+
     return (
-        <nav>
+        <nav className={`nav-menu ${scrollPosition > 80 ? "solid" : ""}`}>
             <Link to="/" className="nav-item active">
                 <HomeSVG />
                 <span>Home</span>
@@ -32,11 +44,11 @@ const NavMenu = () => {
                 <WhoSVG />
                 <span>Who</span>
             </Link>
-            <Link to="/lazypage1" className="nav-item">
+            <Link to="/lazypage1" className="nav-item hide-on-mobile">
                 <TrendsSVG />
                 <span>Trends</span>
             </Link>
-            <Link to="/lazypage1" className="nav-item">
+            <Link to="/lazypage1" className="nav-item hide-on-mobile">
                 <AboutSVG />
                 <span>About</span>
             </Link>
