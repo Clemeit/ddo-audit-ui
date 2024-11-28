@@ -1,25 +1,92 @@
 {
     "short_name": "DDO Audit",
     "name": "DDO Audit",
+    "description": "Real-time Player Concurrency Data and LFM Viewer",
     "icons": [
         {
-            "src": "favicon.ico",
-            "sizes": "64x64 32x32 24x24 16x16",
-            "type": "image/x-icon"
+            "src": "/icons/logo.svg",
+            "sizes": "any",
+            "type": "image/svg+xml"
         },
         {
-            "src": "logo192.png",
-            "type": "image/png",
-            "sizes": "192x192"
+            "src": "/icons/logo-192px.png",
+            "sizes": "192x192",
+            "type": "image/png"
         },
         {
-            "src": "logo512.png",
-            "type": "image/png",
-            "sizes": "512x512"
+            "src": "/icons/logo-512px.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        },
+        {
+            "src": "/icons/android-chrome-192x192.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "/icons/android-chrome-512x512.png",
+            "sizes": "512x512",
+            "type": "image/png"
         }
     ],
-    "start_url": ".",
+    "shortcuts": [
+        {
+            "name": "Servers",
+            "short_name": "Servers",
+            "description": "Check server status",
+            "url": "/servers",
+            "icons": [
+                {
+                    "src": "/icons/servers-192px.png",
+                    "sizes": "192x192",
+                    "type": "image/png"
+                },
+                {
+                    "src": "/icons/servers-512px.png",
+                    "sizes": "512x512",
+                    "type": "image/png"
+                }
+            ]
+        },
+        {
+            "name": "Grouping",
+            "short_name": "Grouping",
+            "description": "Live LFM viewer",
+            "url": "/grouping",
+            "icons": [
+                {
+                    "src": "/icons/grouping-192px.png",
+                    "sizes": "192x192",
+                    "type": "image/png"
+                },
+                {
+                    "src": "/icons/grouping-512px.png",
+                    "sizes": "512x512",
+                    "type": "image/png"
+                }
+            ]
+        },
+        {
+            "name": "Who",
+            "short_name": "Who",
+            "description": "Lookup players",
+            "url": "/who",
+            "icons": [
+                {
+                    "src": "/icons/who-192px.png",
+                    "sizes": "192x192",
+                    "type": "image/png"
+                },
+                {
+                    "src": "/icons/who-512px.png",
+                    "sizes": "512x512",
+                    "type": "image/png"
+                }
+            ]
+        }
+    ],
+    "start_url": "/",
     "display": "standalone",
-    "theme_color": "#000000",
-    "background_color": "#ffffff"
+    "theme_color": "#232323",
+    "background_color": "#232323"
 }
