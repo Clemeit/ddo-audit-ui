@@ -1,0 +1,54 @@
+.banner {
+	width: 100%;
+	height: 500px;
+	background-image: linear-gradient(
+			to bottom,
+			rgba(97, 97, 97, 0.466),
+			rgba(15, 15, 15, 0.774)
+		),
+		url("../../assets/webp/banner.webp");
+	background-position: center;
+	background-repeat: no-repeat;
+	background-size: cover;
+}
+
+.banner.miniature {
+	height: 175px;
+}
+
+.banner .content {
+	position: initial;
+	height: 100%;
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	gap: 10px;
+	box-sizing: border-box;
+}
+
+.banner .title,
+.banner .subtitle {
+	color: var(--white);
+	text-shadow: 0 0 10px var(--black);
+	margin: 0px 10px;
+	text-align: center;
+	user-select: none;
+}
+
+.banner .title {
+	font-size: 3rem;
+}
+
+.banner .subtitle {
+	font-size: 1.8rem;
+}
+
+.banner .call-to-action-container {
+	box-sizing: border-box;
+	display: flex;
+	flex-direction: row;
+	gap: 10px;
+	padding: 10px;
+}

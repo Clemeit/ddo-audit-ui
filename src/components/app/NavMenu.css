@@ -1,0 +1,37 @@
+nav {
+	display: flex;
+	flex-direction: row;
+	position: fixed;
+	z-index: 1;
+	margin-top: 5px;
+}
+
+.nav-item {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	gap: 5px;
+	padding: 10px 15px;
+}
+
+.nav-item svg {
+	width: 30px;
+	height: 30px;
+}
+
+.light-theme .svg-invertible {
+	filter: invert() !important;
+}
+
+.nav-item.active svg,
+.nav-item.active span,
+.nav-item:hover svg,
+.nav-item:hover span {
+	text-decoration: underline;
+	filter: drop-shadow(0 0 7px var(--white));
+}
+
+nav a {
+	color: white;
+	text-decoration: none;
+}
