@@ -2,6 +2,7 @@ import React from "react"
 import NavigationCard from "../global/NavigationCard.tsx"
 import ContentCluster from "../global/ContentCluster.tsx"
 import { Helmet } from "react-helmet-async"
+import Badge from "../global/Badge.tsx"
 
 const Directory = () => {
     return (
@@ -38,6 +39,7 @@ const Directory = () => {
                     <NavigationCard type="who" />
                     <NavigationCard type="friends" />
                     <NavigationCard type="registration" />
+                    <NavigationCard type="verification" />
                     <NavigationCard type="timers" />
                 </div>
             </ContentCluster>

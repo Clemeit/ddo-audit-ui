@@ -12,8 +12,10 @@ import { ReactComponent as TrendsSVG } from "../../assets/svg_icons/trends.svg"
 import { ReactComponent as AboutSVG } from "../../assets/svg_icons/about.svg"
 import { ReactComponent as ApiSVG } from "../../assets/svg_icons/api.svg"
 import { ReactComponent as FeedbackSVG } from "../../assets/svg_icons/feedback.svg"
-import { ReactComponent as RegisterSVG } from "../../assets/svg_icons/register.svg"
+import { ReactComponent as RegistrationSVG } from "../../assets/svg_icons/registration.svg"
+import { ReactComponent as VerificationSVG } from "../../assets/svg_icons/verification.svg"
 import { ReactComponent as TimerSVG } from "../../assets/svg_icons/timer.svg"
+import { Link } from "react-router-dom"
 
 const typeToTitleMap = {
     live: "Quick Info",
@@ -25,6 +27,7 @@ const typeToTitleMap = {
     transfers: "Server Transfers",
     friends: "Friends List",
     registration: "Register Characters",
+    verification: "Verify Characters",
     timers: "Raid Timers",
     about: "About This Project",
     api: "API",
@@ -43,6 +46,7 @@ const typeToDescriptionMap = {
     friends: "See what your friends are up to with your own friends list.",
     registration:
         "Add your characters for automatic LFM filtering and raid tracking.",
+    verification: "Verify your characters to access detailed information.",
     timers: "View and manage your current raid timers.",
     about: "Everything you wanted to know about this project and more.",
     api: "Pull back the curtain. Access the data for your own use.",
@@ -59,22 +63,24 @@ const typeToIconMap = {
     who: <WhoSVG />,
     transfers: <TransferSVG />,
     friends: <FriendsSVG />,
-    registration: <RegisterSVG />,
+    registration: <RegistrationSVG />,
+    verification: <VerificationSVG />,
     timers: <TimerSVG />,
     about: <AboutSVG />,
     api: <ApiSVG />,
     suggestions: <FeedbackSVG />,
 }
 
-const NavigationCard = ({ type }) => {
+const NavigationCard = ({ type, badge }) => {
     return (
-        <button className="navigation-card">
+        <Link to={type} className="navigation-card">
             <h4>
                 {typeToIconMap[type]}
                 {typeToTitleMap[type]}
+                {badge}
             </h4>
             <p>{typeToDescriptionMap[type]}</p>
-        </button>
+        </Link>
     )
 }
 
@@ -89,11 +95,13 @@ NavigationCard.propTypes = {
         "transfers",
         "friends",
         "registration",
+        "verification",
         "timers",
         "about",
         "api",
         "suggestions",
     ]),
+    badge: PropTypes.node,
 }
 
 export default NavigationCard

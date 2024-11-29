@@ -14,11 +14,11 @@
 
 @media (max-width: 1800px) {
     .content-cluster {
-        max-width: 1400px;
+        max-width: 1500px;
     }
 }
 
-@media (max-width: 1500px) {
+@media (max-width: 1600px) {
     .content-cluster {
         max-width: 1100px;
     }

@@ -10,14 +10,16 @@ import App from "./components/app/App.tsx"
 import Directory from "./components/directory/Directory.tsx"
 
 // Lazy load uncommon pages
-// const LazyPage1 = lazy(() => import("./LazyPage1"))
+const Verification = lazy(
+    () => import("./components/verification/Verification.tsx")
+)
 
 // Set up the router
 export default createBrowserRouter(
     createRoutesFromElements(
         <Route path="/" element={<App />}>
             <Route index element={<Directory />} />
-            {/* <Route path="/fakepage1" element={<FakePage1 />} /> */}
+            <Route path="/verification" element={<Verification />} />
         </Route>
     )
 )
