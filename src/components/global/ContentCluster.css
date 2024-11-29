@@ -12,6 +12,14 @@
     margin-top: 0;
 }
 
+.content-cluster {
+    font-size: 1.3rem;
+}
+
+.content-cluster p {
+    text-align: justify;
+}
+
 @media (max-width: 1800px) {
     .content-cluster {
         max-width: 1500px;

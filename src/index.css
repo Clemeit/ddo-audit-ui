@@ -80,13 +80,6 @@ hr {
     color: var(--text);
 }
 
-.page {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 40px 20px 0 20px;
-}
-
 .nav-card-cluster {
     display: flex;
     flex-direction: row;
@@ -99,11 +92,11 @@ hr {
         font-size: 12px;
     }
 
-    .page {
-        padding: 10px;
-    }
-
     .hide-on-mobile {
         display: none !important;
     }
+}
+
+.orange-text {
+    color: var(--orange1);
 }

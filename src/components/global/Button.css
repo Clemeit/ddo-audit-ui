@@ -1,58 +1,73 @@
 .button {
-	background-color: white;
-	padding: 10px 20px;
-	border-radius: 5px;
-	border: none;
-	font-size: 1.1rem;
-	text-align: center;
-	cursor: pointer;
-	transition: box-shadow 250ms;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	gap: 10px;
+    background-color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    border: none;
+    font-size: 1.1rem;
+    text-align: center;
+    cursor: pointer;
+    transition: box-shadow 250ms;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
 }
 
 .button > span {
-	color: black;
+    color: black;
 }
 
 .button:hover {
-	box-shadow: 0px 0px 10px 0px white;
+    box-shadow: 0px 0px 10px 0px white;
 }
 
 .button.secondary {
-	background-color: var(--background);
-	color: white;
-	border: 1px solid white;
+    background-color: var(--background);
+    color: white;
+    border: 1px solid white;
 }
 
 .button.secondary > span {
-	color: white;
+    color: white;
 }
 
 .button.secondary.donate {
-	transition: box-shadow 250ms, border 250ms;
+    transition:
+        box-shadow 250ms,
+        border 250ms;
 }
 
 .button.secondary.donate:hover {
-	border: 1px solid var(--orange4);
-	box-shadow: 0px 0px 10px 0px var(--orange4);
+    border: 1px solid var(--orange4);
+    box-shadow: 0px 0px 10px 0px var(--orange4);
 }
 
 .button.secondary.donate svg {
-	fill: var(--orange4);
+    fill: var(--orange4);
 }
 
 .button.tertiary {
-	background-color: transparent;
-	border: none;
+    background-color: transparent;
+    border: none;
 }
 
 .button.tertiary > span {
-	color: white;
+    color: white;
 }
 
 .button.tertiary:hover {
-	box-shadow: none;
+    box-shadow: none;
+}
+
+.button.disabled span {
+    color: var(--gray3);
+}
+
+.button.disabled:hover {
+    box-shadow: none;
+}
+
+.button.disabled {
+    border: 1px solid var(--gray3);
+    cursor: auto;
 }

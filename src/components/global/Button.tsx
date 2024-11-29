@@ -5,9 +5,9 @@ import "./Button.css"
 const Button = ({ text, icon, onClick, disabled, className, type, style }) => {
     return (
         <button
-            onClick={onClick}
+            onClick={() => !disabled && onClick()}
             disabled={disabled}
-            className={`button ${type} ${className}`}
+            className={`button ${type} ${className} ${disabled ? "disabled" : ""}`}
             style={style}
         >
             {icon && <span className="icon">{icon}</span>}
