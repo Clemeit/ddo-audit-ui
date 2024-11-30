@@ -73,7 +73,7 @@ const typeToIconMap = {
 
 const NavigationCard = ({ type, badge }) => {
     return (
-        <Link to={type} className="navigation-card">
+        <Link to={`/${type}`} className="navigation-card">
             <h4>
                 {typeToIconMap[type]}
                 {typeToTitleMap[type]}

@@ -7,9 +7,9 @@ const bannerRouteMapping = {
     },
     "/live": {
         title: "Live",
-        subtitle: "Server Statys and Quick Info",
+        subtitle: "Server Status and Quick Info",
         miniature: true,
-        showButtons: true,
+        showButtons: false,
     },
     "/servers": {
         title: "Servers",

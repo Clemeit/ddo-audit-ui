@@ -9,6 +9,8 @@ import Page2 from "./Page2.tsx"
 import Page3 from "./Page3.tsx"
 import { useLocation } from "react-router-dom"
 import { getCharacterById } from "../../services/characterService.ts"
+import ContentCluster from "../global/ContentCluster.tsx"
+import NavigationCard from "../global/NavigationCard.tsx"
 
 const VerificationPage = () => {
     const location = useLocation()
@@ -66,6 +68,11 @@ const VerificationPage = () => {
                     character={currentCharacter}
                 />
             )}
+            <ContentCluster title="See Also">
+                <div className="nav-card-cluster">
+                    <NavigationCard type="registration" />
+                </div>
+            </ContentCluster>
         </Page>
     )
 }

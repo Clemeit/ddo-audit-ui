@@ -8,6 +8,7 @@ import {
 // Import common pages
 import App from "./components/app/App.tsx"
 import Directory from "./components/directory/Directory.tsx"
+import Live from "./components/live/Live.tsx"
 
 // Lazy load uncommon pages
 const Verification = lazy(
@@ -22,6 +23,7 @@ export default createBrowserRouter(
     createRoutesFromElements(
         <Route path="/" element={<App />}>
             <Route index element={<Directory />} />
+            <Route path="/live" element={<Live />} />
             <Route path="/verification" element={<Verification />} />
             <Route path="/registration" element={<Registration />} />
         </Route>

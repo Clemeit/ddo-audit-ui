@@ -6,7 +6,7 @@ import { ReactComponent as Checkmark } from "../../assets/svg/checkmark.svg"
 // @ts-ignore
 import { ReactComponent as X } from "../../assets/svg/x.svg"
 import { Verification, AccessToken } from "../../models/Verification.ts"
-import { getVerificationChallengeByCharacterId } from "../../services/verificationServer.ts"
+import { getVerificationChallengeByCharacterId } from "../../services/verificationService.ts"
 import { Link } from "react-router-dom"
 
 const Page3 = ({

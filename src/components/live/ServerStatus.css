@@ -1,0 +1,22 @@
+.server-status-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 20px;
+    row-gap: 5px;
+}
+
+.server-status {
+    display: flex;
+    gap: 5px;
+}
+
+@media (max-width: 768px) {
+    .server-status-container {
+        flex-direction: column;
+        align-items: start;
+        margin-left: 10px;
+        row-gap: 0;
+    }
+}
