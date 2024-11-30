@@ -1,21 +1,26 @@
 import React, { useEffect } from "react"
 import { useLocation, useNavigate } from "react-router-dom"
 
-const usePagination = ({ useQueryParams, clearOtherQueryParams } : { useQueryParams: boolean, clearOtherQueryParams: boolean } = { useQueryParams: false, clearOtherQueryParams: false }) => {
+const usePagination = ({ useQueryParams, clearOtherQueryParams, maxPage } : { useQueryParams: boolean, clearOtherQueryParams: boolean, maxPage: number } = { useQueryParams: false, clearOtherQueryParams: false, maxPage: 99 }) => {
     const location = useLocation()
     const navigate = useNavigate()
     const [currentPage, setCurrentPage] = React.useState(1)
 
     useEffect(() => {
-        const frame = new URLSearchParams(location.search).get("page")
-        if (frame) {
-            setCurrentPage(parseInt(frame))
+        const pageNumberParam = new URLSearchParams(location.search).get("page")
+        if (pageNumberParam) {
+            const pageNumber = parseInt(pageNumberParam)
+            if (pageNumber > maxPage) {
+                setCurrentPage(maxPage)
+            } else {
+                setCurrentPage(pageNumber)
+            }
         } else {
             setCurrentPage(1)
         }
     }, [location.search])
 
-    const setPage = (frame: number) => {
+    const setPage = (pageNumber: number) => {
         const searchParams = new URLSearchParams(location.search)
         if (clearOtherQueryParams) {
             // delete all other query params
@@ -26,14 +31,14 @@ const usePagination = ({ useQueryParams, clearOtherQueryParams } : { useQueryPar
             }
         }
         if (useQueryParams) {
-            if (frame === 1) {
+            if (pageNumber === 1) {
                 searchParams.delete("page")
             } else {
-                searchParams.set("page", frame.toString())
+                searchParams.set("page", pageNumber.toString())
             }
             navigate(`${location.pathname}?${searchParams.toString()}`)
         } else {
-            setCurrentPage(frame)
+            setCurrentPage(pageNumber)
         }
     }
 

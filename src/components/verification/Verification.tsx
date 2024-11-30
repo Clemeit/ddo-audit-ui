@@ -15,6 +15,7 @@ const VerificationPage = () => {
     const { currentPage, setPage } = usePagination({
         useQueryParams: true,
         clearOtherQueryParams: true,
+        maxPage: 3,
     })
 
     const [currentCharacter, setCurrentCharacter] = useState<Character | null>(
