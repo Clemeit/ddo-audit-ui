@@ -79,7 +79,7 @@ const Page2 = ({
     return (
         <>
             {!character && (
-                <ContentCluster title="Verify Character">
+                <ContentCluster title="Oops! Something Went Wrong">
                     <p>
                         To verify a character, head over to the{" "}
                         <Link className="link" to="/verification">
@@ -105,9 +105,10 @@ const Page2 = ({
                             {character?.server_name || "the game"}
                         </span>{" "}
                         and enter the following text in the Public Comment field
-                        found in the Social Panel. There's nothing special about
-                        this text. It's just a random code to verify that you
-                        have access to the character.
+                        found at the bottom of the Who tab in the Social Panel.
+                        There's nothing special about this text. It's just a
+                        random code to verify that you have access to the
+                        character.
                     </p>
                     <code className="verification-code">
                         {verificationChallenge?.challenge_word || (
@@ -140,8 +141,8 @@ const Page2 = ({
                             )}
                         </li>
                         <li>
-                            <strong>Step 3:</strong> Verification code is
-                            entered in the Public Comment field{" "}
+                            <strong>Step 3:</strong> Code is entered in the
+                            Public Comment field on the Who tab{" "}
                             {verificationChallenge &&
                             verificationChallenge.challenge_word_match ? (
                                 <Checkmark className="step-icon" />
@@ -151,8 +152,8 @@ const Page2 = ({
                         </li>
                     </ul>
                     <p className="secondary-text">
-                        This page will automatically refresh. DO NOT REFRESH
-                        THIS PAGE.
+                        This page will automatically refresh. Do not refresh
+                        this page.
                     </p>
                     <Spacer size="10px" />
                     <Stack gap="10px" fullWidth justify="space-between">

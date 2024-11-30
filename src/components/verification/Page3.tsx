@@ -89,7 +89,7 @@ const Page3 = ({
     return (
         <>
             {!character && (
-                <ContentCluster title="Verify Character">
+                <ContentCluster title="Oops! Something Went Wrong">
                     <p>
                         To verify a character, head over to the{" "}
                         <Link className="link" to="/verification">
@@ -116,8 +116,8 @@ const Page3 = ({
                     <p>Here's the checklist:</p>
                     <ul>
                         <li>
-                            <strong>Step 1:</strong> Verification code has been
-                            removed from the Public Comment field{" "}
+                            <strong>Step 1:</strong> Code has been removed from
+                            the Public Comment field{" "}
                             {verificationChallenge &&
                             !verificationChallenge.challenge_word_match ? (
                                 <Checkmark className="step-icon" />
@@ -127,7 +127,8 @@ const Page3 = ({
                         </li>
                     </ul>
                     <p className="secondary-text">
-                        This page will automatically refresh.
+                        This page will automatically refresh. Do not refresh
+                        this page.
                     </p>
                 </ContentCluster>
             )}
