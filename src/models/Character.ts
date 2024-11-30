@@ -44,3 +44,11 @@ interface Character {
     last_updated?: string;
     last_saved?: string;
 }
+
+export {
+    Character,
+    CharacterClass,
+    CharacterLocation,
+    CharacterActivity,
+    CharacterActivityType,
+}

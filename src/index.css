@@ -40,12 +40,12 @@
     --short-push-height: 175px;
 }
 
-.light-theme {
+/* .light-theme {
     --background: var(--white);
     --text: var(--black);
     --secondary-text: var(--gray6);
     --nav-menu-item-highlight: var(--highlight-blue-1);
-}
+} */
 
 .dark-theme {
     --background: var(--gray8);
@@ -53,6 +53,7 @@
     --soft-highlight: var(--gray7);
     --shadow: var(--gray9);
     --text: var(--white);
+    --text-inverted: var(--black);
     --secondary-text: var(--gray3);
     --nav-menu-item-highlight: var(--white);
 }
@@ -99,4 +100,69 @@ hr {
 
 .orange-text {
     color: var(--orange1);
+}
+
+input {
+    color: var(--text-inverted);
+    padding: 2px 5px;
+    font-size: 1rem;
+}
+
+input.large {
+    font-size: 1.3rem;
+}
+
+select {
+    background-color: var(--text);
+    color: var(--text-inverted);
+    padding: 2px 5px;
+    font-size: 1rem;
+}
+
+select.large {
+    font-size: 1.3rem;
+}
+
+select option {
+    background-color: var(--text);
+    color: var(--text-inverted);
+}
+
+.full-width {
+    width: 100%;
+}
+
+table {
+    width: 100%;
+    text-align: left;
+    border-collapse: collapse;
+    margin: 25px 0;
+    box-shadow: 0 0 20px var(--shadow);
+}
+
+table .no-data-row {
+    text-align: center;
+    padding: 10px 0;
+}
+
+table thead tr {
+    background-color: var(--gray6);
+    text-align: left;
+}
+
+table th,
+table td {
+    padding: 6px 7px;
+}
+
+table tbody tr:nth-of-type(even) {
+    background-color: var(--gray7);
+}
+
+table tbody tr:last-of-type {
+    border-bottom: 5px solid var(--gray6);
+}
+
+.secondary-text {
+    color: var(--secondary-text);
 }

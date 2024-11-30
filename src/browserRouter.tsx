@@ -13,6 +13,9 @@ import Directory from "./components/directory/Directory.tsx"
 const Verification = lazy(
     () => import("./components/verification/Verification.tsx")
 )
+const Registration = lazy(
+    () => import("./components/registration/Registration.tsx")
+)
 
 // Set up the router
 export default createBrowserRouter(
@@ -20,6 +23,7 @@ export default createBrowserRouter(
         <Route path="/" element={<App />}>
             <Route index element={<Directory />} />
             <Route path="/verification" element={<Verification />} />
+            <Route path="/registration" element={<Registration />} />
         </Route>
     )
 )

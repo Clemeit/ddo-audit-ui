@@ -6,8 +6,8 @@ const ContentCluster = ({ title, subtitle, link, showLink, children }) => {
     return (
         <div className="content-cluster">
             <h2>{title}</h2>
-            {subtitle && <h3>{subtitle}</h3>}
             <hr />
+            {subtitle && <p className="subtitle">{subtitle}</p>}
             <div className="content">{children}</div>
         </div>
     )

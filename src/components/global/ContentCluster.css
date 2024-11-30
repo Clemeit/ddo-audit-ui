@@ -12,11 +12,15 @@
     margin-top: 0;
 }
 
-.content-cluster {
+.content-cluster > * {
     font-size: 1.3rem;
 }
 
-.content-cluster p {
+.content-cluster .subtitle {
+    color: var(--secondary-text);
+}
+
+.content-cluster .content > p {
     text-align: justify;
 }
 

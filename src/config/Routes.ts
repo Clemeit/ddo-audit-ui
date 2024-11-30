@@ -47,6 +47,12 @@ const bannerRouteMapping = {
         miniature: true,
         showButtons: false,
     },
+    "/registration": {
+        title: "Registration",
+        subtitle: "Register Your Characters",
+        miniature: true,
+        showButtons: false,
+    },
 }
 
 export { bannerRouteMapping }

@@ -3,7 +3,7 @@ import PropTypes from "prop-types"
 import { useNavigate } from "react-router-dom"
 import "../../index.css"
 import "./Banner.css"
-import { ReactComponent as GiftSVG } from "../../assets/svg_icons/gift.svg"
+import { ReactComponent as GiftSVG } from "../../assets/svg/gift.svg"
 import Button from "../global/Button.tsx"
 import useIsMobile from "../../hooks/useIsMobile.ts"
 

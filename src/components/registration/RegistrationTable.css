@@ -1,0 +1,29 @@
+.status-column {
+    width: 84px;
+    height: 42px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.character-status-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+}
+
+.options-cell {
+    cursor: pointer;
+}
+
+.options-cell.disabled {
+    cursor: unset;
+}
+
+.options-cell > svg {
+    fill: var(--gray3);
+}
+
+.options-cell:hover > svg {
+    fill: var(--gray1);
+}

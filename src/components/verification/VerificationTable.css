@@ -1,0 +1,7 @@
+.status-column {
+    width: 84px;
+    height: 42px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}

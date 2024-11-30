@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react"
 import NavMenu from "./NavMenu.tsx"
 import Banner from "./Banner.tsx"
 import { useLocation } from "react-router-dom"
-import { bannerRouteMapping } from "../../config/Routes.ts"
+import { bannerRouteMapping } from "../../config/routes.ts"
 
 const Header = () => {
     const location = useLocation()
