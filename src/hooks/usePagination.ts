@@ -1,7 +1,7 @@
 import React, { useEffect } from "react"
 import { useLocation, useNavigate } from "react-router-dom"
 
-const usePagination = () => {
+const usePagination = ({ useQueryParams, clearOtherQueryParams } : { useQueryParams: boolean, clearOtherQueryParams: boolean } = { useQueryParams: false, clearOtherQueryParams: false }) => {
     const location = useLocation()
     const navigate = useNavigate()
     const [currentPage, setCurrentPage] = React.useState(1)
@@ -17,13 +17,24 @@ const usePagination = () => {
 
     const setPage = (frame: number) => {
         const searchParams = new URLSearchParams(location.search)
-        if (frame === 1) {
-            searchParams.delete("page")
-        } else {
-            searchParams.set("page", frame.toString())
+        if (clearOtherQueryParams) {
+            // delete all other query params
+            for (const key of searchParams.keys()) {
+                if (key !== "page") {
+                    searchParams.delete(key)
+                }
+            }
         }
-        navigate(`${location.pathname}?${searchParams.toString()}`)
-        setCurrentPage(frame)
+        if (useQueryParams) {
+            if (frame === 1) {
+                searchParams.delete("page")
+            } else {
+                searchParams.set("page", frame.toString())
+            }
+            navigate(`${location.pathname}?${searchParams.toString()}`)
+        } else {
+            setCurrentPage(frame)
+        }
     }
 
     return { currentPage, setPage }

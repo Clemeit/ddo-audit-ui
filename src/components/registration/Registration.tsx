@@ -16,6 +16,7 @@ import {
 import InputValidationMessage from "../global/InputValidationMessage.tsx"
 // import status codes axios
 import { HttpStatusCode } from "axios"
+import { AccessToken } from "../../models/Verification.ts"
 
 const Registration = () => {
     // Pagination:
@@ -25,6 +26,11 @@ const Registration = () => {
     const [registeredCharacters, setRegisteredCharacters] = useState<
         Character[]
     >([])
+
+    // Verified character ids:
+    const [verifiedCharacterIds, setVerifiedCharacterIds] = useState<string[]>(
+        []
+    )
 
     // Registering a new character:
     const [characterName, setCharacterName] = useState("")
@@ -48,6 +54,13 @@ const Registration = () => {
         const ids = JSON.parse(
             localStorage.getItem("registered-characters") || "[]"
         )
+        const accessTokens = JSON.parse(
+            localStorage.getItem("access-tokens") || "[]"
+        )
+        const verifiedCharacterIds = accessTokens.map(
+            (token: AccessToken) => token.character_id
+        )
+        setVerifiedCharacterIds(verifiedCharacterIds)
         // for every ID, look up the character data and add it to the list
         const promises = ids.map((id: string) => getCharacterById(id))
         Promise.all(promises).then((responses) => {
@@ -204,7 +217,7 @@ const Registration = () => {
         >
             <RegistrationTable
                 characters={registeredCharacters}
-                // verifiedCharacters={FAKE_VERIFIED_IDS}
+                verifiedCharacterIds={verifiedCharacterIds}
                 noCharactersMessage="No characters added"
                 reload={reloadCharacters}
             />

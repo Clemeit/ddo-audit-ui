@@ -11,13 +11,13 @@ import Button from "../global/Button.tsx"
 
 const CharacterTable = ({
     characters,
-    verifiedCharacters,
+    verifiedCharacterIds,
     noCharactersMessage,
     minimal,
     reload,
 }: {
     characters: Character[]
-    verifiedCharacters: string[]
+    verifiedCharacterIds: string[]
     noCharactersMessage: string
     minimal: boolean
     reload: () => void
@@ -92,7 +92,7 @@ const CharacterTable = ({
                         </td>
                     )}
                     {!minimal &&
-                        (verifiedCharacters.includes(character.id) ? (
+                        (verifiedCharacterIds.includes(character.id) ? (
                             <td className="options-cell disabled">
                                 <Checkmark title="Verified" />
                             </td>
@@ -105,7 +105,7 @@ const CharacterTable = ({
                                     onClick={() => {
                                         // TODO: Navigate to verification page for this character
                                         navigate(
-                                            `/verification?page=3&id=${character.id}`
+                                            `/verification?id=${character.id}`
                                         )
                                     }}
                                 />
@@ -150,7 +150,7 @@ const CharacterTable = ({
 
 CharacterTable.propTypes = {
     characters: PropTypes.array,
-    verifiedCharacters: PropTypes.array,
+    verifiedCharacterIds: PropTypes.array,
     noCharactersMessage: PropTypes.string,
     minimal: PropTypes.bool,
     reload: PropTypes.func,
@@ -158,7 +158,7 @@ CharacterTable.propTypes = {
 
 CharacterTable.defaultProps = {
     characters: [],
-    verifiedCharacters: [],
+    verifiedCharacterIds: [],
     noCharactersMessage: "No characters found",
     minimal: false,
     reload: () => {},

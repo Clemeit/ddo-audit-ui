@@ -11,10 +11,12 @@ const VerificationTable = ({
     characters,
     verifiedCharacters,
     noCharactersMessage,
+    selectCharacter,
 }: {
     characters: Character[]
     verifiedCharacters: string[]
     noCharactersMessage: string
+    selectCharacter: Function
 }) => {
     const navigate = useNavigate()
 
@@ -32,9 +34,7 @@ const VerificationTable = ({
                             text="Verify"
                             type="secondary"
                             onClick={() => {
-                                navigate(
-                                    `/verification?page=3&id=${character.id}`
-                                )
+                                selectCharacter(character)
                             }}
                         />
                     )}
