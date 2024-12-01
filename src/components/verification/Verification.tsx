@@ -6,18 +6,17 @@ import usePagination from "../../hooks/usePagination.ts"
 import { AccessToken } from "../../models/Verification.ts"
 import Page1 from "./Page1.tsx"
 import Page2 from "./Page2.tsx"
-import Page3 from "./Page3.tsx"
-import { useLocation } from "react-router-dom"
+import { useLocation, useNavigate } from "react-router-dom"
 import { getCharacterById } from "../../services/characterService.ts"
-import ContentCluster from "../global/ContentCluster.tsx"
-import NavigationCard from "../global/NavigationCard.tsx"
 
 const VerificationPage = () => {
     const location = useLocation()
+    const navigate = useNavigate()
+    const [isLoaded, setIsLoaded] = useState(false)
     const { currentPage, setPage } = usePagination({
         useQueryParams: true,
-        clearOtherQueryParams: true,
-        maxPage: 3,
+        clearOtherQueryParams: false,
+        maxPage: 2,
     })
 
     const [currentCharacter, setCurrentCharacter] = useState<Character | null>(
@@ -28,20 +27,22 @@ const VerificationPage = () => {
 
     useEffect(() => {
         if (currentPage === 1) {
-            setCurrentCharacter(null)
-            setPendingAccessToken(null)
-
             const id = new URLSearchParams(location.search).get("id")
             if (id) {
                 getCharacterById(id)
                     .then((response) => {
                         setCurrentCharacter(response.data.data)
-                        // push /registration to history so that the user can
-                        // navigate back to the registration page
-                        window.history.pushState({}, "", "/registration")
-                        setPage(2)
+                        setIsLoaded(true)
                     })
                     .catch(() => {})
+            } else {
+                window.history.replaceState({}, "", "/registration")
+                navigate("/registration")
+            }
+        } else if (currentPage === 2) {
+            if (!pendingAccessToken) {
+                window.history.replaceState({}, "", "/registration")
+                navigate("/registration")
             }
         }
     }, [currentPage])
@@ -52,28 +53,20 @@ const VerificationPage = () => {
             description="Verify your characters to access detailed information such as questing history, level history, login history, and more."
         >
             {currentPage === 1 && (
-                <Page1 setPage={setPage} setCharacter={setCurrentCharacter} />
+                <Page1
+                    setPage={setPage}
+                    setPendingAccessToken={setPendingAccessToken}
+                    character={currentCharacter}
+                    isLoaded={isLoaded}
+                />
             )}
             {currentPage === 2 && (
                 <Page2
                     setPage={setPage}
-                    setPendingAccessToken={setPendingAccessToken}
-                    character={currentCharacter}
-                />
-            )}
-            {currentPage === 3 && (
-                <Page3
-                    setPage={setPage}
                     accessToken={pendingAccessToken}
                     character={currentCharacter}
+                    isLoaded={isLoaded}
                 />
-            )}
-            {currentPage === 1 && (
-                <ContentCluster title="See Also...">
-                    <div className="nav-card-cluster">
-                        <NavigationCard type="registration" />
-                    </div>
-                </ContentCluster>
             )}
         </Page>
     )

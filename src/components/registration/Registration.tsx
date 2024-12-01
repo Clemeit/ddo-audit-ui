@@ -21,8 +21,8 @@ const Registration = () => {
             {currentPage === 1 && (
                 <ContentCluster title="See Also...">
                     <div className="nav-card-cluster">
-                        <NavigationCard type="verification" />
                         <NavigationCard type="timers" />
+                        <NavigationCard type="activity" />
                     </div>
                 </ContentCluster>
             )}

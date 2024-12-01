@@ -17,6 +17,7 @@ const Verification = lazy(
 const Registration = lazy(
     () => import("./components/registration/Registration.tsx")
 )
+const Activity = lazy(() => import("./components/activity/Activity.tsx"))
 
 // Set up the router
 export default createBrowserRouter(
@@ -26,6 +27,7 @@ export default createBrowserRouter(
             <Route path="/live" element={<Live />} />
             <Route path="/verification" element={<Verification />} />
             <Route path="/registration" element={<Registration />} />
+            <Route path="/activity" element={<Activity />} />
         </Route>
     )
 )

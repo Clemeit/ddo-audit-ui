@@ -1,9 +1,10 @@
 import React from "react"
 import PropTypes from "prop-types"
 
-const Badge = ({ direction, gap, children, fullWidth, justify }) => {
+const Badge = ({ direction, gap, children, fullWidth, justify, className }) => {
     return (
         <div
+            className={className}
             style={{
                 display: "flex",
                 flexDirection: direction,
@@ -30,6 +31,7 @@ Badge.propTypes = {
         "space-around",
         "space-evenly",
     ]),
+    className: PropTypes.string,
 }
 
 Badge.defaultProps = {
@@ -38,6 +40,7 @@ Badge.defaultProps = {
     children: null,
     fullWidth: false,
     justify: "flex-start",
+    className: "",
 }
 
 export default Badge

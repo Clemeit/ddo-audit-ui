@@ -24,8 +24,8 @@ const Directory = () => {
                     <NavigationCard type="who" />
                     <NavigationCard type="friends" />
                     <NavigationCard type="registration" />
-                    <NavigationCard type="verification" />
                     <NavigationCard type="timers" />
+                    <NavigationCard type="activity" />
                 </div>
             </ContentCluster>
             <ContentCluster title="Additional Resources">

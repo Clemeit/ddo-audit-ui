@@ -14,6 +14,10 @@ import { HttpStatusCode } from "axios"
 import { SERVER_NAMES } from "../../constants/servers.ts"
 import Spacer from "../global/Spacer.tsx"
 import useIsMobile from "../../hooks/useIsMobile.ts"
+import {
+    getRegisteredCharacters,
+    addRegisteredCharacter,
+} from "../../utils/localStorage.ts"
 
 const Page2 = ({ setPage }: { setPage: Function }) => {
     const isMobile = useIsMobile()
@@ -32,21 +36,17 @@ const Page2 = ({ setPage }: { setPage: Function }) => {
     }, [])
 
     function saveCharacterToLocalStorage(character: Character) {
-        const previousCharacterIds = JSON.parse(
-            localStorage.getItem("registered-characters") || "[]"
-        )
-        const allIds = [...new Set([...previousCharacterIds, character.id])]
-        localStorage.setItem("registered-characters", JSON.stringify(allIds))
+        addRegisteredCharacter(character)
         reloadCharacters()
     }
 
     function reloadCharacters() {
         // get the list of registered character IDs from local storage
-        const ids = JSON.parse(
-            localStorage.getItem("registered-characters") || "[]"
-        )
+        const registeredCharacters = getRegisteredCharacters()
         // for every ID, look up the character data and add it to the list
-        const promises = ids.map((id: string) => getCharacterById(id))
+        const promises = registeredCharacters.map((character: Character) =>
+            getCharacterById(character.id)
+        )
         Promise.all(promises).then((responses) => {
             const characters = responses
                 .map((response) => response.data.data)

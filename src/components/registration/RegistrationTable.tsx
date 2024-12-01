@@ -8,19 +8,21 @@ import { ReactComponent as Delete } from "../../assets/svg/delete.svg"
 import { ReactComponent as Checkmark } from "../../assets/svg/checkmark.svg"
 import { useNavigate } from "react-router-dom"
 import Button from "../global/Button.tsx"
+import { AccessToken } from "../../models/Verification.ts"
+import Stack from "../global/Stack.tsx"
 
 const CharacterTable = ({
     characters,
-    verifiedCharacterIds,
+    accessTokens,
     noCharactersMessage,
     minimal,
-    reload,
+    removeCharacter,
 }: {
     characters: Character[]
-    verifiedCharacterIds: string[]
+    accessTokens: AccessToken[]
     noCharactersMessage: string
     minimal: boolean
-    reload: () => void
+    removeCharacter: (character: Character) => void
 }) => {
     const navigate = useNavigate()
 
@@ -40,18 +42,46 @@ const CharacterTable = ({
             .join(", ")
     }
 
-    function removeCharacterId(id: string) {
-        const currentIds = JSON.parse(
-            localStorage.getItem("registered-characters") || "[]"
-        )
-        const newIds = currentIds.filter(
-            (currentId: string) => currentId !== id
-        )
-        localStorage.setItem("registered-characters", JSON.stringify(newIds))
-        reload()
-    }
-
     const characterRow = (character: Character) => {
+        // action cell
+        const actionCell = accessTokens.some(
+            (accessToken: AccessToken) =>
+                accessToken.character_id === character.id
+        ) ? (
+            <td className="action-cell">
+                <Stack gap="5px" justify="flex-end">
+                    <Checkmark title="Verified" />
+                    <Delete
+                        className="clickable-icon"
+                        onClick={() => {
+                            removeCharacter(character)
+                        }}
+                    />
+                </Stack>
+            </td>
+        ) : (
+            <td className="action-cell">
+                <Stack gap="5px" justify="flex-end">
+                    <Button
+                        text="Verify"
+                        type="secondary"
+                        className="verify-button"
+                        small
+                        onClick={() => {
+                            // TODO: Navigate to verification page for this character
+                            navigate(`/verification?id=${character.id}`)
+                        }}
+                    />
+                    <Delete
+                        className="clickable-icon"
+                        onClick={() => {
+                            removeCharacter(character)
+                        }}
+                    />
+                </Stack>
+            </td>
+        )
+
         return (
             <>
                 <tr key={character.id}>
@@ -87,36 +117,7 @@ const CharacterTable = ({
                             {character.location?.name}
                         </td>
                     )}
-                    {!minimal &&
-                        (verifiedCharacterIds.includes(character.id) ? (
-                            <td className="verify-cell">
-                                <Checkmark title="Verified" />
-                            </td>
-                        ) : (
-                            <td className="verify-cell">
-                                <Button
-                                    text="Verify"
-                                    type="secondary"
-                                    small
-                                    onClick={() => {
-                                        // TODO: Navigate to verification page for this character
-                                        navigate(
-                                            `/verification?id=${character.id}`
-                                        )
-                                    }}
-                                />
-                            </td>
-                        ))}
-                    {!minimal && (
-                        <td>
-                            <Delete
-                                className="clickable-icon"
-                                onClick={() => {
-                                    removeCharacterId(character.id)
-                                }}
-                            />
-                        </td>
-                    )}
+                    {!minimal && actionCell}
                 </tr>
             </>
         )
@@ -146,7 +147,6 @@ const CharacterTable = ({
                         {!minimal && (
                             <th className="hide-on-mobile">Location</th>
                         )}
-                        {!minimal && <th className="verify-cell"></th>}
                         {!minimal && <th style={{ position: "sticky" }}></th>}
                     </tr>
                 </thead>
@@ -162,18 +162,18 @@ const CharacterTable = ({
 
 CharacterTable.propTypes = {
     characters: PropTypes.array,
-    verifiedCharacterIds: PropTypes.array,
+    accessTokens: PropTypes.array,
     noCharactersMessage: PropTypes.string,
     minimal: PropTypes.bool,
-    reload: PropTypes.func,
+    removeCharacter: PropTypes.func,
 }
 
 CharacterTable.defaultProps = {
     characters: [],
-    verifiedCharacterIds: [],
+    accessTokens: [],
     noCharactersMessage: "No characters found",
     minimal: false,
-    reload: () => {},
+    removeCharacter: () => {},
 }
 
 export default CharacterTable

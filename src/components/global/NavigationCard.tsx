@@ -13,8 +13,9 @@ import { ReactComponent as AboutSVG } from "../../assets/svg/about.svg"
 import { ReactComponent as ApiSVG } from "../../assets/svg/api.svg"
 import { ReactComponent as FeedbackSVG } from "../../assets/svg/feedback.svg"
 import { ReactComponent as RegistrationSVG } from "../../assets/svg/registration.svg"
-import { ReactComponent as VerificationSVG } from "../../assets/svg/verification.svg"
 import { ReactComponent as TimerSVG } from "../../assets/svg/timer.svg"
+import { ReactComponent as Activity } from "../../assets/svg/activity.svg"
+
 import { Link } from "react-router-dom"
 
 const typeToTitleMap = {
@@ -27,11 +28,11 @@ const typeToTitleMap = {
     transfers: "Server Transfers",
     friends: "Friends List",
     registration: "Register Characters",
-    verification: "Verify Characters",
     timers: "Raid Timers",
     about: "About This Project",
     api: "API",
     suggestions: "Give Feedback",
+    activity: "Character Activity",
 }
 
 const typeToDescriptionMap = {
@@ -46,12 +47,12 @@ const typeToDescriptionMap = {
     friends: "See what your friends are up to with your own friends list.",
     registration:
         "Add your characters for automatic LFM filtering and raid tracking.",
-    verification: "Verify your characters to access detailed information.",
     timers: "View and manage your current raid timers.",
     about: "Everything you wanted to know about this project and more.",
     api: "Pull back the curtain. Access the data for your own use.",
     suggestions:
         "Your feedback is important. Let me know what you think of the project.",
+    activity: "View your verified characters' detailed activity history.",
 }
 
 const typeToIconMap = {
@@ -64,11 +65,11 @@ const typeToIconMap = {
     transfers: <TransferSVG />,
     friends: <FriendsSVG />,
     registration: <RegistrationSVG />,
-    verification: <VerificationSVG />,
     timers: <TimerSVG />,
     about: <AboutSVG />,
     api: <ApiSVG />,
     suggestions: <FeedbackSVG />,
+    activity: <Activity />,
 }
 
 const NavigationCard = ({ type, badge }) => {
@@ -95,11 +96,11 @@ NavigationCard.propTypes = {
         "transfers",
         "friends",
         "registration",
-        "verification",
         "timers",
         "about",
         "api",
         "suggestions",
+        "activity",
     ]),
     badge: PropTypes.node,
 }

@@ -12,22 +12,6 @@
     border-radius: 50%;
 }
 
-.options-cell {
-    cursor: pointer;
-}
-
-.options-cell.disabled {
-    cursor: unset;
-}
-
-.options-cell > svg {
-    fill: var(--gray3);
-}
-
-.options-cell:hover > svg {
-    fill: var(--gray1);
-}
-
 table th:last-child,
 table td:last-child {
     position: sticky;
@@ -36,6 +20,18 @@ table td:last-child {
     z-index: 1;
 }
 
-.verify-cell {
+.action-cell {
     width: 0;
+}
+
+.verify-button {
+    border-color: var(--orange-text) !important;
+}
+
+.verify-button > span {
+    color: var(--orange-text) !important;
+}
+
+.verify-button:hover {
+    box-shadow: 0px 0px 5px 0px var(--orange-text) !important;
 }

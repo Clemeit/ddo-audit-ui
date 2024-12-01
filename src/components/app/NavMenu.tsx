@@ -20,10 +20,6 @@ const NavMenu = () => {
         return () => window.removeEventListener("scroll", handleScroll)
     }, [])
 
-    useEffect(() => {
-        console.log(location.pathname)
-    }, [location])
-
     return (
         <nav className={`nav-menu ${scrollPosition > 80 ? "solid" : ""}`}>
             <Link

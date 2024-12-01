@@ -53,6 +53,12 @@ const bannerRouteMapping = {
         miniature: true,
         showButtons: false,
     },
+    "/activity": {
+        title: "Activity",
+        subtitle: "Detailed Character Activity",
+        miniature: true,
+        showButtons: false,
+    },
 }
 
 export { bannerRouteMapping }

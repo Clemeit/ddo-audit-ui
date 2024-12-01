@@ -7,16 +7,17 @@ import { ReactComponent as Checkmark } from "../../assets/svg/checkmark.svg"
 // @ts-ignore
 import { ReactComponent as Delete } from "../../assets/svg/delete.svg"
 import Button from "../global/Button.tsx"
+import { AccessToken } from "../../models/Verification.ts"
 
 const VerificationTable = ({
     characters,
-    verifiedCharacters,
+    accessTokens,
     noCharactersMessage,
     selectCharacter,
     removeCharacter,
 }: {
     characters: Character[]
-    verifiedCharacters: string[]
+    accessTokens: AccessToken[]
     noCharactersMessage: string
     selectCharacter: Function
     removeCharacter: Function
@@ -30,7 +31,10 @@ const VerificationTable = ({
                     {character.total_level}
                 </td>
                 <td>
-                    {verifiedCharacters.includes(character.id) ? (
+                    {accessTokens.some(
+                        (token: AccessToken) =>
+                            token.character_id === character.id
+                    ) ? (
                         <div className="verified-and-remove-cell">
                             <Checkmark />
                             <Delete
@@ -83,7 +87,7 @@ const VerificationTable = ({
 
 VerificationTable.propTypes = {
     characters: PropTypes.array,
-    verifiedCharacters: PropTypes.array,
+    accessTokens: PropTypes.array,
     noCharactersMessage: PropTypes.string,
     selectCharacter: PropTypes.func,
     removeCharacter: PropTypes.func,
@@ -91,7 +95,7 @@ VerificationTable.propTypes = {
 
 VerificationTable.defaultProps = {
     characters: [],
-    verifiedCharacters: [],
+    accessTokens: [],
     noCharactersMessage: "No characters found",
     selectCharacter: () => {},
     removeCharacter: () => {},

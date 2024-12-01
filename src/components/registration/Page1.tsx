@@ -8,17 +8,21 @@ import { Character } from "../../models/Character.ts"
 import { getCharacterById } from "../../services/characterService.ts"
 import { AccessToken } from "../../models/Verification.ts"
 import Spacer from "../global/Spacer.tsx"
+import {
+    getAccessTokens,
+    getRegisteredCharacters,
+    removeRegisteredCharacter,
+    removeAccessToken,
+} from "../../utils/localStorage.ts"
+import ExpandableContainer from "../global/ExpandableContainer.tsx"
 
 const Page1 = ({ setPage }: { setPage: Function }) => {
     // Registered characters:
     const [registeredCharacters, setRegisteredCharacters] = useState<
         Character[]
     >([])
-
-    // Verified character ids:
-    const [verifiedCharacterIds, setVerifiedCharacterIds] = useState<string[]>(
-        []
-    )
+    // Access tokens:
+    const [accessTokens, setAccessTokens] = useState<AccessToken[]>([])
 
     useEffect(() => {
         reloadCharacters()
@@ -26,24 +30,36 @@ const Page1 = ({ setPage }: { setPage: Function }) => {
 
     function reloadCharacters() {
         // get the list of registered character IDs from local storage
-        const ids = JSON.parse(
-            localStorage.getItem("registered-characters") || "[]"
-        )
-        const accessTokens = JSON.parse(
-            localStorage.getItem("access-tokens") || "[]"
-        )
-        const verifiedCharacterIds = accessTokens.map(
-            (token: AccessToken) => token.character_id
-        )
-        setVerifiedCharacterIds(verifiedCharacterIds)
+        const registeredCharacters = getRegisteredCharacters()
+        const accessTokens = getAccessTokens()
+
+        setRegisteredCharacters(registeredCharacters)
+        setAccessTokens(accessTokens)
+
         // for every ID, look up the character data and add it to the list
-        const promises = ids.map((id: string) => getCharacterById(id))
+        const promises = registeredCharacters.map((character: Character) =>
+            getCharacterById(character.id)
+        )
         Promise.all(promises).then((responses) => {
             const characters = responses
                 .map((response) => response.data.data)
                 .filter((character) => character)
             setRegisteredCharacters(characters)
         })
+    }
+
+    function removeCharacter(character: Character) {
+        // revoke the access token for this character
+        const accessTokens = getAccessTokens()
+        const token = accessTokens.find(
+            (token) => token.character_id === character.id
+        )
+        if (token) removeAccessToken(token)
+
+        // unregister the character
+        removeRegisteredCharacter(character)
+
+        reloadCharacters()
     }
 
     return (
@@ -54,9 +70,9 @@ const Page1 = ({ setPage }: { setPage: Function }) => {
             >
                 <RegistrationTable
                     characters={registeredCharacters}
-                    verifiedCharacterIds={verifiedCharacterIds}
+                    accessTokens={accessTokens}
                     noCharactersMessage="No characters added"
-                    reload={reloadCharacters}
+                    removeCharacter={removeCharacter}
                 />
                 <Spacer size="20px" />
                 <Stack gap="10px" fullWidth justify="space-between">

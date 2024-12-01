@@ -1,0 +1,9 @@
+.character-selection-container {
+    max-width: 300px;
+}
+
+@media (max-width: 768px) {
+    .character-selection-container {
+        max-width: unset;
+    }
+}
