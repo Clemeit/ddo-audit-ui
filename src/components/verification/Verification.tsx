@@ -68,11 +68,13 @@ const VerificationPage = () => {
                     character={currentCharacter}
                 />
             )}
-            <ContentCluster title="See Also">
-                <div className="nav-card-cluster">
-                    <NavigationCard type="registration" />
-                </div>
-            </ContentCluster>
+            {currentPage === 1 && (
+                <ContentCluster title="See Also">
+                    <div className="nav-card-cluster">
+                        <NavigationCard type="registration" />
+                    </div>
+                </ContentCluster>
+            )}
         </Page>
     )
 }

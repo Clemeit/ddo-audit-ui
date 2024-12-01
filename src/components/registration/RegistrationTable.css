@@ -27,3 +27,11 @@
 .options-cell:hover > svg {
     fill: var(--gray1);
 }
+
+table th:last-child,
+table td:last-child {
+    position: sticky;
+    right: 0;
+    background-color: inherit;
+    z-index: 1;
+}

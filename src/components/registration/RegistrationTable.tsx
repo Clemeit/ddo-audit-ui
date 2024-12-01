@@ -81,16 +81,6 @@ const CharacterTable = ({
                             {character.location?.name}
                         </td>
                     )}
-                    {!minimal && (
-                        <td
-                            className="options-cell"
-                            onClick={() => {
-                                removeCharacterId(character.id)
-                            }}
-                        >
-                            <Delete />
-                        </td>
-                    )}
                     {!minimal &&
                         (verifiedCharacterIds.includes(character.id) ? (
                             <td className="options-cell disabled">
@@ -111,6 +101,16 @@ const CharacterTable = ({
                                 />
                             </td>
                         ))}
+                    {!minimal && (
+                        <td
+                            className="options-cell"
+                            onClick={() => {
+                                removeCharacterId(character.id)
+                            }}
+                        >
+                            <Delete />
+                        </td>
+                    )}
                 </tr>
             </>
         )
@@ -125,26 +125,32 @@ const CharacterTable = ({
     )
 
     return (
-        <table>
-            <thead>
-                <tr>
-                    <th style={{ width: "0px" }}></th>
-                    <th>Name</th>
-                    <th>Server</th>
-                    <th>Level</th>
-                    {!minimal && <th>Guild</th>}
-                    {!minimal && <th className="hide-on-mobile">Classes</th>}
-                    {!minimal && <th className="hide-on-mobile">Location</th>}
-                    {!minimal && <th></th>}
-                    {!minimal && <th></th>}
-                </tr>
-            </thead>
-            <tbody>
-                {characters.length
-                    ? characters.map(characterRow)
-                    : noCharactersMessageRow}
-            </tbody>
-        </table>
+        <div className="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th style={{ width: "0px" }}></th>
+                        <th>Name</th>
+                        <th>Server</th>
+                        <th>Level</th>
+                        {!minimal && <th>Guild</th>}
+                        {!minimal && (
+                            <th className="hide-on-mobile">Classes</th>
+                        )}
+                        {!minimal && (
+                            <th className="hide-on-mobile">Location</th>
+                        )}
+                        {!minimal && <th></th>}
+                        {!minimal && <th style={{ position: "sticky" }}></th>}
+                    </tr>
+                </thead>
+                <tbody>
+                    {characters.length
+                        ? characters.map(characterRow)
+                        : noCharactersMessageRow}
+                </tbody>
+            </table>
+        </div>
     )
 }
 

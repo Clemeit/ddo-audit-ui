@@ -7,6 +7,7 @@ import "./Registration.css"
 import { Character } from "../../models/Character.ts"
 import { getCharacterById } from "../../services/characterService.ts"
 import { AccessToken } from "../../models/Verification.ts"
+import Spacer from "../global/Spacer.tsx"
 
 const Page1 = ({ setPage }: { setPage: Function }) => {
     // Registered characters:
@@ -57,6 +58,7 @@ const Page1 = ({ setPage }: { setPage: Function }) => {
                     noCharactersMessage="No characters added"
                     reload={reloadCharacters}
                 />
+                <Spacer size="20px" />
                 <Stack gap="10px" fullWidth justify="space-between">
                     <div />
                     <Button

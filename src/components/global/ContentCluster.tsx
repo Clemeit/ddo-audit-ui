@@ -2,9 +2,16 @@ import React from "react"
 import PropTypes from "prop-types"
 import "./ContentCluster.css"
 
-const ContentCluster = ({ title, subtitle, link, showLink, children }) => {
+const ContentCluster = ({
+    title,
+    subtitle,
+    link,
+    showLink,
+    children,
+    className,
+}) => {
     return (
-        <div className="content-cluster">
+        <div className={`content-cluster ${className}`}>
             <h2>{title}</h2>
             <hr />
             {subtitle && <p className="subtitle">{subtitle}</p>}
@@ -19,6 +26,7 @@ ContentCluster.propTypes = {
     link: PropTypes.string,
     showLink: PropTypes.bool,
     children: PropTypes.node,
+    className: PropTypes.string,
 }
 
 ContentCluster.defaultProps = {
@@ -27,6 +35,7 @@ ContentCluster.defaultProps = {
     link: "#",
     showLink: true,
     children: null,
+    className: "",
 }
 
 export default ContentCluster

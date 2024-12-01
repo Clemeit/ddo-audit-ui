@@ -15,12 +15,10 @@ A real-time player population tracking project and live LFM viewer for Dungeons 
 
 - Removing a character from Registered characters should remove it from Verified characters
 - Allow for removing a character verification
-- html content is able to overflow in the x direction
-- Should hide the "See Also" content for Page 2 of Registration and Pages 2-3 of Verification
 - Content layout shift should be reduced by using placeholders
+- Stop using spacers to move bottom-of-page buttons
 - Nav menu links go to fake pages
+- Hitting back button on page 2 of registration doesn't go to page 1
 - On mobile:
--   - There's no visual indication that a character has been registered
--   - The Registration page table overflows
--   - text-align: justified doesn't look great for small paragraphs
--   - <ul> lists should have less margin-left
+-   - There's no visual indication that a character has been registered (maybe automatically navigate back after clicking Add on mobile devices)
+-   - text-align: justified doesn't look great for small paragraphs (at least on mobile it's very evident)

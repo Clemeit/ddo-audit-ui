@@ -64,10 +64,14 @@ body {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     background-color: var(--background);
+    max-width: 100%;
+    overflow-x: hidden;
 }
 
 html {
     font-size: 15px;
+    max-width: 100%;
+    overflow-x: hidden;
 }
 
 hr {
@@ -89,6 +93,7 @@ hr {
     gap: 10px;
 }
 
+/* mobile */
 @media (max-width: 768px) {
     html {
         font-size: 12px;
@@ -96,6 +101,10 @@ hr {
 
     .hide-on-mobile {
         display: none !important;
+    }
+
+    ul {
+        padding-left: 20px;
     }
 }
 
@@ -133,12 +142,17 @@ select option {
     width: 100%;
 }
 
+.table-container {
+    width: 100%;
+    overflow-x: auto;
+    box-shadow: 0 0 20px var(--shadow);
+}
+
 table {
     width: 100%;
     text-align: left;
     border-collapse: collapse;
-    margin: 25px 0;
-    box-shadow: 0 0 20px var(--shadow);
+    margin: 0;
 }
 
 table .no-data-row {
@@ -158,6 +172,10 @@ table td {
 
 table tbody tr:nth-of-type(even) {
     background-color: var(--gray7);
+}
+
+table tbody tr:nth-of-type(odd) {
+    background-color: var(--background);
 }
 
 table tbody tr:last-of-type {

@@ -14,12 +14,14 @@ const Registration = () => {
         <Page className="registration" title="DDO Character Registration">
             {currentPage === 1 && <Page1 setPage={setPage} />}
             {currentPage === 2 && <Page2 setPage={setPage} />}
-            <ContentCluster title="See Also">
-                <div className="nav-card-cluster">
-                    <NavigationCard type="verification" />
-                    <NavigationCard type="timers" />
-                </div>
-            </ContentCluster>
+            {currentPage === 1 && (
+                <ContentCluster title="See Also">
+                    <div className="nav-card-cluster">
+                        <NavigationCard type="verification" />
+                        <NavigationCard type="timers" />
+                    </div>
+                </ContentCluster>
+            )}
         </Page>
     )
 }
