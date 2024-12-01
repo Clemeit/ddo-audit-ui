@@ -13,7 +13,5 @@ A real-time player population tracking project and live LFM viewer for Dungeons 
 
 ## To-do:
 
-- Removing a character from Registered characters should remove it from Verified characters
-- Allow for removing a character verification
 - Content layout shift should be reduced by using placeholders
 - Stop using spacers to move bottom-of-page buttons

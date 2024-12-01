@@ -13,11 +13,13 @@ const VerificationTable = ({
     verifiedCharacters,
     noCharactersMessage,
     selectCharacter,
+    removeCharacter,
 }: {
     characters: Character[]
     verifiedCharacters: string[]
     noCharactersMessage: string
     selectCharacter: Function
+    removeCharacter: Function
 }) => {
     const characterRow = (character: Character) => {
         return (
@@ -31,7 +33,12 @@ const VerificationTable = ({
                     {verifiedCharacters.includes(character.id) ? (
                         <div className="verified-and-remove-cell">
                             <Checkmark />
-                            <Delete className="clickable-icon" />
+                            <Delete
+                                className="clickable-icon"
+                                onClick={() => {
+                                    removeCharacter(character)
+                                }}
+                            />
                         </div>
                     ) : (
                         <Button
@@ -78,12 +85,16 @@ VerificationTable.propTypes = {
     characters: PropTypes.array,
     verifiedCharacters: PropTypes.array,
     noCharactersMessage: PropTypes.string,
+    selectCharacter: PropTypes.func,
+    removeCharacter: PropTypes.func,
 }
 
 VerificationTable.defaultProps = {
     characters: [],
     verifiedCharacters: [],
     noCharactersMessage: "No characters found",
+    selectCharacter: () => {},
+    removeCharacter: () => {},
 }
 
 export default VerificationTable

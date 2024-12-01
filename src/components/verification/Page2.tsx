@@ -149,13 +149,13 @@ const Page2 = ({
                         </li>
                     </ul>
                     <p className="secondary-text">
-                        This page will automatically refresh. Do not refresh
-                        this page.
-                    </p>
-                    <p className="secondary-text">
                         There's nothing special about this text. It's just a
                         random code to verify that you have access to the
                         character.
+                    </p>
+                    <p className="secondary-text">
+                        This page will automatically refresh. Do not refresh
+                        this page.
                     </p>
                     <Spacer size="10px" />
                     <Stack gap="10px" fullWidth justify="space-between">

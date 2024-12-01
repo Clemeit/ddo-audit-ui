@@ -30,6 +30,21 @@ const Page1 = ({
 
     useEffect(() => {
         // get registered character ids and access tokens from local storage
+        refreshCharacters()
+    }, [])
+
+    function removeCharacter(character: Character) {
+        const accessTokens = JSON.parse(
+            localStorage.getItem("access-tokens") || "[]"
+        )
+        const newAccessTokens = accessTokens.filter(
+            (token: AccessToken) => token.character_id !== character.id
+        )
+        localStorage.setItem("access-tokens", JSON.stringify(newAccessTokens))
+        refreshCharacters()
+    }
+
+    function refreshCharacters() {
         const registeredCharacterIds = JSON.parse(
             localStorage.getItem("registered-characters") || "[]"
         )
@@ -53,7 +68,7 @@ const Page1 = ({
                 .filter((character) => character)
             setRegisteredCharacters(characters)
         })
-    }, [])
+    }
 
     return (
         <>
@@ -65,6 +80,9 @@ const Page1 = ({
                     selectCharacter={(character: Character) => {
                         setCharacter(character)
                         setPage(2)
+                    }}
+                    removeCharacter={(character: Character) => {
+                        removeCharacter(character)
                     }}
                 />
                 <p>
