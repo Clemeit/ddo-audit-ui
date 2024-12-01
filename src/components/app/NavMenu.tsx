@@ -20,35 +20,58 @@ const NavMenu = () => {
         return () => window.removeEventListener("scroll", handleScroll)
     }, [])
 
-    useEffect(() => {}, [location])
+    useEffect(() => {
+        console.log(location.pathname)
+    }, [location])
 
     return (
         <nav className={`nav-menu ${scrollPosition > 80 ? "solid" : ""}`}>
-            <Link to="/" className="nav-item active">
+            <Link
+                to="/"
+                className={`nav-item ${location.pathname === "/" ? "active" : ""}`}
+            >
                 <HomeSVG />
                 <span>Home</span>
             </Link>
-            <Link to="/fakepage1" className="nav-item">
+            <Link
+                to="/live"
+                className={`nav-item ${location.pathname.startsWith("/live") ? "active" : ""}`}
+            >
                 <LiveSVG />
                 <span>Live</span>
             </Link>
-            <Link to="/fakepage2" className="nav-item">
+            <Link
+                to="/servers"
+                className={`nav-item ${location.pathname.startsWith("/servers") ? "active" : ""}`}
+            >
                 <ServersSVG />
                 <span>Servers</span>
             </Link>
-            <Link to="/fakepage3" className="nav-item">
+            <Link
+                to="/grouping"
+                className={`nav-item ${location.pathname.startsWith("/grouping") ? "active" : ""}`}
+            >
                 <GroupingSVG />
                 <span>Grouping</span>
             </Link>
-            <Link to="/lazypage1" className="nav-item">
+            <Link
+                to="/who"
+                className={`nav-item ${location.pathname.startsWith("/who") ? "active" : ""}`}
+            >
                 <WhoSVG />
                 <span>Who</span>
             </Link>
-            <Link to="/lazypage1" className="nav-item hide-on-mobile">
+            <Link
+                to="/trends"
+                className={`nav-item hide-on-mobile ${location.pathname.startsWith("/trends") ? "active" : ""}`}
+            >
                 <TrendsSVG />
                 <span>Trends</span>
             </Link>
-            <Link to="/lazypage1" className="nav-item hide-on-mobile">
+            <Link
+                to="/about"
+                className={`nav-item hide-on-mobile ${location.pathname.startsWith("/about") ? "active" : ""}`}
+            >
                 <AboutSVG />
                 <span>About</span>
             </Link>

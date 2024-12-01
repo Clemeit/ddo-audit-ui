@@ -21,7 +21,7 @@
 }
 
 .content-cluster .content > p {
-    text-align: justify;
+    /* text-align: justify; */
 }
 
 @media (max-width: 1800px) {

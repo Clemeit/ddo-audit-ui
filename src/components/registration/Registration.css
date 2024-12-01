@@ -23,6 +23,13 @@
     max-width: 400px;
 }
 
+@media (max-width: 768px) {
+    .registration-form {
+        max-width: unset;
+        padding: 30px 20px 50px 20px;
+    }
+}
+
 .registration-form-content {
     width: 100%;
     padding: 40px 0;

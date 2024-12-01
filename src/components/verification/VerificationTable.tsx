@@ -4,8 +4,9 @@ import "./VerificationTable.css"
 import { Character } from "../../models/Character.ts"
 // @ts-ignore
 import { ReactComponent as Checkmark } from "../../assets/svg/checkmark.svg"
+// @ts-ignore
+import { ReactComponent as Delete } from "../../assets/svg/delete.svg"
 import Button from "../global/Button.tsx"
-import { useNavigate } from "react-router-dom"
 
 const VerificationTable = ({
     characters,
@@ -18,17 +19,20 @@ const VerificationTable = ({
     noCharactersMessage: string
     selectCharacter: Function
 }) => {
-    const navigate = useNavigate()
-
     const characterRow = (character: Character) => {
         return (
             <tr key={character.id}>
                 <td>{character.name}</td>
                 <td>{character.server_name}</td>
-                <td>{character.total_level}</td>
-                <td className="status-column">
+                <td className="hide-on-small-mobile">
+                    {character.total_level}
+                </td>
+                <td>
                     {verifiedCharacters.includes(character.id) ? (
-                        <Checkmark />
+                        <div className="verified-and-remove-cell">
+                            <Checkmark />
+                            <Delete className="clickable-icon" />
+                        </div>
                     ) : (
                         <Button
                             text="Verify"
@@ -57,7 +61,7 @@ const VerificationTable = ({
                 <tr>
                     <th>Name</th>
                     <th>Server</th>
-                    <th>Level</th>
+                    <th className="hide-on-small-mobile">Level</th>
                     <th>Status</th>
                 </tr>
             </thead>

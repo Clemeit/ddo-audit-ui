@@ -35,3 +35,7 @@ table td:last-child {
     background-color: inherit;
     z-index: 1;
 }
+
+.verify-cell {
+    width: 0;
+}

@@ -8,14 +8,18 @@ import ContentCluster from "../global/ContentCluster.tsx"
 import NavigationCard from "../global/NavigationCard.tsx"
 
 const Registration = () => {
-    const { currentPage, setPage } = usePagination()
+    const { currentPage, setPage } = usePagination({
+        useQueryParams: true,
+        clearOtherQueryParams: false,
+        maxPage: 2,
+    })
 
     return (
         <Page className="registration" title="DDO Character Registration">
             {currentPage === 1 && <Page1 setPage={setPage} />}
             {currentPage === 2 && <Page2 setPage={setPage} />}
             {currentPage === 1 && (
-                <ContentCluster title="See Also">
+                <ContentCluster title="See Also...">
                     <div className="nav-card-cluster">
                         <NavigationCard type="verification" />
                         <NavigationCard type="timers" />

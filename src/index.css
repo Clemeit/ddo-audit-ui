@@ -108,6 +108,17 @@ hr {
     }
 }
 
+/* small mobile */
+@media (max-width: 300px) {
+    html {
+        font-size: 10px;
+    }
+
+    .hide-on-small-mobile {
+        display: none !important;
+    }
+}
+
 .orange-text {
     color: var(--orange1);
 }
@@ -188,4 +199,13 @@ table tbody tr:last-of-type {
 
 .link {
     color: var(--link-blue);
+}
+
+.clickable-icon {
+    cursor: pointer;
+    fill: var(--gray3);
+}
+
+.clickable-icon:hover {
+    fill: var(--gray1);
 }

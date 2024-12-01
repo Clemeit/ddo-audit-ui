@@ -57,7 +57,7 @@ const Page1 = ({
 
     return (
         <>
-            <ContentCluster title="Select a Character">
+            <ContentCluster title="Verify Your Characters">
                 <p>Verify your characters to access additional information.</p>
                 <VerificationTable
                     characters={registeredCharacters}

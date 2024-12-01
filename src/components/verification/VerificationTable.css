@@ -5,3 +5,10 @@
     justify-content: center;
     align-items: center;
 }
+
+.verified-and-remove-cell {
+    display: flex;
+    width: min-content;
+    align-items: center;
+    gap: 10px;
+}

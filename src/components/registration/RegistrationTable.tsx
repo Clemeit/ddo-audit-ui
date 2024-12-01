@@ -69,8 +69,14 @@ const CharacterTable = ({
                         <span>{character.name}</span>
                     </td>
                     <td>{character.server_name}</td>
-                    <td>{character.total_level}</td>
-                    {!minimal && <td>{character.guild_name}</td>}
+                    <td className="hide-on-small-mobile">
+                        {character.total_level}
+                    </td>
+                    {!minimal && (
+                        <td className="hide-on-mobile">
+                            {character.guild_name}
+                        </td>
+                    )}
                     {!minimal && (
                         <td className="hide-on-mobile">
                             {mapClassesToString(character.classes)}
@@ -83,11 +89,11 @@ const CharacterTable = ({
                     )}
                     {!minimal &&
                         (verifiedCharacterIds.includes(character.id) ? (
-                            <td className="options-cell disabled">
+                            <td className="verify-cell">
                                 <Checkmark title="Verified" />
                             </td>
                         ) : (
-                            <td>
+                            <td className="verify-cell">
                                 <Button
                                     text="Verify"
                                     type="secondary"
@@ -102,13 +108,13 @@ const CharacterTable = ({
                             </td>
                         ))}
                     {!minimal && (
-                        <td
-                            className="options-cell"
-                            onClick={() => {
-                                removeCharacterId(character.id)
-                            }}
-                        >
-                            <Delete />
+                        <td>
+                            <Delete
+                                className="clickable-icon"
+                                onClick={() => {
+                                    removeCharacterId(character.id)
+                                }}
+                            />
                         </td>
                     )}
                 </tr>
@@ -132,15 +138,15 @@ const CharacterTable = ({
                         <th style={{ width: "0px" }}></th>
                         <th>Name</th>
                         <th>Server</th>
-                        <th>Level</th>
-                        {!minimal && <th>Guild</th>}
+                        <th className="hide-on-small-mobile">Level</th>
+                        {!minimal && <th className="hide-on-mobile">Guild</th>}
                         {!minimal && (
                             <th className="hide-on-mobile">Classes</th>
                         )}
                         {!minimal && (
                             <th className="hide-on-mobile">Location</th>
                         )}
-                        {!minimal && <th></th>}
+                        {!minimal && <th className="verify-cell"></th>}
                         {!minimal && <th style={{ position: "sticky" }}></th>}
                     </tr>
                 </thead>

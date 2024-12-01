@@ -106,9 +106,6 @@ const Page2 = ({
                         </span>{" "}
                         and enter the following text in the Public Comment field
                         found at the bottom of the Who tab in the Social Panel.
-                        There's nothing special about this text. It's just a
-                        random code to verify that you have access to the
-                        character.
                     </p>
                     <code className="verification-code">
                         {verificationChallenge?.challenge_word || (
@@ -154,6 +151,11 @@ const Page2 = ({
                     <p className="secondary-text">
                         This page will automatically refresh. Do not refresh
                         this page.
+                    </p>
+                    <p className="secondary-text">
+                        There's nothing special about this text. It's just a
+                        random code to verify that you have access to the
+                        character.
                     </p>
                     <Spacer size="10px" />
                     <Stack gap="10px" fullWidth justify="space-between">

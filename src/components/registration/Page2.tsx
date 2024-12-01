@@ -13,8 +13,11 @@ import {
 import { HttpStatusCode } from "axios"
 import { SERVER_NAMES } from "../../constants/servers.ts"
 import Spacer from "../global/Spacer.tsx"
+import useIsMobile from "../../hooks/useIsMobile.ts"
 
 const Page2 = ({ setPage }: { setPage: Function }) => {
+    const isMobile = useIsMobile()
+
     // Registering a new character:
     const [characterName, setCharacterName] = useState("")
     const [characterServer, setCharacterServer] = useState("Argonnessen")
@@ -80,6 +83,9 @@ const Page2 = ({ setPage }: { setPage: Function }) => {
                     setValidationErrorMessage("Error registering character")
                 }
                 setCharacterName("")
+                if (isMobile) {
+                    setPage(1)
+                }
             })
             .catch((error) => {
                 console.log(error)
@@ -177,7 +183,7 @@ const Page2 = ({ setPage }: { setPage: Function }) => {
 
     const registrationPanel2 = (
         <div className="registered-list hide-on-mobile">
-            <span>Registered characters:</span>
+            <p>Registered characters:</p>
             <RegistrationTable
                 minimal
                 characters={registeredCharacters}
@@ -188,7 +194,7 @@ const Page2 = ({ setPage }: { setPage: Function }) => {
 
     return (
         <>
-            <ContentCluster title="Registration">
+            <ContentCluster title="Registration" hideHeaderOnMobile>
                 <div className="registration-form-container">
                     <div className="inner-container">
                         <Stack>

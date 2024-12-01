@@ -69,7 +69,7 @@ const VerificationPage = () => {
                 />
             )}
             {currentPage === 1 && (
-                <ContentCluster title="See Also">
+                <ContentCluster title="See Also...">
                     <div className="nav-card-cluster">
                         <NavigationCard type="registration" />
                     </div>
