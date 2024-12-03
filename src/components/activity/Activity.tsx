@@ -12,45 +12,93 @@ import {
     getAccessTokens,
     getRegisteredCharacters,
 } from "../../utils/localStorage.ts"
+import useGetRegisteredCharacters from "../../hooks/useGetRegisteredCharacters.ts"
+import Button from "../global/Button.tsx"
+import Spacer from "../global/Spacer.tsx"
+import {
+    getCharacterLocationActivityById,
+    getCharacterStatusActivityById,
+} from "../../services/activityService.ts"
+import LocationActivityTable from "./LocationActivityTable.tsx"
+import { CharacterActivityType, ActivityEvent } from "../../models/Activity.ts"
+import StatusActivityTable from "./StatusActivityTable.tsx"
 
 const Activity = () => {
-    const [registeredCharacters, setRegisteredCharacters] = useState<
-        Character[]
-    >([])
-    const [verifiedCharacters, setVerifiedCharacters] = useState<Character[]>(
-        []
-    )
-    const [dataLoaded, setDataLoaded] = useState<boolean>(true)
+    const {
+        registeredCharacters,
+        verifiedCharacters,
+        accessTokens,
+        isLoaded,
+        isError,
+        reload: reloadCharacters,
+    } = useGetRegisteredCharacters()
 
-    useEffect(() => {
-        refreshCharacters()
-    }, [])
+    const [selectedCharacter, setSelectedCharacter] =
+        useState<Character | null>(null)
 
-    function refreshCharacters() {
-        const registeredCharacters = getRegisteredCharacters()
-        const accessTokens = getAccessTokens()
+    const [locationActivity, setLocationActivity] = useState<
+        ActivityEvent[] | null
+    >(null)
+    const [statusActivity, setStatusActivity] = useState<
+        ActivityEvent[] | null
+    >(null)
 
-        setRegisteredCharacters(registeredCharacters)
+    function reloadActivityData() {
+        setLocationActivity(null)
+        if (selectedCharacter) {
+            const accessToken = accessTokens.find(
+                (token: AccessToken) =>
+                    token.character_id === selectedCharacter.id
+            )
+            if (accessToken) {
+                getCharacterLocationActivityById(
+                    selectedCharacter.id,
+                    accessToken.access_token
+                ).then((response) => {
+                    setLocationActivity(response.data.data)
+                })
 
-        const verifiedCharacterIds = accessTokens.map(
-            (token: AccessToken) => token.character_id
-        )
-
-        // fetch character data
-        const promises = verifiedCharacterIds.map((id: string) =>
-            getCharacterById(id)
-        )
-        Promise.all(promises).then((responses) => {
-            const characters = responses
-                .map((response) => response.data.data)
-                .filter((character) => character)
-            setVerifiedCharacters(characters)
-            setDataLoaded(false)
-        })
+                getCharacterStatusActivityById(
+                    selectedCharacter.id,
+                    accessToken.access_token
+                ).then((response) => {
+                    setStatusActivity(response.data.data)
+                })
+            }
+        }
     }
 
-    const conditionalContent = () => {
-        if (dataLoaded) return <p>Loading...</p>
+    useEffect(() => {
+        reloadActivityData()
+    }, [selectedCharacter])
+
+    function handleCharacterSelectionChange(e: any) {
+        setSelectedCharacter(
+            verifiedCharacters.find(
+                (character: Character) => character.id === e.target.value
+            ) || null
+        )
+    }
+
+    const conditionalSelectionContent = () => {
+        if (!isLoaded) return <p>Loading...</p>
+
+        if (isError)
+            return (
+                <div>
+                    <p>
+                        Failed to load character data. Please try again later.
+                    </p>
+                    <Button
+                        text="Reload"
+                        type="secondary"
+                        onClick={reloadCharacters}
+                        disabled={!isLoaded}
+                    />
+                    <Spacer size="10px" />
+                </div>
+            )
+
         if (verifiedCharacters.length > 0)
             return (
                 <div>
@@ -62,19 +110,41 @@ const Activity = () => {
                         <label htmlFor="character-selection">
                             Select a character:
                         </label>
-                        <select className="large" id="character-selection">
-                            {verifiedCharacters.map((character) => (
-                                <option key={character.id} value={character.id}>
-                                    {character.name}
-                                </option>
-                            ))}
-                        </select>
+                        <Stack gap="10px">
+                            <select
+                                className="large full-width-mobile"
+                                id="character-selection"
+                                value={
+                                    selectedCharacter
+                                        ? selectedCharacter?.id
+                                        : ""
+                                }
+                                onChange={handleCharacterSelectionChange}
+                            >
+                                <option value="">Select a character...</option>
+                                {verifiedCharacters.map((character) => (
+                                    <option
+                                        key={character.id}
+                                        value={character.id}
+                                    >
+                                        {character.name}
+                                    </option>
+                                ))}
+                            </select>
+                            <Button
+                                text="Reload"
+                                type="secondary"
+                                small
+                                onClick={reloadActivityData}
+                            />
+                        </Stack>
                     </Stack>
                     <p className="secondary-text">
                         You can only view the data of your{" "}
                         <Link className="link" to="/registration">
-                            registered, verified characters.
+                            registered, verified characters
                         </Link>
+                        .
                     </p>
                 </div>
             )
@@ -105,13 +175,29 @@ const Activity = () => {
             )
     }
 
+    const conditionalActivityContent = () => {
+        return (
+            <Stack direction="column" gap="20px">
+                {locationActivity ? (
+                    <LocationActivityTable
+                        characterActivity={locationActivity}
+                    />
+                ) : null}
+                {statusActivity ? (
+                    <StatusActivityTable characterActivity={statusActivity} />
+                ) : null}
+            </Stack>
+        )
+    }
+
     return (
         <Page
             title="Character Activity History"
             description="View detailed information about your characters' activity history, including questing history, level history, login history, and more."
         >
             <ContentCluster title="Character Activity">
-                {conditionalContent()}
+                {conditionalSelectionContent()}
+                {conditionalActivityContent()}
             </ContentCluster>
             <ContentCluster title="See Also...">
                 <div className="nav-card-cluster">

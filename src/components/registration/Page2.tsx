@@ -5,7 +5,7 @@ import Stack from "../global/Stack.tsx"
 import Button from "../global/Button.tsx"
 import "./Registration.css"
 import { Character } from "../../models/Character.ts"
-import InputValidationMessage from "../global/InputValidationMessage.tsx"
+import ValidationMessage from "../global/ValidationMessage.tsx"
 import {
     getCharacterByNameAndServer,
     getCharacterById,
@@ -18,16 +18,23 @@ import {
     getRegisteredCharacters,
     addRegisteredCharacter,
 } from "../../utils/localStorage.ts"
+import useGetRegisteredCharacters from "../../hooks/useGetRegisteredCharacters.ts"
 
 const Page2 = ({ setPage }: { setPage: Function }) => {
     const isMobile = useIsMobile()
 
+    const {
+        registeredCharacters,
+        accessTokens,
+        isLoaded,
+        isError,
+        reload: reloadCharacters,
+        unregisterCharacter,
+    } = useGetRegisteredCharacters()
+
     // Registering a new character:
     const [characterName, setCharacterName] = useState("")
     const [characterServer, setCharacterServer] = useState("Argonnessen")
-    const [registeredCharacters, setRegisteredCharacters] = useState<
-        Character[]
-    >([])
     const [isFetching, setIsFetching] = useState(false)
     const [validationErrorMessage, setValidationErrorMessage] = useState("")
 
@@ -38,21 +45,6 @@ const Page2 = ({ setPage }: { setPage: Function }) => {
     function saveCharacterToLocalStorage(character: Character) {
         addRegisteredCharacter(character)
         reloadCharacters()
-    }
-
-    function reloadCharacters() {
-        // get the list of registered character IDs from local storage
-        const registeredCharacters = getRegisteredCharacters()
-        // for every ID, look up the character data and add it to the list
-        const promises = registeredCharacters.map((character: Character) =>
-            getCharacterById(character.id)
-        )
-        Promise.all(promises).then((responses) => {
-            const characters = responses
-                .map((response) => response.data.data)
-                .filter((character) => character)
-            setRegisteredCharacters(characters)
-        })
     }
 
     function registerCharacter() {
@@ -162,8 +154,8 @@ const Page2 = ({ setPage }: { setPage: Function }) => {
                             }}
                         />
                         {validationErrorMessage && (
-                            <InputValidationMessage
-                                text={validationErrorMessage}
+                            <ValidationMessage
+                                message={validationErrorMessage}
                             />
                         )}
                     </Stack>

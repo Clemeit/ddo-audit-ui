@@ -2,8 +2,16 @@
     max-width: 300px;
 }
 
+#character-selection {
+    min-width: 230px;
+}
+
 @media (max-width: 768px) {
     .character-selection-container {
         max-width: unset;
+    }
+
+    #character-selection {
+        min-width: unset;
     }
 }

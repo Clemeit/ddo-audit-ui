@@ -60,6 +60,10 @@
     --link-blue: var(--blue1);
     --orange-text: var(--orange1);
     --blue-text: var(--blue1);
+    --text-red-desaturated: rgb(220, 50, 50);
+    --text-blue-desaturated: rgb(50, 50, 220);
+    --text-green-desaturated: rgb(50, 220, 50);
+    --text-orange-desaturated: rgb(255, 110, 0);
 }
 
 body {
@@ -104,6 +108,10 @@ hr {
 
     .hide-on-mobile {
         display: none !important;
+    }
+
+    .full-width-mobile {
+        width: 100%;
     }
 
     ul {
@@ -211,4 +219,16 @@ table tbody tr:last-of-type {
 
 .clickable-icon:hover {
     fill: var(--gray1);
+}
+
+.text-red-desaturated {
+    color: var(--text-red-desaturated);
+}
+
+.text-blue-desaturated {
+    color: var(--text-blue-desaturated);
+}
+
+.text-green-desaturated {
+    color: var(--text-green-desaturated);
 }

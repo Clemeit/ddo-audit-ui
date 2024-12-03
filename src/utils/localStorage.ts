@@ -1,6 +1,5 @@
 import { AccessToken } from "../models/Verification.ts"
 import { Character } from "../models/Character.ts"
-import { getCharacterById } from "../services/characterService.ts"
 import { LocalStorageEntry } from "../models/LocalStorage.ts"
 
 function getAccessTokens(): AccessToken[] {
@@ -14,6 +13,27 @@ function getAccessTokens(): AccessToken[] {
     } catch (e) {
         console.error(e)
         return []
+    }
+}
+
+function getAccessTokensMetadata(): LocalStorageEntry {
+    try {
+        const storageValue = localStorage.getItem("access-tokens")
+        if (!storageValue) {
+            return {
+                createdAt: "",
+                updatedAt: "",
+                data: [],
+            }
+        }
+        return JSON.parse(storageValue)
+    } catch (e) {
+        console.error(e)
+        return {
+            createdAt: "",
+            updatedAt: "",
+            data: [],
+        }
     }
 }
 
@@ -86,6 +106,27 @@ function getRegisteredCharacters(): Character[] {
     }
 }
 
+function getRegisteredCharactersMetadata(): LocalStorageEntry {
+    try {
+        const storageValue = localStorage.getItem("registered-characters")
+        if (!storageValue) {
+            return {
+                createdAt: "",
+                updatedAt: "",
+                data: [],
+            }
+        }
+        return JSON.parse(storageValue)
+    } catch (e) {
+        console.error(e)
+        return {
+            createdAt: "",
+            updatedAt: "",
+            data: [],
+        }
+    }
+}
+
 function setRegisteredCharacters(characters: Character[]): void {
     try {
         const previousEntry: LocalStorageEntry = JSON.parse(
@@ -141,27 +182,15 @@ function removeRegisteredCharacter(character: Character): void {
     }
 }
 
-function updateRegisteredCharacters(): void {
-    const characters = getRegisteredCharacters()
-    const promises = characters.map((character: Character) =>
-        getCharacterById(character.id)
-    )
-    Promise.all(promises).then((responses) => {
-        const characters = responses
-            .map((response: { data: { data: any } }) => response.data.data)
-            .filter((character: Character) => character)
-        setRegisteredCharacters(characters)
-    })
-}
-
 export {
     getAccessTokens,
+    getAccessTokensMetadata,
     setAccessTokens,
     addAccessToken,
     removeAccessToken,
     getRegisteredCharacters,
+    getRegisteredCharactersMetadata,
     setRegisteredCharacters,
     addRegisteredCharacter,
     removeRegisteredCharacter,
-    updateRegisteredCharacters,
 }

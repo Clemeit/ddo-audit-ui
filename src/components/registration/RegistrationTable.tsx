@@ -16,13 +16,13 @@ const CharacterTable = ({
     accessTokens,
     noCharactersMessage,
     minimal,
-    removeCharacter,
+    unregisterCharacter,
 }: {
     characters: Character[]
     accessTokens: AccessToken[]
     noCharactersMessage: string
     minimal: boolean
-    removeCharacter: (character: Character) => void
+    unregisterCharacter: (character: Character) => void
 }) => {
     const navigate = useNavigate()
 
@@ -54,7 +54,7 @@ const CharacterTable = ({
                     <Delete
                         className="clickable-icon"
                         onClick={() => {
-                            removeCharacter(character)
+                            unregisterCharacter(character)
                         }}
                     />
                 </Stack>
@@ -75,7 +75,7 @@ const CharacterTable = ({
                     <Delete
                         className="clickable-icon"
                         onClick={() => {
-                            removeCharacter(character)
+                            unregisterCharacter(character)
                         }}
                     />
                 </Stack>
@@ -165,7 +165,7 @@ CharacterTable.propTypes = {
     accessTokens: PropTypes.array,
     noCharactersMessage: PropTypes.string,
     minimal: PropTypes.bool,
-    removeCharacter: PropTypes.func,
+    unregisterCharacter: PropTypes.func,
 }
 
 CharacterTable.defaultProps = {
@@ -173,7 +173,7 @@ CharacterTable.defaultProps = {
     accessTokens: [],
     noCharactersMessage: "No characters found",
     minimal: false,
-    removeCharacter: () => {},
+    unregisterCharacter: () => {},
 }
 
 export default CharacterTable

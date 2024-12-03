@@ -4,13 +4,42 @@ const API_URL = "https://api.hcnxsryjficudzazjxty.com/v1/activity"
 
 function getCharacterLocationActivityById(
     id: string,
-    start_date: string,
-    end_date: string,
-    limit: number
+    accessToken: string,
+    startDate?: string,
+    endDate?: string,
+    limit?: number
 ) {
-    return axios.get(
-        `${API_URL}/${id}/location?start_date=${start_date}&end_date=${end_date}&limit=${limit}`
-    )
+    const params = new URLSearchParams()
+    if (startDate) params.append("start_date", startDate)
+    if (endDate) params.append("end_date", endDate)
+    if (limit) params.append("limit", limit.toString())
+
+    return axios.get(`${API_URL}/${id}/location`, {
+        headers: {
+            Authorization: accessToken,
+        },
+        params,
+    })
 }
 
-export { getCharacterLocationActivityById }
+function getCharacterStatusActivityById(
+    id: string,
+    accessToken: string,
+    startDate?: string,
+    endDate?: string,
+    limit?: number
+) {
+    const params = new URLSearchParams()
+    if (startDate) params.append("start_date", startDate)
+    if (endDate) params.append("end_date", endDate)
+    if (limit) params.append("limit", limit.toString())
+
+    return axios.get(`${API_URL}/${id}/status`, {
+        headers: {
+            Authorization: accessToken,
+        },
+        params,
+    })
+}
+
+export { getCharacterLocationActivityById, getCharacterStatusActivityById }
