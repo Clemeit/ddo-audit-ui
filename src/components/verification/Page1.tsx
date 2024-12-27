@@ -125,7 +125,7 @@ const Page1 = ({
                     </ContentCluster>
                 </ExpandableContainer>
                 <p>
-                    To verify{" "}
+                    To verify that you have access to{" "}
                     <span className="orange-text">
                         {character?.name || "your character"}
                     </span>
@@ -133,9 +133,8 @@ const Page1 = ({
                     <span className="orange-text">
                         {character?.server_name || "the game"}
                     </span>{" "}
-                    and enter the following text<sup>*</sup> in the Public
-                    Comment field found at the bottom of the Who tab in the
-                    Social Panel.
+                    and enter the following text in the Public Comment field
+                    found at the bottom of the Who tab in the Social Panel.
                 </p>
                 <code className="verification-code">
                     {verificationChallenge?.challenge_word || (
@@ -177,11 +176,6 @@ const Page1 = ({
                         )}
                     </li>
                 </ul>
-                <p className="secondary-text">
-                    <sup className="secondary-text">*</sup>There's nothing
-                    special about this text. It's just a random code to verify
-                    that you have access to the character.
-                </p>
                 <p className="secondary-text">
                     This page will automatically refresh. Do not refresh this
                     page.

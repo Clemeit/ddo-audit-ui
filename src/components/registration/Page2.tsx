@@ -80,7 +80,6 @@ const Page2 = ({ setPage }: { setPage: Function }) => {
                 }
             })
             .catch((error) => {
-                console.log(error)
                 if (error.status === HttpStatusCode.NotFound) {
                     setValidationErrorMessage("Character not found")
                 } else {
@@ -156,6 +155,7 @@ const Page2 = ({ setPage }: { setPage: Function }) => {
                         {validationErrorMessage && (
                             <ValidationMessage
                                 message={validationErrorMessage}
+                                visible={!!validationErrorMessage}
                             />
                         )}
                     </Stack>

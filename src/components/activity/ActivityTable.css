@@ -1,6 +1,8 @@
-.table-container {
+.activity-table-container {
     max-height: 400px;
-    overflow-y: scroll;
+    overflow-y: auto;
+    box-shadow: 0 0 20px var(--shadow);
+    width: 100%;
 }
 
 .activity-table thead th {
@@ -8,4 +10,14 @@
     top: 0;
     background-color: inherit;
     z-index: 1;
+}
+
+.activity-table-title {
+    font-size: 1.7rem;
+    font-weight: 500;
+    margin-bottom: 0px;
+}
+
+.activity-table .ransack-boundary-row {
+    border-top: 1px solid red;
 }

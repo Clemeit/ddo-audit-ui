@@ -10,6 +10,7 @@ import { useNavigate } from "react-router-dom"
 import Button from "../global/Button.tsx"
 import { AccessToken } from "../../models/Verification.ts"
 import Stack from "../global/Stack.tsx"
+import { mapClassesToString } from "../../utils/stringUtils.ts"
 
 const CharacterTable = ({
     characters,
@@ -25,22 +26,6 @@ const CharacterTable = ({
     unregisterCharacter: (character: Character) => void
 }) => {
     const navigate = useNavigate()
-
-    function mapClassesToString(classes?: CharacterClass[]): string {
-        const excludedClasses = ["Epic", "Legendary"]
-
-        if (!classes) return ""
-        return classes
-            .filter(
-                (characterClass) =>
-                    !excludedClasses.includes(characterClass.name)
-            )
-            .map(
-                (characterClass) =>
-                    `${characterClass.name} ${characterClass.level}`
-            )
-            .join(", ")
-    }
 
     const characterRow = (character: Character) => {
         // action cell
@@ -133,7 +118,7 @@ const CharacterTable = ({
 
     return (
         <div className="table-container">
-            <table>
+            <table className="registration-table">
                 <thead>
                     <tr>
                         <th style={{ width: "0px" }}></th>

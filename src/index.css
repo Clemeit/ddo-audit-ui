@@ -60,6 +60,7 @@
     --link-blue: var(--blue1);
     --orange-text: var(--orange1);
     --blue-text: var(--blue1);
+    --red-text: var(--red1);
     --text-red-desaturated: rgb(220, 50, 50);
     --text-blue-desaturated: rgb(50, 50, 220);
     --text-green-desaturated: rgb(50, 220, 50);
@@ -206,6 +207,10 @@ table tbody tr:last-of-type {
 
 .secondary-text {
     color: var(--secondary-text);
+}
+
+.red-text {
+    color: var(--red1);
 }
 
 .link {

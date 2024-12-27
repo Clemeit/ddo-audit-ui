@@ -4,26 +4,22 @@ import ContentCluster from "../global/ContentCluster.tsx"
 import Page from "../global/Page.tsx"
 import { AccessToken } from "../../models/Verification.ts"
 import { Character } from "../../models/Character.ts"
-import { getCharacterById } from "../../services/characterService.ts"
 import "./Activity.css"
 import Stack from "../global/Stack.tsx"
-import { Link } from "react-router-dom"
-import {
-    getAccessTokens,
-    getRegisteredCharacters,
-} from "../../utils/localStorage.ts"
+import { Link, useLocation } from "react-router-dom"
 import useGetRegisteredCharacters from "../../hooks/useGetRegisteredCharacters.ts"
 import Button from "../global/Button.tsx"
 import Spacer from "../global/Spacer.tsx"
-import {
-    getCharacterLocationActivityById,
-    getCharacterStatusActivityById,
-} from "../../services/activityService.ts"
-import LocationActivityTable from "./LocationActivityTable.tsx"
+import useGetCharacterActivity from "../../hooks/useGetCharacterActivity.ts"
 import { CharacterActivityType, ActivityEvent } from "../../models/Activity.ts"
-import StatusActivityTable from "./StatusActivityTable.tsx"
+import ActivityTable from "./ActivityTable.tsx"
+import useDebounce from "../../hooks/useDebounce.ts"
+import { getLocationActivityStats } from "../../utils/locationActivityUtil.ts"
+import { RANSACK_HOURS, RANSACK_THRESHOLD } from "../../constants/game.ts"
+import { convertMillisecondsToPrettyString } from "../../utils/stringUtils.ts"
 
 const Activity = () => {
+    const location = useLocation()
     const {
         registeredCharacters,
         verifiedCharacters,
@@ -33,50 +29,175 @@ const Activity = () => {
         reload: reloadCharacters,
     } = useGetRegisteredCharacters()
 
-    const [selectedCharacter, setSelectedCharacter] =
-        useState<Character | null>(null)
+    const [
+        selectedCharacterAndAccessToken,
+        setSelectedCharacterAndAccessToken,
+    ] = useState<{
+        character: Character | null
+        accessToken: AccessToken | null
+    }>({
+        character: null,
+        accessToken: null,
+    })
 
-    const [locationActivity, setLocationActivity] = useState<
-        ActivityEvent[] | null
-    >(null)
-    const [statusActivity, setStatusActivity] = useState<
-        ActivityEvent[] | null
-    >(null)
+    const [areaFilter, setAreaFilter] = useState("")
+    const debouncedAreaFilter = useDebounce(areaFilter, 200)
 
-    function reloadActivityData() {
-        setLocationActivity(null)
-        if (selectedCharacter) {
+    const {
+        data: locationActivity,
+        loadingState: locationActivityLoadingState,
+        reload: reloadLocationActivityData,
+    } = useGetCharacterActivity({
+        characterId: selectedCharacterAndAccessToken?.character?.id,
+        accessToken: selectedCharacterAndAccessToken?.accessToken?.access_token,
+        activityType: CharacterActivityType.location,
+    })
+    const {
+        data: statusActivity,
+        loadingState: statusActivityLoadingState,
+        reload: reloadStatusActivityData,
+    } = useGetCharacterActivity({
+        characterId: selectedCharacterAndAccessToken?.character?.id,
+        accessToken: selectedCharacterAndAccessToken?.accessToken?.access_token,
+        activityType: CharacterActivityType.status,
+    })
+    const {
+        data: levelActivity,
+        loadingState: levelActivityLoadingState,
+        reload: reloadLevelActivityData,
+    } = useGetCharacterActivity({
+        characterId: selectedCharacterAndAccessToken?.character?.id,
+        accessToken: selectedCharacterAndAccessToken?.accessToken?.access_token,
+        activityType: CharacterActivityType.total_level,
+    })
+
+    useEffect(() => {
+        // get character name param from url
+        const characterName = new URLSearchParams(location.search).get(
+            "character"
+        )
+        if (characterName && verifiedCharacters.length > 0) {
+            const character = verifiedCharacters.find(
+                (character: Character) =>
+                    character.name?.toLowerCase() ===
+                    characterName.toLowerCase()
+            )
+            if (character) {
+                const accessToken = accessTokens.find(
+                    (token: AccessToken) => token.character_id === character.id
+                )
+                if (accessToken) {
+                    setSelectedCharacterAndAccessToken({
+                        character,
+                        accessToken,
+                    })
+                }
+            }
+        }
+    }, [location.search, verifiedCharacters])
+
+    function handleCharacterSelectionChange(e: any) {
+        const character =
+            verifiedCharacters.find(
+                (character: Character) => character.id === e.target.value
+            ) || null
+        if (character) {
             const accessToken = accessTokens.find(
-                (token: AccessToken) =>
-                    token.character_id === selectedCharacter.id
+                (token: AccessToken) => token.character_id === character.id
             )
             if (accessToken) {
-                getCharacterLocationActivityById(
-                    selectedCharacter.id,
-                    accessToken.access_token
-                ).then((response) => {
-                    setLocationActivity(response.data.data)
+                setSelectedCharacterAndAccessToken({
+                    character,
+                    accessToken,
                 })
-
-                getCharacterStatusActivityById(
-                    selectedCharacter.id,
-                    accessToken.access_token
-                ).then((response) => {
-                    setStatusActivity(response.data.data)
-                })
+            }
+            // set selected character in url
+            const searchParams = new URLSearchParams(location.search)
+            if (character.name?.toLowerCase()) {
+                searchParams.set("character", character.name.toLowerCase())
+                window.history.replaceState(
+                    null,
+                    "",
+                    `${location.pathname}?${searchParams.toString()}`
+                )
             }
         }
     }
 
-    useEffect(() => {
-        reloadActivityData()
-    }, [selectedCharacter])
+    function renderFilters() {
+        const {
+            totalTime,
+            totalRuns,
+            totalRunsWithinRansackHours,
+            averageTime,
+            ransackTimerStart,
+        } = getLocationActivityStats(locationActivity, debouncedAreaFilter)
 
-    function handleCharacterSelectionChange(e: any) {
-        setSelectedCharacter(
-            verifiedCharacters.find(
-                (character: Character) => character.id === e.target.value
-            ) || null
+        return (
+            <>
+                <div className="activity-table-filter">
+                    <label htmlFor="area-filter">Quest name:</label>
+                    <input
+                        id="area-filter"
+                        className="large"
+                        value={areaFilter}
+                        onChange={(e) => {
+                            setAreaFilter(e.target.value)
+                        }}
+                    />
+                </div>
+                <Stack
+                    direction="row"
+                    gap="20px"
+                    className="activity-table-stats"
+                >
+                    <Stack direction="column" className="stat">
+                        <span className="stat-title">Total time</span>
+                        <span>
+                            {totalTime
+                                ? convertMillisecondsToPrettyString(totalTime)
+                                : "-"}
+                        </span>
+                    </Stack>
+                    <Stack direction="column" className="stat">
+                        <span className="stat-title">Average time</span>
+                        <span>
+                            {averageTime
+                                ? convertMillisecondsToPrettyString(averageTime)
+                                : "-"}
+                        </span>
+                    </Stack>
+                    <Stack direction="column" className="stat">
+                        <span className="stat-title">Total runs</span>
+                        <span>{totalRuns ? totalRuns : "-"}</span>
+                    </Stack>
+                    <Stack direction="column" className="stat">
+                        <span className="stat-title">Ransack</span>
+                        <span>
+                            {totalRunsWithinRansackHours ? (
+                                totalRunsWithinRansackHours >=
+                                RANSACK_THRESHOLD ? (
+                                    <span className="red-text">
+                                        Until{" "}
+                                        {new Date(
+                                            ransackTimerStart?.getTime() +
+                                                RANSACK_HOURS * 1000 * 60 * 60
+                                        ).toLocaleString()}
+                                    </span>
+                                ) : (
+                                    <span>
+                                        {RANSACK_THRESHOLD -
+                                            totalRunsWithinRansackHours}{" "}
+                                        more runs
+                                    </span>
+                                )
+                            ) : (
+                                "-"
+                            )}
+                        </span>
+                    </Stack>
+                </Stack>
+            </>
         )
     }
 
@@ -115,8 +236,9 @@ const Activity = () => {
                                 className="large full-width-mobile"
                                 id="character-selection"
                                 value={
-                                    selectedCharacter
-                                        ? selectedCharacter?.id
+                                    selectedCharacterAndAccessToken
+                                        ? selectedCharacterAndAccessToken
+                                              .character?.id
                                         : ""
                                 }
                                 onChange={handleCharacterSelectionChange}
@@ -135,7 +257,11 @@ const Activity = () => {
                                 text="Reload"
                                 type="secondary"
                                 small
-                                onClick={reloadActivityData}
+                                onClick={() => {
+                                    reloadLocationActivityData()
+                                    reloadStatusActivityData()
+                                    reloadLevelActivityData()
+                                }}
                             />
                         </Stack>
                     </Stack>
@@ -178,14 +304,23 @@ const Activity = () => {
     const conditionalActivityContent = () => {
         return (
             <Stack direction="column" gap="20px">
-                {locationActivity ? (
-                    <LocationActivityTable
-                        characterActivity={locationActivity}
-                    />
-                ) : null}
-                {statusActivity ? (
-                    <StatusActivityTable characterActivity={statusActivity} />
-                ) : null}
+                {renderFilters()}
+                <ActivityTable
+                    characterActivity={locationActivity}
+                    activityType={CharacterActivityType.location}
+                    loadingState={locationActivityLoadingState}
+                    filter={debouncedAreaFilter}
+                />
+                <ActivityTable
+                    characterActivity={statusActivity}
+                    activityType={CharacterActivityType.status}
+                    loadingState={statusActivityLoadingState}
+                />
+                <ActivityTable
+                    characterActivity={levelActivity}
+                    activityType={CharacterActivityType.total_level}
+                    loadingState={levelActivityLoadingState}
+                />
             </Stack>
         )
     }

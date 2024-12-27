@@ -12,8 +12,8 @@
     border-radius: 50%;
 }
 
-table th:last-child,
-table td:last-child {
+.registration-table th:last-child,
+.registration-table td:last-child {
     position: sticky;
     right: 0;
     background-color: inherit;

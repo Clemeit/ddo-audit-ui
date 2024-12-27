@@ -7,12 +7,14 @@ function getCharacterLocationActivityById(
     accessToken: string,
     startDate?: string,
     endDate?: string,
-    limit?: number
+    limit?: number,
+    areaName?: string
 ) {
     const params = new URLSearchParams()
     if (startDate) params.append("start_date", startDate)
     if (endDate) params.append("end_date", endDate)
     if (limit) params.append("limit", limit.toString())
+    if (areaName) params.append("area_name", areaName)
 
     return axios.get(`${API_URL}/${id}/location`, {
         headers: {
@@ -42,4 +44,28 @@ function getCharacterStatusActivityById(
     })
 }
 
-export { getCharacterLocationActivityById, getCharacterStatusActivityById }
+function getCharacterLevelActivityById(
+    id: string,
+    accessToken: string,
+    startDate?: string,
+    endDate?: string,
+    limit?: number
+) {
+    const params = new URLSearchParams()
+    if (startDate) params.append("start_date", startDate)
+    if (endDate) params.append("end_date", endDate)
+    if (limit) params.append("limit", limit.toString())
+
+    return axios.get(`${API_URL}/${id}/level`, {
+        headers: {
+            Authorization: accessToken,
+        },
+        params,
+    })
+}
+
+export {
+    getCharacterLocationActivityById,
+    getCharacterStatusActivityById,
+    getCharacterLevelActivityById,
+}
