@@ -1,7 +1,15 @@
 import React from "react"
 import PropTypes from "prop-types"
 
-const Badge = ({ direction, gap, children, fullWidth, justify, className }) => {
+const Badge = ({
+    direction,
+    gap,
+    children,
+    fullWidth,
+    justify,
+    align,
+    className,
+}) => {
     return (
         <div
             className={className}
@@ -11,6 +19,7 @@ const Badge = ({ direction, gap, children, fullWidth, justify, className }) => {
                 gap: gap,
                 width: fullWidth ? "100%" : "auto",
                 justifyContent: justify,
+                alignItems: align,
             }}
         >
             {children}
@@ -31,6 +40,13 @@ Badge.propTypes = {
         "space-around",
         "space-evenly",
     ]),
+    align: PropTypes.oneOf([
+        "flex-start",
+        "flex-end",
+        "center",
+        "baseline",
+        "stretch",
+    ]),
     className: PropTypes.string,
 }
 
@@ -40,6 +56,7 @@ Badge.defaultProps = {
     children: null,
     fullWidth: false,
     justify: "flex-start",
+    align: "flex-start",
     className: "",
 }
 

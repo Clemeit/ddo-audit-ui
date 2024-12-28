@@ -37,20 +37,20 @@ const Banner = ({ title, subtitle, showButtons, miniature, hideOnMobile }) => {
                                 text="Make a suggestion"
                                 type="primary"
                                 onClick={routeToSuggestionsPage}
-                                style={{ width: "11rem" }}
+                                style={{ width: "9rem" }}
                             />
                             <Button
                                 text="Visit my GitHub"
                                 type="secondary"
                                 onClick={openGitHubLink}
-                                style={{ width: "11rem" }}
+                                style={{ width: "9rem" }}
                             />
                             <Button
                                 text="Donate"
                                 icon={<GiftSVG />}
                                 type="secondary donate"
                                 onClick={openDonationLink}
-                                style={{ width: "11rem" }}
+                                style={{ width: "9rem" }}
                             />
                         </div>
                     </>

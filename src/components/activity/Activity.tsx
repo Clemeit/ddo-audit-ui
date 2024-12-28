@@ -11,7 +11,7 @@ import useGetRegisteredCharacters from "../../hooks/useGetRegisteredCharacters.t
 import Button from "../global/Button.tsx"
 import Spacer from "../global/Spacer.tsx"
 import useGetCharacterActivity from "../../hooks/useGetCharacterActivity.ts"
-import { CharacterActivityType, ActivityEvent } from "../../models/Activity.ts"
+import { CharacterActivityType } from "../../models/Activity.ts"
 import ActivityTable from "./ActivityTable.tsx"
 import useDebounce from "../../hooks/useDebounce.ts"
 import { getLocationActivityStats } from "../../utils/locationActivityUtil.ts"

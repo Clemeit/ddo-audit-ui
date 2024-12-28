@@ -16,7 +16,6 @@ const ContentCluster = ({
             <h2 className={hideHeaderOnMobile ? "hide-on-mobile" : ""}>
                 {title}
             </h2>
-            <hr className={hideHeaderOnMobile ? "hide-on-mobile" : ""} />
             {subtitle && <p className="subtitle">{subtitle}</p>}
             <div className="content">{children}</div>
         </div>
@@ -34,7 +33,7 @@ ContentCluster.propTypes = {
 }
 
 ContentCluster.defaultProps = {
-    title: "Title",
+    title: "",
     subtitle: "",
     link: "#",
     showLink: true,

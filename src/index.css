@@ -65,6 +65,11 @@
     --text-blue-desaturated: rgb(50, 50, 220);
     --text-green-desaturated: rgb(50, 220, 50);
     --text-orange-desaturated: rgb(255, 110, 0);
+
+    --info: var(--blue1);
+    --error: var(--red1);
+    --success: var(--green1);
+    --warning: orange;
 }
 
 body {
@@ -73,13 +78,13 @@ body {
     -moz-osx-font-smoothing: grayscale;
     background-color: var(--background);
     max-width: 100%;
-    overflow-x: hidden;
 }
 
 html {
-    font-size: 15px;
     max-width: 100%;
     overflow-x: hidden;
+    overflow-y: scroll;
+    font-size: 18px;
 }
 
 hr {
@@ -104,7 +109,7 @@ hr {
 /* mobile */
 @media (max-width: 768px) {
     html {
-        font-size: 12px;
+        font-size: 16px;
     }
 
     .hide-on-mobile {
@@ -123,7 +128,7 @@ hr {
 /* small mobile */
 @media (max-width: 300px) {
     html {
-        font-size: 10px;
+        font-size: 12px;
     }
 
     .hide-on-small-mobile {
@@ -236,4 +241,8 @@ table tbody tr:last-of-type {
 
 .text-green-desaturated {
     color: var(--text-green-desaturated);
+}
+
+.drop-shadow {
+    filter: drop-shadow(0 0 5px var(--shadow));
 }

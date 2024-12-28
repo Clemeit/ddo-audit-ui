@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react"
+import React, { useState, useEffect, useRef, useCallback } from "react"
 import ContentCluster from "../global/ContentCluster.tsx"
 import Stack from "../global/Stack.tsx"
 import Button from "../global/Button.tsx"
@@ -32,7 +32,7 @@ const Page1 = ({
     const [verificationChallenge, setVerificationChallenge] =
         useState<Verification | null>(null)
 
-    function pollVerificationChallenge() {
+    const pollVerificationChallenge = useCallback(() => {
         if (character && character.id) {
             getVerificationChallengeByCharacterId(character.id!)
                 .then((response) => {
@@ -60,7 +60,7 @@ const Page1 = ({
                 })
                 .catch((error) => {})
         }
-    }
+    }, [character, setPage, setPendingAccessToken])
 
     useEffect(() => {
         if (!character) return
@@ -79,13 +79,13 @@ const Page1 = ({
             if (navigateToNextPageTimeout.current)
                 clearInterval(navigateToNextPageTimeout.current)
         }
-    }, [character])
+    }, [pollVerificationChallenge, character])
 
     return (
         <>
             <ContentCluster title="Verify Character">
                 <ExpandableContainer title="What is this?">
-                    <ContentCluster title="Benefits">
+                    <ContentCluster>
                         <p>
                             Verifying your character gives you access to
                             additional information such as:
@@ -104,23 +104,22 @@ const Page1 = ({
                                 daily and weekly playtime
                             </li>
                             <li>
-                                Giuild members - information that you'd find in
+                                Guild members - information that you'd find in
                                 the Guild tab of the social panel
                             </li>
                         </ul>
                         <p>
                             Character verification is entirely optional. This
-                            process is easy and does not require login
+                            process does <strong>not</strong> require login
                             credentials or personal information.{" "}
                             <span className="orange-text">
                                 We will never ask for your username or password.
-                                Do not provide this information to us!
                             </span>
                         </p>
                         <p>
-                            Note: Access tokens will be stored in your browser's
-                            local storage. If you clear your browser's cookies,
-                            you will need to verify your characters again.
+                            Access tokens will be stored in your browser's local
+                            storage. If you clear your browser's cookies, you
+                            will need to verify your characters again.
                         </p>
                     </ContentCluster>
                 </ExpandableContainer>
@@ -148,32 +147,32 @@ const Page1 = ({
                 <p>Here's the checklist:</p>
                 <ul>
                     <li>
-                        <strong>Step 1:</strong> Character is online{" "}
                         {verificationChallenge &&
                         verificationChallenge.is_online ? (
                             <Checkmark className="step-icon" />
                         ) : (
                             <X className="step-icon" />
-                        )}
+                        )}{" "}
+                        <strong>Step 1:</strong> Character is online
                     </li>
                     <li>
-                        <strong>Step 2:</strong> Character is not anonymous{" "}
                         {verificationChallenge &&
                         !verificationChallenge.is_anonymous ? (
                             <Checkmark className="step-icon" />
                         ) : (
                             <X className="step-icon" />
-                        )}
+                        )}{" "}
+                        <strong>Step 2:</strong> Character is not anonymous
                     </li>
                     <li>
-                        <strong>Step 3:</strong> Code is entered in the Public
-                        Comment field on the Who tab{" "}
                         {verificationChallenge &&
                         verificationChallenge.challenge_word_match ? (
                             <Checkmark className="step-icon" />
                         ) : (
                             <X className="step-icon" />
-                        )}
+                        )}{" "}
+                        <strong>Step 3:</strong> Code is entered in the Public
+                        Comment field on the Who tab
                     </li>
                 </ul>
                 <p className="secondary-text">

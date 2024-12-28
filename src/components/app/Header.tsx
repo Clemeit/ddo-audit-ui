@@ -14,7 +14,8 @@ const Header = () => {
     })
 
     useEffect(() => {
-        setBannerData(bannerRouteMapping[location.pathname])
+        if (bannerRouteMapping[location.pathname])
+            setBannerData(bannerRouteMapping[location.pathname])
     }, [location.pathname])
 
     return (

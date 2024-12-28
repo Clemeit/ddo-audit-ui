@@ -1,0 +1,14 @@
+.page-message {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 20px;
+}
+
+.page-message-icon {
+    height: 1.5rem;
+    width: auto;
+    vertical-align: bottom;
+    margin-right: 10px;
+}

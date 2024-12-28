@@ -3,7 +3,7 @@
     padding: 10px 20px;
     border-radius: 5px;
     border: none;
-    font-size: 1.1rem;
+    font-size: medium;
     text-align: center;
     cursor: pointer;
     transition: box-shadow 250ms;
@@ -15,7 +15,7 @@
 
 .button.small {
     padding: 3px 10px;
-    font-size: 1rem;
+    font-size: 0.8rem;
 }
 
 .button.small:hover {

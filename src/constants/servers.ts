@@ -8,12 +8,9 @@ const SERVER_NAMES = [
     "Thelanis",
     "Wayfinder",
     "Hardcore",
-    "Cormyr"
+    "Cormyr",
 ]
 
 const SERVER_NAMES_LOWER = SERVER_NAMES.map((server) => server.toLowerCase())
 
-export {
-    SERVER_NAMES,
-    SERVER_NAMES_LOWER
-}
+export { SERVER_NAMES, SERVER_NAMES_LOWER }

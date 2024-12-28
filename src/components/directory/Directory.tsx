@@ -15,7 +15,7 @@ const Directory = () => {
                     <NavigationCard type="servers" />
                     <NavigationCard type="quests" />
                     <NavigationCard type="trends" />
-                    <NavigationCard type="transfers" />
+                    {/* <NavigationCard type="transfers" /> */}
                 </div>
             </ContentCluster>
             <ContentCluster title="Social Tools">

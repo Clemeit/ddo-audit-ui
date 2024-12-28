@@ -35,26 +35,10 @@
 .banner .title,
 .banner .subtitle {
     color: var(--white);
-    text-shadow: 0 0 10px var(--black);
+    text-shadow: 0 0 2px var(--black);
     margin: 0px 10px;
     text-align: center;
     user-select: none;
-}
-
-.banner .title {
-    font-size: 3rem;
-}
-
-.banner.miniature .title {
-    font-size: 2.2rem;
-}
-
-.banner .subtitle {
-    font-size: 1.8rem;
-}
-
-.banner.miniature .subtitle {
-    font-size: 1.5rem;
 }
 
 .banner .call-to-action-container {

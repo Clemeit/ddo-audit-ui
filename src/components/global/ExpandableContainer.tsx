@@ -8,26 +8,25 @@ import "./ExpandableContainer.css"
 
 const ExpandableContainer = ({ title, children, defaultState }) => {
     const [isOpen, setIsOpen] = useState(defaultState)
-    return isOpen ? (
+
+    return (
         <div className="expandable-container">
             <div
                 className="expandable-container-header"
                 onClick={() => setIsOpen(!isOpen)}
             >
-                <h2>{title}</h2>
-                <Contract className="expandable-container-icon" />
+                <span>{title}</span>
+                {isOpen ? (
+                    <Contract className="expandable-container-icon" />
+                ) : (
+                    <Expand className="expandable-container-icon" />
+                )}
             </div>
-            <div className="expandable-container-content">{children}</div>
-        </div>
-    ) : (
-        <div className="expandable-container">
-            <div
-                className="expandable-container-header"
-                onClick={() => setIsOpen(!isOpen)}
-            >
-                <h2>{title}</h2>
-                <Expand className="expandable-container-icon" />
-            </div>
+            {isOpen && (
+                <div className="expandable-container-content drop-shadow">
+                    {children}
+                </div>
+            )}
         </div>
     )
 }

@@ -1,3 +1,9 @@
+.server-status-display {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
 .server-status-container {
     display: flex;
     justify-content: center;
@@ -7,9 +13,16 @@
     row-gap: 5px;
 }
 
-.server-status {
+.server-status-container .server-status {
     display: flex;
+    align-items: center;
     gap: 5px;
+}
+
+.server-status-container .status-icon {
+    height: 1.5rem;
+    width: auto;
+    vertical-align: bottom;
 }
 
 @media (max-width: 768px) {
@@ -17,6 +30,6 @@
         flex-direction: column;
         align-items: start;
         margin-left: 10px;
-        row-gap: 0;
+        row-gap: 2px;
     }
 }
