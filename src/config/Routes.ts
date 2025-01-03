@@ -1,61 +1,67 @@
 const bannerRouteMapping = {
-    "/": {
+    "": {
         title: "DDO Audit",
         subtitle: "Real-time Player Concurrency Data and LFM Viewer",
         miniature: false,
         showButtons: true,
     },
-    "/live": {
+    live: {
         title: "Live",
         subtitle: "Server Status and Quick Info",
         miniature: true,
         showButtons: false,
     },
-    "/servers": {
+    servers: {
         title: "Servers",
         subtitle: "Server Population, Demographics, and Trends",
         miniature: true,
         showButtons: false,
     },
-    "/grouping": {
+    grouping: {
         title: "Grouping",
         subtitle: "Live LFM Viewer",
         miniature: true,
         showButtons: false,
     },
-    "/who": {
+    who: {
         title: "Who",
         subtitle: "Live Who Panel",
         miniature: true,
         showButtons: false,
     },
-    "/trends": {
+    trends: {
         title: "Trends",
         subtitle: "Long-term Population Trends",
         miniature: true,
         showButtons: false,
     },
-    "/about": {
+    about: {
         title: "About DDO Audit",
         subtitle: "Real-time Player Concurrency Data and LFM Viewer",
         miniature: false,
         showButtons: true,
     },
-    "/verification": {
+    verification: {
         title: "Verification",
         subtitle: "Verify Your Characters",
         miniature: true,
         showButtons: false,
     },
-    "/registration": {
+    registration: {
         title: "Registration",
         subtitle: "Register Your Characters",
         miniature: true,
         showButtons: false,
     },
-    "/activity": {
+    activity: {
         title: "Activity",
         subtitle: "Detailed Character Activity",
+        miniature: true,
+        showButtons: false,
+    },
+    notifications: {
+        title: "LFM Notifications",
+        subtitle: "Set Up and Manager Notifications",
         miniature: true,
         showButtons: false,
     },

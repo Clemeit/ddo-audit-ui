@@ -9,6 +9,8 @@ import {
 import App from "./components/app/App.tsx"
 import Directory from "./components/directory/Directory.tsx"
 import Live from "./components/live/Live.tsx"
+import Grouping from "./components/grouping/Grouping.tsx"
+import GroupingSpecific from "./components/grouping/GroupingSpecific.tsx"
 
 // Lazy load uncommon pages
 const Verification = lazy(
@@ -19,6 +21,9 @@ const Registration = lazy(
 )
 const Activity = lazy(() => import("./components/activity/Activity.tsx"))
 const NotFound = lazy(() => import("./components/app/NotFound.tsx"))
+const Notifications = lazy(
+    () => import("./components/notifications/Notifications.tsx")
+)
 
 // Set up the router
 export default createBrowserRouter(
@@ -29,6 +34,9 @@ export default createBrowserRouter(
             <Route path="/verification" element={<Verification />} />
             <Route path="/registration" element={<Registration />} />
             <Route path="/activity" element={<Activity />} />
+            <Route path="/grouping" element={<Grouping />} />
+            <Route path="/grouping/:id" element={<GroupingSpecific />} />
+            <Route path="/notifications" element={<Notifications />} />
             <Route path="*" element={<NotFound />} />
         </Route>
     )

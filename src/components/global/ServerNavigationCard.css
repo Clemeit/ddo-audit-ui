@@ -1,0 +1,40 @@
+.server-navigation-card {
+    background-color: var(--background);
+    text-decoration: none;
+    border: none;
+    padding: 0 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition:
+        background-color 200ms,
+        filter 200ms;
+    width: 320px;
+    height: 6rem;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    justify-content: center;
+}
+
+.server-navigation-card:hover {
+    background-color: var(--highlight);
+    filter: drop-shadow(2px 2px 2px var(--shadow));
+}
+
+.server-navigation-card-title {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+    margin: 0;
+    font-size: 1.3rem;
+    font-weight: 400;
+}
+
+.server-navigation-card-content {
+    text-align: left;
+    color: var(--secondary-text);
+    margin: 0;
+    /* font-size: 1rem; */
+    line-height: 1.3;
+}

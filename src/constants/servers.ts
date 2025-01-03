@@ -1,6 +1,7 @@
 const SERVER_NAMES = [
     "Argonnessen",
     "Cannith",
+    "Cormyr",
     "Ghallanda",
     "Khyber",
     "Orien",
@@ -8,7 +9,6 @@ const SERVER_NAMES = [
     "Thelanis",
     "Wayfinder",
     "Hardcore",
-    "Cormyr",
 ]
 
 const SERVER_NAMES_LOWER = SERVER_NAMES.map((server) => server.toLowerCase())

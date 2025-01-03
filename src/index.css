@@ -246,3 +246,22 @@ table tbody tr:last-of-type {
 .drop-shadow {
     filter: drop-shadow(0 0 5px var(--shadow));
 }
+
+.inverted-select {
+    background-color: var(--bg);
+    color: var(--text);
+}
+
+.inverted-select option {
+    background-color: var(--bg);
+    color: var(--text);
+}
+
+.inverted-select:hover {
+    background-color: var(--background-light);
+}
+
+.inverted-input {
+    background-color: var(--bg);
+    color: var(--text);
+}

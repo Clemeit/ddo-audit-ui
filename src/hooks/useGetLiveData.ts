@@ -3,7 +3,13 @@ import { LoadingState, ApiState } from "../models/Api.ts"
 import { getServerInfo } from "../services/gameService.ts"
 import { ServerInfo } from "../models/Game.ts"
 
-const useGetLiveData = () => {
+interface UseGetLiveDataParams {
+    refreshInterval: number
+}
+
+const useGetLiveData = (
+    { refreshInterval }: UseGetLiveDataParams = { refreshInterval: 5000 }
+) => {
     const [pageLoadedAt] = useState<Date>(new Date())
     const [serverInfo, setServerInfo] = useState<
         ApiState<Record<string, ServerInfo>>
@@ -13,7 +19,8 @@ const useGetLiveData = () => {
         error: null,
     })
 
-    const mustReload = new Date().getTime() - pageLoadedAt.getTime() > 1000
+    const mustReload =
+        new Date().getTime() - pageLoadedAt.getTime() > 1000 * 60 * 60 * 12
 
     const fetchServerInfo = useCallback(() => {
         if (mustReload) return
@@ -39,9 +46,9 @@ const useGetLiveData = () => {
 
     useEffect(() => {
         fetchServerInfo()
-        const interval = setInterval(fetchServerInfo, 5000)
+        const interval = setInterval(fetchServerInfo, refreshInterval)
         return () => clearInterval(interval)
-    }, [fetchServerInfo])
+    }, [fetchServerInfo, refreshInterval])
 
     return {
         mustReload,
