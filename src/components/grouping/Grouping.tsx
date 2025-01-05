@@ -1,4 +1,4 @@
-import React from "react"
+import React, { useState } from "react"
 import Page from "../global/Page.tsx"
 import ContentCluster from "../global/ContentCluster.tsx"
 import { SERVER_NAMES_LOWER } from "../../constants/servers.ts"
@@ -9,15 +9,27 @@ import { Lfm, LfmApiServerModel } from "../../models/Lfm.ts"
 import ServerNavigationCard from "../global/ServerNavigationCard.tsx"
 import NavigationCard from "../global/NavigationCard.tsx"
 import { Link } from "react-router-dom"
+// @ts-ignore
 import { ReactComponent as Checkmark } from "../../assets/svg/checkmark.svg"
+// @ts-ignore
 import { ReactComponent as X } from "../../assets/svg/x.svg"
+// @ts-ignore
 import { ReactComponent as Pending } from "../../assets/svg/pending.svg"
 import { LoadingState } from "../../models/Api.ts"
 import GroupingCanvas from "./GroupingCanvas.tsx"
+import { useGroupingContext } from "./GroupingContext.tsx"
 
 const Grouping = () => {
     const { serverInfo } = useGetLiveData()
     const { lfmData } = usePollLfms({ serverName: "", refreshInterval: 10000 })
+    const {
+        fontSize,
+        setFontSize,
+        panelWidth,
+        setPanelWidth,
+        showBoundingBoxes,
+        setShowBoundingBoxes,
+    } = useGroupingContext()
 
     const cardDescription = (serverData: LfmApiServerModel) => {
         const serverLfms = serverData.lfms
@@ -53,11 +65,15 @@ const Grouping = () => {
         Object.entries(lfmData?.data || {}).forEach(
             ([serverName, serverData]: [string, LfmApiServerModel]) => {
                 Object.values(serverData.lfms)?.forEach((lfm: Lfm) => {
-                    if (lfm.quest?.group_size === "Raid") {
+                    if (lfm.quest?.group_size !== "Raid") {
+                        const eligibleLfm: Lfm = {
+                            ...lfm,
+                            is_eligible: true,
+                        }
                         if (!currentRaids[serverName]) {
-                            currentRaids[serverName] = [lfm]
+                            currentRaids[serverName] = [eligibleLfm]
                         } else {
-                            currentRaids[serverName].push(lfm)
+                            currentRaids[serverName].push(eligibleLfm)
                         }
                     }
                 })
@@ -128,13 +144,13 @@ const Grouping = () => {
             ([serverName, lfms]: [string, { [key: number]: Lfm }]) => (
                 <>
                     <h3>{toSentenceCase(serverName)}</h3>
-                    <Link to={`/grouping/${serverName}`}>
-                        <GroupingCanvas
-                            serverName={serverName}
-                            lfms={Object.values(lfms)}
-                            raidView
-                        />
-                    </Link>
+                    {/* <Link to={`/grouping/${serverName}`}> */}
+                    <GroupingCanvas
+                        serverName={serverName}
+                        lfms={Object.values(lfms)}
+                        raidView
+                    />
+                    {/* </Link> */}
                 </>
             )
         )
@@ -151,6 +167,27 @@ const Grouping = () => {
                 </div>
             </ContentCluster>
             <ContentCluster title="Current Raids">
+                <input
+                    type="range"
+                    min={10}
+                    max={20}
+                    value={fontSize}
+                    onChange={(e) => setFontSize(parseInt(e.target.value))}
+                />
+                <input
+                    type="range"
+                    min={600}
+                    max={1200}
+                    value={panelWidth}
+                    onChange={(e) => setPanelWidth(parseInt(e.target.value))}
+                />
+                <input
+                    type="checkbox"
+                    id="showBoundingBoxes"
+                    checked={showBoundingBoxes}
+                    onChange={(e) => setShowBoundingBoxes(e.target.checked)}
+                />
+                <label htmlFor="showBoundingBoxes">Show bounding boxes</label>
                 {getCurrentRaidsContent()}
             </ContentCluster>
             <ContentCluster title="Notifications">
