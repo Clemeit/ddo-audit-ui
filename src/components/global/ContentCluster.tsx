@@ -13,9 +13,11 @@ const ContentCluster = ({
 }) => {
     return (
         <div className={`content-cluster ${className}`}>
-            <h2 className={hideHeaderOnMobile ? "hide-on-mobile" : ""}>
-                {title}
-            </h2>
+            {title && (
+                <h2 className={hideHeaderOnMobile ? "hide-on-mobile" : ""}>
+                    {title}
+                </h2>
+            )}
             {subtitle && <p className="subtitle">{subtitle}</p>}
             <div className="content">{children}</div>
         </div>

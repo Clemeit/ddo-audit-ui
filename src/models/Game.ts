@@ -1,5 +1,5 @@
 interface ServerInfo {
-    inedx: number
+    index: number
     last_status_check: string
     is_online: boolean
     queue_number: number
