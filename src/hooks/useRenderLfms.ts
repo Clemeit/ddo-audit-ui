@@ -1,4 +1,4 @@
-import { useCallback } from "react"
+import { useCallback, useMemo } from "react"
 import { Lfm } from "../models/Lfm"
 import {
     LFM_HEIGHT,
@@ -7,8 +7,10 @@ import {
     GROUPING_COLORS,
     FONTS,
 } from "../constants/grouping.ts"
-import { getTextSize, wrapText } from "../utils/stringUtils.ts"
 import { useGroupingContext } from "../components/grouping/GroupingContext.tsx"
+import { CLASS_LIST } from "../constants/game.ts"
+import { BoundingBox } from "../models/Geometry.ts"
+import useTextRenderer from "./useTextRenderer.ts"
 
 interface UseRenderLfmsProps {
     lfmSprite?: HTMLImageElement | null
@@ -16,162 +18,299 @@ interface UseRenderLfmsProps {
 }
 
 const useRenderLfms = ({ lfmSprite, context }: UseRenderLfmsProps) => {
-    const { panelWidth, showBoundingBoxes } = useGroupingContext()
+    const { panelWidth, showBoundingBoxes, fontSize } = useGroupingContext()
+    const { confineTextToBoundingBox } = useTextRenderer(context)
+
+    function getTextWidthAndHeight(
+        text: string,
+        font: string,
+        context: CanvasRenderingContext2D
+    ) {
+        const initialFont = context.font
+        context.font = font
+        const measuredText = context.measureText(text)
+        const height =
+            measuredText.actualBoundingBoxAscent +
+            measuredText.actualBoundingBoxDescent
+        const width = measuredText.width
+        context.font = initialFont
+        return {
+            width,
+            height,
+        }
+    }
+
+    const commonBoundingBoxes = useMemo(() => {
+        const lfmBoundingBox = new BoundingBox(
+            LFM_PADDING.left + GROUPING_SPRITE_MAP.CONTENT_LEFT.width,
+            LFM_PADDING.top,
+            panelWidth -
+                LFM_PADDING.right -
+                LFM_PADDING.left -
+                GROUPING_SPRITE_MAP.CONTENT_LEFT.width -
+                GROUPING_SPRITE_MAP.CONTENT_RIGHT.width,
+            LFM_HEIGHT - LFM_PADDING.top - LFM_PADDING.bottom
+        )
+        const mainPanelBoundingBox = new BoundingBox(
+            lfmBoundingBox.x,
+            lfmBoundingBox.y,
+            lfmBoundingBox.width * 0.4,
+            lfmBoundingBox.height
+        )
+        const questPanelBoundingBox = new BoundingBox(
+            mainPanelBoundingBox.x + mainPanelBoundingBox.width,
+            lfmBoundingBox.y,
+            lfmBoundingBox.width * 0.25,
+            lfmBoundingBox.height
+        )
+        const classPanelBoundingBox = new BoundingBox(
+            questPanelBoundingBox.x + questPanelBoundingBox.width,
+            lfmBoundingBox.y,
+            lfmBoundingBox.width * 0.2,
+            lfmBoundingBox.height
+        )
+        const levelPanelBoundingBox = new BoundingBox(
+            classPanelBoundingBox.x + classPanelBoundingBox.width,
+            lfmBoundingBox.y,
+            lfmBoundingBox.width * 0.15,
+            lfmBoundingBox.height
+        )
+        const leaderClassIconBoundingBox = new BoundingBox(
+            mainPanelBoundingBox.x + 4,
+            mainPanelBoundingBox.y + 4,
+            18,
+            18
+        )
+        const classesBoundingBox = new BoundingBox(
+            classPanelBoundingBox.x + 4,
+            classPanelBoundingBox.y + 4,
+            GROUPING_SPRITE_MAP.CLASSES.ALL.width,
+            GROUPING_SPRITE_MAP.CLASSES.ALL.height
+        )
+        const questPanelBoundingBoxWithPadding = new BoundingBox(
+            questPanelBoundingBox.x + 4,
+            questPanelBoundingBox.y + 4,
+            questPanelBoundingBox.width - 8,
+            questPanelBoundingBox.height - 8
+        )
+        const levelPanelBoundingBoxWithPadding = new BoundingBox(
+            levelPanelBoundingBox.x + 4,
+            levelPanelBoundingBox.y + 4,
+            levelPanelBoundingBox.width - 8,
+            levelPanelBoundingBox.height - 8
+        )
+
+        return {
+            lfmBoundingBox,
+            mainPanelBoundingBox,
+            questPanelBoundingBox,
+            classPanelBoundingBox,
+            levelPanelBoundingBox,
+            leaderClassIconBoundingBox,
+            classesBoundingBox,
+            questPanelBoundingBoxWithPadding,
+            levelPanelBoundingBoxWithPadding,
+        }
+    }, [panelWidth])
 
     const renderLfmToCanvas = useCallback(
-        (lfm: Lfm, tempFontSize: number) => {
+        (lfm: Lfm) => {
             if (!context || !lfmSprite) return
-            const fonts = FONTS(tempFontSize)
+            const fonts = FONTS(fontSize)
 
             // set up this lfm's bounds
-            const lfmBoundingBox = {
-                x: LFM_PADDING.left + GROUPING_SPRITE_MAP.CONTENT_LEFT.width,
-                y: LFM_PADDING.top,
-                width:
-                    panelWidth -
-                    LFM_PADDING.right -
-                    LFM_PADDING.left -
-                    GROUPING_SPRITE_MAP.CONTENT_LEFT.width -
-                    GROUPING_SPRITE_MAP.CONTENT_RIGHT.width,
-                height: LFM_HEIGHT - LFM_PADDING.top - LFM_PADDING.bottom,
-            }
-            const mainPanelBoundingBox = {
-                x: lfmBoundingBox.x,
-                y: lfmBoundingBox.y,
-                width: lfmBoundingBox.width * 0.4,
-                height: lfmBoundingBox.height,
-            }
-            const questPanelBoundingBox = {
-                x: mainPanelBoundingBox.x + mainPanelBoundingBox.width,
-                y: lfmBoundingBox.y,
-                width: lfmBoundingBox.width * 0.25,
-                height: lfmBoundingBox.height,
-            }
-            const classPanelBoundingBox = {
-                x: questPanelBoundingBox.x + questPanelBoundingBox.width,
-                y: lfmBoundingBox.y,
-                width: lfmBoundingBox.width * 0.2,
-                height: lfmBoundingBox.height,
-            }
-            const levelPanelBoundingBox = {
-                x: classPanelBoundingBox.x + classPanelBoundingBox.width,
-                y: lfmBoundingBox.y,
-                width: lfmBoundingBox.width * 0.15,
-                height: lfmBoundingBox.height,
-            }
-            const leaderClassIconBoundingBox = {
-                x: mainPanelBoundingBox.x + 4,
-                y: mainPanelBoundingBox.y + 4,
-                width: 18,
-                height: 18,
-            }
-            const leaderNameMetrics = getTextSize(
-                lfm.leader.name || "Anonymous",
-                fonts.LEADER_NAME,
-                context
-            )
-            const leaderNameBoundingBox = {
-                x:
+            const {
+                lfmBoundingBox,
+                mainPanelBoundingBox,
+                questPanelBoundingBox,
+                classPanelBoundingBox,
+                levelPanelBoundingBox,
+                leaderClassIconBoundingBox,
+                classesBoundingBox,
+                questPanelBoundingBoxWithPadding,
+                levelPanelBoundingBoxWithPadding,
+            } = commonBoundingBoxes
+            const {
+                textLines: leaderNameTextLines,
+                boundingBox: leaderNameBoundingBox,
+            } = confineTextToBoundingBox({
+                text: lfm.leader.name,
+                boundingBox: new BoundingBox(
                     leaderClassIconBoundingBox.x +
-                    leaderClassIconBoundingBox.width +
-                    6,
-                y:
-                    leaderClassIconBoundingBox.y +
-                    leaderClassIconBoundingBox.height / 2 -
-                    leaderNameMetrics.height / 2,
-                width: leaderNameMetrics.width,
-                height: leaderNameMetrics.height,
-            }
-            const memberCount = lfm.members.length + 1
-            const memberCountText = ({ abbreviated = false }) =>
-                `(${memberCount}${abbreviated ? "" : " members"})`
-            const memberCountTextMetrics = getTextSize(
-                memberCountText({ abbreviated: false }),
-                fonts.MEMBER_COUNT,
-                context
-            )
-            const memberCountBoundingBox = {
-                x: leaderNameBoundingBox.x + leaderNameBoundingBox.width + 6,
-                y:
-                    leaderNameBoundingBox.y +
-                    leaderNameBoundingBox.height / 2 -
-                    memberCountTextMetrics.height / 2,
-                width: Math.min(
-                    memberCountTextMetrics.width,
-                    mainPanelBoundingBox.width +
-                        9 -
-                        (leaderNameBoundingBox.x + leaderNameBoundingBox.width)
+                        leaderClassIconBoundingBox.width +
+                        6,
+                    mainPanelBoundingBox.y,
+                    mainPanelBoundingBox.width,
+                    mainPanelBoundingBox.height
                 ),
-                height: memberCountTextMetrics.height,
-            }
-            const commentLineHeight =
-                getTextSize("Mj", fonts.COMMENT, context).height * 1.33
-            const commentBoundingBox = {
-                x: mainPanelBoundingBox.x + 4,
-                y:
-                    leaderClassIconBoundingBox.y +
-                    leaderClassIconBoundingBox.height +
-                    4,
-                width: mainPanelBoundingBox.width - 8,
-                height:
-                    mainPanelBoundingBox.height -
-                    leaderClassIconBoundingBox.height -
-                    12 -
-                    (Math.round(lfm.adventure_active_time / 60) > 0
-                        ? commentLineHeight
-                        : 0),
-            }
-            const questNameLines = wrapText(
-                lfm.quest?.name || "",
-                questPanelBoundingBox.width - 8,
-                2,
-                fonts.QUEST_NAME,
-                context
-            )
-            const questNameMetrics = getTextSize(
-                questNameLines.join(""),
-                fonts.QUEST_NAME,
-                context
-            )
-            const questNameWidth = Math.min(
-                questNameMetrics.width,
-                questPanelBoundingBox.width - 8
-            )
-            const questNameLineHeight =
-                getTextSize("Mj", fonts.QUEST_NAME, context).height * 1.33
-            const difficultyMetrics = getTextSize(
-                lfm.difficulty || "",
+                font: fonts.LEADER_NAME,
+            })
+            leaderNameBoundingBox.y =
+                leaderClassIconBoundingBox.centerY() -
+                leaderNameBoundingBox.height / 2
+
+            const showMemberCount = lfm.members.length > 0
+            const memberCountTextOptions = (abbreviated) =>
+                `(${lfm.members.length + 1}${abbreviated ? "" : " members"})`
+            let memberCountText = ""
+            let memberCountTextBounds = getTextWidthAndHeight(
+                memberCountTextOptions(false),
                 fonts.COMMENT,
                 context
             )
-            const difficultyWidth = Math.min(
-                difficultyMetrics.width,
-                questPanelBoundingBox.width - 8
+            if (memberCountTextBounds.width > mainPanelBoundingBox.width - 8) {
+                memberCountText = memberCountTextOptions(true)
+                memberCountTextBounds = getTextWidthAndHeight(
+                    memberCountTextOptions(true),
+                    fonts.COMMENT,
+                    context
+                )
+            } else {
+                memberCountText = memberCountTextOptions(false)
+            }
+
+            // const memberCountBoundingBox = new BoundingBox(
+            //     leaderNameBoundingBox.x + leaderNameBoundingBox.width + 6,
+            //     leaderNameBoundingBox.y +
+            //         leaderNameBoundingBox.height / 2 -
+            //         memberCountTextMetrics.height / 2,
+            //     Math.min(
+            //         memberCountTextMetrics.width,
+            //         mainPanelBoundingBox.width +
+            //             9 -
+            //             (leaderNameBoundingBox.x + leaderNameBoundingBox.width)
+            //     ),
+            //     memberCountTextMetrics.height
+            // )
+            const {
+                textLines: memberCountTextLines,
+                boundingBox: memberCountBoundingBox,
+            } = confineTextToBoundingBox({
+                text: showMemberCount ? memberCountText : "",
+                boundingBox: mainPanelBoundingBox,
+                font: fonts.MEMBER_COUNT,
+            })
+            memberCountBoundingBox.x = leaderNameBoundingBox.right() + 6
+            memberCountBoundingBox.y =
+                leaderNameBoundingBox.centerY() -
+                memberCountBoundingBox.height / 2
+
+            const showAdventureActiveTime =
+                Math.round(lfm.adventure_active_time / 60) > 0
+            const adventureActiveTextOptions = (abbreviated: boolean) =>
+                `${abbreviated ? "" : "Adventure "}Active: ${Math.round(lfm.adventure_active_time / 60)} minute${Math.round(lfm.adventure_active_time / 60) === 1 ? "" : "s"}`
+            let adventureActiveText = ""
+            let adventureActiveTextBounds = getTextWidthAndHeight(
+                adventureActiveTextOptions(false),
+                fonts.COMMENT,
+                context
             )
-            const difficultyLineHeight =
-                getTextSize("Mj", fonts.COMMENT, context).height * 1.33
-            const questNameBoundingBox = {
-                x:
-                    questPanelBoundingBox.x +
-                    questPanelBoundingBox.width / 2 -
-                    questNameWidth / 2,
-                y:
-                    questPanelBoundingBox.y +
-                    questPanelBoundingBox.height / 2 -
-                    (questNameLineHeight * questNameLines.length) / 2 -
-                    difficultyLineHeight / 2,
-                width: questNameWidth,
-                height: questNameLineHeight * questNameLines.length,
+            if (
+                adventureActiveTextBounds.width >
+                mainPanelBoundingBox.width - 8
+            ) {
+                adventureActiveText = adventureActiveTextOptions(true)
+                adventureActiveTextBounds = getTextWidthAndHeight(
+                    adventureActiveTextOptions(true),
+                    fonts.COMMENT,
+                    context
+                )
+            } else {
+                adventureActiveText = adventureActiveTextOptions(false)
             }
-            const difficultyBoundingBox = {
-                x:
-                    questPanelBoundingBox.x +
-                    questPanelBoundingBox.width / 2 -
-                    difficultyWidth / 2,
-                y: questNameBoundingBox.y + questNameBoundingBox.height,
-                width: difficultyWidth,
-                height: difficultyLineHeight,
+            const { boundingBox: adventureActiveBoundingBox } =
+                confineTextToBoundingBox({
+                    text: showAdventureActiveTime ? adventureActiveText : "",
+                    boundingBox: mainPanelBoundingBox,
+                    font: fonts.COMMENT,
+                    centered: true,
+                })
+            adventureActiveBoundingBox.y =
+                mainPanelBoundingBox.bottom() -
+                adventureActiveBoundingBox.height -
+                4
+            lfm.comment =
+                "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam nec purus nec nunc ultricies aliquam. Nullam nec purus nec nunc ultricies aliquam. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam nec purus nec nunc ultricies aliquam. Nullam nec purus nec nunc ultricies aliquam. END"
+            const {
+                textLines: commentLines,
+                lineHeight: commentLineHeight,
+                boundingBox: commentBoundingBox,
+            } = confineTextToBoundingBox({
+                text: lfm.comment,
+                boundingBox: new BoundingBox(
+                    mainPanelBoundingBox.x + 4,
+                    leaderClassIconBoundingBox.y +
+                        leaderClassIconBoundingBox.height +
+                        4,
+                    mainPanelBoundingBox.width - 8,
+                    mainPanelBoundingBox.height -
+                        leaderClassIconBoundingBox.height -
+                        8 -
+                        (mainPanelBoundingBox.bottom() -
+                            adventureActiveBoundingBox.top() +
+                            2)
+                ),
+                font: fonts.COMMENT,
+            })
+            const {
+                textLines: questNameTextLines,
+                lineHeight: questNameLineHeight,
+                boundingBox: questNameBoundingBox,
+            } = confineTextToBoundingBox({
+                text: lfm.quest?.name,
+                boundingBox: questPanelBoundingBoxWithPadding,
+                font: fonts.QUEST_NAME,
+                maxLines: lfm.quest?.tip ? 1 : 2,
+                centered: true,
+            })
+            const {
+                textLines: questTipTextLines,
+                boundingBox: questTipBoundingBox,
+            } = confineTextToBoundingBox({
+                text: lfm.quest?.tip,
+                boundingBox: questPanelBoundingBoxWithPadding,
+                font: fonts.COMMENT,
+                maxLines: 1,
+                centered: true,
+            })
+            const {
+                textLines: questDifficultyTextLines,
+                boundingBox: questDifficultyBoundingBox,
+            } = confineTextToBoundingBox({
+                text: lfm.difficulty,
+                boundingBox: questPanelBoundingBoxWithPadding,
+                font: fonts.COMMENT,
+                maxLines: 1,
+                centered: true,
+            })
+            const questInfoGap = 5
+            let totalQuestInfoHeight =
+                questNameBoundingBox.height +
+                questTipBoundingBox.height +
+                questDifficultyBoundingBox.height +
+                questInfoGap
+            if (lfm.quest?.tip) {
+                totalQuestInfoHeight += questInfoGap
             }
+            const topPadding = Math.max(
+                0,
+                (questPanelBoundingBox.height - totalQuestInfoHeight) / 2
+            )
+            questNameBoundingBox.y = topPadding
+            questDifficultyBoundingBox.y =
+                questPanelBoundingBox.bottom() -
+                topPadding -
+                questDifficultyBoundingBox.height
+            const levelRangeText = `${lfm.minimum_level} - ${lfm.maximum_level}`
+            const {
+                textLines: levelRangeTextLines,
+                boundingBox: levelRangeBoundingBox,
+            } = confineTextToBoundingBox({
+                text: levelRangeText,
+                boundingBox: levelPanelBoundingBoxWithPadding,
+                font: fonts.LEVEL_RANGE,
+                centered: true,
+            })
 
             // background and edges
             // context.clearRect(0, 0, panelWidth, LFM_HEIGHT)
@@ -241,39 +380,27 @@ const useRenderLfms = ({ lfmSprite, context }: UseRenderLfmsProps) => {
             context.textBaseline = "middle"
             context.textAlign = "left"
             context.fillText(
-                lfm.leader?.name || "Anonymous",
+                leaderNameTextLines[0] || "Anonymous",
                 leaderNameBoundingBox.x,
                 leaderNameBoundingBox.y + leaderNameBoundingBox.height / 2
             )
             // member count
-            if (memberCount > 1) {
-                const shouldAbbreviate =
-                    getTextSize(
-                        memberCountText({ abbreviated: false }),
-                        fonts.MEMBER_COUNT,
-                        context
-                    ).width > memberCountBoundingBox.width
+            if (showMemberCount) {
+                context.textAlign = "center"
                 context.fillStyle = GROUPING_COLORS.SECONDARY_TEXT
                 context.font = fonts.MEMBER_COUNT
                 context.fillText(
-                    memberCountText({ abbreviated: shouldAbbreviate }),
-                    leaderNameBoundingBox.x + leaderNameBoundingBox.width + 6,
-                    leaderNameBoundingBox.y + leaderNameBoundingBox.height / 2
+                    memberCountTextLines[0],
+                    memberCountBoundingBox.centerX(),
+                    memberCountBoundingBox.centerY()
                 )
             }
             // comment
-            context.fillStyle = GROUPING_COLORS.STANDARD_TEXT
+            context.fillStyle = GROUPING_COLORS.COMMENT_TEXT
             context.font = fonts.COMMENT
             context.textBaseline = "top"
             context.textAlign = "left"
-            const wrappedComment = wrapText(
-                lfm.comment,
-                commentBoundingBox.width,
-                Math.floor(commentBoundingBox.height / commentLineHeight),
-                fonts.COMMENT,
-                context
-            )
-            wrappedComment.forEach((line, index) => {
+            commentLines.forEach((line, index) => {
                 context.fillText(
                     line,
                     commentBoundingBox.x,
@@ -281,57 +408,98 @@ const useRenderLfms = ({ lfmSprite, context }: UseRenderLfmsProps) => {
                 )
             })
             // adventure active time
-            if (Math.round(lfm.adventure_active_time / 60) > 0) {
+            if (showAdventureActiveTime) {
                 context.fillStyle = GROUPING_COLORS.ADVENTURE_ACTIVE
                 context.font = fonts.COMMENT
-                context.textBaseline = "top"
+                context.textBaseline = "middle"
                 context.textAlign = "center"
-                const minutes = Math.round(lfm.adventure_active_time / 60)
-                const text = ({ abbreviated = false }) =>
-                    `${abbreviated ? "" : "Adventure "}Active: ${minutes} minute${
-                        minutes === 1 ? "" : "s"
-                    }`
-                const textBounds = getTextSize(
-                    text({ abbreviated: false }),
-                    fonts.COMMENT,
-                    context
-                )
-                const shouldAbbreviate =
-                    textBounds.width > commentBoundingBox.width
                 context.fillText(
-                    text({
-                        abbreviated: shouldAbbreviate,
-                    }),
-                    commentBoundingBox.x + commentBoundingBox.width / 2,
-                    commentBoundingBox.y + commentBoundingBox.height + 4
+                    adventureActiveText,
+                    adventureActiveBoundingBox.x +
+                        adventureActiveBoundingBox.width / 2,
+                    adventureActiveBoundingBox.y +
+                        adventureActiveBoundingBox.height / 2
                 )
             }
 
             // ===== QUEST PANEL =====
             if (lfm.quest) {
                 // quest name
-                context.fillStyle = GROUPING_COLORS.STANDARD_TEXT
-                context.font = fonts.QUEST_NAME
-                context.textBaseline = "top"
+                context.fillStyle = lfm.is_quest_guess
+                    ? GROUPING_COLORS.GUESS_TEXT
+                    : GROUPING_COLORS.STANDARD_TEXT
+                context.font = lfm.is_quest_guess
+                    ? fonts.QUEST_GUESS_NAME
+                    : fonts.QUEST_NAME
+                context.textBaseline = "middle"
                 context.textAlign = "center"
-                questNameLines.forEach((line, index) => {
+                questNameTextLines.forEach((line, index) => {
                     context.fillText(
                         line,
-                        questNameBoundingBox.x + questNameBoundingBox.width / 2,
-                        questNameBoundingBox.y + index * questNameLineHeight
+                        questNameBoundingBox.centerX(),
+                        questNameBoundingBox.top() +
+                            index * questNameLineHeight +
+                            questNameLineHeight / 2
                     )
                 })
+                // quest tip
+                if (lfm.quest.tip) {
+                    context.fillStyle = lfm.is_quest_guess
+                        ? GROUPING_COLORS.GUESS_TEXT
+                        : GROUPING_COLORS.STANDARD_TEXT
+                    context.font = fonts.TIP
+                    context.textBaseline = "middle"
+                    context.textAlign = "center"
+                    questTipTextLines.forEach((line) => {
+                        context.fillText(
+                            line,
+                            questTipBoundingBox.centerX(),
+                            questTipBoundingBox.centerY()
+                        )
+                    })
+                }
                 // quest difficulty
-                context.fillStyle = GROUPING_COLORS.SECONDARY_TEXT
+                context.fillStyle = lfm.is_quest_guess
+                    ? GROUPING_COLORS.GUESS_TEXT
+                    : GROUPING_COLORS.SECONDARY_TEXT
                 context.font = fonts.COMMENT
-                context.textBaseline = "top"
+                context.textBaseline = "middle"
                 context.textAlign = "center"
                 context.fillText(
-                    lfm.difficulty || "",
-                    difficultyBoundingBox.x + difficultyBoundingBox.width / 2,
-                    difficultyBoundingBox.y
+                    questDifficultyTextLines[0] || "",
+                    questDifficultyBoundingBox.centerX(),
+                    questDifficultyBoundingBox.centerY()
                 )
             }
+
+            // ===== CLASS PANEL =====
+            if (
+                lfm.accepted_classes_count === CLASS_LIST.length ||
+                lfm.accepted_classes === null
+            ) {
+                context.drawImage(
+                    lfmSprite,
+                    GROUPING_SPRITE_MAP.CLASSES.ALL.x,
+                    GROUPING_SPRITE_MAP.CLASSES.ALL.y,
+                    GROUPING_SPRITE_MAP.CLASSES.ALL.width,
+                    GROUPING_SPRITE_MAP.CLASSES.ALL.height,
+                    classesBoundingBox.x,
+                    classesBoundingBox.y,
+                    GROUPING_SPRITE_MAP.CLASSES.ALL.width,
+                    GROUPING_SPRITE_MAP.CLASSES.ALL.height
+                )
+            }
+
+            // ===== LEVEL PANEL =====
+            context.fillStyle = GROUPING_COLORS.STANDARD_TEXT
+            context.font = fonts.LEVEL_RANGE
+            context.textBaseline = "middle"
+            context.textAlign = "center"
+            context.fillText(
+                levelRangeTextLines[0],
+                levelRangeBoundingBox.centerX(),
+                levelRangeBoundingBox.centerY()
+            )
 
             // left
             context.drawImage(
@@ -417,20 +585,52 @@ const useRenderLfms = ({ lfmSprite, context }: UseRenderLfmsProps) => {
                     commentBoundingBox.height
                 )
                 context.strokeRect(
+                    adventureActiveBoundingBox.x,
+                    adventureActiveBoundingBox.y,
+                    adventureActiveBoundingBox.width,
+                    adventureActiveBoundingBox.height
+                )
+                context.strokeRect(
                     questNameBoundingBox.x,
                     questNameBoundingBox.y,
                     questNameBoundingBox.width,
                     questNameBoundingBox.height
                 )
                 context.strokeRect(
-                    difficultyBoundingBox.x,
-                    difficultyBoundingBox.y,
-                    difficultyBoundingBox.width,
-                    difficultyBoundingBox.height
+                    classesBoundingBox.x,
+                    classesBoundingBox.y,
+                    classesBoundingBox.width,
+                    classesBoundingBox.height
+                )
+                context.strokeRect(
+                    levelRangeBoundingBox.x,
+                    levelRangeBoundingBox.y,
+                    levelRangeBoundingBox.width,
+                    levelRangeBoundingBox.height
+                )
+                context.strokeRect(
+                    questTipBoundingBox.x,
+                    questTipBoundingBox.y,
+                    questTipBoundingBox.width,
+                    questTipBoundingBox.height
+                )
+                context.strokeRect(
+                    questDifficultyBoundingBox.x,
+                    questDifficultyBoundingBox.y,
+                    questDifficultyBoundingBox.width,
+                    questDifficultyBoundingBox.height
                 )
             }
         },
-        [lfmSprite, context, panelWidth, showBoundingBoxes]
+        [
+            lfmSprite,
+            context,
+            panelWidth,
+            showBoundingBoxes,
+            commonBoundingBoxes,
+            fontSize,
+            confineTextToBoundingBox,
+        ]
     )
 
     return { renderLfmToCanvas }

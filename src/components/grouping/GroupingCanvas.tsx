@@ -1,10 +1,15 @@
 import React, { useEffect, useRef, useState } from "react"
 import { Lfm } from "../../models/Lfm.ts"
-import { LFM_HEIGHT } from "../../constants/grouping.ts"
+import {
+    LFM_HEIGHT,
+    GROUPING_SPRITE_MAP,
+    TOTAL_GROUPING_PANEL_BORDER_HEIGHT,
+} from "../../constants/grouping.ts"
 import useRenderLfms from "../../hooks/useRenderLfms.ts"
 // @ts-ignore
 import LfmSprite from "../../assets/png/lfm_sprite.png"
 import { useGroupingContext } from "./GroupingContext.tsx"
+import useRenderLfmPanel from "../../hooks/useRenderLfmPanel.ts"
 
 interface GroupingCanvasProps {
     serverName?: string
@@ -33,6 +38,10 @@ const GroupingCanvas = ({
         lfmSprite: image,
         context: canvasRef?.current?.getContext("2d"),
     })
+    const { renderLfmPanelToCanvas } = useRenderLfmPanel({
+        lfmSprite: image,
+        context: canvasRef?.current?.getContext("2d"),
+    })
 
     useEffect(() => {
         if (image) {
@@ -47,8 +56,14 @@ const GroupingCanvas = ({
                         canvasElement.height
                     )
 
+                    renderLfmPanelToCanvas(1)
+                    context.translate(
+                        0,
+                        GROUPING_SPRITE_MAP.HEADER_BAR.height +
+                            GROUPING_SPRITE_MAP.CONTENT_TOP.height
+                    )
                     lfms.forEach((lfm) => {
-                        renderLfmToCanvas(lfm, fontSize)
+                        renderLfmToCanvas(lfm)
                         context.translate(0, LFM_HEIGHT)
                     })
 
@@ -57,14 +72,16 @@ const GroupingCanvas = ({
                 }
             }
         }
-    }, [image, lfms, raidView, renderLfmToCanvas, fontSize, panelWidth])
+    }, [image, lfms, renderLfmToCanvas, renderLfmPanelToCanvas])
 
     return (
         <canvas
             ref={canvasRef}
             id={serverName}
             width={panelWidth}
-            height={LFM_HEIGHT * lfms.length}
+            height={
+                LFM_HEIGHT * lfms.length + TOTAL_GROUPING_PANEL_BORDER_HEIGHT
+            }
             style={{
                 maxWidth: "100%",
             }}

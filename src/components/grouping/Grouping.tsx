@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React from "react"
 import Page from "../global/Page.tsx"
 import ContentCluster from "../global/ContentCluster.tsx"
 import { SERVER_NAMES_LOWER } from "../../constants/servers.ts"
@@ -18,6 +18,10 @@ import { ReactComponent as Pending } from "../../assets/svg/pending.svg"
 import { LoadingState } from "../../models/Api.ts"
 import GroupingCanvas from "./GroupingCanvas.tsx"
 import { useGroupingContext } from "./GroupingContext.tsx"
+import {
+    MAXIMUM_GROUPING_PANEL_WIDTH,
+    MINIMUM_GROUPING_PANEL_WIDTH,
+} from "../../constants/grouping.ts"
 
 const Grouping = () => {
     const { serverInfo } = useGetLiveData()
@@ -144,13 +148,13 @@ const Grouping = () => {
             ([serverName, lfms]: [string, { [key: number]: Lfm }]) => (
                 <>
                     <h3>{toSentenceCase(serverName)}</h3>
-                    {/* <Link to={`/grouping/${serverName}`}> */}
-                    <GroupingCanvas
-                        serverName={serverName}
-                        lfms={Object.values(lfms)}
-                        raidView
-                    />
-                    {/* </Link> */}
+                    <Link to={`/grouping/${serverName}`}>
+                        <GroupingCanvas
+                            serverName={serverName}
+                            lfms={Object.values(lfms)}
+                            raidView
+                        />
+                    </Link>
                 </>
             )
         )
@@ -176,8 +180,8 @@ const Grouping = () => {
                 />
                 <input
                     type="range"
-                    min={600}
-                    max={1200}
+                    min={MINIMUM_GROUPING_PANEL_WIDTH}
+                    max={MAXIMUM_GROUPING_PANEL_WIDTH}
                     value={panelWidth}
                     onChange={(e) => setPanelWidth(parseInt(e.target.value))}
                 />

@@ -41,9 +41,9 @@ function mapClassesToString(classes?: CharacterClass[]): string {
 function wrapText(
     text: string,
     width: number,
-    maxLines: number,
     font: string,
-    context: CanvasRenderingContext2D
+    context: CanvasRenderingContext2D,
+    maxLines?: number
 ) {
     if (text.length === 0) return [""]
 
@@ -58,22 +58,47 @@ function wrapText(
         const testLine = line + words[i] + " "
         const testWidth = context.measureText(testLine).width
         if (testWidth > width) {
-            lines.push(line)
-            line = words[i] + " "
+            const wordWidth = context.measureText(words[i]).width
+            lines.push(line ? line.trim() : "")
+            if (wordWidth > width) {
+                const letters = words[i].split("")
+                let partialWord = ""
+                for (let j = 0; j < letters.length; j++) {
+                    const testPartialWord = partialWord + letters[j]
+                    const testPartialWidth =
+                        context.measureText(testPartialWord).width
+                    if (testPartialWidth > width) {
+                        lines.push(partialWord.slice(0, -3) + "...")
+                        partialWord = ""
+                    }
+                    partialWord += letters[j]
+                }
+            } else {
+                line = words[i] + " "
+            }
         } else {
             line = testLine
         }
     }
 
     lines.push(line)
-    if (lines.length > maxLines) {
+    if (maxLines && lines.length > maxLines) {
         lines = lines.slice(0, maxLines)
-        lines[maxLines - 1] = lines[maxLines - 1].slice(0, -3) + "..."
+        const originalLastLine = lines[maxLines - 1]
+        const letters = originalLastLine.split("")
+        let testLine = ""
+        for (let i = 0; i < letters.length; i++) {
+            testLine += letters[i]
+            if (context.measureText(testLine).width > width) {
+                lines[maxLines - 1] = testLine.slice(0, -3)
+                break
+            }
+        }
     }
 
     context.font = previousFont
 
-    return lines
+    return lines.filter((line) => line.length > 0)
 }
 
 function getTextSize(
