@@ -1,4 +1,4 @@
-import React from "react"
+import React, { useCallback, useEffect, useRef } from "react"
 import Page from "../global/Page.tsx"
 import ContentCluster from "../global/ContentCluster.tsx"
 import { SERVER_NAMES_LOWER } from "../../constants/servers.ts"
@@ -63,9 +63,8 @@ const Grouping = () => {
         }
     }
 
-    const getCurrentRaids = () => {
+    const getCurrentRaids = useCallback(() => {
         const currentRaids: Record<string, Lfm[]> = {}
-        console.log(Object.entries(lfmData.data || {}))
         Object.entries(lfmData?.data || {}).forEach(
             ([serverName, serverData]: [string, LfmApiServerModel]) => {
                 Object.values(serverData.lfms)?.forEach((lfm: Lfm) => {
@@ -84,7 +83,7 @@ const Grouping = () => {
             }
         )
         return currentRaids
-    }
+    }, [lfmData.data])
 
     const getServerSelectContent = () => {
         if (
@@ -134,7 +133,7 @@ const Grouping = () => {
             ))
     }
 
-    const getCurrentRaidsContent = () => {
+    const getCurrentRaidsContent = useCallback(() => {
         if (
             serverInfo.loadingState === LoadingState.Initial ||
             serverInfo.loadingState === LoadingState.Loading ||
@@ -144,8 +143,9 @@ const Grouping = () => {
             return <p className="secondary-text">Loading content...</p>
         }
 
-        return Object.entries(getCurrentRaids() || {}).map(
-            ([serverName, lfms]: [string, { [key: number]: Lfm }]) => (
+        return Object.entries(getCurrentRaids() || {})
+            .filter(([serverName]) => serverName === "argonnessen")
+            .map(([serverName, lfms]: [string, { [key: number]: Lfm }]) => (
                 <>
                     <h3>{toSentenceCase(serverName)}</h3>
                     <Link to={`/grouping/${serverName}`}>
@@ -156,9 +156,8 @@ const Grouping = () => {
                         />
                     </Link>
                 </>
-            )
-        )
-    }
+            ))
+    }, [serverInfo.loadingState, lfmData.loadingState, getCurrentRaids])
 
     return (
         <Page

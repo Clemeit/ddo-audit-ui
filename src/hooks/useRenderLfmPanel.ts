@@ -5,6 +5,7 @@ import {
     GROUPING_SPRITE_MAP,
     GROUPING_COLORS,
     FONTS,
+    GROUPING_PANEL_TOP_BORDER_HEIGHT,
 } from "../constants/grouping.ts"
 import { useGroupingContext } from "../components/grouping/GroupingContext.tsx"
 
@@ -103,6 +104,50 @@ const useRenderLfmPanel = ({ lfmSprite, context }: UseRenderLfmPanelProps) => {
             )
 
             // draw footer
+            const bottomY =
+                GROUPING_PANEL_TOP_BORDER_HEIGHT + lfmCount * LFM_HEIGHT
+            for (
+                let i = 0;
+                i <=
+                Math.round(
+                    panelWidth / GROUPING_SPRITE_MAP.CONTENT_BOTTOM.width
+                );
+                i++
+            ) {
+                context.drawImage(
+                    lfmSprite,
+                    GROUPING_SPRITE_MAP.CONTENT_BOTTOM.x,
+                    GROUPING_SPRITE_MAP.CONTENT_BOTTOM.y,
+                    GROUPING_SPRITE_MAP.CONTENT_BOTTOM.width,
+                    GROUPING_SPRITE_MAP.CONTENT_BOTTOM.height,
+                    GROUPING_SPRITE_MAP.CONTENT_BOTTOM.width * i,
+                    bottomY,
+                    GROUPING_SPRITE_MAP.CONTENT_BOTTOM.width,
+                    GROUPING_SPRITE_MAP.CONTENT_BOTTOM.height
+                )
+            }
+            context.drawImage(
+                lfmSprite,
+                GROUPING_SPRITE_MAP.CONTENT_BOTTOM_LEFT.x,
+                GROUPING_SPRITE_MAP.CONTENT_BOTTOM_LEFT.y,
+                GROUPING_SPRITE_MAP.CONTENT_BOTTOM_LEFT.width,
+                GROUPING_SPRITE_MAP.CONTENT_BOTTOM_LEFT.height,
+                0,
+                bottomY,
+                GROUPING_SPRITE_MAP.CONTENT_BOTTOM_LEFT.width,
+                GROUPING_SPRITE_MAP.CONTENT_BOTTOM_LEFT.height
+            )
+            context.drawImage(
+                lfmSprite,
+                GROUPING_SPRITE_MAP.CONTENT_BOTTOM_RIGHT.x,
+                GROUPING_SPRITE_MAP.CONTENT_BOTTOM_RIGHT.y,
+                GROUPING_SPRITE_MAP.CONTENT_BOTTOM_RIGHT.width,
+                GROUPING_SPRITE_MAP.CONTENT_BOTTOM_RIGHT.height,
+                panelWidth - GROUPING_SPRITE_MAP.CONTENT_BOTTOM_RIGHT.width,
+                bottomY,
+                GROUPING_SPRITE_MAP.CONTENT_BOTTOM_RIGHT.width,
+                GROUPING_SPRITE_MAP.CONTENT_BOTTOM_RIGHT.height
+            )
         },
         [lfmSprite, context, panelWidth]
     )

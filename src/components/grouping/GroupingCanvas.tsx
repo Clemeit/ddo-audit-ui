@@ -2,14 +2,15 @@ import React, { useEffect, useRef, useState } from "react"
 import { Lfm } from "../../models/Lfm.ts"
 import {
     LFM_HEIGHT,
-    GROUPING_SPRITE_MAP,
     TOTAL_GROUPING_PANEL_BORDER_HEIGHT,
+    GROUPING_PANEL_TOP_BORDER_HEIGHT,
 } from "../../constants/grouping.ts"
 import useRenderLfms from "../../hooks/useRenderLfms.ts"
 // @ts-ignore
 import LfmSprite from "../../assets/png/lfm_sprite.png"
 import { useGroupingContext } from "./GroupingContext.tsx"
 import useRenderLfmPanel from "../../hooks/useRenderLfmPanel.ts"
+import { shouldLfmRerender } from "../../utils/lfmUtils.ts"
 
 interface GroupingCanvasProps {
     serverName?: string
@@ -25,6 +26,10 @@ const GroupingCanvas = ({
     const canvasRef = useRef<HTMLCanvasElement>(null)
     const [image, setImage] = useState<HTMLImageElement | null>(null)
     const { fontSize, panelWidth } = useGroupingContext()
+
+    const previousLfms = useRef<Lfm[]>([])
+    const previousFontSize = useRef<number>(fontSize)
+    const previousPanelWidth = useRef<number>(panelWidth)
 
     useEffect(() => {
         const img = new Image()
@@ -49,30 +54,51 @@ const GroupingCanvas = ({
             if (canvasElement) {
                 const context = canvasElement.getContext("2d")
                 if (context) {
-                    context.clearRect(
-                        0,
-                        0,
-                        canvasElement.width,
-                        canvasElement.height
-                    )
+                    const shouldForceRender =
+                        fontSize !== previousFontSize.current ||
+                        panelWidth !== previousPanelWidth.current ||
+                        lfms.length !== previousLfms.current.length
 
-                    renderLfmPanelToCanvas(1)
-                    context.translate(
-                        0,
-                        GROUPING_SPRITE_MAP.HEADER_BAR.height +
-                            GROUPING_SPRITE_MAP.CONTENT_TOP.height
-                    )
-                    lfms.forEach((lfm) => {
-                        renderLfmToCanvas(lfm)
+                    if (
+                        shouldForceRender ||
+                        lfms.length !== previousLfms.current.length
+                    ) {
+                        renderLfmPanelToCanvas(lfms.length)
+                    }
+                    context.translate(0, GROUPING_PANEL_TOP_BORDER_HEIGHT)
+                    let totalLfmsRendered = 0
+                    lfms.forEach((lfm, index) => {
+                        const shouldRenderLfm =
+                            index >= previousLfms.current.length ||
+                            shouldLfmRerender(previousLfms.current[index], lfm)
+                        if (shouldForceRender || shouldRenderLfm) {
+                            renderLfmToCanvas(lfm)
+                            totalLfmsRendered += 1
+                        }
                         context.translate(0, LFM_HEIGHT)
                     })
+                    console.log(
+                        `Rendered lfms for ${lfms.length > 0 ? lfms[0].server_name : ""}`,
+                        totalLfmsRendered
+                    )
 
                     // reset the context
                     context.setTransform(1, 0, 0, 1, 0, 0)
+
+                    previousLfms.current = lfms
+                    previousFontSize.current = fontSize
+                    previousPanelWidth.current = panelWidth
                 }
             }
         }
-    }, [image, lfms, renderLfmToCanvas, renderLfmPanelToCanvas])
+    }, [
+        image,
+        lfms,
+        fontSize,
+        panelWidth,
+        renderLfmToCanvas,
+        renderLfmPanelToCanvas,
+    ])
 
     return (
         <canvas

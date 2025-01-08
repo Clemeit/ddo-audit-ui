@@ -169,19 +169,6 @@ const useRenderLfms = ({ lfmSprite, context }: UseRenderLfmsProps) => {
                 memberCountText = memberCountTextOptions(false)
             }
 
-            // const memberCountBoundingBox = new BoundingBox(
-            //     leaderNameBoundingBox.x + leaderNameBoundingBox.width + 6,
-            //     leaderNameBoundingBox.y +
-            //         leaderNameBoundingBox.height / 2 -
-            //         memberCountTextMetrics.height / 2,
-            //     Math.min(
-            //         memberCountTextMetrics.width,
-            //         mainPanelBoundingBox.width +
-            //             9 -
-            //             (leaderNameBoundingBox.x + leaderNameBoundingBox.width)
-            //     ),
-            //     memberCountTextMetrics.height
-            // )
             const {
                 textLines: memberCountTextLines,
                 boundingBox: memberCountBoundingBox,
@@ -229,8 +216,8 @@ const useRenderLfms = ({ lfmSprite, context }: UseRenderLfmsProps) => {
                 mainPanelBoundingBox.bottom() -
                 adventureActiveBoundingBox.height -
                 4
-            lfm.comment =
-                "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam nec purus nec nunc ultricies aliquam. Nullam nec purus nec nunc ultricies aliquam. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam nec purus nec nunc ultricies aliquam. Nullam nec purus nec nunc ultricies aliquam. END"
+            // lfm.comment =
+            //     "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam nec purus nec nunc ultricies aliquam. Nullam nec purus nec nunc ultricies aliquam. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam nec purus nec nunc ultricies aliquam. Nullam nec purus nec nunc ultricies aliquam. END"
             const {
                 textLines: commentLines,
                 lineHeight: commentLineHeight,
