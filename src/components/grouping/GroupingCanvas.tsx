@@ -11,7 +11,7 @@ import {
 import useRenderLfms from "../../hooks/useRenderLfms.ts"
 // @ts-ignore
 import LfmSprite from "../../assets/png/lfm_sprite.png"
-import { useGroupingContext } from "./GroupingContext.tsx"
+import { useGroupingContext } from "../../contexts/GroupingContext.tsx"
 import useRenderLfmPanel from "../../hooks/useRenderLfmPanel.ts"
 import { shouldLfmRerender } from "../../utils/lfmUtils.ts"
 
@@ -28,11 +28,12 @@ const GroupingCanvas = ({
 }: GroupingCanvasProps) => {
     const canvasRef = useRef<HTMLCanvasElement>(null)
     const [image, setImage] = useState<HTMLImageElement | null>(null)
-    const { fontSize, panelWidth } = useGroupingContext()
+    const { fontSize, panelWidth, sortBy } = useGroupingContext()
 
     const previousLfms = useRef<Lfm[]>([])
     const previousFontSize = useRef<number>(fontSize)
     const previousPanelWidth = useRef<number>(panelWidth)
+    const previousSortBy = useRef(sortBy)
 
     useEffect(() => {
         const img = new Image()
@@ -60,12 +61,10 @@ const GroupingCanvas = ({
                     const shouldForceRender =
                         fontSize !== previousFontSize.current ||
                         panelWidth !== previousPanelWidth.current ||
-                        lfms.length !== previousLfms.current.length
+                        lfms.length !== previousLfms.current.length ||
+                        sortBy !== previousSortBy.current
 
-                    if (
-                        panelWidth !== previousPanelWidth.current ||
-                        lfms.length !== previousLfms.current.length
-                    ) {
+                    if (shouldForceRender) {
                         renderLfmPanelToCanvas(lfms.length)
                     }
                     context.translate(
@@ -97,6 +96,7 @@ const GroupingCanvas = ({
                     previousLfms.current = lfms
                     previousFontSize.current = fontSize
                     previousPanelWidth.current = panelWidth
+                    previousSortBy.current = sortBy
                 }
             }
         }
@@ -105,6 +105,7 @@ const GroupingCanvas = ({
         lfms,
         fontSize,
         panelWidth,
+        sortBy,
         renderLfmToCanvas,
         renderLfmPanelToCanvas,
     ])

@@ -185,6 +185,11 @@ const GROUPING_SPRITE_MAP = {
         RIGHT: { x: 167, y: 0, width: 2, height: 21 },
         CENTER: { x: 150, y: 0, width: 17, height: 21 },
     },
+    SORT_HEADER_HIGHLIGHTED: {
+        LEFT: { x: 169, y: 0, width: 2, height: 21 },
+        RIGHT: { x: 188, y: 0, width: 2, height: 21 },
+        CENTER: { x: 171, y: 0, width: 17, height: 21 },
+    },
 }
 
 const GROUPING_PANEL_TOP_BORDER_HEIGHT =
@@ -216,8 +221,8 @@ const FONTS = (baseFontSize: number = DEFAULT_BASE_FONT_SIZE) => ({
     TIP: `italic ${baseFontSize}px Arial`,
     MEMBER_COUNT: `${baseFontSize}px Arial`,
     LEVEL_RANGE: `${baseFontSize + 2}px Arial`,
-    MAIN_HEADER: "14px Arial",
-    SORT_HEADER: "10px Arial",
+    MAIN_HEADER: "14px 'Trebuchet MS'",
+    SORT_HEADER: "12px 'Trebuchet MS'",
 })
 
 const GROUPING_COLORS = {

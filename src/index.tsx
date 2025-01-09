@@ -6,7 +6,7 @@ import reportWebVitals from "./reportWebVitals"
 import browserRouter from "./browserRouter.tsx"
 import { ThemeProvider } from "./contexts/ThemeContext.tsx"
 import { HelmetProvider } from "react-helmet-async"
-import { GroupingProvider } from "./components/grouping/GroupingContext.tsx"
+import { GroupingProvider } from "./contexts/GroupingContext.tsx"
 
 const root = ReactDOM.createRoot(document.getElementById("root")!)
 root.render(

@@ -6,7 +6,7 @@ import {
     GROUPING_COLORS,
     FONTS,
 } from "../constants/grouping.ts"
-import { useGroupingContext } from "../components/grouping/GroupingContext.tsx"
+import { useGroupingContext } from "../contexts/GroupingContext.tsx"
 import { CLASS_LIST } from "../constants/game.ts"
 import { BoundingBox } from "../models/Geometry.ts"
 import useTextRenderer from "./useTextRenderer.ts"
@@ -393,7 +393,7 @@ const useRenderLfms = ({ lfmSprite, context }: UseRenderLfmsProps) => {
             // ===== CLASS PANEL =====
             if (
                 lfm.accepted_classes_count === CLASS_LIST.length ||
-                lfm.accepted_classes === null
+                lfm.accepted_classes == null
             ) {
                 context.drawImage(
                     lfmSprite,
@@ -517,7 +517,6 @@ const useRenderLfms = ({ lfmSprite, context }: UseRenderLfmsProps) => {
         [
             lfmSprite,
             context,
-            panelWidth,
             showBoundingBoxes,
             commonBoundingBoxes,
             fontSize,

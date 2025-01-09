@@ -2,7 +2,13 @@ import React, { createContext, useContext, useState, ReactNode } from "react"
 import {
     DEFAULT_BASE_FONT_SIZE,
     DEFAULT_GROUPING_PANEL_WIDTH,
-} from "../../constants/grouping.ts"
+} from "../constants/grouping.ts"
+
+// TODO: move this out
+interface SortType {
+    type: string
+    direction: string
+}
 
 interface GroupingContextProps {
     fontSize: number
@@ -11,6 +17,8 @@ interface GroupingContextProps {
     setPanelWidth: (size: number) => void
     showBoundingBoxes: boolean
     setShowBoundingBoxes: (show: boolean) => void
+    sortBy: SortType
+    setSortBy: (sort: SortType) => void
 }
 
 const GroupingContext = createContext<GroupingContextProps | undefined>(
@@ -24,6 +32,12 @@ export const GroupingProvider = ({ children }: { children: ReactNode }) => {
     )
     const [showBoundingBoxes, setShowBoundingBoxes] = useState<boolean>(false)
 
+    // TODO: store all of the filters and sorting options here
+    const [sortBy, setSortBy] = useState<SortType>({
+        type: "level",
+        direction: "asc",
+    })
+
     return (
         <GroupingContext.Provider
             value={{
@@ -33,6 +47,8 @@ export const GroupingProvider = ({ children }: { children: ReactNode }) => {
                 setPanelWidth,
                 showBoundingBoxes,
                 setShowBoundingBoxes,
+                sortBy,
+                setSortBy,
             }}
         >
             {children}

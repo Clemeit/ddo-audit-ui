@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react"
 import { LoadingState, ApiState } from "../models/Api.ts"
-import { Lfm, LfmApiModel, LfmApiServerModel } from "../models/Lfm.ts"
+import { LfmApiModel, LfmApiServerModel } from "../models/Lfm.ts"
 import { getAllLfms, getLfmsByServerName } from "../services/lfmService.ts"
 
 interface UsePollLfmsParams {

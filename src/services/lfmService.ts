@@ -7,7 +7,7 @@ function getAllLfms() {
 }
 
 function getLfmsByServerName(serverName: string) {
-    return axios.get(`${API_URL}/${serverName}`)
+    return axios.get(`${API_URL}/${serverName.toLowerCase()}`)
 }
 
 export { getAllLfms, getLfmsByServerName }

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef } from "react"
+import React, { useCallback } from "react"
 import Page from "../global/Page.tsx"
 import ContentCluster from "../global/ContentCluster.tsx"
 import { SERVER_NAMES_LOWER } from "../../constants/servers.ts"
@@ -17,7 +17,7 @@ import { ReactComponent as X } from "../../assets/svg/x.svg"
 import { ReactComponent as Pending } from "../../assets/svg/pending.svg"
 import { LoadingState } from "../../models/Api.ts"
 import GroupingCanvas from "./GroupingCanvas.tsx"
-import { useGroupingContext } from "./GroupingContext.tsx"
+import { useGroupingContext } from "../../contexts/GroupingContext.tsx"
 import {
     MAXIMUM_GROUPING_PANEL_WIDTH,
     MINIMUM_GROUPING_PANEL_WIDTH,
