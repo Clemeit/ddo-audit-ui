@@ -8,6 +8,7 @@ import {
     SORT_HEADER_HEIGHT,
     LFM_AREA_PADDING,
     MINIMUM_LFM_COUNT,
+    SORT_HEADERS,
 } from "../constants/lfmPanel.ts"
 import { useLfmContext } from "../contexts/LfmContext.tsx"
 import { calculateCommonBoundingBoxes } from "../utils/lfmUtils.ts"
@@ -32,6 +33,10 @@ const useRenderLfmPanel = ({
         [panelWidth]
     )
     const fonts = useMemo(() => FONTS(0), [])
+    const sortHeaders = useMemo(
+        () => SORT_HEADERS(commonBoundingBoxes),
+        [commonBoundingBoxes]
+    )
 
     const renderLfmPanelToCanvas = useCallback(
         (lfmCount: number) => {
@@ -229,98 +234,89 @@ const useRenderLfmPanel = ({
                 context.font = fonts.SORT_HEADER
                 context.textBaseline = "middle"
                 context.textAlign = "left"
-                const panels: [string, BoundingBox, string][] = [
-                    [
-                        "leader",
-                        commonBoundingBoxes.mainPanelBoundingBox,
-                        "Leader Name",
-                    ],
-                    [
-                        "quest",
-                        commonBoundingBoxes.questPanelBoundingBox,
-                        "Quest",
-                    ],
-                    [
-                        "classes",
-                        commonBoundingBoxes.classPanelBoundingBox,
-                        "Classes Needed",
-                    ],
-                    ["level", commonBoundingBoxes.levelPanelBoundingBox, "Lvl"],
-                ]
-                panels.forEach((panel, index) => {
-                    context.translate(
-                        panel[1].x +
-                            LFM_SPRITE_MAP.CONTENT_LEFT.width +
-                            LFM_AREA_PADDING.left,
-                        panel[1].y +
-                            LFM_PANEL_TOP_BORDER_HEIGHT +
-                            LFM_AREA_PADDING.top
-                    )
-                    const sourceBox =
-                        sortBy.type === panel[0]
-                            ? LFM_SPRITE_MAP.SORT_HEADER_HIGHLIGHTED
-                            : LFM_SPRITE_MAP.SORT_HEADER
-                    context.drawImage(
-                        lfmSprite,
-                        sourceBox.LEFT.x,
-                        sourceBox.LEFT.y,
-                        sourceBox.LEFT.width,
-                        sourceBox.LEFT.height,
-                        0,
-                        0,
-                        sourceBox.LEFT.width,
-                        sourceBox.LEFT.height
-                    )
-                    context.drawImage(
-                        lfmSprite,
-                        sourceBox.CENTER.x,
-                        sourceBox.CENTER.y,
-                        sourceBox.CENTER.width,
-                        sourceBox.CENTER.height,
-                        sourceBox.LEFT.width,
-                        0,
-                        panel[1].width,
-                        sourceBox.CENTER.height
-                    )
-                    context.drawImage(
-                        lfmSprite,
-                        sourceBox.RIGHT.x,
-                        sourceBox.RIGHT.y,
-                        sourceBox.RIGHT.width,
-                        sourceBox.RIGHT.height,
-                        panel[1].width - (index === panels.length - 1 ? 0 : 2),
-                        0,
-                        sourceBox.RIGHT.width,
-                        sourceBox.RIGHT.height
-                    )
-                    context.fillText(panel[2], 20, sourceBox.CENTER.height / 2)
-                    if (sortBy.type === panel[0]) {
-                        // draw a little triangle to indicate sorting
-                        context.save()
-                        context.shadowBlur = 2
-                        context.shadowColor = "black"
-                        context.shadowOffsetX = 1
-                        context.shadowOffsetY = 1
-                        const triangleX = 10
-                        if (sortBy.direction === "asc") {
-                            const triangleY = sourceBox.CENTER.height / 2 - 3
-                            context.beginPath()
-                            context.moveTo(triangleX, triangleY + 5)
-                            context.lineTo(triangleX + 5, triangleY + 5)
-                            context.lineTo(triangleX + 2.5, triangleY)
-                            context.fill()
-                        } else {
-                            const triangleY = sourceBox.CENTER.height / 2 - 2
-                            context.beginPath()
-                            context.moveTo(triangleX, triangleY)
-                            context.lineTo(triangleX + 5, triangleY)
-                            context.lineTo(triangleX + 2.5, triangleY + 5)
-                            context.fill()
+                sortHeaders.forEach(
+                    ({ type, boundingBox, displayText }, index) => {
+                        context.translate(
+                            boundingBox.x +
+                                LFM_SPRITE_MAP.CONTENT_LEFT.width +
+                                LFM_AREA_PADDING.left,
+                            boundingBox.y +
+                                LFM_PANEL_TOP_BORDER_HEIGHT +
+                                LFM_AREA_PADDING.top
+                        )
+                        const sourceBox =
+                            sortBy.type === type
+                                ? LFM_SPRITE_MAP.SORT_HEADER_HIGHLIGHTED
+                                : LFM_SPRITE_MAP.SORT_HEADER
+                        context.drawImage(
+                            lfmSprite,
+                            sourceBox.LEFT.x,
+                            sourceBox.LEFT.y,
+                            sourceBox.LEFT.width,
+                            sourceBox.LEFT.height,
+                            0,
+                            0,
+                            sourceBox.LEFT.width,
+                            sourceBox.LEFT.height
+                        )
+                        context.drawImage(
+                            lfmSprite,
+                            sourceBox.CENTER.x,
+                            sourceBox.CENTER.y,
+                            sourceBox.CENTER.width,
+                            sourceBox.CENTER.height,
+                            sourceBox.LEFT.width,
+                            0,
+                            boundingBox.width,
+                            sourceBox.CENTER.height
+                        )
+                        context.drawImage(
+                            lfmSprite,
+                            sourceBox.RIGHT.x,
+                            sourceBox.RIGHT.y,
+                            sourceBox.RIGHT.width,
+                            sourceBox.RIGHT.height,
+                            boundingBox.width -
+                                (index === sortHeaders.length - 1 ? 0 : 2),
+                            0,
+                            sourceBox.RIGHT.width,
+                            sourceBox.RIGHT.height
+                        )
+                        context.fillText(
+                            displayText,
+                            20,
+                            sourceBox.CENTER.height / 2
+                        )
+                        if (sortBy.type === type) {
+                            // draw a little triangle to indicate sorting
+                            context.save()
+                            context.shadowBlur = 2
+                            context.shadowColor = "black"
+                            context.shadowOffsetX = 1
+                            context.shadowOffsetY = 1
+                            const triangleX = 10
+                            if (sortBy.direction === "asc") {
+                                const triangleY =
+                                    sourceBox.CENTER.height / 2 - 3
+                                context.beginPath()
+                                context.moveTo(triangleX, triangleY + 5)
+                                context.lineTo(triangleX + 5, triangleY + 5)
+                                context.lineTo(triangleX + 2.5, triangleY)
+                                context.fill()
+                            } else {
+                                const triangleY =
+                                    sourceBox.CENTER.height / 2 - 2
+                                context.beginPath()
+                                context.moveTo(triangleX, triangleY)
+                                context.lineTo(triangleX + 5, triangleY)
+                                context.lineTo(triangleX + 2.5, triangleY + 5)
+                                context.fill()
+                            }
+                            context.restore()
                         }
-                        context.restore()
+                        context.setTransform(1, 0, 0, 1, 0, 0)
                     }
-                    context.setTransform(1, 0, 0, 1, 0, 0)
-                })
+                )
             }
         },
         [
@@ -332,6 +328,7 @@ const useRenderLfmPanel = ({
             commonBoundingBoxes,
             fonts,
             sortBy,
+            sortHeaders,
         ]
     )
 

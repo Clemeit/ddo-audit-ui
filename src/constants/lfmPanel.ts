@@ -1,3 +1,5 @@
+import { BoundingBox } from "../models/Geometry"
+
 const DEFAULT_LFM_PANEL_WIDTH = 848
 const MINIMUM_LFM_PANEL_WIDTH = 600
 const MAXIMUM_LFM_PANEL_WIDTH = 1600
@@ -241,6 +243,35 @@ const LFM_COLORS = {
     GUESS_TEXT: "#D3F6F6",
 }
 
+interface SortHeaderData {
+    type: string
+    boundingBox: BoundingBox
+    displayText: string
+}
+
+const SORT_HEADERS = (commonBoundingBoxes): SortHeaderData[] => [
+    {
+        type: "leader",
+        boundingBox: commonBoundingBoxes.mainPanelBoundingBox,
+        displayText: "Leader Name",
+    },
+    {
+        type: "quest",
+        boundingBox: commonBoundingBoxes.questPanelBoundingBox,
+        displayText: "Quest",
+    },
+    {
+        type: "classes",
+        boundingBox: commonBoundingBoxes.classPanelBoundingBox,
+        displayText: "Classes Needed",
+    },
+    {
+        type: "level",
+        boundingBox: commonBoundingBoxes.levelPanelBoundingBox,
+        displayText: "Lvl",
+    },
+]
+
 export {
     DEFAULT_LFM_PANEL_WIDTH,
     MINIMUM_LFM_PANEL_WIDTH,
@@ -258,4 +289,5 @@ export {
     MINIMUM_LFM_COUNT,
     QUEST_INFO_GAP,
     FONTS,
+    SORT_HEADERS,
 }

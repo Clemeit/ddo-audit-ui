@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react"
+import React, { useEffect, useMemo, useRef, useState } from "react"
 import { Lfm } from "../../models/Lfm.ts"
 import {
     LFM_HEIGHT,
@@ -8,13 +8,18 @@ import {
     LFM_AREA_PADDING,
     LFM_SPRITE_MAP,
     MINIMUM_LFM_COUNT,
+    LFM_PADDING,
+    SORT_HEADERS,
 } from "../../constants/lfmPanel.ts"
 import useRenderLfm from "../../hooks/useRenderLfm.ts"
 // @ts-ignore
 import LfmSprite from "../../assets/png/lfm_sprite.png"
 import { useLfmContext } from "../../contexts/LfmContext.tsx"
 import useRenderLfmPanel from "../../hooks/useRenderLfmPanel.ts"
-import { shouldLfmRerender } from "../../utils/lfmUtils.ts"
+import {
+    calculateCommonBoundingBoxes,
+    shouldLfmRerender,
+} from "../../utils/lfmUtils.ts"
 
 interface GroupingCanvasProps {
     serverName?: string
@@ -29,7 +34,15 @@ const GroupingCanvas = ({
 }: GroupingCanvasProps) => {
     const canvasRef = useRef<HTMLCanvasElement>(null)
     const [image, setImage] = useState<HTMLImageElement | null>(null)
-    const { fontSize, panelWidth, sortBy } = useLfmContext()
+    const { fontSize, panelWidth, sortBy, setSortBy } = useLfmContext()
+    const commonBoundingBoxes = useMemo(
+        () => calculateCommonBoundingBoxes(panelWidth),
+        [panelWidth]
+    )
+    const sortHeaders = useMemo(
+        () => SORT_HEADERS(commonBoundingBoxes),
+        [commonBoundingBoxes]
+    )
 
     const previousLfms = useRef<Lfm[]>([])
     const previousFontSize = useRef<number>(fontSize)
@@ -54,6 +67,38 @@ const GroupingCanvas = ({
         context: canvasRef?.current?.getContext("2d"),
         raidView: raidView,
     })
+
+    const handleCanvasClick = (event: React.MouseEvent<HTMLCanvasElement>) => {
+        if (raidView) return
+        // get x and y coordinates of the click
+        const canvas = canvasRef.current
+        if (canvas) {
+            const rect = canvas.getBoundingClientRect()
+            const x = event.clientX - rect.left
+            const y = event.clientY - rect.top
+
+            sortHeaders.forEach(({ type, boundingBox }) => {
+                if (
+                    x >= boundingBox.x &&
+                    x <= boundingBox.x + boundingBox.width &&
+                    y >= boundingBox.y + LFM_PANEL_TOP_BORDER_HEIGHT &&
+                    y <=
+                        boundingBox.y +
+                            LFM_SPRITE_MAP.SORT_HEADER.CENTER.height +
+                            LFM_PANEL_TOP_BORDER_HEIGHT +
+                            LFM_AREA_PADDING.top
+                ) {
+                    setSortBy({
+                        type: type,
+                        direction:
+                            sortBy.type === type && sortBy.direction === "asc"
+                                ? "desc"
+                                : "asc",
+                    })
+                }
+            })
+        }
+    }
 
     useEffect(() => {
         if (image) {
@@ -111,6 +156,7 @@ const GroupingCanvas = ({
         raidView,
         fontSize,
         panelWidth,
+        sortHeaders,
         sortBy,
         renderLfmToCanvas,
         renderLfmPanelToCanvas,
@@ -133,6 +179,7 @@ const GroupingCanvas = ({
             style={{
                 maxWidth: "100%",
             }}
+            onClick={handleCanvasClick}
         />
     )
 }
