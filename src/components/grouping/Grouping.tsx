@@ -68,7 +68,7 @@ const Grouping = () => {
         Object.entries(lfmData?.data || {}).forEach(
             ([serverName, serverData]: [string, LfmApiServerModel]) => {
                 Object.values(serverData.lfms)?.forEach((lfm: Lfm) => {
-                    if (lfm.quest?.group_size !== "Raid") {
+                    if (lfm.quest?.group_size === "Raid") {
                         const eligibleLfm: Lfm = {
                             ...lfm,
                             is_eligible: true,
@@ -143,9 +143,8 @@ const Grouping = () => {
             return <p className="secondary-text">Loading content...</p>
         }
 
-        return Object.entries(getCurrentRaids() || {})
-            .filter(([serverName]) => serverName === "argonnessen")
-            .map(([serverName, lfms]: [string, { [key: number]: Lfm }]) => (
+        return Object.entries(getCurrentRaids() || {}).map(
+            ([serverName, lfms]: [string, { [key: number]: Lfm }]) => (
                 <>
                     <h3>{toSentenceCase(serverName)}</h3>
                     <Link to={`/grouping/${serverName}`}>
@@ -156,7 +155,8 @@ const Grouping = () => {
                         />
                     </Link>
                 </>
-            ))
+            )
+        )
     }, [serverInfo.loadingState, lfmData.loadingState, getCurrentRaids])
 
     return (

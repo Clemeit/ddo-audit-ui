@@ -180,6 +180,11 @@ const GROUPING_SPRITE_MAP = {
             height: 20,
         },
     },
+    SORT_HEADER: {
+        LEFT: { x: 148, y: 0, width: 2, height: 21 },
+        RIGHT: { x: 167, y: 0, width: 2, height: 21 },
+        CENTER: { x: 150, y: 0, width: 17, height: 21 },
+    },
 }
 
 const GROUPING_PANEL_TOP_BORDER_HEIGHT =
@@ -192,6 +197,15 @@ const GROUPING_PANEL_BOTTOM_BORDER_HEIGHT =
 const TOTAL_GROUPING_PANEL_BORDER_HEIGHT =
     GROUPING_PANEL_TOP_BORDER_HEIGHT + GROUPING_PANEL_BOTTOM_BORDER_HEIGHT
 
+const SORT_HEADER_HEIGHT = GROUPING_SPRITE_MAP.SORT_HEADER.CENTER.height
+
+const LFM_AREA_PADDING = {
+    top: 5,
+    right: 5,
+    bottom: 5,
+    left: 5,
+}
+
 const DEFAULT_BASE_FONT_SIZE = 14
 
 const FONTS = (baseFontSize: number = DEFAULT_BASE_FONT_SIZE) => ({
@@ -202,6 +216,8 @@ const FONTS = (baseFontSize: number = DEFAULT_BASE_FONT_SIZE) => ({
     TIP: `italic ${baseFontSize}px Arial`,
     MEMBER_COUNT: `${baseFontSize}px Arial`,
     LEVEL_RANGE: `${baseFontSize + 2}px Arial`,
+    MAIN_HEADER: "14px Arial",
+    SORT_HEADER: "10px Arial",
 })
 
 const GROUPING_COLORS = {
@@ -231,5 +247,7 @@ export {
     TOTAL_GROUPING_PANEL_BORDER_HEIGHT,
     GROUPING_PANEL_TOP_BORDER_HEIGHT,
     GROUPING_PANEL_BOTTOM_BORDER_HEIGHT,
+    SORT_HEADER_HEIGHT,
+    LFM_AREA_PADDING,
     FONTS,
 }

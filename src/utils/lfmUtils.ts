@@ -1,4 +1,83 @@
 import { Lfm } from "../models/Lfm"
+import {
+    LFM_HEIGHT,
+    GROUPING_SPRITE_MAP,
+    LFM_AREA_PADDING,
+} from "../constants/grouping.ts"
+import { BoundingBox } from "../models/Geometry.ts"
+
+const calculateCommonBoundingBoxes = (panelWidth: number) => {
+    const lfmBoundingBox = new BoundingBox(
+        0,
+        0,
+        panelWidth -
+            GROUPING_SPRITE_MAP.CONTENT_LEFT.width -
+            GROUPING_SPRITE_MAP.CONTENT_RIGHT.width -
+            LFM_AREA_PADDING.left -
+            LFM_AREA_PADDING.right,
+        LFM_HEIGHT
+    )
+    const mainPanelBoundingBox = new BoundingBox(
+        lfmBoundingBox.x,
+        lfmBoundingBox.y,
+        lfmBoundingBox.width * 0.4,
+        lfmBoundingBox.height
+    )
+    const questPanelBoundingBox = new BoundingBox(
+        mainPanelBoundingBox.x + mainPanelBoundingBox.width,
+        lfmBoundingBox.y,
+        lfmBoundingBox.width * 0.25,
+        lfmBoundingBox.height
+    )
+    const classPanelBoundingBox = new BoundingBox(
+        questPanelBoundingBox.x + questPanelBoundingBox.width,
+        lfmBoundingBox.y,
+        lfmBoundingBox.width * 0.2,
+        lfmBoundingBox.height
+    )
+    const levelPanelBoundingBox = new BoundingBox(
+        classPanelBoundingBox.x + classPanelBoundingBox.width,
+        lfmBoundingBox.y,
+        lfmBoundingBox.width * 0.15,
+        lfmBoundingBox.height
+    )
+    const leaderClassIconBoundingBox = new BoundingBox(
+        mainPanelBoundingBox.x + 4,
+        mainPanelBoundingBox.y + 4,
+        18,
+        18
+    )
+    const classesBoundingBox = new BoundingBox(
+        classPanelBoundingBox.x + 4,
+        classPanelBoundingBox.y + 4,
+        GROUPING_SPRITE_MAP.CLASSES.ALL.width,
+        GROUPING_SPRITE_MAP.CLASSES.ALL.height
+    )
+    const questPanelBoundingBoxWithPadding = new BoundingBox(
+        questPanelBoundingBox.x + 4,
+        questPanelBoundingBox.y + 4,
+        questPanelBoundingBox.width - 8,
+        questPanelBoundingBox.height - 8
+    )
+    const levelPanelBoundingBoxWithPadding = new BoundingBox(
+        levelPanelBoundingBox.x + 4,
+        levelPanelBoundingBox.y + 4,
+        levelPanelBoundingBox.width - 8,
+        levelPanelBoundingBox.height - 8
+    )
+
+    return {
+        lfmBoundingBox,
+        mainPanelBoundingBox,
+        questPanelBoundingBox,
+        classPanelBoundingBox,
+        levelPanelBoundingBox,
+        leaderClassIconBoundingBox,
+        classesBoundingBox,
+        questPanelBoundingBoxWithPadding,
+        levelPanelBoundingBoxWithPadding,
+    }
+}
 
 function shouldLfmRerender(previous: Lfm, current: Lfm): boolean {
     if (previous.comment !== current.comment) return true
@@ -17,4 +96,4 @@ function shouldLfmRerender(previous: Lfm, current: Lfm): boolean {
     return false
 }
 
-export { shouldLfmRerender }
+export { shouldLfmRerender, calculateCommonBoundingBoxes }

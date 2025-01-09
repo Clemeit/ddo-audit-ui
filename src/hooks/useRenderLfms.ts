@@ -2,7 +2,6 @@ import { useCallback, useMemo } from "react"
 import { Lfm } from "../models/Lfm"
 import {
     LFM_HEIGHT,
-    LFM_PADDING,
     GROUPING_SPRITE_MAP,
     GROUPING_COLORS,
     FONTS,
@@ -11,6 +10,7 @@ import { useGroupingContext } from "../components/grouping/GroupingContext.tsx"
 import { CLASS_LIST } from "../constants/game.ts"
 import { BoundingBox } from "../models/Geometry.ts"
 import useTextRenderer from "./useTextRenderer.ts"
+import { calculateCommonBoundingBoxes } from "../utils/lfmUtils.ts"
 
 interface UseRenderLfmsProps {
     lfmSprite?: HTMLImageElement | null
@@ -20,6 +20,10 @@ interface UseRenderLfmsProps {
 const useRenderLfms = ({ lfmSprite, context }: UseRenderLfmsProps) => {
     const { panelWidth, showBoundingBoxes, fontSize } = useGroupingContext()
     const { confineTextToBoundingBox } = useTextRenderer(context)
+    const commonBoundingBoxes = useMemo(
+        () => calculateCommonBoundingBoxes(panelWidth),
+        [panelWidth]
+    )
 
     function getTextWidthAndHeight(
         text: string,
@@ -39,79 +43,6 @@ const useRenderLfms = ({ lfmSprite, context }: UseRenderLfmsProps) => {
             height,
         }
     }
-
-    const commonBoundingBoxes = useMemo(() => {
-        const lfmBoundingBox = new BoundingBox(
-            LFM_PADDING.left + GROUPING_SPRITE_MAP.CONTENT_LEFT.width,
-            LFM_PADDING.top,
-            panelWidth -
-                LFM_PADDING.right -
-                LFM_PADDING.left -
-                GROUPING_SPRITE_MAP.CONTENT_LEFT.width -
-                GROUPING_SPRITE_MAP.CONTENT_RIGHT.width,
-            LFM_HEIGHT - LFM_PADDING.top - LFM_PADDING.bottom
-        )
-        const mainPanelBoundingBox = new BoundingBox(
-            lfmBoundingBox.x,
-            lfmBoundingBox.y,
-            lfmBoundingBox.width * 0.4,
-            lfmBoundingBox.height
-        )
-        const questPanelBoundingBox = new BoundingBox(
-            mainPanelBoundingBox.x + mainPanelBoundingBox.width,
-            lfmBoundingBox.y,
-            lfmBoundingBox.width * 0.25,
-            lfmBoundingBox.height
-        )
-        const classPanelBoundingBox = new BoundingBox(
-            questPanelBoundingBox.x + questPanelBoundingBox.width,
-            lfmBoundingBox.y,
-            lfmBoundingBox.width * 0.2,
-            lfmBoundingBox.height
-        )
-        const levelPanelBoundingBox = new BoundingBox(
-            classPanelBoundingBox.x + classPanelBoundingBox.width,
-            lfmBoundingBox.y,
-            lfmBoundingBox.width * 0.15,
-            lfmBoundingBox.height
-        )
-        const leaderClassIconBoundingBox = new BoundingBox(
-            mainPanelBoundingBox.x + 4,
-            mainPanelBoundingBox.y + 4,
-            18,
-            18
-        )
-        const classesBoundingBox = new BoundingBox(
-            classPanelBoundingBox.x + 4,
-            classPanelBoundingBox.y + 4,
-            GROUPING_SPRITE_MAP.CLASSES.ALL.width,
-            GROUPING_SPRITE_MAP.CLASSES.ALL.height
-        )
-        const questPanelBoundingBoxWithPadding = new BoundingBox(
-            questPanelBoundingBox.x + 4,
-            questPanelBoundingBox.y + 4,
-            questPanelBoundingBox.width - 8,
-            questPanelBoundingBox.height - 8
-        )
-        const levelPanelBoundingBoxWithPadding = new BoundingBox(
-            levelPanelBoundingBox.x + 4,
-            levelPanelBoundingBox.y + 4,
-            levelPanelBoundingBox.width - 8,
-            levelPanelBoundingBox.height - 8
-        )
-
-        return {
-            lfmBoundingBox,
-            mainPanelBoundingBox,
-            questPanelBoundingBox,
-            classPanelBoundingBox,
-            levelPanelBoundingBox,
-            leaderClassIconBoundingBox,
-            classesBoundingBox,
-            questPanelBoundingBoxWithPadding,
-            levelPanelBoundingBoxWithPadding,
-        }
-    }, [panelWidth])
 
     const renderLfmToCanvas = useCallback(
         (lfm: Lfm) => {
@@ -302,7 +233,7 @@ const useRenderLfms = ({ lfmSprite, context }: UseRenderLfmsProps) => {
             // background and edges
             // context.clearRect(0, 0, panelWidth, LFM_HEIGHT)
             context.fillStyle = GROUPING_COLORS.BLACK_BACKGROUND
-            context.fillRect(0, 0, panelWidth, LFM_HEIGHT)
+            context.fillRect(0, 0, lfmBoundingBox.width, LFM_HEIGHT)
 
             // gradient fill
             if (lfm.is_eligible) {
@@ -486,32 +417,6 @@ const useRenderLfms = ({ lfmSprite, context }: UseRenderLfmsProps) => {
                 levelRangeTextLines[0],
                 levelRangeBoundingBox.centerX(),
                 levelRangeBoundingBox.centerY()
-            )
-
-            // left
-            context.drawImage(
-                lfmSprite,
-                GROUPING_SPRITE_MAP.CONTENT_LEFT.x,
-                GROUPING_SPRITE_MAP.CONTENT_LEFT.y,
-                GROUPING_SPRITE_MAP.CONTENT_LEFT.width,
-                GROUPING_SPRITE_MAP.CONTENT_LEFT.height,
-                0,
-                0,
-                GROUPING_SPRITE_MAP.CONTENT_LEFT.width,
-                LFM_HEIGHT
-            )
-
-            // right
-            context.drawImage(
-                lfmSprite,
-                GROUPING_SPRITE_MAP.CONTENT_RIGHT.x,
-                GROUPING_SPRITE_MAP.CONTENT_RIGHT.y,
-                GROUPING_SPRITE_MAP.CONTENT_RIGHT.width,
-                GROUPING_SPRITE_MAP.CONTENT_RIGHT.height,
-                panelWidth - GROUPING_SPRITE_MAP.CONTENT_RIGHT.width,
-                0,
-                GROUPING_SPRITE_MAP.CONTENT_RIGHT.width,
-                LFM_HEIGHT
             )
 
             if (showBoundingBoxes) {

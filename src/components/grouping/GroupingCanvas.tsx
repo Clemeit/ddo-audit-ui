@@ -4,6 +4,9 @@ import {
     LFM_HEIGHT,
     TOTAL_GROUPING_PANEL_BORDER_HEIGHT,
     GROUPING_PANEL_TOP_BORDER_HEIGHT,
+    SORT_HEADER_HEIGHT,
+    LFM_AREA_PADDING,
+    GROUPING_SPRITE_MAP,
 } from "../../constants/grouping.ts"
 import useRenderLfms from "../../hooks/useRenderLfms.ts"
 // @ts-ignore
@@ -60,12 +63,18 @@ const GroupingCanvas = ({
                         lfms.length !== previousLfms.current.length
 
                     if (
-                        shouldForceRender ||
+                        panelWidth !== previousPanelWidth.current ||
                         lfms.length !== previousLfms.current.length
                     ) {
                         renderLfmPanelToCanvas(lfms.length)
                     }
-                    context.translate(0, GROUPING_PANEL_TOP_BORDER_HEIGHT)
+                    context.translate(
+                        GROUPING_SPRITE_MAP.CONTENT_LEFT.width +
+                            LFM_AREA_PADDING.left,
+                        GROUPING_PANEL_TOP_BORDER_HEIGHT +
+                            SORT_HEADER_HEIGHT +
+                            LFM_AREA_PADDING.top
+                    )
                     let totalLfmsRendered = 0
                     lfms.forEach((lfm, index) => {
                         const shouldRenderLfm =
@@ -106,7 +115,11 @@ const GroupingCanvas = ({
             id={serverName}
             width={panelWidth}
             height={
-                LFM_HEIGHT * lfms.length + TOTAL_GROUPING_PANEL_BORDER_HEIGHT
+                LFM_HEIGHT * lfms.length +
+                TOTAL_GROUPING_PANEL_BORDER_HEIGHT +
+                SORT_HEADER_HEIGHT +
+                LFM_AREA_PADDING.top +
+                LFM_AREA_PADDING.bottom
             }
             style={{
                 maxWidth: "100%",
