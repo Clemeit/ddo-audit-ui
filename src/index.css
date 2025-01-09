@@ -109,7 +109,7 @@ hr {
 /* mobile */
 @media (max-width: 768px) {
     html {
-        font-size: 16px;
+        font-size: 15px;
     }
 
     .hide-on-mobile {
@@ -122,6 +122,11 @@ hr {
 
     ul {
         padding-left: 20px;
+    }
+
+    .shrinkable-icon {
+        width: 20px;
+        height: 20px;
     }
 }
 

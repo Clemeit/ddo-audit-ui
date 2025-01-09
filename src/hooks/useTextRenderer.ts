@@ -40,12 +40,12 @@ const useTextRenderer = (
             context.font = font
             const measuredText = context.measureText(text)
             const fontHeight =
-                measuredText.actualBoundingBoxAscent +
-                measuredText.actualBoundingBoxDescent
+                measuredText.fontBoundingBoxAscent +
+                measuredText.fontBoundingBoxDescent
             // take care of wrapping...
             const wrappedText = wrapText(text, boundingBox.width, font, context)
             // take care of height...
-            const lineHeight = fontHeight * 1.33
+            const lineHeight = fontHeight
             const textLines: string[] = []
             wrappedText.forEach((line, index) => {
                 const totalHeight = (index + 1) * lineHeight

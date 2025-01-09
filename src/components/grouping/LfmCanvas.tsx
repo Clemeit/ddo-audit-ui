@@ -2,16 +2,17 @@ import React, { useEffect, useRef, useState } from "react"
 import { Lfm } from "../../models/Lfm.ts"
 import {
     LFM_HEIGHT,
-    TOTAL_GROUPING_PANEL_BORDER_HEIGHT,
-    GROUPING_PANEL_TOP_BORDER_HEIGHT,
+    TOTAL_LFM_PANEL_BORDER_HEIGHT,
+    LFM_PANEL_TOP_BORDER_HEIGHT,
     SORT_HEADER_HEIGHT,
     LFM_AREA_PADDING,
-    GROUPING_SPRITE_MAP,
-} from "../../constants/grouping.ts"
-import useRenderLfms from "../../hooks/useRenderLfms.ts"
+    LFM_SPRITE_MAP,
+    MINIMUM_LFM_COUNT,
+} from "../../constants/lfmPanel.ts"
+import useRenderLfm from "../../hooks/useRenderLfm.ts"
 // @ts-ignore
 import LfmSprite from "../../assets/png/lfm_sprite.png"
-import { useGroupingContext } from "../../contexts/GroupingContext.tsx"
+import { useLfmContext } from "../../contexts/LfmContext.tsx"
 import useRenderLfmPanel from "../../hooks/useRenderLfmPanel.ts"
 import { shouldLfmRerender } from "../../utils/lfmUtils.ts"
 
@@ -28,7 +29,7 @@ const GroupingCanvas = ({
 }: GroupingCanvasProps) => {
     const canvasRef = useRef<HTMLCanvasElement>(null)
     const [image, setImage] = useState<HTMLImageElement | null>(null)
-    const { fontSize, panelWidth, sortBy } = useGroupingContext()
+    const { fontSize, panelWidth, sortBy } = useLfmContext()
 
     const previousLfms = useRef<Lfm[]>([])
     const previousFontSize = useRef<number>(fontSize)
@@ -43,13 +44,15 @@ const GroupingCanvas = ({
         }
     }, [])
 
-    const { renderLfmToCanvas } = useRenderLfms({
+    const { renderLfmToCanvas } = useRenderLfm({
         lfmSprite: image,
         context: canvasRef?.current?.getContext("2d"),
+        raidView: raidView,
     })
     const { renderLfmPanelToCanvas } = useRenderLfmPanel({
         lfmSprite: image,
         context: canvasRef?.current?.getContext("2d"),
+        raidView: raidView,
     })
 
     useEffect(() => {
@@ -68,11 +71,13 @@ const GroupingCanvas = ({
                         renderLfmPanelToCanvas(lfms.length)
                     }
                     context.translate(
-                        GROUPING_SPRITE_MAP.CONTENT_LEFT.width +
+                        LFM_SPRITE_MAP.CONTENT_LEFT.width +
                             LFM_AREA_PADDING.left,
-                        GROUPING_PANEL_TOP_BORDER_HEIGHT +
-                            SORT_HEADER_HEIGHT +
-                            LFM_AREA_PADDING.top
+                        raidView
+                            ? 0
+                            : LFM_PANEL_TOP_BORDER_HEIGHT +
+                                  SORT_HEADER_HEIGHT +
+                                  LFM_AREA_PADDING.top
                     )
                     let totalLfmsRendered = 0
                     lfms.forEach((lfm, index) => {
@@ -103,6 +108,7 @@ const GroupingCanvas = ({
     }, [
         image,
         lfms,
+        raidView,
         fontSize,
         panelWidth,
         sortBy,
@@ -116,11 +122,13 @@ const GroupingCanvas = ({
             id={serverName}
             width={panelWidth}
             height={
-                LFM_HEIGHT * lfms.length +
-                TOTAL_GROUPING_PANEL_BORDER_HEIGHT +
-                SORT_HEADER_HEIGHT +
-                LFM_AREA_PADDING.top +
-                LFM_AREA_PADDING.bottom
+                raidView
+                    ? LFM_HEIGHT * lfms.length
+                    : LFM_HEIGHT * Math.max(MINIMUM_LFM_COUNT, lfms.length) +
+                      TOTAL_LFM_PANEL_BORDER_HEIGHT +
+                      SORT_HEADER_HEIGHT +
+                      LFM_AREA_PADDING.top +
+                      LFM_AREA_PADDING.bottom
             }
             style={{
                 maxWidth: "100%",

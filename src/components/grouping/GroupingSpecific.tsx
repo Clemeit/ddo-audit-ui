@@ -1,19 +1,39 @@
 import React from "react"
-import GroupingContainer from "./GroupingContainer.tsx"
+import GroupingContainer from "./LfmContainer.tsx"
 import { useLocation } from "react-router-dom"
-import { useGroupingContext } from "../../contexts/GroupingContext.tsx"
+import { useLfmContext } from "../../contexts/LfmContext.tsx"
 import Button from "../global/Button.tsx"
 import Stack from "../global/Stack.tsx"
+import {
+    MAXIMUM_LFM_PANEL_WIDTH,
+    MINIMUM_LFM_PANEL_WIDTH,
+} from "../../constants/lfmPanel.ts"
+import Page from "../global/Page.tsx"
+import { possessiveCase, toSentenceCase } from "../../utils/stringUtils.ts"
 
 const GroupingSpecific = () => {
     // get server name from path, like /grouping/thelanis or /grouping/ghallanda:
     const location = useLocation()
-    const serverName = location.pathname.split("/")[2]
-    const { sortBy, setSortBy } = useGroupingContext()
+    const serverName = location.pathname.split("/")[2] || ""
+    // const {
+    //     sortBy,
+    //     setSortBy,
+    //     fontSize,
+    //     setFontSize,
+    //     panelWidth,
+    //     setPanelWidth,
+    //     showBoundingBoxes,
+    //     setShowBoundingBoxes,
+    // } = useLfmContext()
 
     return (
-        <div>
-            <Stack direction="row" gap="5px">
+        <Page
+            title={`DDO Live LFM Viewer for ${toSentenceCase(serverName)}`}
+            description={`Browse ${possessiveCase(toSentenceCase(serverName))} LFMs! Check the LFM panel before you login, or set up notifications and never miss raid night again!`}
+            centered
+            noPadding
+        >
+            {/* <Stack direction="row" gap="5px">
                 <Button
                     onClick={() => {
                         switch (sortBy.type) {
@@ -48,9 +68,30 @@ const GroupingSpecific = () => {
                     type="secondary"
                     text={`Sort ${sortBy.direction === "asc" ? "ascending" : "descending"}`}
                 />
-            </Stack>
+                <input
+                    type="range"
+                    min={10}
+                    max={20}
+                    value={fontSize}
+                    onChange={(e) => setFontSize(parseInt(e.target.value))}
+                />
+                <input
+                    type="range"
+                    min={MINIMUM_LFM_PANEL_WIDTH}
+                    max={MAXIMUM_LFM_PANEL_WIDTH}
+                    value={panelWidth}
+                    onChange={(e) => setPanelWidth(parseInt(e.target.value))}
+                />
+                <input
+                    type="checkbox"
+                    id="showBoundingBoxes"
+                    checked={showBoundingBoxes}
+                    onChange={(e) => setShowBoundingBoxes(e.target.checked)}
+                />
+                <label htmlFor="showBoundingBoxes">Show bounding boxes</label>
+            </Stack> */}
             <GroupingContainer serverName={serverName ? serverName : ""} />
-        </div>
+        </Page>
     )
 }
 

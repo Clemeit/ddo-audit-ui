@@ -4,6 +4,10 @@ function toSentenceCase(str: string): string {
     return str.charAt(0).toUpperCase() + str.slice(1)
 }
 
+function possessiveCase(str: string): string {
+    return str.endsWith("s") ? `${str}'` : `${str}'s`
+}
+
 function convertMillisecondsToPrettyString(
     millis: number,
     commaSeparated: boolean = false
@@ -118,6 +122,7 @@ function getTextSize(
 
 export {
     toSentenceCase,
+    possessiveCase,
     convertMillisecondsToPrettyString,
     mapClassesToString,
     wrapText,

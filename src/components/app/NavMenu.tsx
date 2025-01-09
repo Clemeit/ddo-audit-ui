@@ -26,49 +26,49 @@ const NavMenu = () => {
                 to="/"
                 className={`nav-item ${location.pathname === "/" ? "active" : ""}`}
             >
-                <HomeSVG />
+                <HomeSVG className="nav-icon" />
                 <span>Home</span>
             </Link>
             <Link
                 to="/live"
                 className={`nav-item ${location.pathname.startsWith("/live") ? "active" : ""}`}
             >
-                <LiveSVG />
+                <LiveSVG className="nav-icon" />
                 <span>Live</span>
             </Link>
             <Link
                 to="/servers"
                 className={`nav-item ${location.pathname.startsWith("/servers") ? "active" : ""}`}
             >
-                <ServersSVG />
+                <ServersSVG className="nav-icon" />
                 <span>Servers</span>
             </Link>
             <Link
                 to="/grouping"
                 className={`nav-item ${location.pathname.startsWith("/grouping") ? "active" : ""}`}
             >
-                <GroupingSVG />
+                <GroupingSVG className="nav-icon" />
                 <span>Grouping</span>
             </Link>
             <Link
                 to="/who"
                 className={`nav-item ${location.pathname.startsWith("/who") ? "active" : ""}`}
             >
-                <WhoSVG />
+                <WhoSVG className="nav-icon" />
                 <span>Who</span>
             </Link>
             <Link
                 to="/trends"
                 className={`nav-item hide-on-mobile ${location.pathname.startsWith("/trends") ? "active" : ""}`}
             >
-                <TrendsSVG />
+                <TrendsSVG className="nav-icon" />
                 <span>Trends</span>
             </Link>
             <Link
                 to="/about"
                 className={`nav-item hide-on-mobile ${location.pathname.startsWith("/about") ? "active" : ""}`}
             >
-                <AboutSVG />
+                <AboutSVG className="nav-icon" />
                 <span>About</span>
             </Link>
         </nav>

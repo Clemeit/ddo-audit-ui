@@ -3,7 +3,25 @@ import PropTypes from "prop-types"
 import { Helmet } from "react-helmet-async"
 import "./Page.css"
 
-const Page = ({ children, title, description, icon, className }) => {
+interface Props {
+    children: React.ReactNode
+    title: string
+    description: string
+    icon?: React.ReactNode
+    className?: string
+    centered?: boolean
+    noPadding?: boolean
+}
+
+const Page = ({
+    children,
+    title,
+    description,
+    icon,
+    className,
+    centered = false,
+    noPadding = false,
+}: Props) => {
     return (
         <div className={className}>
             <Helmet>
@@ -20,8 +38,10 @@ const Page = ({ children, title, description, icon, className }) => {
                     data-react-helmet="true"
                 />
             </Helmet>
-            <div className="page">
-                <div className="page-content">{children}</div>
+            <div className={`page ${noPadding ? "no-padding" : ""}`}>
+                <div className={`page-content ${centered ? "centered" : ""}`}>
+                    {children}
+                </div>
             </div>
         </div>
     )

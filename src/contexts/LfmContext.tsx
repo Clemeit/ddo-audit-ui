@@ -1,8 +1,8 @@
 import React, { createContext, useContext, useState, ReactNode } from "react"
 import {
     DEFAULT_BASE_FONT_SIZE,
-    DEFAULT_GROUPING_PANEL_WIDTH,
-} from "../constants/grouping.ts"
+    DEFAULT_LFM_PANEL_WIDTH,
+} from "../constants/lfmPanel.ts"
 
 // TODO: move this out
 interface SortType {
@@ -10,7 +10,7 @@ interface SortType {
     direction: string
 }
 
-interface GroupingContextProps {
+interface LfmContextProps {
     fontSize: number
     setFontSize: (size: number) => void
     panelWidth: number
@@ -21,14 +21,12 @@ interface GroupingContextProps {
     setSortBy: (sort: SortType) => void
 }
 
-const GroupingContext = createContext<GroupingContextProps | undefined>(
-    undefined
-)
+const LfmContext = createContext<LfmContextProps | undefined>(undefined)
 
-export const GroupingProvider = ({ children }: { children: ReactNode }) => {
+export const LfmProvider = ({ children }: { children: ReactNode }) => {
     const [fontSize, setFontSize] = useState<number>(DEFAULT_BASE_FONT_SIZE)
     const [panelWidth, setPanelWidth] = useState<number>(
-        DEFAULT_GROUPING_PANEL_WIDTH
+        DEFAULT_LFM_PANEL_WIDTH
     )
     const [showBoundingBoxes, setShowBoundingBoxes] = useState<boolean>(false)
 
@@ -39,7 +37,7 @@ export const GroupingProvider = ({ children }: { children: ReactNode }) => {
     })
 
     return (
-        <GroupingContext.Provider
+        <LfmContext.Provider
             value={{
                 fontSize,
                 setFontSize,
@@ -52,16 +50,14 @@ export const GroupingProvider = ({ children }: { children: ReactNode }) => {
             }}
         >
             {children}
-        </GroupingContext.Provider>
+        </LfmContext.Provider>
     )
 }
 
-export const useGroupingContext = () => {
-    const context = useContext(GroupingContext)
+export const useLfmContext = () => {
+    const context = useContext(LfmContext)
     if (!context) {
-        throw new Error(
-            "useGroupingContext must be used within a GroupingProvider"
-        )
+        throw new Error("useLfmContext must be used within a LfmProvider")
     }
     return context
 }

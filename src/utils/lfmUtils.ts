@@ -1,9 +1,9 @@
 import { Lfm } from "../models/Lfm"
 import {
     LFM_HEIGHT,
-    GROUPING_SPRITE_MAP,
+    LFM_SPRITE_MAP,
     LFM_AREA_PADDING,
-} from "../constants/grouping.ts"
+} from "../constants/lfmPanel.ts"
 import { BoundingBox } from "../models/Geometry.ts"
 
 const calculateCommonBoundingBoxes = (panelWidth: number) => {
@@ -11,8 +11,8 @@ const calculateCommonBoundingBoxes = (panelWidth: number) => {
         0,
         0,
         panelWidth -
-            GROUPING_SPRITE_MAP.CONTENT_LEFT.width -
-            GROUPING_SPRITE_MAP.CONTENT_RIGHT.width -
+            LFM_SPRITE_MAP.CONTENT_LEFT.width -
+            LFM_SPRITE_MAP.CONTENT_RIGHT.width -
             LFM_AREA_PADDING.left -
             LFM_AREA_PADDING.right,
         LFM_HEIGHT
@@ -50,8 +50,8 @@ const calculateCommonBoundingBoxes = (panelWidth: number) => {
     const classesBoundingBox = new BoundingBox(
         classPanelBoundingBox.x + 4,
         classPanelBoundingBox.y + 4,
-        GROUPING_SPRITE_MAP.CLASSES.ALL.width,
-        GROUPING_SPRITE_MAP.CLASSES.ALL.height
+        LFM_SPRITE_MAP.CLASSES.ALL.width,
+        LFM_SPRITE_MAP.CLASSES.ALL.height
     )
     const questPanelBoundingBoxWithPadding = new BoundingBox(
         questPanelBoundingBox.x + 4,

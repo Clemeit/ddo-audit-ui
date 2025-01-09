@@ -1,24 +1,26 @@
 import { useCallback, useMemo } from "react"
-import { Lfm } from "../models/Lfm"
+import { Lfm } from "../models/Lfm.ts"
 import {
     LFM_HEIGHT,
-    GROUPING_SPRITE_MAP,
-    GROUPING_COLORS,
+    LFM_SPRITE_MAP,
+    LFM_COLORS,
     FONTS,
-} from "../constants/grouping.ts"
-import { useGroupingContext } from "../contexts/GroupingContext.tsx"
+    QUEST_INFO_GAP,
+} from "../constants/lfmPanel.ts"
+import { useLfmContext } from "../contexts/LfmContext.tsx"
 import { CLASS_LIST } from "../constants/game.ts"
 import { BoundingBox } from "../models/Geometry.ts"
 import useTextRenderer from "./useTextRenderer.ts"
 import { calculateCommonBoundingBoxes } from "../utils/lfmUtils.ts"
 
-interface UseRenderLfmsProps {
+interface Props {
     lfmSprite?: HTMLImageElement | null
     context?: CanvasRenderingContext2D | null
+    raidView?: boolean
 }
 
-const useRenderLfms = ({ lfmSprite, context }: UseRenderLfmsProps) => {
-    const { panelWidth, showBoundingBoxes, fontSize } = useGroupingContext()
+const useRenderLfm = ({ lfmSprite, context, raidView = false }: Props) => {
+    const { panelWidth, showBoundingBoxes, fontSize } = useLfmContext()
     const { confineTextToBoundingBox } = useTextRenderer(context)
     const commonBoundingBoxes = useMemo(
         () => calculateCommonBoundingBoxes(panelWidth),
@@ -34,13 +36,60 @@ const useRenderLfms = ({ lfmSprite, context }: UseRenderLfmsProps) => {
         context.font = font
         const measuredText = context.measureText(text)
         const height =
-            measuredText.actualBoundingBoxAscent +
-            measuredText.actualBoundingBoxDescent
+            measuredText.fontBoundingBoxAscent +
+            measuredText.fontBoundingBoxDescent
         const width = measuredText.width
         context.font = initialFont
         return {
             width,
             height,
+        }
+    }
+
+    function calculateQuestInfoYPositions({
+        questNameBoundingBox,
+        questTipBoundingBox,
+        questDifficultyBoundingBox,
+        questPanelBoundingBox,
+        hasTip,
+    }) {
+        let totalQuestInfoHeight =
+            questNameBoundingBox.height +
+            QUEST_INFO_GAP +
+            (hasTip ? questTipBoundingBox.height + QUEST_INFO_GAP : 0) +
+            questDifficultyBoundingBox.height
+        let topPadding = Math.max(
+            0,
+            (questPanelBoundingBox.height - totalQuestInfoHeight) / 2
+        )
+        const hasEnoughSpaceForTip =
+            hasTip && totalQuestInfoHeight < questPanelBoundingBox.height
+        if (!hasEnoughSpaceForTip) {
+            totalQuestInfoHeight =
+                questNameBoundingBox.height +
+                QUEST_INFO_GAP +
+                questDifficultyBoundingBox.height
+            topPadding = Math.max(
+                0,
+                (questPanelBoundingBox.height - totalQuestInfoHeight) / 2
+            )
+        }
+        const questNameBoundingBoxY = topPadding
+        const questDifficultyBoundingBoxY =
+            questPanelBoundingBox.bottom() -
+            topPadding -
+            questDifficultyBoundingBox.height
+        const questTipBoundingBoxY =
+            questNameBoundingBox.bottom() +
+            (questDifficultyBoundingBox.top() - questNameBoundingBox.bottom()) /
+                2 -
+            questTipBoundingBox.height / 2
+
+        return {
+            questNameBoundingBoxY,
+            questTipBoundingBoxY,
+            questDifficultyBoundingBoxY,
+            hasEnoughSpaceForTip,
         }
     }
 
@@ -89,7 +138,10 @@ const useRenderLfms = ({ lfmSprite, context }: UseRenderLfmsProps) => {
                 fonts.COMMENT,
                 context
             )
-            if (memberCountTextBounds.width > mainPanelBoundingBox.width - 8) {
+            if (
+                memberCountTextBounds.width >
+                mainPanelBoundingBox.width - leaderNameBoundingBox.right() - 8
+            ) {
                 memberCountText = memberCountTextOptions(true)
                 memberCountTextBounds = getTextWidthAndHeight(
                     memberCountTextOptions(true),
@@ -178,7 +230,7 @@ const useRenderLfms = ({ lfmSprite, context }: UseRenderLfmsProps) => {
                 text: lfm.quest?.name,
                 boundingBox: questPanelBoundingBoxWithPadding,
                 font: fonts.QUEST_NAME,
-                maxLines: lfm.quest?.tip ? 1 : 2,
+                maxLines: 2,
                 centered: true,
             })
             const {
@@ -201,24 +253,23 @@ const useRenderLfms = ({ lfmSprite, context }: UseRenderLfmsProps) => {
                 maxLines: 1,
                 centered: true,
             })
-            const questInfoGap = 5
-            let totalQuestInfoHeight =
-                questNameBoundingBox.height +
-                questTipBoundingBox.height +
-                questDifficultyBoundingBox.height +
-                questInfoGap
-            if (lfm.quest?.tip) {
-                totalQuestInfoHeight += questInfoGap
-            }
-            const topPadding = Math.max(
-                0,
-                (questPanelBoundingBox.height - totalQuestInfoHeight) / 2
-            )
-            questNameBoundingBox.y = topPadding
-            questDifficultyBoundingBox.y =
-                questPanelBoundingBox.bottom() -
-                topPadding -
-                questDifficultyBoundingBox.height
+
+            const {
+                questNameBoundingBoxY,
+                questTipBoundingBoxY,
+                questDifficultyBoundingBoxY,
+                hasEnoughSpaceForTip: showQuestTip,
+            } = calculateQuestInfoYPositions({
+                questNameBoundingBox,
+                questTipBoundingBox,
+                questDifficultyBoundingBox,
+                questPanelBoundingBox,
+                hasTip: !!lfm.quest?.tip,
+            })
+            questNameBoundingBox.y = questNameBoundingBoxY
+            questTipBoundingBox.y = questTipBoundingBoxY
+            questDifficultyBoundingBox.y = questDifficultyBoundingBoxY
+
             const levelRangeText = `${lfm.minimum_level} - ${lfm.maximum_level}`
             const {
                 textLines: levelRangeTextLines,
@@ -232,7 +283,7 @@ const useRenderLfms = ({ lfmSprite, context }: UseRenderLfmsProps) => {
 
             // background and edges
             // context.clearRect(0, 0, panelWidth, LFM_HEIGHT)
-            context.fillStyle = GROUPING_COLORS.BLACK_BACKGROUND
+            context.fillStyle = LFM_COLORS.BLACK_BACKGROUND
             context.fillRect(0, 0, lfmBoundingBox.width, LFM_HEIGHT)
 
             // gradient fill
@@ -243,16 +294,10 @@ const useRenderLfms = ({ lfmSprite, context }: UseRenderLfmsProps) => {
                     0,
                     lfmBoundingBox.height
                 )
-                gradient.addColorStop(0, GROUPING_COLORS.ELIGIBLE_GRADIENT_EDGE)
-                gradient.addColorStop(
-                    0.25,
-                    GROUPING_COLORS.ELIGIBLE_GRADIENT_CENTER
-                )
-                gradient.addColorStop(
-                    0.75,
-                    GROUPING_COLORS.ELIGIBLE_GRADIENT_CENTER
-                )
-                gradient.addColorStop(1, GROUPING_COLORS.ELIGIBLE_GRADIENT_EDGE)
+                gradient.addColorStop(0, LFM_COLORS.ELIGIBLE_GRADIENT_EDGE)
+                gradient.addColorStop(0.25, LFM_COLORS.ELIGIBLE_GRADIENT_CENTER)
+                gradient.addColorStop(0.75, LFM_COLORS.ELIGIBLE_GRADIENT_CENTER)
+                gradient.addColorStop(1, LFM_COLORS.ELIGIBLE_GRADIENT_EDGE)
                 context.fillStyle = gradient
                 context.fillRect(
                     lfmBoundingBox.x,
@@ -263,7 +308,7 @@ const useRenderLfms = ({ lfmSprite, context }: UseRenderLfmsProps) => {
             }
 
             // dividers
-            context.strokeStyle = GROUPING_COLORS.LFM_BORDER
+            context.strokeStyle = LFM_COLORS.LFM_BORDER
             context.lineWidth = 1
             context.strokeRect(
                 mainPanelBoundingBox.x,
@@ -293,7 +338,7 @@ const useRenderLfms = ({ lfmSprite, context }: UseRenderLfmsProps) => {
             // ===== MAIN PANEL =====
             // leader class icon
             // leader name
-            context.fillStyle = GROUPING_COLORS.LEADER_NAME
+            context.fillStyle = LFM_COLORS.LEADER_NAME
             context.font = fonts.LEADER_NAME
             context.textBaseline = "middle"
             context.textAlign = "left"
@@ -305,7 +350,7 @@ const useRenderLfms = ({ lfmSprite, context }: UseRenderLfmsProps) => {
             // member count
             if (showMemberCount) {
                 context.textAlign = "center"
-                context.fillStyle = GROUPING_COLORS.SECONDARY_TEXT
+                context.fillStyle = LFM_COLORS.SECONDARY_TEXT
                 context.font = fonts.MEMBER_COUNT
                 context.fillText(
                     memberCountTextLines[0],
@@ -314,7 +359,7 @@ const useRenderLfms = ({ lfmSprite, context }: UseRenderLfmsProps) => {
                 )
             }
             // comment
-            context.fillStyle = GROUPING_COLORS.COMMENT_TEXT
+            context.fillStyle = LFM_COLORS.COMMENT_TEXT
             context.font = fonts.COMMENT
             context.textBaseline = "top"
             context.textAlign = "left"
@@ -327,7 +372,7 @@ const useRenderLfms = ({ lfmSprite, context }: UseRenderLfmsProps) => {
             })
             // adventure active time
             if (showAdventureActiveTime) {
-                context.fillStyle = GROUPING_COLORS.ADVENTURE_ACTIVE
+                context.fillStyle = LFM_COLORS.ADVENTURE_ACTIVE
                 context.font = fonts.COMMENT
                 context.textBaseline = "middle"
                 context.textAlign = "center"
@@ -344,8 +389,8 @@ const useRenderLfms = ({ lfmSprite, context }: UseRenderLfmsProps) => {
             if (lfm.quest) {
                 // quest name
                 context.fillStyle = lfm.is_quest_guess
-                    ? GROUPING_COLORS.GUESS_TEXT
-                    : GROUPING_COLORS.STANDARD_TEXT
+                    ? LFM_COLORS.GUESS_TEXT
+                    : LFM_COLORS.STANDARD_TEXT
                 context.font = lfm.is_quest_guess
                     ? fonts.QUEST_GUESS_NAME
                     : fonts.QUEST_NAME
@@ -361,10 +406,10 @@ const useRenderLfms = ({ lfmSprite, context }: UseRenderLfmsProps) => {
                     )
                 })
                 // quest tip
-                if (lfm.quest.tip) {
+                if (lfm.quest.tip && showQuestTip) {
                     context.fillStyle = lfm.is_quest_guess
-                        ? GROUPING_COLORS.GUESS_TEXT
-                        : GROUPING_COLORS.STANDARD_TEXT
+                        ? LFM_COLORS.GUESS_TEXT
+                        : LFM_COLORS.STANDARD_TEXT
                     context.font = fonts.TIP
                     context.textBaseline = "middle"
                     context.textAlign = "center"
@@ -378,8 +423,8 @@ const useRenderLfms = ({ lfmSprite, context }: UseRenderLfmsProps) => {
                 }
                 // quest difficulty
                 context.fillStyle = lfm.is_quest_guess
-                    ? GROUPING_COLORS.GUESS_TEXT
-                    : GROUPING_COLORS.SECONDARY_TEXT
+                    ? LFM_COLORS.GUESS_TEXT
+                    : LFM_COLORS.SECONDARY_TEXT
                 context.font = fonts.COMMENT
                 context.textBaseline = "middle"
                 context.textAlign = "center"
@@ -397,19 +442,19 @@ const useRenderLfms = ({ lfmSprite, context }: UseRenderLfmsProps) => {
             ) {
                 context.drawImage(
                     lfmSprite,
-                    GROUPING_SPRITE_MAP.CLASSES.ALL.x,
-                    GROUPING_SPRITE_MAP.CLASSES.ALL.y,
-                    GROUPING_SPRITE_MAP.CLASSES.ALL.width,
-                    GROUPING_SPRITE_MAP.CLASSES.ALL.height,
+                    LFM_SPRITE_MAP.CLASSES.ALL.x,
+                    LFM_SPRITE_MAP.CLASSES.ALL.y,
+                    LFM_SPRITE_MAP.CLASSES.ALL.width,
+                    LFM_SPRITE_MAP.CLASSES.ALL.height,
                     classesBoundingBox.x,
                     classesBoundingBox.y,
-                    GROUPING_SPRITE_MAP.CLASSES.ALL.width,
-                    GROUPING_SPRITE_MAP.CLASSES.ALL.height
+                    LFM_SPRITE_MAP.CLASSES.ALL.width,
+                    LFM_SPRITE_MAP.CLASSES.ALL.height
                 )
             }
 
             // ===== LEVEL PANEL =====
-            context.fillStyle = GROUPING_COLORS.STANDARD_TEXT
+            context.fillStyle = LFM_COLORS.STANDARD_TEXT
             context.font = fonts.LEVEL_RANGE
             context.textBaseline = "middle"
             context.textAlign = "center"
@@ -527,4 +572,4 @@ const useRenderLfms = ({ lfmSprite, context }: UseRenderLfmsProps) => {
     return { renderLfmToCanvas }
 }
 
-export default useRenderLfms
+export default useRenderLfm

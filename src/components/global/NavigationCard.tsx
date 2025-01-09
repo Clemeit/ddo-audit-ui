@@ -56,20 +56,20 @@ const typeToDescriptionMap = {
 }
 
 const typeToIconMap = {
-    live: <LiveSVG />,
-    servers: <ServersSVG />,
-    quests: <QuestsSVG />,
-    trends: <TrendsSVG />,
-    grouping: <GroupingSVG />,
-    who: <WhoSVG />,
-    transfers: <TransferSVG />,
-    friends: <FriendsSVG />,
-    registration: <RegistrationSVG />,
-    timers: <TimerSVG />,
-    about: <AboutSVG />,
-    api: <ApiSVG />,
-    suggestions: <FeedbackSVG />,
-    activity: <Activity />,
+    live: <LiveSVG className="shrinkable-icon" />,
+    servers: <ServersSVG className="shrinkable-icon" />,
+    quests: <QuestsSVG className="shrinkable-icon" />,
+    trends: <TrendsSVG className="shrinkable-icon" />,
+    grouping: <GroupingSVG className="shrinkable-icon" />,
+    who: <WhoSVG className="shrinkable-icon" />,
+    transfers: <TransferSVG className="shrinkable-icon" />,
+    friends: <FriendsSVG className="shrinkable-icon" />,
+    registration: <RegistrationSVG className="shrinkable-icon" />,
+    timers: <TimerSVG className="shrinkable-icon" />,
+    about: <AboutSVG className="shrinkable-icon" />,
+    api: <ApiSVG className="shrinkable-icon" />,
+    suggestions: <FeedbackSVG className="shrinkable-icon" />,
+    activity: <Activity className="shrinkable-icon" />,
 }
 
 const NavigationCard = ({ type, badge }) => {

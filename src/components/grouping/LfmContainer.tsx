@@ -1,17 +1,22 @@
 import React, { useMemo } from "react"
-import GroupingCanvas from "./GroupingCanvas.tsx"
+import GroupingCanvas from "./LfmCanvas.tsx"
 import usePollLfms from "../../hooks/usePollLfms.ts"
 import { Lfm } from "../../models/Lfm.ts"
-import { useGroupingContext } from "../../contexts/GroupingContext.tsx"
+import { useLfmContext } from "../../contexts/LfmContext.tsx"
 
 interface Props {
     serverName: string
     refreshInterval?: number
+    raidView?: boolean
 }
 
-const GroupingContainer = ({ serverName, refreshInterval = 3000 }: Props) => {
+const GroupingContainer = ({
+    serverName,
+    refreshInterval = 3000,
+    raidView = false,
+}: Props) => {
     const { lfmData } = usePollLfms({ serverName, refreshInterval })
-    const { sortBy } = useGroupingContext()
+    const { sortBy } = useLfmContext()
 
     // filter and sort the lfms
     const filteredLfms = useMemo(() => {
@@ -72,7 +77,7 @@ const GroupingContainer = ({ serverName, refreshInterval = 3000 }: Props) => {
         <GroupingCanvas
             serverName={serverName}
             lfms={filteredLfms || []}
-            raidView
+            raidView={raidView}
         />
     )
 }

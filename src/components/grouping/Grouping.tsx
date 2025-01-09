@@ -16,12 +16,12 @@ import { ReactComponent as X } from "../../assets/svg/x.svg"
 // @ts-ignore
 import { ReactComponent as Pending } from "../../assets/svg/pending.svg"
 import { LoadingState } from "../../models/Api.ts"
-import GroupingCanvas from "./GroupingCanvas.tsx"
-import { useGroupingContext } from "../../contexts/GroupingContext.tsx"
+import GroupingCanvas from "./LfmCanvas.tsx"
+import { useLfmContext } from "../../contexts/LfmContext.tsx"
 import {
-    MAXIMUM_GROUPING_PANEL_WIDTH,
-    MINIMUM_GROUPING_PANEL_WIDTH,
-} from "../../constants/grouping.ts"
+    MAXIMUM_LFM_PANEL_WIDTH,
+    MINIMUM_LFM_PANEL_WIDTH,
+} from "../../constants/lfmPanel.ts"
 
 const Grouping = () => {
     const { serverInfo } = useGetLiveData()
@@ -33,7 +33,7 @@ const Grouping = () => {
         setPanelWidth,
         showBoundingBoxes,
         setShowBoundingBoxes,
-    } = useGroupingContext()
+    } = useLfmContext()
 
     const cardDescription = (serverData: LfmApiServerModel) => {
         const serverLfms = serverData.lfms
@@ -55,11 +55,11 @@ const Grouping = () => {
     const cardIcon = (serverName: string) => {
         const isOnline = serverInfo.data?.[serverName]?.is_online
         if (isOnline === true) {
-            return <Checkmark className="icon" />
+            return <Checkmark className="shrinkable-icon" />
         } else if (isOnline === false) {
-            return <X className="icon" />
+            return <X className="shrinkable-icon" />
         } else {
-            return <Pending className="icon" />
+            return <Pending className="shrinkable-icon" />
         }
     }
 
@@ -97,7 +97,7 @@ const Grouping = () => {
                     destination={`/grouping/${serverName}`}
                     title={toSentenceCase(serverName)}
                     content="Loading data..."
-                    icon={<Pending className="icon" />}
+                    icon={<Pending className="shrinkable-icon" />}
                 />
             ))
         }
@@ -146,7 +146,9 @@ const Grouping = () => {
         return Object.entries(getCurrentRaids() || {}).map(
             ([serverName, lfms]: [string, { [key: number]: Lfm }]) => (
                 <>
-                    <h3>{toSentenceCase(serverName)}</h3>
+                    <h3 style={{ marginTop: "0px" }}>
+                        {toSentenceCase(serverName)}
+                    </h3>
                     <Link to={`/grouping/${serverName}`}>
                         <GroupingCanvas
                             serverName={serverName}
@@ -170,7 +172,7 @@ const Grouping = () => {
                 </div>
             </ContentCluster>
             <ContentCluster title="Current Raids">
-                <input
+                {/* <input
                     type="range"
                     min={10}
                     max={20}
@@ -179,8 +181,8 @@ const Grouping = () => {
                 />
                 <input
                     type="range"
-                    min={MINIMUM_GROUPING_PANEL_WIDTH}
-                    max={MAXIMUM_GROUPING_PANEL_WIDTH}
+                    min={MINIMUM_LFM_PANEL_WIDTH}
+                    max={MAXIMUM_LFM_PANEL_WIDTH}
                     value={panelWidth}
                     onChange={(e) => setPanelWidth(parseInt(e.target.value))}
                 />
@@ -190,7 +192,7 @@ const Grouping = () => {
                     checked={showBoundingBoxes}
                     onChange={(e) => setShowBoundingBoxes(e.target.checked)}
                 />
-                <label htmlFor="showBoundingBoxes">Show bounding boxes</label>
+                <label htmlFor="showBoundingBoxes">Show bounding boxes</label> */}
                 {getCurrentRaidsContent()}
             </ContentCluster>
             <ContentCluster title="Notifications">
