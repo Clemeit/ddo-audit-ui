@@ -52,6 +52,12 @@ const useRenderLfm = ({ lfmSprite, context, raidView = false }: Props) => {
         questDifficultyBoundingBox,
         questPanelBoundingBox,
         hasTip,
+    }: {
+        questNameBoundingBox: BoundingBox
+        questTipBoundingBox: BoundingBox
+        questDifficultyBoundingBox: BoundingBox
+        questPanelBoundingBox: BoundingBox
+        hasTip: boolean
     }) {
         let totalQuestInfoHeight =
             questNameBoundingBox.height +
@@ -80,8 +86,10 @@ const useRenderLfm = ({ lfmSprite, context, raidView = false }: Props) => {
             topPadding -
             questDifficultyBoundingBox.height
         const questTipBoundingBoxY =
-            questNameBoundingBox.bottom() +
-            (questDifficultyBoundingBox.top() - questNameBoundingBox.bottom()) /
+            questNameBoundingBoxY +
+            questNameBoundingBox.height +
+            (questDifficultyBoundingBoxY -
+                (questNameBoundingBoxY + questNameBoundingBox.height)) /
                 2 -
             questTipBoundingBox.height / 2
 

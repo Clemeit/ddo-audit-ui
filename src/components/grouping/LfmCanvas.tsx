@@ -8,8 +8,8 @@ import {
     LFM_AREA_PADDING,
     LFM_SPRITE_MAP,
     MINIMUM_LFM_COUNT,
-    LFM_PADDING,
     SORT_HEADERS,
+    MINIMUM_LFM_PANEL_WIDTH,
 } from "../../constants/lfmPanel.ts"
 import useRenderLfm from "../../hooks/useRenderLfm.ts"
 // @ts-ignore
@@ -20,6 +20,7 @@ import {
     calculateCommonBoundingBoxes,
     shouldLfmRerender,
 } from "../../utils/lfmUtils.ts"
+import { debounce } from "../../utils/functionUtils.ts"
 
 interface GroupingCanvasProps {
     serverName?: string
@@ -34,7 +35,14 @@ const GroupingCanvas = ({
 }: GroupingCanvasProps) => {
     const canvasRef = useRef<HTMLCanvasElement>(null)
     const [image, setImage] = useState<HTMLImageElement | null>(null)
-    const { fontSize, panelWidth, sortBy, setSortBy } = useLfmContext()
+    const {
+        fontSize,
+        panelWidth,
+        setPanelWidth,
+        sortBy,
+        setSortBy,
+        isDynamicWidth,
+    } = useLfmContext()
     const commonBoundingBoxes = useMemo(
         () => calculateCommonBoundingBoxes(panelWidth),
         [panelWidth]
@@ -99,6 +107,23 @@ const GroupingCanvas = ({
             })
         }
     }
+
+    useEffect(() => {
+        const handleCanvasResize = debounce(() => {
+            if (!isDynamicWidth) return
+            const canvas = canvasRef.current
+            if (canvas) {
+                const width = canvas.getBoundingClientRect().width
+                setPanelWidth(Math.max(width, MINIMUM_LFM_PANEL_WIDTH))
+            }
+        }, 300)
+
+        window.addEventListener("resize", handleCanvasResize)
+        handleCanvasResize()
+        return () => {
+            window.removeEventListener("resize", handleCanvasResize)
+        }
+    }, [isDynamicWidth, setPanelWidth])
 
     useEffect(() => {
         if (image) {
@@ -178,6 +203,7 @@ const GroupingCanvas = ({
             }
             style={{
                 maxWidth: "100%",
+                width: isDynamicWidth ? "100%" : "auto",
             }}
             onClick={handleCanvasClick}
         />

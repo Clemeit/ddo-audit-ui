@@ -16,6 +16,10 @@
     background-color: var(--background);
 }
 
+.page-content.content-max-width {
+    max-width: unset !important;
+}
+
 .page-content.centered {
     display: flex;
     flex-direction: column;

@@ -11,6 +11,7 @@ interface Props {
     className?: string
     centered?: boolean
     noPadding?: boolean
+    contentMaxWidth?: boolean
 }
 
 const Page = ({
@@ -21,6 +22,7 @@ const Page = ({
     className,
     centered = false,
     noPadding = false,
+    contentMaxWidth = false,
 }: Props) => {
     return (
         <div className={className}>
@@ -39,7 +41,9 @@ const Page = ({
                 />
             </Helmet>
             <div className={`page ${noPadding ? "no-padding" : ""}`}>
-                <div className={`page-content ${centered ? "centered" : ""}`}>
+                <div
+                    className={`page-content ${centered ? "centered" : ""} ${contentMaxWidth ? "content-max-width" : ""}`}
+                >
                     {children}
                 </div>
             </div>

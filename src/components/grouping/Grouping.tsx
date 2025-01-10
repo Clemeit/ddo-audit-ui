@@ -22,6 +22,8 @@ import {
     MAXIMUM_LFM_PANEL_WIDTH,
     MINIMUM_LFM_PANEL_WIDTH,
 } from "../../constants/lfmPanel.ts"
+import Stack from "../global/Stack.tsx"
+import Button from "../global/Button.tsx"
 
 const Grouping = () => {
     const { serverInfo } = useGetLiveData()
@@ -33,6 +35,9 @@ const Grouping = () => {
         setPanelWidth,
         showBoundingBoxes,
         setShowBoundingBoxes,
+        isDynamicWidth,
+        setIsDynamicWidth,
+        resetAll,
     } = useLfmContext()
 
     const cardDescription = (serverData: LfmApiServerModel) => {
@@ -166,33 +171,59 @@ const Grouping = () => {
             title="DDO Live LFM Viewer"
             description="View a live LFM panel to find public groups - before you even log in! See which groups are currently looking for more players and what content is currently being run."
         >
+            <ContentCluster title="Debug options">
+                <Stack direction="column" gap="10px">
+                    <input
+                        type="range"
+                        min={10}
+                        max={20}
+                        value={fontSize}
+                        onChange={(e) => setFontSize(parseInt(e.target.value))}
+                    />
+                    <input
+                        type="range"
+                        min={MINIMUM_LFM_PANEL_WIDTH}
+                        max={MAXIMUM_LFM_PANEL_WIDTH}
+                        value={panelWidth}
+                        onChange={(e) =>
+                            setPanelWidth(parseInt(e.target.value))
+                        }
+                    />
+                    <label htmlFor="showBoundingBoxes">
+                        <input
+                            type="checkbox"
+                            id="showBoundingBoxes"
+                            checked={showBoundingBoxes}
+                            onChange={(e) =>
+                                setShowBoundingBoxes(e.target.checked)
+                            }
+                        />
+                        Show bounding boxes
+                    </label>
+                    <label htmlFor="dynamicWidth">
+                        <input
+                            type="checkbox"
+                            id="dynamicWidth"
+                            checked={isDynamicWidth}
+                            onChange={(e) =>
+                                setIsDynamicWidth(e.target.checked)
+                            }
+                        />
+                        Dynamic width
+                    </label>
+                    <Button
+                        onClick={resetAll}
+                        type="secondary"
+                        text="Reset all"
+                    />
+                </Stack>
+            </ContentCluster>
             <ContentCluster title="Select a Server">
                 <div className="nav-card-cluster">
                     {getServerSelectContent()}
                 </div>
             </ContentCluster>
             <ContentCluster title="Current Raids">
-                {/* <input
-                    type="range"
-                    min={10}
-                    max={20}
-                    value={fontSize}
-                    onChange={(e) => setFontSize(parseInt(e.target.value))}
-                />
-                <input
-                    type="range"
-                    min={MINIMUM_LFM_PANEL_WIDTH}
-                    max={MAXIMUM_LFM_PANEL_WIDTH}
-                    value={panelWidth}
-                    onChange={(e) => setPanelWidth(parseInt(e.target.value))}
-                />
-                <input
-                    type="checkbox"
-                    id="showBoundingBoxes"
-                    checked={showBoundingBoxes}
-                    onChange={(e) => setShowBoundingBoxes(e.target.checked)}
-                />
-                <label htmlFor="showBoundingBoxes">Show bounding boxes</label> */}
                 {getCurrentRaidsContent()}
             </ContentCluster>
             <ContentCluster title="Notifications">
