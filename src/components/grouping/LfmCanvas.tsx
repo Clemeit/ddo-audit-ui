@@ -116,7 +116,7 @@ const GroupingCanvas = ({
                 const width = canvas.getBoundingClientRect().width
                 setPanelWidth(Math.max(width, MINIMUM_LFM_PANEL_WIDTH))
             }
-        }, 300)
+        }, 20)
 
         window.addEventListener("resize", handleCanvasResize)
         handleCanvasResize()
@@ -183,6 +183,7 @@ const GroupingCanvas = ({
         panelWidth,
         sortHeaders,
         sortBy,
+        isDynamicWidth,
         renderLfmToCanvas,
         renderLfmPanelToCanvas,
     ])
@@ -203,7 +204,7 @@ const GroupingCanvas = ({
             }
             style={{
                 maxWidth: "100%",
-                width: isDynamicWidth ? "100%" : "auto",
+                width: isDynamicWidth ? "100%" : "unset",
             }}
             onClick={handleCanvasClick}
         />

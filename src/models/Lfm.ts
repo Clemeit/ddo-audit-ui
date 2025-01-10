@@ -95,6 +95,11 @@ interface LfmApiModel {
     data: LfmApiDataModel
 }
 
+interface LfmSortType {
+    type: string
+    direction: string
+}
+
 export {
     QuestLevel,
     QuestXP,
@@ -106,4 +111,5 @@ export {
     LfmApiServerModel,
     LfmApiDataModel,
     LfmApiModel,
+    LfmSortType,
 }

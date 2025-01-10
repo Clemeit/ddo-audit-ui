@@ -1,14 +1,19 @@
 import React, { createContext, useState, useEffect, useContext } from "react"
 
-const ThemeContext = createContext({
-    theme: "dark-theme",
-    toggleTheme: () => {},
-})
+interface ThemeContextProps {
+    theme: string
+    toggleTheme: () => void
+    isFullScreen: boolean
+    setIsFullScreen: (fullScreen: boolean) => void
+}
+
+const ThemeContext = createContext<ThemeContextProps | undefined>(undefined)
 
 export const ThemeProvider = ({ children }) => {
     const [theme, setTheme] = useState(() => {
         return localStorage.getItem("theme") || "dark-theme"
     })
+    const [isFullScreen, setIsFullScreen] = useState(false)
 
     useEffect(() => {
         document.body.className = theme
@@ -22,10 +27,18 @@ export const ThemeProvider = ({ children }) => {
     }
 
     return (
-        <ThemeContext.Provider value={{ theme, toggleTheme }}>
+        <ThemeContext.Provider
+            value={{ theme, toggleTheme, isFullScreen, setIsFullScreen }}
+        >
             {children}
         </ThemeContext.Provider>
     )
 }
 
-export const useTheme = () => useContext(ThemeContext)
+export const useThemeContext = () => {
+    const context = useContext(ThemeContext)
+    if (!context) {
+        throw new Error("useThemeContext must be used within a ThemeContext")
+    }
+    return context
+}

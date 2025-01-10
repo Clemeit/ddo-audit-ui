@@ -19,8 +19,15 @@ interface Props {
     raidView?: boolean
 }
 
-const useRenderLfm = ({ lfmSprite, context, raidView = false }: Props) => {
-    const { panelWidth, showBoundingBoxes, fontSize } = useLfmContext()
+const useRenderLfm = ({ lfmSprite, context }: Props) => {
+    const {
+        panelWidth,
+        showBoundingBoxes,
+        fontSize,
+        // showRaidTimerIndicator,
+        showQuestGuesses,
+        showQuestTips,
+    } = useLfmContext()
     const { confineTextToBoundingBox } = useTextRenderer(context)
     const commonBoundingBoxes = useMemo(
         () => calculateCommonBoundingBoxes(panelWidth),
@@ -46,60 +53,67 @@ const useRenderLfm = ({ lfmSprite, context, raidView = false }: Props) => {
         }
     }
 
-    function calculateQuestInfoYPositions({
-        questNameBoundingBox,
-        questTipBoundingBox,
-        questDifficultyBoundingBox,
-        questPanelBoundingBox,
-        hasTip,
-    }: {
-        questNameBoundingBox: BoundingBox
-        questTipBoundingBox: BoundingBox
-        questDifficultyBoundingBox: BoundingBox
-        questPanelBoundingBox: BoundingBox
-        hasTip: boolean
-    }) {
-        let totalQuestInfoHeight =
-            questNameBoundingBox.height +
-            QUEST_INFO_GAP +
-            (hasTip ? questTipBoundingBox.height + QUEST_INFO_GAP : 0) +
-            questDifficultyBoundingBox.height
-        let topPadding = Math.max(
-            0,
-            (questPanelBoundingBox.height - totalQuestInfoHeight) / 2
-        )
-        const hasEnoughSpaceForTip =
-            hasTip && totalQuestInfoHeight < questPanelBoundingBox.height
-        if (!hasEnoughSpaceForTip) {
-            totalQuestInfoHeight =
+    const calculateQuestInfoYPositions = useCallback(
+        ({
+            questNameBoundingBox,
+            questTipBoundingBox,
+            questDifficultyBoundingBox,
+            questPanelBoundingBox,
+            hasTip,
+        }: {
+            questNameBoundingBox: BoundingBox
+            questTipBoundingBox: BoundingBox
+            questDifficultyBoundingBox: BoundingBox
+            questPanelBoundingBox: BoundingBox
+            hasTip: boolean
+        }) => {
+            let totalQuestInfoHeight =
                 questNameBoundingBox.height +
                 QUEST_INFO_GAP +
+                (hasTip && showQuestTips
+                    ? questTipBoundingBox.height + QUEST_INFO_GAP
+                    : 0) +
                 questDifficultyBoundingBox.height
-            topPadding = Math.max(
+            let topPadding = Math.max(
                 0,
                 (questPanelBoundingBox.height - totalQuestInfoHeight) / 2
             )
-        }
-        const questNameBoundingBoxY = topPadding
-        const questDifficultyBoundingBoxY =
-            questPanelBoundingBox.bottom() -
-            topPadding -
-            questDifficultyBoundingBox.height
-        const questTipBoundingBoxY =
-            questNameBoundingBoxY +
-            questNameBoundingBox.height +
-            (questDifficultyBoundingBoxY -
-                (questNameBoundingBoxY + questNameBoundingBox.height)) /
-                2 -
-            questTipBoundingBox.height / 2
+            const hasEnoughSpaceForTip =
+                hasTip &&
+                showQuestTips &&
+                totalQuestInfoHeight < questPanelBoundingBox.height
+            if (!hasEnoughSpaceForTip) {
+                totalQuestInfoHeight =
+                    questNameBoundingBox.height +
+                    QUEST_INFO_GAP +
+                    questDifficultyBoundingBox.height
+                topPadding = Math.max(
+                    0,
+                    (questPanelBoundingBox.height - totalQuestInfoHeight) / 2
+                )
+            }
+            const questNameBoundingBoxY = topPadding
+            const questDifficultyBoundingBoxY =
+                questPanelBoundingBox.bottom() -
+                topPadding -
+                questDifficultyBoundingBox.height
+            const questTipBoundingBoxY =
+                questNameBoundingBoxY +
+                questNameBoundingBox.height +
+                (questDifficultyBoundingBoxY -
+                    (questNameBoundingBoxY + questNameBoundingBox.height)) /
+                    2 -
+                questTipBoundingBox.height / 2
 
-        return {
-            questNameBoundingBoxY,
-            questTipBoundingBoxY,
-            questDifficultyBoundingBoxY,
-            hasEnoughSpaceForTip,
-        }
-    }
+            return {
+                questNameBoundingBoxY,
+                questTipBoundingBoxY,
+                questDifficultyBoundingBoxY,
+                hasEnoughSpaceForTip,
+            }
+        },
+        [showQuestTips]
+    )
 
     const renderLfmToCanvas = useCallback(
         (lfm: Lfm) => {
@@ -207,8 +221,6 @@ const useRenderLfm = ({ lfmSprite, context, raidView = false }: Props) => {
                 mainPanelBoundingBox.bottom() -
                 adventureActiveBoundingBox.height -
                 4
-            // lfm.comment =
-            //     "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam nec purus nec nunc ultricies aliquam. Nullam nec purus nec nunc ultricies aliquam. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam nec purus nec nunc ultricies aliquam. Nullam nec purus nec nunc ultricies aliquam. END"
             const {
                 textLines: commentLines,
                 lineHeight: commentLineHeight,
@@ -290,9 +302,14 @@ const useRenderLfm = ({ lfmSprite, context, raidView = false }: Props) => {
             })
 
             // background and edges
-            // context.clearRect(0, 0, panelWidth, LFM_HEIGHT)
-            context.fillStyle = LFM_COLORS.BLACK_BACKGROUND
+            context.fillStyle = lfm.is_eligible
+                ? LFM_COLORS.BLACK_BACKGROUND
+                : LFM_COLORS.INELIGIBLE_FILL
             context.fillRect(0, 0, lfmBoundingBox.width, LFM_HEIGHT)
+
+            if (!lfm.is_eligible) {
+                context.globalAlpha = 0.5
+            }
 
             // gradient fill
             if (lfm.is_eligible) {
@@ -394,11 +411,12 @@ const useRenderLfm = ({ lfmSprite, context, raidView = false }: Props) => {
             }
 
             // ===== QUEST PANEL =====
-            if (lfm.quest) {
+            if (lfm.quest && (lfm.is_quest_guess ? showQuestGuesses : true)) {
                 // quest name
-                context.fillStyle = lfm.is_quest_guess
-                    ? LFM_COLORS.GUESS_TEXT
-                    : LFM_COLORS.STANDARD_TEXT
+                context.fillStyle =
+                    lfm.is_quest_guess && lfm.is_eligible
+                        ? LFM_COLORS.GUESS_TEXT
+                        : LFM_COLORS.STANDARD_TEXT
                 context.font = lfm.is_quest_guess
                     ? fonts.QUEST_GUESS_NAME
                     : fonts.QUEST_NAME
@@ -415,12 +433,7 @@ const useRenderLfm = ({ lfmSprite, context, raidView = false }: Props) => {
                 })
                 // quest tip
                 if (lfm.quest.tip && showQuestTip) {
-                    context.fillStyle = lfm.is_quest_guess
-                        ? LFM_COLORS.GUESS_TEXT
-                        : LFM_COLORS.STANDARD_TEXT
                     context.font = fonts.TIP
-                    context.textBaseline = "middle"
-                    context.textAlign = "center"
                     questTipTextLines.forEach((line) => {
                         context.fillText(
                             line,
@@ -430,12 +443,7 @@ const useRenderLfm = ({ lfmSprite, context, raidView = false }: Props) => {
                     })
                 }
                 // quest difficulty
-                context.fillStyle = lfm.is_quest_guess
-                    ? LFM_COLORS.GUESS_TEXT
-                    : LFM_COLORS.SECONDARY_TEXT
                 context.font = fonts.COMMENT
-                context.textBaseline = "middle"
-                context.textAlign = "center"
                 context.fillText(
                     questDifficultyTextLines[0] || "",
                     questDifficultyBoundingBox.centerX(),
@@ -566,6 +574,8 @@ const useRenderLfm = ({ lfmSprite, context, raidView = false }: Props) => {
                     questDifficultyBoundingBox.height
                 )
             }
+
+            context.globalAlpha = 1
         },
         [
             lfmSprite,
@@ -573,7 +583,10 @@ const useRenderLfm = ({ lfmSprite, context, raidView = false }: Props) => {
             showBoundingBoxes,
             commonBoundingBoxes,
             fontSize,
+            // showRaidTimerIndicator,
+            showQuestGuesses,
             confineTextToBoundingBox,
+            calculateQuestInfoYPositions,
         ]
     )
 

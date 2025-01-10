@@ -3,6 +3,7 @@ import GroupingCanvas from "./LfmCanvas.tsx"
 import usePollLfms from "../../hooks/usePollLfms.ts"
 import { Lfm } from "../../models/Lfm.ts"
 import { useLfmContext } from "../../contexts/LfmContext.tsx"
+import LfmToolbar from "./LfmToolbar.tsx"
 
 interface Props {
     serverName: string
@@ -16,7 +17,7 @@ const GroupingContainer = ({
     raidView = false,
 }: Props) => {
     const { lfmData } = usePollLfms({ serverName, refreshInterval })
-    const { sortBy } = useLfmContext()
+    const { sortBy, minLevel, maxLevel, showNotEligible } = useLfmContext()
 
     // filter and sort the lfms
     const filteredLfms = useMemo(() => {
@@ -27,12 +28,23 @@ const GroupingContainer = ({
 
         // determine eligibility
         const determinedLfms = lfms.map((lfm) => {
-            const newLfm: Lfm = { ...lfm, is_eligible: true }
+            let isEligible = true
+
+            // level check
+            if (minLevel && minLevel > lfm.maximum_level) {
+                isEligible = false
+            }
+            if (maxLevel && maxLevel < lfm.minimum_level) {
+                isEligible = false
+            }
+
+            const newLfm: Lfm = { ...lfm, is_eligible: isEligible }
             return newLfm
         })
 
         // sort
         return determinedLfms
+            .filter((lfm) => showNotEligible || lfm.is_eligible)
             .sort((a, b) => {
                 // this sort should take care of the case where the next sort
                 // operataion has ties
@@ -71,14 +83,17 @@ const GroupingContainer = ({
                         : averageLevelB - averageLevelA
                 }
             })
-    }, [lfmData, sortBy, serverName])
+    }, [lfmData, sortBy, minLevel, showNotEligible, maxLevel, serverName])
 
     return (
-        <GroupingCanvas
-            serverName={serverName}
-            lfms={filteredLfms || []}
-            raidView={raidView}
-        />
+        <>
+            <LfmToolbar />
+            <GroupingCanvas
+                serverName={serverName}
+                lfms={filteredLfms || []}
+                raidView={raidView}
+            />
+        </>
     )
 }
 

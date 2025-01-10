@@ -182,6 +182,27 @@ function removeRegisteredCharacter(character: Character): void {
     }
 }
 
+function getValue(key: string): any {
+    try {
+        const storageValue = localStorage.getItem(key)
+        if (!storageValue) {
+            return null
+        }
+        return JSON.parse(storageValue)
+    } catch (e) {
+        console.error(e)
+        return null
+    }
+}
+
+function setValue(key: string, value: any): void {
+    try {
+        localStorage.setItem(key, JSON.stringify(value))
+    } catch (e) {
+        console.error(e)
+    }
+}
+
 export {
     getAccessTokens,
     getAccessTokensMetadata,
@@ -193,4 +214,6 @@ export {
     setRegisteredCharacters,
     addRegisteredCharacter,
     removeRegisteredCharacter,
+    getValue,
+    setValue,
 }

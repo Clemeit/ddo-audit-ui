@@ -12,7 +12,6 @@ import {
 } from "../constants/lfmPanel.ts"
 import { useLfmContext } from "../contexts/LfmContext.tsx"
 import { calculateCommonBoundingBoxes } from "../utils/lfmUtils.ts"
-import { BoundingBox } from "../models/Geometry.ts"
 
 interface Props {
     lfmSprite?: HTMLImageElement | null
@@ -325,7 +324,6 @@ const useRenderLfmPanel = ({
             minimumLfmCount,
             raidView,
             panelWidth,
-            commonBoundingBoxes,
             fonts,
             sortBy,
             sortHeaders,

@@ -92,6 +92,7 @@ function shouldLfmRerender(previous: Lfm, current: Lfm): boolean {
     if (previous.minimum_level !== current.minimum_level) return true
     if (previous.maximum_level !== current.maximum_level) return true
     if (previous.leader.name !== current.leader.name) return true
+    if (previous.is_eligible !== current.is_eligible) return true
 
     return false
 }

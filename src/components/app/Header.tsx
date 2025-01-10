@@ -3,6 +3,7 @@ import NavMenu from "./NavMenu.tsx"
 import Banner from "./Banner.tsx"
 import { useLocation } from "react-router-dom"
 import { bannerRouteMapping } from "../../config/routes.ts"
+import { useThemeContext } from "../../contexts/ThemeContext.tsx"
 
 const Header = () => {
     const location = useLocation()
@@ -12,6 +13,7 @@ const Header = () => {
         miniature: false,
         showButtons: true,
     })
+    const { isFullScreen } = useThemeContext()
 
     useEffect(() => {
         const rootPath = location.pathname.split("/")[1]
@@ -20,15 +22,17 @@ const Header = () => {
     }, [location.pathname])
 
     return (
-        <>
-            <NavMenu />
-            <Banner
-                title={bannerData.title}
-                subtitle={bannerData.subtitle}
-                miniature={bannerData.miniature}
-                showButtons={bannerData.showButtons}
-            />
-        </>
+        !isFullScreen && (
+            <>
+                <NavMenu />
+                <Banner
+                    title={bannerData.title}
+                    subtitle={bannerData.subtitle}
+                    miniature={bannerData.miniature}
+                    showButtons={bannerData.showButtons}
+                />
+            </>
+        )
     )
 }
 
