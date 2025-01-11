@@ -97,4 +97,26 @@ function shouldLfmRerender(previous: Lfm, current: Lfm): boolean {
     return false
 }
 
-export { shouldLfmRerender, calculateCommonBoundingBoxes }
+function getLfmPostedTimestamp(lfm: Lfm): Date {
+    if (!lfm.activity) return new Date()
+    const lfmActivityEventsFlatMap = lfm.activity.flatMap((activity) =>
+        activity.events.map((event) => ({
+            tag: event.tag,
+            data: event.data,
+            timestamp: activity.timestamp,
+        }))
+    )
+    console.log(lfmActivityEventsFlatMap)
+    const lfmPostedEvent = lfmActivityEventsFlatMap.find(
+        (event) => event.tag === "posted"
+    )
+    console.log(lfmPostedEvent)
+    if (!lfmPostedEvent) return new Date()
+    return new Date(lfmPostedEvent.timestamp + "Z")
+}
+
+export {
+    shouldLfmRerender,
+    calculateCommonBoundingBoxes,
+    getLfmPostedTimestamp,
+}

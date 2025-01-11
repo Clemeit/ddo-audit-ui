@@ -11,7 +11,11 @@ import { useLfmContext } from "../contexts/LfmContext.tsx"
 import { CLASS_LIST } from "../constants/game.ts"
 import { BoundingBox } from "../models/Geometry.ts"
 import useTextRenderer from "./useTextRenderer.ts"
-import { calculateCommonBoundingBoxes } from "../utils/lfmUtils.ts"
+import {
+    calculateCommonBoundingBoxes,
+    getLfmPostedTimestamp,
+} from "../utils/lfmUtils.ts"
+import { convertMillisecondsToPrettyString } from "../utils/stringUtils.ts"
 
 interface Props {
     lfmSprite?: HTMLImageElement | null
@@ -28,6 +32,7 @@ const useRenderLfm = ({ lfmSprite, context }: Props) => {
         showMemberCount,
         showQuestGuesses,
         showQuestTips,
+        showLfmPostedTime,
     } = useLfmContext()
     const { confineTextToBoundingBox } = useTextRenderer(context)
     const commonBoundingBoxes = useMemo(
@@ -270,40 +275,46 @@ const useRenderLfm = ({ lfmSprite, context }: Props) => {
                 leaderNameBoundingBox.centerY() -
                 memberCountBoundingBox.height / 2
 
-            const showAdventureActiveTime =
-                Math.round(lfm.adventure_active_time / 60) > 0
-            const adventureActiveTextOptions = (abbreviated: boolean) =>
-                `${abbreviated ? "" : "Adventure "}Active: ${Math.round(lfm.adventure_active_time / 60)} minute${Math.round(lfm.adventure_active_time / 60) === 1 ? "" : "s"}`
-            let adventureActiveText = ""
-            let adventureActiveTextBounds = getTextWidthAndHeight(
-                adventureActiveTextOptions(false),
+            const lfmPostedTimestamp = getLfmPostedTimestamp(lfm)
+            const postedTimeDifference =
+                new Date().getTime() - lfmPostedTimestamp.getTime()
+            const postedTimeDifferenceString = (abbreviated: boolean) =>
+                postedTimeDifference < 60000
+                    ? "Just now"
+                    : `${convertMillisecondsToPrettyString(Math.round(postedTimeDifference), false, true, true)} ago`
+            const isAdventureActive = lfm.adventure_active_time > 0
+            const adventureActiveMinutes = Math.round(
+                lfm.adventure_active_time / 60
+            )
+            const showTimerNote =
+                isAdventureActive || (!!lfmPostedTimestamp && showLfmPostedTime)
+            const timerNoteTextOptions = (abbreviated: boolean) =>
+                isAdventureActive
+                    ? `${abbreviated ? "" : "Adventure "}Active: ${adventureActiveMinutes === 0 ? "<1 minute" : `${adventureActiveMinutes} minute${adventureActiveMinutes === 1 ? "" : "s"}`}`
+                    : `Posted: ${postedTimeDifferenceString(abbreviated)}`
+            const timerNoteTextWidth = getTextWidthAndHeight(
+                timerNoteTextOptions(false),
                 fonts.COMMENT,
                 context
-            )
-            if (
-                adventureActiveTextBounds.width >
-                mainPanelBoundingBox.width - 8
-            ) {
-                adventureActiveText = adventureActiveTextOptions(true)
-                adventureActiveTextBounds = getTextWidthAndHeight(
-                    adventureActiveTextOptions(true),
-                    fonts.COMMENT,
-                    context
-                )
+            ).width
+            let timerNoteText = ""
+            if (timerNoteTextWidth > mainPanelBoundingBox.width - 8) {
+                timerNoteText = timerNoteTextOptions(true)
             } else {
-                adventureActiveText = adventureActiveTextOptions(false)
+                timerNoteText = timerNoteTextOptions(false)
             }
-            const { boundingBox: adventureActiveBoundingBox } =
+            const { boundingBox: timerNoteTextBoundingBox } =
                 confineTextToBoundingBox({
-                    text: showAdventureActiveTime ? adventureActiveText : "",
+                    text: showTimerNote ? timerNoteText : "",
                     boundingBox: mainPanelBoundingBox,
                     font: fonts.COMMENT,
                     centered: true,
                 })
-            adventureActiveBoundingBox.y =
+            timerNoteTextBoundingBox.y =
                 mainPanelBoundingBox.bottom() -
-                adventureActiveBoundingBox.height -
+                timerNoteTextBoundingBox.height -
                 4
+
             const {
                 textLines: commentLines,
                 lineHeight: commentLineHeight,
@@ -320,7 +331,9 @@ const useRenderLfm = ({ lfmSprite, context }: Props) => {
                         leaderClassIconBoundingBox.height -
                         8 -
                         (mainPanelBoundingBox.bottom() -
-                            adventureActiveBoundingBox.top() +
+                            (showTimerNote
+                                ? timerNoteTextBoundingBox.top()
+                                : 0) +
                             2)
                 ),
                 font: fonts.COMMENT,
@@ -495,17 +508,19 @@ const useRenderLfm = ({ lfmSprite, context }: Props) => {
                 )
             })
             // adventure active time
-            if (showAdventureActiveTime) {
-                context.fillStyle = LFM_COLORS.ADVENTURE_ACTIVE
+            if (showTimerNote) {
+                context.fillStyle = isAdventureActive
+                    ? LFM_COLORS.ADVENTURE_ACTIVE
+                    : LFM_COLORS.LFM_POSTED
                 context.font = fonts.COMMENT
                 context.textBaseline = "middle"
                 context.textAlign = "center"
                 context.fillText(
-                    adventureActiveText,
-                    adventureActiveBoundingBox.x +
-                        adventureActiveBoundingBox.width / 2,
-                    adventureActiveBoundingBox.y +
-                        adventureActiveBoundingBox.height / 2
+                    timerNoteText,
+                    timerNoteTextBoundingBox.x +
+                        timerNoteTextBoundingBox.width / 2,
+                    timerNoteTextBoundingBox.y +
+                        timerNoteTextBoundingBox.height / 2
                 )
             }
 
@@ -637,10 +652,10 @@ const useRenderLfm = ({ lfmSprite, context }: Props) => {
                     commentBoundingBox.height
                 )
                 context.strokeRect(
-                    adventureActiveBoundingBox.x,
-                    adventureActiveBoundingBox.y,
-                    adventureActiveBoundingBox.width,
-                    adventureActiveBoundingBox.height
+                    timerNoteTextBoundingBox.x,
+                    timerNoteTextBoundingBox.y,
+                    timerNoteTextBoundingBox.width,
+                    timerNoteTextBoundingBox.height
                 )
                 context.strokeRect(
                     questNameBoundingBox.x,

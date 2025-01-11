@@ -52,6 +52,8 @@ interface LfmContextProps {
     reloadRegisteredCharacters: () => void
     trackedCharacterIds: string[]
     setTrackedCharacterIds: (ids: string[]) => void
+    showLfmPostedTime: boolean
+    setShowLfmPostedTime: (show: boolean) => void
     resetViewSettings: () => void
     resetUserSettings: () => void
 }
@@ -98,6 +100,7 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
     const [showQuestTips, setShowQuestTips] = useState<boolean>(true)
     const [showCharacterGuildNames, setShowCharacterGuildNames] =
         useState<boolean>(true)
+    const [showLfmPostedTime, setShowLfmPostedTime] = useState<boolean>(false)
 
     const resetUserSettings = () => {
         setMinLevel(MIN_LEVEL)
@@ -110,6 +113,7 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
         setShowQuestGuesses(true)
         setShowQuestTips(true)
         setShowCharacterGuildNames(false)
+        setShowLfmPostedTime(false)
         setTrackedCharacterIds([])
     }
 
@@ -130,8 +134,8 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
                 setMaxLevel(settings.maxLevel)
                 setFilterByMyCharacters(settings.filterByMyCharacters)
                 setShowNotEligible(settings.showNotEligible)
-                setFontSize(settings.fontSize)
-                setPanelWidth(settings.panelWidth)
+                setFontSize(parseInt(settings.fontSize))
+                setPanelWidth(parseInt(settings.panelWidth))
                 setShowBoundingBoxes(settings.showBoundingBoxes)
                 setSortBy(settings.sortBy)
                 setIsDynamicWidth(settings.isDynamicWidth)
@@ -141,6 +145,7 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
                 setShowQuestTips(settings.showQuestTips)
                 setShowCharacterGuildNames(settings.showCharacterGuildNames)
                 setTrackedCharacterIds(settings.trackedCharacterIds)
+                setShowLfmPostedTime(settings.showLfmPostedTime)
             } catch (e) {
                 // TODO: maybe show a modal here to allow the user to reset their settings
                 console.error("Error loading settings from local storage", e)
@@ -179,6 +184,7 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
             showQuestTips,
             showCharacterGuildNames,
             trackedCharacterIds,
+            showLfmPostedTime,
         })
     }, [
         minLevel,
@@ -197,6 +203,7 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
         showQuestTips,
         showCharacterGuildNames,
         trackedCharacterIds,
+        showLfmPostedTime,
     ])
 
     useEffect(() => {
@@ -242,6 +249,8 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
                 reloadRegisteredCharacters,
                 trackedCharacterIds,
                 setTrackedCharacterIds,
+                showLfmPostedTime,
+                setShowLfmPostedTime,
                 resetViewSettings,
                 resetUserSettings,
             }}

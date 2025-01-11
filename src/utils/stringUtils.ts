@@ -10,7 +10,9 @@ function toPossessiveCase(str: string): string {
 
 function convertMillisecondsToPrettyString(
     millis: number,
-    commaSeparated: boolean = false
+    commaSeparated: boolean = false,
+    useFullWords: boolean = false,
+    onlyIncludeLargest: boolean = false
 ): string {
     const seconds = Math.floor(millis / 1000)
     const minutes = Math.floor(seconds / 60)
@@ -21,10 +23,18 @@ function convertMillisecondsToPrettyString(
     if (days > 0) resultArray.push(`${days} day${days > 1 ? "s" : ""}`)
     if (hours % 24 > 0)
         resultArray.push(`${hours % 24} hour${hours > 1 ? "s" : ""}`)
-    if (minutes % 60 > 0 && hours < 12) resultArray.push(`${minutes % 60} min`)
+    if (minutes % 60 > 0 && hours < 12)
+        resultArray.push(
+            `${minutes % 60} min${useFullWords ? "ute" : ""}${minutes > 1 ? "s" : ""}`
+        )
     if (seconds % 60 > 0 && minutes < 30 && hours === 0)
-        resultArray.push(`${seconds % 60} sec`)
+        resultArray.push(
+            `${seconds % 60} sec${useFullWords ? "ond" : ""}${seconds > 1 ? "s" : ""}`
+        )
 
+    if (onlyIncludeLargest) {
+        return resultArray[0]
+    }
     return resultArray.join(commaSeparated ? ", " : " ").trim()
 }
 

@@ -65,6 +65,8 @@ const LfmToolbar = ({ reloadLfms }: Props) => {
         registeredCharacters,
         trackedCharacterIds,
         setTrackedCharacterIds,
+        showLfmPostedTime,
+        setShowLfmPostedTime,
         reloadRegisteredCharacters,
         resetViewSettings,
         resetUserSettings,
@@ -394,6 +396,17 @@ const LfmToolbar = ({ reloadLfms }: Props) => {
                             />
                             Show character guild names
                         </label>
+                        <label className="input-label" htmlFor="lfmPostedTime">
+                            <input
+                                type="checkbox"
+                                id="lfmPostedTime"
+                                checked={showLfmPostedTime}
+                                onChange={(e) =>
+                                    setShowLfmPostedTime(e.target.checked)
+                                }
+                            />
+                            Show LFM posted time
+                        </label>
                     </Stack>
                 </ContentCluster>
             </>
@@ -430,6 +443,8 @@ const LfmToolbar = ({ reloadLfms }: Props) => {
             trackedCharacterIds,
             setTrackedCharacterIds,
             registeredCharacters,
+            showLfmPostedTime,
+            setShowLfmPostedTime,
         ]
     )
 
