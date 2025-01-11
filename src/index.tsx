@@ -6,16 +6,12 @@ import reportWebVitals from "./reportWebVitals"
 import browserRouter from "./browserRouter.tsx"
 import { ThemeProvider } from "./contexts/ThemeContext.tsx"
 import { HelmetProvider } from "react-helmet-async"
-import { LfmProvider } from "./contexts/LfmContext.tsx"
-
 const root = ReactDOM.createRoot(document.getElementById("root")!)
 root.render(
     <React.StrictMode>
         <HelmetProvider>
             <ThemeProvider>
-                <LfmProvider>
-                    <RouterProvider router={browserRouter} />
-                </LfmProvider>
+                <RouterProvider router={browserRouter} />
             </ThemeProvider>
         </HelmetProvider>
     </React.StrictMode>

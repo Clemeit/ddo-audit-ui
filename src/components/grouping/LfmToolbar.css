@@ -2,7 +2,6 @@
     background-color: var(--background-light);
     display: flex;
     align-items: center;
-    /* gap: 10px; */
     padding: 0;
     height: 30px;
 }
@@ -24,4 +23,34 @@
 
 .screenshot-button {
     margin-left: auto;
+}
+
+.filter-section {
+    margin-left: 5px;
+    padding-left: 10px;
+    border-left: 2px solid var(--secondary-text);
+}
+
+.refresh-button.disabled {
+    background-color: var(--background-light);
+    transition: none;
+}
+
+.refresh-button.disabled:hover {
+    background-color: var(--background-light);
+}
+
+@media (max-width: 768px) {
+    .lfm-toolbar-container {
+        height: 40px;
+    }
+
+    .lfm-toolbar-item-icon {
+        width: 30px;
+        height: 30px;
+    }
+
+    .settings-button {
+        margin-left: auto;
+    }
 }

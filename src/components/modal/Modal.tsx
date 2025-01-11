@@ -20,7 +20,9 @@ const Modal = ({ children, onClose, hideOverlay = false }: Props) => {
             )}
             <div className="modal-container">
                 <div className="modal-content">
-                    <CloseSVG className="modal-close" onClick={onClose} />
+                    <div className="modal-close-container" onClick={onClose}>
+                        <CloseSVG className="modal-close" />
+                    </div>
                     {children}
                     {isMobile && <Spacer size="50px" />}
                 </div>

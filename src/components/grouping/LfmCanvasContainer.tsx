@@ -1,5 +1,5 @@
 import React, { useMemo } from "react"
-import GroupingCanvas from "./LfmCanvas.tsx"
+import LfmCanvas from "./LfmCanvas.tsx"
 import usePollLfms from "../../hooks/usePollLfms.ts"
 import { Lfm } from "../../models/Lfm.ts"
 import { useLfmContext } from "../../contexts/LfmContext.tsx"
@@ -16,26 +16,61 @@ const GroupingContainer = ({
     refreshInterval = 3000,
     raidView = false,
 }: Props) => {
-    const { lfmData } = usePollLfms({ serverName, refreshInterval })
-    const { sortBy, minLevel, maxLevel, showNotEligible } = useLfmContext()
+    const { lfmData, reload } = usePollLfms({ serverName, refreshInterval })
+    const {
+        sortBy,
+        minLevel,
+        maxLevel,
+        showNotEligible,
+        filterByMyCharacters,
+        registeredCharacters,
+        trackedCharacterIds,
+    } = useLfmContext()
 
     // filter and sort the lfms
     const filteredLfms = useMemo(() => {
         const lfms: Lfm[] = Object.values(
             lfmData.data?.data?.[serverName]?.lfms || {}
         )
-        if (!lfms) return []
+        if (!lfms)
+            return {
+                filteredAndSortedLfms: [],
+                excludedLfmCount: 0,
+            }
 
         // determine eligibility
         const determinedLfms = lfms.map((lfm) => {
             let isEligible = true
 
             // level check
-            if (minLevel && minLevel > lfm.maximum_level) {
-                isEligible = false
-            }
-            if (maxLevel && maxLevel < lfm.minimum_level) {
-                isEligible = false
+            if (!filterByMyCharacters) {
+                if (minLevel && minLevel > lfm.maximum_level) {
+                    isEligible = false
+                }
+                if (maxLevel && maxLevel < lfm.minimum_level) {
+                    isEligible = false
+                }
+            } else {
+                const characterLevels =
+                    registeredCharacters
+                        ?.filter((character) => {
+                            return (
+                                character.server_name?.toLowerCase() ===
+                                    serverName.toLowerCase() &&
+                                trackedCharacterIds.includes(character.id)
+                            )
+                        })
+                        ?.map((character) => character.total_level || 99) || []
+                let localEligibility = false
+                characterLevels.forEach((level) => {
+                    if (
+                        level >= lfm.minimum_level &&
+                        level <= lfm.maximum_level
+                    ) {
+                        localEligibility = true
+                    }
+                })
+                isEligible = localEligibility
             }
 
             const newLfm: Lfm = { ...lfm, is_eligible: isEligible }
@@ -43,7 +78,7 @@ const GroupingContainer = ({
         })
 
         // sort
-        return determinedLfms
+        const filteredAndSortedLfms = determinedLfms
             .filter((lfm) => showNotEligible || lfm.is_eligible)
             .sort((a, b) => {
                 // this sort should take care of the case where the next sort
@@ -83,14 +118,30 @@ const GroupingContainer = ({
                         : averageLevelB - averageLevelA
                 }
             })
-    }, [lfmData, sortBy, minLevel, showNotEligible, maxLevel, serverName])
+
+        return {
+            filteredAndSortedLfms,
+            excludedLfmCount: lfms.length - filteredAndSortedLfms.length,
+        }
+    }, [
+        lfmData,
+        sortBy,
+        minLevel,
+        showNotEligible,
+        maxLevel,
+        serverName,
+        filterByMyCharacters,
+        registeredCharacters,
+        trackedCharacterIds,
+    ])
 
     return (
         <>
-            <LfmToolbar />
-            <GroupingCanvas
+            <LfmToolbar reloadLfms={reload} />
+            <LfmCanvas
                 serverName={serverName}
-                lfms={filteredLfms || []}
+                lfms={filteredLfms.filteredAndSortedLfms || []}
+                excludedLfmCount={filteredLfms.excludedLfmCount}
                 raidView={raidView}
             />
         </>

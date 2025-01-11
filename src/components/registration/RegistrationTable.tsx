@@ -137,7 +137,11 @@ const CharacterTable = ({
                 </thead>
                 <tbody>
                     {characters.length
-                        ? characters.map(characterRow)
+                        ? characters
+                              .sort((a, b) =>
+                                  (a.name || "").localeCompare(b.name || "")
+                              )
+                              .map(characterRow)
                         : noCharactersMessageRow}
                 </tbody>
             </table>

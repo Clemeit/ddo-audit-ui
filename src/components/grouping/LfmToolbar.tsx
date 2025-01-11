@@ -7,7 +7,7 @@ import { ReactComponent as MenuSVG } from "../../assets/svg/menu.svg"
 // @ts-ignore
 import { ReactComponent as ScreenshotSVG } from "../../assets/svg/capture.svg"
 // @ts-ignore
-import { ReactComponent as FilterSVG } from "../../assets/svg/filter.svg"
+import { ReactComponent as SettingsSVG } from "../../assets/svg/settings.svg"
 // @ts-ignore
 import { ReactComponent as FullscreenSVG } from "../../assets/svg/fullscreen.svg"
 // @ts-ignore
@@ -26,16 +26,22 @@ import {
 } from "../../constants/lfmPanel.ts"
 import Button from "../global/Button.tsx"
 import ContentCluster from "../global/ContentCluster.tsx"
+import { Character } from "../../models/Character.ts"
+import YesNoModal from "../modal/YesNoModal.tsx"
 
-const LfmToolbar = () => {
+interface Props {
+    reloadLfms: () => void
+}
+
+const LfmToolbar = ({ reloadLfms }: Props) => {
     const { serverNameSentenceCase } = useGetCurrentServer()
     const {
         minLevel,
         setMinLevel,
         maxLevel,
         setMaxLevel,
-        filterByMyLevel,
-        setFilterByMyLevel,
+        filterByMyCharacters,
+        setFilterByMyCharacters,
         showNotEligible,
         setShowNotEligible,
         fontSize,
@@ -56,49 +62,167 @@ const LfmToolbar = () => {
         setShowQuestTips,
         showCharacterGuildNames,
         setShowCharacterGuildNames,
-        resetAll,
+        registeredCharacters,
+        trackedCharacterIds,
+        setTrackedCharacterIds,
+        reloadRegisteredCharacters,
+        resetViewSettings,
+        resetUserSettings,
     } = useLfmContext()
     const { isFullScreen, setIsFullScreen } = useThemeContext()
     const [showSettingsModal, setShowSettingsModal] = React.useState(false)
+    const [showResetViewSettingsModal, setShowResetViewSettingsModal] =
+        React.useState(false)
+    const [showResetUserSettingsModal, setShowResetUserSettingsModal] =
+        React.useState(false)
+    const [canManuallyReload, setCanManuallyReload] = React.useState(true)
+
+    const resetViewSettingsModal = useMemo(
+        () => (
+            <YesNoModal
+                title="Are you sure?"
+                text="This will reset all display settings to their default values."
+                onYes={() => {
+                    resetViewSettings()
+                    setShowResetViewSettingsModal(false)
+                    setShowSettingsModal(false)
+                }}
+                onNo={() => setShowResetViewSettingsModal(false)}
+            />
+        ),
+        [resetViewSettings]
+    )
+
+    const resetUserSettingsModal = useMemo(
+        () => (
+            <YesNoModal
+                title="Are you sure?"
+                text="This will reset all filter settings to their default values. Your registered characters will not be affected."
+                onYes={() => {
+                    resetUserSettings()
+                    setShowResetUserSettingsModal(false)
+                    setShowSettingsModal(false)
+                }}
+                onNo={() => setShowResetUserSettingsModal(false)}
+            />
+        ),
+        [resetUserSettings]
+    )
 
     const settingModalContent = useMemo(
         () => (
             <>
                 <ContentCluster title="Filter Groups">
                     <Stack direction="column" gap="10px">
-                        <span>Level range:</span>
-                        <Stack>
+                        <label
+                            className="input-label"
+                            htmlFor="filterByLevelRange"
+                        >
                             <input
-                                type="text"
-                                placeholder="Min"
-                                style={{ width: "100px" }}
-                                value={minLevel}
-                                onChange={(e) =>
-                                    setMinLevel(parseInt(e.target.value))
-                                }
+                                type="radio"
+                                name="sort"
+                                id="filterByLevelRange"
+                                checked={!filterByMyCharacters}
+                                onChange={() => setFilterByMyCharacters(false)}
                             />
+                            Filter by level range
+                        </label>
+                        <label
+                            className="input-label"
+                            htmlFor="filterOnMyLevel"
+                        >
                             <input
-                                type="text"
-                                placeholder="Max"
-                                style={{ width: "100px" }}
-                                value={maxLevel}
-                                onChange={(e) =>
-                                    setMaxLevel(parseInt(e.target.value))
-                                }
-                            />
-                        </Stack>
-                        <label htmlFor="filterOnMyLevel">
-                            <input
-                                type="checkbox"
+                                type="radio"
                                 id="filterOnMyLevel"
-                                checked={filterByMyLevel}
-                                onChange={(e) =>
-                                    setFilterByMyLevel(e.target.checked)
-                                }
+                                checked={filterByMyCharacters}
+                                onChange={() => setFilterByMyCharacters(true)}
                             />
                             Filter based on my current level
                         </label>
-                        <label htmlFor="showNotEligible">
+                        {!filterByMyCharacters && (
+                            <div className="filter-section">
+                                <Stack direction="column" gap="10px">
+                                    <span>Level range:</span>
+                                    <Stack>
+                                        <input
+                                            type="text"
+                                            placeholder="Min"
+                                            style={{ width: "100px" }}
+                                            value={minLevel}
+                                            onChange={(e) =>
+                                                setMinLevel(
+                                                    parseInt(e.target.value)
+                                                )
+                                            }
+                                        />
+                                        <input
+                                            type="text"
+                                            placeholder="Max"
+                                            style={{ width: "100px" }}
+                                            value={maxLevel}
+                                            onChange={(e) =>
+                                                setMaxLevel(
+                                                    parseInt(e.target.value)
+                                                )
+                                            }
+                                        />
+                                    </Stack>
+                                </Stack>
+                            </div>
+                        )}
+                        {filterByMyCharacters && (
+                            <div className="filter-section">
+                                <Stack direction="column" gap="10px">
+                                    {registeredCharacters &&
+                                        registeredCharacters
+                                            .sort((a, b) =>
+                                                (a.name || "").localeCompare(
+                                                    b.name || ""
+                                                )
+                                            )
+                                            .map((character: Character) => (
+                                                <label
+                                                    className="input-label"
+                                                    htmlFor={`character${character.id}`}
+                                                >
+                                                    <input
+                                                        type="checkbox"
+                                                        id={`character${character.id}`}
+                                                        checked={trackedCharacterIds.includes(
+                                                            character.id
+                                                        )}
+                                                        onChange={(e) =>
+                                                            setTrackedCharacterIds(
+                                                                e.target.checked
+                                                                    ? [
+                                                                          ...trackedCharacterIds,
+                                                                          character.id,
+                                                                      ]
+                                                                    : trackedCharacterIds.filter(
+                                                                          (
+                                                                              id
+                                                                          ) =>
+                                                                              id !==
+                                                                              character.id
+                                                                      )
+                                                            )
+                                                        }
+                                                    />
+                                                    {character.name} |{" "}
+                                                    {character.total_level} |{" "}
+                                                    {character.server_name}
+                                                </label>
+                                            ))}
+                                    <Link to="/registration" className="link">
+                                        Register more
+                                    </Link>
+                                </Stack>
+                            </div>
+                        )}
+                        <label
+                            className="input-label"
+                            htmlFor="showNotEligible"
+                        >
                             <input
                                 type="checkbox"
                                 id="showNotEligible"
@@ -109,6 +233,16 @@ const LfmToolbar = () => {
                             />
                             Show groups I'm not eligible for
                         </label>
+                        <Stack fullWidth justify="right">
+                            <Button
+                                onClick={() =>
+                                    setShowResetUserSettingsModal(true)
+                                }
+                                type="tertiary"
+                                text="Reset all"
+                                className="critical"
+                            />
+                        </Stack>
                     </Stack>
                 </ContentCluster>
                 <ContentCluster title="Display">
@@ -149,7 +283,10 @@ const LfmToolbar = () => {
                                 setPanelWidth(parseInt(e.target.value))
                             }
                         />
-                        <label htmlFor="showBoundingBoxes">
+                        <label
+                            className="input-label"
+                            htmlFor="showBoundingBoxes"
+                        >
                             <input
                                 type="checkbox"
                                 id="showBoundingBoxes"
@@ -160,7 +297,7 @@ const LfmToolbar = () => {
                             />
                             Show bounding boxes
                         </label>
-                        <label htmlFor="dynamicWidth">
+                        <label className="input-label" htmlFor="dynamicWidth">
                             <input
                                 type="checkbox"
                                 id="dynamicWidth"
@@ -171,7 +308,7 @@ const LfmToolbar = () => {
                             />
                             Dynamic width
                         </label>
-                        <label htmlFor="fullscreen">
+                        <label className="input-label" htmlFor="fullscreen">
                             <input
                                 type="checkbox"
                                 id="fullscreen"
@@ -182,16 +319,24 @@ const LfmToolbar = () => {
                             />
                             Fullscreen
                         </label>
-                        <Button
-                            onClick={resetAll}
-                            type="secondary"
-                            text="Reset all"
-                        />
+                        <Stack fullWidth justify="right">
+                            <Button
+                                onClick={() =>
+                                    setShowResetViewSettingsModal(true)
+                                }
+                                type="tertiary"
+                                text="Reset all"
+                                className="critical"
+                            />
+                        </Stack>
                     </Stack>
                 </ContentCluster>
                 <ContentCluster title="Tools">
                     <Stack direction="column" gap="10px">
-                        <label htmlFor="raidTimerIndicator">
+                        <label
+                            className="input-label"
+                            htmlFor="raidTimerIndicator"
+                        >
                             <input
                                 type="checkbox"
                                 id="raidTimerIndicator"
@@ -202,7 +347,7 @@ const LfmToolbar = () => {
                             />
                             Show raid timer indicator
                         </label>
-                        <label htmlFor="memberCount">
+                        <label className="input-label" htmlFor="memberCount">
                             <input
                                 type="checkbox"
                                 id="memberCount"
@@ -213,7 +358,7 @@ const LfmToolbar = () => {
                             />
                             Show member count
                         </label>
-                        <label htmlFor="questGuesses">
+                        <label className="input-label" htmlFor="questGuesses">
                             <input
                                 type="checkbox"
                                 id="questGuesses"
@@ -224,7 +369,7 @@ const LfmToolbar = () => {
                             />
                             Show quest guesses
                         </label>
-                        <label htmlFor="questTips">
+                        <label className="input-label" htmlFor="questTips">
                             <input
                                 type="checkbox"
                                 id="questTips"
@@ -235,7 +380,10 @@ const LfmToolbar = () => {
                             />
                             Show quest tips
                         </label>
-                        <label htmlFor="characterGuildNames">
+                        <label
+                            className="input-label"
+                            htmlFor="characterGuildNames"
+                        >
                             <input
                                 type="checkbox"
                                 id="characterGuildNames"
@@ -255,8 +403,8 @@ const LfmToolbar = () => {
             setMinLevel,
             maxLevel,
             setMaxLevel,
-            filterByMyLevel,
-            setFilterByMyLevel,
+            filterByMyCharacters,
+            setFilterByMyCharacters,
             showNotEligible,
             setShowNotEligible,
             fontSize,
@@ -279,17 +427,23 @@ const LfmToolbar = () => {
             setShowQuestTips,
             showCharacterGuildNames,
             setShowCharacterGuildNames,
-            resetAll,
+            trackedCharacterIds,
+            setTrackedCharacterIds,
+            registeredCharacters,
         ]
     )
 
     return (
         <>
-            {showSettingsModal && (
-                <Modal onClose={() => setShowSettingsModal(false)}>
-                    {settingModalContent}
-                </Modal>
-            )}
+            {showResetViewSettingsModal && resetViewSettingsModal}
+            {showResetUserSettingsModal && resetUserSettingsModal}
+            {showSettingsModal &&
+                !showResetViewSettingsModal &&
+                !showResetUserSettingsModal && (
+                    <Modal onClose={() => setShowSettingsModal(false)}>
+                        {settingModalContent}
+                    </Modal>
+                )}
             <div
                 className="lfm-toolbar-container"
                 style={{ width: panelWidth, maxWidth: "100%" }}
@@ -298,37 +452,53 @@ const LfmToolbar = () => {
                     to="/grouping"
                     className="lfm-toolbar-item server-name-link"
                 >
-                    <MenuSVG />
+                    <MenuSVG className="lfm-toolbar-item-icon" />
                     <span className="lfm-toolbar-item-text">
                         {serverNameSentenceCase}
                     </span>
                 </Link>
-                <div className="lfm-toolbar-item screenshot-button">
-                    <ScreenshotSVG />
+                <div className="lfm-toolbar-item screenshot-button hide-on-mobile">
+                    <ScreenshotSVG className="lfm-toolbar-item-icon" />
                     <span className="lfm-toolbar-item-text hide-on-mobile">
                         Screenshot
                     </span>
                 </div>
                 <div
-                    className="lfm-toolbar-item filter-button"
+                    className="lfm-toolbar-item settings-button"
                     onClick={() => setShowSettingsModal(true)}
                 >
-                    <FilterSVG />
+                    <SettingsSVG className="lfm-toolbar-item-icon" />
                     <span className="lfm-toolbar-item-text hide-on-mobile">
-                        Filter
+                        Settings
                     </span>
                 </div>
                 <div
                     className="lfm-toolbar-item fullscreen-button"
                     onClick={() => setIsFullScreen(!isFullScreen)}
                 >
-                    {isFullScreen ? <FullscreenExitSVG /> : <FullscreenSVG />}
+                    {isFullScreen ? (
+                        <FullscreenExitSVG className="lfm-toolbar-item-icon" />
+                    ) : (
+                        <FullscreenSVG className="lfm-toolbar-item-icon" />
+                    )}
                     <span className="lfm-toolbar-item-text hide-on-mobile">
                         Fullscreen
                     </span>
                 </div>
-                <div className="lfm-toolbar-item refresh-button">
-                    <RefreshSVG />
+                <div
+                    className={`lfm-toolbar-item refresh-button ${canManuallyReload ? "" : "disabled"}`}
+                    onClick={() => {
+                        if (canManuallyReload) {
+                            reloadRegisteredCharacters()
+                            reloadLfms()
+                            setCanManuallyReload(false)
+                            setTimeout(() => setCanManuallyReload(true), 5000)
+                        }
+                    }}
+                >
+                    <RefreshSVG
+                        className={`lfm-toolbar-item-icon ${canManuallyReload ? "" : "icon-disabled"}`}
+                    />
                 </div>
             </div>
         </>

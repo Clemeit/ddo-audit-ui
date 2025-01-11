@@ -4,6 +4,7 @@ import React, {
     useState,
     ReactNode,
     useEffect,
+    useCallback,
 } from "react"
 import {
     DEFAULT_BASE_FONT_SIZE,
@@ -13,14 +14,16 @@ import { useThemeContext } from "./ThemeContext.tsx"
 import { setValue, getValue } from "../utils/localStorage.ts"
 import { LfmSortType } from "../models/Lfm.ts"
 import { MAX_LEVEL, MIN_LEVEL } from "../constants/game.ts"
+import useGetRegisteredCharacters from "../hooks/useGetRegisteredCharacters.ts"
+import { Character } from "../models/Character.ts"
 
 interface LfmContextProps {
     minLevel: number
     setMinLevel: (level: number) => void
     maxLevel: number
     setMaxLevel: (level: number) => void
-    filterByMyLevel: boolean
-    setFilterByMyLevel: (filter: boolean) => void
+    filterByMyCharacters: boolean
+    setFilterByMyCharacters: (filter: boolean) => void
     showNotEligible: boolean
     setShowNotEligible: (show: boolean) => void
     fontSize: number
@@ -45,7 +48,12 @@ interface LfmContextProps {
     setShowQuestTips: (show: boolean) => void
     showCharacterGuildNames: boolean
     setShowCharacterGuildNames: (show: boolean) => void
-    resetAll: () => void
+    registeredCharacters: Character[] | null
+    reloadRegisteredCharacters: () => void
+    trackedCharacterIds: string[]
+    setTrackedCharacterIds: (ids: string[]) => void
+    resetViewSettings: () => void
+    resetUserSettings: () => void
 }
 
 const LfmContext = createContext<LfmContextProps | undefined>(undefined)
@@ -53,6 +61,9 @@ const LfmContext = createContext<LfmContextProps | undefined>(undefined)
 export const LfmProvider = ({ children }: { children: ReactNode }) => {
     const settingsStorageKey = "lfm-settings"
     const [isLoaded, setIsLoaded] = useState<boolean>(false)
+    const { registeredCharacters, reload: reloadRegisteredCharacters } =
+        useGetRegisteredCharacters()
+    const [trackedCharacterIds, setTrackedCharacterIds] = useState<string[]>([])
 
     // debug:
     const [showBoundingBoxes, setShowBoundingBoxes] = useState<boolean>(false)
@@ -63,7 +74,8 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
     // filter:
     const [minLevel, setMinLevel] = useState<number>(MIN_LEVEL)
     const [maxLevel, setMaxLevel] = useState<number>(MAX_LEVEL)
-    const [filterByMyLevel, setFilterByMyLevel] = useState<boolean>(false)
+    const [filterByMyCharacters, setFilterByMyCharacters] =
+        useState<boolean>(false)
     const [showNotEligible, setShowNotEligible] = useState<boolean>(true)
 
     // display:
@@ -87,37 +99,74 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
     const [showCharacterGuildNames, setShowCharacterGuildNames] =
         useState<boolean>(true)
 
-    const loadSettingsFromLocalStorage = () => {
-        const settings = getValue(settingsStorageKey)
-        if (settings) {
-            setMinLevel(settings.minLevel)
-            setMaxLevel(settings.maxLevel)
-            setFilterByMyLevel(settings.filterByMyLevel)
-            setShowNotEligible(settings.showNotEligible)
-            setFontSize(settings.fontSize)
-            setPanelWidth(settings.panelWidth)
-            setShowBoundingBoxes(settings.showBoundingBoxes)
-            setSortBy(settings.sortBy)
-            setIsDynamicWidth(settings.isDynamicWidth)
-            setShowRaidTimerIndicator(settings.showRaidTimerIndicator)
-            setShowMemberCount(settings.showMemberCount)
-            setShowQuestGuesses(settings.showQuestGuesses)
-            setShowQuestTips(settings.showQuestTips)
-            setShowCharacterGuildNames(settings.showCharacterGuildNames)
-        }
+    const resetUserSettings = () => {
+        setMinLevel(MIN_LEVEL)
+        setMaxLevel(MAX_LEVEL)
+        setFilterByMyCharacters(false)
+        setShowNotEligible(true)
+        setIsDynamicWidth(false)
+        setShowRaidTimerIndicator(true)
+        setShowMemberCount(true)
+        setShowQuestGuesses(true)
+        setShowQuestTips(true)
+        setShowCharacterGuildNames(false)
+        setTrackedCharacterIds([])
     }
 
-    useEffect(() => {
-        loadSettingsFromLocalStorage()
-        setIsLoaded(true)
-    }, [])
+    const resetViewSettings = useCallback(() => {
+        setSortBy({ type: "level", direction: "asc" })
+        setFontSize(DEFAULT_BASE_FONT_SIZE)
+        setPanelWidth(DEFAULT_LFM_PANEL_WIDTH)
+        setShowBoundingBoxes(false)
+        setIsDynamicWidth(false)
+        setIsFullScreen(false)
+    }, [setIsFullScreen])
+
+    const loadSettingsFromLocalStorage = useCallback(() => {
+        const settings = getValue(settingsStorageKey)
+        if (settings) {
+            try {
+                setMinLevel(settings.minLevel)
+                setMaxLevel(settings.maxLevel)
+                setFilterByMyCharacters(settings.filterByMyCharacters)
+                setShowNotEligible(settings.showNotEligible)
+                setFontSize(settings.fontSize)
+                setPanelWidth(settings.panelWidth)
+                setShowBoundingBoxes(settings.showBoundingBoxes)
+                setSortBy(settings.sortBy)
+                setIsDynamicWidth(settings.isDynamicWidth)
+                setShowRaidTimerIndicator(settings.showRaidTimerIndicator)
+                setShowMemberCount(settings.showMemberCount)
+                setShowQuestGuesses(settings.showQuestGuesses)
+                setShowQuestTips(settings.showQuestTips)
+                setShowCharacterGuildNames(settings.showCharacterGuildNames)
+                setTrackedCharacterIds(settings.trackedCharacterIds)
+            } catch (e) {
+                // TODO: maybe show a modal here to allow the user to reset their settings
+                console.error("Error loading settings from local storage", e)
+                resetUserSettings()
+                resetViewSettings()
+            }
+        }
+    }, [resetViewSettings])
 
     useEffect(() => {
+        // load from local storage
+        loadSettingsFromLocalStorage()
+        setIsLoaded(true)
+
+        // reload registered characters every minute
+        const interval = setInterval(reloadRegisteredCharacters, 60000)
+        return () => clearInterval(interval)
+    }, [reloadRegisteredCharacters, loadSettingsFromLocalStorage])
+
+    useEffect(() => {
+        // save to local storage
         if (!isLoaded) return
         setValue(settingsStorageKey, {
             minLevel,
             maxLevel,
-            filterByMyLevel,
+            filterByMyCharacters,
             showNotEligible,
             fontSize,
             panelWidth,
@@ -129,11 +178,12 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
             showQuestGuesses,
             showQuestTips,
             showCharacterGuildNames,
+            trackedCharacterIds,
         })
     }, [
         minLevel,
         maxLevel,
-        filterByMyLevel,
+        filterByMyCharacters,
         showNotEligible,
         isLoaded,
         fontSize,
@@ -146,16 +196,8 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
         showQuestGuesses,
         showQuestTips,
         showCharacterGuildNames,
+        trackedCharacterIds,
     ])
-
-    const resetAll = () => {
-        setFontSize(DEFAULT_BASE_FONT_SIZE)
-        setPanelWidth(DEFAULT_LFM_PANEL_WIDTH)
-        setShowBoundingBoxes(false)
-        setSortBy({ type: "level", direction: "asc" })
-        setIsDynamicWidth(false)
-        setIsFullScreen(false)
-    }
 
     useEffect(() => {
         if (!isDynamicWidth) {
@@ -170,8 +212,8 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
                 setMinLevel,
                 maxLevel,
                 setMaxLevel,
-                filterByMyLevel,
-                setFilterByMyLevel,
+                filterByMyCharacters,
+                setFilterByMyCharacters,
                 showNotEligible,
                 setShowNotEligible,
                 fontSize,
@@ -196,7 +238,12 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
                 setShowQuestTips,
                 showCharacterGuildNames,
                 setShowCharacterGuildNames,
-                resetAll,
+                registeredCharacters,
+                reloadRegisteredCharacters,
+                trackedCharacterIds,
+                setTrackedCharacterIds,
+                resetViewSettings,
+                resetUserSettings,
             }}
         >
             {children}

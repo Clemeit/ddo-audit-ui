@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import {
     getAccessTokens as getAccessTokensFromLocalStorage,
     getRegisteredCharactersMetadata as getRegisteredCharactersMetadataFromLocalStorage,
@@ -6,11 +6,16 @@ import {
     removeRegisteredCharacter as removeRegisteredCharacterFromLocalStorage,
     removeAccessToken as removeAccessTokenFromLocalStorage,
 } from "../utils/localStorage.ts"
-import { getCharacterById } from "../services/characterService.ts"
+import { getCharactersByIds } from "../services/characterService.ts"
 import { Character } from "../models/Character.ts"
 import { AccessToken } from "../models/Verification.ts"
+import { CACHED_CHARACTER_EXPIRY_TIME } from "../constants/client.ts"
 
-const useGetRegisteredCharacters = () => {
+interface Props {
+    enabled?: boolean
+}
+
+const useGetRegisteredCharacters = ({ enabled = true }: Props = {}) => {
     const [registeredCharacters, setRegisteredCharacters] = useState<
         Character[] | null
     >(null)
@@ -26,7 +31,7 @@ const useGetRegisteredCharacters = () => {
     const [isLoaded, setIsLoaded] = useState<boolean>(false)
     const [isError, setIsError] = useState<boolean>(false)
 
-    function reload() {
+    const reload = useCallback(() => {
         setIsLoaded(false)
         const registeredCharactersMetadata =
             getRegisteredCharactersMetadataFromLocalStorage()
@@ -44,14 +49,12 @@ const useGetRegisteredCharacters = () => {
         setVerifiedCharactersCached(verifiedCharactersCached)
 
         // for every ID, look up the character data and add it to the list
-        const promises = registeredCharactersMetadata.data.map(
-            (character: Character) => getCharacterById(character.id)
+        const characterIds = registeredCharactersMetadata.data.map(
+            (character: Character) => character.id
         )
-        Promise.all(promises)
-            .then((responses) => {
-                const characters = responses
-                    .map((response) => response.data.data)
-                    .filter((character) => character)
+        getCharactersByIds(characterIds)
+            .then((response) => {
+                const characters = response.data?.data
                 setRegisteredCharacters(characters)
                 setIsLoaded(true)
 
@@ -62,13 +65,13 @@ const useGetRegisteredCharacters = () => {
                 )
                 setVerifiedCharacters(verifiedCharacters)
 
-                // update cached data if it's older than an hour
+                // update cached data if it's older than CACHED_CHARACTER_EXPIRY_TIME
                 const lastUpdated = new Date(
                     registeredCharactersMetadata.updatedAt
                 )
                 if (
                     new Date().getTime() - lastUpdated.getTime() >
-                    1000 * 60 * 60
+                    CACHED_CHARACTER_EXPIRY_TIME
                 ) {
                     setRegisteredCharactersInLocalStorage(characters)
                 }
@@ -76,7 +79,7 @@ const useGetRegisteredCharacters = () => {
             .catch(() => {
                 setIsError(true)
             })
-    }
+    }, [])
 
     function unregisterCharacter(character: Character) {
         // revoke the access token for this character
@@ -93,8 +96,8 @@ const useGetRegisteredCharacters = () => {
     }
 
     useEffect(() => {
-        reload()
-    }, [])
+        if (enabled) reload()
+    }, [reload, enabled])
 
     return {
         registeredCharacters:

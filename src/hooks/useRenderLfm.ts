@@ -25,6 +25,7 @@ const useRenderLfm = ({ lfmSprite, context }: Props) => {
         showBoundingBoxes,
         fontSize,
         // showRaidTimerIndicator,
+        showMemberCount,
         showQuestGuesses,
         showQuestTips,
     } = useLfmContext()
@@ -151,7 +152,7 @@ const useRenderLfm = ({ lfmSprite, context }: Props) => {
                 leaderClassIconBoundingBox.centerY() -
                 leaderNameBoundingBox.height / 2
 
-            const showMemberCount = lfm.members.length > 0
+            const localShowMemberCount = lfm.members.length > 0
             const memberCountTextOptions = (abbreviated) =>
                 `(${lfm.members.length + 1}${abbreviated ? "" : " members"})`
             let memberCountText = ""
@@ -373,7 +374,7 @@ const useRenderLfm = ({ lfmSprite, context }: Props) => {
                 leaderNameBoundingBox.y + leaderNameBoundingBox.height / 2
             )
             // member count
-            if (showMemberCount) {
+            if (localShowMemberCount && showMemberCount) {
                 context.textAlign = "center"
                 context.fillStyle = LFM_COLORS.SECONDARY_TEXT
                 context.font = fonts.MEMBER_COUNT
@@ -584,6 +585,7 @@ const useRenderLfm = ({ lfmSprite, context }: Props) => {
             commonBoundingBoxes,
             fontSize,
             // showRaidTimerIndicator,
+            showMemberCount,
             showQuestGuesses,
             confineTextToBoundingBox,
             calculateQuestInfoYPositions,

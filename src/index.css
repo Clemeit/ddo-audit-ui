@@ -106,41 +106,6 @@ hr {
     gap: 10px;
 }
 
-/* mobile */
-@media (max-width: 768px) {
-    html {
-        font-size: 15px;
-    }
-
-    .hide-on-mobile {
-        display: none !important;
-    }
-
-    .full-width-mobile {
-        width: 100%;
-    }
-
-    ul {
-        padding-left: 20px;
-    }
-
-    .shrinkable-icon {
-        width: 20px;
-        height: 20px;
-    }
-}
-
-/* small mobile */
-@media (max-width: 300px) {
-    html {
-        font-size: 12px;
-    }
-
-    .hide-on-small-mobile {
-        display: none !important;
-    }
-}
-
 .orange-text {
     color: var(--orange1);
 }
@@ -149,6 +114,7 @@ input {
     color: var(--text-inverted);
     padding: 2px 5px;
     font-size: 1rem;
+    margin: 0px 5px 0px 0px;
 }
 
 input.large {
@@ -236,6 +202,10 @@ table tbody tr:last-of-type {
     fill: var(--gray1);
 }
 
+.icon-disabled {
+    fill: var(--gray5);
+}
+
 .text-red-desaturated {
     color: var(--text-red-desaturated);
 }
@@ -269,4 +239,48 @@ table tbody tr:last-of-type {
 .inverted-input {
     background-color: var(--bg);
     color: var(--text);
+}
+
+/* mobile */
+@media (max-width: 768px) {
+    html {
+        font-size: 15px;
+    }
+
+    .hide-on-mobile {
+        display: none !important;
+    }
+
+    .full-width-mobile {
+        width: 100%;
+    }
+
+    ul {
+        padding-left: 20px;
+    }
+
+    .shrinkable-icon {
+        width: 20px;
+        height: 20px;
+    }
+
+    input {
+        min-width: 18px;
+        min-height: 18px;
+    }
+
+    .input-label {
+        font-size: 1.2rem;
+    }
+}
+
+/* small mobile */
+@media (max-width: 300px) {
+    html {
+        font-size: 12px;
+    }
+
+    .hide-on-small-mobile {
+        display: none !important;
+    }
 }

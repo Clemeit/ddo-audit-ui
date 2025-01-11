@@ -10,6 +10,8 @@ import {
     MINIMUM_LFM_COUNT,
     SORT_HEADERS,
     MINIMUM_LFM_PANEL_WIDTH,
+    FONTS,
+    LFM_COLORS,
 } from "../../constants/lfmPanel.ts"
 import useRenderLfm from "../../hooks/useRenderLfm.ts"
 // @ts-ignore
@@ -26,12 +28,14 @@ interface GroupingCanvasProps {
     serverName?: string
     lfms?: Lfm[]
     raidView?: boolean
+    excludedLfmCount?: number
 }
 
-const GroupingCanvas = ({
+const LfmCanvas = ({
     serverName = "",
     lfms = [],
     raidView = false,
+    excludedLfmCount = 0,
 }: GroupingCanvasProps) => {
     const canvasRef = useRef<HTMLCanvasElement>(null)
     const [image, setImage] = useState<HTMLImageElement | null>(null)
@@ -51,8 +55,11 @@ const GroupingCanvas = ({
         () => SORT_HEADERS(commonBoundingBoxes),
         [commonBoundingBoxes]
     )
+    const fonts = useMemo(() => FONTS(fontSize), [fontSize])
 
+    // TODO: this is disgusting and shouldn't be used in prod
     const previousLfms = useRef<Lfm[]>([])
+    const previousServerName = useRef<string>("")
     const previousFontSize = useRef<number>(fontSize)
     const previousPanelWidth = useRef<number>(panelWidth)
     const previousSortBy = useRef(sortBy)
@@ -85,12 +92,16 @@ const GroupingCanvas = ({
             const x = event.clientX - rect.left
             const y = event.clientY - rect.top
 
+            const scalingFactor = panelWidth / rect.width
+            const scaledX = x * scalingFactor
+            const scaledY = y * scalingFactor
+
             sortHeaders.forEach(({ type, boundingBox }) => {
                 if (
-                    x >= boundingBox.x &&
-                    x <= boundingBox.x + boundingBox.width &&
-                    y >= boundingBox.y + LFM_PANEL_TOP_BORDER_HEIGHT &&
-                    y <=
+                    scaledX >= boundingBox.x &&
+                    scaledX <= boundingBox.x + boundingBox.width &&
+                    scaledY >= boundingBox.y + LFM_PANEL_TOP_BORDER_HEIGHT &&
+                    scaledY <=
                         boundingBox.y +
                             LFM_SPRITE_MAP.SORT_HEADER.CENTER.height +
                             LFM_PANEL_TOP_BORDER_HEIGHT +
@@ -135,7 +146,8 @@ const GroupingCanvas = ({
                         fontSize !== previousFontSize.current ||
                         panelWidth !== previousPanelWidth.current ||
                         lfms.length !== previousLfms.current.length ||
-                        sortBy !== previousSortBy.current
+                        sortBy !== previousSortBy.current ||
+                        serverName !== previousServerName.current
 
                     if (shouldForceRender) {
                         renderLfmPanelToCanvas(lfms.length)
@@ -160,8 +172,27 @@ const GroupingCanvas = ({
                         }
                         context.translate(0, LFM_HEIGHT)
                     })
+                    // show message if all lfms are excluded
+                    if (lfms.length === 0 && excludedLfmCount > 0) {
+                        context.fillStyle = LFM_COLORS.BLACK_BACKGROUND
+                        context.fillRect(
+                            0,
+                            LFM_PANEL_TOP_BORDER_HEIGHT,
+                            commonBoundingBoxes.lfmBoundingBox.width,
+                            LFM_HEIGHT
+                        )
+
+                        context.font = fonts.GROUPS_HIDDEN_MESSAGE
+                        context.fillStyle = LFM_COLORS.LEADER_NAME
+                        context.textAlign = "center"
+                        context.fillText(
+                            `${excludedLfmCount} groups have been hidden by your filter settings`,
+                            panelWidth / 2,
+                            LFM_HEIGHT
+                        )
+                    }
                     console.log(
-                        `Rendered lfms for ${lfms.length > 0 ? lfms[0].server_name : ""}`,
+                        `Rendered lfms for ${serverName}`,
                         totalLfmsRendered
                     )
 
@@ -172,18 +203,24 @@ const GroupingCanvas = ({
                     previousFontSize.current = fontSize
                     previousPanelWidth.current = panelWidth
                     previousSortBy.current = sortBy
+                    previousServerName.current = serverName
                 }
             }
         }
     }, [
         image,
         lfms,
+        excludedLfmCount,
         raidView,
         fontSize,
         panelWidth,
         sortHeaders,
         sortBy,
         isDynamicWidth,
+        commonBoundingBoxes,
+        fonts,
+        previousServerName,
+        serverName,
         renderLfmToCanvas,
         renderLfmPanelToCanvas,
     ])
@@ -211,4 +248,4 @@ const GroupingCanvas = ({
     )
 }
 
-export default GroupingCanvas
+export default LfmCanvas

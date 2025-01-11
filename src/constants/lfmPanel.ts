@@ -183,6 +183,104 @@ const LFM_SPRITE_MAP = {
             height: 20,
         },
     },
+    RACES: {
+        DRAGONBORN: {
+            x: 105,
+            y: 58,
+            width: 18,
+            height: 18,
+        },
+        DROW: {
+            x: 123,
+            y: 58,
+            width: 18,
+            height: 18,
+        },
+        DWARF: {
+            x: 141,
+            y: 58,
+            width: 18,
+            height: 18,
+        },
+        ELF: {
+            x: 159,
+            y: 58,
+            width: 18,
+            height: 18,
+        },
+        GNOME: {
+            x: 177,
+            y: 58,
+            width: 18,
+            height: 18,
+        },
+        HALFLING: {
+            x: 195,
+            y: 58,
+            width: 18,
+            height: 18,
+        },
+        HALF_ELF: {
+            x: 105,
+            y: 76,
+            width: 18,
+            height: 18,
+        },
+        HALF_ORC: {
+            x: 123,
+            y: 76,
+            width: 18,
+            height: 18,
+        },
+        HUMAN: {
+            x: 141,
+            y: 76,
+            width: 18,
+            height: 18,
+        },
+        TIEFLING: {
+            x: 159,
+            y: 76,
+            width: 18,
+            height: 18,
+        },
+        WARFORGED: {
+            x: 177,
+            y: 76,
+            width: 18,
+            height: 18,
+        },
+        AASIMAR: {
+            x: 195,
+            y: 76,
+            width: 18,
+            height: 18,
+        },
+        ELADRIN: {
+            x: 105,
+            y: 94,
+            width: 18,
+            height: 18,
+        },
+        SHIFTER: {
+            x: 123,
+            y: 94,
+            width: 18,
+            height: 18,
+        },
+        TABAXI: {
+            x: 141,
+            y: 94,
+            width: 18,
+            height: 18,
+        },
+        CHAOSMANCER: {
+            x: 159,
+            y: 94,
+            width: 18,
+            height: 18,
+        },
+    },
     SORT_HEADER: {
         LEFT: { x: 148, y: 0, width: 2, height: 21 },
         RIGHT: { x: 167, y: 0, width: 2, height: 21 },
@@ -226,6 +324,7 @@ const FONTS = (baseFontSize: number = DEFAULT_BASE_FONT_SIZE) => ({
     LEVEL_RANGE: `${baseFontSize + 2}px Arial`,
     MAIN_HEADER: "14px 'Trebuchet MS'",
     SORT_HEADER: "12px 'Trebuchet MS'",
+    GROUPS_HIDDEN_MESSAGE: `italic ${baseFontSize + 6}px 'Trebuchet MS`,
 })
 
 const LFM_COLORS = {

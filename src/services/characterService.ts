@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios from "axios"
 
 const API_URL = "https://api.hcnxsryjficudzazjxty.com/v1/characters"
 
@@ -10,6 +10,8 @@ function getCharacterById(id: string) {
     return axios.get(`${API_URL}/${id}`)
 }
 
-export{
-    getCharacterByNameAndServer,getCharacterById
+function getCharactersByIds(ids: string[]) {
+    return axios.get(`${API_URL}/ids/${ids.join(",")}`)
 }
+
+export { getCharacterByNameAndServer, getCharacterById, getCharactersByIds }

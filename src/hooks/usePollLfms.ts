@@ -80,6 +80,7 @@ const usePollLfms = (
     return {
         mustReload,
         lfmData,
+        reload: fetchLfms,
     }
 }
 
