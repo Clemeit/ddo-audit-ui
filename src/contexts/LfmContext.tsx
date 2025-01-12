@@ -127,7 +127,7 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
     }, [setIsFullScreen])
 
     const loadSettingsFromLocalStorage = useCallback(() => {
-        const settings = getValue(settingsStorageKey)
+        const settings = getValue<any>(settingsStorageKey)
         if (settings) {
             try {
                 setMinLevel(settings.minLevel)
@@ -168,7 +168,7 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
     useEffect(() => {
         // save to local storage
         if (!isLoaded) return
-        setValue(settingsStorageKey, {
+        setValue<any>(settingsStorageKey, {
             minLevel,
             maxLevel,
             filterByMyCharacters,

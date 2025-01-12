@@ -8,7 +8,7 @@ function getAccessTokens(): AccessToken[] {
         if (!storageValue) {
             return []
         }
-        const entry: LocalStorageEntry = JSON.parse(storageValue)
+        const entry: LocalStorageEntry<AccessToken[]> = JSON.parse(storageValue)
         return entry.data
     } catch (e) {
         console.error(e)
@@ -16,7 +16,7 @@ function getAccessTokens(): AccessToken[] {
     }
 }
 
-function getAccessTokensMetadata(): LocalStorageEntry {
+function getAccessTokensMetadata(): LocalStorageEntry<AccessToken[]> {
     try {
         const storageValue = localStorage.getItem("access-tokens")
         if (!storageValue) {
@@ -39,10 +39,10 @@ function getAccessTokensMetadata(): LocalStorageEntry {
 
 function setAccessTokens(tokens: AccessToken[]): void {
     try {
-        const previousEntry: LocalStorageEntry = JSON.parse(
+        const previousEntry: LocalStorageEntry<AccessToken[]> = JSON.parse(
             localStorage.getItem("access-tokens") || "{}"
         )
-        const entry: LocalStorageEntry = {
+        const entry: LocalStorageEntry<AccessToken[]> = {
             createdAt: previousEntry.createdAt || new Date().toISOString(),
             updatedAt: new Date().toISOString(),
             data: tokens,
@@ -55,12 +55,12 @@ function setAccessTokens(tokens: AccessToken[]): void {
 
 function addAccessToken(token: AccessToken): void {
     try {
-        const previousEntry: LocalStorageEntry = JSON.parse(
+        const previousEntry: LocalStorageEntry<AccessToken[]> = JSON.parse(
             localStorage.getItem("access-tokens") || "{}"
         )
         const tokens = getAccessTokens()
         tokens.push(token)
-        const entry: LocalStorageEntry = {
+        const entry: LocalStorageEntry<AccessToken[]> = {
             createdAt: previousEntry.createdAt || new Date().toISOString(),
             updatedAt: new Date().toISOString(),
             data: tokens,
@@ -73,7 +73,7 @@ function addAccessToken(token: AccessToken): void {
 
 function removeAccessToken(token: AccessToken): void {
     try {
-        const previousEntry: LocalStorageEntry = JSON.parse(
+        const previousEntry: LocalStorageEntry<AccessToken[]> = JSON.parse(
             localStorage.getItem("access-tokens") || "{}"
         )
         const tokens = getAccessTokens()
@@ -81,7 +81,7 @@ function removeAccessToken(token: AccessToken): void {
             (currentToken: AccessToken) =>
                 currentToken.character_id !== token.character_id
         )
-        const entry: LocalStorageEntry = {
+        const entry: LocalStorageEntry<AccessToken[]> = {
             createdAt: previousEntry.createdAt || new Date().toISOString(),
             updatedAt: new Date().toISOString(),
             data: newTokens,
@@ -98,7 +98,7 @@ function getRegisteredCharacters(): Character[] {
         if (!storageValue) {
             return []
         }
-        const entry: LocalStorageEntry = JSON.parse(storageValue)
+        const entry: LocalStorageEntry<Character[]> = JSON.parse(storageValue)
         return entry.data
     } catch (e) {
         console.error(e)
@@ -106,7 +106,7 @@ function getRegisteredCharacters(): Character[] {
     }
 }
 
-function getRegisteredCharactersMetadata(): LocalStorageEntry {
+function getRegisteredCharactersMetadata(): LocalStorageEntry<Character[]> {
     try {
         const storageValue = localStorage.getItem("registered-characters")
         if (!storageValue) {
@@ -129,10 +129,10 @@ function getRegisteredCharactersMetadata(): LocalStorageEntry {
 
 function setRegisteredCharacters(characters: Character[]): void {
     try {
-        const previousEntry: LocalStorageEntry = JSON.parse(
+        const previousEntry: LocalStorageEntry<Character[]> = JSON.parse(
             localStorage.getItem("registered-characters") || "{}"
         )
-        const entry: LocalStorageEntry = {
+        const entry: LocalStorageEntry<Character[]> = {
             createdAt: previousEntry.createdAt || new Date().toISOString(),
             updatedAt: new Date().toISOString(),
             data: characters,
@@ -145,12 +145,12 @@ function setRegisteredCharacters(characters: Character[]): void {
 
 function addRegisteredCharacter(character: Character): void {
     try {
-        const previousEntry: LocalStorageEntry = JSON.parse(
+        const previousEntry: LocalStorageEntry<Character[]> = JSON.parse(
             localStorage.getItem("registered-characters") || "{}"
         )
         const characters = getRegisteredCharacters()
         characters.push(character)
-        const entry: LocalStorageEntry = {
+        const entry: LocalStorageEntry<Character[]> = {
             createdAt: previousEntry.createdAt || new Date().toISOString(),
             updatedAt: new Date().toISOString(),
             data: characters,
@@ -163,7 +163,7 @@ function addRegisteredCharacter(character: Character): void {
 
 function removeRegisteredCharacter(character: Character): void {
     try {
-        const previousEntry: LocalStorageEntry = JSON.parse(
+        const previousEntry: LocalStorageEntry<Character[]> = JSON.parse(
             localStorage.getItem("registered-characters") || "{}"
         )
         const characters = getRegisteredCharacters()
@@ -171,7 +171,7 @@ function removeRegisteredCharacter(character: Character): void {
             (currentCharacter: Character) =>
                 currentCharacter.id !== character.id
         )
-        const entry: LocalStorageEntry = {
+        const entry: LocalStorageEntry<Character[]> = {
             createdAt: previousEntry.createdAt || new Date().toISOString(),
             updatedAt: new Date().toISOString(),
             data: newCharacters,
@@ -182,20 +182,20 @@ function removeRegisteredCharacter(character: Character): void {
     }
 }
 
-function getValue(key: string): any {
+function getValue<T>(key: string): T | null {
     try {
         const storageValue = localStorage.getItem(key)
         if (!storageValue) {
             return null
         }
-        return JSON.parse(storageValue)
+        return JSON.parse(storageValue) as T
     } catch (e) {
         console.error(e)
         return null
     }
 }
 
-function setValue(key: string, value: any): void {
+function setValue<T>(key: string, value: T): void {
     try {
         localStorage.setItem(key, JSON.stringify(value))
     } catch (e) {

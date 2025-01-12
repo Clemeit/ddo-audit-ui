@@ -1,7 +1,5 @@
 import React, { useState } from "react"
-// @ts-ignore
 import { ReactComponent as Expand } from "../../assets/svg/expand.svg"
-// @ts-ignore
 import { ReactComponent as Contract } from "../../assets/svg/contract.svg"
 import "./ExpandableContainer.css"
 

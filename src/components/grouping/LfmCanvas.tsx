@@ -14,7 +14,6 @@ import {
     LFM_COLORS,
 } from "../../constants/lfmPanel.ts"
 import useRenderLfm from "../../hooks/useRenderLfm.ts"
-// @ts-ignore
 import LfmSprite from "../../assets/png/lfm_sprite.png"
 import { useLfmContext } from "../../contexts/LfmContext.tsx"
 import useRenderLfmPanel from "../../hooks/useRenderLfmPanel.ts"

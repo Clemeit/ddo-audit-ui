@@ -5,7 +5,6 @@ import "./Page2.css"
 import Button from "../global/Button.tsx"
 import { MAX_LEVEL } from "../../constants/game.ts"
 import { SERVER_NAMES } from "../../constants/servers.ts"
-// @ts-ignore
 import { ReactComponent as Delete } from "../../assets/svg/delete.svg"
 
 enum Operator {

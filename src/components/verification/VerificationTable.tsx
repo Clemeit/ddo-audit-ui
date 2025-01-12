@@ -1,9 +1,7 @@
 import React from "react"
 import "./VerificationTable.css"
 import { Character } from "../../models/Character.ts"
-// @ts-ignore
 import { ReactComponent as Checkmark } from "../../assets/svg/checkmark.svg"
-// @ts-ignore
 import { ReactComponent as Delete } from "../../assets/svg/delete.svg"
 import Button from "../global/Button.tsx"
 import { AccessToken } from "../../models/Verification.ts"

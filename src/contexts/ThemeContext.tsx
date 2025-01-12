@@ -9,7 +9,11 @@ interface ThemeContextProps {
 
 const ThemeContext = createContext<ThemeContextProps | undefined>(undefined)
 
-export const ThemeProvider = ({ children }) => {
+interface Props {
+    children: React.ReactNode
+}
+
+export const ThemeProvider = ({ children }: Props) => {
     const [theme, setTheme] = useState(() => {
         return localStorage.getItem("theme") || "dark-theme"
     })

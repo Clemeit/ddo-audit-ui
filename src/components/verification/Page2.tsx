@@ -1,9 +1,7 @@
 import React, { useState, useEffect, useRef } from "react"
 import ContentCluster from "../global/ContentCluster.tsx"
 import { Character } from "../../models/Character.ts"
-// @ts-ignore
 import { ReactComponent as Checkmark } from "../../assets/svg/checkmark.svg"
-// @ts-ignore
 import { ReactComponent as X } from "../../assets/svg/x.svg"
 import { Verification, AccessToken } from "../../models/Verification.ts"
 import { getVerificationChallengeByCharacterId } from "../../services/verificationService.ts"

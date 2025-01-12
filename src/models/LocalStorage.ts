@@ -1,7 +1,7 @@
-interface LocalStorageEntry {
+interface LocalStorageEntry<T> {
     createdAt: string
     updatedAt: string
-    data: any
+    data: T
 }
 
 export { LocalStorageEntry }

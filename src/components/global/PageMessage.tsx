@@ -1,13 +1,8 @@
 import React from "react"
 import "./PageMessage.css"
-// @ts-ignore
-// @ts-ignore
 import { ReactComponent as InfoSVG } from "../../assets/svg/info.svg"
-// @ts-ignore
 import { ReactComponent as ErrorSVG } from "../../assets/svg/x.svg"
-// @ts-ignore
 import { ReactComponent as WarningSVG } from "../../assets/svg/warning.svg"
-// @ts-ignore
 import { ReactComponent as SuccessSVG } from "../../assets/svg/checkmark.svg"
 import Stack from "../global/Stack.tsx"
 

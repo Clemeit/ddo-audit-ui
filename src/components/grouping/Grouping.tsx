@@ -9,11 +9,8 @@ import { Lfm, LfmApiServerModel } from "../../models/Lfm.ts"
 import ServerNavigationCard from "../global/ServerNavigationCard.tsx"
 import NavigationCard from "../global/NavigationCard.tsx"
 import { Link } from "react-router-dom"
-// @ts-ignore
 import { ReactComponent as Checkmark } from "../../assets/svg/checkmark.svg"
-// @ts-ignore
 import { ReactComponent as X } from "../../assets/svg/x.svg"
-// @ts-ignore
 import { ReactComponent as Pending } from "../../assets/svg/pending.svg"
 import { LoadingState } from "../../models/Api.ts"
 import GroupingCanvas from "./LfmCanvas.tsx"

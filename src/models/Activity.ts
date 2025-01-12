@@ -1,3 +1,4 @@
+/* eslint-disable  @typescript-eslint/no-explicit-any */
 interface ActivityEvent {
     timestamp: string
     data: any

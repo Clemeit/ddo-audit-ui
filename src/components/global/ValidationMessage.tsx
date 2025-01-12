@@ -1,7 +1,5 @@
 import React from "react"
-// @ts-ignore
 import { ReactComponent as X } from "../../assets/svg/x.svg"
-// @ts-ignore
 import { ReactComponent as Warning } from "../../assets/svg/warning.svg"
 import "./ValidationMessage.css"
 

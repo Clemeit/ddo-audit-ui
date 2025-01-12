@@ -19,7 +19,7 @@ function convertMillisecondsToPrettyString(
     const hours = Math.floor(minutes / 60)
     const days = Math.floor(hours / 24)
 
-    let resultArray: string[] = []
+    const resultArray: string[] = []
     if (days > 0) resultArray.push(`${days} day${days > 1 ? "s" : ""}`)
     if (hours % 24 > 0)
         resultArray.push(`${hours % 24} hour${hours > 1 ? "s" : ""}`)

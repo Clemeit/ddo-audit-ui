@@ -2,7 +2,6 @@ import React from "react"
 import { useNavigate } from "react-router-dom"
 import "../../index.css"
 import "./Banner.css"
-// @ts-ignore
 import { ReactComponent as GiftSVG } from "../../assets/svg/gift.svg"
 import Button from "../global/Button.tsx"
 import useIsMobile from "../../hooks/useIsMobile.ts"

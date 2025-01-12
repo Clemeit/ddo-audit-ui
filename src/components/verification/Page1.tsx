@@ -3,11 +3,8 @@ import ContentCluster from "../global/ContentCluster.tsx"
 import Stack from "../global/Stack.tsx"
 import Button from "../global/Button.tsx"
 import { Character } from "../../models/Character.ts"
-// @ts-ignore
 import { ReactComponent as Checkmark } from "../../assets/svg/checkmark.svg"
-// @ts-ignore
 import { ReactComponent as X } from "../../assets/svg/x.svg"
-// @ts-ignore
 import { Verification, AccessToken } from "../../models/Verification.ts"
 import { getVerificationChallengeByCharacterId } from "../../services/verificationService.ts"
 import Spacer from "../global/Spacer.tsx"

@@ -2,17 +2,11 @@ import React, { useMemo } from "react"
 import "./LfmToolbar.css"
 import useGetCurrentServer from "../../hooks/useGetCurrentServer.ts"
 import { Link } from "react-router-dom"
-// @ts-ignore
 import { ReactComponent as MenuSVG } from "../../assets/svg/menu.svg"
-// @ts-ignore
 import { ReactComponent as ScreenshotSVG } from "../../assets/svg/capture.svg"
-// @ts-ignore
 import { ReactComponent as SettingsSVG } from "../../assets/svg/settings.svg"
-// @ts-ignore
 import { ReactComponent as FullscreenSVG } from "../../assets/svg/fullscreen.svg"
-// @ts-ignore
 import { ReactComponent as FullscreenExitSVG } from "../../assets/svg/fullscreen-exit.svg"
-// @ts-ignore
 import { ReactComponent as RefreshSVG } from "../../assets/svg/refresh.svg"
 import { useThemeContext } from "../../contexts/ThemeContext.tsx"
 import Modal from "../modal/Modal.tsx"
