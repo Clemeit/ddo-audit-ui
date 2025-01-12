@@ -702,6 +702,7 @@ const useRenderLfm = ({ lfmSprite, context }: Props) => {
             commonBoundingBoxes,
             fontSize,
             // showRaidTimerIndicator,
+            showLfmPostedTime,
             showMemberCount,
             showQuestGuesses,
             confineTextToBoundingBox,
