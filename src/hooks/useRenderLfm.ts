@@ -278,7 +278,7 @@ const useRenderLfm = ({ lfmSprite, context }: Props) => {
             const lfmPostedTimestamp = getLfmPostedTimestamp(lfm)
             const postedTimeDifference =
                 new Date().getTime() - lfmPostedTimestamp.getTime()
-            const postedTimeDifferenceString = (abbreviated: boolean) =>
+            const postedTimeDifferenceString =
                 postedTimeDifference < 60000
                     ? "Just now"
                     : `${convertMillisecondsToPrettyString(Math.round(postedTimeDifference), false, true, true)} ago`
@@ -286,12 +286,16 @@ const useRenderLfm = ({ lfmSprite, context }: Props) => {
             const adventureActiveMinutes = Math.round(
                 lfm.adventure_active_time / 60
             )
+            // TODO: the LFM doesn't re-render when the time since posted changes,
+            // so the timer note doesn't update unless something else about the LFM
+            // changes. Find a way to force a re-render when the time since posted changes.
+            // Maybe force re-render every minute?
             const showTimerNote =
                 isAdventureActive || (!!lfmPostedTimestamp && showLfmPostedTime)
             const timerNoteTextOptions = (abbreviated: boolean) =>
                 isAdventureActive
                     ? `${abbreviated ? "" : "Adventure "}Active: ${adventureActiveMinutes === 0 ? "<1 minute" : `${adventureActiveMinutes} minute${adventureActiveMinutes === 1 ? "" : "s"}`}`
-                    : `Posted: ${postedTimeDifferenceString(abbreviated)}`
+                    : `Posted: ${postedTimeDifferenceString}`
             const timerNoteTextWidth = getTextWidthAndHeight(
                 timerNoteTextOptions(false),
                 fonts.COMMENT,
@@ -403,10 +407,6 @@ const useRenderLfm = ({ lfmSprite, context }: Props) => {
                 : LFM_COLORS.INELIGIBLE_FILL
             context.fillRect(0, 0, lfmBoundingBox.width, LFM_HEIGHT)
 
-            if (!lfm.is_eligible) {
-                context.globalAlpha = 0.5
-            }
-
             // gradient fill
             if (lfm.is_eligible) {
                 const gradient = context.createLinearGradient(
@@ -455,6 +455,10 @@ const useRenderLfm = ({ lfmSprite, context }: Props) => {
                 levelPanelBoundingBox.width,
                 levelPanelBoundingBox.height
             )
+
+            if (!lfm.is_eligible) {
+                context.globalAlpha = 0.5
+            }
 
             // ===== MAIN PANEL =====
             // leader class icon
