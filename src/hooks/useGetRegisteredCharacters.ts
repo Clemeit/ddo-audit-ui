@@ -17,10 +17,10 @@ interface Props {
 
 const useGetRegisteredCharacters = ({ enabled = true }: Props = {}) => {
     const [registeredCharacters, setRegisteredCharacters] = useState<
-        Character[] | null
-    >(null)
+        Character[]
+    >([])
     const [registeredCharactersCached, setRegisteredCharactersCached] =
-        useState<Character[] | null>(null)
+        useState<Character[]>([])
     const [accessTokens, setAccessTokens] = useState<AccessToken[]>([])
     const [verifiedCharacters, setVerifiedCharacters] = useState<Character[]>(
         []
@@ -35,6 +35,14 @@ const useGetRegisteredCharacters = ({ enabled = true }: Props = {}) => {
         setIsLoaded(false)
         const registeredCharactersMetadata =
             getRegisteredCharactersMetadataFromLocalStorage()
+        if (
+            !registeredCharactersMetadata ||
+            registeredCharactersMetadata.data?.length === 0
+        ) {
+            setRegisteredCharacters([])
+            setIsLoaded(true)
+            return
+        }
         const accessTokens = getAccessTokensFromLocalStorage()
 
         setRegisteredCharactersCached(registeredCharactersMetadata.data)

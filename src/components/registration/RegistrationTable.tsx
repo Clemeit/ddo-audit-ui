@@ -1,7 +1,6 @@
 import React from "react"
-import PropTypes from "prop-types"
 import "./RegistrationTable.css"
-import { Character, CharacterClass } from "../../models/Character.ts"
+import { Character } from "../../models/Character.ts"
 // @ts-ignore
 import { ReactComponent as Delete } from "../../assets/svg/delete.svg"
 // @ts-ignore
@@ -12,19 +11,21 @@ import { AccessToken } from "../../models/Verification.ts"
 import Stack from "../global/Stack.tsx"
 import { mapClassesToString } from "../../utils/stringUtils.ts"
 
-const CharacterTable = ({
-    characters,
-    accessTokens,
-    noCharactersMessage,
-    minimal,
-    unregisterCharacter,
-}: {
+interface Props {
     characters: Character[]
-    accessTokens: AccessToken[]
-    noCharactersMessage: string
-    minimal: boolean
-    unregisterCharacter: (character: Character) => void
-}) => {
+    accessTokens?: AccessToken[]
+    noCharactersMessage?: string
+    minimal?: boolean
+    unregisterCharacter?: (character: Character) => void
+}
+
+const RegistrationTable = ({
+    characters = [],
+    accessTokens = [],
+    noCharactersMessage = "No characters found",
+    minimal = false,
+    unregisterCharacter = (character: Character) => {},
+}: Props) => {
     const navigate = useNavigate()
 
     const characterRow = (character: Character) => {
@@ -48,15 +49,15 @@ const CharacterTable = ({
             <td className="action-cell">
                 <Stack gap="5px" justify="flex-end">
                     <Button
-                        text="Verify"
                         type="secondary"
                         className="verify-button"
                         small
                         onClick={() => {
-                            // TODO: Navigate to verification page for this character
                             navigate(`/verification?id=${character.id}`)
                         }}
-                    />
+                    >
+                        Verify
+                    </Button>
                     <Delete
                         className="clickable-icon"
                         onClick={() => {
@@ -149,20 +150,4 @@ const CharacterTable = ({
     )
 }
 
-CharacterTable.propTypes = {
-    characters: PropTypes.array,
-    accessTokens: PropTypes.array,
-    noCharactersMessage: PropTypes.string,
-    minimal: PropTypes.bool,
-    unregisterCharacter: PropTypes.func,
-}
-
-CharacterTable.defaultProps = {
-    characters: [],
-    accessTokens: [],
-    noCharactersMessage: "No characters found",
-    minimal: false,
-    unregisterCharacter: () => {},
-}
-
-export default CharacterTable
+export default RegistrationTable

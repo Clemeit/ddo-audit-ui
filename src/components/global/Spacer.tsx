@@ -1,13 +1,12 @@
 import React from "react"
-import PropTypes from "prop-types"
 
-const Spacer = ({ size, className = "" }) => {
-    return <div className={className} style={{ width: size, height: size }} />
+interface Props {
+    size: string
+    className?: string
 }
 
-Spacer.propTypes = {
-    size: PropTypes.string,
-    className: PropTypes.string,
+const Spacer = ({ size, className = "" }: Props) => {
+    return <div className={className} style={{ width: size, height: size }} />
 }
 
 export default Spacer

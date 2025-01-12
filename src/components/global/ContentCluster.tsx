@@ -1,6 +1,15 @@
 import React from "react"
-import PropTypes from "prop-types"
 import "./ContentCluster.css"
+
+interface Props {
+    title?: string
+    subtitle?: string
+    link?: string
+    showLink?: boolean
+    children?: React.ReactNode
+    className?: string
+    hideHeaderOnMobile?: boolean
+}
 
 const ContentCluster = ({
     title,
@@ -8,9 +17,9 @@ const ContentCluster = ({
     link,
     showLink,
     children,
-    className,
-    hideHeaderOnMobile,
-}) => {
+    className = "",
+    hideHeaderOnMobile = false,
+}: Props) => {
     return (
         <div className={`content-cluster ${className}`}>
             {title && (
@@ -19,29 +28,9 @@ const ContentCluster = ({
                 </h2>
             )}
             {subtitle && <p className="subtitle">{subtitle}</p>}
-            <div className="content">{children}</div>
+            {children && <div className="content">{children}</div>}
         </div>
     )
-}
-
-ContentCluster.propTypes = {
-    title: PropTypes.string,
-    subtitle: PropTypes.string,
-    link: PropTypes.string,
-    showLink: PropTypes.bool,
-    children: PropTypes.node,
-    className: PropTypes.string,
-    hideHeaderOnMobile: PropTypes.bool,
-}
-
-ContentCluster.defaultProps = {
-    title: "",
-    subtitle: "",
-    link: "#",
-    showLink: true,
-    children: null,
-    className: "",
-    hideHeaderOnMobile: false,
 }
 
 export default ContentCluster

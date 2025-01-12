@@ -16,8 +16,8 @@ const YesNoModal = ({ title, text, onYes, onNo }: Props) => {
         <ContentCluster title={title}>
             <p>{text}</p>
             <Stack direction="row" gap="10px">
-                <Button text="Yes" onClick={onYes} />
-                <Button text="No" onClick={onNo} />
+                <Button onClick={onYes}>Yes</Button>
+                <Button onClick={onNo}>No</Button>
             </Stack>
         </ContentCluster>
     )

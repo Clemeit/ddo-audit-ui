@@ -15,7 +15,11 @@ const Registration = () => {
     })
 
     return (
-        <Page className="registration" title="DDO Character Registration">
+        <Page
+            title="DDO Character Registration"
+            description="Register your characters to automatically filter LFMs and see your raid timers."
+            className="registration"
+        >
             {currentPage === 1 && <Page1 setPage={setPage} />}
             {currentPage === 2 && <Page2 setPage={setPage} />}
             {currentPage === 1 && (

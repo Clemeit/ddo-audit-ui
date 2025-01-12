@@ -16,11 +16,9 @@ const Page1 = ({ setPage }: { setPage: Function }) => {
                 <Spacer size="20px" />
                 <Stack gap="10px" fullWidth justify="space-between">
                     <div />
-                    <Button
-                        text="New Rule"
-                        type="primary"
-                        onClick={() => setPage(2)}
-                    />
+                    <Button type="primary" onClick={() => setPage(2)}>
+                        New Rule
+                    </Button>
                 </Stack>
             </ContentCluster>
         </>

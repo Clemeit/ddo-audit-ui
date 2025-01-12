@@ -81,7 +81,7 @@ const useGetCharacterActivity = ({
     }, [characterId, accessToken, activityType, areaName])
 
     return {
-        data: activity.data,
+        data: activity.data || [],
         loadingState: activity.loadingState,
         error: activity.error,
         reload,

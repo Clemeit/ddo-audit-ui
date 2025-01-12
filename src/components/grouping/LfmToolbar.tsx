@@ -235,15 +235,16 @@ const LfmToolbar = ({ reloadLfms }: Props) => {
                             />
                             Show groups I'm not eligible for
                         </label>
-                        <Stack fullWidth justify="right">
+                        <Stack fullWidth justify="flex-end">
                             <Button
                                 onClick={() =>
                                     setShowResetUserSettingsModal(true)
                                 }
                                 type="tertiary"
-                                text="Reset all"
                                 className="critical"
-                            />
+                            >
+                                Reset all
+                            </Button>
                         </Stack>
                     </Stack>
                 </ContentCluster>
@@ -321,15 +322,16 @@ const LfmToolbar = ({ reloadLfms }: Props) => {
                             />
                             Fullscreen
                         </label>
-                        <Stack fullWidth justify="right">
+                        <Stack fullWidth justify="flex-end">
                             <Button
                                 onClick={() =>
                                     setShowResetViewSettingsModal(true)
                                 }
                                 type="tertiary"
-                                text="Reset all"
                                 className="critical"
-                            />
+                            >
+                                Reset all
+                            </Button>
                         </Stack>
                     </Stack>
                 </ContentCluster>

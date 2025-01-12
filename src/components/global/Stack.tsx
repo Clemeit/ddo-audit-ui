@@ -1,14 +1,29 @@
 import React from "react"
-import PropTypes from "prop-types"
 
-const Badge = ({
-    direction,
-    gap,
+interface Props {
+    direction?: React.CSSProperties["flexDirection"]
+    gap?: string
+    children?: React.ReactNode
+    fullWidth?: boolean
+    justify?:
+        | "flex-start"
+        | "flex-end"
+        | "center"
+        | "space-between"
+        | "space-around"
+        | "space-evenly"
+    align?: "flex-start" | "flex-end" | "center" | "baseline" | "stretch"
+    className?: string
+}
+
+const Badge: React.FC<Props> = ({
+    direction = "row",
+    gap = "0px",
     children,
-    fullWidth,
-    justify,
-    align,
-    className,
+    fullWidth = false,
+    justify = "flex-start",
+    align = "flex-start",
+    className = "",
 }) => {
     return (
         <div
@@ -25,39 +40,6 @@ const Badge = ({
             {children}
         </div>
     )
-}
-
-Badge.propTypes = {
-    direction: PropTypes.oneOf(["row", "column"]),
-    gap: PropTypes.string,
-    children: PropTypes.node,
-    fullWidth: PropTypes.bool,
-    justify: PropTypes.oneOf([
-        "flex-start",
-        "flex-end",
-        "center",
-        "space-between",
-        "space-around",
-        "space-evenly",
-    ]),
-    align: PropTypes.oneOf([
-        "flex-start",
-        "flex-end",
-        "center",
-        "baseline",
-        "stretch",
-    ]),
-    className: PropTypes.string,
-}
-
-Badge.defaultProps = {
-    direction: "row",
-    gap: "0px",
-    children: null,
-    fullWidth: false,
-    justify: "flex-start",
-    align: "flex-start",
-    className: "",
 }
 
 export default Badge

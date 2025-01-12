@@ -6,18 +6,12 @@ import Button from "../global/Button.tsx"
 import "./Registration.css"
 import { Character } from "../../models/Character.ts"
 import ValidationMessage from "../global/ValidationMessage.tsx"
-import {
-    getCharacterByNameAndServer,
-    getCharacterById,
-} from "../../services/characterService.ts"
+import { getCharacterByNameAndServer } from "../../services/characterService.ts"
 import { HttpStatusCode } from "axios"
 import { SERVER_NAMES } from "../../constants/servers.ts"
 import Spacer from "../global/Spacer.tsx"
 import useIsMobile from "../../hooks/useIsMobile.ts"
-import {
-    getRegisteredCharacters,
-    addRegisteredCharacter,
-} from "../../utils/localStorage.ts"
+import { addRegisteredCharacter } from "../../utils/localStorage.ts"
 import useGetRegisteredCharacters from "../../hooks/useGetRegisteredCharacters.ts"
 
 const Page2 = ({ setPage }: { setPage: Function }) => {
@@ -163,12 +157,13 @@ const Page2 = ({ setPage }: { setPage: Function }) => {
             </div>
             <div className="registration-form-footer">
                 <Button
-                    text="Add"
                     type="primary"
                     fullWidth
                     onClick={registerCharacter}
                     disabled={isFetching}
-                />
+                >
+                    Add
+                </Button>
             </div>
         </form>
     )
@@ -177,8 +172,8 @@ const Page2 = ({ setPage }: { setPage: Function }) => {
         <div className="registered-list hide-on-mobile">
             <p>Registered characters:</p>
             <RegistrationTable
-                minimal
                 characters={registeredCharacters}
+                minimal
                 noCharactersMessage="No recent characters"
             />
         </div>
@@ -204,11 +199,9 @@ const Page2 = ({ setPage }: { setPage: Function }) => {
                 </div>
                 <Spacer size="30px" />
                 <Stack gap="10px" fullWidth justify="space-between">
-                    <Button
-                        text="Back"
-                        type="secondary"
-                        onClick={() => setPage(1)}
-                    />
+                    <Button type="secondary" onClick={() => setPage(1)}>
+                        Back
+                    </Button>
                 </Stack>
             </ContentCluster>
         </>

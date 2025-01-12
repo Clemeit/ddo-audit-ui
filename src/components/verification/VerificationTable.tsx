@@ -1,5 +1,4 @@
 import React from "react"
-import PropTypes from "prop-types"
 import "./VerificationTable.css"
 import { Character } from "../../models/Character.ts"
 // @ts-ignore
@@ -9,19 +8,21 @@ import { ReactComponent as Delete } from "../../assets/svg/delete.svg"
 import Button from "../global/Button.tsx"
 import { AccessToken } from "../../models/Verification.ts"
 
-const VerificationTable = ({
-    characters,
-    accessTokens,
-    noCharactersMessage,
-    selectCharacter,
-    removeCharacter,
-}: {
+interface Props {
     characters: Character[]
     accessTokens: AccessToken[]
     noCharactersMessage: string
     selectCharacter: Function
     removeCharacter: Function
-}) => {
+}
+
+const VerificationTable = ({
+    characters = [],
+    accessTokens = [],
+    noCharactersMessage = "No characters found",
+    selectCharacter = () => {},
+    removeCharacter = () => {},
+}: Props) => {
     const characterRow = (character: Character) => {
         return (
             <tr key={character.id}>
@@ -46,12 +47,13 @@ const VerificationTable = ({
                         </div>
                     ) : (
                         <Button
-                            text="Verify"
                             type="secondary"
                             onClick={() => {
                                 selectCharacter(character)
                             }}
-                        />
+                        >
+                            Verify
+                        </Button>
                     )}
                 </td>
             </tr>
@@ -83,22 +85,6 @@ const VerificationTable = ({
             </tbody>
         </table>
     )
-}
-
-VerificationTable.propTypes = {
-    characters: PropTypes.array,
-    accessTokens: PropTypes.array,
-    noCharactersMessage: PropTypes.string,
-    selectCharacter: PropTypes.func,
-    removeCharacter: PropTypes.func,
-}
-
-VerificationTable.defaultProps = {
-    characters: [],
-    accessTokens: [],
-    noCharactersMessage: "No characters found",
-    selectCharacter: () => {},
-    removeCharacter: () => {},
 }
 
 export default VerificationTable

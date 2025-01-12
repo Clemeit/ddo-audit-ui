@@ -182,10 +182,11 @@ const Page1 = ({
                 <Spacer size="10px" />
                 <Stack gap="10px" fullWidth justify="space-between">
                     <Button
-                        text="Back"
                         type="secondary"
                         onClick={() => navigate("/registration")}
-                    />
+                    >
+                        Back
+                    </Button>
                 </Stack>
             </ContentCluster>
         </>

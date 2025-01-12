@@ -211,11 +211,12 @@ const Activity = () => {
                         Failed to load character data. Please try again later.
                     </p>
                     <Button
-                        text="Reload"
                         type="secondary"
                         onClick={reloadCharacters}
                         disabled={!isLoaded}
-                    />
+                    >
+                        Reload
+                    </Button>
                     <Spacer size="10px" />
                 </div>
             )
@@ -254,7 +255,6 @@ const Activity = () => {
                                 ))}
                             </select>
                             <Button
-                                text="Reload"
                                 type="secondary"
                                 small
                                 onClick={() => {
@@ -262,7 +262,9 @@ const Activity = () => {
                                     reloadStatusActivityData()
                                     reloadLevelActivityData()
                                 }}
-                            />
+                            >
+                                Reload
+                            </Button>
                         </Stack>
                     </Stack>
                     <p className="secondary-text">

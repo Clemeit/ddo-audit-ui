@@ -1,8 +1,15 @@
 import React from "react"
-import PropTypes from "prop-types"
+// @ts-ignore
 import { ReactComponent as X } from "../../assets/svg/x.svg"
+// @ts-ignore
 import { ReactComponent as Warning } from "../../assets/svg/warning.svg"
 import "./ValidationMessage.css"
+
+interface Props {
+    type?: "error" | "warning" | "info" | "success"
+    message: string
+    visible: boolean
+}
 
 const typeToColorMap = {
     error: "red",
@@ -11,7 +18,11 @@ const typeToColorMap = {
     success: "green",
 }
 
-const ValidationMessage = ({ type, message, visible }) => {
+const ValidationMessage = ({
+    type = "error",
+    message = "Error",
+    visible = false,
+}: Props) => {
     if (!visible) return null
 
     return (
@@ -26,18 +37,6 @@ const ValidationMessage = ({ type, message, visible }) => {
             <div style={{ color: "inherit" }}>{message}</div>
         </div>
     )
-}
-
-ValidationMessage.propTypes = {
-    type: PropTypes.oneOf(["error", "warning", "info", "success"]),
-    message: PropTypes.string,
-    visible: PropTypes.bool,
-}
-
-ValidationMessage.defaultProps = {
-    type: "error",
-    message: "Error",
-    visible: false,
 }
 
 export default ValidationMessage

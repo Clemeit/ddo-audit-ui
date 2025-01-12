@@ -5,8 +5,8 @@ import "./Page2.css"
 import Button from "../global/Button.tsx"
 import { MAX_LEVEL } from "../../constants/game.ts"
 import { SERVER_NAMES } from "../../constants/servers.ts"
+// @ts-ignore
 import { ReactComponent as Delete } from "../../assets/svg/delete.svg"
-import Spacer from "../global/Spacer.tsx"
 
 enum Operator {
     EQUALS = "is",
@@ -312,7 +312,6 @@ const Page2 = ({ setPage }: { setPage: Function }) => {
                             {getValueField(condition, index)}
                             {index !== 0 || conditions.length > 1 ? (
                                 <Button
-                                    text=""
                                     icon={<Delete />}
                                     type="tertiary"
                                     small
@@ -331,7 +330,6 @@ const Page2 = ({ setPage }: { setPage: Function }) => {
                 <li>
                     <Stack>
                         <Button
-                            text="Add Condition"
                             type="secondary"
                             small
                             onClick={() =>
@@ -344,19 +342,26 @@ const Page2 = ({ setPage }: { setPage: Function }) => {
                                     },
                                 ])
                             }
-                        />
+                        >
+                            Add Condition
+                        </Button>
                     </Stack>
                 </li>
             </ol>
             <p className="secondary-text">Rules are not case-sensitive.</p>
 
             <Stack gap="10px" fullWidth>
+                <Button type="secondary" onClick={() => setPage(1)}>
+                    Cancel
+                </Button>
                 <Button
-                    text="Cancel"
-                    type="secondary"
-                    onClick={() => setPage(1)}
-                />
-                <Button text="Save Rule" type="primary" />
+                    type="primary"
+                    onClick={() => {
+                        // TODO
+                    }}
+                >
+                    Save Rule
+                </Button>
             </Stack>
         </ContentCluster>
     )

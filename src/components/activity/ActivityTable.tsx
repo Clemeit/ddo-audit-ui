@@ -1,5 +1,4 @@
-import React, { act } from "react"
-import PropTypes from "prop-types"
+import React from "react"
 import { ActivityEvent, CharacterActivityType } from "../../models/Activity.ts"
 import { convertMillisecondsToPrettyString } from "../../utils/stringUtils.ts"
 import "./ActivityTable.css"
@@ -7,12 +6,19 @@ import { mapClassesToString } from "../../utils/stringUtils.ts"
 import { LoadingState } from "../../models/Api.ts"
 import { RANSACK_HOURS } from "../../constants/game.ts"
 
+interface Props {
+    characterActivity: ActivityEvent[]
+    activityType: CharacterActivityType
+    loadingState: LoadingState
+    filter?: string
+}
+
 const ActivityTable = ({
     characterActivity,
     activityType,
     loadingState,
     filter = "",
-}) => {
+}: Props) => {
     function renderTableHead() {
         if (activityType === CharacterActivityType.location) {
             return (
@@ -294,13 +300,6 @@ const ActivityTable = ({
             </div>
         </>
     )
-}
-
-ActivityTable.propTypes = {
-    characterActivity: PropTypes.array,
-    activityType: PropTypes.oneOf(Object.values(CharacterActivityType))
-        .isRequired,
-    loadingState: PropTypes.oneOf(Object.values(LoadingState)).isRequired,
 }
 
 export default ActivityTable

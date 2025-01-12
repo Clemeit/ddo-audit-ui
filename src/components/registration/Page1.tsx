@@ -1,16 +1,10 @@
-import React, { useEffect, useState } from "react"
+import React from "react"
 import ContentCluster from "../global/ContentCluster.tsx"
 import RegistrationTable from "./RegistrationTable.tsx"
 import Stack from "../global/Stack.tsx"
 import Button from "../global/Button.tsx"
 import "./Registration.css"
-import { Character } from "../../models/Character.ts"
 import Spacer from "../global/Spacer.tsx"
-import {
-    getAccessTokens,
-    removeRegisteredCharacter,
-    removeAccessToken,
-} from "../../utils/localStorage.ts"
 import useGetRegisteredCharacters from "../../hooks/useGetRegisteredCharacters.ts"
 import ValidationMessage from "../global/ValidationMessage.tsx"
 
@@ -44,11 +38,9 @@ const Page1 = ({ setPage }: { setPage: Function }) => {
                 <Spacer size="20px" />
                 <Stack gap="10px" fullWidth justify="space-between">
                     <div />
-                    <Button
-                        text="Add a character"
-                        type="primary"
-                        onClick={() => setPage(2)}
-                    />
+                    <Button type="primary" onClick={() => setPage(2)}>
+                        Add a character
+                    </Button>
                 </Stack>
             </ContentCluster>
         </>

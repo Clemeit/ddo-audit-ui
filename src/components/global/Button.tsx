@@ -1,18 +1,29 @@
 import React from "react"
-import PropTypes from "prop-types"
 import "./Button.css"
 
+interface Props {
+    children?: React.ReactNode
+    icon?: React.ReactElement | null
+    onClick: () => void
+    disabled?: boolean
+    className?: string
+    type?: "primary" | "secondary" | "tertiary" | "donate" | "secondary donate"
+    style?: React.CSSProperties
+    fullWidth?: boolean
+    small?: boolean
+}
+
 const Button = ({
-    text,
-    icon,
+    children = null,
+    icon = null,
     onClick,
-    disabled,
-    className,
-    type,
+    disabled = false,
+    className = "",
+    type = "primary",
     style,
-    fullWidth,
-    small,
-}) => {
+    fullWidth = false,
+    small = false,
+}: Props) => {
     return (
         <button
             onClick={() => !disabled && onClick()}
@@ -21,32 +32,9 @@ const Button = ({
             style={style}
         >
             {icon && <span className="icon">{icon}</span>}
-            <span>{text}</span>
+            <span>{children}</span>
         </button>
     )
-}
-
-Button.propTypes = {
-    text: PropTypes.string,
-    icon: PropTypes.element,
-    onClick: PropTypes.func,
-    disabled: PropTypes.bool,
-    className: PropTypes.string,
-    type: PropTypes.oneOf(["primary", "secondary", "tertiary", "donate"]),
-    style: PropTypes.object,
-    fullWidth: PropTypes.bool,
-    small: PropTypes.bool,
-}
-
-Button.defaultProps = {
-    text: "Button",
-    icon: null,
-    onClick: () => {},
-    disabled: false,
-    className: "",
-    type: "primary",
-    fullWidth: false,
-    small: false,
 }
 
 export default Button

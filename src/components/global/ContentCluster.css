@@ -15,10 +15,6 @@
     color: var(--secondary-text);
 }
 
-.content-cluster .content > p {
-    /* text-align: justify; */
-}
-
 @media (max-width: 768px) {
     .content-cluster .content {
         display: flex;

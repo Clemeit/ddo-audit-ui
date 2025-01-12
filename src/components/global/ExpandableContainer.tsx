@@ -1,12 +1,21 @@
 import React, { useState } from "react"
-import PropTypes from "prop-types"
 // @ts-ignore
 import { ReactComponent as Expand } from "../../assets/svg/expand.svg"
 // @ts-ignore
 import { ReactComponent as Contract } from "../../assets/svg/contract.svg"
 import "./ExpandableContainer.css"
 
-const ExpandableContainer = ({ title, children, defaultState }) => {
+interface Props {
+    title?: string
+    children?: React.ReactNode
+    defaultState?: boolean
+}
+
+const ExpandableContainer = ({
+    title = "Expandable Container",
+    children,
+    defaultState = false,
+}: Props) => {
     const [isOpen, setIsOpen] = useState(defaultState)
 
     return (
@@ -29,18 +38,6 @@ const ExpandableContainer = ({ title, children, defaultState }) => {
             )}
         </div>
     )
-}
-
-ExpandableContainer.propTypes = {
-    title: PropTypes.string,
-    children: PropTypes.element,
-    defaultState: PropTypes.bool,
-}
-
-ExpandableContainer.defaultProps = {
-    title: "Expandable Container",
-    children: null,
-    defaultState: false,
 }
 
 export default ExpandableContainer

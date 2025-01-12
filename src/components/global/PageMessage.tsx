@@ -1,13 +1,27 @@
 import React from "react"
 import "./PageMessage.css"
-import PropTypes from "prop-types"
+// @ts-ignore
+// @ts-ignore
 import { ReactComponent as InfoSVG } from "../../assets/svg/info.svg"
+// @ts-ignore
 import { ReactComponent as ErrorSVG } from "../../assets/svg/x.svg"
+// @ts-ignore
 import { ReactComponent as WarningSVG } from "../../assets/svg/warning.svg"
+// @ts-ignore
 import { ReactComponent as SuccessSVG } from "../../assets/svg/checkmark.svg"
 import Stack from "../global/Stack.tsx"
 
-const PageMessage = ({ type, title, message }) => {
+interface Props {
+    type?: "error" | "warning" | "info" | "success"
+    title?: string
+    message?: string
+}
+
+const PageMessage = ({
+    type = "info",
+    title = "Title",
+    message = "Message",
+}: Props) => {
     return (
         <div
             className={`page-message ${type}`}
@@ -47,18 +61,6 @@ const PageMessage = ({ type, title, message }) => {
             </Stack>
         </div>
     )
-}
-
-PageMessage.propTypes = {
-    type: PropTypes.oneOf(["error", "warning", "info", "success"]),
-    title: PropTypes.string,
-    message: PropTypes.string,
-}
-
-PageMessage.defaultProps = {
-    type: "info",
-    title: "Title",
-    message: "Message",
 }
 
 export default PageMessage

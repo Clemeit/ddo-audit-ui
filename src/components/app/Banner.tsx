@@ -1,5 +1,4 @@
 import React from "react"
-import PropTypes from "prop-types"
 import { useNavigate } from "react-router-dom"
 import "../../index.css"
 import "./Banner.css"
@@ -8,7 +7,21 @@ import { ReactComponent as GiftSVG } from "../../assets/svg/gift.svg"
 import Button from "../global/Button.tsx"
 import useIsMobile from "../../hooks/useIsMobile.ts"
 
-const Banner = ({ title, subtitle, showButtons, miniature, hideOnMobile }) => {
+interface Props {
+    title: string
+    subtitle: string
+    showButtons: boolean
+    miniature: boolean
+    hideOnMobile: boolean
+}
+
+const Banner = ({
+    title = "DDO Audit",
+    subtitle = "Real-time Player Concurrency Data and LFM Viewer",
+    showButtons = true,
+    miniature = false,
+    hideOnMobile = true,
+}: Props) => {
     const navigate = useNavigate()
     const isMobile = useIsMobile()
 
@@ -35,46 +48,33 @@ const Banner = ({ title, subtitle, showButtons, miniature, hideOnMobile }) => {
                         <br />
                         <div className="call-to-action-container">
                             <Button
-                                text="Make a suggestion"
                                 type="primary"
                                 onClick={routeToSuggestionsPage}
                                 style={{ width: "9rem" }}
-                            />
+                            >
+                                Make a suggestion
+                            </Button>
                             <Button
-                                text="Visit my GitHub"
                                 type="secondary"
                                 onClick={openGitHubLink}
                                 style={{ width: "9rem" }}
-                            />
+                            >
+                                Visit my GitHub
+                            </Button>
                             <Button
-                                text="Donate"
                                 icon={<GiftSVG />}
                                 type="secondary donate"
                                 onClick={openDonationLink}
                                 style={{ width: "9rem" }}
-                            />
+                            >
+                                Donate
+                            </Button>
                         </div>
                     </>
                 )}
             </div>
         </div>
     )
-}
-
-Banner.propTypes = {
-    title: PropTypes.string,
-    subtitle: PropTypes.string,
-    showButtons: PropTypes.bool,
-    miniature: PropTypes.bool,
-    hideOnMobile: PropTypes.bool,
-}
-
-Banner.defaultProps = {
-    title: "DDO Audit",
-    subtitle: "Real-time Player Concurrency Data and LFM Viewer",
-    showButtons: true,
-    miniature: false,
-    hideOnMobile: true,
 }
 
 export default Banner

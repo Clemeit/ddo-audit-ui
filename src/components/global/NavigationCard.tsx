@@ -1,19 +1,32 @@
 import React from "react"
-import PropTypes from "prop-types"
 import "./NavigationCard.css"
+// @ts-ignore
 import { ReactComponent as LiveSVG } from "../../assets/svg/live.svg"
+// @ts-ignore
 import { ReactComponent as TransferSVG } from "../../assets/svg/transfer.svg"
+// @ts-ignore
 import { ReactComponent as ServersSVG } from "../../assets/svg/servers.svg"
+// @ts-ignore
 import { ReactComponent as GroupingSVG } from "../../assets/svg/grouping.svg"
+// @ts-ignore
 import { ReactComponent as WhoSVG } from "../../assets/svg/who.svg"
+// @ts-ignore
 import { ReactComponent as FriendsSVG } from "../../assets/svg/friends.svg"
+// @ts-ignore
 import { ReactComponent as QuestsSVG } from "../../assets/svg/quests.svg"
+// @ts-ignore
 import { ReactComponent as TrendsSVG } from "../../assets/svg/trends.svg"
+// @ts-ignore
 import { ReactComponent as AboutSVG } from "../../assets/svg/about.svg"
+// @ts-ignore
 import { ReactComponent as ApiSVG } from "../../assets/svg/api.svg"
+// @ts-ignore
 import { ReactComponent as FeedbackSVG } from "../../assets/svg/feedback.svg"
+// @ts-ignore
 import { ReactComponent as RegistrationSVG } from "../../assets/svg/registration.svg"
+// @ts-ignore
 import { ReactComponent as TimerSVG } from "../../assets/svg/timer.svg"
+// @ts-ignore
 import { ReactComponent as Activity } from "../../assets/svg/activity.svg"
 
 import { Link } from "react-router-dom"
@@ -72,7 +85,12 @@ const typeToIconMap = {
     activity: <Activity className="shrinkable-icon" />,
 }
 
-const NavigationCard = ({ type, badge }) => {
+interface Props {
+    type: string
+    badge?: React.ReactNode
+}
+
+const NavigationCard = ({ type, badge }: Props) => {
     return (
         <Link to={`/${type}`} className="navigation-card">
             <span className="navigation-card-title">
@@ -85,26 +103,6 @@ const NavigationCard = ({ type, badge }) => {
             </p>
         </Link>
     )
-}
-
-NavigationCard.propTypes = {
-    type: PropTypes.oneOf([
-        "live",
-        "servers",
-        "quests",
-        "trends",
-        "grouping",
-        "who",
-        "transfers",
-        "friends",
-        "registration",
-        "timers",
-        "about",
-        "api",
-        "suggestions",
-        "activity",
-    ]),
-    badge: PropTypes.node,
 }
 
 export default NavigationCard
