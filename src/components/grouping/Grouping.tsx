@@ -15,6 +15,7 @@ import { ReactComponent as Pending } from "../../assets/svg/pending.svg"
 import { LoadingState } from "../../models/Api.ts"
 import GroupingCanvas from "./LfmCanvas.tsx"
 import Stack from "../global/Stack.tsx"
+import Badge from "../global/Badge.tsx"
 
 const Grouping = () => {
     const { serverInfo } = useGetLiveData()
@@ -46,6 +47,18 @@ const Grouping = () => {
         } else {
             return <Pending className="shrinkable-icon" />
         }
+    }
+
+    const cardBadge = (serverName: string) => {
+        return (
+            serverInfo.data?.[serverName]?.is_vip_only && (
+                <Badge
+                    text="VIP"
+                    size="small"
+                    backgroundColor="var(--orange4)"
+                />
+            )
+        )
     }
 
     const getCurrentRaids = useCallback(() => {
@@ -114,6 +127,7 @@ const Grouping = () => {
                     title={toSentenceCase(serverName)}
                     content={cardDescription(serverData)}
                     icon={cardIcon(serverName)}
+                    badge={cardBadge(serverName)}
                 />
             ))
     }

@@ -22,13 +22,16 @@ import Button from "../global/Button.tsx"
 import ContentCluster from "../global/ContentCluster.tsx"
 import { Character } from "../../models/Character.ts"
 import YesNoModal from "../modal/YesNoModal.tsx"
+import Badge from "../global/Badge.tsx"
+import { VIP_SERVER_NAMES_LOWER } from "../../constants/servers.ts"
 
 interface Props {
     reloadLfms: () => void
 }
 
 const LfmToolbar = ({ reloadLfms }: Props) => {
-    const { serverNameSentenceCase } = useGetCurrentServer()
+    const { serverNameSentenceCase, serverNameLowercase } =
+        useGetCurrentServer()
     const {
         minLevel,
         setMinLevel,
@@ -84,6 +87,7 @@ const LfmToolbar = ({ reloadLfms }: Props) => {
                     setShowSettingsModal(false)
                 }}
                 onNo={() => setShowResetViewSettingsModal(false)}
+                fullScreenOnMobile
             />
         ),
         [resetViewSettings]
@@ -100,6 +104,7 @@ const LfmToolbar = ({ reloadLfms }: Props) => {
                     setShowSettingsModal(false)
                 }}
                 onNo={() => setShowResetUserSettingsModal(false)}
+                fullScreenOnMobile
             />
         ),
         [resetUserSettings]
@@ -167,7 +172,7 @@ const LfmToolbar = ({ reloadLfms }: Props) => {
                             </div>
                         )}
                         {filterByMyCharacters && (
-                            <div className="filter-section">
+                            <div className="filter-section multi-select">
                                 <Stack direction="column" gap="10px">
                                     {registeredCharacters &&
                                         registeredCharacters
@@ -451,7 +456,10 @@ const LfmToolbar = ({ reloadLfms }: Props) => {
             {showSettingsModal &&
                 !showResetViewSettingsModal &&
                 !showResetUserSettingsModal && (
-                    <Modal onClose={() => setShowSettingsModal(false)}>
+                    <Modal
+                        onClose={() => setShowSettingsModal(false)}
+                        fullScreenOnMobile
+                    >
                         {settingModalContent}
                     </Modal>
                 )}
@@ -466,6 +474,18 @@ const LfmToolbar = ({ reloadLfms }: Props) => {
                     <MenuSVG className="lfm-toolbar-item-icon" />
                     <span className="lfm-toolbar-item-text">
                         {serverNameSentenceCase}
+                        {VIP_SERVER_NAMES_LOWER.includes(
+                            serverNameLowercase
+                        ) && (
+                            <>
+                                {" "}
+                                <Badge
+                                    text="VIP"
+                                    size="small"
+                                    backgroundColor="var(--orange4)"
+                                />
+                            </>
+                        )}
                     </span>
                 </Link>
                 <div className="lfm-toolbar-item screenshot-button hide-on-mobile">

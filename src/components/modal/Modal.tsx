@@ -1,29 +1,55 @@
-import React from "react"
+import React, { useEffect } from "react"
 import { ReactComponent as CloseSVG } from "../../assets/svg/close.svg"
 import "./Modal.css"
 import useIsMobile from "../../hooks/useIsMobile.ts"
-import Spacer from "../global/Spacer.tsx"
 
 interface Props {
     children: React.ReactNode
     onClose: () => void
     hideOverlay?: boolean
+    centeredContent?: boolean
+    maxWidth?: string
+    fullScreenOnMobile?: boolean
 }
-const Modal = ({ children, onClose, hideOverlay = false }: Props) => {
+const Modal = ({
+    children,
+    onClose,
+    hideOverlay = false,
+    centeredContent = false,
+    maxWidth = "400px",
+    fullScreenOnMobile = false,
+}: Props) => {
     const isMobile = useIsMobile()
+
+    useEffect(() => {
+        // event listener for closing modal on escape key press
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === "Escape") {
+                onClose()
+            }
+        }
+        document.addEventListener("keydown", handleKeyDown)
+        return () => {
+            document.removeEventListener("keydown", handleKeyDown)
+        }
+    }, [])
 
     return (
         <>
             {!hideOverlay && (
                 <div className="modal-overlay" onClick={onClose} />
             )}
-            <div className="modal-container">
-                <div className="modal-content">
+            <div
+                className={`modal-container ${centeredContent ? "centered-content" : ""} ${fullScreenOnMobile ? "full-screen-on-mobile" : ""}`}
+                style={{ maxWidth }}
+            >
+                <div
+                    className={`modal-content ${centeredContent ? "centered-content" : ""}`}
+                >
                     <div className="modal-close-container" onClick={onClose}>
                         <CloseSVG className="modal-close" />
                     </div>
                     {children}
-                    {isMobile && <Spacer size="50px" />}
                 </div>
             </div>
         </>

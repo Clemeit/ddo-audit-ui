@@ -5,13 +5,14 @@ import "./Banner.css"
 import { ReactComponent as GiftSVG } from "../../assets/svg/gift.svg"
 import Button from "../global/Button.tsx"
 import useIsMobile from "../../hooks/useIsMobile.ts"
+import { DONATE_LINK, GITHUB_LINK } from "../../constants/client.ts"
 
 interface Props {
     title: string
     subtitle: string
     showButtons: boolean
     miniature: boolean
-    hideOnMobile: boolean
+    hideOnMobile?: boolean
 }
 
 const Banner = ({
@@ -28,13 +29,10 @@ const Banner = ({
         navigate("/suggestions")
     }
     const openGitHubLink = () => {
-        window.open("https://github.com/Clemeit/ddo-audit", "_blank")
+        window.open(GITHUB_LINK, "_blank")
     }
     const openDonationLink = () => {
-        window.open(
-            "https://www.paypal.com/donate/?hosted_button_id=YWG5SJPYLDQXY",
-            "_blank"
-        )
+        window.open(DONATE_LINK, "_blank")
     }
 
     return isMobile && hideOnMobile ? null : (

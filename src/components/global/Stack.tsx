@@ -14,9 +14,10 @@ interface Props {
         | "space-evenly"
     align?: "flex-start" | "flex-end" | "center" | "baseline" | "stretch"
     className?: string
+    rest?: any
 }
 
-const Badge: React.FC<Props> = ({
+const Stack: React.FC<Props> = ({
     direction = "row",
     gap = "0px",
     children,
@@ -24,6 +25,7 @@ const Badge: React.FC<Props> = ({
     justify = "flex-start",
     align = "flex-start",
     className = "",
+    ...rest
 }) => {
     return (
         <div
@@ -36,10 +38,11 @@ const Badge: React.FC<Props> = ({
                 justifyContent: justify,
                 alignItems: align,
             }}
+            {...rest}
         >
             {children}
         </div>
     )
 }
 
-export default Badge
+export default Stack

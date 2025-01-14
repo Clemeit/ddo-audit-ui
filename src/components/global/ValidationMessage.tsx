@@ -2,6 +2,7 @@ import React from "react"
 import { ReactComponent as X } from "../../assets/svg/x.svg"
 import { ReactComponent as Warning } from "../../assets/svg/warning.svg"
 import "./ValidationMessage.css"
+import Stack from "./Stack.tsx"
 
 interface Props {
     type?: "error" | "warning" | "info" | "success"
@@ -24,15 +25,18 @@ const ValidationMessage = ({
     if (!visible) return null
 
     return (
-        <div
-            className="validation-message"
-            style={{
-                color: typeToColorMap[type],
-            }}
-        >
-            {type === "error" && <X style={{ fill: "red" }} />}
-            {type === "warning" && <Warning style={{ fill: "orange" }} />}
-            <div style={{ color: "inherit" }}>{message}</div>
+        <div className="validation-message">
+            <Stack direction="row" gap="5px">
+                <div>
+                    {type === "error" && (
+                        <X className="icon" style={{ fill: "red" }} />
+                    )}
+                    {type === "warning" && (
+                        <Warning className="icon" style={{ fill: "orange" }} />
+                    )}
+                </div>
+                <div style={{ color: typeToColorMap[type] }}>{message}</div>
+            </Stack>
         </div>
     )
 }

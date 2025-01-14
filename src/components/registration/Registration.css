@@ -14,7 +14,7 @@
 
 .registration-form {
     margin: 0;
-    padding: 50px 40px 80px 40px;
+    padding: 20px 40px 30px 40px;
     border-radius: 10px;
     display: flex;
     flex-direction: column;
@@ -32,7 +32,7 @@
 
 .registration-form-content {
     width: 100%;
-    padding: 40px 0;
+    padding: 30px 0px 50px 0px;
 }
 
 .registration-form h2 {

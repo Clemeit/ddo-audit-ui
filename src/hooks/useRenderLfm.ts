@@ -332,13 +332,12 @@ const useRenderLfm = ({ lfmSprite, context }: Props) => {
                         4,
                     mainPanelBoundingBox.width - 8,
                     mainPanelBoundingBox.height -
-                        leaderClassIconBoundingBox.height -
-                        8 -
-                        (mainPanelBoundingBox.bottom() -
-                            (showTimerNote
-                                ? timerNoteTextBoundingBox.top()
-                                : 0) +
-                            2)
+                        leaderClassIconBoundingBox.bottom() -
+                        (showTimerNote
+                            ? mainPanelBoundingBox.bottom() -
+                              timerNoteTextBoundingBox.top() +
+                              6
+                            : 0)
                 ),
                 font: fonts.COMMENT,
             })

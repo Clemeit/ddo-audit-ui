@@ -114,7 +114,6 @@ input {
     color: var(--text-inverted);
     padding: 2px 5px;
     font-size: 1rem;
-    margin: 0px 5px 0px 0px;
 }
 
 input.large {

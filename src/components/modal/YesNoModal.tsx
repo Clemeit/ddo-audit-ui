@@ -9,9 +9,16 @@ interface Props {
     text: string
     onYes: () => void
     onNo: () => void
+    fullScreenOnMobile?: boolean
 }
 
-const YesNoModal = ({ title, text, onYes, onNo }: Props) => {
+const YesNoModal = ({
+    title,
+    text,
+    onYes,
+    onNo,
+    fullScreenOnMobile = false,
+}: Props) => {
     const content = (
         <ContentCluster title={title}>
             <p>{text}</p>
@@ -22,7 +29,11 @@ const YesNoModal = ({ title, text, onYes, onNo }: Props) => {
         </ContentCluster>
     )
 
-    return <Modal onClose={onNo}>{content}</Modal>
+    return (
+        <Modal onClose={onNo} fullScreenOnMobile={fullScreenOnMobile}>
+            {content}
+        </Modal>
+    )
 }
 
 export default YesNoModal

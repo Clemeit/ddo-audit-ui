@@ -75,7 +75,9 @@ const Page2 = ({ setPage }: { setPage: Function }) => {
             })
             .catch((error) => {
                 if (error.status === HttpStatusCode.NotFound) {
-                    setValidationErrorMessage("Character not found")
+                    setValidationErrorMessage(
+                        "Character not found. Ensure that the character has logged in recently and is not anonymous."
+                    )
                 } else {
                     setValidationErrorMessage("Error registering character")
                 }
@@ -98,12 +100,12 @@ const Page2 = ({ setPage }: { setPage: Function }) => {
         >
             <h2>Register</h2>
             <div className="registration-form-content">
-                <Stack direction="column" gap="15px">
-                    <Stack gap="5px" direction="column">
+                <Stack direction="column" gap="15px" fullWidth>
+                    <Stack gap="5px" direction="column" fullWidth>
                         <label htmlFor="server-select">Server:</label>
                         <select
                             id="server-select"
-                            className="large"
+                            className="large full-width"
                             value={characterServer}
                             onChange={(e) => {
                                 setCharacterServer(e.target.value)
@@ -129,11 +131,11 @@ const Page2 = ({ setPage }: { setPage: Function }) => {
                             ))}
                         </select>
                     </Stack>
-                    <Stack gap="5px" direction="column">
+                    <Stack gap="5px" direction="column" fullWidth>
                         <label htmlFor="character-name">Character name:</label>
                         <input
                             id="character-name"
-                            className="large"
+                            className="large full-width"
                             type="text"
                             value={characterName}
                             onChange={(e) => {
@@ -159,8 +161,10 @@ const Page2 = ({ setPage }: { setPage: Function }) => {
                 <Button
                     type="primary"
                     fullWidth
-                    onClick={registerCharacter}
-                    disabled={isFetching}
+                    onClick={() => {
+                        !validationErrorMessage && registerCharacter()
+                    }}
+                    disabled={isFetching || !!validationErrorMessage}
                 >
                     Add
                 </Button>

@@ -2,3 +2,15 @@
     padding: 2px 5px;
     border-radius: 4px;
 }
+
+.badge.badge-small {
+    font-size: 0.6em;
+}
+
+.badge.badge-medium {
+    font-size: 0.8em;
+}
+
+.badge.badge-large {
+    font-size: 1em;
+}
