@@ -4,6 +4,7 @@ import Header from "./Header.tsx"
 import Footer from "./Footer.tsx"
 import ContentPush from "./ContentPush.tsx"
 import { ErrorBoundary } from "./ErrorBoundary.tsx"
+import Notifications from "../global/Notifications.tsx"
 
 function App() {
     return (
@@ -12,6 +13,7 @@ function App() {
             <Outlet />
             <ScrollRestoration />
             <Footer />
+            <Notifications />
             <ContentPush />
         </ErrorBoundary>
     )

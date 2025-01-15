@@ -3,7 +3,7 @@
     padding: 10px 20px;
     border-radius: 5px;
     border: none;
-    font-size: medium;
+    font-size: 0.8rem;
     text-align: center;
     cursor: pointer;
     transition: box-shadow 250ms;
@@ -11,6 +11,7 @@
     align-items: center;
     justify-content: center;
     gap: 10px;
+    border: 1px solid white;
 }
 
 .button.small {

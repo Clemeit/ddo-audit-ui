@@ -10,6 +10,7 @@ interface Props {
     type?: "primary" | "secondary" | "tertiary" | "donate" | "secondary donate"
     style?: React.CSSProperties
     fullWidth?: boolean
+    fullWidthOnMobile?: boolean
     small?: boolean
 }
 
@@ -22,13 +23,14 @@ const Button = ({
     type = "primary",
     style,
     fullWidth = false,
+    fullWidthOnMobile = false,
     small = false,
 }: Props) => {
     return (
         <button
             onClick={() => !disabled && onClick()}
             disabled={disabled}
-            className={`button ${type} ${className} ${disabled ? "disabled" : ""} ${fullWidth ? "fullWidth" : ""} ${small ? "small" : ""}`}
+            className={`button ${type} ${className} ${disabled ? "disabled" : ""} ${fullWidth ? "fullWidth" : ""} ${fullWidthOnMobile ? "full-width-mobile" : ""} ${small ? "small" : ""}`}
             style={style}
         >
             {icon && <span className="icon">{icon}</span>}

@@ -1,0 +1,46 @@
+.notifications-container {
+    position: fixed;
+    bottom: 10px;
+    left: 50%;
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    transform: translateX(-50%);
+    width: 100%;
+}
+
+.notification {
+    position: relative;
+    background-color: var(--background-light);
+    padding: 10px;
+    border-radius: 5px;
+    box-shadow: 0 0 20px var(--shadow);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    transition: background-color 0.3s;
+    max-width: 400px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+@media (max-width: 768px) {
+    .notification {
+        max-width: unset;
+        width: 100%;
+    }
+}
+
+.notification-close {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    cursor: pointer;
+    align-self: flex-end;
+}
+
+.notification-actions-container {
+    padding-top: 10px;
+}

@@ -1,4 +1,5 @@
 import React from "react"
+import "./Stack.css"
 
 interface Props {
     direction?: React.CSSProperties["flexDirection"]
@@ -15,6 +16,7 @@ interface Props {
     align?: "flex-start" | "flex-end" | "center" | "baseline" | "stretch"
     className?: string
     rest?: any
+    fullColumnOnMobile?: boolean
 }
 
 const Stack: React.FC<Props> = ({
@@ -25,11 +27,12 @@ const Stack: React.FC<Props> = ({
     justify = "flex-start",
     align = "flex-start",
     className = "",
+    fullColumnOnMobile = false,
     ...rest
 }) => {
     return (
         <div
-            className={className}
+            className={`${className} ${fullColumnOnMobile ? "full-column-on-mobile" : ""}`}
             style={{
                 display: "flex",
                 flexDirection: direction,

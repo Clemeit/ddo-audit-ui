@@ -1,0 +1,6 @@
+@media (max-width: 768px) {
+    .full-column-on-mobile {
+        flex-direction: column !important;
+        width: 100% !important;
+    }
+}
