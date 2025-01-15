@@ -14,13 +14,13 @@ import useTextRenderer from "./useTextRenderer.ts"
 import {
     calculateCommonBoundingBoxes,
     getLfmPostedTimestamp,
+    mapRaceAndGenderToRaceIconBoundingBox,
 } from "../utils/lfmUtils.ts"
 import { convertMillisecondsToPrettyString } from "../utils/stringUtils.ts"
 
 interface Props {
     lfmSprite?: HTMLImageElement | null
     context?: CanvasRenderingContext2D | null
-    raidView?: boolean
 }
 
 const useRenderLfm = ({ lfmSprite, context }: Props) => {
@@ -56,88 +56,6 @@ const useRenderLfm = ({ lfmSprite, context }: Props) => {
         return {
             width,
             height,
-        }
-    }
-
-    function mapRaceAndGenderToRaceIconBoundingBox(
-        race: string,
-        gender: string
-    ) {
-        let raceIconBoundingBox: {
-            x: number
-            y: number
-            width: number
-            height: number
-        }
-        switch (race.toLowerCase()) {
-            case "dragonborn":
-                raceIconBoundingBox = LFM_SPRITE_MAP.RACES.DRAGONBORN
-                break
-            case "drow elf":
-                raceIconBoundingBox = LFM_SPRITE_MAP.RACES.DROW
-                break
-            case "dwarf":
-                raceIconBoundingBox = LFM_SPRITE_MAP.RACES.DWARF
-                break
-            case "elf":
-            case "wood elf":
-            case "sun elf":
-                raceIconBoundingBox = LFM_SPRITE_MAP.RACES.ELF
-                break
-            case "gnome":
-            case "deep gnome":
-                raceIconBoundingBox = LFM_SPRITE_MAP.RACES.GNOME
-                break
-            case "halfling":
-                raceIconBoundingBox = LFM_SPRITE_MAP.RACES.HALFLING
-                break
-            case "half elf":
-                raceIconBoundingBox = LFM_SPRITE_MAP.RACES.HALF_ELF
-                break
-            case "half orc":
-                raceIconBoundingBox = LFM_SPRITE_MAP.RACES.HALF_ORC
-                break
-            case "human":
-            case "shadar-kai":
-                raceIconBoundingBox = LFM_SPRITE_MAP.RACES.HUMAN
-                break
-            case "tiefling":
-            case "tiefling scoundrel":
-                raceIconBoundingBox = LFM_SPRITE_MAP.RACES.TIEFLING
-                break
-            case "warforged":
-            case "bladeforged":
-                raceIconBoundingBox = LFM_SPRITE_MAP.RACES.WARFORGED
-                break
-            case "aasimar":
-            case "aasimar scourge":
-                raceIconBoundingBox = LFM_SPRITE_MAP.RACES.AASIMAR
-                break
-            case "eladrin":
-                raceIconBoundingBox = LFM_SPRITE_MAP.RACES.ELADRIN
-                break
-            case "shifter":
-            case "razorclaw shifter":
-                raceIconBoundingBox = LFM_SPRITE_MAP.RACES.SHIFTER
-                break
-            case "tabaxi":
-            case "tabaxi trailblazer":
-                raceIconBoundingBox = LFM_SPRITE_MAP.RACES.TABAXI
-                break
-            case "eladrin chaosmancer":
-                raceIconBoundingBox = LFM_SPRITE_MAP.RACES.CHAOSMANCER
-                break
-            default:
-                raceIconBoundingBox = LFM_SPRITE_MAP.RACES.HUMAN
-        }
-
-        return {
-            x:
-                raceIconBoundingBox.x +
-                (gender.toLowerCase() === "female" ? 108 : 0),
-            y: raceIconBoundingBox.y,
-            width: raceIconBoundingBox.width,
-            height: raceIconBoundingBox.height,
         }
     }
 

@@ -1,4 +1,3 @@
-/* eslint-disable  @typescript-eslint/no-explicit-any */
 function debounce(func: (...args: any[]) => void, wait: number) {
     let timeout: NodeJS.Timeout
     return (...args: any[]) => {
