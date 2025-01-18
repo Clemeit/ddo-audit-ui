@@ -18,6 +18,12 @@ import { getLocationActivityStats } from "../../utils/locationActivityUtil.ts"
 import { RANSACK_HOURS, RANSACK_THRESHOLD } from "../../constants/game.ts"
 import { convertMillisecondsToPrettyString } from "../../utils/stringUtils.ts"
 
+// TODO: Location table updates:
+// - Show quest name when a location belongs to a quest.
+// - Click on a quest entry to see how your run stacks up
+// - Click on a quest entry to see all of your runs, including ransack
+// - The Quest Name filter is filtering by location, it should filter by quest
+
 const Activity = () => {
     const location = useLocation()
     const {

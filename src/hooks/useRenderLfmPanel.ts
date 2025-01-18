@@ -40,6 +40,7 @@ const useRenderLfmPanel = ({
     const renderLfmPanelToCanvas = useCallback(
         (lfmCount: number) => {
             if (!context || !lfmSprite) return
+            context.imageSmoothingEnabled = false
             const lfmCountWithLfmPadding = Math.max(lfmCount, minimumLfmCount)
 
             const panelBottom = raidView

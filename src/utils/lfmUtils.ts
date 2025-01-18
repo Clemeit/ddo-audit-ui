@@ -42,8 +42,8 @@ const calculateCommonBoundingBoxes = (panelWidth: number) => {
         lfmBoundingBox.height
     )
     const leaderClassIconBoundingBox = new BoundingBox(
-        mainPanelBoundingBox.x + 4,
-        mainPanelBoundingBox.y + 4,
+        mainPanelBoundingBox.x + 2,
+        mainPanelBoundingBox.y + 2,
         18,
         18
     )
@@ -115,7 +115,47 @@ function getLfmPostedTimestamp(lfm: Lfm): Date {
     return new Date(lfmPostedEvent.timestamp + "Z")
 }
 
-function mapRaceAndGenderToRaceIconBoundingBox(race: string, gender: string) {
+function mapClassToIconBoundingBox(className: string = "fighter") {
+    switch (className.toLowerCase()) {
+        case "alchemist":
+            return LFM_SPRITE_MAP.CLASSES.ALCHEMIST
+        case "artificer":
+            return LFM_SPRITE_MAP.CLASSES.ARTIFICER
+        case "barbarian":
+            return LFM_SPRITE_MAP.CLASSES.BARBARIAN
+        case "bard":
+            return LFM_SPRITE_MAP.CLASSES.BARD
+        case "cleric":
+            return LFM_SPRITE_MAP.CLASSES.CLERIC
+        case "druid":
+            return LFM_SPRITE_MAP.CLASSES.DRUID
+        case "favored soul":
+            return LFM_SPRITE_MAP.CLASSES.FAVORED_SOUL
+        case "fighter":
+            return LFM_SPRITE_MAP.CLASSES.FIGHTER
+        case "monk":
+            return LFM_SPRITE_MAP.CLASSES.MONK
+        case "paladin":
+            return LFM_SPRITE_MAP.CLASSES.PALADIN
+        case "ranger":
+            return LFM_SPRITE_MAP.CLASSES.RANGER
+        case "rogue":
+            return LFM_SPRITE_MAP.CLASSES.ROGUE
+        case "sorcerer":
+            return LFM_SPRITE_MAP.CLASSES.SORCERER
+        case "warlock":
+            return LFM_SPRITE_MAP.CLASSES.WARLOCK
+        case "wizard":
+            return LFM_SPRITE_MAP.CLASSES.WIZARD
+        default:
+            return LFM_SPRITE_MAP.CLASSES.FIGHTER
+    }
+}
+
+function mapRaceAndGenderToRaceIconBoundingBox(
+    race: string = "human",
+    gender: string = "male"
+) {
     let raceIconBoundingBox: {
         x: number
         y: number
@@ -199,4 +239,5 @@ export {
     calculateCommonBoundingBoxes,
     getLfmPostedTimestamp,
     mapRaceAndGenderToRaceIconBoundingBox,
+    mapClassToIconBoundingBox,
 }

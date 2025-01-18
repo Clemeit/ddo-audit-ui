@@ -112,7 +112,7 @@ function wrapText(
 
     context.font = previousFont
 
-    return lines.filter((line) => line.length > 0)
+    return lines.filter((line) => line.length > 0).map((line) => line.trim())
 }
 
 function getTextSize(

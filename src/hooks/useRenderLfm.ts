@@ -121,9 +121,10 @@ const useRenderLfm = ({ lfmSprite, context }: Props) => {
         [showQuestTips]
     )
 
-    const renderLfmToCanvas = useCallback(
+    const renderLfm = useCallback(
         (lfm: Lfm) => {
             if (!context || !lfmSprite) return
+            context.imageSmoothingEnabled = false
             const fonts = FONTS(fontSize)
 
             // set up this lfm's bounds
@@ -267,7 +268,7 @@ const useRenderLfm = ({ lfmSprite, context }: Props) => {
                 text: lfm.quest?.name,
                 boundingBox: questPanelBoundingBoxWithPadding,
                 font: fonts.QUEST_NAME,
-                maxLines: 2,
+                maxLines: showQuestTips && lfm.quest?.tip ? 1 : 2,
                 centered: true,
             })
             const {
@@ -627,7 +628,7 @@ const useRenderLfm = ({ lfmSprite, context }: Props) => {
         ]
     )
 
-    return { renderLfmToCanvas }
+    return { renderLfm }
 }
 
 export default useRenderLfm

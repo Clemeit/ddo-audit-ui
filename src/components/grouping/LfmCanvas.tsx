@@ -16,6 +16,7 @@ import {
     LFM_COLORS,
 } from "../../constants/lfmPanel.ts"
 import useRenderLfm from "../../hooks/useRenderLfm.ts"
+// @ts-expect-error ts-migrate(2307) FIXME: Cannot find module '../../assets/png/lfm_sprite.png'.
 import LfmSprite from "../../assets/png/lfm_sprite.png"
 import { useLfmContext } from "../../contexts/LfmContext.tsx"
 import useRenderLfmPanel from "../../hooks/useRenderLfmPanel.ts"
@@ -39,6 +40,7 @@ interface SelectedLfmInfo {
     lfm: Lfm
     index: number
     renderType: RenderType
+    position: { x: number; y: number }
 }
 
 const LfmCanvas = ({
@@ -86,6 +88,7 @@ const LfmCanvas = ({
     }, [lfms, raidView])
     const [selectedLfmInfo, setSelectedLfmInfo] =
         useState<SelectedLfmInfo | null>(null)
+    const [isMouseOverCanvas, setIsMouseOverCanvas] = useState(false)
 
     useEffect(() => {
         // update the sizes of the lfm and overlay canvases
@@ -110,7 +113,7 @@ const LfmCanvas = ({
         }
     }, [])
 
-    const { renderLfmToCanvas } = useRenderLfm({
+    const { renderLfm } = useRenderLfm({
         lfmSprite: image,
         context: lfmCanvasRef?.current?.getContext("2d"),
     })
@@ -124,8 +127,28 @@ const LfmCanvas = ({
         context: overlayCanvasRef?.current?.getContext("2d"),
     })
 
-    const handleCanvasClick = (event: React.MouseEvent<HTMLCanvasElement>) => {
-        if (raidView) return
+    const handleCanvasMouseMove = debounce(
+        (event: React.MouseEvent<HTMLCanvasElement>) =>
+            handleCanvasClick(event, true),
+        250
+    )
+
+    const handleCanvasMouseLeave = () => {
+        setIsMouseOverCanvas(false)
+        handleCanvasMouseMove.clear()
+        clearOverlay()
+        setSelectedLfmInfo(null)
+    }
+
+    const handleCanvasMouseEnter = () => {
+        setIsMouseOverCanvas(true)
+    }
+
+    const handleCanvasClick = (
+        event: React.MouseEvent<HTMLCanvasElement>,
+        isHover: boolean = false
+    ) => {
+        if (raidView || !isMouseOverCanvas) return
         // get x and y coordinates of the click
         const canvas = mainCanvasRef.current
         if (canvas) {
@@ -138,37 +161,54 @@ const LfmCanvas = ({
             const scaledY = y * scalingFactor
 
             // clicked a header
-            sortHeaders.forEach(({ type, boundingBox }) => {
-                if (
-                    scaledX >= boundingBox.x &&
-                    scaledX <= boundingBox.x + boundingBox.width &&
-                    scaledY >= boundingBox.y + LFM_PANEL_TOP_BORDER_HEIGHT &&
-                    scaledY <=
-                        boundingBox.y +
-                            LFM_SPRITE_MAP.SORT_HEADER.CENTER.height +
-                            LFM_PANEL_TOP_BORDER_HEIGHT +
-                            LFM_AREA_PADDING.top
-                ) {
-                    setSortBy({
-                        type: type,
-                        direction:
-                            sortBy.type === type && sortBy.direction === "asc"
-                                ? "desc"
-                                : "asc",
-                    })
-                }
-            })
+            if (!isHover) {
+                sortHeaders.forEach(({ type, boundingBox }) => {
+                    if (
+                        scaledX >= boundingBox.x &&
+                        scaledX <= boundingBox.x + boundingBox.width &&
+                        scaledY >=
+                            boundingBox.y + LFM_PANEL_TOP_BORDER_HEIGHT &&
+                        scaledY <=
+                            boundingBox.y +
+                                LFM_SPRITE_MAP.SORT_HEADER.CENTER.height +
+                                LFM_PANEL_TOP_BORDER_HEIGHT +
+                                LFM_AREA_PADDING.top
+                    ) {
+                        setSortBy({
+                            type: type,
+                            direction:
+                                sortBy.type === type &&
+                                sortBy.direction === "asc"
+                                    ? "desc"
+                                    : "asc",
+                        })
+                    }
+                })
+            }
 
             // clicked an lfm
             const lfmIndex = Math.floor(
                 (scaledY - LFM_TOP_PADDING) / LFM_HEIGHT
             )
-            if (scaledY >= LFM_TOP_PADDING && lfmIndex < lfms.length) {
-                const renderType =
+            if (
+                scaledY >= LFM_TOP_PADDING &&
+                lfmIndex < lfms.length &&
+                scaledX >=
+                    LFM_LEFT_PADDING +
+                        commonBoundingBoxes.mainPanelBoundingBox.x &&
+                scaledX <=
+                    LFM_LEFT_PADDING +
+                        commonBoundingBoxes.questPanelBoundingBox.right()
+            ) {
+                let renderType: RenderType
+                if (
                     scaledX - LFM_LEFT_PADDING <=
                     commonBoundingBoxes.mainPanelBoundingBox.right()
-                        ? RenderType.LFM
-                        : RenderType.QUEST
+                ) {
+                    renderType = RenderType.LFM
+                } else {
+                    renderType = RenderType.QUEST
+                }
                 if (
                     selectedLfmInfo?.index !== lfmIndex ||
                     selectedLfmInfo?.renderType !== renderType
@@ -178,6 +218,7 @@ const LfmCanvas = ({
                         lfm: lfms[lfmIndex],
                         index: lfmIndex,
                         renderType: renderType,
+                        position: { x: scaledX, y: scaledY },
                     })
                 }
             } else {
@@ -234,7 +275,7 @@ const LfmCanvas = ({
                 index >= previousLfms.current.length ||
                 shouldLfmRerender(previousLfms.current[index], lfm)
             if (shouldForceRender || shouldRenderLfm) {
-                renderLfmToCanvas(lfm)
+                renderLfm(lfm)
                 totalLfmsRendered += 1
             }
             lfmPanelContext.translate(0, LFM_HEIGHT)
@@ -243,8 +284,8 @@ const LfmCanvas = ({
         // draw the overlay
         if (selectedLfmInfo !== null) {
             overlayContext.translate(
-                100,
-                selectedLfmInfo.index * LFM_HEIGHT + LFM_TOP_PADDING
+                selectedLfmInfo.position.x,
+                selectedLfmInfo.position.y
             )
             renderLfmOverlay(selectedLfmInfo.lfm, selectedLfmInfo.renderType)
             overlayContext.setTransform(1, 0, 0, 1, 0, 0)
@@ -299,7 +340,7 @@ const LfmCanvas = ({
         previousServerName,
         serverName,
         selectedLfmInfo,
-        renderLfmToCanvas,
+        renderLfm,
         renderLfmPanelToCanvas,
         renderLfmOverlay,
     ])
@@ -315,6 +356,9 @@ const LfmCanvas = ({
                 width: isDynamicWidth ? "100%" : "unset",
             }}
             onClick={handleCanvasClick}
+            onMouseMove={handleCanvasMouseMove}
+            onMouseLeave={handleCanvasMouseLeave}
+            onMouseEnter={handleCanvasMouseEnter}
         />
     )
 }

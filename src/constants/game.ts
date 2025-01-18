@@ -21,4 +21,13 @@ const CLASS_LIST = [
     "Alchemist",
 ]
 
-export { RANSACK_HOURS, RANSACK_THRESHOLD, MIN_LEVEL, MAX_LEVEL, CLASS_LIST }
+const CLASS_LIST_LOWER = CLASS_LIST.map((c) => c.toLowerCase())
+
+export {
+    RANSACK_HOURS,
+    RANSACK_THRESHOLD,
+    MIN_LEVEL,
+    MAX_LEVEL,
+    CLASS_LIST,
+    CLASS_LIST_LOWER,
+}
