@@ -25,6 +25,7 @@ import YesNoModal from "../modal/YesNoModal.tsx"
 import Badge from "../global/Badge.tsx"
 import { VIP_SERVER_NAMES_LOWER } from "../../constants/servers.ts"
 import Checkbox from "../global/Checkbox.tsx"
+import useFeatureCallouts from "../../hooks/useFeatureCallouts.ts"
 
 interface Props {
     reloadLfms: () => void
@@ -74,12 +75,23 @@ const LfmToolbar = ({ reloadLfms }: Props) => {
         setShowLfmActivity,
     } = useLfmContext()
     const { isFullScreen, setIsFullScreen } = useThemeContext()
+    const { isCalloutActive, dismissCallout } = useFeatureCallouts()
     const [showSettingsModal, setShowSettingsModal] = React.useState(false)
     const [showResetViewSettingsModal, setShowResetViewSettingsModal] =
         React.useState(false)
     const [showResetUserSettingsModal, setShowResetUserSettingsModal] =
         React.useState(false)
     const [canManuallyReload, setCanManuallyReload] = React.useState(true)
+
+    const handleOpenModal = () => {
+        setShowSettingsModal(true)
+        document.body.style.overflow = "hidden"
+    }
+
+    const handleCloseModal = () => {
+        setShowSettingsModal(false)
+        document.body.style.overflow = "scroll"
+    }
 
     const resetViewSettingsModal = useMemo(
         () => (
@@ -89,7 +101,7 @@ const LfmToolbar = ({ reloadLfms }: Props) => {
                 onYes={() => {
                     resetViewSettings()
                     setShowResetViewSettingsModal(false)
-                    setShowSettingsModal(false)
+                    handleCloseModal()
                 }}
                 onNo={() => setShowResetViewSettingsModal(false)}
                 fullScreenOnMobile
@@ -106,7 +118,7 @@ const LfmToolbar = ({ reloadLfms }: Props) => {
                 onYes={() => {
                     resetUserSettings()
                     setShowResetUserSettingsModal(false)
-                    setShowSettingsModal(false)
+                    handleCloseModal()
                 }}
                 onNo={() => setShowResetUserSettingsModal(false)}
                 fullScreenOnMobile
@@ -364,20 +376,27 @@ const LfmToolbar = ({ reloadLfms }: Props) => {
                         </Checkbox>
                         <Checkbox
                             checked={showLfmActivity}
-                            onChange={(e) =>
+                            onChange={(e) => {
                                 setShowLfmActivity(e.target.checked)
-                            }
+                                dismissCallout("show-lfm-activity")
+                            }}
                         >
                             Show LFM activity history{" "}
-                            <Badge type="new" text="New" />
+                            {isCalloutActive("show-lfm-activity") && (
+                                <Badge type="new" text="New" />
+                            )}
                         </Checkbox>
                         <Checkbox
                             checked={showLfmPostedTime}
-                            onChange={(e) =>
+                            onChange={(e) => {
                                 setShowLfmPostedTime(e.target.checked)
-                            }
+                                dismissCallout("show-lfm-posted-time")
+                            }}
                         >
-                            Show LFM posted time <Badge type="new" text="New" />
+                            Show LFM posted time{" "}
+                            {isCalloutActive("show-lfm-posted-time") && (
+                                <Badge type="new" text="New" />
+                            )}
                         </Checkbox>
                     </Stack>
                 </ContentCluster>
@@ -431,10 +450,7 @@ const LfmToolbar = ({ reloadLfms }: Props) => {
             {showSettingsModal &&
                 !showResetViewSettingsModal &&
                 !showResetUserSettingsModal && (
-                    <Modal
-                        onClose={() => setShowSettingsModal(false)}
-                        fullScreenOnMobile
-                    >
+                    <Modal onClose={handleCloseModal} fullScreenOnMobile>
                         {settingModalContent}
                     </Modal>
                 )}
@@ -471,11 +487,17 @@ const LfmToolbar = ({ reloadLfms }: Props) => {
                 </div>
                 <div
                     className="lfm-toolbar-item settings-button"
-                    onClick={() => setShowSettingsModal(true)}
+                    onClick={() => {
+                        handleOpenModal()
+                        dismissCallout("grouping-settings-button")
+                    }}
                 >
                     <SettingsSVG className="lfm-toolbar-item-icon" />
                     <span className="lfm-toolbar-item-text hide-on-mobile">
-                        Settings
+                        Settings{" "}
+                        {isCalloutActive("grouping-settings-button") && (
+                            <Badge type="new" text="New" />
+                        )}
                     </span>
                 </div>
                 <div

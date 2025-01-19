@@ -374,7 +374,7 @@ const OVERLAY_COLORS = {
     ACTIVITY_MEMBER_LEFT: "#bf9999",
     ACTIVITY_QUEST: "#bf9d73",
     ACTIVITY_COMMENT: "#BFBFBF",
-    QUEST_INFO: "#BFBFBF",
+    QUEST_INFO: "#e0e0e0",
 }
 
 const OVERLAY_WIDTH = 287
@@ -385,7 +385,7 @@ const OVERLAY_CHARACTER_WIDTH = 272
 const OVERLAY_ACTIVITY_LEFT_PADDING = 50
 const MAXIMUM_ACTIVITY_EVENTS = 11
 const OVERLAY_QUEST_INFO_SPACING = 20
-const OVERLAY_QUEST_INFO_LEFT_GAP = 100
+const OVERLAY_QUEST_INFO_LEFT_GAP = 120
 
 const OVERLAY_FONTS = {
     MEMBER_NAME: "16px 'Trebuchet MS'",
@@ -397,8 +397,8 @@ const OVERLAY_FONTS = {
     COMMENT: "14px 'Trebuchet MS'",
     ACTIVITY: "14px 'Trebuchet MS'",
     ACTIVITY_COMMENT: "italic 14px 'Trebuchet MS'",
-    QUEST_INFO_HEADER: "bold 14px 'Trebuchet MS'",
-    QUEST_INFO: "14px 'Trebuchet MS'",
+    QUEST_INFO_HEADER: "bold 16px 'Trebuchet MS'",
+    QUEST_INFO: "16px 'Trebuchet MS'",
 }
 
 interface SortHeaderData {

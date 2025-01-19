@@ -78,12 +78,12 @@ body {
     -moz-osx-font-smoothing: grayscale;
     background-color: var(--background);
     max-width: 100%;
+    overflow-y: scroll;
+    overflow-x: hidden;
 }
 
 html {
     max-width: 100%;
-    overflow-x: hidden;
-    overflow-y: scroll;
     font-size: 18px;
 }
 

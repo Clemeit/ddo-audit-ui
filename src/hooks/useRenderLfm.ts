@@ -478,6 +478,12 @@ const useRenderLfm = ({ lfmSprite, context }: Props) => {
                         )
                     })
                 }
+
+                // get skull count:
+                // look in comment. if something matching "r" followed by a number, that's the skull count
+                // if something matching "reaper" followed by a number, that's the skull count
+                // if something matching "skull" preceded by a number, that's the skull count
+
                 // quest difficulty
                 context.font = fonts.COMMENT
                 context.fillText(
@@ -485,6 +491,7 @@ const useRenderLfm = ({ lfmSprite, context }: Props) => {
                     questDifficultyBoundingBox.centerX(),
                     questDifficultyBoundingBox.centerY()
                 )
+                // TODO: render the skull count (get from comment)
             }
 
             // ===== CLASS PANEL =====

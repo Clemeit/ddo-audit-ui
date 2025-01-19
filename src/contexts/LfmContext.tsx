@@ -108,8 +108,8 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
     const [showQuestTips, setShowQuestTips] = useState<boolean>(true)
     const [showCharacterGuildNames, setShowCharacterGuildNames] =
         useState<boolean>(true)
-    const [showLfmPostedTime, setShowLfmPostedTime] = useState<boolean>(false)
-    const [showLfmActivity, setShowLfmActivity] = useState<boolean>(false)
+    const [showLfmPostedTime, setShowLfmPostedTime] = useState<boolean>(true)
+    const [showLfmActivity, setShowLfmActivity] = useState<boolean>(true)
 
     const resetUserSettings = () => {
         setMinLevel(MIN_LEVEL)
@@ -122,9 +122,9 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
         setShowQuestGuesses(true)
         setShowQuestTips(true)
         setShowCharacterGuildNames(false)
-        setShowLfmPostedTime(false)
+        setShowLfmPostedTime(true)
         setTrackedCharacterIds([])
-        setShowLfmActivity(false)
+        setShowLfmActivity(true)
     }
 
     const resetViewSettings = useCallback(() => {

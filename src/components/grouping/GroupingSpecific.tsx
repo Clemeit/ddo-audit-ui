@@ -58,6 +58,7 @@ const GroupingSpecific = () => {
                         <a
                             href={DONATE_LINK}
                             target="_blank"
+                            rel="noreferrer"
                             onClick={handleDismissVipModal}
                         >
                             donating
@@ -73,6 +74,7 @@ const GroupingSpecific = () => {
             <GroupingContainer
                 serverName={serverNameLowercase ? serverNameLowercase : ""}
             />
+            <Spacer className="hide-on-mobile" size="20px" />
         </Page>
     )
 }

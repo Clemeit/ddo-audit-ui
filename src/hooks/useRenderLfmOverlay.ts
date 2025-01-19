@@ -491,7 +491,7 @@ const useRenderLfmOverlay = ({ lfmSprite, context }: Props) => {
                             if (
                                 !hasRenderedAtLeastOne ||
                                 Math.abs(elapsedMinutes - lastElapsedMinutes) >
-                                    2
+                                    1
                             ) {
                                 context.font = OVERLAY_FONTS.ACTIVITY
                                 context.textAlign = "right"
