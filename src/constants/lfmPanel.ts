@@ -85,6 +85,12 @@ const LFM_SPRITE_MAP = {
         width: 13,
         height: 14,
     },
+    CROWN: {
+        x: 193,
+        y: 0,
+        width: 18,
+        height: 18,
+    },
     CLASSES: {
         ALL: {
             x: 0,
@@ -282,14 +288,14 @@ const LFM_SPRITE_MAP = {
         },
     },
     SORT_HEADER: {
-        LEFT: { x: 148, y: 0, width: 2, height: 21 },
-        RIGHT: { x: 167, y: 0, width: 2, height: 21 },
-        CENTER: { x: 150, y: 0, width: 17, height: 21 },
+        LEFT: { x: 149, y: 0, width: 2, height: 21 },
+        RIGHT: { x: 168, y: 0, width: 2, height: 21 },
+        CENTER: { x: 151, y: 0, width: 17, height: 21 },
     },
     SORT_HEADER_HIGHLIGHTED: {
-        LEFT: { x: 169, y: 0, width: 2, height: 21 },
-        RIGHT: { x: 188, y: 0, width: 2, height: 21 },
-        CENTER: { x: 171, y: 0, width: 17, height: 21 },
+        LEFT: { x: 171, y: 0, width: 2, height: 21 },
+        RIGHT: { x: 190, y: 0, width: 2, height: 21 },
+        CENTER: { x: 173, y: 0, width: 17, height: 21 },
     },
 }
 
@@ -318,6 +324,9 @@ const LFM_LEFT_PADDING =
 const QUEST_INFO_GAP = 5
 
 const DEFAULT_BASE_FONT_SIZE = 14
+const MINIMUM_MOUSE_OVER_DELAY = 50
+const DEFAULT_MOUSE_OVER_DELAY = 250
+const MAXIMUM_MOUSE_OVER_DELAY = 1000
 
 const FONTS = (baseFontSize: number = DEFAULT_BASE_FONT_SIZE) => ({
     LEADER_NAME: `${baseFontSize + 2}px 'Trebuchet MS'`,
@@ -359,19 +368,37 @@ const OVERLAY_COLORS = {
     MEMBER_LOCATION: "#DBD6A8",
     MEMBER_CLASS_LEVEL: "#FFFFFF",
     MEMBER_TOTAL_LEVEL: "#F3EDCD",
+    COMMENT: "#BFBFBF",
+    ACTIVITY_POSTED: "#4dacbf",
+    ACTIVITY_MEMBER_JOINED: "#99bf9f",
+    ACTIVITY_MEMBER_LEFT: "#bf9999",
+    ACTIVITY_QUEST: "#bf9d73",
+    ACTIVITY_COMMENT: "#BFBFBF",
+    QUEST_INFO: "#BFBFBF",
 }
 
 const OVERLAY_WIDTH = 287
 const OVERLAY_SIDE_BAR_WIDTH = 6
 const OVERLAY_CHARACTER_HEIGHT = 41
+const OVERLAY_CHARACTER_HEIGHT_WITH_GUILD_NAME = 58
 const OVERLAY_CHARACTER_WIDTH = 272
+const OVERLAY_ACTIVITY_LEFT_PADDING = 50
+const MAXIMUM_ACTIVITY_EVENTS = 11
+const OVERLAY_QUEST_INFO_SPACING = 20
+const OVERLAY_QUEST_INFO_LEFT_GAP = 100
 
 const OVERLAY_FONTS = {
     MEMBER_NAME: "16px 'Trebuchet MS'",
+    MEMBER_GUILD_NAME: "italic 14px 'Trebuchet MS'",
     MEMBER_LOCATION: "13px 'Trebuchet MS'",
     MEMBER_CLASS_LEVEL: "14px 'Trebuchet MS'",
     MEMBER_CLASS_LEVEL_BOLD: "bold 14px 'Trebuchet MS'",
     MEMBER_TOTAL_LEVEL: "16px 'Trebuchet MS'",
+    COMMENT: "14px 'Trebuchet MS'",
+    ACTIVITY: "14px 'Trebuchet MS'",
+    ACTIVITY_COMMENT: "italic 14px 'Trebuchet MS'",
+    QUEST_INFO_HEADER: "bold 14px 'Trebuchet MS'",
+    QUEST_INFO: "14px 'Trebuchet MS'",
 }
 
 interface SortHeaderData {
@@ -429,4 +456,12 @@ export {
     OVERLAY_SIDE_BAR_WIDTH,
     OVERLAY_CHARACTER_HEIGHT,
     OVERLAY_CHARACTER_WIDTH,
+    DEFAULT_MOUSE_OVER_DELAY,
+    MINIMUM_MOUSE_OVER_DELAY,
+    MAXIMUM_MOUSE_OVER_DELAY,
+    OVERLAY_ACTIVITY_LEFT_PADDING,
+    MAXIMUM_ACTIVITY_EVENTS,
+    OVERLAY_CHARACTER_HEIGHT_WITH_GUILD_NAME,
+    OVERLAY_QUEST_INFO_SPACING,
+    OVERLAY_QUEST_INFO_LEFT_GAP,
 }

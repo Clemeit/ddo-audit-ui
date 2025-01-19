@@ -92,6 +92,7 @@ const Grouping = () => {
                 serverNameA.localeCompare(serverNameB)
             ).map((serverName) => (
                 <ServerNavigationCard
+                    key={serverName}
                     destination={`/grouping/${serverName}`}
                     title={toSentenceCase(serverName)}
                     content="Loading data..."
@@ -108,6 +109,7 @@ const Grouping = () => {
                 serverNameA.localeCompare(serverNameB)
             ).map((serverName) => (
                 <ServerNavigationCard
+                    key={serverName}
                     destination={`/grouping/${serverName}`}
                     title={toSentenceCase(serverName)}
                     content="Loading data..."
@@ -123,6 +125,7 @@ const Grouping = () => {
             )
             .map(([serverName, serverData]) => (
                 <ServerNavigationCard
+                    key={serverName}
                     destination={`/grouping/${serverName}`}
                     title={toSentenceCase(serverName)}
                     content={cardDescription(serverData)}
@@ -146,7 +149,7 @@ const Grouping = () => {
             <Stack direction="column" gap="20px">
                 {Object.entries(getCurrentRaids() || {}).map(
                     ([serverName, lfms]: [string, { [key: number]: Lfm }]) => (
-                        <Link to={`/grouping/${serverName}`}>
+                        <Link key={serverName} to={`/grouping/${serverName}`}>
                             <h3
                                 style={{
                                     marginTop: "0px",

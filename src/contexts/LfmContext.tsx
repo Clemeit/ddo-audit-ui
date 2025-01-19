@@ -9,6 +9,7 @@ import React, {
 import {
     DEFAULT_BASE_FONT_SIZE,
     DEFAULT_LFM_PANEL_WIDTH,
+    DEFAULT_MOUSE_OVER_DELAY,
 } from "../constants/lfmPanel.ts"
 import { useThemeContext } from "./ThemeContext.tsx"
 import { setValue, getValue } from "../utils/localStorage.ts"
@@ -56,6 +57,10 @@ interface LfmContextProps {
     setShowLfmPostedTime: (show: boolean) => void
     resetViewSettings: () => void
     resetUserSettings: () => void
+    mouseOverDelay: number
+    setMouseOverDelay: (delay: number) => void
+    showLfmActivity: boolean
+    setShowLfmActivity: (show: boolean) => void
 }
 
 const LfmContext = createContext<LfmContextProps | undefined>(undefined)
@@ -91,6 +96,9 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
         type: "level",
         direction: "asc",
     })
+    const [mouseOverDelay, setMouseOverDelay] = useState<number>(
+        DEFAULT_MOUSE_OVER_DELAY
+    )
 
     // tools:
     const [showRaidTimerIndicator, setShowRaidTimerIndicator] =
@@ -101,6 +109,7 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
     const [showCharacterGuildNames, setShowCharacterGuildNames] =
         useState<boolean>(true)
     const [showLfmPostedTime, setShowLfmPostedTime] = useState<boolean>(false)
+    const [showLfmActivity, setShowLfmActivity] = useState<boolean>(false)
 
     const resetUserSettings = () => {
         setMinLevel(MIN_LEVEL)
@@ -115,6 +124,7 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
         setShowCharacterGuildNames(false)
         setShowLfmPostedTime(false)
         setTrackedCharacterIds([])
+        setShowLfmActivity(false)
     }
 
     const resetViewSettings = useCallback(() => {
@@ -124,6 +134,7 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
         setShowBoundingBoxes(false)
         setIsDynamicWidth(false)
         setIsFullScreen(false)
+        setMouseOverDelay(DEFAULT_MOUSE_OVER_DELAY)
     }, [setIsFullScreen])
 
     const loadSettingsFromLocalStorage = useCallback(() => {
@@ -146,6 +157,8 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
                 setShowCharacterGuildNames(settings.showCharacterGuildNames)
                 setTrackedCharacterIds(settings.trackedCharacterIds)
                 setShowLfmPostedTime(settings.showLfmPostedTime)
+                setMouseOverDelay(settings.mouseOverDelay)
+                setShowLfmActivity(settings.showLfmActivity)
             } catch (e) {
                 // TODO: maybe show a modal here to allow the user to reset their settings
                 console.error("Error loading settings from local storage", e)
@@ -185,6 +198,8 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
             showCharacterGuildNames,
             trackedCharacterIds,
             showLfmPostedTime,
+            mouseOverDelay,
+            showLfmActivity,
         })
     }, [
         minLevel,
@@ -204,6 +219,8 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
         showCharacterGuildNames,
         trackedCharacterIds,
         showLfmPostedTime,
+        mouseOverDelay,
+        showLfmActivity,
     ])
 
     useEffect(() => {
@@ -253,6 +270,10 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
                 setShowLfmPostedTime,
                 resetViewSettings,
                 resetUserSettings,
+                mouseOverDelay,
+                setMouseOverDelay,
+                showLfmActivity,
+                setShowLfmActivity,
             }}
         >
             {children}

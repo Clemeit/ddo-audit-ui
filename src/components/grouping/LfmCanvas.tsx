@@ -65,6 +65,7 @@ const LfmCanvas = ({
         sortBy,
         setSortBy,
         isDynamicWidth,
+        mouseOverDelay,
     } = useLfmContext()
     const commonBoundingBoxes = useMemo(
         () => calculateCommonBoundingBoxes(panelWidth),
@@ -88,7 +89,6 @@ const LfmCanvas = ({
     }, [lfms, raidView])
     const [selectedLfmInfo, setSelectedLfmInfo] =
         useState<SelectedLfmInfo | null>(null)
-    const [isMouseOverCanvas, setIsMouseOverCanvas] = useState(false)
 
     useEffect(() => {
         // update the sizes of the lfm and overlay canvases
@@ -127,28 +127,31 @@ const LfmCanvas = ({
         context: overlayCanvasRef?.current?.getContext("2d"),
     })
 
-    const handleCanvasMouseMove = debounce(
-        (event: React.MouseEvent<HTMLCanvasElement>) =>
-            handleCanvasClick(event, true),
-        250
-    )
-
-    const handleCanvasMouseLeave = () => {
-        setIsMouseOverCanvas(false)
-        handleCanvasMouseMove.clear()
-        clearOverlay()
-        setSelectedLfmInfo(null)
+    const mouseMoveTimeout = useRef<number | null>(null)
+    const handleCanvasMouseMove = (
+        event: React.MouseEvent<HTMLCanvasElement>
+    ) => {
+        if (mouseMoveTimeout.current) {
+            clearTimeout(mouseMoveTimeout.current)
+        }
+        mouseMoveTimeout.current = window.setTimeout(() => {
+            handleCanvasClick(event, true)
+        }, mouseOverDelay)
     }
 
-    const handleCanvasMouseEnter = () => {
-        setIsMouseOverCanvas(true)
+    const handleCanvasMouseLeave = () => {
+        if (mouseMoveTimeout.current) {
+            clearTimeout(mouseMoveTimeout.current)
+        }
+        clearOverlay()
+        setSelectedLfmInfo(null)
     }
 
     const handleCanvasClick = (
         event: React.MouseEvent<HTMLCanvasElement>,
         isHover: boolean = false
     ) => {
-        if (raidView || !isMouseOverCanvas) return
+        if (raidView) return
         // get x and y coordinates of the click
         const canvas = mainCanvasRef.current
         if (canvas) {
@@ -214,12 +217,19 @@ const LfmCanvas = ({
                     selectedLfmInfo?.renderType !== renderType
                 ) {
                     clearOverlay()
-                    setSelectedLfmInfo({
-                        lfm: lfms[lfmIndex],
-                        index: lfmIndex,
-                        renderType: renderType,
-                        position: { x: scaledX, y: scaledY },
-                    })
+                    if (
+                        renderType === RenderType.QUEST &&
+                        lfms[lfmIndex].quest == null
+                    ) {
+                        setSelectedLfmInfo(null)
+                    } else {
+                        setSelectedLfmInfo({
+                            lfm: lfms[lfmIndex],
+                            index: lfmIndex,
+                            renderType: renderType,
+                            position: { x: scaledX, y: scaledY },
+                        })
+                    }
                 }
             } else {
                 clearOverlay()
@@ -269,29 +279,31 @@ const LfmCanvas = ({
             LFM_LEFT_PADDING,
             raidView ? 0 : LFM_TOP_PADDING
         )
-        let totalLfmsRendered = 0
+        // let totalLfmsRendered = 0
         lfms.forEach((lfm, index) => {
             const shouldRenderLfm =
                 index >= previousLfms.current.length ||
                 shouldLfmRerender(previousLfms.current[index], lfm)
             if (shouldForceRender || shouldRenderLfm) {
                 renderLfm(lfm)
-                totalLfmsRendered += 1
+                // totalLfmsRendered += 1
             }
             lfmPanelContext.translate(0, LFM_HEIGHT)
         })
 
         // draw the overlay
+        let totalOverlayWidth = 0
+        let totalOverlayHeight = 0
         if (selectedLfmInfo !== null) {
-            overlayContext.translate(
-                selectedLfmInfo.position.x,
-                selectedLfmInfo.position.y
-            )
-            renderLfmOverlay(selectedLfmInfo.lfm, selectedLfmInfo.renderType)
             overlayContext.setTransform(1, 0, 0, 1, 0, 0)
+            const { width: overlayWidth, height: overlayHeight } =
+                renderLfmOverlay(
+                    selectedLfmInfo.lfm,
+                    selectedLfmInfo.renderType
+                )
+            totalOverlayWidth = overlayWidth
+            totalOverlayHeight = overlayHeight
         }
-
-        lfmPanelContext.setTransform(1, 0, 0, 1, 0, 0)
 
         // show message if all lfms are excluded
         if (lfms.length === 0 && excludedLfmCount > 0) {
@@ -312,13 +324,34 @@ const LfmCanvas = ({
                 LFM_HEIGHT
             )
         }
-        console.log(`Rendered lfms for ${serverName}`, totalLfmsRendered)
+
+        lfmPanelContext.setTransform(1, 0, 0, 1, 0, 0)
 
         // Draw the lfm canvas and overlay canvas to the main canvas
         const lfmCanvas = lfmCanvasRef.current
         const overlayCanvas = overlayCanvasRef.current
         if (lfmCanvas) mainContext.drawImage(lfmCanvas, 0, 0)
-        if (overlayCanvas) mainContext.drawImage(overlayCanvas, 0, 0)
+        if (overlayCanvas && selectedLfmInfo !== null) {
+            const overlayXPosition = Math.max(
+                0,
+                Math.min(
+                    selectedLfmInfo.position.x,
+                    panelWidth - totalOverlayWidth
+                )
+            )
+            const overlayYPosition = Math.max(
+                0,
+                Math.min(
+                    selectedLfmInfo.position.y,
+                    panelHeight - totalOverlayHeight
+                )
+            )
+            mainContext.drawImage(
+                overlayCanvas,
+                Math.round(overlayXPosition),
+                Math.round(overlayYPosition)
+            )
+        }
 
         previousLfms.current = lfms
         previousFontSize.current = fontSize
@@ -358,7 +391,6 @@ const LfmCanvas = ({
             onClick={handleCanvasClick}
             onMouseMove={handleCanvasMouseMove}
             onMouseLeave={handleCanvasMouseLeave}
-            onMouseEnter={handleCanvasMouseEnter}
         />
     )
 }

@@ -134,7 +134,7 @@ const useRenderLfm = ({ lfmSprite, context }: Props) => {
                 questPanelBoundingBox,
                 classPanelBoundingBox,
                 levelPanelBoundingBox,
-                leaderClassIconBoundingBox,
+                leaderRaceIconBoundingBox,
                 classesBoundingBox,
                 questPanelBoundingBoxWithPadding,
                 levelPanelBoundingBoxWithPadding,
@@ -145,9 +145,9 @@ const useRenderLfm = ({ lfmSprite, context }: Props) => {
             } = confineTextToBoundingBox({
                 text: lfm.leader.name,
                 boundingBox: new BoundingBox(
-                    leaderClassIconBoundingBox.x +
-                        leaderClassIconBoundingBox.width +
-                        6,
+                    leaderRaceIconBoundingBox.x +
+                        leaderRaceIconBoundingBox.width +
+                        4,
                     mainPanelBoundingBox.y,
                     mainPanelBoundingBox.width,
                     mainPanelBoundingBox.height
@@ -155,7 +155,7 @@ const useRenderLfm = ({ lfmSprite, context }: Props) => {
                 font: fonts.LEADER_NAME,
             })
             leaderNameBoundingBox.y =
-                leaderClassIconBoundingBox.centerY() -
+                leaderRaceIconBoundingBox.centerY() -
                 leaderNameBoundingBox.height / 2
 
             const localShowMemberCount = lfm.members.length > 0
@@ -246,12 +246,12 @@ const useRenderLfm = ({ lfmSprite, context }: Props) => {
                 text: lfm.comment,
                 boundingBox: new BoundingBox(
                     mainPanelBoundingBox.x + 4,
-                    leaderClassIconBoundingBox.y +
-                        leaderClassIconBoundingBox.height +
+                    leaderRaceIconBoundingBox.y +
+                        leaderRaceIconBoundingBox.height +
                         4,
                     mainPanelBoundingBox.width - 8,
                     mainPanelBoundingBox.height -
-                        leaderClassIconBoundingBox.bottom() -
+                        leaderRaceIconBoundingBox.bottom() -
                         (showTimerNote
                             ? mainPanelBoundingBox.bottom() -
                               timerNoteTextBoundingBox.top() +
@@ -390,8 +390,8 @@ const useRenderLfm = ({ lfmSprite, context }: Props) => {
                 leaderClassIcon.y,
                 leaderClassIcon.width,
                 leaderClassIcon.height,
-                leaderClassIconBoundingBox.x,
-                leaderClassIconBoundingBox.y,
+                leaderRaceIconBoundingBox.x,
+                leaderRaceIconBoundingBox.y,
                 leaderClassIcon.width,
                 leaderClassIcon.height
             )
@@ -550,10 +550,10 @@ const useRenderLfm = ({ lfmSprite, context }: Props) => {
                     levelPanelBoundingBox.height
                 )
                 context.strokeRect(
-                    leaderClassIconBoundingBox.x,
-                    leaderClassIconBoundingBox.y,
-                    leaderClassIconBoundingBox.width,
-                    leaderClassIconBoundingBox.height
+                    leaderRaceIconBoundingBox.x,
+                    leaderRaceIconBoundingBox.y,
+                    leaderRaceIconBoundingBox.width,
+                    leaderRaceIconBoundingBox.height
                 )
                 context.strokeRect(
                     leaderNameBoundingBox.x,

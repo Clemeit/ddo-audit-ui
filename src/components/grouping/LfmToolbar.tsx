@@ -14,9 +14,9 @@ import Stack from "../global/Stack.tsx"
 import { useLfmContext } from "../../contexts/LfmContext.tsx"
 import {
     DEFAULT_BASE_FONT_SIZE,
-    DEFAULT_LFM_PANEL_WIDTH,
-    MAXIMUM_LFM_PANEL_WIDTH,
-    MINIMUM_LFM_PANEL_WIDTH,
+    DEFAULT_MOUSE_OVER_DELAY,
+    MAXIMUM_MOUSE_OVER_DELAY,
+    MINIMUM_MOUSE_OVER_DELAY,
 } from "../../constants/lfmPanel.ts"
 import Button from "../global/Button.tsx"
 import ContentCluster from "../global/ContentCluster.tsx"
@@ -24,6 +24,7 @@ import { Character } from "../../models/Character.ts"
 import YesNoModal from "../modal/YesNoModal.tsx"
 import Badge from "../global/Badge.tsx"
 import { VIP_SERVER_NAMES_LOWER } from "../../constants/servers.ts"
+import Checkbox from "../global/Checkbox.tsx"
 
 interface Props {
     reloadLfms: () => void
@@ -67,6 +68,10 @@ const LfmToolbar = ({ reloadLfms }: Props) => {
         reloadRegisteredCharacters,
         resetViewSettings,
         resetUserSettings,
+        mouseOverDelay,
+        setMouseOverDelay,
+        showLfmActivity,
+        setShowLfmActivity,
     } = useLfmContext()
     const { isFullScreen, setIsFullScreen } = useThemeContext()
     const [showSettingsModal, setShowSettingsModal] = React.useState(false)
@@ -182,37 +187,30 @@ const LfmToolbar = ({ reloadLfms }: Props) => {
                                                 )
                                             )
                                             .map((character: Character) => (
-                                                <label
-                                                    className="input-label"
-                                                    htmlFor={`character${character.id}`}
+                                                <Checkbox
+                                                    key={character.id}
+                                                    checked={trackedCharacterIds.includes(
+                                                        character.id
+                                                    )}
+                                                    onChange={(e) =>
+                                                        setTrackedCharacterIds(
+                                                            e.target.checked
+                                                                ? [
+                                                                      ...trackedCharacterIds,
+                                                                      character.id,
+                                                                  ]
+                                                                : trackedCharacterIds.filter(
+                                                                      (id) =>
+                                                                          id !==
+                                                                          character.id
+                                                                  )
+                                                        )
+                                                    }
                                                 >
-                                                    <input
-                                                        type="checkbox"
-                                                        id={`character${character.id}`}
-                                                        checked={trackedCharacterIds.includes(
-                                                            character.id
-                                                        )}
-                                                        onChange={(e) =>
-                                                            setTrackedCharacterIds(
-                                                                e.target.checked
-                                                                    ? [
-                                                                          ...trackedCharacterIds,
-                                                                          character.id,
-                                                                      ]
-                                                                    : trackedCharacterIds.filter(
-                                                                          (
-                                                                              id
-                                                                          ) =>
-                                                                              id !==
-                                                                              character.id
-                                                                      )
-                                                            )
-                                                        }
-                                                    />
                                                     {character.name} |{" "}
                                                     {character.total_level} |{" "}
                                                     {character.server_name}
-                                                </label>
+                                                </Checkbox>
                                             ))}
                                     <Link to="/registration" className="link">
                                         Register more
@@ -249,16 +247,17 @@ const LfmToolbar = ({ reloadLfms }: Props) => {
                 </ContentCluster>
                 <ContentCluster title="Display">
                     <Stack direction="column" gap="10px">
-                        <span>
-                            Font size: {fontSize}px
+                        <label htmlFor="fontSizeSlider">
+                            Font size: {fontSize.toString()}px
                             {fontSize === DEFAULT_BASE_FONT_SIZE && (
                                 <span className="secondary-text">
                                     {" "}
                                     (default)
                                 </span>
                             )}
-                        </span>
+                        </label>
                         <input
+                            id="fontSizeSlider"
                             type="range"
                             min={10}
                             max={20}
@@ -267,60 +266,49 @@ const LfmToolbar = ({ reloadLfms }: Props) => {
                                 setFontSize(parseInt(e.target.value))
                             }
                         />
-                        <span>
-                            Panel width: {panelWidth}px
-                            {panelWidth === DEFAULT_LFM_PANEL_WIDTH && (
+                        <label htmlFor="overlayPopupDelaySlider">
+                            Overlay popup delay:{" "}
+                            {(mouseOverDelay / 1000).toString()}s
+                            {mouseOverDelay === DEFAULT_MOUSE_OVER_DELAY && (
                                 <span className="secondary-text">
                                     {" "}
                                     (default)
                                 </span>
                             )}
-                        </span>
+                        </label>
                         <input
+                            id="overlayPopupDelaySlider"
                             type="range"
-                            min={MINIMUM_LFM_PANEL_WIDTH}
-                            max={MAXIMUM_LFM_PANEL_WIDTH}
-                            value={panelWidth}
+                            min={MINIMUM_MOUSE_OVER_DELAY}
+                            max={MAXIMUM_MOUSE_OVER_DELAY}
+                            step={50}
+                            value={mouseOverDelay}
                             onChange={(e) =>
-                                setPanelWidth(parseInt(e.target.value))
+                                setMouseOverDelay(parseInt(e.target.value))
                             }
                         />
-                        <label
-                            className="input-label"
-                            htmlFor="showBoundingBoxes"
+                        <Checkbox
+                            checked={showBoundingBoxes}
+                            onChange={(e) =>
+                                setShowBoundingBoxes(e.target.checked)
+                            }
                         >
-                            <input
-                                type="checkbox"
-                                id="showBoundingBoxes"
-                                checked={showBoundingBoxes}
-                                onChange={(e) =>
-                                    setShowBoundingBoxes(e.target.checked)
-                                }
-                            />
                             Show bounding boxes
-                        </label>
-                        <label className="input-label" htmlFor="dynamicWidth">
-                            <input
-                                type="checkbox"
-                                id="dynamicWidth"
-                                checked={isDynamicWidth}
-                                onChange={(e) =>
-                                    setIsDynamicWidth(e.target.checked)
-                                }
-                            />
+                        </Checkbox>
+                        <Checkbox
+                            checked={isDynamicWidth}
+                            onChange={(e) =>
+                                setIsDynamicWidth(e.target.checked)
+                            }
+                        >
                             Dynamic width
-                        </label>
-                        <label className="input-label" htmlFor="fullscreen">
-                            <input
-                                type="checkbox"
-                                id="fullscreen"
-                                checked={isFullScreen}
-                                onChange={(e) =>
-                                    setIsFullScreen(e.target.checked)
-                                }
-                            />
+                        </Checkbox>
+                        <Checkbox
+                            checked={isFullScreen}
+                            onChange={(e) => setIsFullScreen(e.target.checked)}
+                        >
                             Fullscreen
-                        </label>
+                        </Checkbox>
                         <Stack fullWidth justify="flex-end">
                             <Button
                                 onClick={() =>
@@ -336,78 +324,61 @@ const LfmToolbar = ({ reloadLfms }: Props) => {
                 </ContentCluster>
                 <ContentCluster title="Tools">
                     <Stack direction="column" gap="10px">
-                        <label
-                            className="input-label"
-                            htmlFor="raidTimerIndicator"
+                        <Checkbox
+                            checked={showRaidTimerIndicator}
+                            onChange={(e) =>
+                                setShowRaidTimerIndicator(e.target.checked)
+                            }
                         >
-                            <input
-                                type="checkbox"
-                                id="raidTimerIndicator"
-                                checked={showRaidTimerIndicator}
-                                onChange={(e) =>
-                                    setShowRaidTimerIndicator(e.target.checked)
-                                }
-                            />
                             Show raid timer indicator
-                        </label>
-                        <label className="input-label" htmlFor="memberCount">
-                            <input
-                                type="checkbox"
-                                id="memberCount"
-                                checked={showMemberCount}
-                                onChange={(e) =>
-                                    setShowMemberCount(e.target.checked)
-                                }
-                            />
-                            Show member count
-                        </label>
-                        <label className="input-label" htmlFor="questGuesses">
-                            <input
-                                type="checkbox"
-                                id="questGuesses"
-                                checked={showQuestGuesses}
-                                onChange={(e) =>
-                                    setShowQuestGuesses(e.target.checked)
-                                }
-                            />
-                            Show quest guesses
-                        </label>
-                        <label className="input-label" htmlFor="questTips">
-                            <input
-                                type="checkbox"
-                                id="questTips"
-                                checked={showQuestTips}
-                                onChange={(e) =>
-                                    setShowQuestTips(e.target.checked)
-                                }
-                            />
-                            Show quest tips
-                        </label>
-                        <label
-                            className="input-label"
-                            htmlFor="characterGuildNames"
+                        </Checkbox>
+                        <Checkbox
+                            checked={showMemberCount}
+                            onChange={(e) =>
+                                setShowMemberCount(e.target.checked)
+                            }
                         >
-                            <input
-                                type="checkbox"
-                                id="characterGuildNames"
-                                checked={showCharacterGuildNames}
-                                onChange={(e) =>
-                                    setShowCharacterGuildNames(e.target.checked)
-                                }
-                            />
+                            Show member count
+                        </Checkbox>
+                        <Checkbox
+                            checked={showQuestGuesses}
+                            onChange={(e) =>
+                                setShowQuestGuesses(e.target.checked)
+                            }
+                        >
+                            Show quest guesses
+                        </Checkbox>
+                        <Checkbox
+                            checked={showQuestTips}
+                            onChange={(e) => setShowQuestTips(e.target.checked)}
+                        >
+                            Show quest tips
+                        </Checkbox>
+                        <Checkbox
+                            checked={showCharacterGuildNames}
+                            onChange={(e) =>
+                                setShowCharacterGuildNames(e.target.checked)
+                            }
+                        >
                             Show character guild names
-                        </label>
-                        <label className="input-label" htmlFor="lfmPostedTime">
-                            <input
-                                type="checkbox"
-                                id="lfmPostedTime"
-                                checked={showLfmPostedTime}
-                                onChange={(e) =>
-                                    setShowLfmPostedTime(e.target.checked)
-                                }
-                            />
-                            Show LFM posted time
-                        </label>
+                        </Checkbox>
+                        <Checkbox
+                            checked={showLfmActivity}
+                            onChange={(e) =>
+                                setShowLfmActivity(e.target.checked)
+                            }
+                        >
+                            Show LFM activity history{" "}
+                            <Badge type="new" text="New" />
+                        </Checkbox>
+                        <Checkbox
+                            checked={showLfmPostedTime}
+                            onChange={(e) =>
+                                setShowLfmPostedTime(e.target.checked)
+                            }
+                        >
+                            Show LFM posted time <Badge type="new" text="New" />
+                        </Checkbox>
                     </Stack>
                 </ContentCluster>
             </>
@@ -446,6 +417,10 @@ const LfmToolbar = ({ reloadLfms }: Props) => {
             registeredCharacters,
             showLfmPostedTime,
             setShowLfmPostedTime,
+            mouseOverDelay,
+            setMouseOverDelay,
+            showLfmActivity,
+            setShowLfmActivity,
         ]
     )
 

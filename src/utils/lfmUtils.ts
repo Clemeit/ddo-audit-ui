@@ -1,4 +1,4 @@
-import { Lfm } from "../models/Lfm"
+import { FlatActivityEvent, Lfm, LfmActivityType } from "../models/Lfm"
 import {
     LFM_HEIGHT,
     LFM_SPRITE_MAP,
@@ -41,7 +41,7 @@ const calculateCommonBoundingBoxes = (panelWidth: number) => {
         lfmBoundingBox.width * 0.15,
         lfmBoundingBox.height
     )
-    const leaderClassIconBoundingBox = new BoundingBox(
+    const leaderRaceIconBoundingBox = new BoundingBox(
         mainPanelBoundingBox.x + 2,
         mainPanelBoundingBox.y + 2,
         18,
@@ -72,7 +72,7 @@ const calculateCommonBoundingBoxes = (panelWidth: number) => {
         questPanelBoundingBox,
         classPanelBoundingBox,
         levelPanelBoundingBox,
-        leaderClassIconBoundingBox,
+        leaderRaceIconBoundingBox,
         classesBoundingBox,
         questPanelBoundingBoxWithPadding,
         levelPanelBoundingBoxWithPadding,
@@ -99,20 +99,22 @@ function shouldLfmRerender(previous: Lfm, current: Lfm): boolean {
 
 function getLfmPostedTimestamp(lfm: Lfm): Date {
     if (!lfm.activity) return new Date()
-    const lfmActivityEventsFlatMap = lfm.activity.flatMap((activity) =>
+    const lfmPostedEvent = getLfmActivityEventsFlatMap(lfm).find(
+        (event) => event.tag === "posted"
+    )
+    if (!lfmPostedEvent) return new Date()
+    return new Date(lfmPostedEvent.timestamp + "Z")
+}
+
+function getLfmActivityEventsFlatMap(lfm: Lfm): FlatActivityEvent[] {
+    if (!lfm.activity) return []
+    return lfm.activity.flatMap((activity) =>
         activity.events.map((event) => ({
-            tag: event.tag,
+            tag: event.tag as LfmActivityType,
             data: event.data,
             timestamp: activity.timestamp,
         }))
     )
-    console.log(lfmActivityEventsFlatMap)
-    const lfmPostedEvent = lfmActivityEventsFlatMap.find(
-        (event) => event.tag === "posted"
-    )
-    console.log(lfmPostedEvent)
-    if (!lfmPostedEvent) return new Date()
-    return new Date(lfmPostedEvent.timestamp + "Z")
 }
 
 function mapClassToIconBoundingBox(className: string = "fighter") {
@@ -240,4 +242,5 @@ export {
     getLfmPostedTimestamp,
     mapRaceAndGenderToRaceIconBoundingBox,
     mapClassToIconBoundingBox,
+    getLfmActivityEventsFlatMap,
 }

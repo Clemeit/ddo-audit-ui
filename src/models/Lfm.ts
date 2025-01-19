@@ -46,6 +46,12 @@ interface LfmActivity {
     events: LfmActivityEvent[]
 }
 
+interface FlatActivityEvent {
+    tag: LfmActivityType
+    data: string | null
+    timestamp: string
+}
+
 interface Lfm {
     id: string
     comment: string
@@ -66,11 +72,12 @@ interface Lfm {
 }
 
 enum LfmActivityType {
-    posted = "posted",
-    comment = "comment",
-    quest = "quest",
-    member_joined = "member_joined",
-    member_left = "member_left",
+    POSTED = "posted",
+    COMMENT = "comment",
+    QUEST = "quest",
+    MEMBER_JOINED = "member_joined",
+    MEMBER_LEFT = "member_left",
+    SPACER = "spacer",
 }
 
 interface LfmApiServerModel {
@@ -112,4 +119,5 @@ export {
     LfmApiDataModel,
     LfmApiModel,
     LfmSortType,
+    FlatActivityEvent,
 }
