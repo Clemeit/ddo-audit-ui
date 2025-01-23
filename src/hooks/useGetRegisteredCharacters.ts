@@ -35,6 +35,7 @@ const useGetRegisteredCharacters = ({ enabled = true }: Props = {}) => {
         setIsLoaded(false)
         const registeredCharactersMetadata =
             getRegisteredCharactersMetadataFromLocalStorage()
+        console.log(registeredCharactersMetadata)
         if (
             !registeredCharactersMetadata ||
             registeredCharactersMetadata.data?.length === 0

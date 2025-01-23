@@ -8,6 +8,8 @@ import { getVerificationChallengeByCharacterId } from "../../services/verificati
 import { Link } from "react-router-dom"
 import { addAccessToken } from "../../utils/localStorage.ts"
 import { useNavigate } from "react-router-dom"
+import ExpandableContainer from "../global/ExpandableContainer.tsx"
+import PageMessage from "../global/PageMessage.tsx"
 
 const Page2 = ({
     setPage,
@@ -20,9 +22,12 @@ const Page2 = ({
     character: Character | null
     isLoaded: boolean
 }) => {
+    const pageTimeout = 1000 * 60 * 5
+    const [pageLoadedTimestamp] = useState<number>(Date.now())
+    const [isPageTimeout, setIsPageTimeout] = useState<boolean>(false)
     const navigate = useNavigate()
-    let pollVerificationEndpointTimeout = useRef<NodeJS.Timeout | null>(null)
-    let navigateToNextPageTimeout = useRef<NodeJS.Timeout | null>(null)
+    const pollVerificationEndpointTimeout = useRef<NodeJS.Timeout | null>(null)
+    const navigateToNextPageTimeout = useRef<NodeJS.Timeout | null>(null)
 
     const [verificationChallenge, setVerificationChallenge] =
         useState<Verification | null>(null)
@@ -32,6 +37,10 @@ const Page2 = ({
     }
 
     function pollVerificationChallenge() {
+        if (Date.now() - pageLoadedTimestamp > pageTimeout) {
+            setIsPageTimeout(true)
+            return
+        }
         if (accessToken?.character_id) {
             getVerificationChallengeByCharacterId(accessToken?.character_id)
                 .then((response) => {
@@ -95,25 +104,31 @@ const Page2 = ({
             )}
             {!!character && (
                 <ContentCluster title="Verify Character">
+                    {isPageTimeout && (
+                        <PageMessage
+                            type="error"
+                            title="Page Timeout"
+                            message="This page has timed out. Please refresh the page to try again."
+                        />
+                    )}
                     <p>
                         One last step. <b>Remove</b> the verification code from
                         the Public Comment field in the Social Panel.
                     </p>
-                    <p>
-                        Hint: With the Comment field blank, click the Submit
-                        button.
-                    </p>
+                    <ExpandableContainer title="Show me how">
+                        <div className="remove-comment-field-demo" />
+                    </ExpandableContainer>
                     <p>Here's the checklist:</p>
                     <ul>
                         <li>
-                            <strong>Step 1:</strong> Code has been removed from
-                            the Public Comment field{" "}
                             {verificationChallenge &&
                             !verificationChallenge.challenge_word_match ? (
                                 <Checkmark className="step-icon" />
                             ) : (
                                 <X className="step-icon" />
-                            )}
+                            )}{" "}
+                            <strong>Step 1:</strong> Code has been removed from
+                            the Public Comment field
                         </li>
                     </ul>
                     <p className="secondary-text">

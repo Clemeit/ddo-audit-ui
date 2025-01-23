@@ -61,7 +61,13 @@ const bannerRouteMapping = {
     },
     notifications: {
         title: "LFM Notifications",
-        subtitle: "Set Up and Manager Notifications",
+        subtitle: "Set Up and Manage Notifications",
+        miniature: true,
+        showButtons: false,
+    },
+    timers: {
+        title: "Timers",
+        subtitle: "View and Manage Timers",
         miniature: true,
         showButtons: false,
     },

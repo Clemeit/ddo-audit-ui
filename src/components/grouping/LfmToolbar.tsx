@@ -75,7 +75,7 @@ const LfmToolbar = ({ reloadLfms }: Props) => {
         setShowLfmActivity,
     } = useLfmContext()
     const { isFullScreen, setIsFullScreen } = useThemeContext()
-    const { isCalloutActive, dismissCallout } = useFeatureCallouts()
+    const { isCalloutActive, callouts, dismissCallout } = useFeatureCallouts()
     const [showSettingsModal, setShowSettingsModal] = React.useState(false)
     const [showResetViewSettingsModal, setShowResetViewSettingsModal] =
         React.useState(false)
@@ -440,6 +440,7 @@ const LfmToolbar = ({ reloadLfms }: Props) => {
             setMouseOverDelay,
             showLfmActivity,
             setShowLfmActivity,
+            callouts,
         ]
     )
 

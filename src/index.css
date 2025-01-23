@@ -246,6 +246,18 @@ table tbody tr:last-of-type {
     gap: 5px;
 }
 
+.verify-button {
+    border-color: var(--orange-text) !important;
+}
+
+.verify-button > span {
+    color: var(--orange-text) !important;
+}
+
+.verify-button:hover {
+    box-shadow: 0px 0px 5px 0px var(--orange-text) !important;
+}
+
 /* mobile */
 @media (max-width: 768px) {
     html {

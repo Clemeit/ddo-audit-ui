@@ -25,6 +25,7 @@ const NotFound = lazy(() => import("./components/app/NotFound.tsx"))
 const Notifications = lazy(
     () => import("./components/notifications/Notifications.tsx")
 )
+const Timers = lazy(() => import("./components/timers/Timers.tsx"))
 
 // Set up the router
 export default createBrowserRouter(
@@ -52,6 +53,7 @@ export default createBrowserRouter(
                 }
             />
             <Route path="/notifications" element={<Notifications />} />
+            <Route path="/timers" element={<Timers />} />
             <Route path="*" element={<NotFound />} />
         </Route>
     )

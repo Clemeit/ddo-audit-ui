@@ -15,6 +15,9 @@ import { addRegisteredCharacter } from "../../utils/localStorage.ts"
 import useGetRegisteredCharacters from "../../hooks/useGetRegisteredCharacters.ts"
 
 const Page2 = ({ setPage }: { setPage: Function }) => {
+    // TODO: use a prop to determine if we got here from the LfmToolbar.
+    // If so, registered characters should be added to the list of
+    // selected characters used for LFM filtering.
     const isMobile = useIsMobile()
 
     const {

@@ -130,6 +130,10 @@ function getTextSize(
     return { width, height }
 }
 
+function pluralize(word: string, count: number | undefined): string {
+    return count === 1 ? word : `${word}s`
+}
+
 export {
     toSentenceCase,
     toPossessiveCase,
@@ -137,4 +141,5 @@ export {
     mapClassesToString,
     wrapText,
     getTextSize,
+    pluralize,
 }

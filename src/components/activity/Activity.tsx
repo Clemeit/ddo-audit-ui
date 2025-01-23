@@ -17,6 +17,11 @@ import useDebounce from "../../hooks/useDebounce.ts"
 import { getLocationActivityStats } from "../../utils/locationActivityUtil.ts"
 import { RANSACK_HOURS, RANSACK_THRESHOLD } from "../../constants/game.ts"
 import { convertMillisecondsToPrettyString } from "../../utils/stringUtils.ts"
+import {
+    NoRegisteredAndVerifiedCharacters,
+    NoRegisteredCharacters,
+    NoVerifiedCharacters,
+} from "../global/CommonMessages.tsx"
 
 // TODO: Location table updates:
 // - Show quest name when a location belongs to a quest.
@@ -283,30 +288,9 @@ const Activity = () => {
                 </div>
             )
         if (verifiedCharacters.length === 0 && registeredCharacters.length > 0)
-            return (
-                <p>
-                    You have not verified any characters. Head over to the{" "}
-                    <Link className="link" to="/registration">
-                        Character Registration
-                    </Link>{" "}
-                    page to do so. Once a character has been verified, you'll be
-                    able to view their activity here.
-                </p>
-            )
-        if (
-            verifiedCharacters.length === 0 &&
-            registeredCharacters.length === 0
-        )
-            return (
-                <p>
-                    You have not registered any characters. Head over to the{" "}
-                    <Link className="link" to="/registration">
-                        Character Registration
-                    </Link>{" "}
-                    page to get started. Once a character has been registered
-                    and verified, you'll be able to view their activity here.
-                </p>
-            )
+            return <NoVerifiedCharacters />
+        if (verifiedCharacters.length === 0)
+            return <NoRegisteredAndVerifiedCharacters />
     }
 
     const conditionalActivityContent = () => {

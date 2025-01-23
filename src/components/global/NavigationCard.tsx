@@ -27,7 +27,7 @@ const typeToTitleMap = {
     transfers: "Server Transfers",
     friends: "Friends List",
     registration: "Register Characters",
-    timers: "Raid Timers",
+    timers: "Raid and Quest Timers",
     about: "About This Project",
     api: "API",
     suggestions: "Give Feedback",
@@ -46,7 +46,7 @@ const typeToDescriptionMap = {
     friends: "See what your friends are up to with your own friends list.",
     registration:
         "Add your characters for automatic LFM filtering and raid tracking.",
-    timers: "View and manage your current raid timers.",
+    timers: "View and manage your current raid and quest timers.",
     about: "Everything you wanted to know about this project and more.",
     api: "Pull back the curtain. Access the data for your own use.",
     suggestions:

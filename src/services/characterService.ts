@@ -14,4 +14,13 @@ function getCharactersByIds(ids: string[]) {
     return axios.get(`${API_URL}/ids/${ids.join(",")}`)
 }
 
-export { getCharacterByNameAndServer, getCharacterById, getCharactersByIds }
+function getCharacterTimersByIds(ids: string[]) {
+    return axios.get(`${API_URL}/timers/${ids.join(",")}`) // TODO: fix the URL
+}
+
+export {
+    getCharacterByNameAndServer,
+    getCharacterById,
+    getCharactersByIds,
+    getCharacterTimersByIds,
+}
