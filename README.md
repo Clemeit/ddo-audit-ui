@@ -10,8 +10,3 @@ A real-time player population tracking project and live LFM viewer for Dungeons 
 
 - **Main website**: [https://www.ddoaudit.com](https://www.ddoaudit.com)
 - **Backend repository**: [https://github.com/Clemeit/ddo-audit-service](https://github.com/Clemeit/ddo-audit-service)
-
-## To-do:
-
-- Content layout shift should be reduced by using placeholders
-- Stop using spacers to move bottom-of-page buttons
