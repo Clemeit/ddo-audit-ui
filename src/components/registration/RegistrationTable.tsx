@@ -148,16 +148,14 @@ const RegistrationTable = ({
                     </tr>
                 </thead>
                 <tbody>
-                    {!isLoaded && loadingRow}
-                    {isLoaded
-                        ? characters.length
-                            ? characters
-                                  .sort((a, b) =>
-                                      (a.name || "").localeCompare(b.name || "")
-                                  )
-                                  .map(characterRow)
-                            : noCharactersMessageRow
-                        : null}
+                    {characters.length === 0 && !isLoaded && loadingRow}
+                    {characters.length
+                        ? characters
+                              .sort((a, b) =>
+                                  (a.name || "").localeCompare(b.name || "")
+                              )
+                              .map(characterRow)
+                        : noCharactersMessageRow}
                 </tbody>
             </table>
         </div>

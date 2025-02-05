@@ -17,17 +17,19 @@ interface Props {
 
 const useGetRegisteredCharacters = ({ enabled = true }: Props = {}) => {
     const [registeredCharacters, setRegisteredCharacters] = useState<
-        Character[]
-    >([])
+        Character[] | undefined
+    >(undefined)
     const [registeredCharactersCached, setRegisteredCharactersCached] =
-        useState<Character[]>([])
-    const [accessTokens, setAccessTokens] = useState<AccessToken[]>([])
-    const [verifiedCharacters, setVerifiedCharacters] = useState<Character[]>(
-        []
+        useState<Character[] | undefined>(undefined)
+    const [accessTokens, setAccessTokens] = useState<AccessToken[] | undefined>(
+        undefined
     )
+    const [verifiedCharacters, setVerifiedCharacters] = useState<
+        Character[] | undefined
+    >(undefined)
     const [verifiedCharactersCached, setVerifiedCharactersCached] = useState<
-        Character[]
-    >([])
+        Character[] | undefined
+    >(undefined)
     const [isLoaded, setIsLoaded] = useState<boolean>(false)
     const [isError, setIsError] = useState<boolean>(false)
 
