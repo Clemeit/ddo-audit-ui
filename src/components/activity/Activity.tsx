@@ -19,9 +19,10 @@ import { RANSACK_HOURS, RANSACK_THRESHOLD } from "../../constants/game.ts"
 import { convertMillisecondsToPrettyString } from "../../utils/stringUtils.ts"
 import {
     NoRegisteredAndVerifiedCharacters,
-    NoRegisteredCharacters,
     NoVerifiedCharacters,
 } from "../global/CommonMessages.tsx"
+import NavCardCluster from "../global/NavCardCluster.tsx"
+import StatusBarChart from "./StatusBarChart.tsx"
 
 // TODO: Location table updates:
 // - Show quest name when a location belongs to a quest.
@@ -294,6 +295,21 @@ const Activity = () => {
     }
 
     const conditionalActivityContent = () => {
+        if (verifiedCharacters.length === 0)
+            return (
+                <div
+                    style={{
+                        width: "100%",
+                        height: "10vh",
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center",
+                    }}
+                >
+                    <span>Waiting for some verified characters...</span>
+                </div>
+            )
+
         return (
             <Stack direction="column" gap="20px">
                 {renderFilters()}
@@ -308,6 +324,7 @@ const Activity = () => {
                     activityType={CharacterActivityType.status}
                     loadingState={statusActivityLoadingState}
                 />
+                <StatusBarChart activity={statusActivity} />
                 <ActivityTable
                     characterActivity={levelActivity}
                     activityType={CharacterActivityType.total_level}
@@ -327,9 +344,9 @@ const Activity = () => {
                 {conditionalActivityContent()}
             </ContentCluster>
             <ContentCluster title="See Also...">
-                <div className="nav-card-cluster">
+                <NavCardCluster>
                     <NavigationCard type="registration" />
-                </div>
+                </NavCardCluster>
             </ContentCluster>
         </Page>
     )
