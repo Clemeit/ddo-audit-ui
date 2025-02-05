@@ -8,6 +8,7 @@ interface Props {
     type?: "error" | "warning" | "info" | "success"
     message: string
     visible: boolean
+    showIcon?: boolean
 }
 
 const typeToColorMap = {
@@ -21,20 +22,26 @@ const ValidationMessage = ({
     type = "error",
     message = "Error",
     visible = false,
+    showIcon = true,
 }: Props) => {
     if (!visible) return null
 
     return (
         <div className="validation-message">
             <Stack direction="row" gap="5px">
-                <div>
-                    {type === "error" && (
-                        <X className="icon" style={{ fill: "red" }} />
-                    )}
-                    {type === "warning" && (
-                        <Warning className="icon" style={{ fill: "orange" }} />
-                    )}
-                </div>
+                {showIcon && (
+                    <div>
+                        {type === "error" && (
+                            <X className="icon" style={{ fill: "red" }} />
+                        )}
+                        {type === "warning" && (
+                            <Warning
+                                className="icon"
+                                style={{ fill: "orange" }}
+                            />
+                        )}
+                    </div>
+                )}
                 <div style={{ color: typeToColorMap[type] }}>{message}</div>
             </Stack>
         </div>

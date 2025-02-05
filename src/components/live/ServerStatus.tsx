@@ -158,15 +158,6 @@ const ServerStatus = ({
     }
 
     const display = () => {
-        // if (mustReload) {
-        //     return (
-        //         <p>
-        //             To continue viewing live server status, please refresh the
-        //             page.
-        //         </p>
-        //     )
-        // }
-
         if (serverInfo.loadingState === LoadingState.Error) {
             return <p>Something went wrong. Please refresh the page.</p>
         }

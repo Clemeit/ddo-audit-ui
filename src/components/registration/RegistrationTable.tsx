@@ -13,6 +13,7 @@ interface Props {
     characters: Character[]
     accessTokens?: AccessToken[]
     noCharactersMessage?: string
+    isLoaded?: boolean
     minimal?: boolean
     unregisterCharacter?: (character: Character) => void
 }
@@ -21,8 +22,9 @@ const RegistrationTable = ({
     characters = [],
     accessTokens = [],
     noCharactersMessage = "No characters found",
+    isLoaded = true,
     minimal = false,
-    unregisterCharacter = (character: Character) => {},
+    unregisterCharacter = () => {},
 }: Props) => {
     const navigate = useNavigate()
 
@@ -67,43 +69,46 @@ const RegistrationTable = ({
         )
 
         return (
-            <>
-                <tr key={character.id}>
-                    <td>
-                        <div
-                            className="character-status-dot"
-                            style={{
-                                backgroundColor: character.is_online
+            <tr key={character.id}>
+                <td>
+                    <div
+                        className="character-status-dot"
+                        style={{
+                            backgroundColor:
+                                character.is_online && !character.is_anonymous
                                     ? "#00BB00"
                                     : "#DD0000",
-                            }}
-                        />
+                        }}
+                    />
+                </td>
+                <td className="character-cell">
+                    <span>
+                        {character.is_anonymous ? "Anonymous" : character.name}
+                    </span>
+                </td>
+                <td>{character.server_name}</td>
+                <td className="hide-on-small-mobile">
+                    {character.total_level}
+                </td>
+                {!minimal && (
+                    <td className="hide-on-mobile">
+                        {character.is_anonymous ? "-" : character.guild_name}
                     </td>
-                    <td className="character-cell">
-                        <span>{character.name}</span>
+                )}
+                {!minimal && (
+                    <td className="hide-on-mobile">
+                        {mapClassesToString(character.classes)}
                     </td>
-                    <td>{character.server_name}</td>
-                    <td className="hide-on-small-mobile">
-                        {character.total_level}
+                )}
+                {!minimal && (
+                    <td className="hide-on-mobile">
+                        {character.is_anonymous
+                            ? "-"
+                            : character.location?.name}
                     </td>
-                    {!minimal && (
-                        <td className="hide-on-mobile">
-                            {character.guild_name}
-                        </td>
-                    )}
-                    {!minimal && (
-                        <td className="hide-on-mobile">
-                            {mapClassesToString(character.classes)}
-                        </td>
-                    )}
-                    {!minimal && (
-                        <td className="hide-on-mobile">
-                            {character.location?.name}
-                        </td>
-                    )}
-                    {!minimal && actionCell}
-                </tr>
-            </>
+                )}
+                {!minimal && actionCell}
+            </tr>
         )
     }
 
@@ -111,6 +116,14 @@ const RegistrationTable = ({
         <tr>
             <td className="no-data-row" colSpan={100}>
                 {noCharactersMessage}
+            </td>
+        </tr>
+    )
+
+    const loadingRow = (
+        <tr>
+            <td className="no-data-row" colSpan={100}>
+                Loading...
             </td>
         </tr>
     )
@@ -135,13 +148,16 @@ const RegistrationTable = ({
                     </tr>
                 </thead>
                 <tbody>
-                    {characters.length
-                        ? characters
-                              .sort((a, b) =>
-                                  (a.name || "").localeCompare(b.name || "")
-                              )
-                              .map(characterRow)
-                        : noCharactersMessageRow}
+                    {!isLoaded && loadingRow}
+                    {isLoaded
+                        ? characters.length
+                            ? characters
+                                  .sort((a, b) =>
+                                      (a.name || "").localeCompare(b.name || "")
+                                  )
+                                  .map(characterRow)
+                            : noCharactersMessageRow
+                        : null}
                 </tbody>
             </table>
         </div>

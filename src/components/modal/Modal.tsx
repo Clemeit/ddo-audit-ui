@@ -19,8 +19,6 @@ const Modal = ({
     maxWidth = "400px",
     fullScreenOnMobile = false,
 }: Props) => {
-    const isMobile = useIsMobile()
-
     useEffect(() => {
         // event listener for closing modal on escape key press
         const handleKeyDown = (e: KeyboardEvent) => {

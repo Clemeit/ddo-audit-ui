@@ -23,6 +23,7 @@ const useGetCharacterTimers = ({ verifiedCharacters }: Props) => {
     )
 
     useEffect(() => {
+        if (!verifiedCharacters || verifiedCharacters.length === 0) return
         // get timers for each character
         const characterIds = verifiedCharacters.map((character) => character.id)
         getCharacterTimersByIds(characterIds)

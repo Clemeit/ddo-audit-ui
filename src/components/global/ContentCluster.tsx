@@ -23,12 +23,16 @@ const ContentCluster = ({
     return (
         <div className={`content-cluster ${className}`}>
             {title && (
-                <h2 className={hideHeaderOnMobile ? "hide-on-mobile" : ""}>
+                <h2
+                    className={`content-cluster-title ${hideHeaderOnMobile ? "hide-on-mobile" : ""}`}
+                >
                     {title}
                 </h2>
             )}
-            {subtitle && <p className="subtitle">{subtitle}</p>}
-            {children && <div className="content">{children}</div>}
+            {subtitle && <p className="content-cluster-subtitle">{subtitle}</p>}
+            {children && (
+                <div className="content-cluster-content">{children}</div>
+            )}
         </div>
     )
 }

@@ -15,7 +15,7 @@ import { SERVER_NAMES } from "../../constants/servers.ts"
 import Modal from "../modal/Modal.tsx"
 import useIsMobile from "../../hooks/useIsMobile.ts"
 
-const Page1 = ({ setPage }: { setPage: Function }) => {
+const Page1 = () => {
     const {
         registeredCharacters,
         accessTokens,

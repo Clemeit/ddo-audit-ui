@@ -8,12 +8,10 @@ interface UsePollLfmsParams {
     serverName: string
 }
 
-const usePollLfms = (
-    { serverName, refreshInterval }: UsePollLfmsParams = {
-        serverName: "",
-        refreshInterval: 5000,
-    }
-) => {
+const usePollLfms = ({
+    serverName = "",
+    refreshInterval = 5000,
+}: UsePollLfmsParams) => {
     const [pageLoadedAt] = useState<Date>(new Date())
     const [lfmData, setLfmData] = useState<ApiState<LfmApiModel>>({
         data: null,
@@ -54,7 +52,7 @@ const usePollLfms = (
             getAllLfms()
                 .then((response) => {
                     const responseData = response.data
-                    const lfmData: LfmApiModel = responseData.data
+                    const lfmData: LfmApiModel = responseData
                     setLfmData({
                         data: lfmData,
                         loadingState: LoadingState.Loaded,

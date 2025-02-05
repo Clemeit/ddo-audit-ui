@@ -110,6 +110,10 @@ hr {
     color: var(--orange1);
 }
 
+.blue-text {
+    color: var(--blue1);
+}
+
 input {
     color: var(--text-inverted);
     padding: 2px 5px;

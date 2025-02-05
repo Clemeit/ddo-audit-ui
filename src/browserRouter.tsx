@@ -11,7 +11,7 @@ import Directory from "./components/directory/Directory.tsx"
 import Live from "./components/live/Live.tsx"
 import Grouping from "./components/grouping/Grouping.tsx"
 import GroupingSpecific from "./components/grouping/GroupingSpecific.tsx"
-import { LfmProvider } from "./contexts/LfmContext.tsx"
+import Servers from "./components/servers/Servers.tsx"
 
 // Lazy load uncommon pages
 const Verification = lazy(
@@ -26,6 +26,9 @@ const Notifications = lazy(
     () => import("./components/notifications/Notifications.tsx")
 )
 const Timers = lazy(() => import("./components/timers/Timers.tsx"))
+
+// Providers
+import { LfmProvider } from "./contexts/LfmContext.tsx"
 
 // Set up the router
 export default createBrowserRouter(
@@ -54,6 +57,7 @@ export default createBrowserRouter(
             />
             <Route path="/notifications" element={<Notifications />} />
             <Route path="/timers" element={<Timers />} />
+            <Route path="/servers" element={<Servers />} />
             <Route path="*" element={<NotFound />} />
         </Route>
     )

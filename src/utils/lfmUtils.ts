@@ -1,10 +1,16 @@
-import { FlatActivityEvent, Lfm, LfmActivityType } from "../models/Lfm"
+import {
+    FlatActivityEvent,
+    Lfm,
+    LfmActivityType,
+    LfmApiModel,
+} from "../models/Lfm"
 import {
     LFM_HEIGHT,
     LFM_SPRITE_MAP,
     LFM_AREA_PADDING,
 } from "../constants/lfmPanel.ts"
 import { BoundingBox } from "../models/Geometry.ts"
+import { ApiState, LoadingState } from "../models/Api.ts"
 
 const calculateCommonBoundingBoxes = (panelWidth: number) => {
     const lfmBoundingBox = new BoundingBox(
@@ -26,7 +32,7 @@ const calculateCommonBoundingBoxes = (panelWidth: number) => {
     const questPanelBoundingBox = new BoundingBox(
         mainPanelBoundingBox.x + mainPanelBoundingBox.width,
         lfmBoundingBox.y,
-        lfmBoundingBox.width * 0.25,
+        lfmBoundingBox.width * 0.3,
         lfmBoundingBox.height
     )
     const classPanelBoundingBox = new BoundingBox(
@@ -38,7 +44,7 @@ const calculateCommonBoundingBoxes = (panelWidth: number) => {
     const levelPanelBoundingBox = new BoundingBox(
         classPanelBoundingBox.x + classPanelBoundingBox.width,
         lfmBoundingBox.y,
-        lfmBoundingBox.width * 0.15,
+        lfmBoundingBox.width * 0.1,
         lfmBoundingBox.height
     )
     const leaderRaceIconBoundingBox = new BoundingBox(
@@ -236,6 +242,17 @@ function mapRaceAndGenderToRaceIconBoundingBox(
     }
 }
 
+function getLfmsByServerName(
+    lfmData: ApiState<LfmApiModel>,
+    serverName: string
+): Lfm[] {
+    if (!serverName) return []
+    if (!lfmData.data) return []
+    if (!lfmData.data?.data?.[serverName]) return []
+    if (lfmData.loadingState !== LoadingState.Loaded) return []
+    return Object.values(lfmData.data?.data?.[serverName].lfms || {})
+}
+
 export {
     shouldLfmRerender,
     calculateCommonBoundingBoxes,
@@ -243,4 +260,5 @@ export {
     mapRaceAndGenderToRaceIconBoundingBox,
     mapClassToIconBoundingBox,
     getLfmActivityEventsFlatMap,
+    getLfmsByServerName,
 }

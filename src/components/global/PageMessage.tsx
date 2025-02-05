@@ -9,13 +9,13 @@ import Stack from "../global/Stack.tsx"
 interface Props {
     type?: "error" | "warning" | "info" | "success"
     title?: string
-    message?: string
+    message?: React.ReactNode
 }
 
 const PageMessage = ({
     type = "info",
     title = "Title",
-    message = "Message",
+    message = <span>Message</span>,
 }: Props) => {
     return (
         <div

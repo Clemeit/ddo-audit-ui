@@ -50,6 +50,10 @@
     background-color: var(--background-light);
 }
 
+.lfm-settings-modal {
+    padding: 20px;
+}
+
 @media (max-width: 768px) {
     .lfm-toolbar-container {
         height: 40px;

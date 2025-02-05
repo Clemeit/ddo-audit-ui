@@ -3,7 +3,7 @@
     margin-bottom: 20px;
 }
 
-.content-cluster > h2 {
+.content-cluster-title {
     font-weight: 400;
     margin-bottom: 1rem;
     margin-top: 0;
@@ -11,23 +11,18 @@
     padding-bottom: 0.5rem;
 }
 
-.content-cluster .subtitle {
+.content-cluster-subtitle {
     color: var(--secondary-text);
 }
 
 @media (max-width: 768px) {
-    .content-cluster .content {
-        display: flex;
-        flex-direction: column;
-    }
-
-    .content-cluster .content .navigation-card {
+    .content-cluster-content .navigation-card {
         width: 100%;
         padding: 10px;
         height: unset;
     }
 
-    .content-cluster .content .navigation-card p {
+    .content-cluster-content .navigation-card p {
         line-height: unset;
         min-height: unset;
     }

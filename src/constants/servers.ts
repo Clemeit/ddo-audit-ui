@@ -13,7 +13,7 @@ const SERVER_NAMES = [
 
 const SERVER_NAMES_LOWER = SERVER_NAMES.map((server) => server.toLowerCase())
 
-const VIP_SERVER_NAMES = ["Cormyr"]
+const VIP_SERVER_NAMES: string[] = []
 
 const VIP_SERVER_NAMES_LOWER = VIP_SERVER_NAMES.map((server) =>
     server.toLowerCase()

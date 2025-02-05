@@ -13,12 +13,14 @@ import {
 } from "../constants/lfmPanel.ts"
 import { useThemeContext } from "./ThemeContext.tsx"
 import { setValue, getValue } from "../utils/localStorage.ts"
-import { LfmSortType } from "../models/Lfm.ts"
+import { LfmApiDataModel, LfmSortType } from "../models/Lfm.ts"
 import { MAX_LEVEL, MIN_LEVEL } from "../constants/game.ts"
 import useGetRegisteredCharacters from "../hooks/useGetRegisteredCharacters.ts"
 import { Character } from "../models/Character.ts"
 
 interface LfmContextProps {
+    lfmDataCache: LfmApiDataModel
+    setLfmDataCache: (lfmData: LfmApiDataModel) => void
     minLevel: number
     setMinLevel: (level: number) => void
     maxLevel: number
@@ -72,12 +74,15 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
         useGetRegisteredCharacters()
     const [trackedCharacterIds, setTrackedCharacterIds] = useState<string[]>([])
 
+    // lfm cache used when navigating from grouping to grouping specific
+    const [lfmDataCache, setLfmDataCache] = useState<LfmApiDataModel>({})
+
     // debug:
     const [showBoundingBoxes, setShowBoundingBoxes] = useState<boolean>(false)
 
     const { setIsFullScreen } = useThemeContext()
 
-    // TODO: store all of the optionsl and filters here
+    // TODO: store all of the options and filters here
     // filter:
     const [minLevel, setMinLevel] = useState<number>(MIN_LEVEL)
     const [maxLevel, setMaxLevel] = useState<number>(MAX_LEVEL)
@@ -232,6 +237,8 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
     return (
         <LfmContext.Provider
             value={{
+                lfmDataCache,
+                setLfmDataCache,
                 minLevel,
                 setMinLevel,
                 maxLevel,

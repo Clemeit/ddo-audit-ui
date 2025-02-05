@@ -85,12 +85,12 @@ const LfmToolbar = ({ reloadLfms }: Props) => {
 
     const handleOpenModal = () => {
         setShowSettingsModal(true)
-        document.body.style.overflow = "hidden"
+        document.body.style.overflowY = "hidden"
     }
 
     const handleCloseModal = () => {
         setShowSettingsModal(false)
-        document.body.style.overflow = "scroll"
+        document.body.style.overflowY = "scroll"
     }
 
     const resetViewSettingsModal = useMemo(
@@ -129,7 +129,7 @@ const LfmToolbar = ({ reloadLfms }: Props) => {
 
     const settingModalContent = useMemo(
         () => (
-            <>
+            <div className="lfm-settings-modal">
                 <ContentCluster title="Filter Groups">
                     <Stack direction="column" gap="10px">
                         <label
@@ -400,7 +400,7 @@ const LfmToolbar = ({ reloadLfms }: Props) => {
                         </Checkbox>
                     </Stack>
                 </ContentCluster>
-            </>
+            </div>
         ),
         [
             minLevel,
