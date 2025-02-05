@@ -18,6 +18,7 @@ const GroupingContainer = ({
 }: Props) => {
     const { lfmData, reload } = usePollLfms({ serverName, refreshInterval })
     const {
+        lfmDataCache,
         sortBy,
         minLevel,
         maxLevel,
@@ -30,7 +31,9 @@ const GroupingContainer = ({
     // filter and sort the lfms
     const filteredLfms = useMemo(() => {
         const lfms: Lfm[] = Object.values(
-            lfmData.data?.data?.[serverName]?.lfms || {}
+            lfmData.data?.data?.[serverName]?.lfms ||
+                lfmDataCache?.[serverName]?.lfms ||
+                {}
         )
         if (!lfms)
             return {
@@ -44,10 +47,10 @@ const GroupingContainer = ({
 
             // level check
             if (!filterByMyCharacters) {
-                if (minLevel && minLevel > lfm.maximum_level) {
+                if (minLevel && minLevel >= lfm.maximum_level) {
                     isEligible = false
                 }
-                if (maxLevel && maxLevel < lfm.minimum_level) {
+                if (maxLevel && maxLevel <= lfm.minimum_level) {
                     isEligible = false
                 }
             } else {
@@ -124,6 +127,7 @@ const GroupingContainer = ({
             excludedLfmCount: lfms.length - filteredAndSortedLfms.length,
         }
     }, [
+        lfmDataCache,
         lfmData,
         sortBy,
         minLevel,
