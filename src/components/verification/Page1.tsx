@@ -131,9 +131,9 @@ const Page1 = ({
                         </span>
                     </p>
                     <p>
-                        Access tokens will be stored in your browser's local
-                        storage. If you clear your browser's cookies, you will
-                        need to verify your characters again.
+                        Access tokens will be stored as cookies. If you clear
+                        your cookies, you will need to verify your characters
+                        again.
                     </p>
                 </ContentCluster>
             </ExpandableContainer>

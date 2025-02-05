@@ -152,6 +152,14 @@ const Grouping = () => {
             return <p className="secondary-text">Loading content...</p>
         }
 
+        if (Object.entries(getCurrentRaids() || {}).length === 0) {
+            return (
+                <p className="secondary-text">
+                    There aren't any raids posted at the moment.
+                </p>
+            )
+        }
+
         return (
             <Stack direction="column" gap="20px">
                 {Object.entries(getCurrentRaids() || {}).map(
