@@ -8,7 +8,7 @@ import { getMessaging, getToken } from "firebase/messaging"
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 
 const firebaseConfig = {
-    apiKey: "AIzaSyBPQk8DKDZvO88IL5War-0k-GLFmCvqeIg",
+    apiKey: process.env.FIREBASE_API_KEY || "",
     authDomain: "hcnxsryjficudzazjxty.firebaseapp.com",
     projectId: "hcnxsryjficudzazjxty",
     storageBucket: "hcnxsryjficudzazjxty.firebasestorage.app",
@@ -24,8 +24,7 @@ const analytics = getAnalytics(app)
 // Initialize Firebase Cloud Messaging and get a reference to the service
 const messaging = getMessaging(app)
 getToken(messaging, {
-    vapidKey:
-        " BGJOuCJ--9e_IpkMSdfqggo_T-QrSSbCNa-CdOWOiECNJI9IMaRkpwnKYBtiAcOpJMI_XjBFfEnvKo7F_QSkUVg",
+    vapidKey: process.env.FIREBASE_VAPID_KEY || "",
 })
     .then((currentToken) => {
         if (currentToken) {
