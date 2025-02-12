@@ -10,4 +10,17 @@ interface ServerInfo {
     lfm_count: number
 }
 
-export { ServerInfo }
+interface ServerInfoApiDataModel {
+    argonnessen?: ServerInfo
+    cannith?: ServerInfo
+    ghallanda?: ServerInfo
+    khyber?: ServerInfo
+    orien?: ServerInfo
+    sarlona?: ServerInfo
+    thelanis?: ServerInfo
+    wayfinder?: ServerInfo
+    hardcore?: ServerInfo
+    cormyr?: ServerInfo
+}
+
+export { ServerInfo, ServerInfoApiDataModel }

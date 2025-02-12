@@ -27,17 +27,25 @@ export class ErrorBoundary extends React.Component<
         console.error(error, errorInfo)
     }
 
+    handleResetError = () => {
+        this.setState({ hasError: false })
+    }
+
     render() {
         if (this.state.hasError) {
             return (
                 <div className="error-boundary-container">
-                    <h1>Something went wrong.</h1>
+                    <h1 style={{ marginBottom: "5px" }}>
+                        Well this is awkward.
+                    </h1>
                     <p>
                         If you're seeing this page, it means that something went
-                        wrong. Please try refreshing the page or come back
-                        later.
+                        wrong. Sorry about that! Please refresh the page or come
+                        back later.
                     </p>
-                    <Link to="/">Return to the homepage</Link>
+                    <Link to="/" onClick={this.handleResetError}>
+                        Return to the homepage
+                    </Link>
                 </div>
             )
         }

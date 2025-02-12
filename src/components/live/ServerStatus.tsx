@@ -1,7 +1,6 @@
 import React, { useEffect, useState, useRef, useCallback, useMemo } from "react"
 import "./ServerStatus.css"
-import { getServerInfo } from "../../services/gameService.ts"
-import { ServerInfo } from "../../models/Game.ts"
+import { ServerInfoApiDataModel } from "../../models/Game.ts"
 import { ReactComponent as Checkmark } from "../../assets/svg/checkmark.svg"
 import { ReactComponent as X } from "../../assets/svg/x.svg"
 import { ReactComponent as Pending } from "../../assets/svg/pending.svg"
@@ -11,22 +10,24 @@ import {
 } from "../../utils/stringUtils.ts"
 import ValidationMessage from "../global/ValidationMessage.tsx"
 import { SERVER_NAMES, SERVER_NAMES_LOWER } from "../../constants/servers.ts"
-import { ApiState, LoadingState } from "../../models/Api.ts"
+import { LoadingState } from "../../models/Api.ts"
 
 const ServerStatus = ({
-    serverInfo,
+    serverInfoData,
+    serverInfoState,
 }: {
-    serverInfo: ApiState<Record<string, ServerInfo>>
+    serverInfoData: ServerInfoApiDataModel | null
+    serverInfoState: LoadingState
 }) => {
     const mostRecentCheck = useMemo(() => {
-        if (serverInfo === null || serverInfo.data === null) {
+        if (serverInfoData === null) {
             return {
                 mostRecentStatusCheck: new Date(),
                 timeDifferenceInSeconds: 0,
             }
         }
 
-        const statusCheckTimesAsDates: Date[] = Object.values(serverInfo.data)
+        const statusCheckTimesAsDates: Date[] = Object.values(serverInfoData)
             .map((server) => new Date(server.last_status_check + "Z"))
             .filter((date) => !isNaN(date.getTime())) // Filter out invalid dates
         const mostRecentStatusCheck = new Date(
@@ -38,14 +39,14 @@ const ServerStatus = ({
             (currentTime.getTime() - mostRecentStatusCheck.getTime()) / 1000
         )
         return { mostRecentStatusCheck, timeDifferenceInSeconds }
-    }, [serverInfo])
+    }, [serverInfoData])
 
     const isLoading = () => {
         return (
-            serverInfo.loadingState === LoadingState.Initial ||
-            serverInfo.loadingState === LoadingState.Loading ||
-            serverInfo.data === null ||
-            Object.keys(serverInfo.data).length === 0
+            serverInfoState === LoadingState.Initial ||
+            serverInfoState === LoadingState.Loading ||
+            serverInfoData === null ||
+            Object.keys(serverInfoData).length === 0
         )
     }
 
@@ -112,7 +113,7 @@ const ServerStatus = ({
 
         return (
             <div className="server-status-container">
-                {Object.entries(serverInfo.data!)
+                {Object.entries(serverInfoData || {})
                     .filter(([serverName]) =>
                         SERVER_NAMES_LOWER.includes(serverName)
                     )
@@ -142,7 +143,7 @@ const ServerStatus = ({
     }
 
     const validationMessage = () => {
-        if (serverInfo.loadingState !== LoadingState.Loaded) {
+        if (serverInfoState !== LoadingState.Loaded) {
             return null
         }
 
@@ -158,7 +159,7 @@ const ServerStatus = ({
     }
 
     const display = () => {
-        if (serverInfo.loadingState === LoadingState.Error) {
+        if (serverInfoState === LoadingState.Error) {
             return <p>Something went wrong. Please refresh the page.</p>
         }
 

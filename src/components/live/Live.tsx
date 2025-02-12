@@ -4,47 +4,43 @@ import Page from "../global/Page.tsx"
 import ServerStatus from "./ServerStatus.tsx"
 import NavigationCard from "../global/NavigationCard.tsx"
 import QuickInfo from "./QuickInfo.tsx"
-import useGetLiveData from "../../hooks/useGetLiveData.ts"
+import usePollApi from "../../hooks/usePollApi.ts"
 import PageMessage from "../global/PageMessage.tsx"
 import NavCardCluster from "../global/NavCardCluster.tsx"
 import { LoadingState } from "../../models/Api.ts"
+import { ServerInfoApiDataModel } from "../../models/Game.ts"
+import {
+    DataLoadingErrorPageMessage,
+    LiveDataHaultedPageMessage,
+} from "../global/CommonMessages.tsx"
 
 const Live = () => {
-    const { serverInfo, mustReload } = useGetLiveData()
+    const {
+        data: serverInfoData,
+        state: serverInfoState,
+        error: serverInfoError,
+    } = usePollApi<ServerInfoApiDataModel>({
+        endpoint: "game/server-info",
+        interval: 10000,
+        lifespan: 1000 * 60 * 60 * 12, // 24 hours
+    })
 
     return (
         <Page
             title="DDO Server Status"
             description="DDO server status, most populated server, current default server, and recent population trends."
         >
-            {mustReload && (
-                <PageMessage
-                    type="error"
-                    title="Are you still there?"
-                    message="You must refresh the page to continue viewing live data."
-                />
+            {serverInfoState === LoadingState.Haulted && (
+                <LiveDataHaultedPageMessage />
             )}
-            {serverInfo && serverInfo.loadingState === LoadingState.Error && (
-                <PageMessage
-                    type="error"
-                    title="Server Status Error"
-                    message={
-                        <>
-                            <span>
-                                There was an error loading the server status
-                                data. Please try again later.
-                            </span>
-                            {serverInfo.error && (
-                                <span className="secondary-text">
-                                    {serverInfo.error}
-                                </span>
-                            )}
-                        </>
-                    }
-                />
+            {serverInfoState === LoadingState.Error && (
+                <DataLoadingErrorPageMessage />
             )}
             <ContentCluster title="Server Status">
-                <ServerStatus serverInfo={serverInfo} />
+                <ServerStatus
+                    serverInfoData={serverInfoData}
+                    serverInfoState={serverInfoState}
+                />
             </ContentCluster>
             <ContentCluster title="Quick Info">
                 <QuickInfo />

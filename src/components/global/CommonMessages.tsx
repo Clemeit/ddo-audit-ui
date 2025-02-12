@@ -1,6 +1,7 @@
 import React from "react"
 import { Link } from "react-router-dom"
 import Button from "./Button.tsx"
+import PageMessage from "./PageMessage.tsx"
 
 export const NoVerifiedCharacters = () => (
     <p>
@@ -55,4 +56,27 @@ export const ErrorGettingRegisteredCharacters = () => (
         There was an error getting your registered characters. Please try
         refreshing the page.
     </p>
+)
+
+export const LiveDataHaultedPageMessage = () => (
+    <PageMessage
+        title="Live update paused"
+        message="Are you still there? Please refresh the page to continue viewing live data."
+        type="warning"
+    />
+)
+
+export const DataLoadingErrorPageMessage = () => (
+    <PageMessage
+        type="error"
+        title="Failed to load data"
+        message={
+            <>
+                <span>
+                    There was an error loading some data. Please refresh the
+                    page or come back later.
+                </span>
+            </>
+        }
+    />
 )

@@ -430,6 +430,11 @@ const SORT_HEADERS = (commonBoundingBoxes): SortHeaderData[] => [
     },
 ]
 
+const HARD_EXPRESSION = /\b(hard|h|eh)\b/i
+const ELITE_EXPRESSION = /\b(elite|e|ee)\b/i
+const REAPER_EXPRESSION = /\b(reaper|r|re)/i
+const SKULL_EXPRESSION = /\b(r|r |reaper|reaper )(\d+)\b(\+)?/i
+
 export {
     DEFAULT_LFM_PANEL_WIDTH,
     MINIMUM_LFM_PANEL_WIDTH,
@@ -464,4 +469,8 @@ export {
     OVERLAY_CHARACTER_HEIGHT_WITH_GUILD_NAME,
     OVERLAY_QUEST_INFO_SPACING,
     OVERLAY_QUEST_INFO_LEFT_GAP,
+    HARD_EXPRESSION,
+    ELITE_EXPRESSION,
+    REAPER_EXPRESSION,
+    SKULL_EXPRESSION,
 }

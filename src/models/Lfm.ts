@@ -98,10 +98,6 @@ interface LfmApiDataModel {
     cormyr?: LfmApiServerModel
 }
 
-interface LfmApiModel {
-    data: LfmApiDataModel
-}
-
 interface LfmSortType {
     type: string
     direction: string
@@ -117,7 +113,6 @@ export {
     LfmActivityType,
     LfmApiServerModel,
     LfmApiDataModel,
-    LfmApiModel,
     LfmSortType,
     FlatActivityEvent,
 }

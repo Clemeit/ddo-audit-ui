@@ -1,11 +1,11 @@
-import React, { useCallback, useEffect } from "react"
+import React, { useCallback } from "react"
 import Page from "../global/Page.tsx"
 import ContentCluster from "../global/ContentCluster.tsx"
 import { SERVER_NAMES_LOWER } from "../../constants/servers.ts"
 import { toSentenceCase } from "../../utils/stringUtils.ts"
-import usePollLfms from "../../hooks/usePollLfms.ts"
+import usePollApi from "../../hooks/usePollApi.ts"
 import useGetLiveData from "../../hooks/useGetLiveData.ts"
-import { Lfm, LfmApiServerModel } from "../../models/Lfm.ts"
+import { Lfm, LfmApiDataModel, LfmApiServerModel } from "../../models/Lfm.ts"
 import ServerNavigationCard from "../global/ServerNavigationCard.tsx"
 import NavigationCard from "../global/NavigationCard.tsx"
 import { Link } from "react-router-dom"
@@ -17,16 +17,21 @@ import GroupingCanvas from "./LfmCanvas.tsx"
 import Stack from "../global/Stack.tsx"
 import Badge from "../global/Badge.tsx"
 import NavCardCluster from "../global/NavCardCluster.tsx"
-import { useLfmContext } from "../../contexts/LfmContext.tsx"
+import { LiveDataHaultedPageMessage } from "../global/CommonMessages.tsx"
+import { ServerInfoApiDataModel } from "../../models/Game.ts"
 
 const Grouping = () => {
-    const { lfmData } = usePollLfms({ serverName: "", refreshInterval: 10000 })
-    const { serverInfo } = useGetLiveData()
-    const { setLfmDataCache } = useLfmContext()
-
-    useEffect(() => {
-        setLfmDataCache(lfmData.data?.data || {})
-    }, [lfmData])
+    const { data: lfmData, state: lfmState } = usePollApi<LfmApiDataModel>({
+        endpoint: "lfms",
+        interval: 10000,
+        lifespan: 1000 * 60 * 60 * 12, // 12 hours
+    })
+    const { data: serverInfoData, state: serverInfoState } =
+        usePollApi<ServerInfoApiDataModel>({
+            endpoint: "game/server-info",
+            interval: 10000,
+            lifespan: 1000 * 60 * 60 * 12, // 12 hours
+        })
 
     const cardDescription = (serverData: LfmApiServerModel) => {
         const serverLfms = serverData.lfms
@@ -46,7 +51,7 @@ const Grouping = () => {
     }
 
     const cardIcon = (serverName: string) => {
-        const isOnline = serverInfo.data?.[serverName]?.is_online
+        const isOnline = serverInfoData?.[serverName]?.is_online
         if (isOnline === true) {
             return <Checkmark className="shrinkable-icon" />
         } else if (isOnline === false) {
@@ -58,7 +63,7 @@ const Grouping = () => {
 
     const cardBadge = (serverName: string) => {
         return (
-            serverInfo.data?.[serverName]?.is_vip_only && (
+            serverInfoData?.[serverName]?.is_vip_only && (
                 <Badge
                     text="VIP"
                     size="small"
@@ -70,7 +75,7 @@ const Grouping = () => {
 
     const getCurrentRaids = useCallback(() => {
         const currentRaids: Record<string, Lfm[]> = {}
-        Object.entries(lfmData.data?.data || {}).forEach(
+        Object.entries(lfmData || {}).forEach(
             ([serverName, serverData]: [string, LfmApiServerModel]) => {
                 Object.values(serverData.lfms)?.forEach((lfm: Lfm) => {
                     if (lfm.quest?.group_size === "Raid") {
@@ -92,8 +97,8 @@ const Grouping = () => {
 
     const getServerSelectContent = () => {
         if (
-            serverInfo.loadingState === LoadingState.Initial ||
-            serverInfo.loadingState === LoadingState.Loading
+            serverInfoState === LoadingState.Initial ||
+            serverInfoState === LoadingState.Loading
         ) {
             return SERVER_NAMES_LOWER.sort(([serverNameA], [serverNameB]) =>
                 serverNameA.localeCompare(serverNameB)
@@ -109,8 +114,8 @@ const Grouping = () => {
         }
 
         if (
-            lfmData.loadingState === LoadingState.Initial ||
-            lfmData.loadingState === LoadingState.Loading
+            lfmState === LoadingState.Initial ||
+            lfmState === LoadingState.Loading
         ) {
             return SERVER_NAMES_LOWER.sort(([serverNameA], [serverNameB]) =>
                 serverNameA.localeCompare(serverNameB)
@@ -125,7 +130,7 @@ const Grouping = () => {
             ))
         }
 
-        return Object.entries(lfmData.data?.data || {})
+        return Object.entries(lfmData || {})
             .filter(([serverName]) => SERVER_NAMES_LOWER.includes(serverName))
             .sort(([server_name_a], [server_name_b]) =>
                 server_name_a.localeCompare(server_name_b)
@@ -144,10 +149,10 @@ const Grouping = () => {
 
     const getCurrentRaidsContent = useCallback(() => {
         if (
-            serverInfo.loadingState === LoadingState.Initial ||
-            serverInfo.loadingState === LoadingState.Loading ||
-            lfmData.loadingState === LoadingState.Initial ||
-            lfmData.loadingState === LoadingState.Loading
+            serverInfoState === LoadingState.Initial ||
+            serverInfoState === LoadingState.Loading ||
+            lfmState === LoadingState.Initial ||
+            lfmState === LoadingState.Loading
         ) {
             return <p className="secondary-text">Loading content...</p>
         }
@@ -183,13 +188,16 @@ const Grouping = () => {
                 )}
             </Stack>
         )
-    }, [serverInfo.loadingState, lfmData, getCurrentRaids])
+    }, [serverInfoState, lfmData, getCurrentRaids])
 
     return (
         <Page
             title="DDO Live LFM Viewer"
             description="View a live LFM panel to find public groups - before you even log in! See which groups are currently looking for more players and what content is currently being run."
         >
+            {lfmState === LoadingState.Haulted && (
+                <LiveDataHaultedPageMessage />
+            )}
             <ContentCluster title="Select a Server">
                 <NavCardCluster>{getServerSelectContent()}</NavCardCluster>
             </ContentCluster>

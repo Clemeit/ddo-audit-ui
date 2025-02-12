@@ -3,6 +3,7 @@ enum LoadingState {
     Loading = "Loading",
     Loaded = "Loaded",
     Error = "Error",
+    Haulted = "Haulted",
 }
 
 interface ApiState<T> {

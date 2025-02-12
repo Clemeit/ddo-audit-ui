@@ -6,6 +6,10 @@ import {
     LFM_COLORS,
     FONTS,
     QUEST_INFO_GAP,
+    REAPER_EXPRESSION,
+    ELITE_EXPRESSION,
+    HARD_EXPRESSION,
+    SKULL_EXPRESSION,
 } from "../constants/lfmPanel.ts"
 import { useLfmContext } from "../contexts/LfmContext.tsx"
 import { CLASS_LIST } from "../constants/game.ts"
@@ -157,6 +161,11 @@ const useRenderLfm = ({ lfmSprite, context }: Props) => {
             leaderNameBoundingBox.y =
                 leaderRaceIconBoundingBox.centerY() -
                 leaderNameBoundingBox.height / 2
+            const leaderTotalLevelWidth = getTextWidthAndHeight(
+                `${lfm.leader.total_level}`,
+                fonts.LEADER_NAME,
+                context
+            ).width
 
             const localShowMemberCount = lfm.members.length > 0
             const memberCountTextOptions = (abbreviated) =>
@@ -169,7 +178,11 @@ const useRenderLfm = ({ lfmSprite, context }: Props) => {
             )
             if (
                 memberCountTextBounds.width >
-                mainPanelBoundingBox.width - leaderNameBoundingBox.right() - 8
+                mainPanelBoundingBox.width -
+                    leaderNameBoundingBox.right() -
+                    8 -
+                    leaderTotalLevelWidth -
+                    10
             ) {
                 memberCountText = memberCountTextOptions(true)
                 memberCountTextBounds = getTextWidthAndHeight(
@@ -281,11 +294,35 @@ const useRenderLfm = ({ lfmSprite, context }: Props) => {
                 maxLines: 1,
                 centered: true,
             })
+            const skullCountMatches = lfm.comment.match(SKULL_EXPRESSION)
+            let skullCount = 0
+            let skullPlus = false
+            if (skullCountMatches) {
+                skullCount = parseInt(skullCountMatches[2])
+                skullPlus = !!skullCountMatches[3]
+            }
+            let lfmDifficultyString = ""
+            if (!lfm.is_quest_guess) {
+                lfmDifficultyString = lfm.difficulty
+            } else {
+                if (REAPER_EXPRESSION.test(lfm.comment) || skullCountMatches) {
+                    lfmDifficultyString = "Reaper"
+                } else if (ELITE_EXPRESSION.test(lfm.comment)) {
+                    lfmDifficultyString = "Elite"
+                } else if (HARD_EXPRESSION.test(lfm.comment)) {
+                    lfmDifficultyString = "Hard"
+                } else {
+                    lfmDifficultyString = "Normal"
+                }
+            }
+            if (skullCount > 0) {
+                lfmDifficultyString += ` ${skullCount}${skullPlus ? "+" : ""}`
+            }
             const {
                 textLines: questDifficultyTextLines,
                 boundingBox: questDifficultyBoundingBox,
             } = confineTextToBoundingBox({
-                text: lfm.difficulty,
+                text: lfmDifficultyString,
                 boundingBox: questPanelBoundingBoxWithPadding,
                 font: fonts.COMMENT,
                 maxLines: 1,
@@ -312,6 +349,7 @@ const useRenderLfm = ({ lfmSprite, context }: Props) => {
             const {
                 textLines: levelRangeTextLines,
                 boundingBox: levelRangeBoundingBox,
+                lineHeight: levelRangeLineHeight,
             } = confineTextToBoundingBox({
                 text: levelRangeText,
                 boundingBox: levelPanelBoundingBoxWithPadding,
@@ -404,7 +442,17 @@ const useRenderLfm = ({ lfmSprite, context }: Props) => {
             context.fillText(
                 leaderNameTextLines[0] || "Anonymous",
                 leaderNameBoundingBox.x,
-                leaderNameBoundingBox.y + leaderNameBoundingBox.height / 2
+                leaderNameBoundingBox.centerY()
+            )
+            // leader total level
+            context.fillStyle = LFM_COLORS.STANDARD_TEXT
+            context.font = fonts.LEVEL_RANGE
+            context.textBaseline = "middle"
+            context.textAlign = "right"
+            context.fillText(
+                lfm.leader.total_level?.toString() || "??",
+                mainPanelBoundingBox.right() - 5,
+                leaderNameBoundingBox.centerY()
             )
             // member count
             if (localShowMemberCount && showMemberCount) {
@@ -515,13 +563,15 @@ const useRenderLfm = ({ lfmSprite, context }: Props) => {
             // ===== LEVEL PANEL =====
             context.fillStyle = LFM_COLORS.STANDARD_TEXT
             context.font = fonts.LEVEL_RANGE
-            context.textBaseline = "middle"
+            context.textBaseline = "top"
             context.textAlign = "center"
-            context.fillText(
-                levelRangeTextLines[0],
-                levelRangeBoundingBox.centerX(),
-                levelRangeBoundingBox.centerY()
-            )
+            levelRangeTextLines.forEach((line, index) => {
+                context.fillText(
+                    line,
+                    levelRangeBoundingBox.centerX(),
+                    levelRangeBoundingBox.y + index * levelRangeLineHeight * 1.2
+                )
+            })
 
             if (showBoundingBoxes) {
                 context.strokeStyle = "red"
