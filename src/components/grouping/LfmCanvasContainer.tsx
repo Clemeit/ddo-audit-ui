@@ -1,9 +1,9 @@
 import React, { useMemo } from "react"
 import LfmCanvas from "./LfmCanvas.tsx"
-import usePollLfms from "../../hooks/usePollLfms.ts"
-import { Lfm } from "../../models/Lfm.ts"
+import { Lfm, LfmApiServerModel } from "../../models/Lfm.ts"
 import { useLfmContext } from "../../contexts/LfmContext.tsx"
 import LfmToolbar from "./LfmToolbar.tsx"
+import usePollApi from "../../hooks/usePollApi.ts"
 
 interface Props {
     serverName: string
@@ -16,9 +16,13 @@ const GroupingContainer = ({
     refreshInterval = 3000,
     raidView = false,
 }: Props) => {
-    const { lfmData, reload } = usePollLfms({ serverName, refreshInterval })
+    const { data: lfmData, reload: reloadLfms } = usePollApi<LfmApiServerModel>(
+        {
+            endpoint: `lfms/${serverName}`,
+            interval: refreshInterval,
+        }
+    )
     const {
-        lfmDataCache,
         sortBy,
         minLevel,
         maxLevel,
@@ -30,11 +34,7 @@ const GroupingContainer = ({
 
     // filter and sort the lfms
     const filteredLfms = useMemo(() => {
-        const lfms: Lfm[] = Object.values(
-            lfmData.data?.data?.[serverName]?.lfms ||
-                lfmDataCache?.[serverName]?.lfms ||
-                {}
-        )
+        const lfms: Lfm[] = Object.values(lfmData?.lfms || {})
         if (!lfms)
             return {
                 filteredAndSortedLfms: [],
@@ -127,7 +127,6 @@ const GroupingContainer = ({
             excludedLfmCount: lfms.length - filteredAndSortedLfms.length,
         }
     }, [
-        lfmDataCache,
         lfmData,
         sortBy,
         minLevel,
@@ -141,7 +140,7 @@ const GroupingContainer = ({
 
     return (
         <>
-            <LfmToolbar reloadLfms={reload} />
+            <LfmToolbar reloadLfms={reloadLfms} />
             <LfmCanvas
                 serverName={serverName}
                 lfms={filteredLfms.filteredAndSortedLfms || []}
