@@ -43,6 +43,16 @@ interface SelectedLfmInfo {
     position: { x: number; y: number }
 }
 
+/**
+ * It takes in as props the lfms raidView, and excludedLfmCount
+ * It has separate canvases for the lfms and overlay
+ * It renders the lfm panel only when the lfm panel width or height changes
+ * It renders individual lfms on when they different from what was last rendered for that index
+ * It renders the overlay when a lfm is hovered over, and rerenders the overlay if that specific lfm changes
+ * If any lfms are rendered, or if the lfm panel is rendered, or if the overlay is rendered, then it renders the
+ *   lfm canvas and the overlay canvas to the main canvas
+ */
+
 const LfmCanvas = ({
     serverName = "",
     lfms = [],
@@ -262,6 +272,10 @@ const LfmCanvas = ({
         const overlayContext = overlayCanvasRef.current?.getContext("2d")
         if (!mainContext || !lfmPanelContext || !overlayContext) return
 
+        let didRenderLfms = false
+        let didRenderLfmPanel = false
+        let didRenderOverlay = false
+
         const shouldForceRender =
             fontSize !== previousFontSize.current ||
             panelWidth !== previousPanelWidth.current ||
@@ -272,6 +286,7 @@ const LfmCanvas = ({
         // draw the lfm panel
         if (shouldForceRender) {
             renderLfmPanelToCanvas(lfms.length)
+            didRenderLfmPanel = true
         }
 
         // draw the lfms
@@ -279,14 +294,13 @@ const LfmCanvas = ({
             LFM_LEFT_PADDING,
             raidView ? 0 : LFM_TOP_PADDING
         )
-        // let totalLfmsRendered = 0
         lfms.forEach((lfm, index) => {
             const shouldRenderLfm =
                 index >= previousLfms.current.length ||
                 shouldLfmRerender(previousLfms.current[index], lfm)
             if (shouldForceRender || shouldRenderLfm) {
                 renderLfm(lfm)
-                // totalLfmsRendered += 1
+                didRenderLfms = true
             }
             lfmPanelContext.translate(0, LFM_HEIGHT)
         })
@@ -303,6 +317,7 @@ const LfmCanvas = ({
                 )
             totalOverlayWidth = overlayWidth
             totalOverlayHeight = overlayHeight
+            didRenderOverlay = true
         }
 
         // show message if all lfms are excluded
@@ -328,29 +343,37 @@ const LfmCanvas = ({
         lfmPanelContext.setTransform(1, 0, 0, 1, 0, 0)
 
         // Draw the lfm canvas and overlay canvas to the main canvas
-        const lfmCanvas = lfmCanvasRef.current
-        const overlayCanvas = overlayCanvasRef.current
-        if (lfmCanvas) mainContext.drawImage(lfmCanvas, 0, 0)
-        if (overlayCanvas && selectedLfmInfo !== null) {
-            const overlayXPosition = Math.max(
-                0,
-                Math.min(
-                    selectedLfmInfo.position.x,
-                    panelWidth - totalOverlayWidth
+        if (didRenderLfmPanel || didRenderLfms || didRenderOverlay) {
+            const lfmCanvas = lfmCanvasRef.current
+            const overlayCanvas = overlayCanvasRef.current
+            if (lfmCanvas) mainContext.drawImage(lfmCanvas, 0, 0)
+            if (overlayCanvas && selectedLfmInfo !== null) {
+                const overlayXPosition = Math.max(
+                    0,
+                    Math.min(
+                        selectedLfmInfo.position.x,
+                        panelWidth - totalOverlayWidth
+                    )
                 )
-            )
-            const overlayYPosition = Math.max(
-                0,
-                Math.min(
-                    selectedLfmInfo.position.y,
-                    panelHeight - totalOverlayHeight
+                const overlayYPosition = Math.max(
+                    0,
+                    Math.min(
+                        selectedLfmInfo.position.y,
+                        panelHeight - totalOverlayHeight
+                    )
                 )
-            )
-            mainContext.drawImage(
-                overlayCanvas,
-                Math.round(overlayXPosition),
-                Math.round(overlayYPosition)
-            )
+                mainContext.drawImage(
+                    overlayCanvas,
+                    Math.round(overlayXPosition),
+                    Math.round(overlayYPosition)
+                )
+            }
+
+            console.log("didRenderLfms", didRenderLfms)
+            console.log("didRenderLfmPanel", didRenderLfmPanel)
+            console.log("didRenderOverlay", didRenderOverlay)
+        } else {
+            console.log("skipped rendering")
         }
 
         previousLfms.current = lfms
