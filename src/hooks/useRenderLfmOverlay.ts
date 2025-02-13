@@ -50,6 +50,7 @@ const useRenderLfmOverlay = ({ lfmSprite, context }: Props) => {
         // fontSize,
         // showRaidTimerIndicator,
         // showMemberCount,
+        isMultiColumn,
     } = useLfmContext()
     const fonts = useMemo(() => FONTS(14), [])
     const { confineTextToBoundingBox } = useTextRenderer(context)
@@ -63,12 +64,21 @@ const useRenderLfmOverlay = ({ lfmSprite, context }: Props) => {
         ): { width: number; height: number } => {
             if (!context || !lfmSprite) return { width: 0, height: 0 }
             context.imageSmoothingEnabled = false
+            const willWrap =
+                renderType === RenderType.LFM &&
+                isMultiColumn &&
+                lfm.members.length > 5
+            const maxColumnCount = Math.ceil((lfm.members.length + 1) / 2)
             context.clearRect(0, 0, panelWidth, panelHeight)
             const characterHeight = showCharacterGuildNames
                 ? OVERLAY_CHARACTER_HEIGHT_WITH_GUILD_NAME
                 : OVERLAY_CHARACTER_HEIGHT
             let totalOverlayHeight = 100 // calculate the height using all the crap we draw to it
             let totalOverlayWidth = OVERLAY_WIDTH
+
+            if (willWrap)
+                totalOverlayWidth = OVERLAY_WIDTH + OVERLAY_CHARACTER_WIDTH + 3
+
             const {
                 textLines: commentTextLines,
                 boundingBox: commentBoundingBox,
@@ -78,7 +88,7 @@ const useRenderLfmOverlay = ({ lfmSprite, context }: Props) => {
                 boundingBox: new BoundingBox(
                     4,
                     4,
-                    OVERLAY_WIDTH - OVERLAY_SIDE_BAR_WIDTH - 8,
+                    totalOverlayWidth - OVERLAY_SIDE_BAR_WIDTH - 8,
                     400
                 ),
                 font: OVERLAY_FONTS.COMMENT,
@@ -133,8 +143,13 @@ const useRenderLfmOverlay = ({ lfmSprite, context }: Props) => {
             // get the total height of the overlay
             if (renderType === RenderType.LFM) {
                 // party members
-                totalOverlayHeight =
-                    (lfm.members.length + 1) * (characterHeight + 2) + 10
+                if (willWrap) {
+                    totalOverlayHeight =
+                        maxColumnCount * (characterHeight + 2) + 10
+                } else {
+                    totalOverlayHeight =
+                        (lfm.members.length + 1) * (characterHeight + 2) + 10
+                }
                 if (lfm.comment)
                     totalOverlayHeight +=
                         commentBoundingBox.y + commentBoundingBox.height
@@ -217,8 +232,9 @@ const useRenderLfmOverlay = ({ lfmSprite, context }: Props) => {
                 )
                 gradient.addColorStop(1, OVERLAY_COLORS.CHARACTER_GRADIENT_EDGE)
 
+                let hasWrapped = false
                 const characters = [lfm.leader, ...lfm.members]
-                characters.forEach((member) => {
+                characters.forEach((member, index) => {
                     context.fillStyle = gradient
                     context.fillRect(
                         0,
@@ -377,8 +393,24 @@ const useRenderLfmOverlay = ({ lfmSprite, context }: Props) => {
                         10
                     )
 
-                    context.translate(0, characterHeight + 2)
+                    if (willWrap && index === maxColumnCount - 1) {
+                        context.setTransform(1, 0, 0, 1, 0, 0)
+                        context.translate(OVERLAY_CHARACTER_WIDTH + 3, 0)
+                        context.translate(4, 3)
+                    } else {
+                        context.translate(0, characterHeight + 2)
+                    }
                 })
+
+                if (willWrap) {
+                    context.setTransform(1, 0, 0, 1, 0, 0)
+                    context.translate(4, 3)
+                    context.translate(
+                        0,
+                        (characterHeight + 2) *
+                            Math.floor(lfm.members.length / 2 + 1)
+                    )
+                }
 
                 // draw comment
                 context.textAlign = "left"

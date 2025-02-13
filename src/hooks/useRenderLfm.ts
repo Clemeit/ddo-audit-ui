@@ -361,7 +361,12 @@ const useRenderLfm = ({ lfmSprite, context }: Props) => {
             context.fillStyle = lfm.is_eligible
                 ? LFM_COLORS.BLACK_BACKGROUND
                 : LFM_COLORS.INELIGIBLE_FILL
-            context.fillRect(0, 0, lfmBoundingBox.width, LFM_HEIGHT)
+            context.fillRect(
+                0,
+                0,
+                Math.floor(lfmBoundingBox.width),
+                Math.floor(LFM_HEIGHT)
+            )
 
             // gradient fill
             if (lfm.is_eligible) {
@@ -377,39 +382,40 @@ const useRenderLfm = ({ lfmSprite, context }: Props) => {
                 gradient.addColorStop(1, LFM_COLORS.ELIGIBLE_GRADIENT_EDGE)
                 context.fillStyle = gradient
                 context.fillRect(
-                    lfmBoundingBox.x,
-                    lfmBoundingBox.y,
-                    lfmBoundingBox.width,
-                    lfmBoundingBox.height
+                    Math.floor(lfmBoundingBox.x),
+                    Math.floor(lfmBoundingBox.y),
+                    Math.floor(lfmBoundingBox.width),
+                    Math.floor(lfmBoundingBox.height)
                 )
             }
 
             // dividers
+            context.globalAlpha = 1
             context.strokeStyle = LFM_COLORS.LFM_BORDER
             context.lineWidth = 1
             context.strokeRect(
-                mainPanelBoundingBox.x,
-                mainPanelBoundingBox.y,
-                mainPanelBoundingBox.width,
-                mainPanelBoundingBox.height
+                Math.floor(mainPanelBoundingBox.x),
+                Math.floor(mainPanelBoundingBox.y),
+                Math.floor(mainPanelBoundingBox.width),
+                Math.floor(mainPanelBoundingBox.height)
             )
             context.strokeRect(
-                questPanelBoundingBox.x,
-                questPanelBoundingBox.y,
-                questPanelBoundingBox.width,
-                questPanelBoundingBox.height
+                Math.floor(questPanelBoundingBox.x),
+                Math.floor(questPanelBoundingBox.y),
+                Math.floor(questPanelBoundingBox.width),
+                Math.floor(questPanelBoundingBox.height)
             )
             context.strokeRect(
-                classPanelBoundingBox.x,
-                classPanelBoundingBox.y,
-                classPanelBoundingBox.width,
-                classPanelBoundingBox.height
+                Math.floor(classPanelBoundingBox.x),
+                Math.floor(classPanelBoundingBox.y),
+                Math.floor(classPanelBoundingBox.width),
+                Math.floor(classPanelBoundingBox.height)
             )
             context.strokeRect(
-                levelPanelBoundingBox.x,
-                levelPanelBoundingBox.y,
-                levelPanelBoundingBox.width,
-                levelPanelBoundingBox.height
+                Math.floor(levelPanelBoundingBox.x),
+                Math.floor(levelPanelBoundingBox.y),
+                Math.floor(levelPanelBoundingBox.width),
+                Math.floor(levelPanelBoundingBox.height)
             )
 
             if (!lfm.is_eligible) {
@@ -446,7 +452,7 @@ const useRenderLfm = ({ lfmSprite, context }: Props) => {
             )
             // leader total level
             context.fillStyle = LFM_COLORS.STANDARD_TEXT
-            context.font = fonts.LEVEL_RANGE
+            context.font = fonts.MEMBER_COUNT
             context.textBaseline = "middle"
             context.textAlign = "right"
             context.fillText(

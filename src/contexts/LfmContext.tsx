@@ -63,6 +63,8 @@ interface LfmContextProps {
     setMouseOverDelay: (delay: number) => void
     showLfmActivity: boolean
     setShowLfmActivity: (show: boolean) => void
+    isMultiColumn: boolean
+    setIsMultiColumn: (value: boolean) => void
 }
 
 const LfmContext = createContext<LfmContextProps | undefined>(undefined)
@@ -104,6 +106,7 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
     const [mouseOverDelay, setMouseOverDelay] = useState<number>(
         DEFAULT_MOUSE_OVER_DELAY
     )
+    const [isMultiColumn, setIsMultiColumn] = useState<boolean>(true)
 
     // tools:
     const [showRaidTimerIndicator, setShowRaidTimerIndicator] =
@@ -130,6 +133,7 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
         setShowLfmPostedTime(true)
         setTrackedCharacterIds([])
         setShowLfmActivity(true)
+        setIsMultiColumn(false)
     }
 
     const resetViewSettings = useCallback(() => {
@@ -164,6 +168,7 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
                 setShowLfmPostedTime(settings.showLfmPostedTime)
                 setMouseOverDelay(settings.mouseOverDelay)
                 setShowLfmActivity(settings.showLfmActivity)
+                setIsMultiColumn(settings.isMultiColumn)
             } catch (e) {
                 // TODO: maybe show a modal here to allow the user to reset their settings
                 console.error("Error loading settings from local storage", e)
@@ -205,6 +210,7 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
             showLfmPostedTime,
             mouseOverDelay,
             showLfmActivity,
+            isMultiColumn,
         })
     }, [
         minLevel,
@@ -226,6 +232,7 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
         showLfmPostedTime,
         mouseOverDelay,
         showLfmActivity,
+        isMultiColumn,
     ])
 
     useEffect(() => {
@@ -281,6 +288,8 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
                 setMouseOverDelay,
                 showLfmActivity,
                 setShowLfmActivity,
+                isMultiColumn,
+                setIsMultiColumn,
             }}
         >
             {children}

@@ -55,7 +55,7 @@ interface FlatActivityEvent {
 interface Lfm {
     id: string
     comment: string
-    quest: Quest
+    quest: Quest | null
     is_quest_guess: boolean
     difficulty: string
     accepted_classes: string[]
@@ -68,7 +68,8 @@ interface Lfm {
     activity: LfmActivity[]
     last_updated: string
     server_name: string
-    is_eligible: boolean
+    is_eligible: boolean | null
+    last_render_time: number | null
 }
 
 enum LfmActivityType {

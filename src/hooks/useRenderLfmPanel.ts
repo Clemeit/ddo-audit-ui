@@ -5,7 +5,6 @@ import {
     LFM_COLORS,
     FONTS,
     LFM_PANEL_TOP_BORDER_HEIGHT,
-    SORT_HEADER_HEIGHT,
     LFM_AREA_PADDING,
     MINIMUM_LFM_COUNT,
     SORT_HEADERS,
@@ -38,25 +37,16 @@ const useRenderLfmPanel = ({
     )
 
     const renderLfmPanelToCanvas = useCallback(
-        (lfmCount: number) => {
+        (panelHeight: number) => {
             if (!context || !lfmSprite) return
             context.imageSmoothingEnabled = false
-            const lfmCountWithLfmPadding = Math.max(lfmCount, minimumLfmCount)
-
-            const panelBottom = raidView
-                ? LFM_HEIGHT * lfmCount
-                : LFM_PANEL_TOP_BORDER_HEIGHT +
-                  SORT_HEADER_HEIGHT +
-                  LFM_AREA_PADDING.top +
-                  LFM_AREA_PADDING.bottom +
-                  lfmCountWithLfmPadding * LFM_HEIGHT
 
             context.fillStyle = "black"
             context.fillRect(
                 0,
                 raidView ? 0 : LFM_SPRITE_MAP.HEADER_BAR.height,
                 panelWidth,
-                panelBottom
+                panelHeight
             )
 
             if (!raidView) {
@@ -157,7 +147,7 @@ const useRenderLfmPanel = ({
 
             // draw left and right borders
             context.translate(0, raidView ? 0 : LFM_PANEL_TOP_BORDER_HEIGHT)
-            for (let i = 0; i < Math.round(panelBottom / LFM_HEIGHT); i++) {
+            for (let i = 0; i < Math.round(panelHeight / LFM_HEIGHT); i++) {
                 context.drawImage(
                     lfmSprite,
                     LFM_SPRITE_MAP.CONTENT_LEFT.x,
@@ -201,7 +191,7 @@ const useRenderLfmPanel = ({
                         LFM_SPRITE_MAP.CONTENT_BOTTOM.width,
                         LFM_SPRITE_MAP.CONTENT_BOTTOM.height,
                         LFM_SPRITE_MAP.CONTENT_BOTTOM.width * i,
-                        panelBottom,
+                        panelHeight - LFM_SPRITE_MAP.CONTENT_BOTTOM.height,
                         LFM_SPRITE_MAP.CONTENT_BOTTOM.width,
                         LFM_SPRITE_MAP.CONTENT_BOTTOM.height
                     )
@@ -213,7 +203,7 @@ const useRenderLfmPanel = ({
                     LFM_SPRITE_MAP.CONTENT_BOTTOM_LEFT.width,
                     LFM_SPRITE_MAP.CONTENT_BOTTOM_LEFT.height,
                     0,
-                    panelBottom,
+                    panelHeight - LFM_SPRITE_MAP.CONTENT_BOTTOM.height,
                     LFM_SPRITE_MAP.CONTENT_BOTTOM_LEFT.width,
                     LFM_SPRITE_MAP.CONTENT_BOTTOM_LEFT.height
                 )
@@ -224,7 +214,7 @@ const useRenderLfmPanel = ({
                     LFM_SPRITE_MAP.CONTENT_BOTTOM_RIGHT.width,
                     LFM_SPRITE_MAP.CONTENT_BOTTOM_RIGHT.height,
                     panelWidth - LFM_SPRITE_MAP.CONTENT_BOTTOM_RIGHT.width,
-                    panelBottom,
+                    panelHeight - LFM_SPRITE_MAP.CONTENT_BOTTOM.height,
                     LFM_SPRITE_MAP.CONTENT_BOTTOM_RIGHT.width,
                     LFM_SPRITE_MAP.CONTENT_BOTTOM_RIGHT.height
                 )
@@ -239,7 +229,8 @@ const useRenderLfmPanel = ({
                         context.translate(
                             boundingBox.x +
                                 LFM_SPRITE_MAP.CONTENT_LEFT.width +
-                                LFM_AREA_PADDING.left,
+                                LFM_AREA_PADDING.left -
+                                1,
                             boundingBox.y +
                                 LFM_PANEL_TOP_BORDER_HEIGHT +
                                 LFM_AREA_PADDING.top

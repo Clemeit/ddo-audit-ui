@@ -73,6 +73,8 @@ const LfmToolbar = ({ reloadLfms }: Props) => {
         setMouseOverDelay,
         showLfmActivity,
         setShowLfmActivity,
+        isMultiColumn,
+        setIsMultiColumn,
     } = useLfmContext()
     const { isFullScreen, setIsFullScreen } = useThemeContext()
     const { isCalloutActive, callouts, dismissCallout } = useFeatureCallouts()
@@ -320,6 +322,12 @@ const LfmToolbar = ({ reloadLfms }: Props) => {
                             onChange={(e) => setIsFullScreen(e.target.checked)}
                         >
                             Fullscreen
+                        </Checkbox>
+                        <Checkbox
+                            checked={isMultiColumn}
+                            onChange={(e) => setIsMultiColumn(e.target.checked)}
+                        >
+                            Show raid group members in two columns
                         </Checkbox>
                         <Stack fullWidth justify="flex-end">
                             <Button

@@ -47,10 +47,10 @@ const GroupingContainer = ({
 
             // level check
             if (!filterByMyCharacters) {
-                if (minLevel && minLevel >= lfm.maximum_level) {
+                if (minLevel && minLevel > lfm.maximum_level) {
                     isEligible = false
                 }
-                if (maxLevel && maxLevel <= lfm.minimum_level) {
+                if (maxLevel && maxLevel < lfm.minimum_level) {
                     isEligible = false
                 }
             } else {
@@ -121,7 +121,6 @@ const GroupingContainer = ({
                         : averageLevelB - averageLevelA
                 }
             })
-
         return {
             filteredAndSortedLfms,
             excludedLfmCount: lfms.length - filteredAndSortedLfms.length,

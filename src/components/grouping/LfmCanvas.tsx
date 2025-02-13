@@ -1,47 +1,29 @@
 import React, { useEffect, useMemo, useRef, useState } from "react"
 import { Lfm } from "../../models/Lfm.ts"
-import {
-    LFM_HEIGHT,
-    TOTAL_LFM_PANEL_BORDER_HEIGHT,
-    LFM_PANEL_TOP_BORDER_HEIGHT,
-    SORT_HEADER_HEIGHT,
-    LFM_AREA_PADDING,
-    LFM_SPRITE_MAP,
-    MINIMUM_LFM_COUNT,
-    SORT_HEADERS,
-    MINIMUM_LFM_PANEL_WIDTH,
-    LFM_TOP_PADDING,
-    LFM_LEFT_PADDING,
-    FONTS,
-    LFM_COLORS,
-} from "../../constants/lfmPanel.ts"
 import useRenderLfm from "../../hooks/useRenderLfm.ts"
-// @ts-expect-error ts-migrate(2307) FIXME: Cannot find module '../../assets/png/lfm_sprite.png'.
-import LfmSprite from "../../assets/png/lfm_sprite.png"
-import { useLfmContext } from "../../contexts/LfmContext.tsx"
 import useRenderLfmPanel from "../../hooks/useRenderLfmPanel.ts"
-import {
-    calculateCommonBoundingBoxes,
-    shouldLfmRerender,
-} from "../../utils/lfmUtils.ts"
-import { debounce } from "../../utils/functionUtils.ts"
 import useRenderLfmOverlay, {
     RenderType,
 } from "../../hooks/useRenderLfmOverlay.ts"
-
-interface GroupingCanvasProps {
-    serverName?: string
-    lfms?: Lfm[]
-    raidView?: boolean
-    excludedLfmCount?: number
-}
-
-interface SelectedLfmInfo {
-    lfm: Lfm
-    index: number
-    renderType: RenderType
-    position: { x: number; y: number }
-}
+// @ts-expect-error ts-migrate(2307) FIXME: Cannot find module '../../assets/png/lfm_sprite.png'.
+import LfmSprite from "../../assets/png/lfm_sprite.png"
+import { useLfmContext } from "../../contexts/LfmContext.tsx"
+import {
+    areLfmArraysEqual,
+    areLfmOverlaysEquivalent,
+    areLfmsEquivalent,
+    calculateCommonBoundingBoxes,
+} from "../../utils/lfmUtils.ts"
+import {
+    LFM_AREA_PADDING,
+    LFM_HEIGHT,
+    LFM_LEFT_PADDING,
+    LFM_TOP_PADDING,
+    MINIMUM_LFM_COUNT,
+    SORT_HEADER_HEIGHT,
+    SORT_HEADERS,
+    TOTAL_LFM_PANEL_BORDER_HEIGHT,
+} from "../../constants/lfmPanel.ts"
 
 /**
  * It takes in as props the lfms raidView, and excludedLfmCount
@@ -53,24 +35,27 @@ interface SelectedLfmInfo {
  *   lfm canvas and the overlay canvas to the main canvas
  */
 
-const LfmCanvas = ({
-    serverName = "",
-    lfms = [],
-    raidView = false,
-    excludedLfmCount = 0,
-}: GroupingCanvasProps) => {
-    const mainCanvasRef = useRef<HTMLCanvasElement>(null)
-    const lfmCanvasRef = useRef<HTMLCanvasElement>(
-        document.createElement("canvas")
-    )
-    const overlayCanvasRef = useRef<HTMLCanvasElement>(
-        document.createElement("canvas")
-    )
-    const [image, setImage] = useState<HTMLImageElement | null>(null)
+interface Props {
+    serverName: string
+    lfms: Lfm[]
+    raidView: boolean
+    excludedLfmCount: number
+}
+
+interface SelectedLfmInfo {
+    index: number
+    renderType: RenderType
+    position: { x: number; y: number }
+}
+
+const LfmCanvas: React.FC<Props> = ({
+    serverName,
+    lfms,
+    raidView,
+    excludedLfmCount,
+}) => {
     const {
-        fontSize,
         panelWidth,
-        setPanelWidth,
         setPanelHeight,
         sortBy,
         setSortBy,
@@ -85,7 +70,7 @@ const LfmCanvas = ({
         () => SORT_HEADERS(commonBoundingBoxes),
         [commonBoundingBoxes]
     )
-    const fonts = useMemo(() => FONTS(fontSize), [fontSize])
+    // const fonts = useMemo(() => FONTS(fontSize), [fontSize])
     const panelHeight = useMemo(() => {
         const height = raidView
             ? LFM_HEIGHT * lfms.length
@@ -97,24 +82,50 @@ const LfmCanvas = ({
         setPanelHeight(height)
         return height
     }, [lfms, raidView])
+    const [isFirstRender, setIsFirstRender] = useState(true)
     const [selectedLfmInfo, setSelectedLfmInfo] =
         useState<SelectedLfmInfo | null>(null)
+    const [previousState, setPreviousState] = React.useState({
+        lfms,
+        raidView,
+        excludedLfmCount,
+        panelWidth,
+        panelHeight,
+        selectedLfmInfo,
+        sortBy,
+        overlayWidth: 0,
+        overlayHeight: 0,
+    })
 
-    useEffect(() => {
-        // update the sizes of the lfm and overlay canvases
-        lfmCanvasRef.current.width = panelWidth
-        lfmCanvasRef.current.height = panelHeight
-        overlayCanvasRef.current.width = panelWidth
-        overlayCanvasRef.current.height = panelHeight
-    }, [panelWidth, panelHeight])
+    // Separate canvases for the lfms and overlay
+    const [image, setImage] = useState<HTMLImageElement | null>(null)
+    const mainCanvasRef = useRef<HTMLCanvasElement>(null)
+    const lfmPanelCanvasRef = useRef<HTMLCanvasElement>(
+        document.createElement("canvas")
+    )
+    const lfmCanvasRef = useRef<HTMLCanvasElement>(
+        document.createElement("canvas")
+    )
+    const overlayCanvasRef = useRef<HTMLCanvasElement>(
+        document.createElement("canvas")
+    )
 
-    // TODO: this is disgusting and shouldn't be used in prod
-    const previousLfms = useRef<Lfm[]>([])
-    const previousServerName = useRef<string>("")
-    const previousFontSize = useRef<number>(fontSize)
-    const previousPanelWidth = useRef<number>(panelWidth)
-    const previousSortBy = useRef(sortBy)
+    // Hooks to do the rendering
+    const { renderLfm } = useRenderLfm({
+        lfmSprite: image,
+        context: lfmCanvasRef.current?.getContext("2d"),
+    })
+    const { renderLfmPanelToCanvas } = useRenderLfmPanel({
+        lfmSprite: image,
+        context: lfmPanelCanvasRef?.current?.getContext("2d"),
+        raidView: raidView,
+    })
+    const { renderLfmOverlay, clearOverlay } = useRenderLfmOverlay({
+        lfmSprite: image,
+        context: overlayCanvasRef?.current?.getContext("2d"),
+    })
 
+    // Load the lfm sprite
     useEffect(() => {
         const img = new Image()
         img.src = LfmSprite
@@ -123,24 +134,95 @@ const LfmCanvas = ({
         }
     }, [])
 
-    const { renderLfm } = useRenderLfm({
-        lfmSprite: image,
-        context: lfmCanvasRef?.current?.getContext("2d"),
-    })
-    const { renderLfmPanelToCanvas } = useRenderLfmPanel({
-        lfmSprite: image,
-        context: lfmCanvasRef?.current?.getContext("2d"),
-        raidView: raidView,
-    })
-    const { renderLfmOverlay, clearOverlay } = useRenderLfmOverlay({
-        lfmSprite: image,
-        context: overlayCanvasRef?.current?.getContext("2d"),
-    })
+    // Set the canvases to the correct size
+    useEffect(() => {
+        lfmPanelCanvasRef.current.width = panelWidth
+        lfmPanelCanvasRef.current.height = panelHeight
+        lfmCanvasRef.current.width = panelWidth
+        lfmCanvasRef.current.height = panelHeight
+        overlayCanvasRef.current.width = panelWidth
+        overlayCanvasRef.current.height = panelHeight
+    }, [panelWidth, panelHeight])
 
+    // Handle mouse events
+    const handleCanvasClick = (
+        event: React.MouseEvent<HTMLCanvasElement>,
+        isHover = false
+    ) => {
+        if (raidView) return
+        const rect = mainCanvasRef.current?.getBoundingClientRect()
+        if (!rect) return
+        const x = event.clientX - rect.left
+        const y = event.clientY - rect.top
+
+        if (isHover === false) {
+            // check if the mouse is over a sort header
+            const sortHeaderIndex = sortHeaders.findIndex((header) => {
+                return (
+                    x > header.boundingBox.left() &&
+                    x < header.boundingBox.right() &&
+                    y > header.boundingBox.top() &&
+                    y < header.boundingBox.bottom()
+                )
+            })
+            if (sortHeaderIndex > -1) {
+                const previousDirection = sortBy.direction
+                const previousType = sortBy.type
+                let newDirection = "asc"
+                const newType = sortHeaders[sortHeaderIndex].type
+                if (previousType === sortHeaders[sortHeaderIndex].type) {
+                    newDirection = previousDirection === "asc" ? "desc" : "asc"
+                }
+                setSortBy({ type: newType, direction: newDirection })
+
+                return
+            }
+        }
+
+        // Check if the mouse is over an lfm
+        const lfmIndex = Math.floor(
+            (y - (raidView ? 0 : LFM_TOP_PADDING)) / LFM_HEIGHT
+        )
+        if (
+            x > LFM_LEFT_PADDING &&
+            x <
+                LFM_LEFT_PADDING +
+                    commonBoundingBoxes.questPanelBoundingBox.right() &&
+            lfmIndex >= 0 &&
+            lfmIndex < lfms.length
+        ) {
+            const renderType =
+                x <
+                commonBoundingBoxes.mainPanelBoundingBox.right() +
+                    LFM_LEFT_PADDING
+                    ? RenderType.LFM
+                    : RenderType.QUEST
+            if (
+                lfmIndex !== previousState.selectedLfmInfo?.index ||
+                renderType !== previousState.selectedLfmInfo?.renderType
+            ) {
+                setSelectedLfmInfo({
+                    index: lfmIndex,
+                    renderType: renderType,
+                    position: { x, y },
+                })
+            }
+        } else {
+            setSelectedLfmInfo(null)
+        }
+    }
+    const handleCanvasMouseLeave = () => {
+        if (raidView) return
+        setSelectedLfmInfo(null)
+        if (mouseMoveTimeout.current) {
+            clearTimeout(mouseMoveTimeout.current)
+        }
+    }
     const mouseMoveTimeout = useRef<number | null>(null)
     const handleCanvasMouseMove = (
         event: React.MouseEvent<HTMLCanvasElement>
     ) => {
+        if (raidView) return
         if (mouseMoveTimeout.current) {
             clearTimeout(mouseMoveTimeout.current)
         }
@@ -149,256 +231,194 @@ const LfmCanvas = ({
         }, mouseOverDelay)
     }
 
-    const handleCanvasMouseLeave = () => {
-        if (mouseMoveTimeout.current) {
-            clearTimeout(mouseMoveTimeout.current)
+    React.useEffect(() => {
+        // Where the main logic will happen
+
+        // Don't try to render unless the sprite map is loaded
+        if (!image) return
+
+        // Check if global render is needed. This happens when the panel size changes.
+        const globalRenderNeeded =
+            isFirstRender ||
+            panelWidth !== previousState.panelWidth ||
+            panelHeight !== previousState.panelHeight
+
+        const shouldRenderPanel =
+            raidView !== previousState.raidView ||
+            sortBy !== previousState.sortBy
+
+        const shouldRenderAllLfms = lfms.length !== previousState.lfms.length
+
+        const shouldRenderOverlay =
+            selectedLfmInfo !== previousState.selectedLfmInfo ||
+            (selectedLfmInfo &&
+                !areLfmOverlaysEquivalent(
+                    previousState.lfms[selectedLfmInfo.index],
+                    lfms[selectedLfmInfo.index]
+                ))
+
+        // Don't render if there are no lfm changes
+        const hasLfmChanges = !areLfmArraysEqual(
+            lfms,
+            previousState.lfms,
+            areLfmsEquivalent
+        )
+
+        if (!globalRenderNeeded && !hasLfmChanges && !shouldRenderOverlay) {
+            console.log("Skipping render.")
+            return
         }
-        clearOverlay()
-        setSelectedLfmInfo(null)
-    }
 
-    const handleCanvasClick = (
-        event: React.MouseEvent<HTMLCanvasElement>,
-        isHover: boolean = false
-    ) => {
-        if (raidView) return
-        // get x and y coordinates of the click
-        const canvas = mainCanvasRef.current
-        if (canvas) {
-            const rect = canvas.getBoundingClientRect()
-            const x = event.clientX - rect.left
-            const y = event.clientY - rect.top
+        const lfmContext = lfmCanvasRef.current?.getContext("2d")
 
-            const scalingFactor = panelWidth / rect.width
-            const scaledX = x * scalingFactor
-            const scaledY = y * scalingFactor
+        let wasPanelRendered = false
+        let wasLfmRendered = false
+        let numberOfLfmsRendered = 0
+        let wasOverlayRendered = false
 
-            // clicked a header
-            if (!isHover) {
-                sortHeaders.forEach(({ type, boundingBox }) => {
-                    if (
-                        scaledX >= boundingBox.x &&
-                        scaledX <= boundingBox.x + boundingBox.width &&
-                        scaledY >=
-                            boundingBox.y + LFM_PANEL_TOP_BORDER_HEIGHT &&
-                        scaledY <=
-                            boundingBox.y +
-                                LFM_SPRITE_MAP.SORT_HEADER.CENTER.height +
-                                LFM_PANEL_TOP_BORDER_HEIGHT +
-                                LFM_AREA_PADDING.top
-                    ) {
-                        setSortBy({
-                            type: type,
-                            direction:
-                                sortBy.type === type &&
-                                sortBy.direction === "asc"
-                                    ? "desc"
-                                    : "asc",
-                        })
-                    }
-                })
-            }
+        // Render the panel
+        if (globalRenderNeeded || shouldRenderPanel || shouldRenderOverlay) {
+            renderLfmPanelToCanvas(panelHeight)
+            wasPanelRendered = true
+        }
 
-            // clicked an lfm
-            const lfmIndex = Math.floor(
-                (scaledY - LFM_TOP_PADDING) / LFM_HEIGHT
-            )
+        if (globalRenderNeeded || shouldRenderAllLfms) {
+            console.log("Rendering all LFMs")
+            lfmContext?.clearRect(0, 0, panelWidth, panelHeight)
+        }
+        lfmContext?.translate(
+            Math.floor(LFM_LEFT_PADDING),
+            raidView ? 0 : Math.floor(LFM_TOP_PADDING)
+        )
+        // Loop through the lfms, and render the ones that changed
+        lfms.forEach((lfm, index) => {
+            // If the lfm has changed, or if the lfm hasn't been rendered in the last 60 seconds, then render it
             if (
-                scaledY >= LFM_TOP_PADDING &&
-                lfmIndex < lfms.length &&
-                scaledX >=
-                    LFM_LEFT_PADDING +
-                        commonBoundingBoxes.mainPanelBoundingBox.x &&
-                scaledX <=
-                    LFM_LEFT_PADDING +
-                        commonBoundingBoxes.questPanelBoundingBox.right()
+                globalRenderNeeded ||
+                shouldRenderAllLfms ||
+                !areLfmsEquivalent(lfm, previousState.lfms[index]) ||
+                lfm.last_render_time === null ||
+                Date.now() - lfm.last_render_time > 60000
             ) {
-                let renderType: RenderType
-                if (
-                    scaledX - LFM_LEFT_PADDING <=
-                    commonBoundingBoxes.mainPanelBoundingBox.right()
-                ) {
-                    renderType = RenderType.LFM
-                } else {
-                    renderType = RenderType.QUEST
-                }
-                if (
-                    selectedLfmInfo?.index !== lfmIndex ||
-                    selectedLfmInfo?.renderType !== renderType
-                ) {
-                    clearOverlay()
-                    if (
-                        renderType === RenderType.QUEST &&
-                        lfms[lfmIndex].quest == null
-                    ) {
-                        setSelectedLfmInfo(null)
-                    } else {
-                        setSelectedLfmInfo({
-                            lfm: lfms[lfmIndex],
-                            index: lfmIndex,
-                            renderType: renderType,
-                            position: { x: scaledX, y: scaledY },
-                        })
-                    }
+                // Render the lfm
+                renderLfm(lfm)
+                lfm.last_render_time = Date.now()
+                wasLfmRendered = true
+                numberOfLfmsRendered++
+            }
+            lfmContext?.translate(0, Math.floor(LFM_HEIGHT))
+        })
+        lfmContext?.resetTransform()
+
+        // Render the overlay
+        let overlayWidth = 0 // todo these are being set to 0 when overlay rerenders
+        let overlayHeight = 0
+        if (globalRenderNeeded || shouldRenderOverlay) {
+            if (selectedLfmInfo) {
+                const { index, renderType } = selectedLfmInfo
+                if (index < lfms.length) {
+                    const { width, height } = renderLfmOverlay(
+                        lfms[index],
+                        renderType
+                    )
+                    overlayWidth = width
+                    overlayHeight = height
+                    wasOverlayRendered = true
                 }
             } else {
                 clearOverlay()
-                setSelectedLfmInfo(null)
+                wasOverlayRendered = true
             }
         }
-    }
 
-    useEffect(() => {
-        const handleCanvasResize = debounce(() => {
-            if (!isDynamicWidth) return
-            const canvas = mainCanvasRef.current
-            if (canvas) {
-                const width = canvas.getBoundingClientRect().width
-                setPanelWidth(Math.max(width, MINIMUM_LFM_PANEL_WIDTH))
+        // Draw the lfm and overlay canvases to the main canvas
+        if (
+            globalRenderNeeded ||
+            isFirstRender ||
+            wasPanelRendered ||
+            wasLfmRendered ||
+            wasOverlayRendered
+        ) {
+            const mainContext = mainCanvasRef.current?.getContext("2d")
+            if (mainContext) {
+                // mainContext.clearRect(0, 0, panelWidth, panelHeight)
+                mainContext.imageSmoothingEnabled = false
+                if (globalRenderNeeded || isFirstRender || wasPanelRendered) {
+                    mainContext.drawImage(lfmPanelCanvasRef.current, 0, 0)
+                }
+                if (
+                    globalRenderNeeded ||
+                    isFirstRender ||
+                    wasPanelRendered ||
+                    wasLfmRendered
+                ) {
+                    mainContext.drawImage(lfmCanvasRef.current, 0, 0)
+                }
+                if (
+                    (globalRenderNeeded ||
+                        isFirstRender ||
+                        wasPanelRendered ||
+                        wasLfmRendered ||
+                        wasOverlayRendered) &&
+                    selectedLfmInfo
+                ) {
+                    const { position } = selectedLfmInfo
+                    const positionX = Math.min(
+                        position.x,
+                        panelWidth -
+                            (overlayWidth !== 0
+                                ? overlayWidth
+                                : previousState.overlayWidth)
+                    )
+                    const positionY = Math.min(
+                        position.y,
+                        panelHeight -
+                            (overlayHeight !== 0
+                                ? overlayHeight
+                                : previousState.overlayHeight)
+                    )
+                    mainContext.drawImage(
+                        overlayCanvasRef.current,
+                        positionX,
+                        positionY
+                    )
+                }
             }
-        }, 20)
-
-        window.addEventListener("resize", handleCanvasResize)
-        handleCanvasResize()
-        return () => {
-            window.removeEventListener("resize", handleCanvasResize)
-        }
-    }, [isDynamicWidth, setPanelWidth])
-
-    useEffect(() => {
-        if (!image) return
-        const mainContext = mainCanvasRef.current?.getContext("2d")
-        const lfmPanelContext = lfmCanvasRef.current?.getContext("2d")
-        const overlayContext = overlayCanvasRef.current?.getContext("2d")
-        if (!mainContext || !lfmPanelContext || !overlayContext) return
-
-        let didRenderLfms = false
-        let didRenderLfmPanel = false
-        let didRenderOverlay = false
-
-        const shouldForceRender =
-            fontSize !== previousFontSize.current ||
-            panelWidth !== previousPanelWidth.current ||
-            lfms.length !== previousLfms.current.length ||
-            sortBy !== previousSortBy.current ||
-            serverName !== previousServerName.current
-
-        // draw the lfm panel
-        if (shouldForceRender) {
-            renderLfmPanelToCanvas(lfms.length)
-            didRenderLfmPanel = true
         }
 
-        // draw the lfms
-        lfmPanelContext.translate(
-            LFM_LEFT_PADDING,
-            raidView ? 0 : LFM_TOP_PADDING
-        )
-        lfms.forEach((lfm, index) => {
-            const shouldRenderLfm =
-                index >= previousLfms.current.length ||
-                shouldLfmRerender(previousLfms.current[index], lfm)
-            if (shouldForceRender || shouldRenderLfm) {
-                renderLfm(lfm)
-                didRenderLfms = true
-            }
-            lfmPanelContext.translate(0, LFM_HEIGHT)
+        if (numberOfLfmsRendered > 0)
+            console.log(`Number of LFMs rendered: ${numberOfLfmsRendered}`)
+        if (wasOverlayRendered) console.log("Overlay rendered.")
+
+        setPreviousState({
+            lfms,
+            raidView,
+            excludedLfmCount,
+            panelWidth,
+            panelHeight,
+            selectedLfmInfo,
+            sortBy,
+            overlayWidth,
+            overlayHeight,
         })
-
-        // draw the overlay
-        let totalOverlayWidth = 0
-        let totalOverlayHeight = 0
-        if (selectedLfmInfo !== null) {
-            overlayContext.setTransform(1, 0, 0, 1, 0, 0)
-            const { width: overlayWidth, height: overlayHeight } =
-                renderLfmOverlay(
-                    selectedLfmInfo.lfm,
-                    selectedLfmInfo.renderType
-                )
-            totalOverlayWidth = overlayWidth
-            totalOverlayHeight = overlayHeight
-            didRenderOverlay = true
-        }
-
-        // show message if all lfms are excluded
-        if (lfms.length === 0 && excludedLfmCount > 0) {
-            lfmPanelContext.fillStyle = LFM_COLORS.BLACK_BACKGROUND
-            lfmPanelContext.fillRect(
-                0,
-                LFM_PANEL_TOP_BORDER_HEIGHT,
-                commonBoundingBoxes.lfmBoundingBox.width,
-                LFM_HEIGHT
-            )
-
-            lfmPanelContext.font = fonts.GROUPS_HIDDEN_MESSAGE
-            lfmPanelContext.fillStyle = LFM_COLORS.LEADER_NAME
-            lfmPanelContext.textAlign = "center"
-            lfmPanelContext.fillText(
-                `${excludedLfmCount} groups have been hidden by your filter settings`,
-                panelWidth / 2,
-                LFM_HEIGHT
-            )
-        }
-
-        lfmPanelContext.setTransform(1, 0, 0, 1, 0, 0)
-
-        // Draw the lfm canvas and overlay canvas to the main canvas
-        if (didRenderLfmPanel || didRenderLfms || didRenderOverlay) {
-            const lfmCanvas = lfmCanvasRef.current
-            const overlayCanvas = overlayCanvasRef.current
-            if (lfmCanvas) mainContext.drawImage(lfmCanvas, 0, 0)
-            if (overlayCanvas && selectedLfmInfo !== null) {
-                const overlayXPosition = Math.max(
-                    0,
-                    Math.min(
-                        selectedLfmInfo.position.x,
-                        panelWidth - totalOverlayWidth
-                    )
-                )
-                const overlayYPosition = Math.max(
-                    0,
-                    Math.min(
-                        selectedLfmInfo.position.y,
-                        panelHeight - totalOverlayHeight
-                    )
-                )
-                mainContext.drawImage(
-                    overlayCanvas,
-                    Math.round(overlayXPosition),
-                    Math.round(overlayYPosition)
-                )
-            }
-
-            console.log("didRenderLfms", didRenderLfms)
-            console.log("didRenderLfmPanel", didRenderLfmPanel)
-            console.log("didRenderOverlay", didRenderOverlay)
-        } else {
-            console.log("skipped rendering")
-        }
-
-        previousLfms.current = lfms
-        previousFontSize.current = fontSize
-        previousPanelWidth.current = panelWidth
-        previousSortBy.current = sortBy
-        previousServerName.current = serverName
+        setIsFirstRender(false)
     }, [
-        image,
         lfms,
-        excludedLfmCount,
         raidView,
-        fontSize,
-        panelWidth,
-        sortHeaders,
-        sortBy,
-        isDynamicWidth,
-        commonBoundingBoxes,
-        fonts,
-        previousServerName,
-        serverName,
-        selectedLfmInfo,
+        excludedLfmCount,
+        image,
+        mainCanvasRef,
+        lfmCanvasRef,
+        overlayCanvasRef,
         renderLfm,
         renderLfmPanelToCanvas,
         renderLfmOverlay,
+        panelWidth,
+        panelHeight,
+        sortBy,
+        isDynamicWidth,
+        serverName,
+        selectedLfmInfo,
     ])
 
     return (

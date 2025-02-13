@@ -236,6 +236,64 @@ function mapRaceAndGenderToRaceIconBoundingBox(
     }
 }
 
+function areLfmsEquivalent(previous: Lfm, current: Lfm): boolean {
+    if (previous !== undefined && current === undefined) return false
+    if (previous === undefined && current !== undefined) return false
+    if (previous.comment !== current.comment) return false
+    if (
+        Math.round(previous.adventure_active_time / 60) !==
+        Math.round(current.adventure_active_time / 60)
+    )
+        return false
+    if (previous.members.length !== current.members.length) return false
+    if (previous.quest?.name !== current.quest?.name) return false
+    if (previous.difficulty !== current.difficulty) return false
+    if (previous.minimum_level !== current.minimum_level) return false
+    if (previous.maximum_level !== current.maximum_level) return false
+    if (previous.leader.name !== current.leader.name) return false
+    if (previous.is_eligible !== current.is_eligible) return false
+
+    return true
+}
+
+function areLfmOverlaysEquivalent(previous: Lfm, current: Lfm): boolean {
+    // specifically for check if the overlay should be rerendered
+    if (previous === undefined && current === undefined) return true
+    if (previous === undefined || current === undefined) return false
+    if (previous.quest?.name !== current.quest?.name) return false
+    if (previous.difficulty !== current.difficulty) return false
+    if (previous.members.length !== current.members.length) return false
+    // check members
+    const allPreviousMembers = [previous.leader, ...previous.members]
+    const allCurrentMembers = [current.leader, ...current.members]
+    for (let i = 0; i < allPreviousMembers.length; i++) {
+        const member = allPreviousMembers[i]
+        const currentMember = allCurrentMembers[i]
+        if (
+            !currentMember ||
+            member.location?.name !== currentMember.location?.name
+        )
+            return false
+        if (member.total_level !== currentMember.total_level) return false
+    }
+    // check history
+    if (previous.activity?.length !== current.activity?.length) return false
+
+    return true
+}
+
+function areLfmArraysEqual(
+    previous: Lfm[],
+    current: Lfm[],
+    compareFunction: (previous: Lfm, current: Lfm) => boolean
+): boolean {
+    if (previous.length !== current.length) return false
+    for (let i = 0; i < previous.length; i++) {
+        if (!compareFunction(previous[i], current[i])) return false
+    }
+    return true
+}
+
 export {
     shouldLfmRerender,
     calculateCommonBoundingBoxes,
@@ -243,4 +301,7 @@ export {
     mapRaceAndGenderToRaceIconBoundingBox,
     mapClassToIconBoundingBox,
     getLfmActivityEventsFlatMap,
+    areLfmArraysEqual,
+    areLfmsEquivalent,
+    areLfmOverlaysEquivalent,
 }
