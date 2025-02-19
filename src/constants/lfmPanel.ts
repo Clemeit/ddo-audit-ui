@@ -10,7 +10,7 @@ const LFM_PADDING = {
     bottom: 0,
     left: 5,
 }
-const MINIMUM_LFM_COUNT = 5
+const MINIMUM_LFM_COUNT = 6
 
 const LFM_SPRITE_MAP = {
     HEADER_LEFT: {

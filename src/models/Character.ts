@@ -31,4 +31,61 @@ interface Character {
     last_saved?: string
 }
 
-export { Character, CharacterClass, CharacterLocation }
+interface CharacterApiServerModel {
+    characters: { [key: number]: Character }
+    last_update: string
+}
+
+interface CharacterApiDataModel {
+    argonnessen?: CharacterApiServerModel
+    cannith?: CharacterApiServerModel
+    ghallanda?: CharacterApiServerModel
+    khyber?: CharacterApiServerModel
+    orien?: CharacterApiServerModel
+    sarlona?: CharacterApiServerModel
+    thelanis?: CharacterApiServerModel
+    wayfinder?: CharacterApiServerModel
+    hardcore?: CharacterApiServerModel
+    cormyr?: CharacterApiServerModel
+}
+
+interface CharacterSummaryModel {
+    character_count: number
+}
+
+interface CharacterSummaryApiDataModel {
+    argonnessen?: CharacterSummaryModel
+    cannith?: CharacterSummaryModel
+    ghallanda?: CharacterSummaryModel
+    khyber?: CharacterSummaryModel
+    orien?: CharacterSummaryModel
+    sarlona?: CharacterSummaryModel
+    thelanis?: CharacterSummaryModel
+    wayfinder?: CharacterSummaryModel
+    hardcore?: CharacterSummaryModel
+    cormyr?: CharacterSummaryModel
+}
+
+enum CharacterSortType {
+    Name = "name",
+    Level = "level",
+    Guild = "guild",
+    Class = "class",
+}
+
+interface CharacterSortBy {
+    type: CharacterSortType
+    direction: string
+}
+
+export {
+    Character,
+    CharacterClass,
+    CharacterLocation,
+    CharacterApiServerModel,
+    CharacterApiDataModel,
+    CharacterSummaryApiDataModel,
+    CharacterSummaryModel,
+    CharacterSortBy,
+    CharacterSortType,
+}

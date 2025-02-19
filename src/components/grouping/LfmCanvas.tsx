@@ -18,6 +18,8 @@ import {
     LFM_AREA_PADDING,
     LFM_HEIGHT,
     LFM_LEFT_PADDING,
+    LFM_PANEL_TOP_BORDER_HEIGHT,
+    LFM_SPRITE_MAP,
     LFM_TOP_PADDING,
     MINIMUM_LFM_COUNT,
     SORT_HEADER_HEIGHT,
@@ -161,8 +163,11 @@ const LfmCanvas: React.FC<Props> = ({
                 return (
                     x > header.boundingBox.left() &&
                     x < header.boundingBox.right() &&
-                    y > header.boundingBox.top() &&
-                    y < header.boundingBox.bottom()
+                    y > LFM_PANEL_TOP_BORDER_HEIGHT + LFM_AREA_PADDING.top &&
+                    y <
+                        LFM_PANEL_TOP_BORDER_HEIGHT +
+                            LFM_AREA_PADDING.top +
+                            LFM_SPRITE_MAP.SORT_HEADER.CENTER.height
                 )
             })
             if (sortHeaderIndex > -1) {
@@ -197,6 +202,11 @@ const LfmCanvas: React.FC<Props> = ({
                     LFM_LEFT_PADDING
                     ? RenderType.LFM
                     : RenderType.QUEST
+            if (renderType === RenderType.QUEST && !lfms[lfmIndex].quest) {
+                setSelectedLfmInfo(null)
+                clearOverlay()
+                return
+            }
             if (
                 lfmIndex !== previousState.selectedLfmInfo?.index ||
                 renderType !== previousState.selectedLfmInfo?.renderType
@@ -264,7 +274,12 @@ const LfmCanvas: React.FC<Props> = ({
             areLfmsEquivalent
         )
 
-        if (!globalRenderNeeded && !hasLfmChanges && !shouldRenderOverlay) {
+        if (
+            !globalRenderNeeded &&
+            !hasLfmChanges &&
+            !shouldRenderOverlay &&
+            !shouldRenderPanel
+        ) {
             console.log("Skipping render.")
             return
         }
@@ -332,50 +347,44 @@ const LfmCanvas: React.FC<Props> = ({
         }
 
         // Draw the lfm and overlay canvases to the main canvas
-        if (
-            globalRenderNeeded ||
-            isFirstRender ||
-            wasPanelRendered ||
-            wasLfmRendered ||
-            wasOverlayRendered
-        ) {
+        if (wasPanelRendered || wasLfmRendered || wasOverlayRendered) {
             const mainContext = mainCanvasRef.current?.getContext("2d")
             if (mainContext) {
                 // mainContext.clearRect(0, 0, panelWidth, panelHeight)
                 mainContext.imageSmoothingEnabled = false
-                if (globalRenderNeeded || isFirstRender || wasPanelRendered) {
-                    mainContext.drawImage(lfmPanelCanvasRef.current, 0, 0)
-                }
-                if (
-                    globalRenderNeeded ||
-                    isFirstRender ||
-                    wasPanelRendered ||
-                    wasLfmRendered
-                ) {
-                    mainContext.drawImage(lfmCanvasRef.current, 0, 0)
-                }
-                if (
-                    (globalRenderNeeded ||
-                        isFirstRender ||
-                        wasPanelRendered ||
-                        wasLfmRendered ||
-                        wasOverlayRendered) &&
-                    selectedLfmInfo
-                ) {
+                // if (wasPanelRendered) {
+                mainContext.drawImage(lfmPanelCanvasRef.current, 0, 0)
+                // }
+                // if (wasPanelRendered || wasLfmRendered) {
+                mainContext.drawImage(lfmCanvasRef.current, 0, 0)
+                // }
+                // if (
+                //     (wasPanelRendered ||
+                //         wasLfmRendered ||
+                //         wasOverlayRendered) &&
+                //     selectedLfmInfo
+                // ) {
+                if (selectedLfmInfo) {
                     const { position } = selectedLfmInfo
-                    const positionX = Math.min(
-                        position.x,
-                        panelWidth -
-                            (overlayWidth !== 0
-                                ? overlayWidth
-                                : previousState.overlayWidth)
+                    const positionX = Math.max(
+                        Math.min(
+                            position.x,
+                            panelWidth -
+                                (overlayWidth !== 0
+                                    ? overlayWidth
+                                    : previousState.overlayWidth)
+                        ),
+                        0
                     )
-                    const positionY = Math.min(
-                        position.y,
-                        panelHeight -
-                            (overlayHeight !== 0
-                                ? overlayHeight
-                                : previousState.overlayHeight)
+                    const positionY = Math.max(
+                        Math.min(
+                            position.y,
+                            panelHeight -
+                                (overlayHeight !== 0
+                                    ? overlayHeight
+                                    : previousState.overlayHeight)
+                        ),
+                        0
                     )
                     mainContext.drawImage(
                         overlayCanvasRef.current,
@@ -383,6 +392,7 @@ const LfmCanvas: React.FC<Props> = ({
                         positionY
                     )
                 }
+                // }
             }
         }
 
@@ -390,7 +400,7 @@ const LfmCanvas: React.FC<Props> = ({
             console.log(`Number of LFMs rendered: ${numberOfLfmsRendered}`)
         if (wasOverlayRendered) console.log("Overlay rendered.")
 
-        setPreviousState({
+        setPreviousState((prev) => ({
             lfms,
             raidView,
             excludedLfmCount,
@@ -398,9 +408,10 @@ const LfmCanvas: React.FC<Props> = ({
             panelHeight,
             selectedLfmInfo,
             sortBy,
-            overlayWidth,
-            overlayHeight,
-        })
+            overlayWidth: overlayWidth > 0 ? overlayWidth : prev.overlayWidth,
+            overlayHeight:
+                overlayHeight > 0 ? overlayHeight : prev.overlayHeight,
+        }))
         setIsFirstRender(false)
     }, [
         lfms,
@@ -419,6 +430,7 @@ const LfmCanvas: React.FC<Props> = ({
         isDynamicWidth,
         serverName,
         selectedLfmInfo,
+        sortBy,
     ])
 
     return (

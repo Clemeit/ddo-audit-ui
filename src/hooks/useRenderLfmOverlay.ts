@@ -63,6 +63,8 @@ const useRenderLfmOverlay = ({ lfmSprite, context }: Props) => {
             renderType: RenderType
         ): { width: number; height: number } => {
             if (!context || !lfmSprite) return { width: 0, height: 0 }
+            if (renderType === RenderType.QUEST && lfm.quest == null)
+                return { width: 0, height: 0 }
             context.imageSmoothingEnabled = false
             const willWrap =
                 renderType === RenderType.LFM &&
@@ -73,7 +75,7 @@ const useRenderLfmOverlay = ({ lfmSprite, context }: Props) => {
             const characterHeight = showCharacterGuildNames
                 ? OVERLAY_CHARACTER_HEIGHT_WITH_GUILD_NAME
                 : OVERLAY_CHARACTER_HEIGHT
-            let totalOverlayHeight = 100 // calculate the height using all the crap we draw to it
+            let totalOverlayHeight = 100
             let totalOverlayWidth = OVERLAY_WIDTH
 
             if (willWrap)

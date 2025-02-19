@@ -12,6 +12,8 @@ import Live from "./components/live/Live.tsx"
 import Grouping from "./components/grouping/Grouping.tsx"
 import GroupingSpecific from "./components/grouping/GroupingSpecific.tsx"
 import Servers from "./components/servers/Servers.tsx"
+import Who from "./components/who/Who.tsx"
+import WhoSpecific from "./components/who/WhoSpecific.tsx"
 
 // Lazy load uncommon pages
 const Verification = lazy(
@@ -29,6 +31,7 @@ const Timers = lazy(() => import("./components/timers/Timers.tsx"))
 
 // Providers
 import { LfmProvider } from "./contexts/LfmContext.tsx"
+import { WhoProvider } from "./contexts/WhoContext.tsx"
 
 // Set up the router
 export default createBrowserRouter(
@@ -53,6 +56,22 @@ export default createBrowserRouter(
                     <LfmProvider>
                         <GroupingSpecific />
                     </LfmProvider>
+                }
+            />
+            <Route
+                path="/who"
+                element={
+                    <WhoProvider>
+                        <Who />
+                    </WhoProvider>
+                }
+            />
+            <Route
+                path="/who/:id"
+                element={
+                    <WhoProvider>
+                        <WhoSpecific />
+                    </WhoProvider>
                 }
             />
             <Route path="/notifications" element={<Notifications />} />

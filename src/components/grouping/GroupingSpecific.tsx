@@ -1,5 +1,5 @@
 import React from "react"
-import GroupingContainer from "./LfmCanvasContainer.tsx"
+import LfmContainer from "./LfmCanvasContainer.tsx"
 import Page from "../global/Page.tsx"
 import { useThemeContext } from "../../contexts/ThemeContext.tsx"
 import Spacer from "../global/Spacer.tsx"
@@ -23,7 +23,7 @@ const GroupingSpecific = () => {
             contentMaxWidth
         >
             {!isFullScreen && <Spacer className="hide-on-mobile" size="20px" />}
-            <GroupingContainer
+            <LfmContainer
                 serverName={serverNameLowercase ? serverNameLowercase : ""}
             />
             <Spacer className="hide-on-mobile" size="20px" />
