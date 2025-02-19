@@ -324,7 +324,10 @@ const Activity = () => {
                     activityType={CharacterActivityType.status}
                     loadingState={statusActivityLoadingState}
                 />
-                <StatusBarChart activity={statusActivity} />
+                <StatusBarChart
+                    statusActivity={statusActivity}
+                    locationActivity={locationActivity}
+                />
                 <ActivityTable
                     characterActivity={levelActivity}
                     activityType={CharacterActivityType.total_level}

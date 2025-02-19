@@ -5,6 +5,9 @@ const useGetCurrentServer = () => {
     const location = useLocation()
     const serverName = location.pathname.split("/")[2] || ""
 
+    // TODO: validate serverName
+    // const isValidServer = SERVER_NAMES_LOWER.includes(serverName)
+
     return {
         serverNameLowercase: serverName.toLowerCase(),
         serverNameSentenceCase: toSentenceCase(serverName),
