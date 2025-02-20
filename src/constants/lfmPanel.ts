@@ -1,4 +1,5 @@
 import { BoundingBox } from "../models/Geometry"
+import { SPRITE_MAP } from "./spriteMap.ts"
 
 const DEFAULT_LFM_PANEL_WIDTH = 848
 const MINIMUM_LFM_PANEL_WIDTH = 600
@@ -12,302 +13,15 @@ const LFM_PADDING = {
 }
 const MINIMUM_LFM_COUNT = 6
 
-const LFM_SPRITE_MAP = {
-    HEADER_LEFT: {
-        x: 0,
-        y: 0,
-        width: 46,
-        height: 27,
-    },
-    HEADER_RIGHT: {
-        x: 46,
-        y: 0,
-        width: 15,
-        height: 27,
-    },
-    HEADER_BAR: {
-        x: 61,
-        y: 0,
-        width: 87,
-        height: 27,
-    },
-    CONTENT_TOP_LEFT: {
-        x: 0,
-        y: 27,
-        width: 12,
-        height: 11,
-    },
-    CONTENT_TOP_RIGHT: {
-        x: 50,
-        y: 27,
-        width: 11,
-        height: 11,
-    },
-    CONTENT_BOTTOM_LEFT: {
-        x: 0,
-        y: 46,
-        width: 12,
-        height: 12,
-    },
-    CONTENT_BOTTOM_RIGHT: {
-        x: 50,
-        y: 46,
-        width: 11,
-        height: 12,
-    },
-    CONTENT_TOP: {
-        x: 12,
-        y: 27,
-        width: 38,
-        height: 11,
-    },
-    CONTENT_LEFT: {
-        x: 0,
-        y: 38,
-        width: 12,
-        height: 8,
-    },
-    CONTENT_BOTTOM: {
-        x: 12,
-        y: 46,
-        width: 38,
-        height: 12,
-    },
-    CONTENT_RIGHT: {
-        x: 50,
-        y: 38,
-        width: 11,
-        height: 8,
-    },
-    CONTENT_HANDLE: {
-        x: 61,
-        y: 32,
-        width: 13,
-        height: 14,
-    },
-    CROWN: {
-        x: 193,
-        y: 0,
-        width: 18,
-        height: 18,
-    },
-    CLASSES: {
-        ALL: {
-            x: 0,
-            y: 58,
-            width: 104,
-            height: 62,
-        },
-        BARBARIAN: {
-            x: 0,
-            y: 58,
-            width: 20,
-            height: 20,
-        },
-        BARD: {
-            x: 21,
-            y: 58,
-            width: 20,
-            height: 20,
-        },
-        CLERIC: {
-            x: 42,
-            y: 58,
-            width: 20,
-            height: 20,
-        },
-        FIGHTER: {
-            x: 63,
-            y: 58,
-            width: 20,
-            height: 20,
-        },
-        PALADIN: {
-            x: 84,
-            y: 58,
-            width: 20,
-            height: 20,
-        },
-        RANGER: {
-            x: 0,
-            y: 79,
-            width: 20,
-            height: 20,
-        },
-        ROGUE: {
-            x: 21,
-            y: 79,
-            width: 20,
-            height: 20,
-        },
-        SORCERER: {
-            x: 42,
-            y: 79,
-            width: 20,
-            height: 20,
-        },
-        WIZARD: {
-            x: 63,
-            y: 79,
-            width: 20,
-            height: 20,
-        },
-        MONK: {
-            x: 84,
-            y: 79,
-            width: 20,
-            height: 20,
-        },
-        FAVORED_SOUL: {
-            x: 0,
-            y: 100,
-            width: 20,
-            height: 20,
-        },
-        ARTIFICER: {
-            x: 21,
-            y: 100,
-            width: 20,
-            height: 20,
-        },
-        DRUID: {
-            x: 42,
-            y: 100,
-            width: 20,
-            height: 20,
-        },
-        WARLOCK: {
-            x: 63,
-            y: 100,
-            width: 20,
-            height: 20,
-        },
-        ALCHEMIST: {
-            x: 84,
-            y: 100,
-            width: 20,
-            height: 20,
-        },
-    },
-    RACES: {
-        DRAGONBORN: {
-            x: 105,
-            y: 58,
-            width: 18,
-            height: 18,
-        },
-        DROW: {
-            x: 123,
-            y: 58,
-            width: 18,
-            height: 18,
-        },
-        DWARF: {
-            x: 141,
-            y: 58,
-            width: 18,
-            height: 18,
-        },
-        ELF: {
-            x: 159,
-            y: 58,
-            width: 18,
-            height: 18,
-        },
-        GNOME: {
-            x: 177,
-            y: 58,
-            width: 18,
-            height: 18,
-        },
-        HALFLING: {
-            x: 195,
-            y: 58,
-            width: 18,
-            height: 18,
-        },
-        HALF_ELF: {
-            x: 105,
-            y: 76,
-            width: 18,
-            height: 18,
-        },
-        HALF_ORC: {
-            x: 123,
-            y: 76,
-            width: 18,
-            height: 18,
-        },
-        HUMAN: {
-            x: 141,
-            y: 76,
-            width: 18,
-            height: 18,
-        },
-        TIEFLING: {
-            x: 159,
-            y: 76,
-            width: 18,
-            height: 18,
-        },
-        WARFORGED: {
-            x: 177,
-            y: 76,
-            width: 18,
-            height: 18,
-        },
-        AASIMAR: {
-            x: 195,
-            y: 76,
-            width: 18,
-            height: 18,
-        },
-        ELADRIN: {
-            x: 105,
-            y: 94,
-            width: 18,
-            height: 18,
-        },
-        SHIFTER: {
-            x: 123,
-            y: 94,
-            width: 18,
-            height: 18,
-        },
-        TABAXI: {
-            x: 141,
-            y: 94,
-            width: 18,
-            height: 18,
-        },
-        CHAOSMANCER: {
-            x: 159,
-            y: 94,
-            width: 18,
-            height: 18,
-        },
-    },
-    SORT_HEADER: {
-        LEFT: { x: 149, y: 0, width: 2, height: 21 },
-        RIGHT: { x: 168, y: 0, width: 2, height: 21 },
-        CENTER: { x: 151, y: 0, width: 17, height: 21 },
-    },
-    SORT_HEADER_HIGHLIGHTED: {
-        LEFT: { x: 171, y: 0, width: 2, height: 21 },
-        RIGHT: { x: 190, y: 0, width: 2, height: 21 },
-        CENTER: { x: 173, y: 0, width: 17, height: 21 },
-    },
-}
-
 const LFM_PANEL_TOP_BORDER_HEIGHT =
-    LFM_SPRITE_MAP.HEADER_BAR.height + LFM_SPRITE_MAP.CONTENT_TOP.height
+    SPRITE_MAP.HEADER_BAR.height + SPRITE_MAP.CONTENT_TOP.height
 
-const LFM_PANEL_BOTTOM_BORDER_HEIGHT = LFM_SPRITE_MAP.CONTENT_BOTTOM.height
+const LFM_PANEL_BOTTOM_BORDER_HEIGHT = SPRITE_MAP.CONTENT_BOTTOM.height
 
 const TOTAL_LFM_PANEL_BORDER_HEIGHT =
     LFM_PANEL_TOP_BORDER_HEIGHT + LFM_PANEL_BOTTOM_BORDER_HEIGHT
 
-const SORT_HEADER_HEIGHT = LFM_SPRITE_MAP.SORT_HEADER.CENTER.height
+const SORT_HEADER_HEIGHT = SPRITE_MAP.SORT_HEADER.CENTER.height
 
 const LFM_AREA_PADDING = {
     top: 5,
@@ -318,8 +32,7 @@ const LFM_AREA_PADDING = {
 
 const LFM_TOP_PADDING =
     LFM_PANEL_TOP_BORDER_HEIGHT + SORT_HEADER_HEIGHT + LFM_AREA_PADDING.top + 1
-const LFM_LEFT_PADDING =
-    LFM_SPRITE_MAP.CONTENT_LEFT.width + LFM_AREA_PADDING.left
+const LFM_LEFT_PADDING = SPRITE_MAP.CONTENT_LEFT.width + LFM_AREA_PADDING.left
 
 const QUEST_INFO_GAP = 5
 
@@ -441,7 +154,6 @@ export {
     MAXIMUM_LFM_PANEL_WIDTH,
     LFM_HEIGHT,
     LFM_PADDING,
-    LFM_SPRITE_MAP,
     LFM_COLORS,
     DEFAULT_BASE_FONT_SIZE,
     TOTAL_LFM_PANEL_BORDER_HEIGHT,

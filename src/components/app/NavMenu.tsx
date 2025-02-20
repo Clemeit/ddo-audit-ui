@@ -21,7 +21,7 @@ const NavMenu = () => {
     }, [])
 
     return (
-        <nav className={`nav-menu ${scrollPosition > 80 ? "solid" : ""}`}>
+        <nav className={`nav-menu ${scrollPosition > 0 ? "solid" : ""}`}>
             <Link
                 to="/"
                 className={`nav-item ${location.pathname === "/" ? "active" : ""}`}

@@ -19,13 +19,13 @@ import {
     LFM_HEIGHT,
     LFM_LEFT_PADDING,
     LFM_PANEL_TOP_BORDER_HEIGHT,
-    LFM_SPRITE_MAP,
     LFM_TOP_PADDING,
     MINIMUM_LFM_COUNT,
     SORT_HEADER_HEIGHT,
     SORT_HEADERS,
     TOTAL_LFM_PANEL_BORDER_HEIGHT,
 } from "../../constants/lfmPanel.ts"
+import { SPRITE_MAP } from "../../constants/spriteMap.ts"
 
 /**
  * It takes in as props the lfms raidView, and excludedLfmCount
@@ -167,7 +167,7 @@ const LfmCanvas: React.FC<Props> = ({
                     y <
                         LFM_PANEL_TOP_BORDER_HEIGHT +
                             LFM_AREA_PADDING.top +
-                            LFM_SPRITE_MAP.SORT_HEADER.CENTER.height
+                            SPRITE_MAP.SORT_HEADER.CENTER.height
                 )
             })
             if (sortHeaderIndex > -1) {

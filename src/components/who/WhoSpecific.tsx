@@ -17,11 +17,11 @@ const WhoSpecific = () => {
         <Page
             title={`DDO Live Who Panel for ${serverNameSentenceCase}`}
             description={`Browse ${serverNamePossessiveCase} Who panel! Are your friends online? Is your guild forming up for raid night? Now you know!`}
-            // centered
-            // noPadding
-            // contentMaxWidth
+            centered
+            noPadding
+            contentMaxWidth
         >
-            {/* {!isFullScreen && <Spacer className="hide-on-mobile" size="20px" />} */}
+            {!isFullScreen && <Spacer className="hide-on-mobile" size="20px" />}
             <WhoContainer
                 serverName={serverNameLowercase ? serverNameLowercase : ""}
             />

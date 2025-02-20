@@ -3,7 +3,6 @@ import { useLfmContext } from "../contexts/LfmContext.tsx"
 import { FlatActivityEvent, Lfm, LfmActivityType } from "../models/Lfm.ts"
 import {
     FONTS,
-    LFM_SPRITE_MAP,
     MAXIMUM_ACTIVITY_EVENTS,
     OVERLAY_ACTIVITY_LEFT_PADDING,
     OVERLAY_CHARACTER_HEIGHT,
@@ -29,6 +28,7 @@ import {
 import useTextRenderer from "./useTextRenderer.ts"
 import { BoundingBox } from "../models/Geometry.ts"
 import { CHARACTER_IDS } from "../constants/characterIds.ts"
+import { SPRITE_MAP } from "../constants/spriteMap.ts"
 
 interface Props {
     lfmSprite?: HTMLImageElement | null
@@ -275,14 +275,14 @@ const useRenderLfmOverlay = ({ lfmSprite, context }: Props) => {
                         ).width
                         context.drawImage(
                             lfmSprite,
-                            LFM_SPRITE_MAP.CROWN.x,
-                            LFM_SPRITE_MAP.CROWN.y,
-                            LFM_SPRITE_MAP.CROWN.width,
-                            LFM_SPRITE_MAP.CROWN.height,
+                            SPRITE_MAP.CROWN.x,
+                            SPRITE_MAP.CROWN.y,
+                            SPRITE_MAP.CROWN.width,
+                            SPRITE_MAP.CROWN.height,
                             nameWidth + 26,
                             0,
-                            LFM_SPRITE_MAP.CROWN.width,
-                            LFM_SPRITE_MAP.CROWN.height
+                            SPRITE_MAP.CROWN.width,
+                            SPRITE_MAP.CROWN.height
                         )
                     }
 

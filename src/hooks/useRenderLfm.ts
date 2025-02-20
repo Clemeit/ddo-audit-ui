@@ -2,7 +2,6 @@ import { useCallback, useMemo } from "react"
 import { Lfm } from "../models/Lfm.ts"
 import {
     LFM_HEIGHT,
-    LFM_SPRITE_MAP,
     LFM_COLORS,
     FONTS,
     QUEST_INFO_GAP,
@@ -21,6 +20,7 @@ import {
     mapRaceAndGenderToRaceIconBoundingBox,
 } from "../utils/lfmUtils.ts"
 import { convertMillisecondsToPrettyString } from "../utils/stringUtils.ts"
+import { SPRITE_MAP } from "../constants/spriteMap.ts"
 
 interface Props {
     lfmSprite?: HTMLImageElement | null
@@ -555,14 +555,14 @@ const useRenderLfm = ({ lfmSprite, context }: Props) => {
             ) {
                 context.drawImage(
                     lfmSprite,
-                    LFM_SPRITE_MAP.CLASSES.ALL.x,
-                    LFM_SPRITE_MAP.CLASSES.ALL.y,
-                    LFM_SPRITE_MAP.CLASSES.ALL.width,
-                    LFM_SPRITE_MAP.CLASSES.ALL.height,
+                    SPRITE_MAP.CLASSES.ALL.x,
+                    SPRITE_MAP.CLASSES.ALL.y,
+                    SPRITE_MAP.CLASSES.ALL.width,
+                    SPRITE_MAP.CLASSES.ALL.height,
                     classesBoundingBox.x,
                     classesBoundingBox.y,
-                    LFM_SPRITE_MAP.CLASSES.ALL.width,
-                    LFM_SPRITE_MAP.CLASSES.ALL.height
+                    SPRITE_MAP.CLASSES.ALL.width,
+                    SPRITE_MAP.CLASSES.ALL.height
                 )
             }
 

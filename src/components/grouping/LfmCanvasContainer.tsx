@@ -1,9 +1,15 @@
-import React, { useMemo } from "react"
+import React, { useMemo, useState } from "react"
 import LfmCanvas from "./LfmCanvas.tsx"
 import { Lfm, LfmApiServerModel } from "../../models/Lfm.ts"
 import { useLfmContext } from "../../contexts/LfmContext.tsx"
 import LfmToolbar from "./LfmToolbar.tsx"
 import usePollApi from "../../hooks/usePollApi.ts"
+import { ServerInfoApiDataModel } from "../../models/Game.ts"
+import { LoadingState } from "../../models/Api.ts"
+import {
+    LiveDataHaultedPageMessage,
+    ServerOfflineMessage,
+} from "../global/CommonMessages.tsx"
 
 interface Props {
     serverName: string
@@ -16,12 +22,6 @@ const GroupingContainer = ({
     refreshInterval = 3000,
     raidView = false,
 }: Props) => {
-    const { data: lfmData, reload: reloadLfms } = usePollApi<LfmApiServerModel>(
-        {
-            endpoint: `lfms/${serverName}`,
-            interval: refreshInterval,
-        }
-    )
     const {
         sortBy,
         minLevel,
@@ -31,6 +31,30 @@ const GroupingContainer = ({
         registeredCharacters,
         trackedCharacterIds,
     } = useLfmContext()
+    const [ignoreServerDown, setIgnoreServerDown] = useState<boolean>(false)
+
+    const {
+        data: lfmData,
+        state: lfmState,
+        reload: reloadLfms,
+    } = usePollApi<LfmApiServerModel>({
+        endpoint: `lfms/${serverName}`,
+        interval: refreshInterval,
+        lifespan: 1000 * 60 * 60 * 12, // 12 hours
+    })
+    const { data: serverInfoData, state: serverInfoState } =
+        usePollApi<ServerInfoApiDataModel>({
+            endpoint: "game/server-info",
+            interval: 10000,
+            lifespan: 1000 * 60 * 60 * 12, // 12 hours
+        })
+
+    const isServerOffline = useMemo<boolean>(
+        () =>
+            serverInfoState === LoadingState.Loaded &&
+            !serverInfoData?.[serverName]?.is_online,
+        [serverInfoData, serverName]
+    )
 
     // filter and sort the lfms
     const filteredLfms = useMemo(() => {
@@ -139,13 +163,26 @@ const GroupingContainer = ({
 
     return (
         <>
-            <LfmToolbar reloadLfms={reloadLfms} />
-            <LfmCanvas
-                serverName={serverName}
-                lfms={filteredLfms.filteredAndSortedLfms || []}
-                excludedLfmCount={filteredLfms.excludedLfmCount}
-                raidView={raidView}
-            />
+            {lfmState === LoadingState.Haulted && (
+                <LiveDataHaultedPageMessage />
+            )}
+            {isServerOffline && !ignoreServerDown ? (
+                <ServerOfflineMessage
+                    handleDismiss={() => {
+                        setIgnoreServerDown(true)
+                    }}
+                />
+            ) : (
+                <>
+                    <LfmToolbar reloadLfms={reloadLfms} />
+                    <LfmCanvas
+                        serverName={serverName}
+                        lfms={filteredLfms.filteredAndSortedLfms || []}
+                        excludedLfmCount={filteredLfms.excludedLfmCount}
+                        raidView={raidView}
+                    />
+                </>
+            )}
         </>
     )
 }

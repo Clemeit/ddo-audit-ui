@@ -1,18 +1,15 @@
 import { FlatActivityEvent, Lfm, LfmActivityType } from "../models/Lfm"
-import {
-    LFM_HEIGHT,
-    LFM_SPRITE_MAP,
-    LFM_AREA_PADDING,
-} from "../constants/lfmPanel.ts"
+import { LFM_HEIGHT, LFM_AREA_PADDING } from "../constants/lfmPanel.ts"
 import { BoundingBox } from "../models/Geometry.ts"
+import { SPRITE_MAP } from "../constants/spriteMap.ts"
 
 const calculateCommonBoundingBoxes = (panelWidth: number) => {
     const lfmBoundingBox = new BoundingBox(
         0,
         0,
         panelWidth -
-            LFM_SPRITE_MAP.CONTENT_LEFT.width -
-            LFM_SPRITE_MAP.CONTENT_RIGHT.width -
+            SPRITE_MAP.CONTENT_LEFT.width -
+            SPRITE_MAP.CONTENT_RIGHT.width -
             LFM_AREA_PADDING.left -
             LFM_AREA_PADDING.right,
         LFM_HEIGHT
@@ -50,8 +47,8 @@ const calculateCommonBoundingBoxes = (panelWidth: number) => {
     const classesBoundingBox = new BoundingBox(
         classPanelBoundingBox.x + 4,
         classPanelBoundingBox.y + 4,
-        LFM_SPRITE_MAP.CLASSES.ALL.width,
-        LFM_SPRITE_MAP.CLASSES.ALL.height
+        SPRITE_MAP.CLASSES.ALL.width,
+        SPRITE_MAP.CLASSES.ALL.height
     )
     const questPanelBoundingBoxWithPadding = new BoundingBox(
         questPanelBoundingBox.x + 4,
@@ -120,37 +117,37 @@ function getLfmActivityEventsFlatMap(lfm: Lfm): FlatActivityEvent[] {
 function mapClassToIconBoundingBox(className: string = "fighter") {
     switch (className.toLowerCase()) {
         case "alchemist":
-            return LFM_SPRITE_MAP.CLASSES.ALCHEMIST
+            return SPRITE_MAP.CLASSES.ALCHEMIST
         case "artificer":
-            return LFM_SPRITE_MAP.CLASSES.ARTIFICER
+            return SPRITE_MAP.CLASSES.ARTIFICER
         case "barbarian":
-            return LFM_SPRITE_MAP.CLASSES.BARBARIAN
+            return SPRITE_MAP.CLASSES.BARBARIAN
         case "bard":
-            return LFM_SPRITE_MAP.CLASSES.BARD
+            return SPRITE_MAP.CLASSES.BARD
         case "cleric":
-            return LFM_SPRITE_MAP.CLASSES.CLERIC
+            return SPRITE_MAP.CLASSES.CLERIC
         case "druid":
-            return LFM_SPRITE_MAP.CLASSES.DRUID
+            return SPRITE_MAP.CLASSES.DRUID
         case "favored soul":
-            return LFM_SPRITE_MAP.CLASSES.FAVORED_SOUL
+            return SPRITE_MAP.CLASSES.FAVORED_SOUL
         case "fighter":
-            return LFM_SPRITE_MAP.CLASSES.FIGHTER
+            return SPRITE_MAP.CLASSES.FIGHTER
         case "monk":
-            return LFM_SPRITE_MAP.CLASSES.MONK
+            return SPRITE_MAP.CLASSES.MONK
         case "paladin":
-            return LFM_SPRITE_MAP.CLASSES.PALADIN
+            return SPRITE_MAP.CLASSES.PALADIN
         case "ranger":
-            return LFM_SPRITE_MAP.CLASSES.RANGER
+            return SPRITE_MAP.CLASSES.RANGER
         case "rogue":
-            return LFM_SPRITE_MAP.CLASSES.ROGUE
+            return SPRITE_MAP.CLASSES.ROGUE
         case "sorcerer":
-            return LFM_SPRITE_MAP.CLASSES.SORCERER
+            return SPRITE_MAP.CLASSES.SORCERER
         case "warlock":
-            return LFM_SPRITE_MAP.CLASSES.WARLOCK
+            return SPRITE_MAP.CLASSES.WARLOCK
         case "wizard":
-            return LFM_SPRITE_MAP.CLASSES.WIZARD
+            return SPRITE_MAP.CLASSES.WIZARD
         default:
-            return LFM_SPRITE_MAP.CLASSES.FIGHTER
+            return SPRITE_MAP.CLASSES.FIGHTER
     }
 }
 
@@ -166,64 +163,64 @@ function mapRaceAndGenderToRaceIconBoundingBox(
     }
     switch (race.toLowerCase()) {
         case "dragonborn":
-            raceIconBoundingBox = LFM_SPRITE_MAP.RACES.DRAGONBORN
+            raceIconBoundingBox = SPRITE_MAP.RACES.DRAGONBORN
             break
         case "drow elf":
-            raceIconBoundingBox = LFM_SPRITE_MAP.RACES.DROW
+            raceIconBoundingBox = SPRITE_MAP.RACES.DROW
             break
         case "dwarf":
-            raceIconBoundingBox = LFM_SPRITE_MAP.RACES.DWARF
+            raceIconBoundingBox = SPRITE_MAP.RACES.DWARF
             break
         case "elf":
         case "wood elf":
         case "sun elf":
-            raceIconBoundingBox = LFM_SPRITE_MAP.RACES.ELF
+            raceIconBoundingBox = SPRITE_MAP.RACES.ELF
             break
         case "gnome":
         case "deep gnome":
-            raceIconBoundingBox = LFM_SPRITE_MAP.RACES.GNOME
+            raceIconBoundingBox = SPRITE_MAP.RACES.GNOME
             break
         case "halfling":
-            raceIconBoundingBox = LFM_SPRITE_MAP.RACES.HALFLING
+            raceIconBoundingBox = SPRITE_MAP.RACES.HALFLING
             break
         case "half elf":
-            raceIconBoundingBox = LFM_SPRITE_MAP.RACES.HALF_ELF
+            raceIconBoundingBox = SPRITE_MAP.RACES.HALF_ELF
             break
         case "half orc":
-            raceIconBoundingBox = LFM_SPRITE_MAP.RACES.HALF_ORC
+            raceIconBoundingBox = SPRITE_MAP.RACES.HALF_ORC
             break
         case "human":
         case "shadar-kai":
-            raceIconBoundingBox = LFM_SPRITE_MAP.RACES.HUMAN
+            raceIconBoundingBox = SPRITE_MAP.RACES.HUMAN
             break
         case "tiefling":
         case "tiefling scoundrel":
-            raceIconBoundingBox = LFM_SPRITE_MAP.RACES.TIEFLING
+            raceIconBoundingBox = SPRITE_MAP.RACES.TIEFLING
             break
         case "warforged":
         case "bladeforged":
-            raceIconBoundingBox = LFM_SPRITE_MAP.RACES.WARFORGED
+            raceIconBoundingBox = SPRITE_MAP.RACES.WARFORGED
             break
         case "aasimar":
         case "aasimar scourge":
-            raceIconBoundingBox = LFM_SPRITE_MAP.RACES.AASIMAR
+            raceIconBoundingBox = SPRITE_MAP.RACES.AASIMAR
             break
         case "eladrin":
-            raceIconBoundingBox = LFM_SPRITE_MAP.RACES.ELADRIN
+            raceIconBoundingBox = SPRITE_MAP.RACES.ELADRIN
             break
         case "shifter":
         case "razorclaw shifter":
-            raceIconBoundingBox = LFM_SPRITE_MAP.RACES.SHIFTER
+            raceIconBoundingBox = SPRITE_MAP.RACES.SHIFTER
             break
         case "tabaxi":
         case "tabaxi trailblazer":
-            raceIconBoundingBox = LFM_SPRITE_MAP.RACES.TABAXI
+            raceIconBoundingBox = SPRITE_MAP.RACES.TABAXI
             break
         case "eladrin chaosmancer":
-            raceIconBoundingBox = LFM_SPRITE_MAP.RACES.CHAOSMANCER
+            raceIconBoundingBox = SPRITE_MAP.RACES.CHAOSMANCER
             break
         default:
-            raceIconBoundingBox = LFM_SPRITE_MAP.RACES.HUMAN
+            raceIconBoundingBox = SPRITE_MAP.RACES.HUMAN
     }
 
     return {

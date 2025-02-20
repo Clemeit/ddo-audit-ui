@@ -1,0 +1,50 @@
+.generic-toolbar-container {
+    background-color: var(--background-light);
+    display: flex;
+    align-items: center;
+    padding: 0;
+    height: 30px;
+    max-width: 100%;
+
+    .item {
+        height: 100%;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        padding: 0px 10px;
+        transition: background-color 0.3s;
+        cursor: pointer;
+        gap: 10px;
+
+        &:hover {
+            background-color: var(--highlight);
+        }
+
+        &.settings-button {
+            margin-left: auto;
+        }
+
+        &.refresh-button.disabled {
+            background-color: var(--background-light);
+            transition: none;
+            cursor: default;
+
+            &:hover {
+                background-color: var(--background-light);
+            }
+        }
+    }
+}
+
+@media (max-width: 768px) {
+    .generic-toolbar-container {
+        height: 40px;
+
+        .item {
+            .icon {
+                width: 30px;
+                height: 30px;
+            }
+        }
+    }
+}

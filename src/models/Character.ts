@@ -71,6 +71,7 @@ enum CharacterSortType {
     Level = "level",
     Guild = "guild",
     Class = "class",
+    Group = "group",
 }
 
 interface CharacterSortBy {

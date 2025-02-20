@@ -1,15 +1,21 @@
-import React, { useEffect, useMemo, useState } from "react"
+import React, { useMemo, useState } from "react"
 import usePollApi from "../../hooks/usePollApi.ts"
-import { Character, CharacterApiServerModel } from "../../models/Character.ts"
+import {
+    Character,
+    CharacterApiServerModel,
+    CharacterSortType,
+} from "../../models/Character.ts"
 import { ServerInfoApiDataModel } from "../../models/Game.ts"
 import { useWhoContext } from "../../contexts/WhoContext.tsx"
 import WhoCanvas from "./WhoCanvas.tsx"
-import { MAX_LEVEL, MIN_LEVEL } from "../../constants/game.ts"
-import Button from "../global/Button.tsx"
-import Stack from "../global/Stack.tsx"
-import { Link } from "react-router-dom"
 import { LoadingState } from "../../models/Api.ts"
-import { LiveDataHaultedPageMessage } from "../global/CommonMessages.tsx"
+import {
+    LiveDataHaultedPageMessage,
+    ServerOfflineMessage,
+} from "../global/CommonMessages.tsx"
+import WhoToolbar from "./WhoToolbar.tsx"
+
+// TODO: group_id should be null and never "0"
 
 interface Props {
     serverName: string
@@ -25,15 +31,20 @@ const WhoContainer = ({ serverName, refreshInterval = 3000 }: Props) => {
         setMinLevel,
         maxLevel,
         setMaxLevel,
+        classNameFilter,
+        isGroupView,
     } = useWhoContext()
     const [ignoreServerDown, setIgnoreServerDown] = useState<boolean>(false)
 
-    const { data: characterData, state: characterState } =
-        usePollApi<CharacterApiServerModel>({
-            endpoint: `characters/${serverName}`,
-            interval: refreshInterval,
-            lifespan: 1000 * 60 * 60 * 12, // 12 hours
-        })
+    const {
+        data: characterData,
+        state: characterState,
+        reload: reloadCharacters,
+    } = usePollApi<CharacterApiServerModel>({
+        endpoint: `characters/${serverName}`,
+        interval: refreshInterval,
+        lifespan: 1000 * 60 * 60 * 12, // 12 hours
+    })
     const { data: serverInfoData, state: serverInfoState } =
         usePollApi<ServerInfoApiDataModel>({
             endpoint: "game/server-info",
@@ -41,19 +52,19 @@ const WhoContainer = ({ serverName, refreshInterval = 3000 }: Props) => {
             lifespan: 1000 * 60 * 60 * 12, // 12 hours
         })
 
-    const isServerOnline = useMemo<boolean>(
+    const isServerOffline = useMemo<boolean>(
         () =>
-            serverInfoState !== LoadingState.Error &&
-            serverInfoData?.[serverName]?.is_online,
+            serverInfoState === LoadingState.Loaded &&
+            !serverInfoData?.[serverName]?.is_online,
         [serverInfoData, serverName]
-    ) // TODO: this value needs to be debounced
+    )
 
     // Filter and sort
     const curatedCharacters = useMemo<Character[]>(() => {
-        const filteredCharacters = Object.values(
+        let filteredCharacters = Object.values(
             characterData?.characters ?? {}
         ).filter((character) => {
-            let globalMatch = false
+            let stringFilterMatch = false
             const stringFilters = stringFilter.split(",")
             stringFilters.forEach((localFilter) => {
                 const nameMatch = (character.name ?? "")
@@ -64,77 +75,118 @@ const WhoContainer = ({ serverName, refreshInterval = 3000 }: Props) => {
                     .toLowerCase()
                     .trim()
                     .includes(localFilter.toLowerCase().trim())
-                const levelRangeMatch =
-                    character.total_level! >= minLevel &&
-                    character.total_level! <= maxLevel
+                const locationMatch = (character.location?.name ?? "")
+                    .toLowerCase()
+                    .trim()
+                    .includes(localFilter.toLowerCase().trim())
 
-                const isAnonymous = character.is_anonymous
-
-                const localMatch =
-                    (nameMatch || guildNameMatch) &&
-                    levelRangeMatch &&
-                    !isAnonymous
-                globalMatch = globalMatch || localMatch
+                const localMatch = nameMatch || guildNameMatch || locationMatch
+                stringFilterMatch = stringFilterMatch || localMatch
             })
-            return globalMatch
+
+            const levelRangeMatch =
+                character.total_level! >= minLevel &&
+                character.total_level! <= maxLevel
+
+            const classMatch = character.classes?.some((classData) =>
+                classNameFilter.includes(classData.name.toLowerCase())
+            )
+
+            const isAnonymous = character.is_anonymous
+
+            const groupMatch = isGroupView
+                ? character.is_in_party &&
+                  character.group_id !== "0" &&
+                  character.group_id !== undefined
+                : true
+
+            return (
+                stringFilterMatch &&
+                levelRangeMatch &&
+                classMatch &&
+                groupMatch &&
+                (!isAnonymous || isGroupView)
+            )
         })
 
-        const sortedCharacters = filteredCharacters
-            .sort((a, b) => (a.id ?? "").localeCompare(b.id ?? ""))
-            .sort((a, b) => {
-                switch (sortBy.type) {
-                    case "name":
-                        return (a.name ?? "").localeCompare(b.name ?? "")
-                    case "level":
-                        return (a.total_level ?? 0) - (b.total_level ?? 0)
-                    case "guild":
-                        return (a.guild_name ?? "").localeCompare(
-                            b.guild_name ?? ""
-                        )
-                    default:
-                        return 0
-                }
-            })
+        // If group view, add all characters that are in a party with any
+        // character from filteredCharacters
+        if (isGroupView) {
+            const groupIds = new Set<string>(
+                filteredCharacters
+                    .filter((c) => c.is_in_party)
+                    .map((c) => c.group_id ?? "0")
+            )
+            const groupedCharacters = [
+                ...Object.values(characterData?.characters ?? {})
+                    .filter((c) => groupIds.has(c.group_id ?? "0"))
+                    .filter((c) => {
+                        // only characters where there are two or more characters with the same groupid
+                        const groupCount = Object.values(
+                            characterData?.characters ?? {}
+                        ).filter((c2) => c2.group_id === c.group_id).length
+                        return groupCount > 1
+                    }),
+            ]
+
+            filteredCharacters = [...groupedCharacters]
+        }
+
+        let sortedCharacters: Character[] = []
+
+        if (isGroupView) {
+            sortedCharacters = filteredCharacters
+                .sort((a, b) => (a.id ?? "").localeCompare(b.id ?? ""))
+                .sort(
+                    (a, b) =>
+                        (a.is_anonymous ? 1 : 0) - (b.is_anonymous ? 1 : 0)
+                )
+                .sort((a, b) =>
+                    (a.group_id ?? "").localeCompare(b.group_id ?? "")
+                )
+        } else {
+            sortedCharacters = filteredCharacters
+                .sort((a, b) => (a.id ?? "").localeCompare(b.id ?? ""))
+                .sort((a, b) => {
+                    switch (sortBy.type) {
+                        case CharacterSortType.Name:
+                            return (a.name ?? "").localeCompare(b.name ?? "")
+                        case CharacterSortType.Level:
+                            return (a.total_level ?? 0) - (b.total_level ?? 0)
+                        case CharacterSortType.Guild:
+                            return (a.guild_name ?? "").localeCompare(
+                                b.guild_name ?? ""
+                            )
+                        default:
+                            return 0
+                    }
+                })
+        }
 
         return sortedCharacters
-    }, [stringFilter, characterData, minLevel, maxLevel, sortBy])
+    }, [stringFilter, characterData, minLevel, maxLevel, sortBy, isGroupView])
 
     return (
-        <div>
+        <>
             {characterState === LoadingState.Haulted && (
                 <LiveDataHaultedPageMessage />
             )}
-            {isServerOnline || ignoreServerDown ? (
-                <WhoCanvas
-                    characters={curatedCharacters}
-                    serverName={serverName}
-                />
-            ) : (
+            {!isServerOffline || ignoreServerDown ? (
                 <>
-                    <h3 style={{ marginTop: "0px" }}>Server Offline</h3>
-                    <p>
-                        This server appears to be offline. Check the{" "}
-                        <Link className="link" to="/live">
-                            Live
-                        </Link>{" "}
-                        page for status.
-                    </p>
-                    <p>If you think this is an error,</p>
-                    <Stack gap="10px">
-                        <Button
-                            onClick={() => {
-                                setIgnoreServerDown(true)
-                            }}
-                        >
-                            Load data anyway
-                        </Button>
-                        <Button type="secondary" onClick={() => {}}>
-                            Report bug
-                        </Button>
-                    </Stack>
+                    <WhoToolbar reloadCharacters={reloadCharacters} />
+                    <WhoCanvas
+                        characters={curatedCharacters}
+                        serverName={serverName}
+                    />
                 </>
+            ) : (
+                <ServerOfflineMessage
+                    handleDismiss={() => {
+                        setIgnoreServerDown(true)
+                    }}
+                />
             )}
-        </div>
+        </>
     )
 }
 

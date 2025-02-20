@@ -1,13 +1,6 @@
 import React, { useMemo } from "react"
 import "./LfmToolbar.css"
-import useGetCurrentServer from "../../hooks/useGetCurrentServer.ts"
 import { Link } from "react-router-dom"
-import { ReactComponent as MenuSVG } from "../../assets/svg/menu.svg"
-import { ReactComponent as ScreenshotSVG } from "../../assets/svg/capture.svg"
-import { ReactComponent as SettingsSVG } from "../../assets/svg/settings.svg"
-import { ReactComponent as FullscreenSVG } from "../../assets/svg/fullscreen.svg"
-import { ReactComponent as FullscreenExitSVG } from "../../assets/svg/fullscreen-exit.svg"
-import { ReactComponent as RefreshSVG } from "../../assets/svg/refresh.svg"
 import { useThemeContext } from "../../contexts/ThemeContext.tsx"
 import Modal from "../modal/Modal.tsx"
 import Stack from "../global/Stack.tsx"
@@ -23,17 +16,15 @@ import ContentCluster from "../global/ContentCluster.tsx"
 import { Character } from "../../models/Character.ts"
 import YesNoModal from "../modal/YesNoModal.tsx"
 import Badge from "../global/Badge.tsx"
-import { VIP_SERVER_NAMES_LOWER } from "../../constants/servers.ts"
 import Checkbox from "../global/Checkbox.tsx"
 import useFeatureCallouts from "../../hooks/useFeatureCallouts.ts"
+import GenericToolbar from "../global/GenericToolbar.tsx"
 
 interface Props {
     reloadLfms: () => void
 }
 
 const LfmToolbar = ({ reloadLfms }: Props) => {
-    const { serverNameSentenceCase, serverNameLowercase } =
-        useGetCurrentServer()
     const {
         minLevel,
         setMinLevel,
@@ -83,7 +74,6 @@ const LfmToolbar = ({ reloadLfms }: Props) => {
         React.useState(false)
     const [showResetUserSettingsModal, setShowResetUserSettingsModal] =
         React.useState(false)
-    const [canManuallyReload, setCanManuallyReload] = React.useState(true)
 
     const handleOpenModal = () => {
         setShowSettingsModal(true)
@@ -463,81 +453,15 @@ const LfmToolbar = ({ reloadLfms }: Props) => {
                         {settingModalContent}
                     </Modal>
                 )}
-            <div
-                className="lfm-toolbar-container"
-                style={{ width: panelWidth, maxWidth: "100%" }}
-            >
-                <Link
-                    to="/grouping"
-                    className="lfm-toolbar-item server-name-link"
-                >
-                    <MenuSVG className="lfm-toolbar-item-icon" />
-                    <span className="lfm-toolbar-item-text">
-                        {serverNameSentenceCase}
-                        {VIP_SERVER_NAMES_LOWER.includes(
-                            serverNameLowercase
-                        ) && (
-                            <>
-                                {" "}
-                                <Badge
-                                    text="VIP"
-                                    size="small"
-                                    backgroundColor="var(--orange4)"
-                                />
-                            </>
-                        )}
-                    </span>
-                </Link>
-                <div className="lfm-toolbar-item screenshot-button hide-on-mobile">
-                    <ScreenshotSVG className="lfm-toolbar-item-icon" />
-                    <span className="lfm-toolbar-item-text hide-on-mobile">
-                        Screenshot
-                    </span>
-                </div>
-                <div
-                    className="lfm-toolbar-item settings-button"
-                    onClick={() => {
-                        handleOpenModal()
-                        dismissCallout("grouping-settings-button")
-                    }}
-                >
-                    <SettingsSVG className="lfm-toolbar-item-icon" />
-                    <span className="lfm-toolbar-item-text hide-on-mobile">
-                        Settings{" "}
-                        {isCalloutActive("grouping-settings-button") && (
-                            <Badge type="new" text="New" />
-                        )}
-                    </span>
-                </div>
-                <div
-                    className="lfm-toolbar-item fullscreen-button"
-                    onClick={() => setIsFullScreen(!isFullScreen)}
-                >
-                    {isFullScreen ? (
-                        <FullscreenExitSVG className="lfm-toolbar-item-icon" />
-                    ) : (
-                        <FullscreenSVG className="lfm-toolbar-item-icon" />
-                    )}
-                    <span className="lfm-toolbar-item-text hide-on-mobile">
-                        Fullscreen
-                    </span>
-                </div>
-                <div
-                    className={`lfm-toolbar-item refresh-button ${canManuallyReload ? "" : "disabled"}`}
-                    onClick={() => {
-                        if (canManuallyReload) {
-                            reloadRegisteredCharacters()
-                            reloadLfms()
-                            setCanManuallyReload(false)
-                            setTimeout(() => setCanManuallyReload(true), 5000)
-                        }
-                    }}
-                >
-                    <RefreshSVG
-                        className={`lfm-toolbar-item-icon ${canManuallyReload ? "" : "icon-disabled"}`}
-                    />
-                </div>
-            </div>
+            <GenericToolbar
+                handleReload={() => {
+                    reloadRegisteredCharacters()
+                    reloadLfms()
+                }}
+                handleOpenSettingsModal={handleOpenModal}
+                panelWidth={panelWidth}
+                linkDestination="/grouping"
+            />
         </>
     )
 }

@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, ReactNode } from "react"
-import { MAX_LEVEL, MIN_LEVEL } from "../constants/game.ts"
+import { CLASS_LIST_LOWER, MAX_LEVEL, MIN_LEVEL } from "../constants/game.ts"
 import { CharacterSortBy, CharacterSortType } from "../models/Character.ts"
+import { DEFAULT_WHO_PANEL_WIDTH } from "../constants/whoPanel.ts"
 
 interface WhoContextProps {
     stringFilter: string
@@ -19,13 +20,20 @@ interface WhoContextProps {
     setIsExactMatch: (state: boolean) => void
     sortBy: CharacterSortBy
     setSortBy: (state: CharacterSortBy) => void
+    panelWidth: number
+    setPanelWidth: (state: number) => void
+    panelHeight: number
+    setPanelHeight: (state: number) => void
+    isDynamicWidth: boolean
+    setIsDynamicWidth: (state: boolean) => void
 }
 
 const WhoContext = createContext<WhoContextProps | undefined>(undefined)
 
 export const WhoProvider = ({ children }: { children: ReactNode }) => {
     const [stringFilter, setStringFilter] = useState<string>("")
-    const [classNameFilter, setClassNameFilter] = useState<string[]>([])
+    const [classNameFilter, setClassNameFilter] =
+        useState<string[]>(CLASS_LIST_LOWER)
     const [minLevel, setMinLevel] = useState<number>(MIN_LEVEL)
     const [maxLevel, setMaxLevel] = useState<number>(MAX_LEVEL)
     const [isGroupView, setIsGroupView] = useState<boolean>(false)
@@ -36,6 +44,11 @@ export const WhoProvider = ({ children }: { children: ReactNode }) => {
         type: CharacterSortType.Level,
         direction: "asc",
     })
+    const [panelWidth, setPanelWidth] = useState<number>(
+        DEFAULT_WHO_PANEL_WIDTH
+    )
+    const [panelHeight, setPanelHeight] = useState<number>(0)
+    const [isDynamicWidth, setIsDynamicWidth] = useState<boolean>(false)
 
     return (
         <WhoContext.Provider
@@ -56,6 +69,12 @@ export const WhoProvider = ({ children }: { children: ReactNode }) => {
                 setIsExactMatch,
                 sortBy,
                 setSortBy,
+                panelWidth,
+                setPanelWidth,
+                isDynamicWidth,
+                setIsDynamicWidth,
+                panelHeight,
+                setPanelHeight,
             }}
         >
             {children}

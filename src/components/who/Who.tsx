@@ -1,10 +1,6 @@
 import React, { useCallback } from "react"
 import usePollApi from "../../hooks/usePollApi.ts"
-import {
-    CharacterApiDataModel,
-    CharacterApiServerModel,
-    CharacterSummaryApiDataModel,
-} from "../../models/Character.ts"
+import { CharacterSummaryApiDataModel } from "../../models/Character.ts"
 import { ServerInfoApiDataModel } from "../../models/Game.ts"
 import Page from "../global/Page.tsx"
 import ContentCluster from "../global/ContentCluster.tsx"
@@ -13,8 +9,11 @@ import ServerNavigationCard from "../global/ServerNavigationCard.tsx"
 import { LoadingState } from "../../models/Api.ts"
 import { SERVER_NAMES_LOWER } from "../../constants/servers.ts"
 import { pluralize, toSentenceCase } from "../../utils/stringUtils.ts"
+// @ts-expect-error NOFIX
 import { ReactComponent as Checkmark } from "../../assets/svg/checkmark.svg"
+// @ts-expect-error NOFIX
 import { ReactComponent as X } from "../../assets/svg/x.svg"
+// @ts-expect-error NOFIX
 import { ReactComponent as Pending } from "../../assets/svg/pending.svg"
 import Badge from "../global/Badge.tsx"
 import { LiveDataHaultedPageMessage } from "../global/CommonMessages.tsx"

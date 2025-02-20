@@ -38,7 +38,7 @@ export class ErrorBoundary extends React.Component<
                     <h1 style={{ marginBottom: "5px" }}>
                         Well this is awkward.
                     </h1>
-                    <p>
+                    <p style={{ textAlign: "center" }}>
                         If you're seeing this page, it means that something went
                         wrong. Sorry about that! Please refresh the page or come
                         back later.
