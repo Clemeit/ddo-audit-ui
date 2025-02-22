@@ -15,7 +15,9 @@ import {
     calculateCommonBoundingBoxes,
 } from "../../utils/lfmUtils.ts"
 import {
+    FONTS,
     LFM_AREA_PADDING,
+    LFM_COLORS,
     LFM_HEIGHT,
     LFM_LEFT_PADDING,
     LFM_PANEL_TOP_BORDER_HEIGHT,
@@ -98,6 +100,7 @@ const LfmCanvas: React.FC<Props> = ({
         overlayWidth: 0,
         overlayHeight: 0,
     })
+    const fonts = useMemo(() => FONTS(), [])
 
     // Separate canvases for the lfms and overlay
     const [image, setImage] = useState<HTMLImageElement | null>(null)
@@ -259,6 +262,9 @@ const LfmCanvas: React.FC<Props> = ({
 
         const shouldRenderAllLfms = lfms.length !== previousState.lfms.length
 
+        const shouldRenderFilterMessage =
+            excludedLfmCount !== previousState.excludedLfmCount
+
         const shouldRenderOverlay =
             selectedLfmInfo !== previousState.selectedLfmInfo ||
             (selectedLfmInfo &&
@@ -278,7 +284,8 @@ const LfmCanvas: React.FC<Props> = ({
             !globalRenderNeeded &&
             !hasLfmChanges &&
             !shouldRenderOverlay &&
-            !shouldRenderPanel
+            !shouldRenderPanel &&
+            !shouldRenderFilterMessage
         ) {
             console.log("Skipping render.")
             return
@@ -290,6 +297,7 @@ const LfmCanvas: React.FC<Props> = ({
         let wasLfmRendered = false
         let numberOfLfmsRendered = 0
         let wasOverlayRendered = false
+        let wasFilterMessageRendered = false
 
         // Render the panel
         if (globalRenderNeeded || shouldRenderPanel || shouldRenderOverlay) {
@@ -346,8 +354,34 @@ const LfmCanvas: React.FC<Props> = ({
             }
         }
 
+        // If all lfms have been filtered out, render a message
+        if (
+            shouldRenderFilterMessage &&
+            lfms.length === 0 &&
+            excludedLfmCount > 0
+        ) {
+            const context = lfmCanvasRef.current?.getContext("2d")
+            if (context) {
+                context.clearRect(0, 0, panelWidth, panelHeight)
+                context.fillStyle = LFM_COLORS.SECONDARY_TEXT
+                context.font = fonts.GROUPS_HIDDEN_MESSAGE
+                context.textAlign = "center"
+                context.fillText(
+                    `${excludedLfmCount} groups were hidden by your filter settings`,
+                    panelWidth / 2,
+                    200
+                )
+                wasFilterMessageRendered = true
+            }
+        }
+
         // Draw the lfm and overlay canvases to the main canvas
-        if (wasPanelRendered || wasLfmRendered || wasOverlayRendered) {
+        if (
+            wasPanelRendered ||
+            wasLfmRendered ||
+            wasOverlayRendered ||
+            wasFilterMessageRendered
+        ) {
             const mainContext = mainCanvasRef.current?.getContext("2d")
             if (mainContext) {
                 // mainContext.clearRect(0, 0, panelWidth, panelHeight)

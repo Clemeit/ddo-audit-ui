@@ -17,10 +17,10 @@ import useTextRenderer from "./useTextRenderer.ts"
 import {
     calculateCommonBoundingBoxes,
     getLfmPostedTimestamp,
-    mapRaceAndGenderToRaceIconBoundingBox,
 } from "../utils/lfmUtils.ts"
 import { convertMillisecondsToPrettyString } from "../utils/stringUtils.ts"
 import { SPRITE_MAP } from "../constants/spriteMap.ts"
+import { mapRaceAndGenderToRaceIconBoundingBox } from "../utils/socialUtils.ts"
 
 interface Props {
     lfmSprite?: HTMLImageElement | null
@@ -423,21 +423,21 @@ const useRenderLfm = ({ lfmSprite, context }: Props) => {
             }
 
             // ===== MAIN PANEL =====
-            // leader class icon
-            const leaderClassIcon = mapRaceAndGenderToRaceIconBoundingBox(
+            // leader race icon
+            const leaderRaceIcon = mapRaceAndGenderToRaceIconBoundingBox(
                 lfm.leader.race || "human",
                 lfm.leader.gender || "male"
             )
             context.drawImage(
                 lfmSprite,
-                leaderClassIcon.x,
-                leaderClassIcon.y,
-                leaderClassIcon.width,
-                leaderClassIcon.height,
+                leaderRaceIcon.x,
+                leaderRaceIcon.y,
+                leaderRaceIcon.width,
+                leaderRaceIcon.height,
                 leaderRaceIconBoundingBox.x,
                 leaderRaceIconBoundingBox.y,
-                leaderClassIcon.width,
-                leaderClassIcon.height
+                leaderRaceIcon.width,
+                leaderRaceIcon.height
             )
 
             // leader name

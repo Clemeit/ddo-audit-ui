@@ -115,6 +115,25 @@ function wrapText(
     return lines.filter((line) => line.length > 0).map((line) => line.trim())
 }
 
+function truncateText(
+    text: string,
+    width: number,
+    font: string,
+    context: CanvasRenderingContext2D
+) {
+    const previousFont = context.font
+    context.font = font
+    const ellipsisWidth = context.measureText("...").width
+    let truncatedText = text
+    let wasTruncated = false
+    while (context.measureText(truncatedText).width > width - ellipsisWidth) {
+        truncatedText = truncatedText.slice(0, -1)
+        wasTruncated = true
+    }
+    context.font = previousFont
+    return truncatedText.trim() + (wasTruncated ? "..." : "")
+}
+
 function getTextSize(
     text: string,
     font: string,
@@ -142,4 +161,5 @@ export {
     wrapText,
     getTextSize,
     pluralize,
+    truncateText,
 }

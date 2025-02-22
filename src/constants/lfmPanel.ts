@@ -1,4 +1,4 @@
-import { BoundingBox } from "../models/Geometry"
+import { BoundingBox } from "../models/Geometry.ts"
 import { SPRITE_MAP } from "./spriteMap.ts"
 
 const DEFAULT_LFM_PANEL_WIDTH = 848

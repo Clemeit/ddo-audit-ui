@@ -14,6 +14,7 @@ import {
     ServerOfflineMessage,
 } from "../global/CommonMessages.tsx"
 import WhoToolbar from "./WhoToolbar.tsx"
+import { MAXIMUM_CHARACTER_COUNT } from "../../constants/whoPanel.ts"
 
 // TODO: group_id should be null and never "0"
 
@@ -60,7 +61,10 @@ const WhoContainer = ({ serverName, refreshInterval = 3000 }: Props) => {
     )
 
     // Filter and sort
-    const curatedCharacters = useMemo<Character[]>(() => {
+    const curatedCharacters = useMemo<{
+        characters: Character[]
+        areResultsTruncated: boolean
+    }>(() => {
         let filteredCharacters = Object.values(
             characterData?.characters ?? {}
         ).filter((character) => {
@@ -163,7 +167,13 @@ const WhoContainer = ({ serverName, refreshInterval = 3000 }: Props) => {
                 })
         }
 
-        return sortedCharacters
+        const areResultsTruncated =
+            sortedCharacters.length > MAXIMUM_CHARACTER_COUNT
+
+        return {
+            characters: sortedCharacters.slice(0, MAXIMUM_CHARACTER_COUNT),
+            areResultsTruncated,
+        }
     }, [stringFilter, characterData, minLevel, maxLevel, sortBy, isGroupView])
 
     return (
@@ -175,7 +185,13 @@ const WhoContainer = ({ serverName, refreshInterval = 3000 }: Props) => {
                 <>
                     <WhoToolbar reloadCharacters={reloadCharacters} />
                     <WhoCanvas
-                        characters={curatedCharacters}
+                        allCharacters={Object.values(
+                            characterData?.characters ?? {}
+                        )}
+                        curatedCharacters={curatedCharacters.characters}
+                        areResultsTruncated={
+                            curatedCharacters.areResultsTruncated
+                        }
                         serverName={serverName}
                     />
                 </>

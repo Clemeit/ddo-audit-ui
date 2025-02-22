@@ -119,6 +119,20 @@ const SPRITE_MAP = {
         width: 18,
         height: 18,
     },
+    GROUP_VIEW_CHECKBOX: {
+        CHECKED: {
+            x: 206,
+            y: 22,
+            width: 22,
+            height: 23,
+        },
+        UNCHECKED: {
+            x: 182,
+            y: 22,
+            width: 23,
+            height: 23,
+        },
+    },
     CLASSES: {
         ALL: {
             x: 0,
@@ -325,14 +339,26 @@ const SPRITE_MAP = {
         RIGHT: { x: 190, y: 0, width: 2, height: 21 },
         CENTER: { x: 173, y: 0, width: 17, height: 21 },
     },
+    LFM_SORT_ICON: {
+        x: 149,
+        y: 22,
+        width: 15,
+        height: 17,
+    },
+    IN_PARTY_ICON: {
+        x: 165,
+        y: 22,
+        width: 16,
+        height: 20,
+    },
     CHECKBOX: {
-        CHECKED: {
+        UNCHECKED: {
             x: 212,
             y: 1,
             width: 16,
             height: 16,
         },
-        UNCHECKED: {
+        CHECKED: {
             x: 229,
             y: 1,
             width: 16,

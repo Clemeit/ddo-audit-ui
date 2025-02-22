@@ -10,18 +10,24 @@ interface Props {
     type?: "error" | "warning" | "info" | "success"
     title?: string
     message?: React.ReactNode
+    width?: string
+    maxWidth?: string
 }
 
 const PageMessage = ({
     type = "info",
     title = "Title",
     message = <span>Message</span>,
+    width = "unset",
+    maxWidth = "unset",
 }: Props) => {
     return (
         <div
             className={`page-message ${type}`}
             style={{
                 border: `1px solid var(--${type})`,
+                width,
+                maxWidth,
             }}
         >
             <Stack direction="column" gap="10px">

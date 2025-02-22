@@ -1,5 +1,7 @@
 const DEFAULT_WHO_PANEL_WIDTH = 848
-const CHARACTER_HEIGHT = 50
+const MAXIMUM_WHO_PANEL_WIDTH = 550
+const MINIMUM_WHO_PANEL_WIDTH = 1600
+const CHARACTER_HEIGHT = 42
 const MINIMUM_CHARACTER_COUNT = 5
 const MAXIMUM_CHARACTER_COUNT = 100
 
@@ -26,18 +28,45 @@ const GROUP_COLORS = [
 
 const DEFAULT_BASE_FONT_SIZE = 14
 
+const FILTER_ZONE_MARGIN = 7
+
+const CLASS_FILTER_Y = 45
+
+const FILTER_ZONE_CONTENT_HEIGHT = 150
+const FILTER_ZONE_PADDING = 20
+
+const CLASS_FILTER_GAP = 4
+
+const HEADER_HEIGHT = 22
+const LFM_COLUMN_WIDTH = 20
+const CLASS_COLUMN_WIDTH = 110
+const LEVEL_COLUMN_WIDTH = 60
+const SORT_HEADER_PADDING_TOP = 5
+
+const INPUT_BOX_HEIGHT = 20
+
 const FONTS = (baseFontSize: number = DEFAULT_BASE_FONT_SIZE) => ({
-    LEADER_NAME: `${baseFontSize + 2}px 'Trebuchet MS'`,
-    QUEST_NAME: `${baseFontSize + 4}px Arial`,
-    QUEST_GUESS_NAME: `italic ${baseFontSize + 4}px Arial`,
-    COMMENT: `${baseFontSize}px Arial`,
-    TIP: `italic ${baseFontSize}px Arial`,
-    MEMBER_COUNT: `${baseFontSize}px Arial`,
-    LEVEL_RANGE: `${baseFontSize + 2}px Arial`,
     MAIN_HEADER: "14px 'Trebuchet MS'",
-    SORT_HEADER: "12px 'Trebuchet MS'",
-    GROUPS_HIDDEN_MESSAGE: `italic ${baseFontSize + 6}px 'Trebuchet MS`,
+    FILTER_PRIMARY_HEADER: "16px 'Trebuchet MS'",
+    FILTER_SECONDARY_HEADER: "14px 'Trebuchet MS'",
+    FILTER_CHECKBOX: "14px 'Trebuchet MS'",
+    SORT_HEADER: "10px 'Trebuchet MS'",
+    CHARACTER_NAME: `${baseFontSize + 3}px 'Trebuchet MS'`,
+    CHARACTER_LEVEL: `${baseFontSize + 2}px 'Trebuchet MS'`,
+    CHARACTER_GUILD_NAME: `${baseFontSize + 2}px 'Trebuchet MS'`,
+    CHARACTER_LOCATION: `${baseFontSize - 2}px 'Trebuchet MS'`,
 })
+
+const WHO_COLORS = {
+    BLACK_BACKGROUND: "#0F0F0D",
+    WHITE_TEXT: "#FDFDFB",
+    YELLOW_TEXT: "#c9b862",
+    FADED_WHITE: "#999997",
+    CHARACTER_GRADIENT_CENTER: "#4C4A31",
+    CHARACTER_GRADIENT_EDGE: "#3B3827",
+    CHARACTER_BORDER: "#898E6F",
+    CHARACTER_TEXT: "#EEEDD1",
+}
 
 export {
     DEFAULT_WHO_PANEL_WIDTH,
@@ -45,5 +74,19 @@ export {
     CHARACTER_HEIGHT,
     MINIMUM_CHARACTER_COUNT,
     MAXIMUM_CHARACTER_COUNT,
+    FILTER_ZONE_MARGIN,
     FONTS,
+    CLASS_FILTER_Y,
+    WHO_COLORS,
+    FILTER_ZONE_CONTENT_HEIGHT,
+    FILTER_ZONE_PADDING,
+    CLASS_FILTER_GAP,
+    LFM_COLUMN_WIDTH,
+    CLASS_COLUMN_WIDTH,
+    LEVEL_COLUMN_WIDTH,
+    SORT_HEADER_PADDING_TOP,
+    HEADER_HEIGHT,
+    MINIMUM_WHO_PANEL_WIDTH,
+    MAXIMUM_WHO_PANEL_WIDTH,
+    INPUT_BOX_HEIGHT,
 }

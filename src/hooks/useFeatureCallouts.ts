@@ -5,6 +5,7 @@ const useFeatureCallouts = () => {
         "grouping-settings-button",
         "show-lfm-activity",
         "show-lfm-posted-time",
+        "faster-who-updating",
     ]
 
     const [dismissedCallouts, setDismissedCallouts] = useState<string[]>([])

@@ -72,6 +72,7 @@ enum CharacterSortType {
     Guild = "guild",
     Class = "class",
     Group = "group",
+    Lfm = "lfm",
 }
 
 interface CharacterSortBy {
