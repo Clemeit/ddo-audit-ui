@@ -137,18 +137,6 @@ const LfmToolbar = ({ reloadLfms }: Props) => {
                             />
                             Filter by level range
                         </label>
-                        <label
-                            className="input-label"
-                            htmlFor="filterOnMyLevel"
-                        >
-                            <input
-                                type="radio"
-                                id="filterOnMyLevel"
-                                checked={filterByMyCharacters}
-                                onChange={() => setFilterByMyCharacters(true)}
-                            />
-                            Filter based on my current level
-                        </label>
                         {!filterByMyCharacters && (
                             <div className="filter-section">
                                 <Stack direction="column" gap="10px">
@@ -180,6 +168,18 @@ const LfmToolbar = ({ reloadLfms }: Props) => {
                                 </Stack>
                             </div>
                         )}
+                        <label
+                            className="input-label"
+                            htmlFor="filterOnMyLevel"
+                        >
+                            <input
+                                type="radio"
+                                id="filterOnMyLevel"
+                                checked={filterByMyCharacters}
+                                onChange={() => setFilterByMyCharacters(true)}
+                            />
+                            Filter based on my current level
+                        </label>
                         {filterByMyCharacters && (
                             <div className="filter-section multi-select">
                                 <Stack direction="column" gap="10px">
@@ -291,14 +291,14 @@ const LfmToolbar = ({ reloadLfms }: Props) => {
                                 setMouseOverDelay(parseInt(e.target.value))
                             }
                         />
-                        <Checkbox
+                        {/* <Checkbox
                             checked={showBoundingBoxes}
                             onChange={(e) =>
                                 setShowBoundingBoxes(e.target.checked)
                             }
                         >
                             Show bounding boxes
-                        </Checkbox>
+                        </Checkbox> */}
                         <Checkbox
                             checked={isDynamicWidth}
                             onChange={(e) =>

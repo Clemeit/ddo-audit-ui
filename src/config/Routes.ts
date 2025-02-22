@@ -25,7 +25,7 @@ const bannerRouteMapping = {
     },
     who: {
         title: "Who",
-        subtitle: "Live Who Panel",
+        subtitle: "Live Character Viewer",
         miniature: true,
         showButtons: false,
     },

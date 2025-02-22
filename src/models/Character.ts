@@ -77,7 +77,7 @@ enum CharacterSortType {
 
 interface CharacterSortBy {
     type: CharacterSortType
-    direction: string
+    ascending: boolean
 }
 
 export {

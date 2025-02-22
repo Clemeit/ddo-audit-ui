@@ -150,8 +150,8 @@ const useRenderBox = ({ sprite, context }: Props) => {
             context.textAlign = "left"
             context.fillText(
                 text,
-                boundingBox.x + textOffsetX,
-                boundingBox.y + center.height / 2 + textOffsetY
+                Math.round(boundingBox.x + textOffsetX),
+                Math.round(boundingBox.y + center.height / 2 + textOffsetY)
             )
         }
     }

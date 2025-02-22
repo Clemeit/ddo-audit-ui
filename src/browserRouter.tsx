@@ -46,7 +46,9 @@ export default createBrowserRouter(
                 path="/grouping"
                 element={
                     <LfmProvider>
-                        <Grouping />
+                        <WhoProvider>
+                            <Grouping />
+                        </WhoProvider>
                     </LfmProvider>
                 }
             />
@@ -54,7 +56,9 @@ export default createBrowserRouter(
                 path="/grouping/:id"
                 element={
                     <LfmProvider>
-                        <GroupingSpecific />
+                        <WhoProvider>
+                            <GroupingSpecific />
+                        </WhoProvider>
                     </LfmProvider>
                 }
             />
@@ -62,7 +66,9 @@ export default createBrowserRouter(
                 path="/who"
                 element={
                     <WhoProvider>
-                        <Who />
+                        <LfmProvider>
+                            <Who />
+                        </LfmProvider>
                     </WhoProvider>
                 }
             />
@@ -70,7 +76,9 @@ export default createBrowserRouter(
                 path="/who/:id"
                 element={
                     <WhoProvider>
-                        <WhoSpecific />
+                        <LfmProvider>
+                            <WhoSpecific />
+                        </LfmProvider>
                     </WhoProvider>
                 }
             />

@@ -118,8 +118,8 @@ const Who = () => {
 
     return (
         <Page
-            title="DDO Live Who Panel"
-            description="Browse players from any server with a live Who panel. Are your friends online? Is your guild forming up for a late-night raid? Now you know!"
+            title="DDO Live Character Viewer"
+            description="Browse players from any server with a live character viewer. Are your friends online? Is your guild forming up for a late-night raid? Now you know!"
         >
             {characterState === LoadingState.Haulted && (
                 <LiveDataHaultedPageMessage />

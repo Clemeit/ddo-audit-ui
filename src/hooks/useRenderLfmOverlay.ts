@@ -15,10 +15,7 @@ import {
     OVERLAY_SIDE_BAR_WIDTH,
     OVERLAY_WIDTH,
 } from "../constants/lfmPanel.ts"
-import {
-    getLfmActivityEventsFlatMap,
-    mapClassToIconBoundingBox,
-} from "../utils/lfmUtils.ts"
+import { getLfmActivityEventsFlatMap } from "../utils/lfmUtils.ts"
 import { CLASS_LIST_LOWER } from "../constants/game.ts"
 import {
     convertMillisecondsToPrettyString,
@@ -28,7 +25,10 @@ import useTextRenderer from "./useTextRenderer.ts"
 import { BoundingBox } from "../models/Geometry.ts"
 import { CHARACTER_IDS } from "../constants/characterIds.ts"
 import { SPRITE_MAP } from "../constants/spriteMap.ts"
-import { mapRaceAndGenderToRaceIconBoundingBox } from "../utils/socialUtils.ts"
+import {
+    mapClassToIconBoundingBox,
+    mapRaceAndGenderToRaceIconBoundingBox,
+} from "../utils/socialUtils.ts"
 
 interface Props {
     lfmSprite?: HTMLImageElement | null

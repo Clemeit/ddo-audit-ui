@@ -20,20 +20,18 @@ import { MAXIMUM_CHARACTER_COUNT } from "../../constants/whoPanel.ts"
 
 interface Props {
     serverName: string
-    refreshInterval?: number
 }
 
-const WhoContainer = ({ serverName, refreshInterval = 3000 }: Props) => {
+const WhoContainer = ({ serverName }: Props) => {
     const {
         stringFilter,
-        setStringFilter,
         sortBy,
         minLevel,
-        setMinLevel,
         maxLevel,
-        setMaxLevel,
         classNameFilter,
         isGroupView,
+        isExactMatch,
+        // refreshInterval, TODO: make this work
     } = useWhoContext()
     const [ignoreServerDown, setIgnoreServerDown] = useState<boolean>(false)
 
@@ -43,7 +41,7 @@ const WhoContainer = ({ serverName, refreshInterval = 3000 }: Props) => {
         reload: reloadCharacters,
     } = usePollApi<CharacterApiServerModel>({
         endpoint: `characters/${serverName}`,
-        interval: refreshInterval,
+        interval: 3000,
         lifespan: 1000 * 60 * 60 * 12, // 12 hours
     })
     const { data: serverInfoData, state: serverInfoState } =
@@ -60,6 +58,23 @@ const WhoContainer = ({ serverName, refreshInterval = 3000 }: Props) => {
         [serverInfoData, serverName]
     )
 
+    function compareString(
+        a: string | undefined,
+        b: string | undefined,
+        exactMatch: boolean
+    ) {
+        if (exactMatch) {
+            return a === b
+        } else {
+            return (
+                a
+                    ?.toLowerCase()
+                    .trim()
+                    .includes(b?.toLowerCase().trim() ?? "") ?? false
+            )
+        }
+    }
+
     // Filter and sort
     const curatedCharacters = useMemo<{
         characters: Character[]
@@ -71,18 +86,21 @@ const WhoContainer = ({ serverName, refreshInterval = 3000 }: Props) => {
             let stringFilterMatch = false
             const stringFilters = stringFilter.split(",")
             stringFilters.forEach((localFilter) => {
-                const nameMatch = (character.name ?? "")
-                    .toLowerCase()
-                    .trim()
-                    .includes(localFilter.toLowerCase().trim())
-                const guildNameMatch = (character.guild_name ?? "")
-                    .toLowerCase()
-                    .trim()
-                    .includes(localFilter.toLowerCase().trim())
-                const locationMatch = (character.location?.name ?? "")
-                    .toLowerCase()
-                    .trim()
-                    .includes(localFilter.toLowerCase().trim())
+                const nameMatch = compareString(
+                    character.name,
+                    localFilter,
+                    isExactMatch
+                )
+                const guildNameMatch = compareString(
+                    character.guild_name,
+                    localFilter,
+                    isExactMatch
+                )
+                const locationMatch = compareString(
+                    character.location?.name,
+                    localFilter,
+                    isExactMatch
+                )
 
                 const localMatch = nameMatch || guildNameMatch || locationMatch
                 stringFilterMatch = stringFilterMatch || localMatch
@@ -125,7 +143,7 @@ const WhoContainer = ({ serverName, refreshInterval = 3000 }: Props) => {
                 ...Object.values(characterData?.characters ?? {})
                     .filter((c) => groupIds.has(c.group_id ?? "0"))
                     .filter((c) => {
-                        // only characters where there are two or more characters with the same groupid
+                        // only characters where there are two or more characters with the same group_id
                         const groupCount = Object.values(
                             characterData?.characters ?? {}
                         ).filter((c2) => c2.group_id === c.group_id).length
@@ -153,13 +171,27 @@ const WhoContainer = ({ serverName, refreshInterval = 3000 }: Props) => {
                 .sort((a, b) => (a.id ?? "").localeCompare(b.id ?? ""))
                 .sort((a, b) => {
                     switch (sortBy.type) {
+                        case CharacterSortType.Lfm:
+                            return (
+                                ((b.is_in_party ? 1 : 0) -
+                                    (a.is_in_party ? 1 : 0)) *
+                                (sortBy.ascending ? 1 : -1)
+                            )
                         case CharacterSortType.Name:
-                            return (a.name ?? "").localeCompare(b.name ?? "")
+                            return (
+                                (a.name ?? "").localeCompare(b.name ?? "") *
+                                (sortBy.ascending ? 1 : -1)
+                            )
                         case CharacterSortType.Level:
-                            return (a.total_level ?? 0) - (b.total_level ?? 0)
+                            return (
+                                ((a.total_level ?? 0) - (b.total_level ?? 0)) *
+                                (sortBy.ascending ? 1 : -1)
+                            )
                         case CharacterSortType.Guild:
-                            return (a.guild_name ?? "").localeCompare(
-                                b.guild_name ?? ""
+                            return (
+                                (a.guild_name ?? "").localeCompare(
+                                    b.guild_name ?? ""
+                                ) * (sortBy.ascending ? 1 : -1)
                             )
                         default:
                             return 0
@@ -174,7 +206,16 @@ const WhoContainer = ({ serverName, refreshInterval = 3000 }: Props) => {
             characters: sortedCharacters.slice(0, MAXIMUM_CHARACTER_COUNT),
             areResultsTruncated,
         }
-    }, [stringFilter, characterData, minLevel, maxLevel, sortBy, isGroupView])
+    }, [
+        stringFilter,
+        characterData,
+        minLevel,
+        maxLevel,
+        sortBy,
+        isGroupView,
+        classNameFilter,
+        isExactMatch,
+    ])
 
     return (
         <>

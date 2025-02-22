@@ -23,7 +23,7 @@ const typeToTitleMap = {
     quests: "Quest Activity",
     trends: "Population Trends",
     grouping: "Live LFM Viewer",
-    who: "Live Who Panel",
+    who: "Live Character Viewer",
     transfers: "Server Transfers",
     friends: "Friends List",
     registration: "Register Characters",
@@ -40,7 +40,7 @@ const typeToDescriptionMap = {
     quests: "Content popularity, average completion time, and XP/minute.",
     trends: "Long-term trends, daily counts, and important game events.",
     grouping: "Easily find grounds with a live LFM viewer for each server.",
-    who: "Explore a list of online players with a live Who panel.",
+    who: "Explore a list of online players with a live character viewer.",
     transfers:
         "Which servers are gaining players and which servers are losing them.",
     friends: "See what your friends are up to with your own friends list.",

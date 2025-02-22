@@ -82,4 +82,41 @@ function mapRaceAndGenderToRaceIconBoundingBox(
     }
 }
 
-export { mapRaceAndGenderToRaceIconBoundingBox }
+function mapClassToIconBoundingBox(className: string = "fighter") {
+    switch (className.toLowerCase()) {
+        case "alchemist":
+            return SPRITE_MAP.CLASSES.ALCHEMIST
+        case "artificer":
+            return SPRITE_MAP.CLASSES.ARTIFICER
+        case "barbarian":
+            return SPRITE_MAP.CLASSES.BARBARIAN
+        case "bard":
+            return SPRITE_MAP.CLASSES.BARD
+        case "cleric":
+            return SPRITE_MAP.CLASSES.CLERIC
+        case "druid":
+            return SPRITE_MAP.CLASSES.DRUID
+        case "favored soul":
+            return SPRITE_MAP.CLASSES.FAVORED_SOUL
+        case "fighter":
+            return SPRITE_MAP.CLASSES.FIGHTER
+        case "monk":
+            return SPRITE_MAP.CLASSES.MONK
+        case "paladin":
+            return SPRITE_MAP.CLASSES.PALADIN
+        case "ranger":
+            return SPRITE_MAP.CLASSES.RANGER
+        case "rogue":
+            return SPRITE_MAP.CLASSES.ROGUE
+        case "sorcerer":
+            return SPRITE_MAP.CLASSES.SORCERER
+        case "warlock":
+            return SPRITE_MAP.CLASSES.WARLOCK
+        case "wizard":
+            return SPRITE_MAP.CLASSES.WIZARD
+        default:
+            return SPRITE_MAP.CLASSES.FIGHTER
+    }
+}
+
+export { mapRaceAndGenderToRaceIconBoundingBox, mapClassToIconBoundingBox }

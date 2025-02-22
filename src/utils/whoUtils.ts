@@ -13,6 +13,7 @@ import {
     SORT_HEADER_PADDING_TOP,
 } from "../constants/whoPanel.ts"
 import { CLASS_LIST, CLASS_LIST_LOWER } from "../constants/game.ts"
+import { Character } from "../models/Character.ts"
 
 const calculateCommonFilterBoundingBoxes = (panelWidth: number) => {
     const filterZoneX = SPRITE_MAP.CONTENT_TOP_LEFT.width + FILTER_ZONE_MARGIN
@@ -127,8 +128,8 @@ const calculateCommonFilterBoundingBoxes = (panelWidth: number) => {
     const groupViewCheckboxBoundingBox = new BoundingBox(
         groupViewHeaderTextBoundingBox.x + 32,
         groupViewHeaderTextBoundingBox.y + 18,
-        SPRITE_MAP.CHECKBOX.CHECKED.width,
-        SPRITE_MAP.CHECKBOX.CHECKED.height
+        SPRITE_MAP.GROUP_VIEW_CHECKBOX.CHECKED.width,
+        SPRITE_MAP.GROUP_VIEW_CHECKBOX.CHECKED.height
     )
 
     const exactMatchCheckboxBoundingBox = new BoundingBox(
@@ -205,4 +206,20 @@ const calculateCommonFilterBoundingBoxes = (panelWidth: number) => {
     }
 }
 
-export { calculateCommonFilterBoundingBoxes }
+function areCharactersEquivalent(
+    previous: Character,
+    current: Character
+): boolean {
+    if (previous !== undefined && current === undefined) return false
+    if (previous === undefined && current !== undefined) return false
+    if (previous.location?.name !== current.location?.name) return false
+    if (previous.total_level !== current.total_level) return false
+    if (previous.is_in_party !== current.is_in_party) return false
+    if (previous.is_anonymous !== current.is_anonymous) return false
+    if (previous.name !== current.name) return false
+    if (previous.guild_name !== current.guild_name) return false
+
+    return true
+}
+
+export { calculateCommonFilterBoundingBoxes, areCharactersEquivalent }

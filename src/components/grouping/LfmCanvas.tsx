@@ -65,6 +65,13 @@ const LfmCanvas: React.FC<Props> = ({
         setSortBy,
         isDynamicWidth,
         mouseOverDelay,
+        showRaidTimerIndicator,
+        showMemberCount,
+        showQuestGuesses,
+        showQuestTips,
+        showCharacterGuildNames,
+        showLfmPostedTime,
+        fontSize,
     } = useLfmContext()
     const commonBoundingBoxes = useMemo(
         () => calculateCommonBoundingBoxes(panelWidth),
@@ -99,6 +106,13 @@ const LfmCanvas: React.FC<Props> = ({
         sortBy,
         overlayWidth: 0,
         overlayHeight: 0,
+        showRaidTimerIndicator,
+        showMemberCount,
+        showQuestGuesses,
+        showQuestTips,
+        showCharacterGuildNames,
+        showLfmPostedTime,
+        fontSize,
     })
     const fonts = useMemo(() => FONTS(), [])
 
@@ -260,7 +274,15 @@ const LfmCanvas: React.FC<Props> = ({
             raidView !== previousState.raidView ||
             sortBy !== previousState.sortBy
 
-        const shouldRenderAllLfms = lfms.length !== previousState.lfms.length
+        const shouldRenderAllLfms =
+            lfms.length !== previousState.lfms.length ||
+            previousState.showRaidTimerIndicator !== showRaidTimerIndicator ||
+            previousState.showMemberCount !== showMemberCount ||
+            previousState.showQuestGuesses !== showQuestGuesses ||
+            previousState.showQuestTips !== showQuestTips ||
+            previousState.showCharacterGuildNames !== showCharacterGuildNames ||
+            previousState.showLfmPostedTime !== showLfmPostedTime ||
+            previousState.fontSize !== fontSize
 
         const shouldRenderFilterMessage =
             excludedLfmCount !== previousState.excludedLfmCount
@@ -285,7 +307,8 @@ const LfmCanvas: React.FC<Props> = ({
             !hasLfmChanges &&
             !shouldRenderOverlay &&
             !shouldRenderPanel &&
-            !shouldRenderFilterMessage
+            !shouldRenderFilterMessage &&
+            !shouldRenderAllLfms
         ) {
             console.log("Skipping render.")
             return
@@ -445,6 +468,13 @@ const LfmCanvas: React.FC<Props> = ({
             overlayWidth: overlayWidth > 0 ? overlayWidth : prev.overlayWidth,
             overlayHeight:
                 overlayHeight > 0 ? overlayHeight : prev.overlayHeight,
+            showRaidTimerIndicator,
+            showMemberCount,
+            showQuestGuesses,
+            showQuestTips,
+            showCharacterGuildNames,
+            showLfmPostedTime,
+            fontSize,
         }))
         setIsFirstRender(false)
     }, [
@@ -465,6 +495,13 @@ const LfmCanvas: React.FC<Props> = ({
         serverName,
         selectedLfmInfo,
         sortBy,
+        showRaidTimerIndicator,
+        showMemberCount,
+        showQuestGuesses,
+        showQuestTips,
+        showCharacterGuildNames,
+        showLfmPostedTime,
+        fontSize,
     ])
 
     return (

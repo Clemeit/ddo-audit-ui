@@ -1,18 +1,10 @@
 import { useCallback, useMemo } from "react"
 import { SPRITE_MAP } from "../constants/spriteMap.ts"
 import { useWhoContext } from "../contexts/WhoContext.tsx"
-import {
-    FILTER_ZONE_MARGIN,
-    FONTS,
-    CLASS_FILTER_Y,
-    WHO_COLORS,
-    FILTER_ZONE_PADDING,
-    FILTER_ZONE_CONTENT_HEIGHT,
-    CLASS_FILTER_GAP,
-} from "../constants/whoPanel.ts"
+import { FONTS, WHO_COLORS, CLASS_FILTER_GAP } from "../constants/whoPanel.ts"
 import useRenderBox from "../utils/renderUtils.ts"
 import { BoundingBox } from "../models/Geometry.ts"
-import { CLASS_LIST, CLASS_LIST_LOWER } from "../constants/game.ts"
+import { CLASS_LIST_LOWER } from "../constants/game.ts"
 import { Character, CharacterSortType } from "../models/Character.ts"
 import { calculateCommonFilterBoundingBoxes } from "../utils/whoUtils.ts"
 
@@ -24,17 +16,12 @@ interface Props {
 interface RenderWhoPanelProps {
     characters?: Character[]
     displayedCharacters?: Character[]
+    panelHeight: number
 }
 
 const useRenderWhoPanel = ({ sprite, context }: Props) => {
-    const {
-        panelWidth,
-        panelHeight,
-        classNameFilter,
-        isExactMatch,
-        sortBy,
-        isGroupView,
-    } = useWhoContext()
+    const { panelWidth, classNameFilter, isExactMatch, sortBy, isGroupView } =
+        useWhoContext()
     const fonts = useMemo(() => FONTS(0), [])
     const { renderBox, renderHeader, renderSortHeader } = useRenderBox({
         sprite,
@@ -58,7 +45,6 @@ const useRenderWhoPanel = ({ sprite, context }: Props) => {
         levelHeaderBoundingBox,
         guildHeaderBoundingBox,
         filterZoneOffsetX,
-        filterZoneOffsetY,
         groupViewHeaderTextBoundingBox,
         groupViewCheckboxBoundingBox,
     } = useMemo(
@@ -67,8 +53,15 @@ const useRenderWhoPanel = ({ sprite, context }: Props) => {
     )
 
     const renderWhoPanel = useCallback(
-        ({ characters, displayedCharacters }: RenderWhoPanelProps = {}) => {
+        (
+            {
+                characters,
+                displayedCharacters,
+                panelHeight,
+            }: RenderWhoPanelProps = { panelHeight: 0 }
+        ) => {
             if (!context || !sprite) return
+            if (panelHeight === 0) return
             context.imageSmoothingEnabled = false
 
             context.fillStyle = WHO_COLORS.BLACK_BACKGROUND
@@ -345,18 +338,73 @@ const useRenderWhoPanel = ({ sprite, context }: Props) => {
             context.setTransform(1, 0, 0, 1, 0, 0)
 
             // render sort headers
-            let sortHeaderType =
-                sortBy.type === CharacterSortType.Lfm
-                    ? "SORT_HEADER_HIGHLIGHTED"
-                    : "SORT_HEADER"
-            renderSortHeader({
-                boundingBox: lfmHeaderBoundingBox,
-                text: "",
-                font: fonts.SORT_HEADER,
-                left: SPRITE_MAP[sortHeaderType].LEFT,
-                center: SPRITE_MAP[sortHeaderType].CENTER,
-                right: SPRITE_MAP[sortHeaderType].RIGHT,
-                textOffsetX: 10,
+            // TODO: refactor this to use a loop
+            const headers = [
+                {
+                    boundingBox: lfmHeaderBoundingBox,
+                    type: CharacterSortType.Lfm,
+                    text: "",
+                },
+                {
+                    boundingBox: nameHeaderBoundingBox,
+                    type: CharacterSortType.Name,
+                    text: "Name",
+                },
+                {
+                    boundingBox: classHeaderBoundingBox,
+                    type: CharacterSortType.Class,
+                    text: "Class",
+                },
+                {
+                    boundingBox: levelHeaderBoundingBox,
+                    type: CharacterSortType.Level,
+                    text: "Level",
+                },
+                {
+                    boundingBox: guildHeaderBoundingBox,
+                    type: CharacterSortType.Guild,
+                    text: "Guild",
+                },
+            ]
+            headers.forEach(({ boundingBox, type, text }) => {
+                const sortHeaderType =
+                    sortBy.type === type
+                        ? "SORT_HEADER_HIGHLIGHTED"
+                        : "SORT_HEADER"
+                renderSortHeader({
+                    boundingBox: boundingBox,
+                    text: text,
+                    font: fonts.SORT_HEADER,
+                    left: SPRITE_MAP[sortHeaderType].LEFT,
+                    center: SPRITE_MAP[sortHeaderType].CENTER,
+                    right: SPRITE_MAP[sortHeaderType].RIGHT,
+                    textOffsetX: sortBy.type === type ? 20 : 10,
+                })
+                if (sortBy.type === type) {
+                    // draw a little triangle to indicate sorting
+                    context.save()
+                    context.shadowBlur = 2
+                    context.shadowColor = "black"
+                    context.shadowOffsetX = 1
+                    context.shadowOffsetY = 1
+                    const triangleX = boundingBox.x + 10
+                    if (sortBy.ascending) {
+                        const triangleY = boundingBox.centerY() - 3
+                        context.beginPath()
+                        context.moveTo(triangleX, triangleY + 5)
+                        context.lineTo(triangleX + 5, triangleY + 5)
+                        context.lineTo(triangleX + 2.5, triangleY)
+                        context.fill()
+                    } else {
+                        const triangleY = boundingBox.centerY() - 2
+                        context.beginPath()
+                        context.moveTo(triangleX, triangleY)
+                        context.lineTo(triangleX + 5, triangleY)
+                        context.lineTo(triangleX + 2.5, triangleY + 5)
+                        context.fill()
+                    }
+                    context.restore()
+                }
             })
             context.drawImage(
                 sprite,
@@ -369,60 +417,16 @@ const useRenderWhoPanel = ({ sprite, context }: Props) => {
                 SPRITE_MAP.LFM_SORT_ICON.width,
                 SPRITE_MAP.LFM_SORT_ICON.height
             )
-            sortHeaderType =
-                sortBy.type === CharacterSortType.Name
-                    ? "SORT_HEADER_HIGHLIGHTED"
-                    : "SORT_HEADER"
-            renderSortHeader({
-                boundingBox: nameHeaderBoundingBox,
-                text: "Name",
-                font: fonts.SORT_HEADER,
-                left: SPRITE_MAP[sortHeaderType].LEFT,
-                center: SPRITE_MAP[sortHeaderType].CENTER,
-                right: SPRITE_MAP[sortHeaderType].RIGHT,
-                textOffsetX: 10,
-            })
-            sortHeaderType =
-                sortBy.type === CharacterSortType.Class
-                    ? "SORT_HEADER_HIGHLIGHTED"
-                    : "SORT_HEADER"
-            renderSortHeader({
-                boundingBox: classHeaderBoundingBox,
-                text: "Class",
-                font: fonts.SORT_HEADER,
-                left: SPRITE_MAP[sortHeaderType].LEFT,
-                center: SPRITE_MAP[sortHeaderType].CENTER,
-                right: SPRITE_MAP[sortHeaderType].RIGHT,
-                textOffsetX: 10,
-            })
-            sortHeaderType =
-                sortBy.type === CharacterSortType.Level
-                    ? "SORT_HEADER_HIGHLIGHTED"
-                    : "SORT_HEADER"
-            renderSortHeader({
-                boundingBox: levelHeaderBoundingBox,
-                text: "Level",
-                font: fonts.SORT_HEADER,
-                left: SPRITE_MAP[sortHeaderType].LEFT,
-                center: SPRITE_MAP[sortHeaderType].CENTER,
-                right: SPRITE_MAP[sortHeaderType].RIGHT,
-                textOffsetX: 10,
-            })
-            sortHeaderType =
-                sortBy.type === CharacterSortType.Guild
-                    ? "SORT_HEADER_HIGHLIGHTED"
-                    : "SORT_HEADER"
-            renderSortHeader({
-                boundingBox: guildHeaderBoundingBox,
-                text: "Guild",
-                font: fonts.SORT_HEADER,
-                left: SPRITE_MAP[sortHeaderType].LEFT,
-                center: SPRITE_MAP[sortHeaderType].CENTER,
-                right: SPRITE_MAP[sortHeaderType].RIGHT,
-                textOffsetX: 10,
-            })
         },
-        [sprite, context, panelWidth, panelHeight]
+        [
+            sprite,
+            context,
+            panelWidth,
+            isGroupView,
+            classNameFilter,
+            isExactMatch,
+            sortBy,
+        ]
     )
 
     return renderWhoPanel

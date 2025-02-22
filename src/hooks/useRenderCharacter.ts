@@ -4,9 +4,13 @@ import { calculateCommonFilterBoundingBoxes } from "../utils/whoUtils.ts"
 import { useWhoContext } from "../contexts/WhoContext.tsx"
 import { CHARACTER_HEIGHT, FONTS, WHO_COLORS } from "../constants/whoPanel.ts"
 import { SPRITE_MAP } from "../constants/spriteMap.ts"
-import { mapRaceAndGenderToRaceIconBoundingBox } from "../utils/socialUtils.ts"
+import {
+    mapClassToIconBoundingBox,
+    mapRaceAndGenderToRaceIconBoundingBox,
+} from "../utils/socialUtils.ts"
 import { CHARACTER_IDS } from "../constants/characterIds.ts"
-import { truncateText, wrapText } from "../utils/stringUtils.ts"
+import { truncateText } from "../utils/stringUtils.ts"
+import { CLASS_LIST_LOWER } from "../constants/game.ts"
 
 interface Props {
     sprite?: HTMLImageElement | null
@@ -19,7 +23,7 @@ interface RenderCharacterProps {
 }
 
 const useRenderCharacter = ({ sprite, context }: Props) => {
-    const { panelWidth } = useWhoContext()
+    const { panelWidth, showInQuestIndicator } = useWhoContext()
     const {
         filterZone,
         lfmHeaderBoundingBox,
@@ -109,8 +113,8 @@ const useRenderCharacter = ({ sprite, context }: Props) => {
             leaderRaceIcon.y,
             leaderRaceIcon.width,
             leaderRaceIcon.height,
-            nameHeaderBoundingBox.x - leftBound + 2,
-            0,
+            Math.round(nameHeaderBoundingBox.x - leftBound + 2),
+            2,
             leaderRaceIcon.width,
             leaderRaceIcon.height
         )
@@ -120,18 +124,20 @@ const useRenderCharacter = ({ sprite, context }: Props) => {
         context.textBaseline = "middle"
         context.fillStyle = WHO_COLORS.CHARACTER_TEXT
         context.font = fonts.CHARACTER_NAME
+        const characterNameText = character.is_anonymous
+            ? "???"
+            : character.name || ""
         context.fillText(
-            character.name || "",
+            characterNameText,
             nameHeaderBoundingBox.x -
                 leftBound +
                 SPRITE_MAP.RACES.HUMAN.width +
                 5,
-            12
+            13
         )
         if (CHARACTER_IDS.includes(character.id)) {
-            const characterNameWidth = context.measureText(
-                character.name || ""
-            ).width
+            const characterNameWidth =
+                context.measureText(characterNameText).width
             context.drawImage(
                 sprite,
                 SPRITE_MAP.CROWN.x,
@@ -153,7 +159,7 @@ const useRenderCharacter = ({ sprite, context }: Props) => {
         if (character.location?.name) {
             context.font = fonts.CHARACTER_LOCATION
             const locationName = truncateText(
-                character.location?.name,
+                `${showInQuestIndicator && character.location?.is_public_space === false ? "✓ " : ""}${character.location?.name}`,
                 nameHeaderBoundingBox.width - 10,
                 context.font,
                 context
@@ -161,9 +167,58 @@ const useRenderCharacter = ({ sprite, context }: Props) => {
             context.fillText(
                 locationName,
                 nameHeaderBoundingBox.x - leftBound + 7,
-                leaderRaceIcon.height + 13
+                leaderRaceIcon.height + 14
             )
         }
+
+        // render classes
+        character.classes
+            ?.filter((classData) =>
+                CLASS_LIST_LOWER.includes(classData.name.toLowerCase())
+            )
+            .sort((a, b) => b.level - a.level)
+            .forEach((classData, index) => {
+                const classIconBoundingBox = mapClassToIconBoundingBox(
+                    classData.name
+                )
+                context.drawImage(
+                    sprite,
+                    classIconBoundingBox.x,
+                    classIconBoundingBox.y,
+                    classIconBoundingBox.width,
+                    classIconBoundingBox.height,
+                    Math.round(
+                        classHeaderBoundingBox.x +
+                            index * (classIconBoundingBox.width + 1)
+                    ),
+                    Math.round(
+                        (CHARACTER_HEIGHT - classIconBoundingBox.height) / 2
+                    ),
+                    classIconBoundingBox.width,
+                    classIconBoundingBox.height
+                )
+
+                // shadow under text
+                context.save()
+                context.shadowColor = "black"
+                context.shadowBlur = 1
+                context.shadowOffsetX = 0
+                context.shadowOffsetY = 0
+                context.textAlign = "right"
+                context.textBaseline = "bottom"
+                context.fillStyle = WHO_COLORS.WHITE_TEXT
+                context.font = fonts.MEMBER_CLASS_LEVEL
+                context.fillText(
+                    classData.level.toString(),
+                    classHeaderBoundingBox.x +
+                        classIconBoundingBox.width +
+                        index * (classIconBoundingBox.width + 1),
+                    (CHARACTER_HEIGHT - classIconBoundingBox.height) / 2 +
+                        classIconBoundingBox.height
+                )
+
+                context.restore()
+            })
 
         // render total level
         context.textAlign = "center"
@@ -177,12 +232,14 @@ const useRenderCharacter = ({ sprite, context }: Props) => {
         // render guild name
         if (character.guild_name) {
             context.font = fonts.CHARACTER_GUILD_NAME
-            const guildName = truncateText(
-                character.guild_name || "",
-                guildHeaderBoundingBox.width - 10,
-                context.font,
-                context
-            )
+            const guildName = character.is_anonymous
+                ? "???"
+                : truncateText(
+                      character.guild_name || "",
+                      guildHeaderBoundingBox.width - 10,
+                      context.font,
+                      context
+                  )
             context.fillText(
                 guildName,
                 Math.round(guildHeaderBoundingBox.centerX() - leftBound),

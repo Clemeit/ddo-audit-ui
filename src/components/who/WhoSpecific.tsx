@@ -21,7 +21,7 @@ const WhoSpecific = () => {
 
     return (
         <Page
-            title={`DDO Live Who Panel for ${serverNameSentenceCase}`}
+            title={`DDO Live Character Viewer for ${serverNameSentenceCase}`}
             description={`Browse ${serverNamePossessiveCase} Who panel! Are your friends online? Is your guild forming up for raid night? Now you know!`}
             centered
             noPadding

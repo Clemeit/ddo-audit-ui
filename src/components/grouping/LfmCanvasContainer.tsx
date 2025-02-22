@@ -10,6 +10,7 @@ import {
     LiveDataHaultedPageMessage,
     ServerOfflineMessage,
 } from "../global/CommonMessages.tsx"
+import Stack from "../global/Stack.tsx"
 
 interface Props {
     serverName: string
@@ -173,7 +174,7 @@ const GroupingContainer = ({
                     }}
                 />
             ) : (
-                <>
+                <Stack direction="column" gap="0px">
                     <LfmToolbar reloadLfms={reloadLfms} />
                     <LfmCanvas
                         serverName={serverName}
@@ -181,7 +182,7 @@ const GroupingContainer = ({
                         excludedLfmCount={filteredLfms.excludedLfmCount}
                         raidView={raidView}
                     />
-                </>
+                </Stack>
             )}
         </>
     )
