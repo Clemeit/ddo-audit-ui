@@ -74,10 +74,12 @@ const typeToIconMap = {
 interface Props {
     type: string
     badge?: React.ReactNode
+    noLink?: boolean
+    onClick?: () => void
 }
 
-const NavigationCard = ({ type, badge }: Props) => {
-    return (
+const NavigationCard = ({ type, badge, noLink, onClick }: Props) => {
+    return !noLink ? (
         <Link to={`/${type}`} className="navigation-card">
             <span className="navigation-card-title">
                 {typeToIconMap[type]}
@@ -88,6 +90,17 @@ const NavigationCard = ({ type, badge }: Props) => {
                 {typeToDescriptionMap[type]}
             </p>
         </Link>
+    ) : (
+        <button onClick={onClick} className="navigation-card">
+            <span className="navigation-card-title">
+                {typeToIconMap[type]}
+                {typeToTitleMap[type]}
+                {badge}
+            </span>
+            <p className="navigation-card-content">
+                {typeToDescriptionMap[type]}
+            </p>
+        </button>
     )
 }
 

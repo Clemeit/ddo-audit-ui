@@ -10,7 +10,6 @@ import {
     LiveDataHaultedPageMessage,
     ServerOfflineMessage,
 } from "../global/CommonMessages.tsx"
-import Stack from "../global/Stack.tsx"
 
 interface Props {
     serverName: string
@@ -118,7 +117,7 @@ const GroupingContainer = ({
                 const averageLevelA = (a.minimum_level + a.maximum_level) / 2
                 const averageLevelB = (b.minimum_level + b.maximum_level) / 2
                 if (sortBy.type === "leader") {
-                    return sortBy.direction === "asc"
+                    return sortBy.ascending
                         ? (a.leader.name || "").localeCompare(
                               b.leader.name || ""
                           )
@@ -126,7 +125,7 @@ const GroupingContainer = ({
                               a.leader.name || ""
                           )
                 } else if (sortBy.type === "quest") {
-                    return sortBy.direction === "asc"
+                    return sortBy.ascending
                         ? (a.quest?.name || "").localeCompare(
                               b.quest?.name || ""
                           )
@@ -134,14 +133,14 @@ const GroupingContainer = ({
                               a.quest?.name || ""
                           )
                 } else if (sortBy.type === "classes") {
-                    return sortBy.direction === "asc"
+                    return sortBy.ascending
                         ? (a.accepted_classes || []).length -
                               (b.accepted_classes || []).length
                         : (b.accepted_classes || []).length -
                               (a.accepted_classes || []).length
                 } else {
                     // default to level
-                    return sortBy.direction === "asc"
+                    return sortBy.ascending
                         ? averageLevelA - averageLevelB
                         : averageLevelB - averageLevelA
                 }
@@ -174,15 +173,18 @@ const GroupingContainer = ({
                     }}
                 />
             ) : (
-                <Stack direction="column" gap="0px">
-                    <LfmToolbar reloadLfms={reloadLfms} />
+                <>
+                    <LfmToolbar
+                        serverName={serverName}
+                        reloadLfms={reloadLfms}
+                    />
                     <LfmCanvas
                         serverName={serverName}
                         lfms={filteredLfms.filteredAndSortedLfms || []}
                         excludedLfmCount={filteredLfms.excludedLfmCount}
                         raidView={raidView}
                     />
-                </Stack>
+                </>
             )}
         </>
     )

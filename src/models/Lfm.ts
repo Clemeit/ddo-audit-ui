@@ -101,7 +101,7 @@ interface LfmApiDataModel {
 
 interface LfmSortType {
     type: string
-    direction: string
+    ascending: boolean
 }
 
 export {

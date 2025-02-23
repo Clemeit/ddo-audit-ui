@@ -11,16 +11,18 @@ import {
 import { useLfmContext } from "../contexts/LfmContext.tsx"
 import { calculateCommonBoundingBoxes } from "../utils/lfmUtils.ts"
 import { SPRITE_MAP } from "../constants/spriteMap.ts"
+import useRenderBox from "../utils/renderUtils.ts"
+import { BoundingBox } from "../models/Geometry.ts"
 
 interface Props {
-    lfmSprite?: HTMLImageElement | null
+    sprite?: HTMLImageElement | null
     context?: CanvasRenderingContext2D | null
     minimumLfmCount?: number
     raidView?: boolean
 }
 
 const useRenderLfmPanel = ({
-    lfmSprite,
+    sprite,
     context,
     minimumLfmCount = MINIMUM_LFM_COUNT,
     raidView = false,
@@ -35,10 +37,14 @@ const useRenderLfmPanel = ({
         () => SORT_HEADERS(commonBoundingBoxes),
         [commonBoundingBoxes]
     )
+    const { renderSortHeader } = useRenderBox({
+        sprite,
+        context,
+    })
 
     const renderLfmPanelToCanvas = useCallback(
         (panelHeight: number) => {
-            if (!context || !lfmSprite) return
+            if (!context || !sprite) return
             context.imageSmoothingEnabled = false
 
             context.fillStyle = "black"
@@ -57,7 +63,7 @@ const useRenderLfmPanel = ({
                     i++
                 ) {
                     context.drawImage(
-                        lfmSprite,
+                        sprite,
                         SPRITE_MAP.HEADER_BAR.x,
                         SPRITE_MAP.HEADER_BAR.y,
                         SPRITE_MAP.HEADER_BAR.width,
@@ -70,7 +76,7 @@ const useRenderLfmPanel = ({
                     )
                 }
                 context.drawImage(
-                    lfmSprite,
+                    sprite,
                     SPRITE_MAP.HEADER_LEFT.x,
                     SPRITE_MAP.HEADER_LEFT.y,
                     SPRITE_MAP.HEADER_LEFT.width,
@@ -81,7 +87,7 @@ const useRenderLfmPanel = ({
                     SPRITE_MAP.HEADER_LEFT.height
                 )
                 context.drawImage(
-                    lfmSprite,
+                    sprite,
                     SPRITE_MAP.HEADER_RIGHT.x,
                     SPRITE_MAP.HEADER_RIGHT.y,
                     SPRITE_MAP.HEADER_RIGHT.width,
@@ -108,7 +114,7 @@ const useRenderLfmPanel = ({
                     i++
                 ) {
                     context.drawImage(
-                        lfmSprite,
+                        sprite,
                         SPRITE_MAP.CONTENT_TOP.x,
                         SPRITE_MAP.CONTENT_TOP.y,
                         SPRITE_MAP.CONTENT_TOP.width,
@@ -120,7 +126,7 @@ const useRenderLfmPanel = ({
                     )
                 }
                 context.drawImage(
-                    lfmSprite,
+                    sprite,
                     SPRITE_MAP.CONTENT_TOP_LEFT.x,
                     SPRITE_MAP.CONTENT_TOP_LEFT.y,
                     SPRITE_MAP.CONTENT_TOP_LEFT.width,
@@ -131,7 +137,7 @@ const useRenderLfmPanel = ({
                     SPRITE_MAP.CONTENT_TOP_LEFT.height
                 )
                 context.drawImage(
-                    lfmSprite,
+                    sprite,
                     SPRITE_MAP.CONTENT_TOP_RIGHT.x,
                     SPRITE_MAP.CONTENT_TOP_RIGHT.y,
                     SPRITE_MAP.CONTENT_TOP_RIGHT.width,
@@ -147,7 +153,7 @@ const useRenderLfmPanel = ({
             context.translate(0, raidView ? 0 : LFM_PANEL_TOP_BORDER_HEIGHT)
             for (let i = 0; i < Math.round(panelHeight / LFM_HEIGHT); i++) {
                 context.drawImage(
-                    lfmSprite,
+                    sprite,
                     SPRITE_MAP.CONTENT_LEFT.x,
                     SPRITE_MAP.CONTENT_LEFT.y,
                     SPRITE_MAP.CONTENT_LEFT.width,
@@ -159,7 +165,7 @@ const useRenderLfmPanel = ({
                 )
 
                 context.drawImage(
-                    lfmSprite,
+                    sprite,
                     SPRITE_MAP.CONTENT_RIGHT.x,
                     SPRITE_MAP.CONTENT_RIGHT.y,
                     SPRITE_MAP.CONTENT_RIGHT.width,
@@ -181,7 +187,7 @@ const useRenderLfmPanel = ({
                     i++
                 ) {
                     context.drawImage(
-                        lfmSprite,
+                        sprite,
                         SPRITE_MAP.CONTENT_BOTTOM.x,
                         SPRITE_MAP.CONTENT_BOTTOM.y,
                         SPRITE_MAP.CONTENT_BOTTOM.width,
@@ -193,7 +199,7 @@ const useRenderLfmPanel = ({
                     )
                 }
                 context.drawImage(
-                    lfmSprite,
+                    sprite,
                     SPRITE_MAP.CONTENT_BOTTOM_LEFT.x,
                     SPRITE_MAP.CONTENT_BOTTOM_LEFT.y,
                     SPRITE_MAP.CONTENT_BOTTOM_LEFT.width,
@@ -204,7 +210,7 @@ const useRenderLfmPanel = ({
                     SPRITE_MAP.CONTENT_BOTTOM_LEFT.height
                 )
                 context.drawImage(
-                    lfmSprite,
+                    sprite,
                     SPRITE_MAP.CONTENT_BOTTOM_RIGHT.x,
                     SPRITE_MAP.CONTENT_BOTTOM_RIGHT.y,
                     SPRITE_MAP.CONTENT_BOTTOM_RIGHT.width,
@@ -220,94 +226,60 @@ const useRenderLfmPanel = ({
                 context.font = fonts.SORT_HEADER
                 context.textBaseline = "middle"
                 context.textAlign = "left"
-                sortHeaders.forEach(
-                    ({ type, boundingBox, displayText }, index) => {
-                        context.translate(
-                            boundingBox.x +
-                                SPRITE_MAP.CONTENT_LEFT.width +
-                                LFM_AREA_PADDING.left -
-                                1,
-                            boundingBox.y +
-                                LFM_PANEL_TOP_BORDER_HEIGHT +
-                                LFM_AREA_PADDING.top
-                        )
-                        const sourceBox =
-                            sortBy.type === type
-                                ? SPRITE_MAP.SORT_HEADER_HIGHLIGHTED
-                                : SPRITE_MAP.SORT_HEADER
-                        context.drawImage(
-                            lfmSprite,
-                            sourceBox.LEFT.x,
-                            sourceBox.LEFT.y,
-                            sourceBox.LEFT.width,
-                            sourceBox.LEFT.height,
-                            0,
-                            0,
-                            sourceBox.LEFT.width,
-                            sourceBox.LEFT.height
-                        )
-                        context.drawImage(
-                            lfmSprite,
-                            sourceBox.CENTER.x,
-                            sourceBox.CENTER.y,
-                            sourceBox.CENTER.width,
-                            sourceBox.CENTER.height,
-                            sourceBox.LEFT.width,
-                            0,
-                            boundingBox.width,
-                            sourceBox.CENTER.height
-                        )
-                        context.drawImage(
-                            lfmSprite,
-                            sourceBox.RIGHT.x,
-                            sourceBox.RIGHT.y,
-                            sourceBox.RIGHT.width,
-                            sourceBox.RIGHT.height,
-                            boundingBox.width -
-                                (index === sortHeaders.length - 1 ? 0 : 2),
-                            0,
-                            sourceBox.RIGHT.width,
-                            sourceBox.RIGHT.height
-                        )
-                        context.fillText(
-                            displayText,
-                            20,
-                            sourceBox.CENTER.height / 2
-                        )
-                        if (sortBy.type === type) {
-                            // draw a little triangle to indicate sorting
-                            context.save()
-                            context.shadowBlur = 2
-                            context.shadowColor = "black"
-                            context.shadowOffsetX = 1
-                            context.shadowOffsetY = 1
-                            const triangleX = 10
-                            if (sortBy.direction === "asc") {
-                                const triangleY =
-                                    sourceBox.CENTER.height / 2 - 3
-                                context.beginPath()
-                                context.moveTo(triangleX, triangleY + 5)
-                                context.lineTo(triangleX + 5, triangleY + 5)
-                                context.lineTo(triangleX + 2.5, triangleY)
-                                context.fill()
-                            } else {
-                                const triangleY =
-                                    sourceBox.CENTER.height / 2 - 2
-                                context.beginPath()
-                                context.moveTo(triangleX, triangleY)
-                                context.lineTo(triangleX + 5, triangleY)
-                                context.lineTo(triangleX + 2.5, triangleY + 5)
-                                context.fill()
-                            }
-                            context.restore()
+                sortHeaders.forEach(({ type, boundingBox, displayText }) => {
+                    const sortHeaderType =
+                        sortBy.type === type
+                            ? "SORT_HEADER_HIGHLIGHTED"
+                            : "SORT_HEADER"
+                    const actualBoundingBox = new BoundingBox(
+                        boundingBox.x +
+                            SPRITE_MAP.CONTENT_LEFT.width +
+                            LFM_AREA_PADDING.left,
+                        boundingBox.y +
+                            LFM_PANEL_TOP_BORDER_HEIGHT +
+                            LFM_AREA_PADDING.top,
+                        boundingBox.width,
+                        SPRITE_MAP[sortHeaderType].CENTER.height
+                    )
+                    renderSortHeader({
+                        boundingBox: actualBoundingBox,
+                        text: displayText,
+                        font: fonts.SORT_HEADER,
+                        left: SPRITE_MAP[sortHeaderType].LEFT,
+                        center: SPRITE_MAP[sortHeaderType].CENTER,
+                        right: SPRITE_MAP[sortHeaderType].RIGHT,
+                        textOffsetX: sortBy.type === type ? 20 : 10,
+                    })
+                    if (sortBy.type === type) {
+                        // draw a little triangle to indicate sorting
+                        context.save()
+                        context.shadowBlur = 2
+                        context.shadowColor = "black"
+                        context.shadowOffsetX = 1
+                        context.shadowOffsetY = 1
+                        const triangleX = actualBoundingBox.x + 10
+                        if (sortBy.ascending) {
+                            const triangleY = actualBoundingBox.centerY() - 3
+                            context.beginPath()
+                            context.moveTo(triangleX, triangleY + 5)
+                            context.lineTo(triangleX + 5, triangleY + 5)
+                            context.lineTo(triangleX + 2.5, triangleY)
+                            context.fill()
+                        } else {
+                            const triangleY = actualBoundingBox.centerY() - 2
+                            context.beginPath()
+                            context.moveTo(triangleX, triangleY)
+                            context.lineTo(triangleX + 5, triangleY)
+                            context.lineTo(triangleX + 2.5, triangleY + 5)
+                            context.fill()
                         }
-                        context.setTransform(1, 0, 0, 1, 0, 0)
+                        context.restore()
                     }
-                )
+                })
             }
         },
         [
-            lfmSprite,
+            sprite,
             context,
             minimumLfmCount,
             raidView,

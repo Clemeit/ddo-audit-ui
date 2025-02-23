@@ -12,12 +12,14 @@ import { VIP_SERVER_NAMES_LOWER } from "../../constants/servers.ts"
 import { useThemeContext } from "../../contexts/ThemeContext.tsx"
 import useFeatureCallouts from "../../hooks/useFeatureCallouts.ts"
 import "./GenericToolbar.css"
+import { toSentenceCase } from "../../utils/stringUtils.ts"
 
 interface Props {
     handleReload: () => void
     handleOpenSettingsModal: () => void
     panelWidth: number
     linkDestination: string
+    serverName: string
 }
 
 const GenericToolbar = ({
@@ -25,9 +27,8 @@ const GenericToolbar = ({
     handleOpenSettingsModal,
     panelWidth,
     linkDestination,
+    serverName = "",
 }: Props) => {
-    const { serverNameSentenceCase, serverNameLowercase } =
-        useGetCurrentServer()
     const { isFullScreen, setIsFullScreen } = useThemeContext()
     const [canManuallyReload, setCanManuallyReload] = useState(true)
     const { isCalloutActive, dismissCallout } = useFeatureCallouts()
@@ -40,8 +41,8 @@ const GenericToolbar = ({
             <Link to={linkDestination} className="item">
                 <MenuSVG className="icon" />
                 <span>
-                    {serverNameSentenceCase}
-                    {VIP_SERVER_NAMES_LOWER.includes(serverNameLowercase) && (
+                    {toSentenceCase(serverName)}
+                    {VIP_SERVER_NAMES_LOWER.includes(serverName) && (
                         <>
                             {" "}
                             <Badge

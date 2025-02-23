@@ -394,26 +394,26 @@ const useRenderLfm = ({ lfmSprite, context }: Props) => {
             context.strokeStyle = LFM_COLORS.LFM_BORDER
             context.lineWidth = 1
             context.strokeRect(
-                Math.floor(mainPanelBoundingBox.x),
-                Math.floor(mainPanelBoundingBox.y),
+                Math.floor(mainPanelBoundingBox.x) + 0.5,
+                Math.floor(mainPanelBoundingBox.y) + 0.5,
                 Math.floor(mainPanelBoundingBox.width),
                 Math.floor(mainPanelBoundingBox.height)
             )
             context.strokeRect(
-                Math.floor(questPanelBoundingBox.x),
-                Math.floor(questPanelBoundingBox.y),
+                Math.floor(questPanelBoundingBox.x) + 0.5,
+                Math.floor(questPanelBoundingBox.y) + 0.5,
                 Math.floor(questPanelBoundingBox.width),
                 Math.floor(questPanelBoundingBox.height)
             )
             context.strokeRect(
-                Math.floor(classPanelBoundingBox.x),
-                Math.floor(classPanelBoundingBox.y),
+                Math.floor(classPanelBoundingBox.x) + 0.5,
+                Math.floor(classPanelBoundingBox.y) + 0.5,
                 Math.floor(classPanelBoundingBox.width),
                 Math.floor(classPanelBoundingBox.height)
             )
             context.strokeRect(
-                Math.floor(levelPanelBoundingBox.x),
-                Math.floor(levelPanelBoundingBox.y),
+                Math.floor(levelPanelBoundingBox.x) + 0.5,
+                Math.floor(levelPanelBoundingBox.y) + 0.5,
                 Math.floor(levelPanelBoundingBox.width),
                 Math.floor(levelPanelBoundingBox.height)
             )

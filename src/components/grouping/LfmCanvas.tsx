@@ -135,7 +135,7 @@ const LfmCanvas: React.FC<Props> = ({
         context: lfmCanvasRef.current?.getContext("2d"),
     })
     const { renderLfmPanelToCanvas } = useRenderLfmPanel({
-        lfmSprite: image,
+        sprite: image,
         context: lfmPanelCanvasRef?.current?.getContext("2d"),
         raidView: raidView,
     })
@@ -163,16 +163,38 @@ const LfmCanvas: React.FC<Props> = ({
         overlayCanvasRef.current.height = panelHeight
     }, [panelWidth, panelHeight])
 
+    // calculate the scale of the canvas
+    const [canvasScaleWidth, setCanvasScaleWidth] = useState(1)
+    const [canvasScaleHeight, setCanvasScaleHeight] = useState(1)
+    useEffect(() => {
+        const handleResize = () => {
+            if (mainCanvasRef.current) {
+                const rect = mainCanvasRef.current.getBoundingClientRect()
+                setCanvasScaleWidth(mainCanvasRef.current.width / rect.width)
+                setCanvasScaleHeight(mainCanvasRef.current.height / rect.height)
+                console.log(
+                    `canvasScaleWidth: ${canvasScaleWidth}, canvasScaleHeight: ${canvasScaleHeight}`
+                )
+            }
+        }
+
+        window.addEventListener("resize", handleResize)
+        handleResize()
+        return () => {
+            window.removeEventListener("resize", handleResize)
+        }
+    }, [mainCanvasRef.current])
+
     // Handle mouse events
     const handleCanvasClick = (
-        event: React.MouseEvent<HTMLCanvasElement>,
+        e: React.MouseEvent<HTMLCanvasElement>,
         isHover = false
     ) => {
         if (raidView) return
         const rect = mainCanvasRef.current?.getBoundingClientRect()
         if (!rect) return
-        const x = event.clientX - rect.left
-        const y = event.clientY - rect.top
+        const x = (e.clientX - rect.left) * canvasScaleWidth
+        const y = (e.clientY - rect.top) * canvasScaleHeight
 
         if (isHover === false) {
             // check if the mouse is over a sort header
@@ -188,14 +210,14 @@ const LfmCanvas: React.FC<Props> = ({
                 )
             })
             if (sortHeaderIndex > -1) {
-                const previousDirection = sortBy.direction
+                const previousDirection = sortBy.ascending
                 const previousType = sortBy.type
-                let newDirection = "asc"
+                let newAscending = true
                 const newType = sortHeaders[sortHeaderIndex].type
                 if (previousType === sortHeaders[sortHeaderIndex].type) {
-                    newDirection = previousDirection === "asc" ? "desc" : "asc"
+                    newAscending = !previousDirection
                 }
-                setSortBy({ type: newType, direction: newDirection })
+                setSortBy({ type: newType, ascending: newAscending })
 
                 return
             }

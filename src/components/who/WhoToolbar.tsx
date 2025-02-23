@@ -15,9 +15,10 @@ import {
 
 interface Props {
     reloadCharacters: () => void
+    serverName: string
 }
 
-const WhoToolbar = ({ reloadCharacters }: Props) => {
+const WhoToolbar = ({ reloadCharacters, serverName }: Props) => {
     const {
         panelWidth,
         shouldSaveSettings,
@@ -43,7 +44,7 @@ const WhoToolbar = ({ reloadCharacters }: Props) => {
 
     const settingModalContent = useMemo(
         () => (
-            <div className="lfm-settings-modal">
+            <div style={{ padding: "20px" }}>
                 <ContentCluster title="Display">
                     <Stack direction="column" gap="10px">
                         <Checkbox
@@ -175,6 +176,7 @@ const WhoToolbar = ({ reloadCharacters }: Props) => {
                 </Modal>
             )}
             <GenericToolbar
+                serverName={serverName}
                 handleReload={reloadCharacters}
                 handleOpenSettingsModal={() => {
                     setShowSettingsModal(true)

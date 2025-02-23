@@ -101,7 +101,7 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
     const [isDynamicWidth, setIsDynamicWidth] = useState<boolean>(false)
     const [sortBy, setSortBy] = useState<LfmSortType>({
         type: "level",
-        direction: "asc",
+        ascending: true,
     })
     const [mouseOverDelay, setMouseOverDelay] = useState<number>(
         DEFAULT_MOUSE_OVER_DELAY
@@ -137,7 +137,7 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
     }
 
     const resetViewSettings = useCallback(() => {
-        setSortBy({ type: "level", direction: "asc" })
+        setSortBy({ type: "level", ascending: true })
         setFontSize(DEFAULT_BASE_FONT_SIZE)
         setPanelWidth(DEFAULT_LFM_PANEL_WIDTH)
         setShowBoundingBoxes(false)

@@ -22,9 +22,10 @@ import GenericToolbar from "../global/GenericToolbar.tsx"
 
 interface Props {
     reloadLfms: () => void
+    serverName: string
 }
 
-const LfmToolbar = ({ reloadLfms }: Props) => {
+const LfmToolbar = ({ reloadLfms, serverName }: Props) => {
     const {
         minLevel,
         setMinLevel,
@@ -454,6 +455,7 @@ const LfmToolbar = ({ reloadLfms }: Props) => {
                     </Modal>
                 )}
             <GenericToolbar
+                serverName={serverName}
                 handleReload={() => {
                     reloadRegisteredCharacters()
                     reloadLfms()
