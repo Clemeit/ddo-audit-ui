@@ -27,49 +27,62 @@ const usePollApi = <T>({
     const [data, setData] = useState<T | null>(null)
     const [error, setError] = useState<Error | null>(null)
     const timeoutRef = useRef<NodeJS.Timeout | null>(null)
-
-    const fetchData = useCallback(async () => {
-        if (timeoutRef.current) clearTimeout(timeoutRef.current)
-        if (lifespan > 0 && Date.now() - birthTime > lifespan) {
-            if (timeoutRef.current) {
-                clearInterval(timeoutRef.current)
+    console.log("state", state)
+    const fetchData = useCallback(
+        async (signal: AbortSignal) => {
+            if (timeoutRef.current) clearTimeout(timeoutRef.current)
+            if (lifespan > 0 && Date.now() - birthTime > lifespan) {
+                if (timeoutRef.current) {
+                    clearTimeout(timeoutRef.current)
+                }
+                setState(LoadingState.Haulted)
+                return
             }
-            setState(LoadingState.Haulted)
-            return
-        }
 
-        // only set loading state if the request takes longer than 1 second
-        const loadingStateTimeout = setTimeout(() => {
-            setState(LoadingState.Loading)
-        }, 1000)
-        try {
-            const result = await getRequest<T>(endpoint)
-            setData(result)
-            setState(LoadingState.Loaded)
-            clearTimeout(loadingStateTimeout)
-            timeoutRef.current = setTimeout(fetchData, interval)
-        } catch (err) {
-            setError(err as Error)
-            setState(LoadingState.Error)
-            if (stopOnError && timeoutRef.current) {
-                clearInterval(timeoutRef.current)
-            } else {
-                timeoutRef.current = setTimeout(fetchData, interval)
+            // only set loading state if the request takes longer than 1 second
+            const loadingStateTimeout = setTimeout(() => {
+                setState(LoadingState.Loading)
+            }, 1000)
+            try {
+                const result = await getRequest<T>(endpoint, { signal })
+                setData(result)
+                setState(LoadingState.Loaded)
+            } catch (err) {
+                setError(err as Error)
+                setState(LoadingState.Error)
+            } finally {
+                clearTimeout(loadingStateTimeout)
+                if (!signal.aborted) {
+                    timeoutRef.current = setTimeout(
+                        () => fetchData(signal),
+                        interval
+                    )
+                }
             }
-        }
-    }, [endpoint, lifespan, birthTime, stopOnError])
+        },
+        [endpoint, lifespan, birthTime, stopOnError]
+    )
 
     useEffect(() => {
-        fetchData()
+        const controller = new AbortController()
+        const signal = controller.signal
+
+        fetchData(signal)
 
         return () => {
+            controller.abort()
             if (timeoutRef.current) {
-                clearInterval(timeoutRef.current)
+                clearTimeout(timeoutRef.current)
             }
         }
     }, [])
 
-    return { state, data, error, reload: fetchData }
+    return {
+        state,
+        data,
+        error,
+        reload: () => fetchData(new AbortController().signal),
+    }
 }
 
 export default usePollApi

@@ -20,9 +20,15 @@ import { MAXIMUM_CHARACTER_COUNT } from "../../constants/whoPanel.ts"
 
 interface Props {
     serverName: string
+    isSecondaryPanel?: boolean
+    handleClosePanel?: () => void
 }
 
-const WhoContainer = ({ serverName }: Props) => {
+const WhoContainer = ({
+    serverName,
+    isSecondaryPanel,
+    handleClosePanel,
+}: Props) => {
     const {
         stringFilter,
         sortBy,
@@ -224,7 +230,12 @@ const WhoContainer = ({ serverName }: Props) => {
             )}
             {!isServerOffline || ignoreServerDown ? (
                 <>
-                    <WhoToolbar reloadCharacters={reloadCharacters} />
+                    <WhoToolbar
+                        serverName={serverName}
+                        reloadCharacters={reloadCharacters}
+                        isSecondaryPanel={isSecondaryPanel}
+                        handleClosePanel={handleClosePanel}
+                    />
                     <WhoCanvas
                         allCharacters={Object.values(
                             characterData?.characters ?? {}

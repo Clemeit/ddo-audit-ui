@@ -15,12 +15,16 @@ interface Props {
     serverName: string
     refreshInterval?: number
     raidView?: boolean
+    isSecondaryPanel?: boolean
+    handleClosePanel?: () => void
 }
 
 const GroupingContainer = ({
     serverName,
     refreshInterval = 3000,
     raidView = false,
+    isSecondaryPanel = false,
+    handleClosePanel,
 }: Props) => {
     const {
         sortBy,
@@ -177,6 +181,8 @@ const GroupingContainer = ({
                     <LfmToolbar
                         serverName={serverName}
                         reloadLfms={reloadLfms}
+                        isSecondaryPanel={isSecondaryPanel}
+                        handleClosePanel={handleClosePanel}
                     />
                     <LfmCanvas
                         serverName={serverName}

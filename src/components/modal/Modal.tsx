@@ -26,9 +26,11 @@ const Modal = ({
                 onClose()
             }
         }
+        document.body.style.overflowY = "hidden"
         document.addEventListener("keydown", handleKeyDown)
         return () => {
             document.removeEventListener("keydown", handleKeyDown)
+            document.body.style.overflowY = "scroll"
         }
     }, [])
 

@@ -146,16 +146,17 @@ const Page1 = ({
                 <span className="orange-text">
                     {character?.server_name || "the game"}
                 </span>{" "}
-                and enter the following text in the Public Comment field found
-                at the bottom of the Who tab in the Social Panel.
+                , enter the following text in the Public Comment field found at
+                the bottom of the Who tab in the Social Panel, and click the
+                &quot;Submit&quot; button.
             </p>
-            <code className="verification-code">
-                {verificationChallenge?.challenge_word || <span>&nbsp;</span>}
-            </code>
             <ExpandableContainer title="Show me how">
                 <div className="comment-field-demo" />
             </ExpandableContainer>
-            <p>Here's the checklist:</p>
+            <code className="verification-code">
+                {verificationChallenge?.challenge_word || <span>&nbsp;</span>}
+            </code>
+            <p>Here&apos;s the checklist:</p>
             <ul>
                 <li>
                     {verificationChallenge &&

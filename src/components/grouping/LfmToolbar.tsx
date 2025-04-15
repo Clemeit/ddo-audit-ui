@@ -23,9 +23,16 @@ import GenericToolbar from "../global/GenericToolbar.tsx"
 interface Props {
     reloadLfms: () => void
     serverName: string
+    isSecondaryPanel?: boolean
+    handleClosePanel?: () => void
 }
 
-const LfmToolbar = ({ reloadLfms, serverName }: Props) => {
+const LfmToolbar = ({
+    reloadLfms,
+    serverName,
+    isSecondaryPanel,
+    handleClosePanel,
+}: Props) => {
     const {
         minLevel,
         setMinLevel,
@@ -78,12 +85,10 @@ const LfmToolbar = ({ reloadLfms, serverName }: Props) => {
 
     const handleOpenModal = () => {
         setShowSettingsModal(true)
-        document.body.style.overflowY = "hidden"
     }
 
     const handleCloseModal = () => {
         setShowSettingsModal(false)
-        document.body.style.overflowY = "scroll"
     }
 
     const resetViewSettingsModal = useMemo(
@@ -461,8 +466,10 @@ const LfmToolbar = ({ reloadLfms, serverName }: Props) => {
                     reloadLfms()
                 }}
                 handleOpenSettingsModal={handleOpenModal}
+                handleClosePanel={handleClosePanel}
                 panelWidth={panelWidth}
                 linkDestination="/grouping"
+                isSecondaryPanel={isSecondaryPanel}
             />
         </>
     )

@@ -13,6 +13,7 @@ interface Props {
     showButtons: boolean
     miniature: boolean
     hideOnMobile?: boolean
+    hideSuggestionButton?: boolean
 }
 
 const Banner = ({
@@ -21,6 +22,7 @@ const Banner = ({
     showButtons = true,
     miniature = false,
     hideOnMobile = true,
+    hideSuggestionButton = false,
 }: Props) => {
     const navigate = useNavigate()
     const isMobile = useIsMobile()
@@ -44,13 +46,15 @@ const Banner = ({
                     <>
                         <br />
                         <div className="call-to-action-container">
-                            <Button
-                                type="primary"
-                                onClick={routeToSuggestionsPage}
-                                style={{ width: "9rem" }}
-                            >
-                                Make a suggestion
-                            </Button>
+                            {!hideSuggestionButton && (
+                                <Button
+                                    type="primary"
+                                    onClick={routeToSuggestionsPage}
+                                    style={{ width: "9rem" }}
+                                >
+                                    Make a suggestion
+                                </Button>
+                            )}
                             <Button
                                 type="secondary"
                                 onClick={openGitHubLink}

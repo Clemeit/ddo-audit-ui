@@ -94,7 +94,8 @@ const Page2 = ({
                         <Link className="link" to="/registration">
                             Registration page
                         </Link>{" "}
-                        and click "Verify" for any character in the list.
+                        and click &quot;Verify&quot; for any character in the
+                        list.
                     </p>
                     <p>
                         If you got here by refreshing the page, just head back
@@ -112,13 +113,14 @@ const Page2 = ({
                         />
                     )}
                     <p>
-                        One last step. <b>Remove</b> the verification code from
-                        the Public Comment field in the Social Panel.
+                        One last step. <b>Reset</b> your public comment by
+                        clicking the &quot;Submit&quot; button while the Comment
+                        field is blank.
                     </p>
                     <ExpandableContainer title="Show me how">
                         <div className="remove-comment-field-demo" />
                     </ExpandableContainer>
-                    <p>Here's the checklist:</p>
+                    <p>Here&apos;s the checklist:</p>
                     <ul>
                         <li>
                             {verificationChallenge &&

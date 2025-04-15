@@ -8,6 +8,9 @@ import PageMessage from "../global/PageMessage.tsx"
 import { useWhoContext } from "../../contexts/WhoContext.tsx"
 import Button from "../global/Button.tsx"
 import useFeatureCallouts from "../../hooks/useFeatureCallouts.ts"
+import MultiPanelContainer, {
+    PrimaryType,
+} from "../social/MultiPanelContainer.tsx"
 
 const WhoSpecific = () => {
     const {
@@ -52,8 +55,9 @@ const WhoSpecific = () => {
                     maxWidth={`${panelWidth}px`}
                 />
             )}
-            <WhoContainer
-                serverName={serverNameLowercase ? serverNameLowercase : ""}
+            <MultiPanelContainer
+                serverName={serverNameLowercase}
+                primaryType={PrimaryType.Who}
             />
             <Spacer className="hide-on-mobile" size="20px" />
         </Page>

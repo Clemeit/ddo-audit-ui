@@ -14,15 +14,13 @@ init()
 
 const root = ReactDOM.createRoot(document.getElementById("root")!)
 root.render(
-    <React.StrictMode>
-        <HelmetProvider>
-            <ThemeProvider>
-                <NotificationProvider>
-                    <RouterProvider router={browserRouter} />
-                </NotificationProvider>
-            </ThemeProvider>
-        </HelmetProvider>
-    </React.StrictMode>
+    <HelmetProvider>
+        <ThemeProvider>
+            <NotificationProvider>
+                <RouterProvider router={browserRouter} />
+            </NotificationProvider>
+        </ThemeProvider>
+    </HelmetProvider>
 )
 
 // If you want to start measuring performance in your app, pass a function

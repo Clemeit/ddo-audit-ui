@@ -10,6 +10,8 @@ interface Props {
     badge?: React.ReactNode
     noLink?: boolean
     onClick?: () => void
+    miniature?: boolean
+    fullWidth?: boolean
 }
 
 const ServerNavigationCard = ({
@@ -20,24 +22,36 @@ const ServerNavigationCard = ({
     badge,
     noLink,
     onClick,
+    miniature,
+    fullWidth,
 }: Props) => {
     return !noLink ? (
-        <Link to={destination} className="server-navigation-card">
+        <Link
+            to={destination}
+            className={`server-navigation-card${miniature ? " miniature" : ""}${fullWidth ? " full-width" : ""}`}
+        >
             <span className="server-navigation-card-title">
                 {icon}
                 {title}
                 {badge}
             </span>
-            <p className="server-navigation-card-content">{content}</p>
+            {content && (
+                <p className="server-navigation-card-content">{content}</p>
+            )}
         </Link>
     ) : (
-        <button onClick={onClick} className="server-navigation-card">
+        <button
+            onClick={onClick}
+            className={`server-navigation-card${miniature ? " miniature" : ""}${fullWidth ? " full-width" : ""}`}
+        >
             <span className="server-navigation-card-title">
                 {icon}
                 {title}
                 {badge}
             </span>
-            <p className="server-navigation-card-content">{content}</p>
+            {content && (
+                <p className="server-navigation-card-content">{content}</p>
+            )}
         </button>
     )
 }

@@ -28,6 +28,9 @@ const Notifications = lazy(
     () => import("./components/notifications/Notifications.tsx")
 )
 const Timers = lazy(() => import("./components/timers/Timers.tsx"))
+const Suggestions = lazy(
+    () => import("./components/suggestions/Suggestions.tsx")
+)
 
 // Providers
 import { LfmProvider } from "./contexts/LfmContext.tsx"
@@ -85,6 +88,7 @@ export default createBrowserRouter(
             <Route path="/notifications" element={<Notifications />} />
             <Route path="/timers" element={<Timers />} />
             <Route path="/servers" element={<Servers />} />
+            <Route path="/suggestions" element={<Suggestions />} />
             <Route path="*" element={<NotFound />} />
         </Route>
     )

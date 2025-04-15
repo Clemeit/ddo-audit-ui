@@ -26,6 +26,7 @@
     align-items: center;
     gap: 10px;
     box-sizing: border-box;
+    z-index: 100;
 }
 
 .banner.miniature .content {

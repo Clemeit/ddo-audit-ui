@@ -98,7 +98,9 @@ const useRenderLfmOverlay = ({ lfmSprite, context }: Props) => {
             })
 
             // figure out the quest activity history
-            const rawActivityEvents = getLfmActivityEventsFlatMap(lfm)
+            const rawActivityEvents = getLfmActivityEventsFlatMap(lfm).filter(
+                (event) => event.tag !== LfmActivityType.COMMENT
+            )
             // we always want the first event.
             // Then we want the last 7 events, or all of them if there are less than 7.
             const truncatedActivityEvents: FlatActivityEvent[] = []
@@ -116,7 +118,6 @@ const useRenderLfmOverlay = ({ lfmSprite, context }: Props) => {
                 truncatedActivityEvents.push(...rawActivityEvents)
             }
             const activityEvents = truncatedActivityEvents
-                .filter((event) => event.tag !== LfmActivityType.COMMENT)
                 .reduce((acc, event) => {
                     if (
                         acc.length > 0 &&
@@ -659,6 +660,7 @@ const useRenderLfmOverlay = ({ lfmSprite, context }: Props) => {
             panelHeight,
             showLfmActivity,
             showCharacterGuildNames,
+            isMultiColumn,
             confineTextToBoundingBox,
         ]
     )

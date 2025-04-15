@@ -6,6 +6,7 @@ import { ReactComponent as SettingsSVG } from "../../assets/svg/settings.svg"
 import { ReactComponent as FullscreenSVG } from "../../assets/svg/fullscreen.svg"
 import { ReactComponent as FullscreenExitSVG } from "../../assets/svg/fullscreen-exit.svg"
 import { ReactComponent as RefreshSVG } from "../../assets/svg/refresh.svg"
+import { ReactComponent as CloseSVG } from "../../assets/svg/close.svg"
 import Badge from "../global/Badge.tsx"
 import useGetCurrentServer from "../../hooks/useGetCurrentServer.ts"
 import { VIP_SERVER_NAMES_LOWER } from "../../constants/servers.ts"
@@ -17,17 +18,21 @@ import { toSentenceCase } from "../../utils/stringUtils.ts"
 interface Props {
     handleReload: () => void
     handleOpenSettingsModal: () => void
+    handleClosePanel?: () => void
     panelWidth: number
     linkDestination: string
     serverName: string
+    isSecondaryPanel?: boolean
 }
 
 const GenericToolbar = ({
     handleReload,
     handleOpenSettingsModal,
+    handleClosePanel,
     panelWidth,
     linkDestination,
     serverName = "",
+    isSecondaryPanel,
 }: Props) => {
     const { isFullScreen, setIsFullScreen } = useThemeContext()
     const [canManuallyReload, setCanManuallyReload] = useState(true)
@@ -38,22 +43,41 @@ const GenericToolbar = ({
             className="generic-toolbar-container"
             style={{ width: `${panelWidth}px` }}
         >
-            <Link to={linkDestination} className="item">
-                <MenuSVG className="icon" />
-                <span>
-                    {toSentenceCase(serverName)}
-                    {VIP_SERVER_NAMES_LOWER.includes(serverName) && (
-                        <>
-                            {" "}
-                            <Badge
-                                text="VIP"
-                                size="small"
-                                backgroundColor="var(--orange4)"
-                            />
-                        </>
-                    )}
-                </span>
-            </Link>
+            {isSecondaryPanel ? (
+                <button className="item" onClick={handleClosePanel}>
+                    <CloseSVG className="icon" />
+                    <span>
+                        {toSentenceCase(serverName)}
+                        {VIP_SERVER_NAMES_LOWER.includes(serverName) && (
+                            <>
+                                {" "}
+                                <Badge
+                                    text="VIP"
+                                    size="small"
+                                    backgroundColor="var(--orange4)"
+                                />
+                            </>
+                        )}
+                    </span>
+                </button>
+            ) : (
+                <Link to={linkDestination} className="item">
+                    <MenuSVG className="icon" />
+                    <span>
+                        {toSentenceCase(serverName)}
+                        {VIP_SERVER_NAMES_LOWER.includes(serverName) && (
+                            <>
+                                {" "}
+                                <Badge
+                                    text="VIP"
+                                    size="small"
+                                    backgroundColor="var(--orange4)"
+                                />
+                            </>
+                        )}
+                    </span>
+                </Link>
+            )}
             <div
                 className="item settings-button"
                 onClick={() => {

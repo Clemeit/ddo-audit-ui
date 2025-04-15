@@ -1,0 +1,39 @@
+.add-panel-button {
+    position: absolute;
+    top: 20px;
+    /* right: 20px; */
+    transform: translateX(450px);
+    z-index: 2;
+    border: none;
+    background-color: var(--background-light);
+    border-radius: 5px;
+    padding: 10px;
+    cursor: pointer;
+    opacity: 0.8;
+    width: 42px;
+    height: 42px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    overflow-x: hidden;
+    filter: drop-shadow(0 0 5px var(--shadow));
+    gap: 10px;
+    transition:
+        opacity 0.3s,
+        width 0.3s;
+
+    &:hover {
+        opacity: 1;
+        width: 128px;
+    }
+
+    > div {
+        height: 24px;
+    }
+
+    > span {
+        text-wrap: none;
+        white-space: nowrap;
+        font-size: 0.9rem;
+    }
+}

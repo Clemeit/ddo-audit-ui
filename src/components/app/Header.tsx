@@ -12,6 +12,7 @@ const Header = () => {
         subtitle: "Real-time Player Concurrency Data and LFM Viewer",
         miniature: false,
         showButtons: true,
+        hideSuggestionButton: false,
     })
     const { isFullScreen } = useThemeContext()
 
@@ -30,6 +31,7 @@ const Header = () => {
                     subtitle={bannerData.subtitle}
                     miniature={bannerData.miniature}
                     showButtons={bannerData.showButtons}
+                    hideSuggestionButton={bannerData.hideSuggestionButton}
                 />
             </>
         )

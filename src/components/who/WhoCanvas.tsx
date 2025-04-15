@@ -129,7 +129,7 @@ const WhoCanvas: React.FC<Props> = ({
     })
 
     const [previousState, setPreviousState] = useState({
-        onlineCharacterCount: 0,
+        onlineCharacterCount: -1,
         anonymousCharacterCount: 0,
         curatedCharacters,
         panelWidth,
@@ -177,10 +177,14 @@ const WhoCanvas: React.FC<Props> = ({
             }
         }
 
-        window.addEventListener("resize", handleResize)
+        const resizeObserver = new ResizeObserver(handleResize)
+        if (mainCanvasRef.current) {
+            resizeObserver.observe(mainCanvasRef.current)
+        }
+
         handleResize()
         return () => {
-            window.removeEventListener("resize", handleResize)
+            resizeObserver.disconnect()
         }
     }, [mainCanvasRef.current])
 
@@ -267,6 +271,7 @@ const WhoCanvas: React.FC<Props> = ({
                 previousState.curatedCharacters[
                     Math.min(index, previousState.curatedCharacters.length - 1)
                 ].id !== character.id ||
+                previousState.isGroupView !== isGroupView ||
                 !areCharactersEquivalent(
                     previousState.curatedCharacters[index],
                     character
@@ -517,92 +522,101 @@ const WhoCanvas: React.FC<Props> = ({
 
     return (
         <div style={{ position: "relative" }}>
-            <input
-                className="transparent-input"
-                style={{
-                    position: "absolute",
-                    left: searchInputBoundingBox.x / canvasScaleWidth,
-                    top:
-                        searchInputBoundingBox.y / canvasScaleHeight -
-                        (20 -
-                            searchInputBoundingBox.height / canvasScaleHeight) /
-                            2,
-                    width: searchInputBoxWidth / canvasScaleWidth,
-                    fontSize: `${23 - Math.round(canvasScaleWidth * 6)}px`,
-                }}
-                type="text"
-                onChange={(e) => setStringFilter(e.target.value)}
-                value={stringFilter}
-                tabIndex={1}
-            />
-            <input
-                className="transparent-input"
-                style={{
-                    position: "absolute",
-                    left:
-                        levelRangeLowerInputBoundingBox.x / canvasScaleWidth -
-                        (levelRangeInputBoxWidth -
-                            levelRangeLowerInputBoundingBox.width /
-                                canvasScaleWidth) /
-                            2,
-                    top:
-                        levelRangeLowerInputBoundingBox.y / canvasScaleHeight -
-                        (20 -
-                            levelRangeLowerInputBoundingBox.height /
-                                canvasScaleHeight) /
-                            2,
-                    width: levelRangeInputBoxWidth,
-                    fontSize: `${23 - Math.round(canvasScaleWidth * 6)}px`,
-                    textAlign: "center",
-                }}
-                type="text"
-                onChange={(e) => setFauxMinLevel(e.target.value)}
-                value={fauxMinLevel}
-                onBlur={(e) => {
-                    if (!/^\d+$/.test(e.target.value)) {
-                        setFauxMinLevel(MIN_LEVEL.toString())
-                    } else if (parseInt(e.target.value) > MAX_LEVEL) {
-                        setFauxMinLevel(MAX_LEVEL.toString())
-                    } else if (parseInt(e.target.value) < MIN_LEVEL) {
-                        setFauxMinLevel(MIN_LEVEL.toString())
-                    }
-                }}
-                tabIndex={2}
-            />
-            <input
-                className="transparent-input"
-                style={{
-                    position: "absolute",
-                    left:
-                        levelRangeUpperInputBoundingBox.x / canvasScaleWidth -
-                        (levelRangeInputBoxWidth -
-                            levelRangeUpperInputBoundingBox.width /
-                                canvasScaleWidth) /
-                            2,
-                    top:
-                        levelRangeUpperInputBoundingBox.y / canvasScaleHeight -
-                        (20 -
-                            levelRangeUpperInputBoundingBox.height /
-                                canvasScaleHeight) /
-                            2,
-                    width: levelRangeInputBoxWidth,
-                    fontSize: `${23 - Math.round(canvasScaleWidth * 6)}px`,
-                    textAlign: "center",
-                }}
-                type="text"
-                onChange={(e) => setFauxMaxLevel(e.target.value)}
-                value={fauxMaxLevel}
-                onBlur={(e) => {
-                    if (!/^\d+$/.test(e.target.value)) {
-                        setFauxMaxLevel(MAX_LEVEL.toString())
-                    } else if (parseInt(e.target.value) > MAX_LEVEL) {
-                        setFauxMaxLevel(MAX_LEVEL.toString())
-                    } else if (parseInt(e.target.value) < minLevel) {
-                        setFauxMaxLevel(minLevel.toString())
-                    }
-                }}
-                tabIndex={3}
-            />
+            {image && (
+                <>
+                    <input
+                        className="transparent-input"
+                        style={{
+                            position: "absolute",
+                            left: searchInputBoundingBox.x / canvasScaleWidth,
+                            top:
+                                searchInputBoundingBox.y / canvasScaleHeight -
+                                (20 -
+                                    searchInputBoundingBox.height /
+                                        canvasScaleHeight) /
+                                    2,
+                            width: searchInputBoxWidth / canvasScaleWidth,
+                            fontSize: `${23 - Math.round(canvasScaleWidth * 6)}px`,
+                        }}
+                        type="text"
+                        onChange={(e) => setStringFilter(e.target.value)}
+                        value={stringFilter}
+                        tabIndex={1}
+                    />
+                    <input
+                        className="transparent-input"
+                        style={{
+                            position: "absolute",
+                            left:
+                                levelRangeLowerInputBoundingBox.x /
+                                    canvasScaleWidth -
+                                (levelRangeInputBoxWidth -
+                                    levelRangeLowerInputBoundingBox.width /
+                                        canvasScaleWidth) /
+                                    2,
+                            top:
+                                levelRangeLowerInputBoundingBox.y /
+                                    canvasScaleHeight -
+                                (20 -
+                                    levelRangeLowerInputBoundingBox.height /
+                                        canvasScaleHeight) /
+                                    2,
+                            width: levelRangeInputBoxWidth,
+                            fontSize: `${23 - Math.round(canvasScaleWidth * 6)}px`,
+                            textAlign: "center",
+                        }}
+                        type="text"
+                        onChange={(e) => setFauxMinLevel(e.target.value)}
+                        value={fauxMinLevel}
+                        onBlur={(e) => {
+                            if (!/^\d+$/.test(e.target.value)) {
+                                setFauxMinLevel(MIN_LEVEL.toString())
+                            } else if (parseInt(e.target.value) > MAX_LEVEL) {
+                                setFauxMinLevel(MAX_LEVEL.toString())
+                            } else if (parseInt(e.target.value) < MIN_LEVEL) {
+                                setFauxMinLevel(MIN_LEVEL.toString())
+                            }
+                        }}
+                        tabIndex={2}
+                    />
+                    <input
+                        className="transparent-input"
+                        style={{
+                            position: "absolute",
+                            left:
+                                levelRangeUpperInputBoundingBox.x /
+                                    canvasScaleWidth -
+                                (levelRangeInputBoxWidth -
+                                    levelRangeUpperInputBoundingBox.width /
+                                        canvasScaleWidth) /
+                                    2,
+                            top:
+                                levelRangeUpperInputBoundingBox.y /
+                                    canvasScaleHeight -
+                                (20 -
+                                    levelRangeUpperInputBoundingBox.height /
+                                        canvasScaleHeight) /
+                                    2,
+                            width: levelRangeInputBoxWidth,
+                            fontSize: `${23 - Math.round(canvasScaleWidth * 6)}px`,
+                            textAlign: "center",
+                        }}
+                        type="text"
+                        onChange={(e) => setFauxMaxLevel(e.target.value)}
+                        value={fauxMaxLevel}
+                        onBlur={(e) => {
+                            if (!/^\d+$/.test(e.target.value)) {
+                                setFauxMaxLevel(MAX_LEVEL.toString())
+                            } else if (parseInt(e.target.value) > MAX_LEVEL) {
+                                setFauxMaxLevel(MAX_LEVEL.toString())
+                            } else if (parseInt(e.target.value) < minLevel) {
+                                setFauxMaxLevel(minLevel.toString())
+                            }
+                        }}
+                        tabIndex={3}
+                    />
+                </>
+            )}
             <canvas
                 ref={mainCanvasRef}
                 id={serverName}

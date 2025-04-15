@@ -16,9 +16,16 @@ import {
 interface Props {
     reloadCharacters: () => void
     serverName: string
+    isSecondaryPanel?: boolean
+    handleClosePanel?: () => void
 }
 
-const WhoToolbar = ({ reloadCharacters, serverName }: Props) => {
+const WhoToolbar = ({
+    reloadCharacters,
+    serverName,
+    isSecondaryPanel,
+    handleClosePanel,
+}: Props) => {
     const {
         panelWidth,
         shouldSaveSettings,
@@ -183,6 +190,8 @@ const WhoToolbar = ({ reloadCharacters, serverName }: Props) => {
                 }}
                 panelWidth={panelWidth}
                 linkDestination="/who"
+                isSecondaryPanel={isSecondaryPanel}
+                handleClosePanel={handleClosePanel}
             />
         </>
     )

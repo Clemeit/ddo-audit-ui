@@ -1,6 +1,7 @@
 import React from "react"
 import { Helmet } from "react-helmet-async"
 import "./Page.css"
+import useNetworkStatus from "../../hooks/useNetworkStatus.ts"
 
 interface Props {
     children: React.ReactNode
@@ -23,8 +24,19 @@ const Page = ({
     noPadding = false,
     contentMaxWidth = false,
 }: Props) => {
+    const isOnline = useNetworkStatus()
+
     return (
         <div className={className}>
+            {/* Banner messages would go here */}
+            {!isOnline && (
+                <div
+                    className="banner-message"
+                    style={{ backgroundColor: "#0055aa" }}
+                >
+                    You're offline
+                </div>
+            )}
             <Helmet>
                 <title>{title}</title>
                 <meta name="description" content={description} />

@@ -71,6 +71,13 @@ const bannerRouteMapping = {
         miniature: true,
         showButtons: false,
     },
+    suggestions: {
+        title: "DDO Audit",
+        subtitle: "Real-time Player Concurrency Data and LFM Viewer",
+        miniature: false,
+        showButtons: true,
+        hideSuggestionButton: true,
+    },
 }
 
 export { bannerRouteMapping }

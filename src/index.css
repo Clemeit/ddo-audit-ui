@@ -114,7 +114,8 @@ hr {
     color: var(--blue1);
 }
 
-input {
+input,
+textarea {
     color: var(--text-inverted);
     padding: 2px 5px;
     font-size: 1rem;

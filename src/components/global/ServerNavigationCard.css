@@ -14,6 +14,16 @@
     flex-direction: column;
     gap: 10px;
     justify-content: center;
+    font-size: 1rem;
+
+    &.miniature {
+        height: auto !important;
+        padding: 10px 20px;
+    }
+
+    &.full-width {
+        width: 100% !important;
+    }
 }
 
 .server-navigation-card:hover {

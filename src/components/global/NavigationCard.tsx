@@ -76,11 +76,15 @@ interface Props {
     badge?: React.ReactNode
     noLink?: boolean
     onClick?: () => void
+    fullWidth?: boolean
 }
 
-const NavigationCard = ({ type, badge, noLink, onClick }: Props) => {
+const NavigationCard = ({ type, badge, noLink, onClick, fullWidth }: Props) => {
     return !noLink ? (
-        <Link to={`/${type}`} className="navigation-card">
+        <Link
+            to={`/${type}`}
+            className={`navigation-card ${fullWidth ? "full-width" : ""}`}
+        >
             <span className="navigation-card-title">
                 {typeToIconMap[type]}
                 {typeToTitleMap[type]}
@@ -91,7 +95,10 @@ const NavigationCard = ({ type, badge, noLink, onClick }: Props) => {
             </p>
         </Link>
     ) : (
-        <button onClick={onClick} className="navigation-card">
+        <button
+            onClick={onClick}
+            className={`navigation-card ${fullWidth ? "full-width" : ""}`}
+        >
             <span className="navigation-card-title">
                 {typeToIconMap[type]}
                 {typeToTitleMap[type]}
