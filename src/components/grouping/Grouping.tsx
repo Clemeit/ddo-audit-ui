@@ -18,6 +18,7 @@ import Badge from "../global/Badge.tsx"
 import NavCardCluster from "../global/NavCardCluster.tsx"
 import { LiveDataHaultedPageMessage } from "../global/CommonMessages.tsx"
 import { ServerInfoApiDataModel } from "../../models/Game.ts"
+import { useQuestContext } from "../../contexts/QuestContext.tsx"
 
 const Grouping = () => {
     const { data: lfmData, state: lfmState } = usePollApi<LfmApiDataModel>({
@@ -31,6 +32,7 @@ const Grouping = () => {
             interval: 10000,
             lifespan: 1000 * 60 * 60 * 12, // 12 hours
         })
+    const questContext = useQuestContext()
 
     const cardDescription = (serverData: LfmApiServerModel) => {
         const serverLfms = serverData.lfms
@@ -77,7 +79,12 @@ const Grouping = () => {
         Object.entries(lfmData || {}).forEach(
             ([serverName, serverData]: [string, LfmApiServerModel]) => {
                 Object.values(serverData.lfms)?.forEach((lfm: Lfm) => {
-                    if (lfm.quest?.group_size === "Raid") {
+                    const quest =
+                        lfm.quest_id && lfm.quest_id !== 0
+                            ? questContext.quests[lfm.quest_id || 0]
+                            : null
+                    // TODO: revert next line
+                    if (quest?.group_size !== "Raid") {
                         const eligibleLfm: Lfm = {
                             ...lfm,
                             is_eligible: true,

@@ -28,7 +28,7 @@ const ServerStatus = ({
         }
 
         const statusCheckTimesAsDates: Date[] = Object.values(serverInfoData)
-            .map((server) => new Date(server.last_status_check + "Z"))
+            .map((server) => new Date(server.last_status_check))
             .filter((date) => !isNaN(date.getTime())) // Filter out invalid dates
         const mostRecentStatusCheck = new Date(
             Math.max(...statusCheckTimesAsDates.map((date) => date.getTime()))

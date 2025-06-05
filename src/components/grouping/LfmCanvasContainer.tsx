@@ -114,7 +114,7 @@ const GroupingContainer = ({
             .sort((a, b) => {
                 // this sort should take care of the case where the next sort
                 // operataion has ties
-                return a.id.localeCompare(b.id)
+                return a.id - b.id
             })
             .sort((a, b) => {
                 // might use some other method instead of average, but this'll do for now

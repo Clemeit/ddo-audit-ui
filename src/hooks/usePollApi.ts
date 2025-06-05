@@ -27,7 +27,6 @@ const usePollApi = <T>({
     const [data, setData] = useState<T | null>(null)
     const [error, setError] = useState<Error | null>(null)
     const timeoutRef = useRef<NodeJS.Timeout | null>(null)
-    console.log("state", state)
     const fetchData = useCallback(
         async (signal: AbortSignal) => {
             if (timeoutRef.current) clearTimeout(timeoutRef.current)

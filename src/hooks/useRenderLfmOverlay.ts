@@ -29,6 +29,8 @@ import {
     mapClassToIconBoundingBox,
     mapRaceAndGenderToRaceIconBoundingBox,
 } from "../utils/socialUtils.ts"
+import { useAreaContext } from "../contexts/AreaContext.tsx"
+import { useQuestContext } from "../contexts/QuestContext.tsx"
 
 interface Props {
     lfmSprite?: HTMLImageElement | null
@@ -54,6 +56,8 @@ const useRenderLfmOverlay = ({ lfmSprite, context }: Props) => {
     } = useLfmContext()
     const fonts = useMemo(() => FONTS(14), [])
     const { confineTextToBoundingBox } = useTextRenderer(context)
+    const areaContext = useAreaContext()
+    const questContext = useQuestContext()
 
     const renderLfmOverlay = useCallback<
         (lfm: Lfm, renderType: RenderType) => { width: number; height: number }
@@ -217,6 +221,7 @@ const useRenderLfmOverlay = ({ lfmSprite, context }: Props) => {
             if (renderType === RenderType.LFM) {
                 // Render LFM
                 context.translate(4, 3)
+                const quest = questContext.quests[lfm.quest_id || 0]
 
                 const gradient = context.createLinearGradient(
                     0,
@@ -235,7 +240,6 @@ const useRenderLfmOverlay = ({ lfmSprite, context }: Props) => {
                 )
                 gradient.addColorStop(1, OVERLAY_COLORS.CHARACTER_GRADIENT_EDGE)
 
-                let hasWrapped = false
                 const characters = [lfm.leader, ...lfm.members]
                 characters.forEach((member, index) => {
                     context.fillStyle = gradient
@@ -319,23 +323,21 @@ const useRenderLfmOverlay = ({ lfmSprite, context }: Props) => {
                     }
 
                     // draw location
+                    const area = areaContext.areas[member.location_id || 0]
                     context.font = OVERLAY_FONTS.MEMBER_LOCATION
                     context.fillStyle = OVERLAY_COLORS.MEMBER_LOCATION
                     const locationTextLines = wrapText(
-                        member.location?.name || "Somewhere in the aether",
+                        area?.name || "Somewhere in the aether",
                         OVERLAY_CHARACTER_WIDTH - 45,
                         context.font,
                         context,
                         1
                     )
-                    const isPlayerInQuest =
-                        member.location?.name === lfm.quest?.adventure_area
+                    const isPlayerInQuest = area?.name === quest?.adventure_area
                     context.fillText(
                         (isPlayerInQuest ? "✓ " : "") +
                             locationTextLines[0] +
-                            (locationTextLines[0] !== member.location?.name
-                                ? "..."
-                                : ""),
+                            (locationTextLines[0] !== area?.name ? "..." : ""),
                         22,
                         characterHeight - 10
                     )
@@ -516,7 +518,7 @@ const useRenderLfmOverlay = ({ lfmSprite, context }: Props) => {
                         if (event.tag !== LfmActivityType.SPACER) {
                             const currentDate = new Date()
                             const currentActivityDate = new Date(
-                                event.timestamp + "Z"
+                                event.timestamp
                             )
                             const elapsedMinutes = Math.floor(
                                 (currentDate.getTime() -

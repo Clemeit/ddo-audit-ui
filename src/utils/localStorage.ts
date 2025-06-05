@@ -1,6 +1,8 @@
 import { AccessToken } from "../models/Verification.ts"
 import { Character } from "../models/Character.ts"
 import { LocalStorageEntry } from "../models/LocalStorage.ts"
+import { Area } from "../models/Area.ts"
+import { Quest } from "../models/Lfm.ts"
 
 function getAccessTokens(): AccessToken[] {
     try {
@@ -182,6 +184,80 @@ function removeRegisteredCharacter(character: Character): void {
     }
 }
 
+function getAreas(): LocalStorageEntry<Area[]> {
+    try {
+        const storageValue = localStorage.getItem("cached-areas")
+        if (!storageValue) {
+            return {
+                createdAt: "",
+                updatedAt: "",
+                data: [],
+            }
+        }
+        return JSON.parse(storageValue)
+    } catch (e) {
+        console.error(e)
+        return {
+            createdAt: "",
+            updatedAt: "",
+            data: [],
+        }
+    }
+}
+
+function setAreas(areas: Area[]): void {
+    try {
+        const previousEntry: LocalStorageEntry<Area[]> = JSON.parse(
+            localStorage.getItem("cached-areas") || "{}"
+        )
+        const entry: LocalStorageEntry<Area[]> = {
+            createdAt: previousEntry.createdAt || new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            data: areas,
+        }
+        localStorage.setItem("cached-areas", JSON.stringify(entry))
+    } catch (e) {
+        console.error(e)
+    }
+}
+
+function getQuests(): LocalStorageEntry<Quest[]> {
+    try {
+        const storageValue = localStorage.getItem("cached-quests")
+        if (!storageValue) {
+            return {
+                createdAt: "",
+                updatedAt: "",
+                data: [],
+            }
+        }
+        return JSON.parse(storageValue)
+    } catch (e) {
+        console.error(e)
+        return {
+            createdAt: "",
+            updatedAt: "",
+            data: [],
+        }
+    }
+}
+
+function setQuests(quests: Quest[]): void {
+    try {
+        const previousEntry: LocalStorageEntry<Quest[]> = JSON.parse(
+            localStorage.getItem("cached-quests") || "{}"
+        )
+        const entry: LocalStorageEntry<Quest[]> = {
+            createdAt: previousEntry.createdAt || new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            data: quests,
+        }
+        localStorage.setItem("cached-quests", JSON.stringify(entry))
+    } catch (e) {
+        console.error(e)
+    }
+}
+
 function getValue<T>(key: string): T | null {
     try {
         const storageValue = localStorage.getItem(key)
@@ -216,4 +292,8 @@ export {
     removeRegisteredCharacter,
     getValue,
     setValue,
+    getAreas,
+    setAreas,
+    getQuests,
+    setQuests,
 }

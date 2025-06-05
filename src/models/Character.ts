@@ -1,13 +1,8 @@
+import { Area } from "./Area"
+
 interface CharacterClass {
     name: string
     level: number
-}
-
-interface CharacterLocation {
-    id: number
-    name?: string
-    region?: string
-    is_public_space?: boolean
 }
 
 interface Character {
@@ -17,7 +12,8 @@ interface Character {
     race?: string
     total_level?: number
     classes?: CharacterClass[]
-    location?: CharacterLocation
+    location?: Area
+    location_id?: number
     guild_name?: string
     server_name?: string
     home_server_name?: string
@@ -83,7 +79,6 @@ interface CharacterSortBy {
 export {
     Character,
     CharacterClass,
-    CharacterLocation,
     CharacterApiServerModel,
     CharacterApiDataModel,
     CharacterSummaryApiDataModel,

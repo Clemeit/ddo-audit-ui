@@ -19,9 +19,9 @@ interface QuestXP {
 }
 
 interface Quest {
-    id: string
+    id: number
     alt_id: string
-    area_id: string
+    area_id: number
     name: string
     level: QuestLevel
     xp: QuestXP
@@ -34,6 +34,12 @@ interface Quest {
     patron: string
     average_time: number
     tip: string
+}
+
+interface QuestApiResponse {
+    data: Quest[]
+    source: string
+    timestamp: number
 }
 
 interface LfmActivityEvent {
@@ -53,9 +59,10 @@ interface FlatActivityEvent {
 }
 
 interface Lfm {
-    id: string
+    id: number
     comment: string
     quest: Quest | null
+    quest_id: number | null
     is_quest_guess: boolean
     difficulty: string
     accepted_classes: string[]
@@ -116,4 +123,5 @@ export {
     LfmApiDataModel,
     LfmSortType,
     FlatActivityEvent,
+    QuestApiResponse,
 }

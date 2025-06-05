@@ -21,6 +21,7 @@ import {
 import { convertMillisecondsToPrettyString } from "../utils/stringUtils.ts"
 import { SPRITE_MAP } from "../constants/spriteMap.ts"
 import { mapRaceAndGenderToRaceIconBoundingBox } from "../utils/socialUtils.ts"
+import { useQuestContext } from "../contexts/QuestContext.tsx"
 
 interface Props {
     lfmSprite?: HTMLImageElement | null
@@ -43,6 +44,7 @@ const useRenderLfm = ({ lfmSprite, context }: Props) => {
         () => calculateCommonBoundingBoxes(panelWidth),
         [panelWidth]
     )
+    const questContext = useQuestContext()
 
     function getTextWidthAndHeight(
         text: string,
@@ -130,6 +132,7 @@ const useRenderLfm = ({ lfmSprite, context }: Props) => {
             if (!context || !lfmSprite) return
             context.imageSmoothingEnabled = false
             const fonts = FONTS(fontSize)
+            const quest = questContext.quests[lfm.quest_id || 0]
 
             // set up this lfm's bounds
             const {
@@ -278,17 +281,17 @@ const useRenderLfm = ({ lfmSprite, context }: Props) => {
                 lineHeight: questNameLineHeight,
                 boundingBox: questNameBoundingBox,
             } = confineTextToBoundingBox({
-                text: lfm.quest?.name,
+                text: quest?.name,
                 boundingBox: questPanelBoundingBoxWithPadding,
                 font: fonts.QUEST_NAME,
-                maxLines: showQuestTips && lfm.quest?.tip ? 1 : 2,
+                maxLines: showQuestTips && quest?.tip ? 1 : 2,
                 centered: true,
             })
             const {
                 textLines: questTipTextLines,
                 boundingBox: questTipBoundingBox,
             } = confineTextToBoundingBox({
-                text: lfm.quest?.tip,
+                text: quest?.tip,
                 boundingBox: questPanelBoundingBoxWithPadding,
                 font: fonts.COMMENT,
                 maxLines: 1,
@@ -339,7 +342,7 @@ const useRenderLfm = ({ lfmSprite, context }: Props) => {
                 questTipBoundingBox,
                 questDifficultyBoundingBox,
                 questPanelBoundingBox,
-                hasTip: !!lfm.quest?.tip,
+                hasTip: !!quest?.tip,
             })
             questNameBoundingBox.y = questNameBoundingBoxY
             questTipBoundingBox.y = questTipBoundingBoxY
@@ -501,7 +504,7 @@ const useRenderLfm = ({ lfmSprite, context }: Props) => {
             }
 
             // ===== QUEST PANEL =====
-            if (lfm.quest && (lfm.is_quest_guess ? showQuestGuesses : true)) {
+            if (!!quest && (lfm.is_quest_guess ? showQuestGuesses : true)) {
                 // quest name
                 context.fillStyle =
                     lfm.is_quest_guess && lfm.is_eligible
@@ -522,7 +525,7 @@ const useRenderLfm = ({ lfmSprite, context }: Props) => {
                     )
                 })
                 // quest tip
-                if (lfm.quest.tip && showQuestTip) {
+                if (quest.tip && showQuestTip) {
                     context.font = fonts.TIP
                     questTipTextLines.forEach((line) => {
                         context.fillText(

@@ -35,6 +35,8 @@ const Suggestions = lazy(
 // Providers
 import { LfmProvider } from "./contexts/LfmContext.tsx"
 import { WhoProvider } from "./contexts/WhoContext.tsx"
+import { AreaProvider } from "./contexts/AreaContext.tsx"
+import { QuestProvider } from "./contexts/QuestContext.tsx"
 
 // Set up the router
 export default createBrowserRouter(
@@ -50,7 +52,11 @@ export default createBrowserRouter(
                 element={
                     <LfmProvider>
                         <WhoProvider>
-                            <Grouping />
+                            <AreaProvider>
+                                <QuestProvider>
+                                    <Grouping />
+                                </QuestProvider>
+                            </AreaProvider>
                         </WhoProvider>
                     </LfmProvider>
                 }
@@ -60,7 +66,11 @@ export default createBrowserRouter(
                 element={
                     <LfmProvider>
                         <WhoProvider>
-                            <GroupingSpecific />
+                            <AreaProvider>
+                                <QuestProvider>
+                                    <GroupingSpecific />
+                                </QuestProvider>
+                            </AreaProvider>
                         </WhoProvider>
                     </LfmProvider>
                 }
@@ -70,7 +80,9 @@ export default createBrowserRouter(
                 element={
                     <WhoProvider>
                         <LfmProvider>
-                            <Who />
+                            <AreaProvider>
+                                <Who />
+                            </AreaProvider>
                         </LfmProvider>
                     </WhoProvider>
                 }
@@ -80,7 +92,9 @@ export default createBrowserRouter(
                 element={
                     <WhoProvider>
                         <LfmProvider>
-                            <WhoSpecific />
+                            <AreaProvider>
+                                <WhoSpecific />
+                            </AreaProvider>
                         </LfmProvider>
                     </WhoProvider>
                 }

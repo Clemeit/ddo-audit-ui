@@ -100,7 +100,7 @@ function getLfmPostedTimestamp(lfm: Lfm): Date {
         (event) => event.tag === "posted"
     )
     if (!lfmPostedEvent) return new Date()
-    return new Date(lfmPostedEvent.timestamp + "Z")
+    return new Date(lfmPostedEvent.timestamp)
 }
 
 function getLfmActivityEventsFlatMap(lfm: Lfm): FlatActivityEvent[] {
