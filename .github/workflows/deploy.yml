@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-and-deploy:
+  build-and-deploy-stage:
     if: github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
 
@@ -32,4 +32,20 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
           source: "build/*"
-          target: "/var/www/ddoaudit-stage.com/app/client/"
+          target: "/var/www/ddoaudit-stage.com/html/client/"
+
+  deploy-to-prod:
+    needs: build-and-deploy-stage
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - name: Copy build files to remote server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          source: "build/*"
+          target: "/var/www/ddoaudit.com/html/client/"
