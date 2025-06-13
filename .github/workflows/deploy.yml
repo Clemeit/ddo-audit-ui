@@ -25,6 +25,12 @@ jobs:
       - name: Build project
         run: yarn build
 
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: build
+          path: build
+
       - name: Copy build files to remote server
         uses: appleboy/scp-action@v0.1.7
         with:
@@ -41,6 +47,12 @@ jobs:
     environment: production
 
     steps:
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: build
+          path: build
+
       - name: Copy build files to remote server
         uses: appleboy/scp-action@v0.1.7
         with:
