@@ -14,6 +14,7 @@ import { ReactComponent as FeedbackSVG } from "../../assets/svg/feedback.svg"
 import { ReactComponent as RegistrationSVG } from "../../assets/svg/registration.svg"
 import { ReactComponent as TimerSVG } from "../../assets/svg/timer.svg"
 import { ReactComponent as Activity } from "../../assets/svg/activity.svg"
+import { ReactComponent as Health } from "../../assets/svg/health.svg"
 
 import { Link } from "react-router-dom"
 
@@ -32,6 +33,7 @@ const typeToTitleMap = {
     api: "API",
     suggestions: "Give Feedback",
     activity: "Character Activity",
+    health: "Site and API Health",
 }
 
 const typeToDescriptionMap = {
@@ -52,6 +54,7 @@ const typeToDescriptionMap = {
     suggestions:
         "Your feedback is important. Let me know what you think of the project.",
     activity: "View your verified characters' detailed activity history.",
+    health: "Monitor DDO Audit's data collection, website, and API health."
 }
 
 const typeToIconMap = {
@@ -69,6 +72,7 @@ const typeToIconMap = {
     api: <ApiSVG className="shrinkable-icon" />,
     suggestions: <FeedbackSVG className="shrinkable-icon" />,
     activity: <Activity className="shrinkable-icon" />,
+    health: <Health className="shrinkable-icon" />,
 }
 
 interface Props {
@@ -77,10 +81,49 @@ interface Props {
     noLink?: boolean
     onClick?: () => void
     fullWidth?: boolean
+    externalLink?: string
 }
 
-const NavigationCard = ({ type, badge, noLink, onClick, fullWidth }: Props) => {
-    return !noLink ? (
+const NavigationCard = ({ type, badge, noLink, onClick, fullWidth, externalLink }: Props) => {
+    if (externalLink) {
+        return (
+            <a
+                href={externalLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`navigation-card ${fullWidth ? "full-width" : ""}`}
+            >
+                <span className="navigation-card-title">
+                    {typeToIconMap[type]}
+                    {typeToTitleMap[type]}
+                    {badge}
+                </span>
+                <p className="navigation-card-content">
+                    {typeToDescriptionMap[type]}
+                </p>
+            </a>
+        )
+    }
+
+    if (noLink) {
+        return (
+            <button
+                onClick={onClick}
+                className={`navigation-card ${fullWidth ? "full-width" : ""}`}
+            >
+                <span className="navigation-card-title">
+                    {typeToIconMap[type]}
+                    {typeToTitleMap[type]}
+                    {badge}
+                </span>
+                <p className="navigation-card-content">
+                    {typeToDescriptionMap[type]}
+                </p>
+            </button>
+        )
+    }
+
+    return (
         <Link
             to={`/${type}`}
             className={`navigation-card ${fullWidth ? "full-width" : ""}`}
@@ -94,20 +137,6 @@ const NavigationCard = ({ type, badge, noLink, onClick, fullWidth }: Props) => {
                 {typeToDescriptionMap[type]}
             </p>
         </Link>
-    ) : (
-        <button
-            onClick={onClick}
-            className={`navigation-card ${fullWidth ? "full-width" : ""}`}
-        >
-            <span className="navigation-card-title">
-                {typeToIconMap[type]}
-                {typeToTitleMap[type]}
-                {badge}
-            </span>
-            <p className="navigation-card-content">
-                {typeToDescriptionMap[type]}
-            </p>
-        </button>
     )
 }
 

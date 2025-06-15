@@ -33,6 +33,7 @@ const Directory = () => {
                     <NavigationCard type="about" />
                     <NavigationCard type="api" />
                     <NavigationCard type="suggestions" />
+                    <NavigationCard type="health" externalLink="https://ddoaudit.betteruptime.com/" />
                 </NavCardCluster>
             </ContentCluster>
         </Page>
