@@ -2,7 +2,8 @@ interface Area {
     id: number
     name?: string
     region?: string
-    is_public_space?: boolean
+    is_public?: boolean
+    is_wilderness?: boolean
 }
 
 interface AreaApiResponse {

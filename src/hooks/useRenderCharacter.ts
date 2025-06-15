@@ -11,6 +11,7 @@ import {
 import { CHARACTER_IDS } from "../constants/characterIds.ts"
 import { truncateText } from "../utils/stringUtils.ts"
 import { CLASS_LIST_LOWER } from "../constants/game.ts"
+import { useAreaContext } from "../contexts/AreaContext.tsx"
 
 interface Props {
     sprite?: HTMLImageElement | null
@@ -36,6 +37,13 @@ const useRenderCharacter = ({ sprite, context }: Props) => {
         [panelWidth]
     )
     const fonts = useMemo(() => FONTS(), [])
+    const areaContext = useAreaContext()
+    const { areas } = useMemo(
+        () => (
+             { areas: areaContext.areas }
+        ),
+        [areaContext.areas]
+    )
 
     const renderCharacter = ({
         character,
@@ -156,19 +164,22 @@ const useRenderCharacter = ({ sprite, context }: Props) => {
         }
 
         // render location
-        if (character.location?.name) {
-            context.font = fonts.CHARACTER_LOCATION
-            const locationName = truncateText(
-                `${showInQuestIndicator && character.location?.is_public_space === false ? "✓ " : ""}${character.location?.name}`,
-                nameHeaderBoundingBox.width - 10,
-                context.font,
-                context
-            )
-            context.fillText(
-                locationName,
-                nameHeaderBoundingBox.x - leftBound + 7,
-                leaderRaceIcon.height + 14
-            )
+        if (character.location_id) {
+            const location = areas[character.location_id]
+            if (location) {
+                context.font = fonts.CHARACTER_LOCATION
+                const locationName = truncateText(
+                    `${showInQuestIndicator && location.is_public === false ? "✓ " : ""}${location.name}`,
+                    nameHeaderBoundingBox.width - 10,
+                    context.font,
+                    context
+                )
+                context.fillText(
+                    locationName,
+                    nameHeaderBoundingBox.x - leftBound + 7,
+                    leaderRaceIcon.height + 14
+                )
+            }
         }
 
         // render classes

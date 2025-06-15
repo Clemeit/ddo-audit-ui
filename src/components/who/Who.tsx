@@ -7,7 +7,7 @@ import ContentCluster from "../global/ContentCluster.tsx"
 import NavCardCluster from "../global/NavCardCluster.tsx"
 import ServerNavigationCard from "../global/ServerNavigationCard.tsx"
 import { LoadingState } from "../../models/Api.ts"
-import { SERVER_NAMES_LOWER } from "../../constants/servers.ts"
+import { SERVER_NAMES_LOWER, SERVERS_64_BITS_LOWER } from "../../constants/servers.ts"
 import { pluralize, toSentenceCase } from "../../utils/stringUtils.ts"
 // @ts-expect-error NOFIX
 import { ReactComponent as Checkmark } from "../../assets/svg/checkmark.svg"
@@ -55,15 +55,24 @@ const Who = () => {
     }
 
     const cardBadge = (serverName: string) => {
-        return (
-            serverInfoData?.[serverName]?.is_vip_only && (
+        if (serverInfoData?.[serverName]?.is_vip_only) {
+            return (
                 <Badge
                     text="VIP"
                     size="small"
                     backgroundColor="var(--orange4)"
                 />
             )
-        )
+        }
+        if (SERVERS_64_BITS_LOWER.includes(serverName)) {
+            return (
+                <Badge
+                    text="64-bit"
+                    size="small"
+                    backgroundColor="var(--blue1)"
+                />
+            )
+        }
     }
 
     const getServerSelectContent = useCallback(() => {
