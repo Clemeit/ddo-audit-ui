@@ -5,8 +5,8 @@ const CACHED_QUESTS_EXPIRY_TIME = 24 * 60 * 60 * 1000 // 1 day
 const DONATE_LINK =
     "https://www.paypal.com/donate/?hosted_button_id=YWG5SJPYLDQXY"
 const GITHUB_LINK = "https://github.com/Clemeit/ddo-audit-ui"
-// const API_URL = "https://api.hcnxsryjficudzazjxty.com"
-const API_URL = "http://api.localtest.me"
+const API_URL = "https://api.hcnxsryjficudzazjxty.com"
+// const API_URL = "http://api.localtest.me"
 const API_VERSION = "v1"
 
 export {
