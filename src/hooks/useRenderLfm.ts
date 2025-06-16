@@ -45,6 +45,7 @@ const useRenderLfm = ({ lfmSprite, context }: Props) => {
         [panelWidth]
     )
     const questContext = useQuestContext()
+    const { quests } = questContext
 
     function getTextWidthAndHeight(
         text: string,
@@ -114,7 +115,7 @@ const useRenderLfm = ({ lfmSprite, context }: Props) => {
                 questNameBoundingBox.height +
                 (questDifficultyBoundingBoxY -
                     (questNameBoundingBoxY + questNameBoundingBox.height)) /
-                    2 -
+                2 -
                 questTipBoundingBox.height / 2
 
             return {
@@ -132,7 +133,7 @@ const useRenderLfm = ({ lfmSprite, context }: Props) => {
             if (!context || !lfmSprite) return
             context.imageSmoothingEnabled = false
             const fonts = FONTS(fontSize)
-            const quest = questContext.quests[lfm.quest_id || 0]
+            const quest = quests[lfm.quest_id || 0]
 
             // set up this lfm's bounds
             const {
@@ -153,8 +154,8 @@ const useRenderLfm = ({ lfmSprite, context }: Props) => {
                 text: lfm.leader.name,
                 boundingBox: new BoundingBox(
                     leaderRaceIconBoundingBox.x +
-                        leaderRaceIconBoundingBox.width +
-                        4,
+                    leaderRaceIconBoundingBox.width +
+                    4,
                     mainPanelBoundingBox.y,
                     mainPanelBoundingBox.width,
                     mainPanelBoundingBox.height
@@ -182,10 +183,10 @@ const useRenderLfm = ({ lfmSprite, context }: Props) => {
             if (
                 memberCountTextBounds.width >
                 mainPanelBoundingBox.width -
-                    leaderNameBoundingBox.right() -
-                    8 -
-                    leaderTotalLevelWidth -
-                    10
+                leaderNameBoundingBox.right() -
+                8 -
+                leaderTotalLevelWidth -
+                10
             ) {
                 memberCountText = memberCountTextOptions(true)
                 memberCountTextBounds = getTextWidthAndHeight(
@@ -263,16 +264,16 @@ const useRenderLfm = ({ lfmSprite, context }: Props) => {
                 boundingBox: new BoundingBox(
                     mainPanelBoundingBox.x + 4,
                     leaderRaceIconBoundingBox.y +
-                        leaderRaceIconBoundingBox.height +
-                        4,
+                    leaderRaceIconBoundingBox.height +
+                    4,
                     mainPanelBoundingBox.width - 8,
                     mainPanelBoundingBox.height -
-                        leaderRaceIconBoundingBox.bottom() -
-                        (showTimerNote
-                            ? mainPanelBoundingBox.bottom() -
-                              timerNoteTextBoundingBox.top() +
-                              6
-                            : 0)
+                    leaderRaceIconBoundingBox.bottom() -
+                    (showTimerNote
+                        ? mainPanelBoundingBox.bottom() -
+                        timerNoteTextBoundingBox.top() +
+                        6
+                        : 0)
                 ),
                 font: fonts.COMMENT,
             })
@@ -497,9 +498,9 @@ const useRenderLfm = ({ lfmSprite, context }: Props) => {
                 context.fillText(
                     timerNoteText,
                     timerNoteTextBoundingBox.x +
-                        timerNoteTextBoundingBox.width / 2,
+                    timerNoteTextBoundingBox.width / 2,
                     timerNoteTextBoundingBox.y +
-                        timerNoteTextBoundingBox.height / 2
+                    timerNoteTextBoundingBox.height / 2
                 )
             }
 
@@ -520,8 +521,8 @@ const useRenderLfm = ({ lfmSprite, context }: Props) => {
                         line,
                         questNameBoundingBox.centerX(),
                         questNameBoundingBox.top() +
-                            index * questNameLineHeight +
-                            questNameLineHeight / 2
+                        index * questNameLineHeight +
+                        questNameLineHeight / 2
                     )
                 })
                 // quest tip

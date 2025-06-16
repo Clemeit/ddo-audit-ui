@@ -8,10 +8,10 @@ const calculateCommonBoundingBoxes = (panelWidth: number) => {
         0,
         0,
         panelWidth -
-            SPRITE_MAP.CONTENT_LEFT.width -
-            SPRITE_MAP.CONTENT_RIGHT.width -
-            LFM_AREA_PADDING.left -
-            LFM_AREA_PADDING.right,
+        SPRITE_MAP.CONTENT_LEFT.width -
+        SPRITE_MAP.CONTENT_RIGHT.width -
+        LFM_AREA_PADDING.left -
+        LFM_AREA_PADDING.right,
         LFM_HEIGHT
     )
     const mainPanelBoundingBox = new BoundingBox(
@@ -84,7 +84,7 @@ function shouldLfmRerender(previous: Lfm, current: Lfm): boolean {
     )
         return true
     if (previous.members.length !== current.members.length) return true
-    if (previous.quest?.name !== current.quest?.name) return true
+    if (previous.quest_id !== current.quest_id) return true
     if (previous.difficulty !== current.difficulty) return true
     if (previous.minimum_level !== current.minimum_level) return true
     if (previous.maximum_level !== current.maximum_level) return true
@@ -124,7 +124,7 @@ function areLfmsEquivalent(previous: Lfm, current: Lfm): boolean {
     )
         return false
     if (previous.members.length !== current.members.length) return false
-    if (previous.quest?.name !== current.quest?.name) return false
+    if (previous.quest_id !== current.quest_id) return false
     if (previous.difficulty !== current.difficulty) return false
     if (previous.minimum_level !== current.minimum_level) return false
     if (previous.maximum_level !== current.maximum_level) return false
@@ -138,7 +138,7 @@ function areLfmOverlaysEquivalent(previous: Lfm, current: Lfm): boolean {
     // specifically for check if the overlay should be rerendered
     if (previous === undefined && current === undefined) return true
     if (previous === undefined || current === undefined) return false
-    if (previous.quest?.name !== current.quest?.name) return false
+    if (previous.quest_id !== current.quest_id) return false
     if (previous.difficulty !== current.difficulty) return false
     if (previous.members.length !== current.members.length) return false
     // check members
@@ -149,7 +149,7 @@ function areLfmOverlaysEquivalent(previous: Lfm, current: Lfm): boolean {
         const currentMember = allCurrentMembers[i]
         if (
             !currentMember ||
-            member.location?.name !== currentMember.location?.name
+            member.location_id !== currentMember.location_id
         )
             return false
         if (member.total_level !== currentMember.total_level) return false

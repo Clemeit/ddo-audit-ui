@@ -1,3 +1,3 @@
-const CHARACTER_IDS: string[] = []
+const CHARACTER_IDS: number[] = []
 
 export { CHARACTER_IDS }

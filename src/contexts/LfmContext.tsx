@@ -53,8 +53,8 @@ interface LfmContextProps {
     setShowCharacterGuildNames: (show: boolean) => void
     registeredCharacters: Character[] | null
     reloadRegisteredCharacters: () => void
-    trackedCharacterIds: string[]
-    setTrackedCharacterIds: (ids: string[]) => void
+    trackedCharacterIds: number[]
+    setTrackedCharacterIds: (ids: number[]) => void
     showLfmPostedTime: boolean
     setShowLfmPostedTime: (show: boolean) => void
     resetViewSettings: () => void
@@ -74,7 +74,7 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
     const [isLoaded, setIsLoaded] = useState<boolean>(false)
     const { registeredCharacters, reload: reloadRegisteredCharacters } =
         useGetRegisteredCharacters()
-    const [trackedCharacterIds, setTrackedCharacterIds] = useState<string[]>([])
+    const [trackedCharacterIds, setTrackedCharacterIds] = useState<number[]>([])
 
     // lfm cache used when navigating from grouping to grouping specific
     const [lfmDataCache, setLfmDataCache] = useState<LfmApiDataModel>({})

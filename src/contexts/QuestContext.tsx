@@ -30,11 +30,12 @@ export const QuestProvider = ({ children }: Props) => {
             !cachedQuests ||
             !cachedQuests.data ||
             new Date().getTime() - lastUpdated.getTime() >
-                CACHED_QUESTS_EXPIRY_TIME
+            CACHED_QUESTS_EXPIRY_TIME
         ) {
             // Cache is stale
             try {
                 const result = await getRequest<QuestApiResponse>("quests")
+                console.log("result", result)
                 setQuests(
                     result.data.reduce(
                         (acc: { [key: number]: Quest }, quest) => {

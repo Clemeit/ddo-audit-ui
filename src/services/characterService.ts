@@ -10,11 +10,11 @@ function getCharacterById(id: string) {
     return axios.get(`${API_URL}/${id}`)
 }
 
-function getCharactersByIds(ids: string[]) {
+function getCharactersByIds(ids: number[]) {
     return axios.get(`${API_URL}/ids/${ids.join(",")}`)
 }
 
-function getCharacterTimersByIds(ids: string[]) {
+function getCharacterTimersByIds(ids: number[]) {
     return axios.get(`${API_URL}/timers/${ids.join(",")}`) // TODO: fix the URL
 }
 

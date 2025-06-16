@@ -58,6 +58,7 @@ const useRenderLfmOverlay = ({ lfmSprite, context }: Props) => {
     const { confineTextToBoundingBox } = useTextRenderer(context)
     const areaContext = useAreaContext()
     const questContext = useQuestContext()
+    const { quests } = questContext
 
     const renderLfmOverlay = useCallback<
         (lfm: Lfm, renderType: RenderType) => { width: number; height: number }
@@ -66,8 +67,9 @@ const useRenderLfmOverlay = ({ lfmSprite, context }: Props) => {
             lfm: Lfm,
             renderType: RenderType
         ): { width: number; height: number } => {
+            console.log("HERE")
             if (!context || !lfmSprite) return { width: 0, height: 0 }
-            if (renderType === RenderType.QUEST && lfm.quest == null)
+            if (renderType === RenderType.QUEST && lfm.quest_id == null)
                 return { width: 0, height: 0 }
             context.imageSmoothingEnabled = false
             const willWrap =
@@ -165,7 +167,7 @@ const useRenderLfmOverlay = ({ lfmSprite, context }: Props) => {
             } else {
                 // quest
                 totalOverlayHeight = OVERLAY_QUEST_INFO_SPACING
-                const quest = lfm.quest
+                const quest = quests[lfm.quest_id || 0]
                 if (quest) {
                     const infoFields = [
                         quest.name,
@@ -175,8 +177,8 @@ const useRenderLfmOverlay = ({ lfmSprite, context }: Props) => {
                         quest.patron,
                         quest.average_time,
                         quest.group_size,
-                        quest.level.heroic_normal,
-                        quest.level.epic_normal,
+                        quest.heroic_normal_cr,
+                        quest.epic_normal_cr,
                         lfm.difficulty,
                     ]
                     context.font = OVERLAY_FONTS.QUEST_INFO
@@ -221,7 +223,7 @@ const useRenderLfmOverlay = ({ lfmSprite, context }: Props) => {
             if (renderType === RenderType.LFM) {
                 // Render LFM
                 context.translate(4, 3)
-                const quest = questContext.quests[lfm.quest_id || 0]
+                const quest = quests[lfm.quest_id || 0]
 
                 const gradient = context.createLinearGradient(
                     0,
@@ -336,8 +338,8 @@ const useRenderLfmOverlay = ({ lfmSprite, context }: Props) => {
                     const isPlayerInQuest = area?.name === quest?.adventure_area
                     context.fillText(
                         (isPlayerInQuest ? "✓ " : "") +
-                            locationTextLines[0] +
-                            (locationTextLines[0] !== area?.name ? "..." : ""),
+                        locationTextLines[0] +
+                        (locationTextLines[0] !== area?.name ? "..." : ""),
                         22,
                         characterHeight - 10
                     )
@@ -379,8 +381,8 @@ const useRenderLfmOverlay = ({ lfmSprite, context }: Props) => {
                             context.fillText(
                                 classData.level.toString(),
                                 166 +
-                                    classIconBoundingBox.width +
-                                    index * (classIconBoundingBox.width + 1),
+                                classIconBoundingBox.width +
+                                index * (classIconBoundingBox.width + 1),
                                 classIconBoundingBox.height
                             )
 
@@ -413,7 +415,7 @@ const useRenderLfmOverlay = ({ lfmSprite, context }: Props) => {
                     context.translate(
                         0,
                         (characterHeight + 2) *
-                            Math.floor(lfm.members.length / 2 + 1)
+                        Math.floor(lfm.members.length / 2 + 1)
                     )
                 }
 
@@ -434,8 +436,8 @@ const useRenderLfmOverlay = ({ lfmSprite, context }: Props) => {
                 context.translate(
                     4 + OVERLAY_ACTIVITY_LEFT_PADDING,
                     commentBoundingBox.y +
-                        commentTextLines.length * commentLineHeight +
-                        15
+                    commentTextLines.length * commentLineHeight +
+                    15
                 )
 
                 let lastElapsedMinutes = 0
@@ -495,9 +497,9 @@ const useRenderLfmOverlay = ({ lfmSprite, context }: Props) => {
                         )
                         const textToRender =
                             activityDataLines[0] +
-                                (activityDataLines[0] !== activityDataText
-                                    ? "..."
-                                    : "") || ""
+                            (activityDataLines[0] !== activityDataText
+                                ? "..."
+                                : "") || ""
                         context.fillText(textToRender, 0, 0)
 
                         // draw the timeline
@@ -523,12 +525,12 @@ const useRenderLfmOverlay = ({ lfmSprite, context }: Props) => {
                             const elapsedMinutes = Math.floor(
                                 (currentDate.getTime() -
                                     currentActivityDate.getTime()) /
-                                    60000
+                                60000
                             )
                             if (
                                 !hasRenderedAtLeastOne ||
                                 Math.abs(elapsedMinutes - lastElapsedMinutes) >
-                                    1
+                                1
                             ) {
                                 context.font = OVERLAY_FONTS.ACTIVITY
                                 context.textAlign = "right"
@@ -575,7 +577,7 @@ const useRenderLfmOverlay = ({ lfmSprite, context }: Props) => {
                     )
                 }
 
-                const quest = lfm.quest
+                const quest = quests[lfm.quest_id || 0]
                 if (quest) {
                     context.fillStyle = OVERLAY_COLORS.QUEST_INFO
                     context.textBaseline = "middle"
@@ -620,17 +622,17 @@ const useRenderLfmOverlay = ({ lfmSprite, context }: Props) => {
                         renderQuestInfo("Group size:", quest.group_size)
                     }
 
-                    if (quest.level.heroic_normal) {
+                    if (quest.heroic_normal_cr) {
                         renderQuestInfo(
                             "Heroic level:",
-                            quest.level?.heroic_normal.toString()
+                            quest.heroic_normal_cr.toString()
                         )
                     }
 
-                    if (quest.level.epic_normal) {
+                    if (quest.epic_normal_cr) {
                         renderQuestInfo(
                             "Epic level:",
-                            quest.level?.epic_normal.toString()
+                            quest.epic_normal_cr.toString()
                         )
                     }
 

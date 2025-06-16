@@ -6,7 +6,7 @@ interface CharacterClass {
 }
 
 interface Character {
-    id: string
+    id: number
     name?: string
     gender?: string
     race?: string
@@ -17,7 +17,7 @@ interface Character {
     guild_name?: string
     server_name?: string
     home_server_name?: string
-    group_id?: string
+    group_id?: number
     is_online?: boolean
     is_in_party?: boolean
     is_anonymous?: boolean

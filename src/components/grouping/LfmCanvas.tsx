@@ -86,10 +86,10 @@ const LfmCanvas: React.FC<Props> = ({
         const height = raidView
             ? LFM_HEIGHT * lfms.length
             : LFM_HEIGHT * Math.max(MINIMUM_LFM_COUNT, lfms.length) +
-              TOTAL_LFM_PANEL_BORDER_HEIGHT +
-              SORT_HEADER_HEIGHT +
-              LFM_AREA_PADDING.top +
-              LFM_AREA_PADDING.bottom
+            TOTAL_LFM_PANEL_BORDER_HEIGHT +
+            SORT_HEADER_HEIGHT +
+            LFM_AREA_PADDING.top +
+            LFM_AREA_PADDING.bottom
         setPanelHeight(height)
         return height
     }, [lfms, raidView])
@@ -204,9 +204,9 @@ const LfmCanvas: React.FC<Props> = ({
                     x < header.boundingBox.right() &&
                     y > LFM_PANEL_TOP_BORDER_HEIGHT + LFM_AREA_PADDING.top &&
                     y <
-                        LFM_PANEL_TOP_BORDER_HEIGHT +
-                            LFM_AREA_PADDING.top +
-                            SPRITE_MAP.SORT_HEADER.CENTER.height
+                    LFM_PANEL_TOP_BORDER_HEIGHT +
+                    LFM_AREA_PADDING.top +
+                    SPRITE_MAP.SORT_HEADER.CENTER.height
                 )
             })
             if (sortHeaderIndex > -1) {
@@ -230,18 +230,18 @@ const LfmCanvas: React.FC<Props> = ({
         if (
             x > LFM_LEFT_PADDING &&
             x <
-                LFM_LEFT_PADDING +
-                    commonBoundingBoxes.questPanelBoundingBox.right() &&
+            LFM_LEFT_PADDING +
+            commonBoundingBoxes.questPanelBoundingBox.right() &&
             lfmIndex >= 0 &&
             lfmIndex < lfms.length
         ) {
             const renderType =
                 x <
-                commonBoundingBoxes.mainPanelBoundingBox.right() +
+                    commonBoundingBoxes.mainPanelBoundingBox.right() +
                     LFM_LEFT_PADDING
                     ? RenderType.LFM
                     : RenderType.QUEST
-            if (renderType === RenderType.QUEST && !lfms[lfmIndex].quest) {
+            if (renderType === RenderType.QUEST && !lfms[lfmIndex].quest_id) {
                 setSelectedLfmInfo(null)
                 clearOverlay()
                 return
@@ -449,9 +449,9 @@ const LfmCanvas: React.FC<Props> = ({
                         Math.min(
                             position.x,
                             panelWidth -
-                                (overlayWidth !== 0
-                                    ? overlayWidth
-                                    : previousState.overlayWidth)
+                            (overlayWidth !== 0
+                                ? overlayWidth
+                                : previousState.overlayWidth)
                         ),
                         0
                     )
@@ -459,9 +459,9 @@ const LfmCanvas: React.FC<Props> = ({
                         Math.min(
                             position.y,
                             panelHeight -
-                                (overlayHeight !== 0
-                                    ? overlayHeight
-                                    : previousState.overlayHeight)
+                            (overlayHeight !== 0
+                                ? overlayHeight
+                                : previousState.overlayHeight)
                         ),
                         0
                     )

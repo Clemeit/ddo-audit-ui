@@ -83,8 +83,7 @@ const Grouping = () => {
                         lfm.quest_id && lfm.quest_id !== 0
                             ? questContext.quests[lfm.quest_id || 0]
                             : null
-                    // TODO: revert next line
-                    if (quest?.group_size !== "Raid") {
+                    if (quest?.group_size === "Raid") {
                         const eligibleLfm: Lfm = {
                             ...lfm,
                             is_eligible: true,

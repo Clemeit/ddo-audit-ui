@@ -15,6 +15,7 @@ import {
 } from "../global/CommonMessages.tsx"
 import WhoToolbar from "./WhoToolbar.tsx"
 import { MAXIMUM_CHARACTER_COUNT } from "../../constants/whoPanel.ts"
+import { useAreaContext } from "../../contexts/AreaContext.tsx"
 
 // TODO: group_id should be null and never "0"
 
@@ -50,6 +51,8 @@ const WhoContainer = ({
         interval: 3000,
         lifespan: 1000 * 60 * 60 * 12, // 12 hours
     })
+    const areaContext = useAreaContext()
+    const { areas } = areaContext
     const { data: serverInfoData, state: serverInfoState } =
         usePollApi<ServerInfoApiDataModel>({
             endpoint: "game/server-info",
@@ -103,7 +106,7 @@ const WhoContainer = ({
                     isExactMatch
                 )
                 const locationMatch = compareString(
-                    character.location?.name,
+                    areas[character.location_id || 0]?.name,
                     localFilter,
                     isExactMatch
                 )
@@ -124,8 +127,8 @@ const WhoContainer = ({
 
             const groupMatch = isGroupView
                 ? character.is_in_party &&
-                  character.group_id !== "0" &&
-                  character.group_id !== undefined
+                character.group_id !== 0 &&
+                character.group_id !== undefined
                 : true
 
             return (
@@ -140,14 +143,14 @@ const WhoContainer = ({
         // If group view, add all characters that are in a party with any
         // character from filteredCharacters
         if (isGroupView) {
-            const groupIds = new Set<string>(
+            const groupIds = new Set<number>(
                 filteredCharacters
                     .filter((c) => c.is_in_party)
-                    .map((c) => c.group_id ?? "0")
+                    .map((c) => c.group_id ?? 0)
             )
             const groupedCharacters = [
                 ...Object.values(characterData?.characters ?? {})
-                    .filter((c) => groupIds.has(c.group_id ?? "0"))
+                    .filter((c) => groupIds.has(c.group_id ?? 0))
                     .filter((c) => {
                         // only characters where there are two or more characters with the same group_id
                         const groupCount = Object.values(
@@ -164,17 +167,17 @@ const WhoContainer = ({
 
         if (isGroupView) {
             sortedCharacters = filteredCharacters
-                .sort((a, b) => (a.id ?? "").localeCompare(b.id ?? ""))
+                .sort((a, b) => (a.id = b.id))
                 .sort(
                     (a, b) =>
                         (a.is_anonymous ? 1 : 0) - (b.is_anonymous ? 1 : 0)
                 )
                 .sort((a, b) =>
-                    (a.group_id ?? "").localeCompare(b.group_id ?? "")
+                    ((a.group_id || 0) - (b.group_id || 0))
                 )
         } else {
             sortedCharacters = filteredCharacters
-                .sort((a, b) => (a.id ?? "").localeCompare(b.id ?? ""))
+                .sort((a, b) => (a.id - b.id))
                 .sort((a, b) => {
                     switch (sortBy.type) {
                         case CharacterSortType.Lfm:

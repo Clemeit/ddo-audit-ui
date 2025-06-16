@@ -23,7 +23,8 @@ interface Quest {
     alt_id: string
     area_id: number
     name: string
-    level: QuestLevel
+    heroic_normal_cr: number
+    epic_normal_cr: number
     xp: QuestXP
     is_free_to_play: boolean
     is_free_to_vip: boolean

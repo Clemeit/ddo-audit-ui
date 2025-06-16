@@ -28,7 +28,12 @@ function getAccessTokensMetadata(): LocalStorageEntry<AccessToken[]> {
                 data: [],
             }
         }
-        return JSON.parse(storageValue)
+        const result = JSON.parse(storageValue)
+        return {
+            createdAt: result.createdAt || "",
+            updatedAt: result.updatedAt || "",
+            data: result.data || [],
+        }
     } catch (e) {
         console.error(e)
         return {
@@ -118,7 +123,12 @@ function getRegisteredCharactersMetadata(): LocalStorageEntry<Character[]> {
                 data: [],
             }
         }
-        return JSON.parse(storageValue)
+        const result = JSON.parse(storageValue)
+        return {
+            createdAt: result.createdAt || "",
+            updatedAt: result.updatedAt || "",
+            data: result.data || [],
+        }
     } catch (e) {
         console.error(e)
         return {
@@ -194,7 +204,12 @@ function getAreas(): LocalStorageEntry<Area[]> {
                 data: [],
             }
         }
-        return JSON.parse(storageValue)
+        const result = JSON.parse(storageValue)
+        return {
+            createdAt: result.createdAt || "",
+            updatedAt: result.updatedAt || "",
+            data: result.data || [],
+        }
     } catch (e) {
         console.error(e)
         return {
@@ -231,7 +246,12 @@ function getQuests(): LocalStorageEntry<Quest[]> {
                 data: [],
             }
         }
-        return JSON.parse(storageValue)
+        const result = JSON.parse(storageValue)
+        return {
+            createdAt: result.createdAt || "",
+            updatedAt: result.updatedAt || "",
+            data: result.data || [],
+        }
     } catch (e) {
         console.error(e)
         return {

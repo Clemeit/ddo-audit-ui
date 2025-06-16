@@ -8,7 +8,7 @@ interface Verification {
 }
 
 interface AccessToken {
-    character_id: string
+    character_id: number
     access_token: string
 }
 
