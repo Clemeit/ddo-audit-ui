@@ -45,7 +45,7 @@ export default createBrowserRouter(
             <Route index element={<Directory />} />
             <Route path="/live" element={<Live />} />
             <Route path="/verification" element={<Verification />} />
-            <Route path="/registration" element={<Registration />} />
+            <Route path="/registration" element={<AreaProvider><Registration /></AreaProvider>} />
             <Route path="/activity" element={<Activity />} />
             <Route
                 path="/grouping"

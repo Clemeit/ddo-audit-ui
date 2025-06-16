@@ -94,7 +94,7 @@ const Activity = () => {
                     character.name?.toLowerCase() ===
                     characterName.toLowerCase()
             )
-            if (character) {
+            if (character && accessTokens) {
                 const accessToken = accessTokens.find(
                     (token: AccessToken) => token.character_id === character.id
                 )
@@ -106,14 +106,14 @@ const Activity = () => {
                 }
             }
         }
-    }, [location.search, verifiedCharacters])
+    }, [location.search, verifiedCharacters, accessTokens])
 
     function handleCharacterSelectionChange(e: any) {
         const character =
             verifiedCharacters.find(
                 (character: Character) => character.id === e.target.value
             ) || null
-        if (character) {
+        if (character && accessTokens) {
             const accessToken = accessTokens.find(
                 (token: AccessToken) => token.character_id === character.id
             )
@@ -188,12 +188,12 @@ const Activity = () => {
                         <span>
                             {totalRunsWithinRansackHours ? (
                                 totalRunsWithinRansackHours >=
-                                RANSACK_THRESHOLD ? (
+                                    RANSACK_THRESHOLD ? (
                                     <span className="red-text">
                                         Until{" "}
                                         {new Date(
                                             ransackTimerStart?.getTime() +
-                                                RANSACK_HOURS * 1000 * 60 * 60
+                                            RANSACK_HOURS * 1000 * 60 * 60
                                         ).toLocaleString()}
                                     </span>
                                 ) : (
@@ -251,7 +251,7 @@ const Activity = () => {
                                 value={
                                     selectedCharacterAndAccessToken
                                         ? selectedCharacterAndAccessToken
-                                              .character?.id
+                                            .character?.id
                                         : ""
                                 }
                                 onChange={handleCharacterSelectionChange}

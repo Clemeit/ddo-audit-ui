@@ -1,4 +1,4 @@
-import React from "react"
+import React, { useMemo } from "react"
 import "./RegistrationTable.css"
 import { Character } from "../../models/Character.ts"
 import { ReactComponent as Delete } from "../../assets/svg/delete.svg"
@@ -8,6 +8,7 @@ import Button from "../global/Button.tsx"
 import { AccessToken } from "../../models/Verification.ts"
 import Stack from "../global/Stack.tsx"
 import { mapClassesToString } from "../../utils/stringUtils.ts"
+import { useAreaContext } from "../../contexts/AreaContext.tsx"
 
 interface Props {
     characters: Character[]
@@ -24,9 +25,11 @@ const RegistrationTable = ({
     noCharactersMessage = "No characters found",
     isLoaded = true,
     minimal = false,
-    unregisterCharacter = () => {},
+    unregisterCharacter = () => { },
 }: Props) => {
     const navigate = useNavigate()
+    const areaContext = useAreaContext()
+    const { areas } = useMemo(() => areaContext, [areaContext])
 
     const characterRow = (character: Character) => {
         // action cell
@@ -74,9 +77,9 @@ const RegistrationTable = ({
                     <div
                         className="character-status-dot"
                         style={{
-                            backgroundColor:
-                                character.is_online && !character.is_anonymous
-                                    ? "#00BB00"
+                            backgroundColor: character.is_anonymous ? "#1111FF" :
+                                character.is_online ?
+                                    "#00BB00"
                                     : "#DD0000",
                         }}
                     />
@@ -104,7 +107,7 @@ const RegistrationTable = ({
                     <td className="hide-on-mobile">
                         {character.is_anonymous
                             ? "-"
-                            : character.location?.name}
+                            : areas[character.location_id || 0]?.name}
                     </td>
                 )}
                 {!minimal && actionCell}
@@ -151,10 +154,10 @@ const RegistrationTable = ({
                     {characters.length === 0 && !isLoaded && loadingRow}
                     {characters.length
                         ? characters
-                              .sort((a, b) =>
-                                  (a.name || "").localeCompare(b.name || "")
-                              )
-                              .map(characterRow)
+                            .sort((a, b) =>
+                                (a.name || "").localeCompare(b.name || "")
+                            )
+                            .map(characterRow)
                         : noCharactersMessageRow}
                 </tbody>
             </table>
