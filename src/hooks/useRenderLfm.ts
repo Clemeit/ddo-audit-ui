@@ -151,7 +151,7 @@ const useRenderLfm = ({ lfmSprite, context }: Props) => {
                 textLines: leaderNameTextLines,
                 boundingBox: leaderNameBoundingBox,
             } = confineTextToBoundingBox({
-                text: lfm.leader.name,
+                text: lfm.leader.name || "Anonymous",
                 boundingBox: new BoundingBox(
                     leaderRaceIconBoundingBox.x +
                     leaderRaceIconBoundingBox.width +
@@ -429,8 +429,8 @@ const useRenderLfm = ({ lfmSprite, context }: Props) => {
             // ===== MAIN PANEL =====
             // leader race icon
             const leaderRaceIcon = mapRaceAndGenderToRaceIconBoundingBox(
-                lfm.leader.race || "human",
-                lfm.leader.gender || "male"
+                lfm.leader?.race || "human",
+                lfm.leader?.gender || "male"
             )
             context.drawImage(
                 lfmSprite,
@@ -450,7 +450,7 @@ const useRenderLfm = ({ lfmSprite, context }: Props) => {
             context.textBaseline = "middle"
             context.textAlign = "left"
             context.fillText(
-                leaderNameTextLines[0] || "Anonymous",
+                leaderNameTextLines[0],
                 leaderNameBoundingBox.x,
                 leaderNameBoundingBox.centerY()
             )
@@ -505,7 +505,7 @@ const useRenderLfm = ({ lfmSprite, context }: Props) => {
             }
 
             // ===== QUEST PANEL =====
-            if (!!quest && (lfm.is_quest_guess ? showQuestGuesses : true)) {
+            if (!!lfm.quest_id && (lfm.is_quest_guess ? showQuestGuesses : true)) {
                 // quest name
                 context.fillStyle =
                     lfm.is_quest_guess && lfm.is_eligible

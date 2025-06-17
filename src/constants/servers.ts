@@ -9,7 +9,7 @@ const SERVER_NAMES = [
     "Thelanis",
     "Wayfinder",
     "Hardcore",
-    "Oerik",
+    "Shadowdale",
     "Thrane",
     "Moonsea"
 ]
@@ -24,7 +24,7 @@ const VIP_SERVER_NAMES_LOWER = VIP_SERVER_NAMES.map((server) =>
 
 const SERVERS_64_BITS: string[] = [
     "Cormyr",
-    "Oerik",
+    "Shadowdale",
     "Thrane",
     "Moonsea"
 ]

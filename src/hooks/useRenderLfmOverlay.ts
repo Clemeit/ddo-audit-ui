@@ -262,8 +262,8 @@ const useRenderLfmOverlay = ({ lfmSprite, context }: Props) => {
                     // draw class icon
                     const raceIconBoundingBox =
                         mapRaceAndGenderToRaceIconBoundingBox(
-                            member.race,
-                            member.gender
+                            member.race || "Human",
+                            member.gender || "Male"
                         )
                     context.drawImage(
                         lfmSprite,
