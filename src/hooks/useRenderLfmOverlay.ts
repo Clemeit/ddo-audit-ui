@@ -489,7 +489,8 @@ const useRenderLfmOverlay = ({ lfmSprite, context }: Props) => {
                                 activityDataText = `${event.data} left`
                                 break
                             case LfmActivityType.QUEST:
-                                activityDataText = event.data || "No quest"
+                                const eventQuest = quests[event.data || 0]
+                                activityDataText = event.data === "0" ? "No quest" : eventQuest?.name
                                 break
                             case LfmActivityType.COMMENT:
                                 activityDataText = event.data || "No comment"
