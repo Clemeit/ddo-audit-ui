@@ -20,7 +20,7 @@ export const NoVerifiedCharacters = () => (
             type="secondary"
             className="verify-button"
             small
-            onClick={() => {}}
+            onClick={() => { }}
             style={{ display: "inline" }}
         >
             Verify
@@ -68,6 +68,21 @@ export const LiveDataHaultedPageMessage = () => (
     />
 )
 
+export const StaleDataPageMessage = () => (
+    <PageMessage
+        type="warning"
+        title="Stale data"
+        message={
+            <>
+                <span>
+                    The data on this page is stale. Please refresh the page to
+                    get the latest data.
+                </span>
+            </>
+        }
+    />
+)
+
 export const DataLoadingErrorPageMessage = () => (
     <PageMessage
         type="error"
@@ -110,7 +125,7 @@ export const ServerOfflineMessage = ({
             <Button onClick={handleDismiss} fullWidthOnMobile>
                 Load data anyway
             </Button>
-            <Button type="secondary" onClick={() => {}} fullWidthOnMobile>
+            <Button type="secondary" onClick={() => { }} fullWidthOnMobile>
                 Report bug
             </Button>
         </Stack>

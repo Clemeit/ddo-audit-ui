@@ -282,8 +282,8 @@ const StatusBarChart = ({ statusActivity, locationActivity }: Props) => {
                                 return [
                                     value
                                         ? convertMillisecondsToPrettyString(
-                                              value
-                                          )
+                                            value
+                                        )
                                         : "No activity",
                                     "Online for",
                                 ]
@@ -291,8 +291,8 @@ const StatusBarChart = ({ statusActivity, locationActivity }: Props) => {
                                 return [
                                     value
                                         ? convertMillisecondsToPrettyString(
-                                              value
-                                          )
+                                            value
+                                        )
                                         : "No activity",
                                     "In quests for",
                                 ]

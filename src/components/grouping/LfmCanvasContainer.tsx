@@ -9,6 +9,7 @@ import { LoadingState } from "../../models/Api.ts"
 import {
     LiveDataHaultedPageMessage,
     ServerOfflineMessage,
+    StaleDataPageMessage,
 } from "../global/CommonMessages.tsx"
 
 interface Props {
@@ -60,6 +61,14 @@ const GroupingContainer = ({
         [serverInfoData, serverName]
     )
 
+    const isDataStale = useMemo<boolean>(
+        () =>
+            !!lfmData?.last_update &&
+            lfmState === LoadingState.Loaded &&
+            (Date.now() - new Date(lfmData.last_update).getTime()) > 2 * 60 * 1000,
+        [lfmData, lfmState, refreshInterval]
+    )
+
     // filter and sort the lfms
     const filteredLfms = useMemo(() => {
         const lfms: Lfm[] = Object.values(lfmData?.lfms || {})
@@ -87,7 +96,7 @@ const GroupingContainer = ({
                         ?.filter((character) => {
                             return (
                                 character.server_name?.toLowerCase() ===
-                                    serverName.toLowerCase() &&
+                                serverName.toLowerCase() &&
                                 trackedCharacterIds.includes(character.id)
                             )
                         })
@@ -123,25 +132,25 @@ const GroupingContainer = ({
                 if (sortBy.type === "leader") {
                     return sortBy.ascending
                         ? (a.leader.name || "").localeCompare(
-                              b.leader.name || ""
-                          )
+                            b.leader.name || ""
+                        )
                         : (b.leader.name || "").localeCompare(
-                              a.leader.name || ""
-                          )
+                            a.leader.name || ""
+                        )
                 } else if (sortBy.type === "quest") {
                     return sortBy.ascending
                         ? (a.quest?.name || "").localeCompare(
-                              b.quest?.name || ""
-                          )
+                            b.quest?.name || ""
+                        )
                         : (b.quest?.name || "").localeCompare(
-                              a.quest?.name || ""
-                          )
+                            a.quest?.name || ""
+                        )
                 } else if (sortBy.type === "classes") {
                     return sortBy.ascending
                         ? (a.accepted_classes || []).length -
-                              (b.accepted_classes || []).length
+                        (b.accepted_classes || []).length
                         : (b.accepted_classes || []).length -
-                              (a.accepted_classes || []).length
+                        (a.accepted_classes || []).length
                 } else {
                     // default to level
                     return sortBy.ascending
@@ -170,6 +179,7 @@ const GroupingContainer = ({
             {lfmState === LoadingState.Haulted && (
                 <LiveDataHaultedPageMessage />
             )}
+            {isDataStale && <StaleDataPageMessage />}
             {isServerOffline && !ignoreServerDown ? (
                 <ServerOfflineMessage
                     handleDismiss={() => {

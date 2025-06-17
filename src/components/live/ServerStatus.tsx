@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef, useCallback, useMemo } from "react"
+import React, { useMemo } from "react"
 import "./ServerStatus.css"
 import { ServerInfoApiDataModel } from "../../models/Game.ts"
 import { ReactComponent as Checkmark } from "../../assets/svg/checkmark.svg"

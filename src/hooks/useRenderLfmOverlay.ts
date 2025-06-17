@@ -71,6 +71,7 @@ const useRenderLfmOverlay = ({ lfmSprite, context }: Props) => {
             if (!context || !lfmSprite) return { width: 0, height: 0 }
             if (renderType === RenderType.QUEST && lfm.quest_id == null)
                 return { width: 0, height: 0 }
+            const quest = quests[lfm.quest_id || 0] || quests[0]
             context.imageSmoothingEnabled = false
             const willWrap =
                 renderType === RenderType.LFM &&
@@ -167,20 +168,27 @@ const useRenderLfmOverlay = ({ lfmSprite, context }: Props) => {
             } else {
                 // quest
                 totalOverlayHeight = OVERLAY_QUEST_INFO_SPACING
-                const quest = quests[lfm.quest_id || 0]
                 if (quest) {
-                    const infoFields = [
-                        quest.name,
-                        quest.adventure_area,
-                        quest.quest_journal_group,
-                        quest.required_adventure_pack,
-                        quest.patron,
-                        quest.average_time,
-                        quest.group_size,
-                        quest.heroic_normal_cr,
-                        quest.epic_normal_cr,
-                        lfm.difficulty,
-                    ]
+                    let infoFields: any[] = []
+                    if (quest.id === 0) {
+                        infoFields = [
+                            quest.name,
+                            lfm.quest_id,
+                        ]
+                    } else {
+                        infoFields = [
+                            quest.name,
+                            quest.adventure_area,
+                            quest.quest_journal_group,
+                            quest.required_adventure_pack,
+                            quest.patron,
+                            quest.average_time,
+                            quest.group_size,
+                            quest.heroic_normal_cr,
+                            quest.epic_normal_cr,
+                            lfm.difficulty,
+                        ]
+                    }
                     context.font = OVERLAY_FONTS.QUEST_INFO
                     infoFields.forEach((field) => {
                         if (field) {
@@ -223,7 +231,6 @@ const useRenderLfmOverlay = ({ lfmSprite, context }: Props) => {
             if (renderType === RenderType.LFM) {
                 // Render LFM
                 context.translate(4, 3)
-                const quest = quests[lfm.quest_id || 0]
 
                 const gradient = context.createLinearGradient(
                     0,
@@ -577,7 +584,6 @@ const useRenderLfmOverlay = ({ lfmSprite, context }: Props) => {
                     )
                 }
 
-                const quest = quests[lfm.quest_id || 0]
                 if (quest) {
                     context.fillStyle = OVERLAY_COLORS.QUEST_INFO
                     context.textBaseline = "middle"
@@ -589,55 +595,59 @@ const useRenderLfmOverlay = ({ lfmSprite, context }: Props) => {
                         renderQuestInfo("Quest:", quest.name)
                     }
 
-                    if (quest.adventure_area) {
-                        renderQuestInfo("Area:", quest.adventure_area)
-                    }
+                    if (quest.id === 0) {
+                        renderQuestInfo("Quest ID:", lfm.quest_id?.toString() || "N/A")
+                    } else {
+                        if (quest.adventure_area) {
+                            renderQuestInfo("Area:", quest.adventure_area)
+                        }
 
-                    if (quest.quest_journal_group) {
-                        renderQuestInfo(
-                            "Nearest hub:",
-                            quest.quest_journal_group
-                        )
-                    }
-
-                    if (quest.required_adventure_pack) {
-                        renderQuestInfo("Pack", quest.required_adventure_pack)
-                    }
-
-                    if (quest.patron) {
-                        renderQuestInfo("Patron:", quest.patron)
-                    }
-
-                    if (quest.average_time) {
-                        renderQuestInfo(
-                            "Average time:",
-                            convertMillisecondsToPrettyString(
-                                quest.average_time * 1000,
-                                true
+                        if (quest.quest_journal_group) {
+                            renderQuestInfo(
+                                "Nearest hub:",
+                                quest.quest_journal_group
                             )
-                        )
-                    }
+                        }
 
-                    if (quest.group_size) {
-                        renderQuestInfo("Group size:", quest.group_size)
-                    }
+                        if (quest.required_adventure_pack) {
+                            renderQuestInfo("Pack", quest.required_adventure_pack)
+                        }
 
-                    if (quest.heroic_normal_cr) {
-                        renderQuestInfo(
-                            "Heroic level:",
-                            quest.heroic_normal_cr.toString()
-                        )
-                    }
+                        if (quest.patron) {
+                            renderQuestInfo("Patron:", quest.patron)
+                        }
 
-                    if (quest.epic_normal_cr) {
-                        renderQuestInfo(
-                            "Epic level:",
-                            quest.epic_normal_cr.toString()
-                        )
-                    }
+                        if (quest.average_time) {
+                            renderQuestInfo(
+                                "Average time:",
+                                convertMillisecondsToPrettyString(
+                                    quest.average_time * 1000,
+                                    true
+                                )
+                            )
+                        }
 
-                    if (lfm.difficulty) {
-                        renderQuestInfo("Difficulty:", lfm.difficulty)
+                        if (quest.group_size) {
+                            renderQuestInfo("Group size:", quest.group_size)
+                        }
+
+                        if (quest.heroic_normal_cr) {
+                            renderQuestInfo(
+                                "Heroic level:",
+                                quest.heroic_normal_cr.toString()
+                            )
+                        }
+
+                        if (quest.epic_normal_cr) {
+                            renderQuestInfo(
+                                "Epic level:",
+                                quest.epic_normal_cr.toString()
+                            )
+                        }
+
+                        if (lfm.difficulty) {
+                            renderQuestInfo("Difficulty:", lfm.difficulty)
+                        }
                     }
                 }
             }

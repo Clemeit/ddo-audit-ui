@@ -1,4 +1,4 @@
-import React, { createContext, useState, useEffect, useContext } from "react"
+import React, { createContext, useState, useContext } from "react"
 import { Notification } from "../models/Client"
 import { v4 as uuid } from "uuid"
 

@@ -1,7 +1,6 @@
 import React, { useMemo, useState } from "react"
 import { useWhoContext } from "../../contexts/WhoContext.tsx"
 import Badge from "../global/Badge.tsx"
-import useFeatureCallouts from "../../hooks/useFeatureCallouts.ts"
 import GenericToolbar from "../global/GenericToolbar.tsx"
 import ContentCluster from "../global/ContentCluster.tsx"
 import Stack from "../global/Stack.tsx"
@@ -136,7 +135,7 @@ const WhoToolbar = ({
                                 >
                                     Exact match checkbox
                                 </Checkbox>
-                                <Checkbox checked={false} onChange={(e) => {}}>
+                                <Checkbox checked={false} onChange={(e) => { }}>
                                     Level filters{" "}
                                     <Badge text="Soon" type="soon" />
                                 </Checkbox>

@@ -3,7 +3,6 @@ import React, {
     useContext,
     useState,
     ReactNode,
-    useCallback,
     useEffect,
 } from "react"
 import { CLASS_LIST_LOWER, MAX_LEVEL, MIN_LEVEL } from "../constants/game.ts"
