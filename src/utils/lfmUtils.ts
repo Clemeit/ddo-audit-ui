@@ -130,6 +130,7 @@ function areLfmsEquivalent(previous: Lfm, current: Lfm): boolean {
     if (previous.maximum_level !== current.maximum_level) return false
     if (previous.leader.name !== current.leader.name) return false
     if (previous.is_eligible !== current.is_eligible) return false
+    if (previous.accepted_classes_count !== current.accepted_classes_count) return false
 
     return true
 }

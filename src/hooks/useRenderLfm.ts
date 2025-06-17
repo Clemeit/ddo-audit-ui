@@ -554,8 +554,7 @@ const useRenderLfm = ({ lfmSprite, context }: Props) => {
 
             // ===== CLASS PANEL =====
             if (
-                lfm.accepted_classes_count === CLASS_LIST.length ||
-                lfm.accepted_classes == null
+                lfm.accepted_classes == null || lfm.accepted_classes.length === 0
             ) {
                 context.drawImage(
                     lfmSprite,
@@ -568,6 +567,26 @@ const useRenderLfm = ({ lfmSprite, context }: Props) => {
                     SPRITE_MAP.CLASSES.ALL.width,
                     SPRITE_MAP.CLASSES.ALL.height
                 )
+            } else {
+                lfm.accepted_classes.forEach((acceptedClass, index) => {
+                    const row = Math.floor(index / 5)
+                    const col = index % 5
+                    const acceptedClassKey = acceptedClass.toUpperCase().replace(/\s+/g, "_")
+                    const classSprite = SPRITE_MAP.CLASSES[acceptedClassKey]
+                    if (classSprite) {
+                        context.drawImage(
+                            lfmSprite,
+                            classSprite.x,
+                            classSprite.y,
+                            classSprite.width,
+                            classSprite.height,
+                            classesBoundingBox.x + col * (classSprite.width + 1),
+                            classesBoundingBox.y + row * (classSprite.height + 1),
+                            classSprite.width,
+                            classSprite.height
+                        )
+                    }
+                })
             }
 
             // ===== LEVEL PANEL =====
