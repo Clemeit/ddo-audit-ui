@@ -36,6 +36,12 @@
     --blue4: rgb(0, 0, 133);
     --blue5: rgb(0, 0, 66);
 
+    --magenta1: rgb(255, 0, 255);
+    --magenta2: magenta;
+    --magenta3: rgb(230, 98, 230);
+    --magenta4: rgb(168, 0, 168);
+    --magenta5: rgb(85, 0, 85);
+
     --push-height: 500px;
     --short-push-height: 175px;
 }
@@ -60,6 +66,7 @@
     --link-blue: var(--blue1);
     --orange-text: var(--orange1);
     --blue-text: var(--blue1);
+    --green-text: var(--green1);
     --red-text: var(--red1);
     --text-red-desaturated: rgb(220, 50, 50);
     --text-blue-desaturated: rgb(50, 50, 220);
@@ -112,6 +119,10 @@ hr {
 
 .blue-text {
     color: var(--blue1);
+}
+
+.green-text {
+    color: var(--green1);
 }
 
 input,
@@ -255,7 +266,7 @@ table tbody tr:last-of-type {
     border-color: var(--orange-text) !important;
 }
 
-.verify-button > span {
+.verify-button>span {
     color: var(--orange-text) !important;
 }
 

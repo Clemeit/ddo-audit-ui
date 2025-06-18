@@ -1,7 +1,6 @@
 import React, { useCallback } from "react"
 import Page from "../global/Page.tsx"
 import ContentCluster from "../global/ContentCluster.tsx"
-import { SERVER_NAMES_LOWER } from "../../constants/servers.ts"
 import { toSentenceCase } from "../../utils/stringUtils.ts"
 import usePollApi from "../../hooks/usePollApi.ts"
 import { Lfm, LfmApiDataModel, LfmApiServerModel } from "../../models/Lfm.ts"
@@ -19,6 +18,10 @@ import NavCardCluster from "../global/NavCardCluster.tsx"
 import { LiveDataHaultedPageMessage } from "../global/CommonMessages.tsx"
 import { ServerInfoApiDataModel } from "../../models/Game.ts"
 import { useQuestContext } from "../../contexts/QuestContext.tsx"
+import {
+    SERVER_NAMES_LOWER,
+    SERVERS_64_BITS_LOWER,
+} from "../../constants/servers.ts"
 
 const Grouping = () => {
     const { data: lfmData, state: lfmState } = usePollApi<LfmApiDataModel>({
@@ -63,15 +66,24 @@ const Grouping = () => {
     }
 
     const cardBadge = (serverName: string) => {
-        return (
-            serverInfoData?.[serverName]?.is_vip_only && (
+        if (serverInfoData?.[serverName]?.is_vip_only) {
+            return (
                 <Badge
                     text="VIP"
                     size="small"
                     backgroundColor="var(--orange4)"
                 />
             )
-        )
+        }
+        if (SERVERS_64_BITS_LOWER.includes(serverName)) {
+            return (
+                <Badge
+                    text="64-bit"
+                    size="small"
+                    backgroundColor="var(--magenta3)"
+                />
+            )
+        }
     }
 
     const getCurrentRaids = useCallback(() => {
@@ -100,43 +112,76 @@ const Grouping = () => {
         return currentRaids
     }, [lfmData])
 
-    const getServerSelectContent = () => {
+    const getServerSelectContent = (type: "32bit" | "64bit") => {
         if (
             serverInfoState === LoadingState.Initial ||
             serverInfoState === LoadingState.Loading
         ) {
-            return SERVER_NAMES_LOWER.sort(([serverNameA], [serverNameB]) =>
-                serverNameA.localeCompare(serverNameB)
-            ).map((serverName) => (
-                <ServerNavigationCard
-                    key={serverName}
-                    destination={`/grouping/${serverName}`}
-                    title={toSentenceCase(serverName)}
-                    content="Loading data..."
-                    icon={<Pending className="shrinkable-icon" />}
-                />
-            ))
+            return SERVER_NAMES_LOWER.filter((serverName) => {
+                if (type === "32bit") {
+                    return SERVERS_64_BITS_LOWER.includes(serverName) === false
+                } else if (type === "64bit") {
+                    return SERVERS_64_BITS_LOWER.includes(serverName) === true
+                }
+                return true
+            })
+                .sort(([serverNameA], [serverNameB]) =>
+                    serverNameA.localeCompare(serverNameB)
+                )
+                .map((serverName) => (
+                    <ServerNavigationCard
+                        key={serverName}
+                        destination={`/grouping/${serverName}`}
+                        title={toSentenceCase(serverName)}
+                        content="Loading data..."
+                        icon={<Pending className="shrinkable-icon" />}
+                        badge={cardBadge(serverName)}
+                    />
+                ))
         }
 
         if (
             lfmState === LoadingState.Initial ||
             lfmState === LoadingState.Loading
         ) {
-            return SERVER_NAMES_LOWER.sort(([serverNameA], [serverNameB]) =>
-                serverNameA.localeCompare(serverNameB)
-            ).map((serverName) => (
-                <ServerNavigationCard
-                    key={serverName}
-                    destination={`/grouping/${serverName}`}
-                    title={toSentenceCase(serverName)}
-                    content="Loading data..."
-                    icon={cardIcon(serverName)}
-                />
-            ))
+            return Object.keys(serverInfoData || {})
+                .filter((serverName) => {
+                    if (type === "32bit") {
+                        return (
+                            SERVERS_64_BITS_LOWER.includes(serverName) === false
+                        )
+                    } else if (type === "64bit") {
+                        return (
+                            SERVERS_64_BITS_LOWER.includes(serverName) === true
+                        )
+                    }
+                    return true
+                })
+                .sort(([serverNameA], [serverNameB]) =>
+                    serverNameA.localeCompare(serverNameB)
+                )
+                .map((serverName) => (
+                    <ServerNavigationCard
+                        key={serverName}
+                        destination={`/grouping/${serverName}`}
+                        title={toSentenceCase(serverName)}
+                        content="Loading data..."
+                        icon={cardIcon(serverName)}
+                        badge={cardBadge(serverName)}
+                    />
+                ))
         }
 
         return Object.entries(lfmData || {})
             .filter(([serverName]) => SERVER_NAMES_LOWER.includes(serverName))
+            .filter(([serverName]) => {
+                if (type === "32bit") {
+                    return SERVERS_64_BITS_LOWER.includes(serverName) === false
+                } else if (type === "64bit") {
+                    return SERVERS_64_BITS_LOWER.includes(serverName) === true
+                }
+                return true
+            })
             .sort(([server_name_a], [server_name_b]) =>
                 server_name_a.localeCompare(server_name_b)
             )
@@ -204,7 +249,13 @@ const Grouping = () => {
                 <LiveDataHaultedPageMessage />
             )}
             <ContentCluster title="Select a Server">
-                <NavCardCluster>{getServerSelectContent()}</NavCardCluster>
+                <NavCardCluster>
+                    {getServerSelectContent("32bit")}
+                </NavCardCluster>
+                <hr />
+                <NavCardCluster>
+                    {getServerSelectContent("64bit")}
+                </NavCardCluster>
             </ContentCluster>
             <ContentCluster title="Current Raids">
                 {getCurrentRaidsContent()}

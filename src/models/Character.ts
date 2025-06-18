@@ -62,6 +62,12 @@ interface CharacterSummaryApiDataModel {
     cormyr?: CharacterSummaryModel
 }
 
+interface OnlineCharacterIdsModel {
+    [serverName: string]: {
+        online_character_ids: number[]
+    }
+}
+
 enum CharacterSortType {
     Name = "name",
     Level = "level",
@@ -84,5 +90,5 @@ export {
     CharacterSummaryApiDataModel,
     CharacterSummaryModel,
     CharacterSortBy,
-    CharacterSortType,
+    CharacterSortType, OnlineCharacterIdsModel
 }

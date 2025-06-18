@@ -1,13 +1,17 @@
 import React, { useCallback } from "react"
 import usePollApi from "../../hooks/usePollApi.ts"
-import { CharacterSummaryApiDataModel } from "../../models/Character.ts"
+import { ServerInfo } from "../../models/Game.ts"
 import { ServerInfoApiDataModel } from "../../models/Game.ts"
+import { OnlineCharacterIdsModel } from "../../models/Character.ts"
 import Page from "../global/Page.tsx"
 import ContentCluster from "../global/ContentCluster.tsx"
 import NavCardCluster from "../global/NavCardCluster.tsx"
 import ServerNavigationCard from "../global/ServerNavigationCard.tsx"
 import { LoadingState } from "../../models/Api.ts"
-import { SERVER_NAMES_LOWER, SERVERS_64_BITS_LOWER } from "../../constants/servers.ts"
+import {
+    SERVER_NAMES_LOWER,
+    SERVERS_64_BITS_LOWER,
+} from "../../constants/servers.ts"
 import { pluralize, toSentenceCase } from "../../utils/stringUtils.ts"
 // @ts-expect-error NOFIX
 import { ReactComponent as Checkmark } from "../../assets/svg/checkmark.svg"
@@ -18,23 +22,28 @@ import { ReactComponent as Pending } from "../../assets/svg/pending.svg"
 import Badge from "../global/Badge.tsx"
 import { LiveDataHaultedPageMessage } from "../global/CommonMessages.tsx"
 import NavigationCard from "../global/NavigationCard.tsx"
+import useGetRegisteredCharacters from "../../hooks/useGetRegisteredCharacters.ts"
 
 const Who = () => {
-    const { data: characterData, state: characterState } =
-        usePollApi<CharacterSummaryApiDataModel>({
-            endpoint: "characters/summary",
-            interval: 10000,
+    const fakeFriends: number[] = [] // TODO: load from friends list when that gets built
+    const { registeredCharacters } = useGetRegisteredCharacters()
+    console.log(registeredCharacters)
+
+    const { data: characterIdsData, state: characterIdsState } =
+        usePollApi<OnlineCharacterIdsModel>({
+            endpoint: "characters/ids",
+            interval: 15000,
             lifespan: 1000 * 60 * 60 * 12, // 12 hours
         })
-    const { data: serverInfoData, state: serverInfoState } =
+    const { data: gameInfoData, state: gameInfoState } =
         usePollApi<ServerInfoApiDataModel>({
             endpoint: "game/server-info",
-            interval: 10000,
+            interval: 5000,
             lifespan: 1000 * 60 * 60 * 12, // 12 hours
         })
 
     const cardIcon = (serverName: string) => {
-        const isOnline = serverInfoData?.[serverName]?.is_online
+        const isOnline = gameInfoData?.[serverName]?.is_online
         switch (isOnline) {
             case true:
                 return <Checkmark className="shrinkable-icon" />
@@ -45,17 +54,49 @@ const Who = () => {
         }
     }
 
-    const cardDescription = (serverName: string) => {
-        const characterCount = characterData?.[serverName]?.character_count
+    const cardDescription = (serverName: string, serverData: ServerInfo) => {
+        const characterCount = serverData?.character_count || 0
+        const friendCount =
+            characterIdsData?.[serverName]?.online_character_ids?.filter((id) =>
+                fakeFriends.includes(id)
+            ).length || 0
+        const areRegisteredCharactersOnline = characterIdsData?.[
+            serverName
+        ]?.online_character_ids?.some((id) =>
+            registeredCharacters.some((character) => character.id === id)
+        )
         return (
-            <span className="orange-text">
-                {characterCount} {pluralize("character", characterCount)}
-            </span>
+            <>
+                <span className="orange-text">
+                    {characterCount} {pluralize("character", characterCount)}
+                </span>
+                {areRegisteredCharactersOnline && (
+                    <>
+                        {" "}
+                        | <span className="blue-text">You</span>
+                    </>
+                )}
+                {friendCount > 0 && (
+                    <>
+                        {" "}
+                        |{" "}
+                        <span
+                            style={{
+                                whiteSpace: "nowrap",
+                                overflow: "hidden",
+                            }}
+                            className="green-text"
+                        >
+                            {friendCount} {pluralize("friend", friendCount)}
+                        </span>
+                    </>
+                )}
+            </>
         )
     }
 
     const cardBadge = (serverName: string) => {
-        if (serverInfoData?.[serverName]?.is_vip_only) {
+        if (gameInfoData?.[serverName]?.is_vip_only) {
             return (
                 <Badge
                     text="VIP"
@@ -69,72 +110,116 @@ const Who = () => {
                 <Badge
                     text="64-bit"
                     size="small"
-                    backgroundColor="var(--blue1)"
+                    backgroundColor="var(--magenta3)"
                 />
             )
         }
     }
 
-    const getServerSelectContent = useCallback(() => {
-        if (
-            serverInfoState === LoadingState.Initial ||
-            serverInfoState === LoadingState.Loading
-        ) {
-            // server info not yet loaded
-            return SERVER_NAMES_LOWER.sort((a, b) => a.localeCompare(b)).map(
-                (serverName) => (
-                    <ServerNavigationCard
-                        key={serverName}
-                        destination={`/who/${serverName}`}
-                        title={toSentenceCase(serverName)}
-                        content="Loading data..."
-                        icon={<Pending className="shrinkable-icon" />}
-                    />
-                )
-            )
-        }
+    const getServerSelectContent = useCallback(
+        (type: "32bit" | "64bit") => {
+            if (
+                gameInfoState === LoadingState.Initial ||
+                gameInfoState === LoadingState.Loading
+            ) {
+                // server info not yet loaded
+                return SERVER_NAMES_LOWER.filter((serverName) => {
+                    if (type === "32bit") {
+                        return (
+                            SERVERS_64_BITS_LOWER.includes(serverName) === false
+                        )
+                    } else if (type === "64bit") {
+                        return (
+                            SERVERS_64_BITS_LOWER.includes(serverName) === true
+                        )
+                    }
+                    return true
+                })
+                    .sort((a, b) => a.localeCompare(b))
+                    .map((serverName) => (
+                        <ServerNavigationCard
+                            key={serverName}
+                            destination={`/who/${serverName}`}
+                            title={toSentenceCase(serverName)}
+                            content="Loading data..."
+                            icon={<Pending className="shrinkable-icon" />}
+                        />
+                    ))
+            }
 
-        if (
-            characterState === LoadingState.Initial ||
-            characterState === LoadingState.Loading
-        ) {
-            return Object.keys(serverInfoData || {})
-                .sort((a, b) => a.localeCompare(b))
-                .map((serverName) => (
+            // if (
+            //     characterState === LoadingState.Initial ||
+            //     characterState === LoadingState.Loading
+            // ) {
+            //     return Object.keys(serverInfoData || {}).filter((serverName) => {
+            //         if (type === '32bit') {
+            //             return SERVERS_64_BITS_LOWER.includes(serverName) === false
+            //         } else if (type === '64bit') {
+            //             return SERVERS_64_BITS_LOWER.includes(serverName) === true
+            //         }
+            //         return true
+            //     })
+            //         .sort((a, b) => a.localeCompare(b))
+            //         .map((serverName) => (
+            //             <ServerNavigationCard
+            //                 key={serverName}
+            //                 destination={`/who/${serverName}`}
+            //                 title={toSentenceCase(serverName)}
+            //                 content="Loading data..."
+            //                 icon={cardIcon(serverName)}
+            //             />
+            //         ))
+            // }
+
+            return Object.entries(gameInfoData || {})
+                .filter(([serverName]) =>
+                    SERVER_NAMES_LOWER.includes(serverName)
+                )
+                .filter(([serverName]) => {
+                    if (type === "32bit") {
+                        return (
+                            SERVERS_64_BITS_LOWER.includes(serverName) === false
+                        )
+                    } else if (type === "64bit") {
+                        return (
+                            SERVERS_64_BITS_LOWER.includes(serverName) === true
+                        )
+                    }
+                    return true
+                })
+                .sort(([server_name_a], [server_name_b]) =>
+                    server_name_a.localeCompare(server_name_b)
+                )
+                .map(([serverName, serverData]) => (
                     <ServerNavigationCard
                         key={serverName}
                         destination={`/who/${serverName}`}
                         title={toSentenceCase(serverName)}
-                        content="Loading data..."
+                        content={cardDescription(serverName, serverData)}
                         icon={cardIcon(serverName)}
+                        badge={cardBadge(serverName)}
                     />
                 ))
-        }
-
-        return Object.keys(characterData || {})
-            .sort((a, b) => a.localeCompare(b))
-            .map((serverName) => (
-                <ServerNavigationCard
-                    key={serverName}
-                    destination={`/who/${serverName}`}
-                    title={toSentenceCase(serverName)}
-                    content={cardDescription(serverName)}
-                    icon={cardIcon(serverName)}
-                    badge={cardBadge(serverName)}
-                />
-            ))
-    }, [characterData, characterState, serverInfoData, serverInfoState])
+        },
+        [gameInfoData, gameInfoState]
+    )
 
     return (
         <Page
             title="DDO Live Character Viewer"
             description="Browse players from any server with a live character viewer. Are your friends online? Is your guild forming up for a late-night raid? Now you know!"
         >
-            {characterState === LoadingState.Haulted && (
+            {gameInfoState === LoadingState.Haulted && (
                 <LiveDataHaultedPageMessage />
             )}
             <ContentCluster title="Select a Server">
-                <NavCardCluster>{getServerSelectContent()}</NavCardCluster>
+                <NavCardCluster>
+                    {getServerSelectContent("32bit")}
+                </NavCardCluster>
+                <hr />
+                <NavCardCluster>
+                    {getServerSelectContent("64bit")}
+                </NavCardCluster>
             </ContentCluster>
             <ContentCluster title="See Also...">
                 <NavCardCluster>
