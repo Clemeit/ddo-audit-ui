@@ -1,6 +1,6 @@
 import React, { useMemo } from "react"
 import "./ServerStatus.css"
-import { ServerInfoApiDataModel } from "../../models/Game.ts"
+import { ServerInfo, ServerInfoApiDataModel } from "../../models/Game.ts"
 import { ReactComponent as Checkmark } from "../../assets/svg/checkmark.svg"
 import { ReactComponent as X } from "../../assets/svg/x.svg"
 import { ReactComponent as Pending } from "../../assets/svg/pending.svg"
@@ -119,6 +119,9 @@ const ServerStatus = ({
                     )
                     .sort(([server_name_a], [server_name_b]) =>
                         server_name_a.localeCompare(server_name_b)
+                    )
+                    .sort(([, server_a_data]: [string, ServerInfo], [, server_b_data]: [string, ServerInfo]) =>
+                        (server_b_data.is_online ? 1 : 0) - (server_a_data.is_online ? 1 : 0)
                     )
                     .map(([server_name, server_data]) => (
                         <div key={server_name} className="server-status">

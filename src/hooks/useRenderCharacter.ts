@@ -165,10 +165,10 @@ const useRenderCharacter = ({ sprite, context }: Props) => {
 
         // render location
         let locationName = "Somewhere in the Aether"
+        context.font = fonts.CHARACTER_LOCATION
         if (character.location_id) {
             const location = areas[character.location_id]
             if (location) {
-                context.font = fonts.CHARACTER_LOCATION
                 locationName = truncateText(
                     `${showInQuestIndicator && location.is_public === false ? "✓ " : ""}${location.name}`,
                     nameHeaderBoundingBox.width - 10,
