@@ -64,6 +64,9 @@
     .page {
         padding: 10px 10px 0px 10px;
     }
+    .page-content {
+        margin-bottom: 20px;
+    }
 }
 
 @media (max-width: 300px) {
