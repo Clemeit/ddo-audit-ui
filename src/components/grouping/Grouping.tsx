@@ -3,7 +3,12 @@ import Page from "../global/Page.tsx"
 import ContentCluster from "../global/ContentCluster.tsx"
 import { toSentenceCase } from "../../utils/stringUtils.ts"
 import usePollApi from "../../hooks/usePollApi.ts"
-import { Lfm, LfmApiDataModel, LfmApiServerModel } from "../../models/Lfm.ts"
+import {
+    Lfm,
+    LfmApiDataModel,
+    LfmApiServerModel,
+    LfmApiModel,
+} from "../../models/Lfm.ts"
 import ServerNavigationCard from "../global/ServerNavigationCard.tsx"
 import NavigationCard from "../global/NavigationCard.tsx"
 import { Link } from "react-router-dom"
@@ -24,7 +29,7 @@ import {
 } from "../../constants/servers.ts"
 
 const Grouping = () => {
-    const { data: lfmData, state: lfmState } = usePollApi<LfmApiDataModel>({
+    const { data: lfmData, state: lfmState } = usePollApi<LfmApiModel>({
         endpoint: "lfms",
         interval: 10000,
         lifespan: 1000 * 60 * 60 * 12, // 12 hours
@@ -37,8 +42,8 @@ const Grouping = () => {
         })
     const questContext = useQuestContext()
 
-    const cardDescription = (serverData: LfmApiServerModel) => {
-        const serverLfms = serverData.lfms
+    const cardDescription = (serverData?: { number: Lfm }) => {
+        const serverLfms = Object.values(serverData || {})
         const lfmCount = Object.keys(serverLfms).length
         const raidCount = Object.values(serverLfms).filter(
             (lfm) => lfm.quest?.group_size === "Raid"
@@ -88,9 +93,9 @@ const Grouping = () => {
 
     const getCurrentRaids = useCallback(() => {
         const currentRaids: Record<string, Lfm[]> = {}
-        Object.entries(lfmData || {}).forEach(
-            ([serverName, serverData]: [string, LfmApiServerModel]) => {
-                Object.values(serverData.lfms)?.forEach((lfm: Lfm) => {
+        Object.entries(lfmData?.data || {}).forEach(
+            ([serverName, serverData]) => {
+                Object.values(serverData || {})?.forEach((lfm: Lfm) => {
                     const quest =
                         lfm.quest_id && lfm.quest_id !== 0
                             ? questContext.quests[lfm.quest_id || 0]
@@ -172,7 +177,7 @@ const Grouping = () => {
                 ))
         }
 
-        return Object.entries(lfmData || {})
+        return Object.entries(lfmData?.data || {})
             .filter(([serverName]) => SERVER_NAMES_LOWER.includes(serverName))
             .filter(([serverName]) => {
                 if (type === "32bit") {

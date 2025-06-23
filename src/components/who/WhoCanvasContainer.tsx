@@ -2,7 +2,7 @@ import React, { useMemo, useState } from "react"
 import usePollApi from "../../hooks/usePollApi.ts"
 import {
     Character,
-    CharacterApiServerModel,
+    CharacterSpecificApiDataModel,
     CharacterSortType,
 } from "../../models/Character.ts"
 import { ServerInfoApiDataModel } from "../../models/Game.ts"
@@ -46,7 +46,7 @@ const WhoContainer = ({
         data: characterData,
         state: characterState,
         reload: reloadCharacters,
-    } = usePollApi<CharacterApiServerModel>({
+    } = usePollApi<CharacterSpecificApiDataModel>({
         endpoint: `characters/${serverName}`,
         interval: 3000,
         lifespan: 1000 * 60 * 60 * 12, // 12 hours
@@ -90,7 +90,7 @@ const WhoContainer = ({
         areResultsTruncated: boolean
     }>(() => {
         let filteredCharacters = Object.values(
-            characterData?.characters ?? {}
+            characterData?.data ?? {}
         ).filter((character) => {
             let stringFilterMatch = false
             const stringFilters = stringFilter.split(",")
@@ -127,8 +127,8 @@ const WhoContainer = ({
 
             const groupMatch = isGroupView
                 ? character.is_in_party &&
-                character.group_id !== 0 &&
-                character.group_id !== undefined
+                  character.group_id !== 0 &&
+                  character.group_id !== undefined
                 : true
 
             return (
@@ -149,12 +149,12 @@ const WhoContainer = ({
                     .map((c) => c.group_id ?? 0)
             )
             const groupedCharacters = [
-                ...Object.values(characterData?.characters ?? {})
+                ...Object.values(characterData?.data ?? {})
                     .filter((c) => groupIds.has(c.group_id ?? 0))
                     .filter((c) => {
                         // only characters where there are two or more characters with the same group_id
                         const groupCount = Object.values(
-                            characterData?.characters ?? {}
+                            characterData?.data ?? {}
                         ).filter((c2) => c2.group_id === c.group_id).length
                         return groupCount > 1
                     }),
@@ -172,12 +172,10 @@ const WhoContainer = ({
                     (a, b) =>
                         (a.is_anonymous ? 1 : 0) - (b.is_anonymous ? 1 : 0)
                 )
-                .sort((a, b) =>
-                    ((a.group_id || 0) - (b.group_id || 0))
-                )
+                .sort((a, b) => (a.group_id || 0) - (b.group_id || 0))
         } else {
             sortedCharacters = filteredCharacters
-                .sort((a, b) => (a.id - b.id))
+                .sort((a, b) => a.id - b.id)
                 .sort((a, b) => {
                     switch (sortBy.type) {
                         case CharacterSortType.Lfm:
@@ -240,9 +238,7 @@ const WhoContainer = ({
                         handleClosePanel={handleClosePanel}
                     />
                     <WhoCanvas
-                        allCharacters={Object.values(
-                            characterData?.characters ?? {}
-                        )}
+                        allCharacters={Object.values(characterData?.data ?? {})}
                         curatedCharacters={curatedCharacters.characters}
                         areResultsTruncated={
                             curatedCharacters.areResultsTruncated

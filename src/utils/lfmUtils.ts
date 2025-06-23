@@ -17,19 +17,19 @@ const calculateCommonBoundingBoxes = (panelWidth: number) => {
     const mainPanelBoundingBox = new BoundingBox(
         lfmBoundingBox.x,
         lfmBoundingBox.y,
-        lfmBoundingBox.width * 0.4,
+        lfmBoundingBox.width * 0.42,
         lfmBoundingBox.height
     )
     const questPanelBoundingBox = new BoundingBox(
         mainPanelBoundingBox.x + mainPanelBoundingBox.width,
         lfmBoundingBox.y,
-        lfmBoundingBox.width * 0.3,
+        lfmBoundingBox.width * 0.32,
         lfmBoundingBox.height
     )
     const classPanelBoundingBox = new BoundingBox(
         questPanelBoundingBox.x + questPanelBoundingBox.width,
         lfmBoundingBox.y,
-        lfmBoundingBox.width * 0.2,
+        lfmBoundingBox.width * 0.16,
         lfmBoundingBox.height
     )
     const levelPanelBoundingBox = new BoundingBox(

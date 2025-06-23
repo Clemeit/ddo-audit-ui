@@ -65,7 +65,7 @@ const useGetRegisteredCharacters = ({ enabled = true }: Props = {}) => {
         )
         getCharactersByIds(characterIds)
             .then((response) => {
-                const characters = response.data?.data
+                const characters: Character[] = Object.values(response.data?.data || {})
                 setRegisteredCharacters(characters)
                 setIsLoaded(true)
 

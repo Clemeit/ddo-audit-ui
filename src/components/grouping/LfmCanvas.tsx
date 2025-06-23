@@ -172,9 +172,9 @@ const LfmCanvas: React.FC<Props> = ({
                 const rect = mainCanvasRef.current.getBoundingClientRect()
                 setCanvasScaleWidth(mainCanvasRef.current.width / rect.width)
                 setCanvasScaleHeight(mainCanvasRef.current.height / rect.height)
-                console.log(
-                    `canvasScaleWidth: ${canvasScaleWidth}, canvasScaleHeight: ${canvasScaleHeight}`
-                )
+                // console.log(
+                //     `canvasScaleWidth: ${canvasScaleWidth}, canvasScaleHeight: ${canvasScaleHeight}`
+                // )
             }
         }
 
@@ -332,7 +332,7 @@ const LfmCanvas: React.FC<Props> = ({
             !shouldRenderFilterMessage &&
             !shouldRenderAllLfms
         ) {
-            console.log("Skipping render.")
+            // console.log("Skipping render.")
             return
         }
 
@@ -351,7 +351,7 @@ const LfmCanvas: React.FC<Props> = ({
         }
 
         if (globalRenderNeeded || shouldRenderAllLfms) {
-            console.log("Rendering all LFMs")
+            // console.log("Rendering all LFMs")
             lfmContext?.clearRect(0, 0, panelWidth, panelHeight)
         }
         lfmContext?.translate(
@@ -412,9 +412,9 @@ const LfmCanvas: React.FC<Props> = ({
                 context.font = fonts.GROUPS_HIDDEN_MESSAGE
                 context.textAlign = "center"
                 context.fillText(
-                    `${excludedLfmCount} groups were hidden by your filter settings`,
+                    `${excludedLfmCount} ${excludedLfmCount !== 1 ? "groups were" : "group was"} hidden by your filter settings`,
                     panelWidth / 2,
-                    200
+                    150
                 )
                 wasFilterMessageRendered = true
             }
@@ -475,9 +475,9 @@ const LfmCanvas: React.FC<Props> = ({
             }
         }
 
-        if (numberOfLfmsRendered > 0)
-            console.log(`Number of LFMs rendered: ${numberOfLfmsRendered}`)
-        if (wasOverlayRendered) console.log("Overlay rendered.")
+        // if (numberOfLfmsRendered > 0)
+        //     console.log(`Number of LFMs rendered: ${numberOfLfmsRendered}`)
+        // if (wasOverlayRendered) console.log("Overlay rendered.")
 
         setPreviousState((prev) => ({
             lfms,

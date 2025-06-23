@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from "react"
 import LfmCanvas from "./LfmCanvas.tsx"
-import { Lfm, LfmApiServerModel } from "../../models/Lfm.ts"
+import { Lfm, LfmSpecificApiModel } from "../../models/Lfm.ts"
 import { useLfmContext } from "../../contexts/LfmContext.tsx"
 import LfmToolbar from "./LfmToolbar.tsx"
 import usePollApi from "../../hooks/usePollApi.ts"
@@ -42,7 +42,7 @@ const GroupingContainer = ({
         data: lfmData,
         state: lfmState,
         reload: reloadLfms,
-    } = usePollApi<LfmApiServerModel>({
+    } = usePollApi<LfmSpecificApiModel>({
         endpoint: `lfms/${serverName}`,
         interval: refreshInterval,
         lifespan: 1000 * 60 * 60 * 12, // 12 hours
@@ -63,20 +63,26 @@ const GroupingContainer = ({
 
     const isDataStale = useMemo<boolean>(
         () =>
-            !!lfmData?.last_update &&
-            lfmState === LoadingState.Loaded &&
-            (Date.now() - new Date(lfmData.last_update).getTime()) > 2 * 60 * 1000,
-        [lfmData, lfmState, refreshInterval]
+            !!serverInfoData?.[serverName] &&
+            !isServerOffline &&
+            serverInfoState === LoadingState.Loaded &&
+            Date.now() -
+                new Date(
+                    serverInfoData?.[serverName].last_data_fetch
+                ).getTime() >
+                5 * 60 * 1000,
+        [serverInfoData, serverInfoState, refreshInterval]
     )
 
     // filter and sort the lfms
     const filteredLfms = useMemo(() => {
-        const lfms: Lfm[] = Object.values(lfmData?.lfms || {})
-        if (!lfms)
+        if (!lfmData?.data)
             return {
                 filteredAndSortedLfms: [],
                 excludedLfmCount: 0,
             }
+
+        const lfms = Object.values(lfmData?.data || {})
 
         // determine eligibility
         const determinedLfms = lfms.map((lfm) => {
@@ -96,7 +102,7 @@ const GroupingContainer = ({
                         ?.filter((character) => {
                             return (
                                 character.server_name?.toLowerCase() ===
-                                serverName.toLowerCase() &&
+                                    serverName.toLowerCase() &&
                                 trackedCharacterIds.includes(character.id)
                             )
                         })
@@ -132,25 +138,25 @@ const GroupingContainer = ({
                 if (sortBy.type === "leader") {
                     return sortBy.ascending
                         ? (a.leader.name || "").localeCompare(
-                            b.leader.name || ""
-                        )
+                              b.leader.name || ""
+                          )
                         : (b.leader.name || "").localeCompare(
-                            a.leader.name || ""
-                        )
+                              a.leader.name || ""
+                          )
                 } else if (sortBy.type === "quest") {
                     return sortBy.ascending
                         ? (a.quest?.name || "").localeCompare(
-                            b.quest?.name || ""
-                        )
+                              b.quest?.name || ""
+                          )
                         : (b.quest?.name || "").localeCompare(
-                            a.quest?.name || ""
-                        )
+                              a.quest?.name || ""
+                          )
                 } else if (sortBy.type === "classes") {
                     return sortBy.ascending
                         ? (a.accepted_classes || []).length -
-                        (b.accepted_classes || []).length
+                              (b.accepted_classes || []).length
                         : (b.accepted_classes || []).length -
-                        (a.accepted_classes || []).length
+                              (a.accepted_classes || []).length
                 } else {
                     // default to level
                     return sortBy.ascending

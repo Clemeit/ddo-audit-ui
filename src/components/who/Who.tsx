@@ -2,7 +2,7 @@ import React, { useCallback } from "react"
 import usePollApi from "../../hooks/usePollApi.ts"
 import { ServerInfo } from "../../models/Game.ts"
 import { ServerInfoApiDataModel } from "../../models/Game.ts"
-import { OnlineCharacterIdsModel } from "../../models/Character.ts"
+import { OnlineCharacterIdsApiModel } from "../../models/Character.ts"
 import Page from "../global/Page.tsx"
 import ContentCluster from "../global/ContentCluster.tsx"
 import NavCardCluster from "../global/NavCardCluster.tsx"
@@ -27,10 +27,9 @@ import useGetRegisteredCharacters from "../../hooks/useGetRegisteredCharacters.t
 const Who = () => {
     const fakeFriends: number[] = [] // TODO: load from friends list when that gets built
     const { registeredCharacters } = useGetRegisteredCharacters()
-    console.log(registeredCharacters)
 
     const { data: characterIdsData, state: characterIdsState } =
-        usePollApi<OnlineCharacterIdsModel>({
+        usePollApi<OnlineCharacterIdsApiModel>({
             endpoint: "characters/ids",
             interval: 15000,
             lifespan: 1000 * 60 * 60 * 12, // 12 hours
@@ -57,13 +56,13 @@ const Who = () => {
     const cardDescription = (serverName: string, serverData: ServerInfo) => {
         const characterCount = serverData?.character_count || 0
         const friendCount =
-            characterIdsData?.[serverName]?.online_character_ids?.filter((id) =>
+            characterIdsData?.data?.[serverName]?.filter((id) =>
                 fakeFriends.includes(id)
             ).length || 0
-        const areRegisteredCharactersOnline = characterIdsData?.[
+        const areRegisteredCharactersOnline = characterIdsData?.data?.[
             serverName
-        ]?.online_character_ids?.some((id) =>
-            registeredCharacters.some((character) => character.id === id)
+        ]?.some((id) =>
+            registeredCharacters?.some((character) => character.id === id)
         )
         return (
             <>
@@ -146,30 +145,6 @@ const Who = () => {
                         />
                     ))
             }
-
-            // if (
-            //     characterState === LoadingState.Initial ||
-            //     characterState === LoadingState.Loading
-            // ) {
-            //     return Object.keys(serverInfoData || {}).filter((serverName) => {
-            //         if (type === '32bit') {
-            //             return SERVERS_64_BITS_LOWER.includes(serverName) === false
-            //         } else if (type === '64bit') {
-            //             return SERVERS_64_BITS_LOWER.includes(serverName) === true
-            //         }
-            //         return true
-            //     })
-            //         .sort((a, b) => a.localeCompare(b))
-            //         .map((serverName) => (
-            //             <ServerNavigationCard
-            //                 key={serverName}
-            //                 destination={`/who/${serverName}`}
-            //                 title={toSentenceCase(serverName)}
-            //                 content="Loading data..."
-            //                 icon={cardIcon(serverName)}
-            //             />
-            //         ))
-            // }
 
             return Object.entries(gameInfoData || {})
                 .filter(([serverName]) =>

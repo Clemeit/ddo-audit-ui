@@ -11,7 +11,6 @@ import {
     SKULL_EXPRESSION,
 } from "../constants/lfmPanel.ts"
 import { useLfmContext } from "../contexts/LfmContext.tsx"
-import { CLASS_LIST } from "../constants/game.ts"
 import { BoundingBox } from "../models/Geometry.ts"
 import useTextRenderer from "./useTextRenderer.ts"
 import {

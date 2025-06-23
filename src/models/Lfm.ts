@@ -1,3 +1,4 @@
+import { SERVER_NAMES_LOWER } from "../constants/servers"
 import { Character } from "./Character"
 
 interface QuestLevel {
@@ -91,20 +92,20 @@ enum LfmActivityType {
 
 interface LfmApiServerModel {
     lfms: { [key: number]: Lfm }
-    last_update: string
 }
 
-interface LfmApiDataModel {
-    argonnessen?: LfmApiServerModel
-    cannith?: LfmApiServerModel
-    ghallanda?: LfmApiServerModel
-    khyber?: LfmApiServerModel
-    orien?: LfmApiServerModel
-    sarlona?: LfmApiServerModel
-    thelanis?: LfmApiServerModel
-    wayfinder?: LfmApiServerModel
-    hardcore?: LfmApiServerModel
-    cormyr?: LfmApiServerModel
+type ServerName = typeof SERVER_NAMES_LOWER[number]
+
+type LfmApiDataModel = {
+    [K in ServerName]?: { number: Lfm }
+}
+
+interface LfmApiModel {
+    data?: LfmApiDataModel
+}
+
+interface LfmSpecificApiModel {
+    data?: { number: Lfm }
 }
 
 interface LfmSortType {
@@ -125,4 +126,6 @@ export {
     LfmSortType,
     FlatActivityEvent,
     QuestApiResponse,
+    LfmApiModel,
+    LfmSpecificApiModel
 }
