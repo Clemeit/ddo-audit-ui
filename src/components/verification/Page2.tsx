@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from "react"
-import ContentCluster from "../global/ContentCluster.tsx"
+import { ContentCluster } from "../global/ContentCluster.tsx"
 import { Character } from "../../models/Character.ts"
 import { ReactComponent as Checkmark } from "../../assets/svg/checkmark.svg"
+import { ReactComponent as Info } from "../../assets/svg/info.svg"
 import { ReactComponent as X } from "../../assets/svg/x.svg"
 import { Verification, AccessToken } from "../../models/Verification.ts"
 import { getVerificationChallengeByCharacterId } from "../../services/verificationService.ts"
@@ -16,11 +17,13 @@ const Page2 = ({
     accessToken,
     character,
     isLoaded,
+    firstTime,
 }: {
     setPage: Function
     accessToken: AccessToken | null
     character: Character | null
     isLoaded: boolean
+    firstTime: boolean
 }) => {
     const pageTimeout = 1000 * 60 * 5
     const [pageLoadedTimestamp] = useState<number>(Date.now())
@@ -117,7 +120,22 @@ const Page2 = ({
                         clicking the &quot;Submit&quot; button while the Comment
                         field is blank.
                     </p>
-                    <ExpandableContainer title="Show me how">
+                    <ExpandableContainer
+                        defaultState={firstTime}
+                        className="demo-container"
+                        title={
+                            <div
+                                style={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: "5px",
+                                }}
+                            >
+                                <Info style={{ fill: "var(--info)" }} /> Show me
+                                how
+                            </div>
+                        }
+                    >
                         <div className="remove-comment-field-demo" />
                     </ExpandableContainer>
                     <p>Here&apos;s the checklist:</p>

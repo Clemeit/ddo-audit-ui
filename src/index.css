@@ -113,7 +113,8 @@ hr {
     gap: 10px;
 }
 
-.orange-text {
+.orange-text,
+.orange-text > * {
     color: var(--orange1);
 }
 

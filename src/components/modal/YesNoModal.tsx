@@ -2,7 +2,7 @@ import React from "react"
 import Button from "../global/Button.tsx"
 import Modal from "./Modal.tsx"
 import Stack from "../global/Stack.tsx"
-import ContentCluster from "../global/ContentCluster.tsx"
+import { ContentCluster } from "../global/ContentCluster.tsx"
 
 interface Props {
     title: string

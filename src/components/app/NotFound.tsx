@@ -1,6 +1,6 @@
 import React from "react"
 import Page from "../global/Page.tsx"
-import ContentCluster from "../global/ContentCluster.tsx"
+import { ContentCluster } from "../global/ContentCluster.tsx"
 import { Link } from "react-router-dom"
 
 const NotFound = () => {

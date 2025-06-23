@@ -1,6 +1,6 @@
 import React from "react"
 import Page from "../global/Page.tsx"
-import ContentCluster from "../global/ContentCluster.tsx"
+import { ContentCluster } from "../global/ContentCluster.tsx"
 import NavCardCluster from "../global/NavCardCluster.tsx"
 import ServerNavigationCard from "../global/ServerNavigationCard.tsx"
 import useGetLiveData from "../../hooks/useGetLiveData.ts"

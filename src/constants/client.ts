@@ -1,6 +1,7 @@
 const CACHED_CHARACTER_EXPIRY_TIME = 60 * 60 * 1000 // 1 hour
 const CACHED_AREAS_EXPIRY_TIME = 24 * 60 * 60 * 1000 // 1 day
 const CACHED_QUESTS_EXPIRY_TIME = 24 * 60 * 60 * 1000 // 1 day
+const MAX_REGISTERED_CHARACTERS = 35
 
 const DONATE_LINK =
     "https://www.paypal.com/donate/?hosted_button_id=YWG5SJPYLDQXY"
@@ -17,4 +18,5 @@ export {
     API_VERSION,
     CACHED_AREAS_EXPIRY_TIME,
     CACHED_QUESTS_EXPIRY_TIME,
+    MAX_REGISTERED_CHARACTERS
 }

@@ -2,7 +2,10 @@ import React, { useMemo, useState } from "react"
 import { useWhoContext } from "../../contexts/WhoContext.tsx"
 import Badge from "../global/Badge.tsx"
 import GenericToolbar from "../global/GenericToolbar.tsx"
-import ContentCluster from "../global/ContentCluster.tsx"
+import {
+    ContentCluster,
+    ContentClusterGroup,
+} from "../global/ContentCluster.tsx"
 import Stack from "../global/Stack.tsx"
 import Checkbox from "../global/Checkbox.tsx"
 import Modal from "../modal/Modal.tsx"
@@ -51,114 +54,123 @@ const WhoToolbar = ({
     const settingModalContent = useMemo(
         () => (
             <div style={{ padding: "20px" }}>
-                <ContentCluster title="Display">
-                    <Stack direction="column" gap="10px">
-                        <Checkbox
-                            checked={showInQuestIndicator}
-                            onChange={(e) => {
-                                setShowInQuestIndicator(e.target.checked)
-                            }}
-                        >
-                            Show in-quest indicator
-                        </Checkbox>
-                        <label htmlFor="refreshIntervalSlider">
-                            Refresh every: {(refreshInterval / 1000).toString()}{" "}
-                            sec
-                            {refreshInterval === DEFAULT_REFRESH_RATE && (
-                                <span className="secondary-text">
-                                    {" "}
-                                    (default)
-                                </span>
-                            )}
-                        </label>
-                        <input
-                            id="refreshIntervalSlider"
-                            type="range"
-                            min={MINIMUM_REFRESH_RATE}
-                            max={MAXIMUM_REFRESH_RATE}
-                            step={3000}
-                            value={refreshInterval}
-                            onChange={(e) =>
-                                setRefreshInterval(parseInt(e.target.value))
-                            }
-                        />
-                    </Stack>
-                </ContentCluster>
-                <ContentCluster title="Settings">
-                    <Stack direction="column" gap="10px">
-                        <Checkbox
-                            checked={shouldSaveSettings}
-                            onChange={(e) => {
-                                setShouldSaveSettings(e.target.checked)
-                            }}
-                        >
-                            Save my filter settings and apply on each visit
-                        </Checkbox>
-                        <div
-                            style={{
-                                borderLeft: "1px solid #ccc",
-                                paddingLeft: "10px",
-                                opacity: shouldSaveSettings ? 1 : 0.5,
-                                pointerEvents: shouldSaveSettings
-                                    ? "auto"
-                                    : "none",
-                            }}
-                        >
-                            <Stack direction="column" gap="10px">
-                                <Checkbox
-                                    checked={shouldSaveClassFilter}
-                                    onChange={(e) => {
-                                        setShouldSaveClassFilter(
-                                            e.target.checked
-                                        )
-                                    }}
-                                >
-                                    Class filters
-                                </Checkbox>
-                                <Checkbox
-                                    checked={shouldSaveStringFilter}
-                                    onChange={(e) => {
-                                        setShouldSaveStringFilter(
-                                            e.target.checked
-                                        )
-                                    }}
-                                >
-                                    Search text
-                                </Checkbox>
-                                <Checkbox
-                                    checked={shouldSaveExactMatch}
-                                    onChange={(e) => {
-                                        setShouldSaveExactMatch(
-                                            e.target.checked
-                                        )
-                                    }}
-                                >
-                                    Exact match checkbox
-                                </Checkbox>
-                                <Checkbox checked={false} onChange={(e) => { }}>
-                                    Level filters{" "}
-                                    <Badge text="Soon" type="soon" />
-                                </Checkbox>
-                                <Checkbox
-                                    checked={shouldSaveSortBy}
-                                    onChange={(e) => {
-                                        setShouldSaveSortBy(e.target.checked)
-                                    }}
-                                >
-                                    Sort order and direction
-                                </Checkbox>
-                                <Checkbox
-                                    checked={shouldSaveGroupView}
-                                    onChange={(e) => {
-                                        setShouldSaveGroupView(e.target.checked)
-                                    }}
-                                >
-                                    Group view
-                                </Checkbox>
-                            </Stack>
-                        </div>
-                    </Stack>
-                </ContentCluster>
+                <ContentClusterGroup>
+                    <ContentCluster title="Display">
+                        <Stack direction="column" gap="10px">
+                            <Checkbox
+                                checked={showInQuestIndicator}
+                                onChange={(e) => {
+                                    setShowInQuestIndicator(e.target.checked)
+                                }}
+                            >
+                                Show in-quest indicator
+                            </Checkbox>
+                            <label htmlFor="refreshIntervalSlider">
+                                Refresh every:{" "}
+                                {(refreshInterval / 1000).toString()} sec
+                                {refreshInterval === DEFAULT_REFRESH_RATE && (
+                                    <span className="secondary-text">
+                                        {" "}
+                                        (default)
+                                    </span>
+                                )}
+                            </label>
+                            <input
+                                id="refreshIntervalSlider"
+                                type="range"
+                                min={MINIMUM_REFRESH_RATE}
+                                max={MAXIMUM_REFRESH_RATE}
+                                step={3000}
+                                value={refreshInterval}
+                                onChange={(e) =>
+                                    setRefreshInterval(parseInt(e.target.value))
+                                }
+                            />
+                        </Stack>
+                    </ContentCluster>
+                    <ContentCluster title="Settings">
+                        <Stack direction="column" gap="10px">
+                            <Checkbox
+                                checked={shouldSaveSettings}
+                                onChange={(e) => {
+                                    setShouldSaveSettings(e.target.checked)
+                                }}
+                            >
+                                Save my filter settings and apply on each visit
+                            </Checkbox>
+                            <div
+                                style={{
+                                    borderLeft: "1px solid #ccc",
+                                    paddingLeft: "10px",
+                                    opacity: shouldSaveSettings ? 1 : 0.5,
+                                    pointerEvents: shouldSaveSettings
+                                        ? "auto"
+                                        : "none",
+                                }}
+                            >
+                                <Stack direction="column" gap="10px">
+                                    <Checkbox
+                                        checked={shouldSaveClassFilter}
+                                        onChange={(e) => {
+                                            setShouldSaveClassFilter(
+                                                e.target.checked
+                                            )
+                                        }}
+                                    >
+                                        Class filters
+                                    </Checkbox>
+                                    <Checkbox
+                                        checked={shouldSaveStringFilter}
+                                        onChange={(e) => {
+                                            setShouldSaveStringFilter(
+                                                e.target.checked
+                                            )
+                                        }}
+                                    >
+                                        Search text
+                                    </Checkbox>
+                                    <Checkbox
+                                        checked={shouldSaveExactMatch}
+                                        onChange={(e) => {
+                                            setShouldSaveExactMatch(
+                                                e.target.checked
+                                            )
+                                        }}
+                                    >
+                                        Exact match checkbox
+                                    </Checkbox>
+                                    <Checkbox
+                                        checked={false}
+                                        onChange={(e) => {}}
+                                    >
+                                        Level filters{" "}
+                                        <Badge text="Soon" type="soon" />
+                                    </Checkbox>
+                                    <Checkbox
+                                        checked={shouldSaveSortBy}
+                                        onChange={(e) => {
+                                            setShouldSaveSortBy(
+                                                e.target.checked
+                                            )
+                                        }}
+                                    >
+                                        Sort order and direction
+                                    </Checkbox>
+                                    <Checkbox
+                                        checked={shouldSaveGroupView}
+                                        onChange={(e) => {
+                                            setShouldSaveGroupView(
+                                                e.target.checked
+                                            )
+                                        }}
+                                    >
+                                        Group view
+                                    </Checkbox>
+                                </Stack>
+                            </div>
+                        </Stack>
+                    </ContentCluster>
+                </ContentClusterGroup>
             </div>
         ),
         [

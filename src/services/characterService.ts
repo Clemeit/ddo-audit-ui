@@ -6,6 +6,10 @@ function getCharacterByNameAndServer(name: string, server: string) {
     return axios.get(`${API_URL}/${server}/${name}`)
 }
 
+function getCharacterByName(name: string) {
+    return axios.get(`${API_URL}/any/${name}`)
+}
+
 function getCharacterById(id: string) {
     return axios.get(`${API_URL}/${id}`)
 }
@@ -23,4 +27,5 @@ export {
     getCharacterById,
     getCharactersByIds,
     getCharacterTimersByIds,
+    getCharacterByName,
 }

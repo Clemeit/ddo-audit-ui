@@ -3,7 +3,7 @@ import axios from "axios"
 const API_URL = "https://api.hcnxsryjficudzazjxty.com/v1/activity"
 
 function getCharacterLocationActivityById(
-    id: string,
+    id: number,
     accessToken: string,
     startDate?: string,
     endDate?: string,
@@ -25,7 +25,7 @@ function getCharacterLocationActivityById(
 }
 
 function getCharacterStatusActivityById(
-    id: string,
+    id: number,
     accessToken: string,
     startDate?: string,
     endDate?: string,
@@ -45,7 +45,7 @@ function getCharacterStatusActivityById(
 }
 
 function getCharacterLevelActivityById(
-    id: string,
+    id: number,
     accessToken: string,
     startDate?: string,
     endDate?: string,

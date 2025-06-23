@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react"
-import ContentCluster from "../global/ContentCluster.tsx"
+import { ContentCluster } from "../global/ContentCluster.tsx"
 import Stack from "../global/Stack.tsx"
 import "./Page2.css"
 import Button from "../global/Button.tsx"

@@ -31,6 +31,10 @@
     justify-content: center;
 }
 
+.modal-content {
+    padding: 20px;
+}
+
 .modal-content.centered-content {
     display: flex;
     justify-content: center;

@@ -5,17 +5,18 @@ import "./ValidationMessage.css"
 import Stack from "./Stack.tsx"
 
 interface Props {
-    type?: "error" | "warning" | "info" | "success"
+    type?: "error" | "warning" | "info" | "success" | "default"
     message: string
     visible: boolean
     showIcon?: boolean
 }
 
 const typeToColorMap = {
-    error: "red",
+    error: "#ff2222",
     warning: "orange",
-    info: "blue",
+    info: "#6666ff",
     success: "green",
+    default: "var(--text)",
 }
 
 const ValidationMessage = ({

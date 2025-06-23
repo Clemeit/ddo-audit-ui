@@ -8,6 +8,7 @@ import Page1 from "./Page1.tsx"
 import Page2 from "./Page2.tsx"
 import { useLocation, useNavigate } from "react-router-dom"
 import { getCharacterById } from "../../services/characterService.ts"
+import { getAccessTokens as getAccessTokensFromLocalStorage } from "../../utils/localStorage.ts"
 
 const VerificationPage = () => {
     const location = useLocation()
@@ -18,6 +19,9 @@ const VerificationPage = () => {
         clearOtherQueryParams: false,
         maxPage: 2,
     })
+
+    const accessTokens = getAccessTokensFromLocalStorage()
+    console.log("accessTokens", accessTokens)
 
     const [currentCharacter, setCurrentCharacter] = useState<Character | null>(
         null
@@ -58,6 +62,7 @@ const VerificationPage = () => {
                     setPendingAccessToken={setPendingAccessToken}
                     character={currentCharacter}
                     isLoaded={isLoaded}
+                    firstTime={accessTokens.length === 0}
                 />
             )}
             {currentPage === 2 && (
@@ -66,6 +71,7 @@ const VerificationPage = () => {
                     accessToken={pendingAccessToken}
                     character={currentCharacter}
                     isLoaded={isLoaded}
+                    firstTime={accessTokens.length === 0}
                 />
             )}
         </Page>

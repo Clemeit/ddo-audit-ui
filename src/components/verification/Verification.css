@@ -31,3 +31,20 @@
     background-repeat: no-repeat;
     background-size: contain;
 }
+
+.demo-container {
+    .expandable-container-content {
+        display: flex;
+        justify-content: center;
+    }
+}
+
+
+@media (max-width: 768px) {
+    .demo-container {
+        .expandable-container-content {
+            margin-top: 0;
+            padding: 5px;
+        }
+    }
+}

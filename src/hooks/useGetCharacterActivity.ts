@@ -14,7 +14,7 @@ const useGetCharacterActivity = ({
     activityType,
     areaName,
 }: {
-    characterId?: string
+    characterId?: number
     accessToken?: string
     activityType?: CharacterActivityType
     areaName?: string

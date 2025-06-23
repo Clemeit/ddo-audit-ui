@@ -1,9 +1,13 @@
 import React, { useState, useEffect, useRef, useCallback } from "react"
-import ContentCluster from "../global/ContentCluster.tsx"
+import {
+    ContentCluster,
+    ContentClusterGroup,
+} from "../global/ContentCluster.tsx"
 import Stack from "../global/Stack.tsx"
 import Button from "../global/Button.tsx"
 import { Character } from "../../models/Character.ts"
 import { ReactComponent as Checkmark } from "../../assets/svg/checkmark.svg"
+import { ReactComponent as Info } from "../../assets/svg/info.svg"
 import { ReactComponent as X } from "../../assets/svg/x.svg"
 import { Verification, AccessToken } from "../../models/Verification.ts"
 import { getVerificationChallengeByCharacterId } from "../../services/verificationService.ts"
@@ -18,11 +22,13 @@ const Page1 = ({
     setPendingAccessToken,
     character,
     isLoaded,
+    firstTime,
 }: {
     setPage: Function
     setPendingAccessToken: Function
     character: Character | null
     isLoaded: boolean
+    firstTime: boolean
 }) => {
     const pageTimeout = 1000 * 60 * 5
     const [pageLoadedTimestamp] = useState<number>(Date.now())
@@ -30,6 +36,7 @@ const Page1 = ({
     const navigate = useNavigate()
     const pollVerificationEndpointTimeout = useRef<NodeJS.Timeout | null>(null)
     const navigateToNextPageTimeout = useRef<NodeJS.Timeout | null>(null)
+    const [isDemoOpen, setIsDemoOpen] = useState<boolean>(false)
 
     const [verificationChallenge, setVerificationChallenge] =
         useState<Verification | null>(null)
@@ -40,7 +47,7 @@ const Page1 = ({
             return
         }
         if (character && character.id) {
-            getVerificationChallengeByCharacterId(character.id!)
+            getVerificationChallengeByCharacterId(character.id)
                 .then((response) => {
                     const verificationResponse: Verification =
                         response.data.data
@@ -93,113 +100,146 @@ const Page1 = ({
     }, [character])
 
     return (
-        <ContentCluster title="Verify Character">
-            {isPageTimeout && (
-                <PageMessage
-                    type="error"
-                    title="Page Timeout"
-                    message="This page has timed out. Please refresh the page to try again."
-                />
-            )}
-            <ExpandableContainer title="What is this?">
-                <ContentCluster>
-                    <p>
-                        Verifying your character gives you access to additional
-                        information such as:
-                    </p>
-                    <ul>
-                        <li>Raid and ransack timers</li>
-                        <li>
-                            Questing history - what quests you've ran, when you
-                            ran them, and how long they took
-                        </li>
-                        <li>
-                            Level history - when you level up and how long each
-                            level took to complete
-                        </li>
-                        <li>
-                            Guild members - information that you'd find in the
-                            Guild tab of the social panel
-                        </li>
-                    </ul>
-                    <p>
-                        Character verification is entirely optional. This
-                        process does <strong>not</strong> require login
-                        credentials or personal information.{" "}
-                        <span className="orange-text">
-                            We will never ask for your username or password.
-                        </span>
-                    </p>
-                    <p>
-                        Access tokens will be stored as cookies. If you clear
-                        your cookies, you will need to verify your characters
-                        again.
-                    </p>
-                </ContentCluster>
-            </ExpandableContainer>
-            <p>
-                To verify that you have access to{" "}
-                <span className="orange-text">
-                    {character?.name || "your character"}
-                </span>
-                , you will need to log into{" "}
-                <span className="orange-text">
-                    {character?.server_name || "the game"}
-                </span>{" "}
-                , enter the following text in the Public Comment field found at
-                the bottom of the Who tab in the Social Panel, and click the
-                &quot;Submit&quot; button.
-            </p>
-            <ExpandableContainer title="Show me how">
-                <div className="comment-field-demo" />
-            </ExpandableContainer>
-            <code className="verification-code">
-                {verificationChallenge?.challenge_word || <span>&nbsp;</span>}
-            </code>
-            <p>Here&apos;s the checklist:</p>
-            <ul>
-                <li>
-                    {verificationChallenge &&
-                    verificationChallenge.is_online ? (
-                        <Checkmark className="step-icon" />
-                    ) : (
-                        <X className="step-icon" />
-                    )}{" "}
-                    <strong>Step 1:</strong> Character is online
-                </li>
-                <li>
-                    {verificationChallenge &&
-                    !verificationChallenge.is_anonymous ? (
-                        <Checkmark className="step-icon" />
-                    ) : (
-                        <X className="step-icon" />
-                    )}{" "}
-                    <strong>Step 2:</strong> Character is not anonymous
-                </li>
-                <li>
-                    {verificationChallenge &&
-                    verificationChallenge.challenge_word_match ? (
-                        <Checkmark className="step-icon" />
-                    ) : (
-                        <X className="step-icon" />
-                    )}{" "}
-                    <strong>Step 3:</strong> Code is entered in the Public
-                    Comment field on the Who tab
-                </li>
-            </ul>
-            <p className="secondary-text">
-                This page will automatically refresh. Do not refresh this page.
-            </p>
-            <Spacer size="10px" />
-            <Stack gap="10px" fullWidth justify="space-between">
-                <Button
-                    type="secondary"
-                    onClick={() => navigate("/registration")}
+        <ContentClusterGroup>
+            <ContentCluster title="Verify Character">
+                {isPageTimeout && (
+                    <PageMessage
+                        type="error"
+                        title="Page Timeout"
+                        message="This page has timed out. Please refresh the page to try again."
+                    />
+                )}
+                {/* <ExpandableContainer
+                    title={
+                        <div
+                            style={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "5px",
+                            }}
+                        >
+                            <Info style={{ fill: "var(--info)" }} /> What is
+                            this?
+                        </div>
+                    }
                 >
-                    Back
-                </Button>
-            </Stack>
-        </ContentCluster>
+                    <ContentCluster></ContentCluster>
+                </ExpandableContainer> */}
+                <p>
+                    To verify that you have access to{" "}
+                    <span className="orange-text">
+                        {character?.name || "your character"}
+                    </span>
+                    , you will need to log into{" "}
+                    <span className="orange-text">
+                        {character?.server_name || "the game"}
+                    </span>
+                    , enter the following text into the{" "}
+                    <span className="orange-text">Public Comment field</span>{" "}
+                    found at the bottom of the Who tab in the Social Panel, and
+                    click the &quot;Submit&quot; button.
+                </p>
+                <code className="verification-code">
+                    {verificationChallenge?.challenge_word || (
+                        <span>&nbsp;</span>
+                    )}
+                </code>
+                <ExpandableContainer
+                    defaultState={firstTime}
+                    className="demo-container"
+                    title={
+                        <div
+                            style={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "5px",
+                            }}
+                        >
+                            <Info style={{ fill: "var(--info)" }} /> Show me how
+                        </div>
+                    }
+                >
+                    <div className="comment-field-demo" />
+                </ExpandableContainer>
+                <p>Here&apos;s the checklist:</p>
+                <ul>
+                    <li>
+                        {verificationChallenge &&
+                        verificationChallenge.is_online ? (
+                            <Checkmark className="step-icon" />
+                        ) : (
+                            <X className="step-icon" />
+                        )}{" "}
+                        <strong>Step 1:</strong> Character is online
+                    </li>
+                    <li>
+                        {verificationChallenge &&
+                        !verificationChallenge.is_anonymous ? (
+                            <Checkmark className="step-icon" />
+                        ) : (
+                            <X className="step-icon" />
+                        )}{" "}
+                        <strong>Step 2:</strong> Character is not anonymous
+                    </li>
+                    <li>
+                        {verificationChallenge &&
+                        verificationChallenge.challenge_word_match ? (
+                            <Checkmark className="step-icon" />
+                        ) : (
+                            <X className="step-icon" />
+                        )}{" "}
+                        <strong>Step 3:</strong> Code is entered in the Public
+                        Comment field on the Who tab
+                    </li>
+                </ul>
+                <p className="secondary-text">
+                    This page will automatically refresh. Do not refresh this
+                    page.
+                </p>
+                <Spacer size="10px" />
+                <Stack gap="10px" fullWidth justify="space-between">
+                    <Button
+                        type="secondary"
+                        onClick={() => navigate("/registration")}
+                    >
+                        Back
+                    </Button>
+                </Stack>
+            </ContentCluster>
+            <ContentCluster title="About this Feature">
+                <p>
+                    Verifying your character gives you access to additional
+                    information such as:
+                </p>
+                <ul>
+                    <li>Raid and ransack timers</li>
+                    <li>
+                        Questing history - what quests you've ran, when you ran
+                        them, and how long they took
+                    </li>
+                    <li>
+                        Level history - when you level up and how long each
+                        level took to complete
+                    </li>
+                    <li>
+                        Guild members - information that you'd find in the Guild
+                        tab of the social panel
+                    </li>
+                </ul>
+                <p>
+                    Character verification is entirely optional. This process
+                    does <strong>not</strong> require log-in credentials or
+                    personal information.{" "}
+                    <span className="orange-text">
+                        We will never ask for your username or password.
+                    </span>
+                </p>
+                <p>
+                    Access tokens will be stored as cookies. If you clear your
+                    cookies, you will need to verify your characters again.
+                </p>
+            </ContentCluster>
+        </ContentClusterGroup>
     )
 }
 

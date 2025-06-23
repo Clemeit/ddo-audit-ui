@@ -1,6 +1,9 @@
 import React from "react"
 import Page from "../global/Page.tsx"
-import ContentCluster from "../global/ContentCluster.tsx"
+import {
+    ContentCluster,
+    ContentClusterGroup,
+} from "../global/ContentCluster.tsx"
 import useGetRegisteredCharacters from "../../hooks/useGetRegisteredCharacters.ts"
 import {
     ErrorGettingRegisteredCharacters,
@@ -75,15 +78,17 @@ const Timers = () => {
             title="Raid and Quest Timers"
             description="View your raid and quest timers. See which raids you're on timer for and which quests you've ransacked."
         >
-            <ContentCluster title="Timers">
-                {getContentHeader()}
-                {conditionalTimerContent()}
-            </ContentCluster>
-            <ContentCluster title="See Also...">
-                <NavCardCluster>
-                    <NavigationCard type="registration" />
-                </NavCardCluster>
-            </ContentCluster>
+            <ContentClusterGroup>
+                <ContentCluster title="Timers">
+                    {getContentHeader()}
+                    {conditionalTimerContent()}
+                </ContentCluster>
+                <ContentCluster title="See Also...">
+                    <NavCardCluster>
+                        <NavigationCard type="registration" />
+                    </NavCardCluster>
+                </ContentCluster>
+            </ContentClusterGroup>
         </Page>
     )
 }

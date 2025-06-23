@@ -32,7 +32,7 @@
 
 .registration-form-content {
     width: 100%;
-    padding: 30px 0px 50px 0px;
+    padding: 0 0 30px 0;
 }
 
 .registration-form h2 {
@@ -48,6 +48,8 @@
 
 .registration-form-footer {
     width: 100%;
+    display: flex;
+    justify-content: center;
 }
 
 .registered-list {

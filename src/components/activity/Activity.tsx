@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from "react"
 import NavigationCard from "../global/NavigationCard.tsx"
-import ContentCluster from "../global/ContentCluster.tsx"
+import {
+    ContentCluster,
+    ContentClusterGroup,
+} from "../global/ContentCluster.tsx"
 import Page from "../global/Page.tsx"
 import { AccessToken } from "../../models/Verification.ts"
 import { Character } from "../../models/Character.ts"
@@ -188,12 +191,12 @@ const Activity = () => {
                         <span>
                             {totalRunsWithinRansackHours ? (
                                 totalRunsWithinRansackHours >=
-                                    RANSACK_THRESHOLD ? (
+                                RANSACK_THRESHOLD ? (
                                     <span className="red-text">
                                         Until{" "}
                                         {new Date(
                                             ransackTimerStart?.getTime() +
-                                            RANSACK_HOURS * 1000 * 60 * 60
+                                                RANSACK_HOURS * 1000 * 60 * 60
                                         ).toLocaleString()}
                                     </span>
                                 ) : (
@@ -251,7 +254,7 @@ const Activity = () => {
                                 value={
                                     selectedCharacterAndAccessToken
                                         ? selectedCharacterAndAccessToken
-                                            .character?.id
+                                              .character?.id
                                         : ""
                                 }
                                 onChange={handleCharacterSelectionChange}
@@ -342,15 +345,17 @@ const Activity = () => {
             title="Character Activity History"
             description="View detailed information about your characters' activity history, including questing history, level history, login history, and more."
         >
-            <ContentCluster title="Character Activity">
-                {conditionalSelectionContent()}
-                {conditionalActivityContent()}
-            </ContentCluster>
-            <ContentCluster title="See Also...">
-                <NavCardCluster>
-                    <NavigationCard type="registration" />
-                </NavCardCluster>
-            </ContentCluster>
+            <ContentClusterGroup>
+                <ContentCluster title="Character Activity">
+                    {conditionalSelectionContent()}
+                    {conditionalActivityContent()}
+                </ContentCluster>
+                <ContentCluster title="See Also...">
+                    <NavCardCluster>
+                        <NavigationCard type="registration" />
+                    </NavCardCluster>
+                </ContentCluster>
+            </ContentClusterGroup>
         </Page>
     )
 }

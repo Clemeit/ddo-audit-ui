@@ -37,4 +37,30 @@ const ContentCluster = ({
     )
 }
 
-export default ContentCluster
+interface ContentClusterGroupProps {
+    flavor?: "comfortable" | "cozy" | "compact"
+    children?: React.ReactNode
+}
+
+const ContentClusterGroup = ({
+    flavor = "cozy",
+    children,
+}: ContentClusterGroupProps) => {
+    function getGap() {
+        if (flavor === "comfortable") return "50px"
+        if (flavor === "cozy") return "30px"
+        if (flavor === "compact") return "10px"
+    }
+    return (
+        <div
+            className="content-cluster-group"
+            style={{
+                gap: getGap(),
+            }}
+        >
+            {children}
+        </div>
+    )
+}
+
+export { ContentCluster, ContentClusterGroup }

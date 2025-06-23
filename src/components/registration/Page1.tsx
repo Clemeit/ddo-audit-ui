@@ -1,5 +1,5 @@
 import React, { useState } from "react"
-import ContentCluster from "../global/ContentCluster.tsx"
+import { ContentCluster } from "../global/ContentCluster.tsx"
 import RegistrationTable from "./RegistrationTable.tsx"
 import Stack from "../global/Stack.tsx"
 import Button from "../global/Button.tsx"

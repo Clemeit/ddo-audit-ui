@@ -1,6 +1,9 @@
 import React, { useCallback } from "react"
 import Page from "../global/Page.tsx"
-import ContentCluster from "../global/ContentCluster.tsx"
+import {
+    ContentCluster,
+    ContentClusterGroup,
+} from "../global/ContentCluster.tsx"
 import { toSentenceCase } from "../../utils/stringUtils.ts"
 import usePollApi from "../../hooks/usePollApi.ts"
 import {
@@ -253,34 +256,36 @@ const Grouping = () => {
             {lfmState === LoadingState.Haulted && (
                 <LiveDataHaultedPageMessage />
             )}
-            <ContentCluster title="Select a Server">
-                <NavCardCluster>
-                    {getServerSelectContent("32bit")}
-                </NavCardCluster>
-                <hr />
-                <NavCardCluster>
-                    {getServerSelectContent("64bit")}
-                </NavCardCluster>
-            </ContentCluster>
-            <ContentCluster title="Current Raids">
-                {getCurrentRaidsContent()}
-            </ContentCluster>
-            <ContentCluster title="Notifications">
-                <p>
-                    You currently have 0 notification rules set up. Configure
-                    rules on the{" "}
-                    <Link className="link" to="/notifications">
-                        notification settings
-                    </Link>{" "}
-                    page.
-                </p>
-            </ContentCluster>
-            <ContentCluster title="See Also...">
-                <NavCardCluster>
-                    <NavigationCard type="registration" />
-                    <NavigationCard type="timers" />
-                </NavCardCluster>
-            </ContentCluster>
+            <ContentClusterGroup>
+                <ContentCluster title="Select a Server">
+                    <NavCardCluster>
+                        {getServerSelectContent("32bit")}
+                    </NavCardCluster>
+                    <hr />
+                    <NavCardCluster>
+                        {getServerSelectContent("64bit")}
+                    </NavCardCluster>
+                </ContentCluster>
+                <ContentCluster title="Current Raids">
+                    {getCurrentRaidsContent()}
+                </ContentCluster>
+                <ContentCluster title="Notifications">
+                    <p>
+                        You currently have 0 notification rules set up.
+                        Configure rules on the{" "}
+                        <Link className="link" to="/notifications">
+                            notification settings
+                        </Link>{" "}
+                        page.
+                    </p>
+                </ContentCluster>
+                <ContentCluster title="See Also...">
+                    <NavCardCluster>
+                        <NavigationCard type="registration" />
+                        <NavigationCard type="timers" />
+                    </NavCardCluster>
+                </ContentCluster>
+            </ContentClusterGroup>
         </Page>
     )
 }

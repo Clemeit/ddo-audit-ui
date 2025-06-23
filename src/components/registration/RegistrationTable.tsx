@@ -16,7 +16,10 @@ interface Props {
     noCharactersMessage?: string
     isLoaded?: boolean
     minimal?: boolean
+    characterSelectStyle?: boolean
     unregisterCharacter?: (character: Character) => void
+    addButtonCallback?: (character: Character) => void
+    addedCharacterIds?: number[]
 }
 
 const RegistrationTable = ({
@@ -25,15 +28,37 @@ const RegistrationTable = ({
     noCharactersMessage = "No characters found",
     isLoaded = true,
     minimal = false,
-    unregisterCharacter = () => { },
+    characterSelectStyle = false,
+    unregisterCharacter = () => {},
+    addButtonCallback = () => {},
+    addedCharacterIds = [],
 }: Props) => {
     const navigate = useNavigate()
     const areaContext = useAreaContext()
     const { areas } = useMemo(() => areaContext, [areaContext])
 
-    const characterRow = (character: Character) => {
-        // action cell
-        const actionCell = accessTokens.some(
+    const actionCell = (character: Character) => {
+        if (characterSelectStyle) {
+            const characterWasAdded = addedCharacterIds.includes(character.id)
+            return (
+                <td className="action-cell">
+                    <Stack gap="5px" justify="flex-end">
+                        <Button
+                            type={characterWasAdded ? "tertiary" : "secondary"}
+                            small
+                            onClick={() => {
+                                addButtonCallback(character)
+                            }}
+                            disabled={characterWasAdded}
+                        >
+                            {characterWasAdded ? "Added" : "Add"}
+                        </Button>
+                    </Stack>
+                </td>
+            )
+        }
+
+        return accessTokens.some(
             (accessToken: AccessToken) =>
                 accessToken.character_id === character.id
         ) ? (
@@ -70,17 +95,20 @@ const RegistrationTable = ({
                 </Stack>
             </td>
         )
+    }
 
+    const characterRow = (character: Character) => {
         return (
             <tr key={character.id}>
                 <td>
                     <div
                         className="character-status-dot"
                         style={{
-                            backgroundColor: character.is_anonymous ? "#1111FF" :
-                                character.is_online ?
-                                    "#00BB00"
-                                    : "#DD0000",
+                            backgroundColor: character.is_anonymous
+                                ? "#1111FF"
+                                : character.is_online
+                                  ? "#00BB00"
+                                  : "#DD0000",
                         }}
                     />
                 </td>
@@ -93,7 +121,7 @@ const RegistrationTable = ({
                 <td className="hide-on-small-mobile">
                     {character.total_level}
                 </td>
-                {!minimal && (
+                {(!minimal || characterSelectStyle) && (
                     <td className="hide-on-mobile">
                         {character.is_anonymous ? "-" : character.guild_name}
                     </td>
@@ -110,7 +138,7 @@ const RegistrationTable = ({
                             : areas[character.location_id || 0]?.name}
                     </td>
                 )}
-                {!minimal && actionCell}
+                {(!minimal || characterSelectStyle) && actionCell(character)}
             </tr>
         )
     }
@@ -140,24 +168,28 @@ const RegistrationTable = ({
                         <th>Name</th>
                         <th>Server</th>
                         <th className="hide-on-small-mobile">Level</th>
-                        {!minimal && <th className="hide-on-mobile">Guild</th>}
+                        {(!minimal || characterSelectStyle) && (
+                            <th className="hide-on-mobile">Guild</th>
+                        )}
                         {!minimal && (
                             <th className="hide-on-mobile">Classes</th>
                         )}
                         {!minimal && (
                             <th className="hide-on-mobile">Location</th>
                         )}
-                        {!minimal && <th style={{ position: "sticky" }}></th>}
+                        {(!minimal || characterSelectStyle) && (
+                            <th style={{ position: "sticky" }}></th>
+                        )}
                     </tr>
                 </thead>
                 <tbody>
                     {characters.length === 0 && !isLoaded && loadingRow}
                     {characters.length
                         ? characters
-                            .sort((a, b) =>
-                                (a.name || "").localeCompare(b.name || "")
-                            )
-                            .map(characterRow)
+                              .sort((a, b) =>
+                                  (a.name || "").localeCompare(b.name || "")
+                              )
+                              .map(characterRow)
                         : noCharactersMessageRow}
                 </tbody>
             </table>

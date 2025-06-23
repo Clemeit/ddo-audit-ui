@@ -4,7 +4,10 @@ import { ServerInfo } from "../../models/Game.ts"
 import { ServerInfoApiDataModel } from "../../models/Game.ts"
 import { OnlineCharacterIdsApiModel } from "../../models/Character.ts"
 import Page from "../global/Page.tsx"
-import ContentCluster from "../global/ContentCluster.tsx"
+import {
+    ContentCluster,
+    ContentClusterGroup,
+} from "../global/ContentCluster.tsx"
 import NavCardCluster from "../global/NavCardCluster.tsx"
 import ServerNavigationCard from "../global/ServerNavigationCard.tsx"
 import { LoadingState } from "../../models/Api.ts"
@@ -176,7 +179,7 @@ const Who = () => {
                     />
                 ))
         },
-        [gameInfoData, gameInfoState]
+        [gameInfoData, gameInfoState, registeredCharacters]
     )
 
     return (
@@ -187,20 +190,22 @@ const Who = () => {
             {gameInfoState === LoadingState.Haulted && (
                 <LiveDataHaultedPageMessage />
             )}
-            <ContentCluster title="Select a Server">
-                <NavCardCluster>
-                    {getServerSelectContent("32bit")}
-                </NavCardCluster>
-                <hr />
-                <NavCardCluster>
-                    {getServerSelectContent("64bit")}
-                </NavCardCluster>
-            </ContentCluster>
-            <ContentCluster title="See Also...">
-                <NavCardCluster>
-                    <NavigationCard type="friends" />
-                </NavCardCluster>
-            </ContentCluster>
+            <ContentClusterGroup>
+                <ContentCluster title="Select a Server">
+                    <NavCardCluster>
+                        {getServerSelectContent("32bit")}
+                    </NavCardCluster>
+                    <hr />
+                    <NavCardCluster>
+                        {getServerSelectContent("64bit")}
+                    </NavCardCluster>
+                </ContentCluster>
+                <ContentCluster title="See Also...">
+                    <NavCardCluster>
+                        <NavigationCard type="friends" />
+                    </NavCardCluster>
+                </ContentCluster>
+            </ContentClusterGroup>
         </Page>
     )
 }

@@ -1,5 +1,5 @@
 import React from "react"
-import ContentCluster from "../global/ContentCluster.tsx"
+import { ContentCluster } from "../global/ContentCluster.tsx"
 import NavCardCluster from "../global/NavCardCluster.tsx"
 import NavigationCard from "../global/NavigationCard.tsx"
 import ServerNavigationCard from "../global/ServerNavigationCard.tsx"
