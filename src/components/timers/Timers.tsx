@@ -4,7 +4,7 @@ import {
     ContentCluster,
     ContentClusterGroup,
 } from "../global/ContentCluster.tsx"
-import useGetRegisteredCharacters from "../../hooks/useGetRegisteredCharacters.ts"
+import useGetRegisteredCharacters from "../../hooks/useGetFriends.ts"
 import {
     ErrorGettingRegisteredCharacters,
     NoRegisteredAndVerifiedCharacters,

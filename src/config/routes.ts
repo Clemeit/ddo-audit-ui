@@ -53,6 +53,12 @@ const bannerRouteMapping = {
         miniature: true,
         showButtons: false,
     },
+    friends: {
+        title: "Friends",
+        subtitle: "Add Your Friends",
+        miniature: true,
+        showButtons: false,
+    },
     activity: {
         title: "Activity",
         subtitle: "Detailed Character Activity",

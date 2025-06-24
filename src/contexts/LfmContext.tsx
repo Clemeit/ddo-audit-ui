@@ -15,7 +15,7 @@ import { useThemeContext } from "./ThemeContext.tsx"
 import { setValue, getValue } from "../utils/localStorage.ts"
 import { LfmApiDataModel, LfmSortType } from "../models/Lfm.ts"
 import { MAX_LEVEL, MIN_LEVEL } from "../constants/game.ts"
-import useGetRegisteredCharacters from "../hooks/useGetRegisteredCharacters.ts"
+import useGetRegisteredCharacters from "../hooks/useGetFriends.ts"
 import { Character } from "../models/Character.ts"
 
 interface LfmContextProps {

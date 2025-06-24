@@ -25,7 +25,7 @@ import { ReactComponent as Pending } from "../../assets/svg/pending.svg"
 import Badge from "../global/Badge.tsx"
 import { LiveDataHaultedPageMessage } from "../global/CommonMessages.tsx"
 import NavigationCard from "../global/NavigationCard.tsx"
-import useGetRegisteredCharacters from "../../hooks/useGetRegisteredCharacters.ts"
+import useGetRegisteredCharacters from "../../hooks/useGetFriends.ts"
 
 const Who = () => {
     const fakeFriends: number[] = [] // TODO: load from friends list when that gets built

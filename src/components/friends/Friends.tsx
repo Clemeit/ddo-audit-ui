@@ -1,41 +1,37 @@
-import { HttpStatusCode } from "axios"
 import React, { useState } from "react"
-import useGetRegisteredCharacters from "../../hooks/useGetRegisteredCharacters.ts"
-import { Character } from "../../models/Character.ts"
-import { getCharacterByName } from "../../services/characterService.ts"
-import { addRegisteredCharacter } from "../../utils/localStorage.ts"
-import Button from "../global/Button.tsx"
+import Page from "../global/Page.tsx"
 import {
     ContentCluster,
     ContentClusterGroup,
 } from "../global/ContentCluster.tsx"
+import RegistrationTable from "../registration/RegistrationTable.tsx"
+import useGetFriends from "../../hooks/useGetFriends.ts"
+import NavCardCluster from "../global/NavCardCluster.tsx"
 import NavigationCard from "../global/NavigationCard.tsx"
-import Page from "../global/Page.tsx"
+import { convertMillisecondsToPrettyString } from "../../utils/stringUtils.ts"
+import ValidationMessage from "../global/ValidationMessage.tsx"
 import Spacer from "../global/Spacer.tsx"
 import Stack from "../global/Stack.tsx"
-import ValidationMessage from "../global/ValidationMessage.tsx"
+import Button from "../global/Button.tsx"
 import Modal from "../modal/Modal.tsx"
-import "./Registration.css"
-import RegistrationTable from "./RegistrationTable.tsx"
+import { Character } from "../../models/Character.ts"
+import { addFriend as addFriendToLocalStorage } from "../../utils/localStorage.ts"
+import { MAX_FRIENDS } from "../../constants/client.ts"
+import { getCharacterByName } from "../../services/characterService.ts"
+import { HttpStatusCode } from "axios"
 import Checkbox from "../global/Checkbox.tsx"
-import NavCardCluster from "../global/NavCardCluster.tsx"
-import { MAX_REGISTERED_CHARACTERS } from "../../constants/client.ts"
-import { Link } from "react-router-dom"
-import { convertMillisecondsToPrettyString } from "../../utils/stringUtils.ts"
+import "./Friends.css"
 
-const Registration = () => {
+const Friends = () => {
     const {
-        registeredCharacters,
-        accessTokens,
+        friends,
         isLoaded,
         isError,
-        reload: reloadCharacters,
-        unregisterCharacter,
+        reload: reloadFriends,
+        removeFriend,
         lastReload,
-    } = useGetRegisteredCharacters()
-
-    // Registering a new character:
-    const [showRegistrationModal, setShowRegistrationModal] = useState(false)
+    } = useGetFriends()
+    const [showAddFriendsModal, setShowAddFriendsModal] = useState(false)
     const [showCharacterSelectModal, setShowCharacterSelectModal] =
         useState(false)
     const [characterName, setCharacterName] = useState("")
@@ -58,7 +54,7 @@ const Registration = () => {
             if (new Date().getTime() - firstLoad.getTime() > 1000 * 60 * 60 * 5)
                 return
             const millis = new Date().getTime() - lastReload.getTime()
-            if (millis > 30000) reloadCharacters()
+            if (millis > 30000) reloadFriends()
             setMillisSinceReload(millis)
         }, 10000)
 
@@ -80,7 +76,7 @@ const Registration = () => {
     }
 
     const closeModal = () => {
-        setShowRegistrationModal(false)
+        setShowAddFriendsModal(false)
         setCharacterName("")
         setValidationErrorMessage([])
         setKeepModalOpen(false)
@@ -97,20 +93,20 @@ const Registration = () => {
     }
 
     function saveCharacterToLocalStorage(character: Character) {
-        addRegisteredCharacter(character)
-        reloadCharacters()
+        addFriendToLocalStorage(character)
+        reloadFriends()
     }
 
-    function registerCharacter() {
+    function addFriend() {
         if (isFetching) return
         if (!characterName) {
             setValidationErrorMessage(["Character name is required"])
             return
         }
-        if (registeredCharacters.length >= MAX_REGISTERED_CHARACTERS) {
+        if (friends.length >= MAX_FRIENDS) {
             setValidationErrorMessage([
-                "Too many registered characters",
-                `You can register up to ${MAX_REGISTERED_CHARACTERS} characters`,
+                "Too many friends",
+                `You can add up to ${MAX_FRIENDS} friends`,
             ])
             return
         }
@@ -130,14 +126,14 @@ const Registration = () => {
                     // Check to see if every character is already registered
                     if (
                         localFoundCharacters.every((character) =>
-                            registeredCharacters.some(
+                            friends.some(
                                 (registeredCharacter) =>
                                     registeredCharacter.id === character.id
                             )
                         )
                     ) {
                         setValidationErrorMessage([
-                            "All characters with that name have already been registered",
+                            "All characters with that name have already been added",
                         ])
                         return
                     }
@@ -153,7 +149,7 @@ const Registration = () => {
                     }
                 } else {
                     setValidationErrorMessage([
-                        "Error registering character",
+                        "Error adding friend",
                         "Please try again later",
                     ])
                 }
@@ -170,7 +166,7 @@ const Registration = () => {
                     ])
                 } else {
                     setValidationErrorMessage([
-                        "Error registering character",
+                        "Error adding friend",
                         "Please try again later",
                     ])
                 }
@@ -186,8 +182,8 @@ const Registration = () => {
     }
 
     function addCharacter(character: Character) {
-        if (registeredCharacters.find((c) => c.id === character.id)) {
-            setValidationErrorMessage(["Character already registered"])
+        if (friends.find((c) => c.id === character.id)) {
+            setValidationErrorMessage(["Character already added"])
             return
         }
         saveCharacterToLocalStorage(character)
@@ -224,7 +220,7 @@ const Registration = () => {
         </ContentCluster>
     )
 
-    const registrationModalContent = (
+    const addFriendModalContent = (
         <ContentCluster title="Add a Character">
             <div className="registration-form-content">
                 <div
@@ -247,7 +243,7 @@ const Registration = () => {
                         }}
                         onKeyDown={(e) => {
                             if (e.key === "Enter") {
-                                registerCharacter()
+                                addFriend()
                             }
                         }}
                         style={{
@@ -271,8 +267,7 @@ const Registration = () => {
                     <Button
                         type="primary"
                         onClick={() => {
-                            if (!validationErrorMessage.length)
-                                registerCharacter()
+                            if (!validationErrorMessage.length) addFriend()
                         }}
                         fullWidth
                         disabled={isFetching || !!validationErrorMessage.length}
@@ -292,31 +287,29 @@ const Registration = () => {
 
     return (
         <Page
-            title="DDO Character Registration"
-            description="Register your characters to automatically filter LFMs and see your raid timers."
-            className="registration"
+            title="Friends List"
+            description="Add your friends so that you can see what they're up to!"
         >
-            {showRegistrationModal && (
+            {showAddFriendsModal && (
                 <Modal
                     onClose={closeModal}
                     maxWidth={showCharacterSelectModal ? "600px" : "400px"}
                 >
-                    {!showCharacterSelectModal && registrationModalContent}
+                    {!showCharacterSelectModal && addFriendModalContent}
                     {showCharacterSelectModal &&
                         multipleCharacterSelectModalContent}
                 </Modal>
             )}
             <ContentClusterGroup>
                 <ContentCluster
-                    title="Registered Characters"
-                    subtitle="Register your characters to automatically filter LFMs and see your raid timers."
+                    title="Friends"
+                    subtitle="Add your friends so that you don't miss out!"
                 >
                     <RegistrationTable
-                        characters={registeredCharacters}
-                        accessTokens={accessTokens}
+                        characters={friends}
                         isLoaded={isLoaded}
-                        noCharactersMessage="No characters added"
-                        unregisterCharacter={unregisterCharacter}
+                        noCharactersMessage="No friends added"
+                        unregisterCharacter={removeFriend}
                     />
                     <div
                         style={{
@@ -337,47 +330,16 @@ const Registration = () => {
                         <div />
                         <Button
                             type="primary"
-                            onClick={() => setShowRegistrationModal(true)}
+                            onClick={() => setShowAddFriendsModal(true)}
                         >
-                            Add a character
+                            Add a friend
                         </Button>
                     </Stack>
                 </ContentCluster>
-                <ContentCluster title="About this Feature">
-                    <p>
-                        Registering your characters is entirely optional. You do
-                        not need to provide log-in credentials.{" "}
-                        <span className="orange-text">
-                            You should <strong>never</strong> provide DDO Audit
-                            with any personal or account information such as
-                            username, password, or billing details.
-                        </span>
-                    </p>
-                    <p>
-                        Once a character is registered, the LFM viewer can
-                        automatically filter based on that character's server
-                        and level. The LFM viewer will also show an indicator on
-                        a post if you're currently on timer for that raid. You
-                        can view raid timers on the{" "}
-                        <Link to="/timers" className="link">
-                            Timers page
-                        </Link>
-                        .
-                    </p>
-                    <p>
-                        You can also Verify ownership of a character to unlock
-                        additional features such as quest ransack, questing
-                        history, level-up trends, and more. See the{" "}
-                        <Link to="/activity" className="link">
-                            Activity page
-                        </Link>{" "}
-                        for more information.
-                    </p>
-                </ContentCluster>
                 <ContentCluster title="See Also...">
                     <NavCardCluster>
-                        <NavigationCard type="timers" />
-                        <NavigationCard type="activity" />
+                        <NavigationCard type="ignore" />
+                        <NavigationCard type="registration" />
                     </NavCardCluster>
                 </ContentCluster>
             </ContentClusterGroup>
@@ -385,4 +347,4 @@ const Registration = () => {
     )
 }
 
-export default Registration
+export default Friends

@@ -194,6 +194,101 @@ function removeRegisteredCharacter(character: Character): void {
     }
 }
 
+function getFriends(): Character[] {
+    try {
+        const storageValue = localStorage.getItem("friends")
+        if (!storageValue) {
+            return []
+        }
+        const entry: LocalStorageEntry<Character[]> = JSON.parse(storageValue)
+        return entry.data
+    } catch (e) {
+        console.error(e)
+        return []
+    }
+}
+
+function getFriendsMetadata(): LocalStorageEntry<Character[]> {
+    try {
+        const storageValue = localStorage.getItem("friends")
+        if (!storageValue) {
+            return {
+                createdAt: "",
+                updatedAt: "",
+                data: [],
+            }
+        }
+        const result = JSON.parse(storageValue)
+        return {
+            createdAt: result.createdAt || "",
+            updatedAt: result.updatedAt || "",
+            data: result.data || [],
+        }
+    } catch (e) {
+        console.error(e)
+        return {
+            createdAt: "",
+            updatedAt: "",
+            data: [],
+        }
+    }
+}
+
+function setFriends(characters: Character[]): void {
+    try {
+        const previousEntry: LocalStorageEntry<Character[]> = JSON.parse(
+            localStorage.getItem("friends") || "{}"
+        )
+        const entry: LocalStorageEntry<Character[]> = {
+            createdAt: previousEntry.createdAt || new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            data: characters,
+        }
+        localStorage.setItem("friends", JSON.stringify(entry))
+    } catch (e) {
+        console.error(e)
+    }
+}
+
+function addFriend(character: Character): void {
+    try {
+        const previousEntry: LocalStorageEntry<Character[]> = JSON.parse(
+            localStorage.getItem("friends") || "{}"
+        )
+        const characters = getFriends()
+        characters.push(character)
+        const entry: LocalStorageEntry<Character[]> = {
+            createdAt: previousEntry.createdAt || new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            data: characters,
+        }
+        localStorage.setItem("friends", JSON.stringify(entry))
+    } catch (e) {
+        console.error(e)
+    }
+}
+
+function removeFriend(character: Character): void {
+    try {
+        const previousEntry: LocalStorageEntry<Character[]> = JSON.parse(
+            localStorage.getItem("friends") || "{}"
+        )
+        const characters = getFriends()
+        const newCharacters = characters.filter(
+            (currentCharacter: Character) =>
+                currentCharacter.id !== character.id
+        )
+        const entry: LocalStorageEntry<Character[]> = {
+            createdAt: previousEntry.createdAt || new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            data: newCharacters,
+        }
+        localStorage.setItem("friends", JSON.stringify(entry))
+    } catch (e) {
+        console.error(e)
+    }
+}
+
 function getAreas(): LocalStorageEntry<Area[]> {
     try {
         const storageValue = localStorage.getItem("cached-areas")
@@ -310,6 +405,11 @@ export {
     setRegisteredCharacters,
     addRegisteredCharacter,
     removeRegisteredCharacter,
+    getFriends,
+    getFriendsMetadata,
+    addFriend,
+    removeFriend,
+    setFriends,
     getValue,
     setValue,
     getAreas,

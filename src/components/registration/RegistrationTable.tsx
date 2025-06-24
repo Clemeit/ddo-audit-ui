@@ -190,7 +190,7 @@ const RegistrationTable = ({
                                   (a.name || "").localeCompare(b.name || "")
                               )
                               .map(characterRow)
-                        : noCharactersMessageRow}
+                        : isLoaded && noCharactersMessageRow}
                 </tbody>
             </table>
         </div>

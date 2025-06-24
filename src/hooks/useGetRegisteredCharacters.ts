@@ -87,6 +87,7 @@ const useGetRegisteredCharacters = ({ enabled = true }: Props = {}) => {
                 ) {
                     setRegisteredCharactersInLocalStorage(characters)
                 }
+                setIsError(false)
             })
             .catch(() => {
                 setIsError(true)
