@@ -99,7 +99,7 @@ const WhoCanvas: React.FC<Props> = ({
     const panelHeight = useMemo(() => {
         const height =
             CHARACTER_HEIGHT *
-            Math.max(MINIMUM_CHARACTER_COUNT, curatedCharacters.length) +
+                Math.max(MINIMUM_CHARACTER_COUNT, curatedCharacters.length) +
             FILTER_ZONE_CONTENT_HEIGHT +
             135 // TODO: figure out why 135 works
         setPanelHeight(height)
@@ -219,7 +219,7 @@ const WhoCanvas: React.FC<Props> = ({
             previousState.onlineCharacterCount !== allCharacters.length ||
             previousState.anonymousCharacterCount !== anonymousCharacterCount ||
             previousState.curatedCharacters.length !==
-            curatedCharacters.length ||
+                curatedCharacters.length ||
             previousState.panelWidth !== panelWidth ||
             previousState.panelHeight !== panelHeight ||
             previousState.sortBy !== sortBy ||
@@ -241,7 +241,7 @@ const WhoCanvas: React.FC<Props> = ({
         const whoPanelContext = whoCharactersRef.current.getContext("2d")
         const renderAllCharacters =
             previousState.curatedCharacters.length !==
-            curatedCharacters.length ||
+                curatedCharacters.length ||
             previousState.showInQuestIndicator !== showInQuestIndicator
         if (renderAllCharacters) {
             whoPanelContext?.clearRect(0, 0, panelWidth, panelHeight)
@@ -252,6 +252,7 @@ const WhoCanvas: React.FC<Props> = ({
         )
         let colorIndex = 0
         let currentBackgroundColor = ""
+        let currentCharacterGroupIndex = 0
         curatedCharacters.forEach((character, index) => {
             if (isGroupView) {
                 if (
@@ -259,9 +260,11 @@ const WhoCanvas: React.FC<Props> = ({
                     character.group_id !== curatedCharacters[index - 1].group_id
                 ) {
                     colorIndex++
+                    currentCharacterGroupIndex = 0
                 }
                 currentBackgroundColor =
                     GROUP_COLORS[colorIndex % GROUP_COLORS.length]
+                currentCharacterGroupIndex++
             }
             const shouldRenderCharacter =
                 renderAllCharacters ||
@@ -279,6 +282,7 @@ const WhoCanvas: React.FC<Props> = ({
                 renderCharacter({
                     character,
                     backgroundColorOverride: currentBackgroundColor,
+                    characterIndex: currentCharacterGroupIndex,
                 })
                 charactersRendered = true
                 numberOfCharactersRendered++
@@ -407,9 +411,9 @@ const WhoCanvas: React.FC<Props> = ({
         for (let i = 0; i < CLASS_LIST_LOWER.length; i++) {
             const classFilterBoundingBox = new BoundingBox(
                 classFiltersBoundingBox.x +
-                i *
-                (CLASS_FILTER_GAP +
-                    SPRITE_MAP.CLASS_FILTER.FIGHTER.width),
+                    i *
+                        (CLASS_FILTER_GAP +
+                            SPRITE_MAP.CLASS_FILTER.FIGHTER.width),
                 classFiltersBoundingBox.y,
                 SPRITE_MAP.CLASS_FILTER.FIGHTER.width,
                 SPRITE_MAP.CLASS_FILTER.FIGHTER.height
@@ -532,8 +536,8 @@ const WhoCanvas: React.FC<Props> = ({
                                 searchInputBoundingBox.y / canvasScaleHeight -
                                 (20 -
                                     searchInputBoundingBox.height /
-                                    canvasScaleHeight) /
-                                2,
+                                        canvasScaleHeight) /
+                                    2,
                             width: searchInputBoxWidth / canvasScaleWidth,
                             fontSize: `${23 - Math.round(canvasScaleWidth * 6)}px`,
                         }}
@@ -548,18 +552,18 @@ const WhoCanvas: React.FC<Props> = ({
                             position: "absolute",
                             left:
                                 levelRangeLowerInputBoundingBox.x /
-                                canvasScaleWidth -
+                                    canvasScaleWidth -
                                 (levelRangeInputBoxWidth -
                                     levelRangeLowerInputBoundingBox.width /
-                                    canvasScaleWidth) /
-                                2,
+                                        canvasScaleWidth) /
+                                    2,
                             top:
                                 levelRangeLowerInputBoundingBox.y /
-                                canvasScaleHeight -
+                                    canvasScaleHeight -
                                 (20 -
                                     levelRangeLowerInputBoundingBox.height /
-                                    canvasScaleHeight) /
-                                2,
+                                        canvasScaleHeight) /
+                                    2,
                             width: levelRangeInputBoxWidth,
                             fontSize: `${23 - Math.round(canvasScaleWidth * 6)}px`,
                             textAlign: "center",
@@ -584,18 +588,18 @@ const WhoCanvas: React.FC<Props> = ({
                             position: "absolute",
                             left:
                                 levelRangeUpperInputBoundingBox.x /
-                                canvasScaleWidth -
+                                    canvasScaleWidth -
                                 (levelRangeInputBoxWidth -
                                     levelRangeUpperInputBoundingBox.width /
-                                    canvasScaleWidth) /
-                                2,
+                                        canvasScaleWidth) /
+                                    2,
                             top:
                                 levelRangeUpperInputBoundingBox.y /
-                                canvasScaleHeight -
+                                    canvasScaleHeight -
                                 (20 -
                                     levelRangeUpperInputBoundingBox.height /
-                                    canvasScaleHeight) /
-                                2,
+                                        canvasScaleHeight) /
+                                    2,
                             width: levelRangeInputBoxWidth,
                             fontSize: `${23 - Math.round(canvasScaleWidth * 6)}px`,
                             textAlign: "center",
@@ -626,8 +630,8 @@ const WhoCanvas: React.FC<Props> = ({
                     width: isDynamicWidth ? "100%" : "unset",
                 }}
                 onClick={handleCanvasClick}
-            // onMouseMove={handleCanvasMouseMove}
-            // onMouseLeave={handleCanvasMouseLeave}
+                // onMouseMove={handleCanvasMouseMove}
+                // onMouseLeave={handleCanvasMouseLeave}
             />
         </div>
     )

@@ -21,6 +21,7 @@ interface Props {
 interface RenderCharacterProps {
     character: Character
     backgroundColorOverride?: string
+    characterIndex?: number
 }
 
 const useRenderCharacter = ({ sprite, context }: Props) => {
@@ -48,6 +49,7 @@ const useRenderCharacter = ({ sprite, context }: Props) => {
     const renderCharacter = ({
         character,
         backgroundColorOverride,
+        characterIndex
     }: RenderCharacterProps) => {
         if (!sprite || !context) return
 
@@ -96,7 +98,17 @@ const useRenderCharacter = ({ sprite, context }: Props) => {
         })
 
         // render in-party icon
-        if (character.is_in_party) {
+        if (characterIndex) {
+            context.textAlign = "center"
+            context.textBaseline = "middle"
+            context.fillStyle = WHO_COLORS.CHARACTER_TEXT
+            context.font = fonts.CHARACTER_LEVEL
+            context.fillText(
+                characterIndex.toString(),
+                lfmHeaderBoundingBox.x / 2,
+                CHARACTER_HEIGHT / 2
+            )
+        } else if (character.is_in_party) {
             context.drawImage(
                 sprite,
                 SPRITE_MAP.IN_PARTY_ICON.x,
