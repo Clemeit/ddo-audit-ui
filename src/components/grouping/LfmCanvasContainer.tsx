@@ -47,12 +47,15 @@ const GroupingContainer = ({
         interval: refreshInterval,
         lifespan: 1000 * 60 * 60 * 12, // 12 hours
     })
-    const { data: serverInfoData, state: serverInfoState } =
-        usePollApi<ServerInfoApiDataModel>({
-            endpoint: "game/server-info",
-            interval: 10000,
-            lifespan: 1000 * 60 * 60 * 12, // 12 hours
-        })
+    const {
+        data: serverInfoData,
+        state: serverInfoState,
+        reload: reloadServerInfo,
+    } = usePollApi<ServerInfoApiDataModel>({
+        endpoint: "game/server-info",
+        interval: 10000,
+        lifespan: 1000 * 60 * 60 * 12, // 12 hours
+    })
 
     const isServerOffline = useMemo<boolean>(
         () =>
@@ -196,7 +199,10 @@ const GroupingContainer = ({
                 <>
                     <LfmToolbar
                         serverName={serverName}
-                        reloadLfms={reloadLfms}
+                        reloadLfms={() => {
+                            reloadLfms()
+                            reloadServerInfo()
+                        }}
                         isSecondaryPanel={isSecondaryPanel}
                         handleClosePanel={handleClosePanel}
                     />
