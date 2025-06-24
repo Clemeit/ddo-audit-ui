@@ -25,6 +25,7 @@ import Checkbox from "../global/Checkbox.tsx"
 import NavCardCluster from "../global/NavCardCluster.tsx"
 import { MAX_REGISTERED_CHARACTERS } from "../../constants/client.ts"
 import { Link } from "react-router-dom"
+import { convertMillisecondsToPrettyString } from "../../utils/stringUtils.ts"
 
 const Registration = () => {
     const {
@@ -34,6 +35,7 @@ const Registration = () => {
         isError,
         reload: reloadCharacters,
         unregisterCharacter,
+        lastReload,
     } = useGetRegisteredCharacters()
 
     // Registering a new character:
@@ -50,6 +52,36 @@ const Registration = () => {
     const [foundAndAddedCharacterIds, setFoundAndAddedCharacterIds] = useState<
         number[]
     >([])
+    const [millisSinceReload, setMillisSinceReload] = useState<number>(0)
+    const [firstLoad] = useState<Date>(new Date())
+
+    React.useEffect(() => {
+        setMillisSinceReload(new Date().getTime() - lastReload.getTime())
+
+        const updateReloadStatus = setInterval(() => {
+            if (new Date().getTime() - firstLoad.getTime() > 1000 * 60 * 60 * 5)
+                return
+            const millis = new Date().getTime() - lastReload.getTime()
+            if (millis > 30000) reloadCharacters()
+            setMillisSinceReload(millis)
+        }, 10000)
+
+        return () => clearInterval(updateReloadStatus)
+    }, [lastReload])
+
+    function getLastReloadString() {
+        const prettyString = convertMillisecondsToPrettyString(
+            millisSinceReload,
+            true,
+            true,
+            true
+        )
+        if (!prettyString) {
+            return "Last refreshed just now"
+        } else {
+            return `Last refreshed ${prettyString} ago`
+        }
+    }
 
     const closeModal = () => {
         setShowRegistrationModal(false)
@@ -290,6 +322,15 @@ const Registration = () => {
                         noCharactersMessage="No characters added"
                         unregisterCharacter={unregisterCharacter}
                     />
+                    <div
+                        style={{
+                            marginTop: "5px",
+                        }}
+                    >
+                        <span style={{ color: "var(--secondary-text)" }}>
+                            {getLastReloadString()}
+                        </span>
+                    </div>
                     <ValidationMessage
                         type="error"
                         message="Failed to load characters. Showing cached data."

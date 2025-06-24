@@ -32,9 +32,11 @@ const useGetRegisteredCharacters = ({ enabled = true }: Props = {}) => {
     >(undefined)
     const [isLoaded, setIsLoaded] = useState<boolean>(false)
     const [isError, setIsError] = useState<boolean>(false)
+    const [lastReload, setLastReload] = useState<Date>(new Date())
 
     const reload = useCallback(() => {
         setIsLoaded(false)
+        setLastReload(new Date())
         const registeredCharactersMetadata =
             getRegisteredCharactersMetadataFromLocalStorage()
         if (
@@ -119,6 +121,7 @@ const useGetRegisteredCharacters = ({ enabled = true }: Props = {}) => {
         isError,
         reload,
         unregisterCharacter,
+        lastReload
     }
 }
 
