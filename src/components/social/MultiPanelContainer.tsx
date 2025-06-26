@@ -31,20 +31,22 @@ const MultiPanelContainer = ({ serverName, primaryType }: Props) => {
     const secondaryPanelTypeModalContent = () => (
         <div style={{ padding: "20px" }}>
             <ContentCluster title="Choose Secondary Panel">
-                <NavCardCluster>
-                    <NavigationCard
-                        noLink
-                        fullWidth
-                        type="grouping"
-                        onClick={() => setSecondaryType("grouping")}
-                    />
-                    <NavigationCard
-                        noLink
-                        fullWidth
-                        type="who"
-                        onClick={() => setSecondaryType("who")}
-                    />
-                </NavCardCluster>
+                <div style={{ maxWidth: "400px" }}>
+                    <NavCardCluster>
+                        <NavigationCard
+                            noLink
+                            fullWidth
+                            type="grouping"
+                            onClick={() => setSecondaryType("grouping")}
+                        />
+                        <NavigationCard
+                            noLink
+                            fullWidth
+                            type="who"
+                            onClick={() => setSecondaryType("who")}
+                        />
+                    </NavCardCluster>
+                </div>
             </ContentCluster>
         </div>
     )
@@ -52,47 +54,49 @@ const MultiPanelContainer = ({ serverName, primaryType }: Props) => {
     const secondaryPanelServerModalContent = () => (
         <div style={{ padding: "20px" }}>
             <ContentCluster title="Choose a Server">
-                <NavCardCluster>
-                    {SERVER_NAMES_LOWER.map((_serverName) => (
-                        <ServerNavigationCard
-                            noLink
-                            miniature
-                            fullWidth
-                            key={_serverName}
-                            destination={`/grouping/${_serverName}`}
-                            title={toSentenceCase(_serverName)}
-                            onClick={() => {
-                                setIsModalOpen(false)
-                                if (secondaryType === "grouping") {
-                                    setSecondaryPanel(
-                                        <LfmContainer
-                                            serverName={_serverName}
-                                            isSecondaryPanel={true}
-                                            handleClosePanel={() => {
-                                                setSecondaryPanel(undefined)
-                                            }}
-                                        />
-                                    )
-                                } else if (secondaryType === "who") {
-                                    setSecondaryPanel(
-                                        <WhoContainer
-                                            serverName={_serverName}
-                                            isSecondaryPanel={true}
-                                            handleClosePanel={() => {
-                                                setSecondaryPanel(undefined)
-                                            }}
-                                        />
+                <div style={{ maxWidth: "400px" }}>
+                    <NavCardCluster>
+                        {SERVER_NAMES_LOWER.map((_serverName) => (
+                            <ServerNavigationCard
+                                noLink
+                                miniature
+                                fullWidth
+                                key={_serverName}
+                                destination={`/grouping/${_serverName}`}
+                                title={toSentenceCase(_serverName)}
+                                onClick={() => {
+                                    setIsModalOpen(false)
+                                    if (secondaryType === "grouping") {
+                                        setSecondaryPanel(
+                                            <LfmContainer
+                                                serverName={_serverName}
+                                                isSecondaryPanel={true}
+                                                handleClosePanel={() => {
+                                                    setSecondaryPanel(undefined)
+                                                }}
+                                            />
+                                        )
+                                    } else if (secondaryType === "who") {
+                                        setSecondaryPanel(
+                                            <WhoContainer
+                                                serverName={_serverName}
+                                                isSecondaryPanel={true}
+                                                handleClosePanel={() => {
+                                                    setSecondaryPanel(undefined)
+                                                }}
+                                            />
+                                        )
+                                    }
+                                }}
+                                badge={
+                                    _serverName === serverName && (
+                                        <Badge text="Current" size="small" />
                                     )
                                 }
-                            }}
-                            badge={
-                                _serverName === serverName && (
-                                    <Badge text="Current" size="small" />
-                                )
-                            }
-                        />
-                    ))}
-                </NavCardCluster>
+                            />
+                        ))}
+                    </NavCardCluster>
+                </div>
             </ContentCluster>
         </div>
     )

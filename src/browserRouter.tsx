@@ -28,10 +28,9 @@ const Notifications = lazy(
     () => import("./components/notifications/Notifications.tsx")
 )
 const Timers = lazy(() => import("./components/timers/Timers.tsx"))
-const Suggestions = lazy(
-    () => import("./components/suggestions/Suggestions.tsx")
-)
+const Feedback = lazy(() => import("./components/feedback/Feedback.tsx"))
 const Friends = lazy(() => import("./components/friends/Friends.tsx"))
+const About = lazy(() => import("./components/about/About.tsx"))
 
 // Providers
 import { LfmProvider } from "./contexts/LfmContext.tsx"
@@ -49,9 +48,11 @@ export default createBrowserRouter(
             <Route
                 path="/registration"
                 element={
-                    <AreaProvider>
-                        <Registration />
-                    </AreaProvider>
+                    <LfmProvider>
+                        <AreaProvider>
+                            <Registration />
+                        </AreaProvider>
+                    </LfmProvider>
                 }
             />
             <Route path="/activity" element={<Activity />} />
@@ -110,7 +111,7 @@ export default createBrowserRouter(
             <Route path="/notifications" element={<Notifications />} />
             <Route path="/timers" element={<Timers />} />
             <Route path="/servers" element={<Servers />} />
-            <Route path="/suggestions" element={<Suggestions />} />
+            <Route path="/feedback" element={<Feedback />} />
             <Route
                 path="/friends"
                 element={
@@ -119,6 +120,7 @@ export default createBrowserRouter(
                     </AreaProvider>
                 }
             />
+            <Route path="/about" element={<About />} />
             <Route path="*" element={<NotFound />} />
         </Route>
     )

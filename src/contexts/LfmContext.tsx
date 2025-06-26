@@ -15,7 +15,7 @@ import { useThemeContext } from "./ThemeContext.tsx"
 import { setValue, getValue } from "../utils/localStorage.ts"
 import { LfmApiDataModel, LfmSortType } from "../models/Lfm.ts"
 import { MAX_LEVEL, MIN_LEVEL } from "../constants/game.ts"
-import useGetRegisteredCharacters from "../hooks/useGetFriends.ts"
+import useGetRegisteredCharacters from "../hooks/useGetRegisteredCharacters.ts"
 import { Character } from "../models/Character.ts"
 
 interface LfmContextProps {
@@ -57,8 +57,9 @@ interface LfmContextProps {
     setTrackedCharacterIds: (ids: number[]) => void
     showLfmPostedTime: boolean
     setShowLfmPostedTime: (show: boolean) => void
-    resetViewSettings: () => void
-    resetUserSettings: () => void
+    resetFilterSettings: () => void
+    resetDisplaySettings: () => void
+    resetToolSettings: () => void
     mouseOverDelay: number
     setMouseOverDelay: (delay: number) => void
     showLfmActivity: boolean
@@ -119,32 +120,34 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
     const [showLfmPostedTime, setShowLfmPostedTime] = useState<boolean>(true)
     const [showLfmActivity, setShowLfmActivity] = useState<boolean>(true)
 
-    const resetUserSettings = () => {
+    const resetFilterSettings = () => {
         setMinLevel(MIN_LEVEL)
         setMaxLevel(MAX_LEVEL)
         setFilterByMyCharacters(false)
         setShowNotEligible(true)
+        setTrackedCharacterIds([])
+    }
+
+    const resetDisplaySettings = useCallback(() => {
+        setSortBy({ type: "level", ascending: true })
+        setFontSize(DEFAULT_BASE_FONT_SIZE)
+        setMouseOverDelay(DEFAULT_MOUSE_OVER_DELAY)
+        setPanelWidth(DEFAULT_LFM_PANEL_WIDTH)
+        setShowBoundingBoxes(false)
         setIsDynamicWidth(false)
+        setIsFullScreen(false)
+        setIsMultiColumn(false)
+    }, [setIsFullScreen])
+
+    const resetToolSettings = () => {
         setShowRaidTimerIndicator(true)
         setShowMemberCount(true)
         setShowQuestGuesses(true)
         setShowQuestTips(true)
         setShowCharacterGuildNames(false)
         setShowLfmPostedTime(true)
-        setTrackedCharacterIds([])
         setShowLfmActivity(true)
-        setIsMultiColumn(false)
     }
-
-    const resetViewSettings = useCallback(() => {
-        setSortBy({ type: "level", ascending: true })
-        setFontSize(DEFAULT_BASE_FONT_SIZE)
-        setPanelWidth(DEFAULT_LFM_PANEL_WIDTH)
-        setShowBoundingBoxes(false)
-        setIsDynamicWidth(false)
-        setIsFullScreen(false)
-        setMouseOverDelay(DEFAULT_MOUSE_OVER_DELAY)
-    }, [setIsFullScreen])
 
     const loadSettingsFromLocalStorage = useCallback(() => {
         const settings = getValue<any>(settingsStorageKey)
@@ -172,11 +175,11 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
             } catch (e) {
                 // TODO: maybe show a modal here to allow the user to reset their settings
                 console.error("Error loading settings from local storage", e)
-                resetUserSettings()
-                resetViewSettings()
+                resetFilterSettings()
+                resetDisplaySettings()
             }
         }
-    }, [resetViewSettings])
+    }, [resetDisplaySettings])
 
     useEffect(() => {
         // load from local storage
@@ -282,8 +285,9 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
                 setTrackedCharacterIds,
                 showLfmPostedTime,
                 setShowLfmPostedTime,
-                resetViewSettings,
-                resetUserSettings,
+                resetDisplaySettings,
+                resetFilterSettings,
+                resetToolSettings,
                 mouseOverDelay,
                 setMouseOverDelay,
                 showLfmActivity,

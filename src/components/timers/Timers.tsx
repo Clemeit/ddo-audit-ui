@@ -4,13 +4,13 @@ import {
     ContentCluster,
     ContentClusterGroup,
 } from "../global/ContentCluster.tsx"
-import useGetRegisteredCharacters from "../../hooks/useGetFriends.ts"
+import useGetRegisteredCharacters from "../../hooks/useGetRegisteredCharacters.ts"
 import {
     ErrorGettingRegisteredCharacters,
     NoRegisteredAndVerifiedCharacters,
     NoVerifiedCharacters,
 } from "../global/CommonMessages.tsx"
-import { Link } from "react-router-dom"
+import Link from "../global/Link.tsx"
 import useGetCharacterTimers from "../../hooks/useGetCharacterTimers.ts"
 import { pluralize } from "../../utils/stringUtils.ts"
 import NavigationCard from "../global/NavigationCard.tsx"

@@ -17,7 +17,9 @@ import { ReactComponent as Activity } from "../../assets/svg/activity.svg"
 import { ReactComponent as Health } from "../../assets/svg/health.svg"
 import { ReactComponent as Ignore } from "../../assets/svg/ignore.svg"
 
-import { Link } from "react-router-dom"
+import Link from "./Link.tsx"
+import WebLink from "./WebLink.tsx"
+import logMessage from "../../utils/logUtils.ts"
 
 const typeToTitleMap = {
     live: "Quick Info",
@@ -32,7 +34,7 @@ const typeToTitleMap = {
     timers: "Raid and Quest Timers",
     about: "About This Project",
     api: "API",
-    suggestions: "Give Feedback",
+    feedback: "Give Feedback",
     activity: "Character Activity",
     health: "Site and API Health",
     ignore: "Ignore List",
@@ -53,7 +55,7 @@ const typeToDescriptionMap = {
     timers: "View and manage your current raid and quest timers.",
     about: "Everything you wanted to know about this project and more.",
     api: "Pull back the curtain. Access the data for your own use.",
-    suggestions:
+    feedback:
         "Your feedback is important. Let me know what you think of the project.",
     activity: "View your verified characters' detailed activity history.",
     health: "Monitor DDO Audit's data collection, website, and API health.",
@@ -73,7 +75,7 @@ const typeToIconMap = {
     timers: <TimerSVG className="shrinkable-icon" />,
     about: <AboutSVG className="shrinkable-icon" />,
     api: <ApiSVG className="shrinkable-icon" />,
-    suggestions: <FeedbackSVG className="shrinkable-icon" />,
+    feedback: <FeedbackSVG className="shrinkable-icon" />,
     activity: <Activity className="shrinkable-icon" />,
     health: <Health className="shrinkable-icon" />,
     ignore: <Ignore className="shrinkable-icon" />,
@@ -96,12 +98,15 @@ const NavigationCard = ({
     fullWidth,
     externalLink,
 }: Props) => {
+    const handleClick = () => {
+        logMessage(`Navigation card clicked: ${type}`, "info", "click")
+        onClick?.()
+    }
+
     if (externalLink) {
         return (
-            <a
+            <WebLink
                 href={externalLink}
-                target="_blank"
-                rel="noopener noreferrer"
                 className={`navigation-card ${fullWidth ? "full-width" : ""}`}
             >
                 <span className="navigation-card-title">
@@ -112,14 +117,14 @@ const NavigationCard = ({
                 <p className="navigation-card-content">
                     {typeToDescriptionMap[type]}
                 </p>
-            </a>
+            </WebLink>
         )
     }
 
     if (noLink) {
         return (
             <button
-                onClick={onClick}
+                onClick={handleClick}
                 className={`navigation-card ${fullWidth ? "full-width" : ""}`}
             >
                 <span className="navigation-card-title">

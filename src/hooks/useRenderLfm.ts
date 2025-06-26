@@ -132,7 +132,7 @@ const useRenderLfm = ({ lfmSprite, context }: Props) => {
             if (!context || !lfmSprite) return
             context.imageSmoothingEnabled = false
             const fonts = FONTS(fontSize)
-            const quest = quests[lfm.quest_id || 0] || quests[0]
+            const quest = quests[lfm.quest_id || 0] ?? quests[0]
 
             // set up this lfm's bounds
             const {

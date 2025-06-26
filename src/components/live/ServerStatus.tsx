@@ -22,8 +22,8 @@ const ServerStatus = ({
     const mostRecentCheck = useMemo(() => {
         if (serverInfoData === null) {
             return {
-                mostRecentStatusCheck: new Date(),
-                timeDifferenceInSeconds: 0,
+                mostRecentStatusCheck: new Date(0),
+                timeDifferenceInSeconds: -1,
             }
         }
 
@@ -58,7 +58,14 @@ const ServerStatus = ({
         const { timeDifferenceInSeconds } = mostRecentCheck
 
         let delayStatementSpan = <span />
-        if (timeDifferenceInSeconds < 10) {
+        if (timeDifferenceInSeconds === -1) {
+            delayStatementSpan = (
+                <span className="secondary-text">
+                    a long time ago in a galaxy far, far away... (something
+                    broke)
+                </span>
+            )
+        } else if (timeDifferenceInSeconds < 10) {
             delayStatementSpan = (
                 <span className="secondary-text">
                     just now <span className="orange-text">(live data)</span>
@@ -120,8 +127,13 @@ const ServerStatus = ({
                     .sort(([server_name_a], [server_name_b]) =>
                         server_name_a.localeCompare(server_name_b)
                     )
-                    .sort(([, server_a_data]: [string, ServerInfo], [, server_b_data]: [string, ServerInfo]) =>
-                        (server_b_data.is_online ? 1 : 0) - (server_a_data.is_online ? 1 : 0)
+                    .sort(
+                        (
+                            [, server_a_data]: [string, ServerInfo],
+                            [, server_b_data]: [string, ServerInfo]
+                        ) =>
+                            (server_b_data.is_online ? 1 : 0) -
+                            (server_a_data.is_online ? 1 : 0)
                     )
                     .map(([server_name, server_data]) => (
                         <div key={server_name} className="server-status">

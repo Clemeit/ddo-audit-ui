@@ -1,6 +1,6 @@
 import React, { useMemo } from "react"
 import "./LfmToolbar.css"
-import { Link } from "react-router-dom"
+import Link from "../global/Link.tsx"
 import { useThemeContext } from "../../contexts/ThemeContext.tsx"
 import Modal from "../modal/Modal.tsx"
 import Stack from "../global/Stack.tsx"
@@ -22,6 +22,7 @@ import Badge from "../global/Badge.tsx"
 import Checkbox from "../global/Checkbox.tsx"
 import useFeatureCallouts from "../../hooks/useFeatureCallouts.ts"
 import GenericToolbar from "../global/GenericToolbar.tsx"
+import useGetRegisteredCharacters from "../../hooks/useGetRegisteredCharacters.ts"
 
 interface Props {
     reloadLfms: () => void
@@ -69,8 +70,9 @@ const LfmToolbar = ({
         showLfmPostedTime,
         setShowLfmPostedTime,
         reloadRegisteredCharacters,
-        resetViewSettings,
-        resetUserSettings,
+        resetDisplaySettings,
+        resetFilterSettings,
+        resetToolSettings,
         mouseOverDelay,
         setMouseOverDelay,
         showLfmActivity,
@@ -81,9 +83,11 @@ const LfmToolbar = ({
     const { isFullScreen, setIsFullScreen } = useThemeContext()
     const { isCalloutActive, callouts, dismissCallout } = useFeatureCallouts()
     const [showSettingsModal, setShowSettingsModal] = React.useState(false)
-    const [showResetViewSettingsModal, setShowResetViewSettingsModal] =
+    const [showResetDisplaySettingsModal, setShowResetDisplaySettingsModal] =
         React.useState(false)
-    const [showResetUserSettingsModal, setShowResetUserSettingsModal] =
+    const [showResetFilterSettingsModal, setShowResetFilterSettingsModal] =
+        React.useState(false)
+    const [showResetToolSettingsModal, setShowResetToolSettingsModal] =
         React.useState(false)
 
     const handleOpenModal = () => {
@@ -94,45 +98,62 @@ const LfmToolbar = ({
         setShowSettingsModal(false)
     }
 
-    const resetViewSettingsModal = useMemo(
+    const resetFilterSettingsModal = useMemo(
         () => (
             <YesNoModal
-                title="Are you sure?"
-                text="This will reset all display settings to their default values."
-                onYes={() => {
-                    resetViewSettings()
-                    setShowResetViewSettingsModal(false)
-                    handleCloseModal()
-                }}
-                onNo={() => setShowResetViewSettingsModal(false)}
-                fullScreenOnMobile
-            />
-        ),
-        [resetViewSettings]
-    )
-
-    const resetUserSettingsModal = useMemo(
-        () => (
-            <YesNoModal
-                title="Are you sure?"
+                title="Reset Filters"
                 text="This will reset all filter settings to their default values. Your registered characters will not be affected."
                 onYes={() => {
-                    resetUserSettings()
-                    setShowResetUserSettingsModal(false)
+                    resetFilterSettings()
+                    setShowResetFilterSettingsModal(false)
                     handleCloseModal()
                 }}
-                onNo={() => setShowResetUserSettingsModal(false)}
+                onNo={() => setShowResetFilterSettingsModal(false)}
                 fullScreenOnMobile
             />
         ),
-        [resetUserSettings]
+        [resetFilterSettings]
+    )
+
+    const resetDisplaySettingsModal = useMemo(
+        () => (
+            <YesNoModal
+                title="Reset Display"
+                text="This will reset all display settings to their default values."
+                onYes={() => {
+                    resetDisplaySettings()
+                    setShowResetDisplaySettingsModal(false)
+                    handleCloseModal()
+                }}
+                onNo={() => setShowResetDisplaySettingsModal(false)}
+                fullScreenOnMobile
+            />
+        ),
+        [resetDisplaySettings]
+    )
+
+    const resetToolSettingsModal = useMemo(
+        () => (
+            <YesNoModal
+                title="Reset Tools"
+                text="This will reset all tool settings to their default values."
+                onYes={() => {
+                    resetToolSettings()
+                    setShowResetToolSettingsModal(false)
+                    handleCloseModal()
+                }}
+                onNo={() => setShowResetToolSettingsModal(false)}
+                fullScreenOnMobile
+            />
+        ),
+        [resetToolSettings]
     )
 
     const settingModalContent = useMemo(
         () => (
             <div className="lfm-settings-modal">
                 <ContentClusterGroup flavor="compact">
-                    <ContentCluster title="Filter Groups">
+                    <ContentCluster title="Filters">
                         <Stack direction="column" gap="10px">
                             <label
                                 className="input-label"
@@ -261,7 +282,7 @@ const LfmToolbar = ({
                             <Stack fullWidth justify="flex-end">
                                 <Button
                                     onClick={() =>
-                                        setShowResetUserSettingsModal(true)
+                                        setShowResetFilterSettingsModal(true)
                                     }
                                     type="tertiary"
                                     className="critical"
@@ -349,7 +370,7 @@ const LfmToolbar = ({
                             <Stack fullWidth justify="flex-end">
                                 <Button
                                     onClick={() =>
-                                        setShowResetViewSettingsModal(true)
+                                        setShowResetDisplaySettingsModal(true)
                                     }
                                     type="tertiary"
                                     className="critical"
@@ -425,6 +446,17 @@ const LfmToolbar = ({
                                     <Badge type="new" text="New" />
                                 )}
                             </Checkbox>
+                            <Stack fullWidth justify="flex-end">
+                                <Button
+                                    onClick={() =>
+                                        setShowResetToolSettingsModal(true)
+                                    }
+                                    type="tertiary"
+                                    className="critical"
+                                >
+                                    Reset all
+                                </Button>
+                            </Stack>
                         </Stack>
                     </ContentCluster>
                 </ContentClusterGroup>
@@ -474,11 +506,13 @@ const LfmToolbar = ({
 
     return (
         <>
-            {showResetViewSettingsModal && resetViewSettingsModal}
-            {showResetUserSettingsModal && resetUserSettingsModal}
+            {showResetDisplaySettingsModal && resetDisplaySettingsModal}
+            {showResetFilterSettingsModal && resetFilterSettingsModal}
+            {showResetToolSettingsModal && resetToolSettingsModal}
             {showSettingsModal &&
-                !showResetViewSettingsModal &&
-                !showResetUserSettingsModal && (
+                !showResetDisplaySettingsModal &&
+                !showResetFilterSettingsModal &&
+                !showResetToolSettingsModal && (
                     <Modal onClose={handleCloseModal} fullScreenOnMobile>
                         {settingModalContent}
                     </Modal>

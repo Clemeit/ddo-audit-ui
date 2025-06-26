@@ -17,19 +17,19 @@ interface Props {
 
 const useGetRegisteredCharacters = ({ enabled = true }: Props = {}) => {
     const [registeredCharacters, setRegisteredCharacters] = useState<
-        Character[] | undefined
-    >(undefined)
+        Character[]
+    >([])
     const [registeredCharactersCached, setRegisteredCharactersCached] =
-        useState<Character[] | undefined>(undefined)
-    const [accessTokens, setAccessTokens] = useState<AccessToken[] | undefined>(
-        undefined
+        useState<Character[]>([])
+    const [accessTokens, setAccessTokens] = useState<AccessToken[]>(
+        []
     )
     const [verifiedCharacters, setVerifiedCharacters] = useState<
-        Character[] | undefined
-    >(undefined)
+        Character[]
+    >([])
     const [verifiedCharactersCached, setVerifiedCharactersCached] = useState<
-        Character[] | undefined
-    >(undefined)
+        Character[]
+    >([])
     const [isLoaded, setIsLoaded] = useState<boolean>(false)
     const [isError, setIsError] = useState<boolean>(false)
     const [lastReload, setLastReload] = useState<Date>(new Date())
@@ -43,7 +43,10 @@ const useGetRegisteredCharacters = ({ enabled = true }: Props = {}) => {
             !registeredCharactersMetadata ||
             registeredCharactersMetadata.data?.length === 0
         ) {
+            setRegisteredCharactersCached([])
             setRegisteredCharacters([])
+            setVerifiedCharactersCached([])
+            setVerifiedCharacters([])
             setIsLoaded(true)
             return
         }
@@ -112,11 +115,25 @@ const useGetRegisteredCharacters = ({ enabled = true }: Props = {}) => {
         if (enabled) reload()
     }, [reload, enabled])
 
+    const publishedRegisteredCharacters = (): Character[] => {
+        if (registeredCharacters.length === 0 && registeredCharactersCached.length !== 0) {
+            return registeredCharactersCached
+        }
+        return registeredCharacters
+    }
+
+    const publishedVerifiedCharacters = (): Character[] => {
+        if (verifiedCharacters.length === 0 && verifiedCharactersCached.length !== 0) {
+            return verifiedCharactersCached
+        }
+        return verifiedCharacters
+    }
+
     return {
         registeredCharacters:
-            registeredCharacters || registeredCharactersCached || [],
+            publishedRegisteredCharacters(),
         verifiedCharacters:
-            verifiedCharacters || verifiedCharactersCached || [],
+            publishedVerifiedCharacters(),
         accessTokens,
         isLoaded,
         isError,

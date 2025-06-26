@@ -1,5 +1,6 @@
 import axios from "axios"
 
+// TODO: replace this with the base URL, should be stored in an environment variable
 const API_URL = "https://api.hcnxsryjficudzazjxty.com/v1/characters"
 
 function getCharacterByNameAndServer(name: string, server: string) {

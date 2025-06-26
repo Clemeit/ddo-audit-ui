@@ -1,6 +1,6 @@
 import React from "react"
 import "./ErrorBoundary.css"
-import { Link } from "react-router-dom"
+import Link from "../global/Link.tsx"
 
 interface ErrorBoundaryState {
     hasError: boolean

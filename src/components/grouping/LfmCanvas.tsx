@@ -29,16 +29,6 @@ import {
 } from "../../constants/lfmPanel.ts"
 import { SPRITE_MAP } from "../../constants/spriteMap.ts"
 
-/**
- * It takes in as props the lfms raidView, and excludedLfmCount
- * It has separate canvases for the lfms and overlay
- * It renders the lfm panel only when the lfm panel width or height changes
- * It renders individual lfms on when they different from what was last rendered for that index
- * It renders the overlay when a lfm is hovered over, and rerenders the overlay if that specific lfm changes
- * If any lfms are rendered, or if the lfm panel is rendered, or if the overlay is rendered, then it renders the
- *   lfm canvas and the overlay canvas to the main canvas
- */
-
 interface Props {
     serverName: string
     lfms: Lfm[]
@@ -178,10 +168,14 @@ const LfmCanvas: React.FC<Props> = ({
             }
         }
 
-        window.addEventListener("resize", handleResize)
+        const resizeObserver = new ResizeObserver(handleResize)
+        if (mainCanvasRef.current) {
+            resizeObserver.observe(mainCanvasRef.current)
+        }
+
         handleResize()
         return () => {
-            window.removeEventListener("resize", handleResize)
+            resizeObserver.disconnect()
         }
     }, [mainCanvasRef.current])
 
@@ -193,6 +187,8 @@ const LfmCanvas: React.FC<Props> = ({
         if (raidView) return
         const rect = mainCanvasRef.current?.getBoundingClientRect()
         if (!rect) return
+        if (!mainCanvasRef.current) return
+
         const x = (e.clientX - rect.left) * canvasScaleWidth
         const y = (e.clientY - rect.top) * canvasScaleHeight
 

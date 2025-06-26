@@ -187,18 +187,6 @@ const WhoCanvas: React.FC<Props> = ({
         }
     }, [mainCanvasRef.current])
 
-    // const canvasScaleWidth = useMemo(() => {
-    //     if (!mainCanvasRef.current) return 1
-    //     console.log(
-    //         mainCanvasRef.current.width / mainCanvasRef.current.clientWidth
-    //     )
-    //     return mainCanvasRef.current.width / mainCanvasRef.current.clientWidth
-    // }, [mainCanvasRef, window.innerWidth])
-    // const canvasScaleHeight = useMemo(() => {
-    //     if (!mainCanvasRef.current) return 1
-    //     return mainCanvasRef.current.height / mainCanvasRef.current.clientHeight
-    // }, [mainCanvasRef, window.innerWidth])
-
     // Render the who panel
     useEffect(() => {
         if (!image) return

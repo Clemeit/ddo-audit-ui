@@ -41,7 +41,7 @@ const Directory = () => {
                     <NavCardCluster>
                         <NavigationCard type="about" />
                         <NavigationCard type="api" />
-                        <NavigationCard type="suggestions" />
+                        <NavigationCard type="feedback" />
                         <NavigationCard
                             type="health"
                             externalLink="https://ddoaudit.betteruptime.com/"

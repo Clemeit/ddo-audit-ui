@@ -3,7 +3,7 @@ import "./Footer.css"
 import useIsMobile from "../../hooks/useIsMobile.ts"
 import { useLocation } from "react-router-dom"
 
-const showFooterOnPages = ["/"]
+const showFooterOnPages = ["/", "/about"]
 
 const Footer = () => {
     const isMobile = useIsMobile()

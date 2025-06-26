@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react"
 import { useLocation } from "react-router-dom"
-import { Link } from "react-router-dom"
+import Link from "../global/Link.tsx"
 import "./NavMenu.css"
 import { ReactComponent as HomeSVG } from "../../assets/svg/home.svg"
 import { ReactComponent as AboutSVG } from "../../assets/svg/about.svg"

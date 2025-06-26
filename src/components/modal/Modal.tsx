@@ -41,7 +41,7 @@ const Modal = ({
             )}
             <div
                 className={`modal-container ${centeredContent ? "centered-content" : ""} ${fullScreenOnMobile ? "full-screen-on-mobile" : ""}`}
-                style={{ maxWidth }}
+                // style={{ maxWidth }}
             >
                 <div
                     className={`modal-content ${centeredContent ? "centered-content" : ""}`}

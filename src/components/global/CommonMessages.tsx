@@ -1,5 +1,5 @@
 import React from "react"
-import { Link } from "react-router-dom"
+import Link from "./Link.tsx"
 import Button from "./Button.tsx"
 import PageMessage from "./PageMessage.tsx"
 import Stack from "./Stack.tsx"
@@ -20,7 +20,7 @@ export const NoVerifiedCharacters = () => (
             type="secondary"
             className="verify-button"
             small
-            onClick={() => { }}
+            onClick={() => {}}
             style={{ display: "inline" }}
         >
             Verify
@@ -125,7 +125,7 @@ export const ServerOfflineMessage = ({
             <Button onClick={handleDismiss} fullWidthOnMobile>
                 Load data anyway
             </Button>
-            <Button type="secondary" onClick={() => { }} fullWidthOnMobile>
+            <Button type="secondary" onClick={() => {}} fullWidthOnMobile>
                 Report bug
             </Button>
         </Stack>

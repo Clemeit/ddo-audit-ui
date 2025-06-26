@@ -16,7 +16,7 @@
     background-color: var(--background);
     border-radius: 5px;
     box-shadow: 0 0 20px var(--shadow);
-    width: 90%;
+    /* width: 90%; */
     z-index: 91;
     top: 50%;
     left: 50%;
