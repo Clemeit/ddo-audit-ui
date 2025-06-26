@@ -22,7 +22,6 @@ import Badge from "../global/Badge.tsx"
 import Checkbox from "../global/Checkbox.tsx"
 import useFeatureCallouts from "../../hooks/useFeatureCallouts.ts"
 import GenericToolbar from "../global/GenericToolbar.tsx"
-import useGetRegisteredCharacters from "../../hooks/useGetRegisteredCharacters.ts"
 
 interface Props {
     reloadLfms: () => void
