@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext } from "react"
+import React, { createContext, useState, useContext, useEffect } from "react"
 import { Notification } from "../models/Client"
 import { v4 as uuid } from "uuid"
 
@@ -19,14 +19,48 @@ interface Props {
 export const NotificationProvider = ({ children }: Props) => {
     const [notifications, setNotifications] = useState<Notification[]>([])
 
+    const timeoutNotification = (id: string, lifetime: number) => {
+        setTimeout(() => {
+            setNotifications((prev) =>
+                prev.filter((notification) => notification.id !== id)
+            )
+        }, lifetime)
+    }
+
     const createNotification = (notification: Notification) => {
-        setNotifications((prev) => [...prev, { ...notification, id: uuid() }])
+        const nofiticationId = notification.id || uuid()
+        setNotifications((prev) => [
+            ...prev,
+            { ...notification, id: nofiticationId },
+        ])
+        if (notification.lifetime) {
+            timeoutNotification(nofiticationId, notification.lifetime)
+        }
     }
 
     const dismissNotification = (id?: string) => {
         if (!id) return
         setNotifications((prev) => prev.filter((n) => n.id !== id))
     }
+
+    useEffect(() => {
+        // event listener for closing modal on escape key press
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === "Escape") {
+                // dismiss the first notification in the list
+                setNotifications((prev) => {
+                    if (prev.length > 0) {
+                        return prev.slice(1)
+                    }
+                    return prev
+                })
+            }
+        }
+        document.addEventListener("keydown", handleKeyDown)
+        return () => {
+            document.removeEventListener("keydown", handleKeyDown)
+        }
+    }, [])
 
     return (
         <NotificationContext.Provider

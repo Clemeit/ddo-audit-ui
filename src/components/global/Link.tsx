@@ -1,16 +1,22 @@
 import React from "react"
 import { Link as ReactLink } from "react-router-dom"
 import logMessage from "../../utils/logUtils.ts"
+import { getElementInnerText } from "../../utils/elementUtils.ts"
 
 interface Props {
     to: string
     className?: string
     children: React.ReactNode
+    noDecoration?: boolean
 }
 
-const Link = ({ to = "/", className = "", children }: Props) => {
+const Link = ({ to = "/", className = "", children, noDecoration }: Props) => {
     const handleClick = () => {
-        logMessage(`Link clicked: ${to}`, "info", "click")
+        logMessage("Link clicked", "info", {
+            action: "click",
+            component: "Link",
+            metadata: { to, label: getElementInnerText(children) },
+        })
     }
 
     return (
@@ -18,6 +24,9 @@ const Link = ({ to = "/", className = "", children }: Props) => {
             to={to}
             className={`link ${className ? className : ""}`}
             onClick={handleClick}
+            style={{
+                textDecoration: noDecoration ? "none" : "",
+            }}
         >
             {children}
         </ReactLink>

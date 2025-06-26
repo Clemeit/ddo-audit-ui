@@ -1,5 +1,6 @@
 import React from "react"
 import logMessage from "../../utils/logUtils.ts"
+import { getElementInnerText } from "../../utils/elementUtils.ts"
 
 interface Props {
     href: string
@@ -13,7 +14,11 @@ const WebLink = ({
     children,
 }: Props) => {
     const onClick = () => {
-        logMessage(`Web link clicked: ${href}`, "info", "click")
+        logMessage("Web link clicked", "info", {
+            action: "click",
+            component: "WebLink",
+            metadata: { href, label: getElementInnerText(children) },
+        })
     }
 
     return (

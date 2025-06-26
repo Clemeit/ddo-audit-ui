@@ -13,6 +13,8 @@ import { useThemeContext } from "../../contexts/ThemeContext.tsx"
 import useFeatureCallouts from "../../hooks/useFeatureCallouts.ts"
 import "./GenericToolbar.css"
 import { toSentenceCase } from "../../utils/stringUtils.ts"
+import Button from "./Button.tsx"
+import Stack from "./Stack.tsx"
 
 interface Props {
     handleReload: () => void
@@ -77,21 +79,25 @@ const GenericToolbar = ({
                     </span>
                 </Link>
             )}
-            <div
+            <Button
+                asDiv
                 className="item settings-button"
                 onClick={() => {
                     handleOpenSettingsModal()
                     dismissCallout("grouping-settings-button")
                 }}
+                data-attribute="grouping-settings-button"
             >
-                <SettingsSVG className="icon" />
-                <span className="hide-on-mobile">
-                    Settings{" "}
-                    {isCalloutActive("grouping-settings-button") && (
-                        <Badge type="new" text="New" />
-                    )}
-                </span>
-            </div>
+                <Stack align="center" gap="4px">
+                    <SettingsSVG className="icon" />
+                    <span className="hide-on-mobile">
+                        Settings{" "}
+                        {isCalloutActive("grouping-settings-button") && (
+                            <Badge type="new" text="New" />
+                        )}
+                    </span>
+                </Stack>
+            </Button>
             <div className="item screenshot-button hide-on-mobile">
                 <ScreenshotSVG className="icon" />
                 <span className="hide-on-mobile">Screenshot</span>

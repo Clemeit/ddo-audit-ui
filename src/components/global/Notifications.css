@@ -1,42 +1,50 @@
 .notifications-container {
     position: fixed;
-    bottom: 10px;
-    left: 50%;
+    bottom: 0;
+    left: 0;
     z-index: 100;
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 10px;
-    transform: translateX(-50%);
     width: 100%;
+    pointer-events: none;
 }
 
 .notification {
     position: relative;
+    bottom: 20px;
     background-color: var(--background-light);
-    padding: 10px;
+    padding: 20px;
     border-radius: 5px;
     box-shadow: 0 0 20px var(--shadow);
     display: flex;
     flex-direction: column;
     gap: 10px;
     transition: background-color 0.3s;
-    max-width: 400px;
-    width: 100%;
+    max-width: 600px;
+    width: 90%;
     box-sizing: border-box;
+    pointer-events: all;
 }
 
 @media (max-width: 768px) {
+    /* .notifications-container {
+        bottom: unset;
+        top: 0;
+    } */
     .notification {
         max-width: unset;
         width: 100%;
+        top: 0px;
+        bottom: unset;
     }
 }
 
 .notification-close {
     position: absolute;
-    top: 5px;
-    right: 5px;
+    top: 8px;
+    right: 8px;
     cursor: pointer;
     align-self: flex-end;
 }

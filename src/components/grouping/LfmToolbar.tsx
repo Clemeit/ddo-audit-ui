@@ -22,6 +22,7 @@ import Badge from "../global/Badge.tsx"
 import Checkbox from "../global/Checkbox.tsx"
 import useFeatureCallouts from "../../hooks/useFeatureCallouts.ts"
 import GenericToolbar from "../global/GenericToolbar.tsx"
+import RadioButton from "../global/RadioButton.tsx"
 
 interface Props {
     reloadLfms: () => void
@@ -154,21 +155,12 @@ const LfmToolbar = ({
                 <ContentClusterGroup flavor="compact">
                     <ContentCluster title="Filters">
                         <Stack direction="column" gap="10px">
-                            <label
-                                className="input-label"
-                                htmlFor="filterByLevelRange"
+                            <RadioButton
+                                checked={!filterByMyCharacters}
+                                onChange={() => setFilterByMyCharacters(false)}
                             >
-                                <input
-                                    type="radio"
-                                    name="sort"
-                                    id="filterByLevelRange"
-                                    checked={!filterByMyCharacters}
-                                    onChange={() =>
-                                        setFilterByMyCharacters(false)
-                                    }
-                                />
                                 Filter by level range
-                            </label>
+                            </RadioButton>
                             {!filterByMyCharacters && (
                                 <div className="filter-section">
                                     <Stack direction="column" gap="10px">
@@ -200,20 +192,12 @@ const LfmToolbar = ({
                                     </Stack>
                                 </div>
                             )}
-                            <label
-                                className="input-label"
-                                htmlFor="filterOnMyLevel"
+                            <RadioButton
+                                checked={filterByMyCharacters}
+                                onChange={() => setFilterByMyCharacters(true)}
                             >
-                                <input
-                                    type="radio"
-                                    id="filterOnMyLevel"
-                                    checked={filterByMyCharacters}
-                                    onChange={() =>
-                                        setFilterByMyCharacters(true)
-                                    }
-                                />
                                 Filter based on my current level
-                            </label>
+                            </RadioButton>
                             {filterByMyCharacters && (
                                 <div className="filter-section multi-select">
                                     <Stack direction="column" gap="10px">
@@ -264,20 +248,14 @@ const LfmToolbar = ({
                                     </Stack>
                                 </div>
                             )}
-                            <label
-                                className="input-label"
-                                htmlFor="showNotEligible"
+                            <Checkbox
+                                checked={showNotEligible}
+                                onChange={(e) =>
+                                    setShowNotEligible(e.target.checked)
+                                }
                             >
-                                <input
-                                    type="checkbox"
-                                    id="showNotEligible"
-                                    checked={showNotEligible}
-                                    onChange={(e) =>
-                                        setShowNotEligible(e.target.checked)
-                                    }
-                                />
                                 Show groups I'm not eligible for
-                            </label>
+                            </Checkbox>
                             <Stack fullWidth justify="flex-end">
                                 <Button
                                     onClick={() =>

@@ -1,41 +1,29 @@
-import React, { useCallback, useEffect, useMemo } from "react"
+import React, { useMemo } from "react"
 import "./Notifications.css"
 import { useNotificationContext } from "../../contexts/NotificationContext.tsx"
 import { ReactComponent as CloseSVG } from "../../assets/svg/close.svg"
-import Stack from "./Stack.tsx"
-import Button from "./Button.tsx"
+import { ReactComponent as X } from "../../assets/svg/x.svg"
+import { ReactComponent as Warning } from "../../assets/svg/warning.svg"
+import { ReactComponent as Checkmark } from "../../assets/svg/checkmark.svg"
+import { ReactComponent as Info } from "../../assets/svg/info.svg"
 
 const Notifications = () => {
-    const { notifications, dismissNotification, createNotification } =
-        useNotificationContext()
+    const { notifications, dismissNotification } = useNotificationContext()
 
-    // temp
-    useEffect(() => {
-        // createNotification({
-        //     title: "Something went wrong",
-        //     message:
-        //         "You should try refreshing the page. If the problem persists, please report it.",
-        //     actions: (
-        //         <Stack
-        //             direction="row"
-        //             gap="5px"
-        //             justify="flex-end"
-        //             fullColumnOnMobile
-        //         >
-        //             <Button type="primary" onClick={() => {}} fullWidthOnMobile>
-        //                 Refresh
-        //             </Button>
-        //             <Button
-        //                 type="secondary"
-        //                 onClick={() => {}}
-        //                 fullWidthOnMobile
-        //             >
-        //                 Report
-        //             </Button>
-        //         </Stack>
-        //     ),
-        // })
-    }, [])
+    const getIcon = (type?: string) => {
+        switch (type) {
+            case "success":
+                return <Checkmark />
+            case "info":
+                return <Info style={{ fill: "var(--blue1)" }} />
+            case "warning":
+                return <Warning style={{ fill: "var(--orange4)" }} />
+            case "error":
+                return <X />
+            default:
+                return null
+        }
+    }
 
     const notificationElements = useMemo(
         () =>
@@ -48,11 +36,33 @@ const Notifications = () => {
                         >
                             <CloseSVG />
                         </div>
-                        <h3 style={{ margin: 0 }}>{notification.title}</h3>
+                        <h3
+                            style={{
+                                margin: 0,
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "5px",
+                            }}
+                        >
+                            {getIcon(notification.type)}
+                            {notification.title}
+                        </h3>
                         <p style={{ margin: 0 }}>{notification.message}</p>
-                        <div className="notification-actions-container">
-                            {notification.actions}
-                        </div>
+                        {notification.subMessage && (
+                            <p
+                                style={{
+                                    margin: 0,
+                                    color: "var(--secondary-text)",
+                                }}
+                            >
+                                {notification.subMessage}
+                            </p>
+                        )}
+                        {notification.actions && (
+                            <div className="notification-actions-container">
+                                {notification.actions}
+                            </div>
+                        )}
                     </div>
                 )
             }),

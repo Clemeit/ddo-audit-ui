@@ -1,5 +1,7 @@
 import React from "react"
 import "./Button.css"
+import logMessage from "../../utils/logUtils.ts"
+import { getElementInnerText } from "../../utils/elementUtils.ts"
 
 interface Props {
     children?: React.ReactNode
@@ -12,6 +14,7 @@ interface Props {
     fullWidth?: boolean
     fullWidthOnMobile?: boolean
     small?: boolean
+    asDiv?: boolean // Optional prop to render as a div instead of a button
 }
 
 const Button = ({
@@ -25,12 +28,26 @@ const Button = ({
     fullWidth = false,
     fullWidthOnMobile = false,
     small = false,
+    asDiv = false, // If true, render as a div instead of a button
 }: Props) => {
+    const handleClick = () => {
+        if (!disabled) {
+            onClick()
+            logMessage("Button clicked", "info", {
+                action: "click",
+                component: "Button",
+                metadata: {
+                    label: getElementInnerText(children) || "None",
+                },
+            })
+        }
+    }
+
     return (
         <button
-            onClick={() => !disabled && onClick()}
+            onClick={handleClick}
             disabled={disabled}
-            className={`button ${type} ${className} ${disabled ? "disabled" : ""} ${fullWidth ? "fullWidth" : ""} ${fullWidthOnMobile ? "full-width-mobile" : ""} ${small ? "small" : ""}`}
+            className={`${asDiv ? "div" : "button"} ${type} ${className} ${disabled ? "disabled" : ""} ${fullWidth ? "fullWidth" : ""} ${fullWidthOnMobile ? "full-width-mobile" : ""} ${small ? "small" : ""}`}
             style={style}
         >
             {icon && <span className="icon">{icon}</span>}

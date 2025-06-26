@@ -1,29 +1,23 @@
 import React, { useState } from "react"
 import { v4 as uuid } from "uuid"
 import logMessage from "../../utils/logUtils.ts"
-import "./Checkbox.css"
 import { getElementInnerText } from "../../utils/elementUtils.ts"
 
 interface Props {
     children?: React.ReactNode
+    onChange: (event: React.ChangeEvent<HTMLInputElement>) => void
     checked: boolean
-    onChange: (e: React.ChangeEvent<HTMLInputElement>) => void
     key?: string
 }
 
-const Checkbox = ({
-    children = null,
-    checked = false,
-    onChange = () => {},
-    key = "",
-}: Props) => {
+const RadioButton = ({ children = null, onChange, checked, key }: Props) => {
     const [id] = useState(uuid())
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         onChange(e)
-        logMessage("Checkbox changed", "info", {
+        logMessage("Radio button changed", "info", {
             action: "change",
-            component: "Checkbox",
+            component: "RadioButton",
             metadata: {
                 label: getElementInnerText(children) || "None",
                 checked: e.target.checked,
@@ -33,17 +27,18 @@ const Checkbox = ({
     }
 
     return (
-        <label className="checkbox-label" htmlFor={id} key={key}>
+        <label className="input-label" htmlFor={id} key={key}>
             <input
-                type="checkbox"
-                className="checkbox-input"
+                type="radio"
+                className="input-radio"
                 id={id}
-                checked={checked}
+                name="radio-group"
                 onChange={handleChange}
+                checked={checked}
             />
             {children}
         </label>
     )
 }
 
-export default Checkbox
+export default RadioButton

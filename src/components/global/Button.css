@@ -59,6 +59,11 @@
 .button.tertiary {
     background-color: transparent;
     border: none;
+    border: 1px solid transparent;
+}
+
+.button.tertiary.critical:hover {
+    border: 1px solid red !important;
 }
 
 .button.tertiary > span {
@@ -66,6 +71,7 @@
 }
 
 .button.tertiary:hover {
+    border: 1px solid white;
     box-shadow: none;
 }
 

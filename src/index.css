@@ -263,6 +263,10 @@ table tbody tr:last-of-type {
     gap: 5px;
 }
 
+.input-label, .checkbox-label, .input-label *, .checkbox-label * {
+    cursor: pointer;
+}
+
 .verify-button {
     border-color: var(--orange-text) !important;
 }

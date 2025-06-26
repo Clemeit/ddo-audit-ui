@@ -20,6 +20,7 @@ import { ReactComponent as Ignore } from "../../assets/svg/ignore.svg"
 import Link from "./Link.tsx"
 import WebLink from "./WebLink.tsx"
 import logMessage from "../../utils/logUtils.ts"
+import { getElementInnerText } from "../../utils/elementUtils.ts"
 
 const typeToTitleMap = {
     live: "Quick Info",
@@ -99,7 +100,13 @@ const NavigationCard = ({
     externalLink,
 }: Props) => {
     const handleClick = () => {
-        logMessage(`Navigation card clicked: ${type}`, "info", "click")
+        logMessage("Navigation card clicked", "info", {
+            action: "click",
+            component: "NavigationCard",
+            metadata: {
+                type,
+            },
+        })
         onClick?.()
     }
 

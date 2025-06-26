@@ -1,0 +1,16 @@
+.raid-card {
+    background-color: var(--background);
+    text-decoration: none;
+    border: none;
+    padding: 20px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition:
+        background-color 200ms,
+        filter 200ms;
+}
+
+.raid-card:hover {
+    background-color: var(--highlight);
+    filter: drop-shadow(2px 2px 2px var(--shadow));
+}

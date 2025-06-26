@@ -12,12 +12,17 @@ import {
     DEFAULT_MOUSE_OVER_DELAY,
 } from "../constants/lfmPanel.ts"
 import { useThemeContext } from "./ThemeContext.tsx"
-import { setValue, getValue } from "../utils/localStorage.ts"
+import {
+    setValue,
+    getValue as getValueFromLocalStorage,
+} from "../utils/localStorage.ts"
 import { LfmApiDataModel, LfmSortType } from "../models/Lfm.ts"
 import { MAX_LEVEL, MIN_LEVEL } from "../constants/game.ts"
 import useGetRegisteredCharacters from "../hooks/useGetRegisteredCharacters.ts"
 import { Character } from "../models/Character.ts"
 import logMessage from "../utils/logUtils.ts"
+import { useNotificationContext } from "./NotificationContext.tsx"
+import Button from "../components/global/Button.tsx"
 
 interface LfmContextProps {
     lfmDataCache: LfmApiDataModel
@@ -121,6 +126,8 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
     const [showLfmPostedTime, setShowLfmPostedTime] = useState<boolean>(true)
     const [showLfmActivity, setShowLfmActivity] = useState<boolean>(true)
 
+    const { createNotification } = useNotificationContext()
+
     const resetFilterSettings = () => {
         setMinLevel(MIN_LEVEL)
         setMaxLevel(MAX_LEVEL)
@@ -154,7 +161,31 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
     }
 
     const loadSettingsFromLocalStorage = useCallback(() => {
-        const settings = getValue<any>(settingsStorageKey)
+        let settings: any = null
+        try {
+            settings = getValueFromLocalStorage<any>(settingsStorageKey)
+        } catch (e) {
+            logMessage(
+                "Error loading settings from local storage, resetting to defaults",
+                "error",
+                {
+                    metadata: {
+                        error: e instanceof Error ? e.message : String(e),
+                    },
+                }
+            )
+            resetFilterSettings()
+            resetDisplaySettings()
+            resetToolSettings()
+            createNotification({
+                title: new Date().toLocaleTimeString(),
+                message:
+                    "An error occurred while loading your settings. Your settings have been reset to defaults. Sorry about that!",
+                subMessage: "This error has been logged.",
+                // lifetime: 10000,
+                type: "error",
+            })
+        }
         if (settings) {
             try {
                 setMinLevel(settings.minLevel)
@@ -177,10 +208,8 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
                 setShowLfmActivity(settings.showLfmActivity)
                 setIsMultiColumn(settings.isMultiColumn)
             } catch (e) {
-                // TODO: maybe show a modal here to allow the user to reset their settings
-                console.error("Error loading settings from local storage", e)
                 logMessage(
-                    "Error loading settings from local storage, resetting to defaults",
+                    "Error applying settings from local storage, resetting to defaults",
                     "error",
                     {
                         metadata: {
@@ -189,9 +218,14 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
                         },
                     }
                 )
-                resetFilterSettings()
-                resetDisplaySettings()
-                resetToolSettings()
+                createNotification({
+                    title: new Date().toLocaleTimeString(),
+                    message:
+                        "An error occurred while applying your settings. You can try resetting them if this problem continues.",
+                    subMessage: "This error has been logged.",
+                    // lifetime: 10000,
+                    type: "error",
+                })
             }
         }
     }, [resetDisplaySettings])

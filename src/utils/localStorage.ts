@@ -374,16 +374,11 @@ function setQuests(quests: Quest[]): void {
 }
 
 function getValue<T>(key: string): T | null {
-    try {
-        const storageValue = localStorage.getItem(key)
-        if (!storageValue) {
-            return null
-        }
-        return JSON.parse(storageValue) as T
-    } catch (e) {
-        console.error(e)
+    const storageValue = localStorage.getItem(key)
+    if (!storageValue) {
         return null
     }
+    return JSON.parse(storageValue) as T
 }
 
 function setValue<T>(key: string, value: T): void {

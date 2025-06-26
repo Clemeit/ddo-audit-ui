@@ -26,6 +26,7 @@ import {
     SERVERS_64_BITS_LOWER,
 } from "../../constants/servers.ts"
 import ColoredText from "../global/ColoredText.tsx"
+import "./Grouping.css"
 
 const Grouping = () => {
     const { data: lfmData, state: lfmState } = usePollApi<LfmApiModel>({
@@ -225,21 +226,27 @@ const Grouping = () => {
             <Stack direction="column" gap="20px">
                 {Object.entries(getCurrentRaids() || {}).map(
                     ([serverName, lfms]: [string, { [key: number]: Lfm }]) => (
-                        <Link key={serverName} to={`/grouping/${serverName}`}>
-                            <h3
-                                style={{
-                                    marginTop: "0px",
-                                    marginBottom: "10px",
-                                }}
+                        <div className="raid-card">
+                            <Link
+                                key={serverName}
+                                to={`/grouping/${serverName}`}
+                                noDecoration
                             >
-                                {toSentenceCase(serverName)}
-                            </h3>
-                            <GroupingCanvas
-                                serverName={serverName}
-                                lfms={Object.values(lfms)}
-                                raidView
-                            />
-                        </Link>
+                                <h3
+                                    style={{
+                                        marginTop: "0px",
+                                        marginBottom: "10px",
+                                    }}
+                                >
+                                    {toSentenceCase(serverName)}
+                                </h3>
+                                <GroupingCanvas
+                                    serverName={serverName}
+                                    lfms={Object.values(lfms)}
+                                    raidView
+                                />
+                            </Link>
+                        </div>
                     )
                 )}
             </Stack>
