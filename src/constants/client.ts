@@ -9,6 +9,7 @@ const DONATE_LINK =
 const GITHUB_LINK = "https://github.com/Clemeit/ddo-audit-ui"
 const API_URL = "https://api.hcnxsryjficudzazjxty.com"
 // const API_URL = "http://api.localtest.me"
+const BETTER_STACK_URL = "https://ddoaudit.betteruptime.com/"
 const API_VERSION = "v1"
 
 export {
@@ -20,5 +21,6 @@ export {
     CACHED_AREAS_EXPIRY_TIME,
     CACHED_QUESTS_EXPIRY_TIME,
     MAX_REGISTERED_CHARACTERS,
-    MAX_FRIENDS
+    MAX_FRIENDS,
+    BETTER_STACK_URL,
 }

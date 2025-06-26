@@ -175,7 +175,7 @@ const LfmToolbar = ({
                                         <span>Level range:</span>
                                         <Stack>
                                             <input
-                                                type="text"
+                                                type="number"
                                                 placeholder="Min"
                                                 style={{ width: "100px" }}
                                                 value={minLevel}
@@ -186,7 +186,7 @@ const LfmToolbar = ({
                                                 }
                                             />
                                             <input
-                                                type="text"
+                                                type="number"
                                                 placeholder="Max"
                                                 style={{ width: "100px" }}
                                                 value={maxLevel}

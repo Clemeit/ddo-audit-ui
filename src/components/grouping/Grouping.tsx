@@ -6,12 +6,7 @@ import {
 } from "../global/ContentCluster.tsx"
 import { toSentenceCase } from "../../utils/stringUtils.ts"
 import usePollApi from "../../hooks/usePollApi.ts"
-import {
-    Lfm,
-    LfmApiDataModel,
-    LfmApiServerModel,
-    LfmApiModel,
-} from "../../models/Lfm.ts"
+import { Lfm, LfmApiModel } from "../../models/Lfm.ts"
 import ServerNavigationCard from "../global/ServerNavigationCard.tsx"
 import NavigationCard from "../global/NavigationCard.tsx"
 import Link from "../global/Link.tsx"
@@ -30,6 +25,7 @@ import {
     SERVER_NAMES_LOWER,
     SERVERS_64_BITS_LOWER,
 } from "../../constants/servers.ts"
+import ColoredText from "../global/ColoredText.tsx"
 
 const Grouping = () => {
     const { data: lfmData, state: lfmState } = usePollApi<LfmApiModel>({
@@ -212,14 +208,16 @@ const Grouping = () => {
             lfmState === LoadingState.Initial ||
             lfmState === LoadingState.Loading
         ) {
-            return <p className="secondary-text">Loading content...</p>
+            return (
+                <ColoredText color="secondary">Loading content...</ColoredText>
+            )
         }
 
         if (Object.entries(getCurrentRaids() || {}).length === 0) {
             return (
-                <p className="secondary-text">
+                <ColoredText color="secondary">
                     There aren't any raids posted at the moment.
-                </p>
+                </ColoredText>
             )
         }
 
@@ -273,9 +271,7 @@ const Grouping = () => {
                     <p>
                         You currently have 0 notification rules set up.
                         Configure rules on the{" "}
-                        <Link className="link" to="/notifications">
-                            notification settings
-                        </Link>{" "}
+                        <Link to="/notifications">notification settings</Link>{" "}
                         page.
                     </p>
                 </ContentCluster>

@@ -6,6 +6,7 @@ import {
 } from "../global/ContentCluster.tsx"
 import Page from "../global/Page.tsx"
 import NavCardCluster from "../global/NavCardCluster.tsx"
+import { BETTER_STACK_URL } from "../../constants/client.ts"
 
 const Directory = () => {
     return (
@@ -44,7 +45,7 @@ const Directory = () => {
                         <NavigationCard type="feedback" />
                         <NavigationCard
                             type="health"
-                            externalLink="https://ddoaudit.betteruptime.com/"
+                            externalLink={BETTER_STACK_URL}
                         />
                     </NavCardCluster>
                 </ContentCluster>

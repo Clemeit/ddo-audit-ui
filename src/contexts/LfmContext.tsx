@@ -17,6 +17,7 @@ import { LfmApiDataModel, LfmSortType } from "../models/Lfm.ts"
 import { MAX_LEVEL, MIN_LEVEL } from "../constants/game.ts"
 import useGetRegisteredCharacters from "../hooks/useGetRegisteredCharacters.ts"
 import { Character } from "../models/Character.ts"
+import logMessage from "../utils/logUtils.ts"
 
 interface LfmContextProps {
     lfmDataCache: LfmApiDataModel
@@ -126,6 +127,7 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
         setFilterByMyCharacters(false)
         setShowNotEligible(true)
         setTrackedCharacterIds([])
+        logMessage("Filter settings reset to defaults", "info")
     }
 
     const resetDisplaySettings = useCallback(() => {
@@ -137,6 +139,7 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
         setIsDynamicWidth(false)
         setIsFullScreen(false)
         setIsMultiColumn(false)
+        logMessage("Display settings reset to defaults", "info")
     }, [setIsFullScreen])
 
     const resetToolSettings = () => {
@@ -147,6 +150,7 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
         setShowCharacterGuildNames(false)
         setShowLfmPostedTime(true)
         setShowLfmActivity(true)
+        logMessage("Tool settings reset to defaults", "info")
     }
 
     const loadSettingsFromLocalStorage = useCallback(() => {
@@ -175,8 +179,19 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
             } catch (e) {
                 // TODO: maybe show a modal here to allow the user to reset their settings
                 console.error("Error loading settings from local storage", e)
+                logMessage(
+                    "Error loading settings from local storage, resetting to defaults",
+                    "error",
+                    {
+                        metadata: {
+                            settings,
+                            error: e instanceof Error ? e.message : String(e),
+                        },
+                    }
+                )
                 resetFilterSettings()
                 resetDisplaySettings()
+                resetToolSettings()
             }
         }
     }, [resetDisplaySettings])
