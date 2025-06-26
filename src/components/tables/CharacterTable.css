@@ -6,6 +6,26 @@
     z-index: 1;
 }
 
+.has-scroll-shadow .character-table th:last-child::before,
+.has-scroll-shadow .character-table td:last-child::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 5px;
+    height: 100%;
+    box-shadow: -5px 0 5px rgba(0, 0, 0, 0.5);
+    z-index: -1;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+}
+
+.character-table-container {
+    position: relative;
+    overflow-x: auto;
+    overflow-y: hidden;
+}
+
 .character-status-dot {
     width: 12px;
     height: 12px;

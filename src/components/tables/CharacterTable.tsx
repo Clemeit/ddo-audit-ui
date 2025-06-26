@@ -1,4 +1,4 @@
-import React from "react"
+import React, { useEffect, useRef, useCallback } from "react"
 import { Character } from "../../models/Character.ts"
 import { mapClassesToString } from "../../utils/stringUtils.ts"
 import { useAreaContext } from "../../contexts/AreaContext.tsx"
@@ -44,6 +44,51 @@ const CharacterTable = ({
 }: Props) => {
     const areaContext = useAreaContext()
     const { areas } = areaContext
+    const containerRef = useRef<HTMLDivElement>(null)
+
+    // Function to update shadow based on scroll position
+    const updateScrollShadow = useCallback(() => {
+        const container = containerRef.current
+        if (!container) return
+
+        const table = container.querySelector(".character-table") as HTMLElement
+        if (!table) return
+
+        const isScrollable = table.scrollWidth > container.clientWidth
+
+        const isNotAtRightEnd =
+            container.scrollLeft < table.scrollWidth - container.clientWidth - 1
+
+        const shouldShowShadow = isScrollable && isNotAtRightEnd
+        if (shouldShowShadow) {
+            container.classList.add("has-scroll-shadow")
+        } else {
+            container.classList.remove("has-scroll-shadow")
+        }
+    }, [])
+
+    // Set up scroll listener and initial shadow state
+    useEffect(() => {
+        const container = containerRef.current
+        if (!container) return
+
+        updateScrollShadow()
+
+        container.addEventListener("scroll", updateScrollShadow)
+        window.addEventListener("resize", updateScrollShadow)
+
+        return () => {
+            container.removeEventListener("scroll", updateScrollShadow)
+            window.removeEventListener("resize", updateScrollShadow)
+        }
+    }, [updateScrollShadow])
+
+    // Update shadow when data changes
+    useEffect(() => {
+        // Small delay to ensure DOM is updated
+        const timeoutId = setTimeout(updateScrollShadow, 10)
+        return () => clearTimeout(timeoutId)
+    }, [characterRows, visibleColumns, updateScrollShadow])
 
     const noCharactersMessageRow = (
         <tr>
@@ -133,7 +178,7 @@ const CharacterTable = ({
     }
 
     return (
-        <div className="character-table-container">
+        <div className="character-table-container" ref={containerRef}>
             <table className="character-table">
                 <thead>
                     <tr>
