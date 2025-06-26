@@ -1,0 +1,13 @@
+.character-table th:last-child,
+.character-table td:last-child {
+    position: sticky;
+    right: 0;
+    background-color: inherit;
+    z-index: 1;
+}
+
+.character-status-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+}
