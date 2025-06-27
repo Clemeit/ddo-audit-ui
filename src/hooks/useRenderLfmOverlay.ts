@@ -67,7 +67,6 @@ const useRenderLfmOverlay = ({ lfmSprite, context }: Props) => {
             lfm: Lfm,
             renderType: RenderType
         ): { width: number; height: number } => {
-            console.log("HERE")
             if (!context || !lfmSprite) return { width: 0, height: 0 }
             if (renderType === RenderType.QUEST && lfm.quest_id == null)
                 return { width: 0, height: 0 }
@@ -171,10 +170,7 @@ const useRenderLfmOverlay = ({ lfmSprite, context }: Props) => {
                 if (quest) {
                     let infoFields: any[] = []
                     if (quest.id === 0) {
-                        infoFields = [
-                            quest.name,
-                            lfm.quest_id,
-                        ]
+                        infoFields = [quest.name, lfm.quest_id]
                     } else {
                         infoFields = [
                             quest.name,
@@ -345,8 +341,8 @@ const useRenderLfmOverlay = ({ lfmSprite, context }: Props) => {
                     const isPlayerInQuest = area?.name === quest?.adventure_area
                     context.fillText(
                         (isPlayerInQuest ? "✓ " : "") +
-                        locationTextLines[0] +
-                        (locationTextLines[0] !== area?.name ? "..." : ""),
+                            locationTextLines[0] +
+                            (locationTextLines[0] !== area?.name ? "..." : ""),
                         22,
                         characterHeight - 10
                     )
@@ -388,8 +384,8 @@ const useRenderLfmOverlay = ({ lfmSprite, context }: Props) => {
                             context.fillText(
                                 classData.level.toString(),
                                 166 +
-                                classIconBoundingBox.width +
-                                index * (classIconBoundingBox.width + 1),
+                                    classIconBoundingBox.width +
+                                    index * (classIconBoundingBox.width + 1),
                                 classIconBoundingBox.height
                             )
 
@@ -422,7 +418,7 @@ const useRenderLfmOverlay = ({ lfmSprite, context }: Props) => {
                     context.translate(
                         0,
                         (characterHeight + 2) *
-                        Math.floor(lfm.members.length / 2 + 1)
+                            Math.floor(lfm.members.length / 2 + 1)
                     )
                 }
 
@@ -443,8 +439,8 @@ const useRenderLfmOverlay = ({ lfmSprite, context }: Props) => {
                 context.translate(
                     4 + OVERLAY_ACTIVITY_LEFT_PADDING,
                     commentBoundingBox.y +
-                    commentTextLines.length * commentLineHeight +
-                    15
+                        commentTextLines.length * commentLineHeight +
+                        15
                 )
 
                 let lastElapsedMinutes = 0
@@ -490,7 +486,10 @@ const useRenderLfmOverlay = ({ lfmSprite, context }: Props) => {
                                 break
                             case LfmActivityType.QUEST:
                                 const eventQuest = quests[event.data || 0]
-                                activityDataText = event.data === "0" ? "No quest" : eventQuest?.name
+                                activityDataText =
+                                    event.data === "0"
+                                        ? "No quest"
+                                        : eventQuest?.name
                                 break
                             case LfmActivityType.COMMENT:
                                 activityDataText = event.data || "No comment"
@@ -505,9 +504,9 @@ const useRenderLfmOverlay = ({ lfmSprite, context }: Props) => {
                         )
                         const textToRender =
                             activityDataLines[0] +
-                            (activityDataLines[0] !== activityDataText
-                                ? "..."
-                                : "") || ""
+                                (activityDataLines[0] !== activityDataText
+                                    ? "..."
+                                    : "") || ""
                         context.fillText(textToRender, 0, 0)
 
                         // draw the timeline
@@ -533,12 +532,12 @@ const useRenderLfmOverlay = ({ lfmSprite, context }: Props) => {
                             const elapsedMinutes = Math.floor(
                                 (currentDate.getTime() -
                                     currentActivityDate.getTime()) /
-                                60000
+                                    60000
                             )
                             if (
                                 !hasRenderedAtLeastOne ||
                                 Math.abs(elapsedMinutes - lastElapsedMinutes) >
-                                1
+                                    1
                             ) {
                                 context.font = OVERLAY_FONTS.ACTIVITY
                                 context.textAlign = "right"
@@ -597,7 +596,10 @@ const useRenderLfmOverlay = ({ lfmSprite, context }: Props) => {
                     }
 
                     if (quest.id === 0) {
-                        renderQuestInfo("Quest ID:", lfm.quest_id?.toString() || "N/A")
+                        renderQuestInfo(
+                            "Quest ID:",
+                            lfm.quest_id?.toString() || "N/A"
+                        )
                     } else {
                         if (quest.adventure_area) {
                             renderQuestInfo("Area:", quest.adventure_area)
@@ -611,7 +613,10 @@ const useRenderLfmOverlay = ({ lfmSprite, context }: Props) => {
                         }
 
                         if (quest.required_adventure_pack) {
-                            renderQuestInfo("Pack", quest.required_adventure_pack)
+                            renderQuestInfo(
+                                "Pack",
+                                quest.required_adventure_pack
+                            )
                         }
 
                         if (quest.patron) {

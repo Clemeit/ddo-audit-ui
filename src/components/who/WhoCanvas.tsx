@@ -170,9 +170,9 @@ const WhoCanvas: React.FC<Props> = ({
                 const rect = mainCanvasRef.current.getBoundingClientRect()
                 setCanvasScaleWidth(mainCanvasRef.current.width / rect.width)
                 setCanvasScaleHeight(mainCanvasRef.current.height / rect.height)
-                console.log(
-                    `canvasScaleWidth: ${canvasScaleWidth}, canvasScaleHeight: ${canvasScaleHeight}`
-                )
+                // console.log(
+                //     `canvasScaleWidth: ${canvasScaleWidth}, canvasScaleHeight: ${canvasScaleHeight}`
+                // )
             }
         }
 
@@ -315,9 +315,9 @@ const WhoCanvas: React.FC<Props> = ({
                 mainContext.drawImage(whoPanelRef.current, 0, 0)
                 mainContext.drawImage(whoCharactersRef.current, 0, 0)
             }
-            console.log(`Rendered ${numberOfCharactersRendered} characters`)
+            // console.log(`Rendered ${numberOfCharactersRendered} characters`)
         } else {
-            console.log("Skipped render")
+            // console.log("Skipped render")
         }
 
         setPreviousState({

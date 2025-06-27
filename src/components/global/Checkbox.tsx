@@ -8,14 +8,12 @@ interface Props {
     children?: React.ReactNode
     checked: boolean
     onChange: (e: React.ChangeEvent<HTMLInputElement>) => void
-    key?: string
 }
 
 const Checkbox = ({
     children = null,
     checked = false,
     onChange = () => {},
-    key = "",
 }: Props) => {
     const [id] = useState(uuid())
 
@@ -33,7 +31,7 @@ const Checkbox = ({
     }
 
     return (
-        <label className="checkbox-label" htmlFor={id} key={key}>
+        <label className="checkbox-label" htmlFor={id}>
             <input
                 type="checkbox"
                 className="checkbox-input"
