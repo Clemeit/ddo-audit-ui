@@ -5,13 +5,22 @@ import { Area } from "../models/Area.ts"
 import { Quest } from "../models/Lfm.ts"
 
 function getAccessTokens(): AccessToken[] {
+    // try {
+    //     const storageValue = localStorage.getItem("access-tokens")
+    //     if (!storageValue) {
+    //         return []
+    //     }
+    //     const entry: LocalStorageEntry<AccessToken[]> = JSON.parse(storageValue)
+    //     return entry.data
+    // } catch (e) {
+    //     console.error(e)
+    //     return []
+    // }
+    
+    // TODO: Can't I just do this?
     try {
-        const storageValue = localStorage.getItem("access-tokens")
-        if (!storageValue) {
-            return []
-        }
-        const entry: LocalStorageEntry<AccessToken[]> = JSON.parse(storageValue)
-        return entry.data
+        const accessTokens = getValue<LocalStorageEntry<AccessToken[]>>("access-tokens")
+        return accessTokens?.data || []
     } catch (e) {
         console.error(e)
         return []
@@ -374,11 +383,15 @@ function setQuests(quests: Quest[]): void {
 }
 
 function getValue<T>(key: string): T | null {
-    const storageValue = localStorage.getItem(key)
-    if (!storageValue) {
-        return null
+    try {
+        const storageValue = localStorage.getItem(key)
+        if (!storageValue) {
+            return null
+        }
+        return JSON.parse(storageValue) as T
+    } catch (e) {
+        throw new Error(`Failed to get value for key "${key}": ${e} - Value: ${localStorage.getItem(key)}`)
     }
-    return JSON.parse(storageValue) as T
 }
 
 function setValue<T>(key: string, value: T): void {
