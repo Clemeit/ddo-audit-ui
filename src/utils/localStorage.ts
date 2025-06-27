@@ -4,382 +4,172 @@ import { LocalStorageEntry } from "../models/LocalStorage.ts"
 import { Area } from "../models/Area.ts"
 import { Quest } from "../models/Lfm.ts"
 
+const ACCESS_TOKENS_KEY = "access-tokens"
+const REGISTERED_CHARACTERS_KEY = "registered-characters"
+const FRIENDS_KEY = "friends"
+const CACHED_AREAS_KEY = "cached-areas"
+const CACHED_QUEST_KEY = "cached-quests"
+
+// Access Token functions
 function getAccessTokens(): AccessToken[] {
-    // try {
-    //     const storageValue = localStorage.getItem("access-tokens")
-    //     if (!storageValue) {
-    //         return []
-    //     }
-    //     const entry: LocalStorageEntry<AccessToken[]> = JSON.parse(storageValue)
-    //     return entry.data
-    // } catch (e) {
-    //     console.error(e)
-    //     return []
-    // }
-    
-    // TODO: Can't I just do this?
-    try {
-        const accessTokens = getValue<LocalStorageEntry<AccessToken[]>>("access-tokens")
-        return accessTokens?.data || []
-    } catch (e) {
-        console.error(e)
-        return []
-    }
+    return getData<AccessToken>(ACCESS_TOKENS_KEY)
 }
 
 function getAccessTokensMetadata(): LocalStorageEntry<AccessToken[]> {
-    try {
-        const storageValue = localStorage.getItem("access-tokens")
-        if (!storageValue) {
-            return {
-                createdAt: "",
-                updatedAt: "",
-                data: [],
-            }
-        }
-        const result = JSON.parse(storageValue)
-        return {
-            createdAt: result.createdAt || "",
-            updatedAt: result.updatedAt || "",
-            data: result.data || [],
-        }
-    } catch (e) {
-        console.error(e)
-        return {
-            createdAt: "",
-            updatedAt: "",
-            data: [],
-        }
-    }
+    return getMetadata<AccessToken>(ACCESS_TOKENS_KEY)
 }
 
 function setAccessTokens(tokens: AccessToken[]): void {
-    try {
-        const previousEntry: LocalStorageEntry<AccessToken[]> = JSON.parse(
-            localStorage.getItem("access-tokens") || "{}"
-        )
-        const entry: LocalStorageEntry<AccessToken[]> = {
-            createdAt: previousEntry.createdAt || new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-            data: tokens,
-        }
-        localStorage.setItem("access-tokens", JSON.stringify(entry))
-    } catch (e) {
-        console.error(e)
-    }
+    setData<AccessToken>(ACCESS_TOKENS_KEY, tokens)
 }
 
 function addAccessToken(token: AccessToken): void {
-    try {
-        const previousEntry: LocalStorageEntry<AccessToken[]> = JSON.parse(
-            localStorage.getItem("access-tokens") || "{}"
-        )
-        const tokens = getAccessTokens()
-        tokens.push(token)
-        const entry: LocalStorageEntry<AccessToken[]> = {
-            createdAt: previousEntry.createdAt || new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-            data: tokens,
-        }
-        localStorage.setItem("access-tokens", JSON.stringify(entry))
-    } catch (e) {
-        console.error(e)
-    }
+    addItem<AccessToken>(
+        ACCESS_TOKENS_KEY,
+        token,
+        (a, b) => a.character_id === b.character_id
+    )
 }
 
 function removeAccessToken(token: AccessToken): void {
-    try {
-        const previousEntry: LocalStorageEntry<AccessToken[]> = JSON.parse(
-            localStorage.getItem("access-tokens") || "{}"
-        )
-        const tokens = getAccessTokens()
-        const newTokens = tokens.filter(
-            (currentToken: AccessToken) =>
-                currentToken.character_id !== token.character_id
-        )
-        const entry: LocalStorageEntry<AccessToken[]> = {
-            createdAt: previousEntry.createdAt || new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-            data: newTokens,
-        }
-        localStorage.setItem("access-tokens", JSON.stringify(entry))
-    } catch (e) {
-        console.error(e)
-    }
+    removeItem<AccessToken>(
+        ACCESS_TOKENS_KEY,
+        token,
+        (a, b) => a.character_id === b.character_id
+    )
 }
 
+// Registered Characters functions
 function getRegisteredCharacters(): Character[] {
-    try {
-        const storageValue = localStorage.getItem("registered-characters")
-        if (!storageValue) {
-            return []
-        }
-        const entry: LocalStorageEntry<Character[]> = JSON.parse(storageValue)
-        return entry.data
-    } catch (e) {
-        console.error(e)
-        return []
-    }
+    return getData<Character>(REGISTERED_CHARACTERS_KEY)
 }
 
 function getRegisteredCharactersMetadata(): LocalStorageEntry<Character[]> {
-    try {
-        const storageValue = localStorage.getItem("registered-characters")
-        if (!storageValue) {
-            return {
-                createdAt: "",
-                updatedAt: "",
-                data: [],
-            }
-        }
-        const result = JSON.parse(storageValue)
-        return {
-            createdAt: result.createdAt || "",
-            updatedAt: result.updatedAt || "",
-            data: result.data || [],
-        }
-    } catch (e) {
-        console.error(e)
-        return {
-            createdAt: "",
-            updatedAt: "",
-            data: [],
-        }
-    }
+    return getMetadata<Character>(REGISTERED_CHARACTERS_KEY)
 }
 
 function setRegisteredCharacters(characters: Character[]): void {
-    try {
-        const previousEntry: LocalStorageEntry<Character[]> = JSON.parse(
-            localStorage.getItem("registered-characters") || "{}"
-        )
-        const entry: LocalStorageEntry<Character[]> = {
-            createdAt: previousEntry.createdAt || new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-            data: characters,
-        }
-        localStorage.setItem("registered-characters", JSON.stringify(entry))
-    } catch (e) {
-        console.error(e)
-    }
+    setData<Character>(REGISTERED_CHARACTERS_KEY, characters)
 }
 
 function addRegisteredCharacter(character: Character): void {
-    try {
-        const previousEntry: LocalStorageEntry<Character[]> = JSON.parse(
-            localStorage.getItem("registered-characters") || "{}"
-        )
-        const characters = getRegisteredCharacters()
-        characters.push(character)
-        const entry: LocalStorageEntry<Character[]> = {
-            createdAt: previousEntry.createdAt || new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-            data: characters,
-        }
-        localStorage.setItem("registered-characters", JSON.stringify(entry))
-    } catch (e) {
-        console.error(e)
-    }
+    addItem<Character>(
+        REGISTERED_CHARACTERS_KEY,
+        character,
+        (a, b) => a.id === b.id
+    )
 }
 
 function removeRegisteredCharacter(character: Character): void {
-    try {
-        const previousEntry: LocalStorageEntry<Character[]> = JSON.parse(
-            localStorage.getItem("registered-characters") || "{}"
-        )
-        const characters = getRegisteredCharacters()
-        const newCharacters = characters.filter(
-            (currentCharacter: Character) =>
-                currentCharacter.id !== character.id
-        )
-        const entry: LocalStorageEntry<Character[]> = {
-            createdAt: previousEntry.createdAt || new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-            data: newCharacters,
-        }
-        localStorage.setItem("registered-characters", JSON.stringify(entry))
-    } catch (e) {
-        console.error(e)
-    }
+    removeItem<Character>(
+        REGISTERED_CHARACTERS_KEY,
+        character,
+        (a, b) => a.id === b.id
+    )
 }
 
+// Friends functions
 function getFriends(): Character[] {
-    try {
-        const storageValue = localStorage.getItem("friends")
-        if (!storageValue) {
-            return []
-        }
-        const entry: LocalStorageEntry<Character[]> = JSON.parse(storageValue)
-        return entry.data
-    } catch (e) {
-        console.error(e)
-        return []
-    }
+    return getData<Character>(FRIENDS_KEY)
 }
 
 function getFriendsMetadata(): LocalStorageEntry<Character[]> {
-    try {
-        const storageValue = localStorage.getItem("friends")
-        if (!storageValue) {
-            return {
-                createdAt: "",
-                updatedAt: "",
-                data: [],
-            }
-        }
-        const result = JSON.parse(storageValue)
-        return {
-            createdAt: result.createdAt || "",
-            updatedAt: result.updatedAt || "",
-            data: result.data || [],
-        }
-    } catch (e) {
-        console.error(e)
-        return {
-            createdAt: "",
-            updatedAt: "",
-            data: [],
-        }
-    }
+    return getMetadata<Character>(FRIENDS_KEY)
 }
 
 function setFriends(characters: Character[]): void {
-    try {
-        const previousEntry: LocalStorageEntry<Character[]> = JSON.parse(
-            localStorage.getItem("friends") || "{}"
-        )
-        const entry: LocalStorageEntry<Character[]> = {
-            createdAt: previousEntry.createdAt || new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-            data: characters,
-        }
-        localStorage.setItem("friends", JSON.stringify(entry))
-    } catch (e) {
-        console.error(e)
-    }
+    setData<Character>(FRIENDS_KEY, characters)
 }
 
 function addFriend(character: Character): void {
-    try {
-        const previousEntry: LocalStorageEntry<Character[]> = JSON.parse(
-            localStorage.getItem("friends") || "{}"
-        )
-        const characters = getFriends()
-        characters.push(character)
-        const entry: LocalStorageEntry<Character[]> = {
-            createdAt: previousEntry.createdAt || new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-            data: characters,
-        }
-        localStorage.setItem("friends", JSON.stringify(entry))
-    } catch (e) {
-        console.error(e)
-    }
+    addItem<Character>(FRIENDS_KEY, character, (a, b) => a.id === b.id)
 }
 
 function removeFriend(character: Character): void {
-    try {
-        const previousEntry: LocalStorageEntry<Character[]> = JSON.parse(
-            localStorage.getItem("friends") || "{}"
-        )
-        const characters = getFriends()
-        const newCharacters = characters.filter(
-            (currentCharacter: Character) =>
-                currentCharacter.id !== character.id
-        )
-        const entry: LocalStorageEntry<Character[]> = {
-            createdAt: previousEntry.createdAt || new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-            data: newCharacters,
-        }
-        localStorage.setItem("friends", JSON.stringify(entry))
-    } catch (e) {
-        console.error(e)
-    }
+    removeItem<Character>(FRIENDS_KEY, character, (a, b) => a.id === b.id)
 }
 
+// Areas functions
 function getAreas(): LocalStorageEntry<Area[]> {
-    try {
-        const storageValue = localStorage.getItem("cached-areas")
-        if (!storageValue) {
-            return {
-                createdAt: "",
-                updatedAt: "",
-                data: [],
-            }
-        }
-        const result = JSON.parse(storageValue)
-        return {
-            createdAt: result.createdAt || "",
-            updatedAt: result.updatedAt || "",
-            data: result.data || [],
-        }
-    } catch (e) {
-        console.error(e)
-        return {
-            createdAt: "",
-            updatedAt: "",
-            data: [],
-        }
-    }
+    return getMetadata<Area>(CACHED_AREAS_KEY)
 }
 
 function setAreas(areas: Area[]): void {
-    try {
-        const previousEntry: LocalStorageEntry<Area[]> = JSON.parse(
-            localStorage.getItem("cached-areas") || "{}"
-        )
-        const entry: LocalStorageEntry<Area[]> = {
-            createdAt: previousEntry.createdAt || new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-            data: areas,
-        }
-        localStorage.setItem("cached-areas", JSON.stringify(entry))
-    } catch (e) {
-        console.error(e)
-    }
+    setData<Area>(CACHED_AREAS_KEY, areas)
 }
 
+// Quests functions
 function getQuests(): LocalStorageEntry<Quest[]> {
-    try {
-        const storageValue = localStorage.getItem("cached-quests")
-        if (!storageValue) {
-            return {
-                createdAt: "",
-                updatedAt: "",
-                data: [],
-            }
-        }
-        const result = JSON.parse(storageValue)
-        return {
-            createdAt: result.createdAt || "",
-            updatedAt: result.updatedAt || "",
-            data: result.data || [],
-        }
-    } catch (e) {
-        console.error(e)
+    return getMetadata<Quest>(CACHED_QUEST_KEY)
+}
+
+function setQuests(quests: Quest[]): void {
+    setData<Quest>(CACHED_QUEST_KEY, quests)
+}
+
+// Generic functions
+function getMetadata<T>(key: string): LocalStorageEntry<T[]> {
+    const metadata = getValue<LocalStorageEntry<T[]>>(key)
+    if (!metadata) {
         return {
             createdAt: "",
             updatedAt: "",
             data: [],
         }
     }
+    return metadata
 }
 
-function setQuests(quests: Quest[]): void {
-    try {
-        const previousEntry: LocalStorageEntry<Quest[]> = JSON.parse(
-            localStorage.getItem("cached-quests") || "{}"
-        )
-        const entry: LocalStorageEntry<Quest[]> = {
-            createdAt: previousEntry.createdAt || new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-            data: quests,
-        }
-        localStorage.setItem("cached-quests", JSON.stringify(entry))
-    } catch (e) {
-        console.error(e)
+function getData<T>(key: string): T[] {
+    return getMetadata<T>(key).data || []
+}
+
+function setData<T>(key: string, data: T[]): void {
+    const metadata = getMetadata<T>(key)
+    const newEntry: LocalStorageEntry<T[]> = {
+        createdAt: metadata.createdAt || new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        data: data,
     }
+    setValue(key, newEntry)
+}
+
+function addItem<T>(
+    key: string,
+    item: T,
+    compareFn: (a: T, b: T) => boolean
+): void {
+    const metadata = getMetadata<T>(key)
+    const items = metadata.data || []
+    if (items.some((existing) => compareFn(existing, item))) {
+        return
+    }
+    items.push(item)
+    const newEntry: LocalStorageEntry<T[]> = {
+        createdAt: metadata.createdAt || new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        data: items,
+    }
+    setValue(key, newEntry)
+}
+
+function removeItem<T>(
+    key: string,
+    item: T,
+    compareFn: (a: T, b: T) => boolean
+): void {
+    const metadata = getMetadata<T>(key)
+    const items = metadata.data || []
+    if (!items.some((existing) => compareFn(existing, item))) {
+        return
+    }
+    const newItems = items.filter((existing) => !compareFn(existing, item))
+    const newEntry: LocalStorageEntry<T[]> = {
+        createdAt: metadata.createdAt || new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        data: newItems,
+    }
+    setValue(key, newEntry)
 }
 
 function getValue<T>(key: string): T | null {
@@ -390,7 +180,8 @@ function getValue<T>(key: string): T | null {
         }
         return JSON.parse(storageValue) as T
     } catch (e) {
-        throw new Error(`Failed to get value for key "${key}": ${e} - Value: ${localStorage.getItem(key)}`)
+        console.error(`Error parsing localStorage value for key "${key}":`, e)
+        return null
     }
 }
 
@@ -398,7 +189,7 @@ function setValue<T>(key: string, value: T): void {
     try {
         localStorage.setItem(key, JSON.stringify(value))
     } catch (e) {
-        console.error(e)
+        console.error(`Error setting localStorage value for key "${key}":`, e)
     }
 }
 
