@@ -29,7 +29,11 @@ const useRenderLfmPanel = ({
 }: Props) => {
     const { panelWidth, sortBy } = useLfmContext()
     const commonBoundingBoxes = useMemo(
-        () => calculateCommonBoundingBoxes(panelWidth),
+        () =>
+            calculateCommonBoundingBoxes({
+                panelWidth,
+                lfmHeight: LFM_HEIGHT,
+            }),
         [panelWidth]
     )
     const fonts = useMemo(() => FONTS(0), [])

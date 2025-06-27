@@ -15,6 +15,7 @@ import { BoundingBox } from "../models/Geometry.ts"
 import useTextRenderer from "./useTextRenderer.ts"
 import {
     calculateCommonBoundingBoxes,
+    CommonBoundingBoxReturn,
     getLfmPostedTimestamp,
 } from "../utils/lfmUtils.ts"
 import { convertMillisecondsToPrettyString } from "../utils/stringUtils.ts"
@@ -40,7 +41,8 @@ const useRenderLfm = ({ lfmSprite, context }: Props) => {
     } = useLfmContext()
     const { confineTextToBoundingBox } = useTextRenderer(context)
     const commonBoundingBoxes = useMemo(
-        () => calculateCommonBoundingBoxes(panelWidth),
+        () =>
+            calculateCommonBoundingBoxes({ panelWidth, lfmHeight: LFM_HEIGHT }),
         [panelWidth]
     )
     const questContext = useQuestContext()
@@ -114,7 +116,7 @@ const useRenderLfm = ({ lfmSprite, context }: Props) => {
                 questNameBoundingBox.height +
                 (questDifficultyBoundingBoxY -
                     (questNameBoundingBoxY + questNameBoundingBox.height)) /
-                2 -
+                    2 -
                 questTipBoundingBox.height / 2
 
             return {
@@ -128,7 +130,7 @@ const useRenderLfm = ({ lfmSprite, context }: Props) => {
     )
 
     const renderLfm = useCallback(
-        (lfm: Lfm) => {
+        (lfm: Lfm, boundingBoxes: CommonBoundingBoxReturn) => {
             if (!context || !lfmSprite) return
             context.imageSmoothingEnabled = false
             const fonts = FONTS(fontSize)
@@ -145,7 +147,7 @@ const useRenderLfm = ({ lfmSprite, context }: Props) => {
                 classesBoundingBox,
                 questPanelBoundingBoxWithPadding,
                 levelPanelBoundingBoxWithPadding,
-            } = commonBoundingBoxes
+            } = boundingBoxes
             const {
                 textLines: leaderNameTextLines,
                 boundingBox: leaderNameBoundingBox,
@@ -153,8 +155,8 @@ const useRenderLfm = ({ lfmSprite, context }: Props) => {
                 text: lfm.leader.name || "Anonymous",
                 boundingBox: new BoundingBox(
                     leaderRaceIconBoundingBox.x +
-                    leaderRaceIconBoundingBox.width +
-                    4,
+                        leaderRaceIconBoundingBox.width +
+                        4,
                     mainPanelBoundingBox.y,
                     mainPanelBoundingBox.width,
                     mainPanelBoundingBox.height
@@ -182,10 +184,10 @@ const useRenderLfm = ({ lfmSprite, context }: Props) => {
             if (
                 memberCountTextBounds.width >
                 mainPanelBoundingBox.width -
-                leaderNameBoundingBox.right() -
-                8 -
-                leaderTotalLevelWidth -
-                10
+                    leaderNameBoundingBox.right() -
+                    8 -
+                    leaderTotalLevelWidth -
+                    10
             ) {
                 memberCountText = memberCountTextOptions(true)
                 memberCountTextBounds = getTextWidthAndHeight(
@@ -263,16 +265,16 @@ const useRenderLfm = ({ lfmSprite, context }: Props) => {
                 boundingBox: new BoundingBox(
                     mainPanelBoundingBox.x + 4,
                     leaderRaceIconBoundingBox.y +
-                    leaderRaceIconBoundingBox.height +
-                    4,
+                        leaderRaceIconBoundingBox.height +
+                        4,
                     mainPanelBoundingBox.width - 8,
                     mainPanelBoundingBox.height -
-                    leaderRaceIconBoundingBox.bottom() -
-                    (showTimerNote
-                        ? mainPanelBoundingBox.bottom() -
-                        timerNoteTextBoundingBox.top() +
-                        6
-                        : 0)
+                        leaderRaceIconBoundingBox.bottom() -
+                        (showTimerNote
+                            ? mainPanelBoundingBox.bottom() -
+                              timerNoteTextBoundingBox.top() +
+                              6
+                            : 0)
                 ),
                 font: fonts.COMMENT,
             })
@@ -296,6 +298,21 @@ const useRenderLfm = ({ lfmSprite, context }: Props) => {
                 font: fonts.COMMENT,
                 maxLines: 1,
                 centered: true,
+            })
+            console.log("lfm.eligible_characters", lfm.eligible_characters)
+            const {
+                textLines: expandedDetailTextLines,
+                lineHeight: expandedDetailLineHeight,
+                boundingBox: expandedDetailBoundingBox,
+            } = confineTextToBoundingBox({
+                text: `Eligible: ${lfm.eligible_characters?.map((character) => character.name).join(", ")}`,
+                boundingBox: new BoundingBox(
+                    mainPanelBoundingBox.x + 10,
+                    mainPanelBoundingBox.bottom() - 20,
+                    mainPanelBoundingBox.width - 20,
+                    25
+                ),
+                font: fonts.COMMENT,
             })
             const skullCountMatches = lfm.comment.match(SKULL_EXPRESSION)
             let skullCount = 0
@@ -368,7 +385,7 @@ const useRenderLfm = ({ lfmSprite, context }: Props) => {
                 0,
                 0,
                 Math.floor(lfmBoundingBox.width),
-                Math.floor(LFM_HEIGHT)
+                Math.floor(lfmBoundingBox.height)
             )
 
             // gradient fill
@@ -497,14 +514,35 @@ const useRenderLfm = ({ lfmSprite, context }: Props) => {
                 context.fillText(
                     timerNoteText,
                     timerNoteTextBoundingBox.x +
-                    timerNoteTextBoundingBox.width / 2,
+                        timerNoteTextBoundingBox.width / 2,
                     timerNoteTextBoundingBox.y +
-                    timerNoteTextBoundingBox.height / 2
+                        timerNoteTextBoundingBox.height / 2
                 )
+            }
+            // expanded detail
+            if (lfm.eligible_characters?.length) {
+                context.fillStyle = "#33ff33"
+                context.font = fonts.COMMENT
+                context.textBaseline = "top"
+                context.textAlign = "left"
+                expandedDetailTextLines.forEach((line) => {
+                    context.fillText(
+                        line,
+                        mainPanelBoundingBox.x + 4,
+                        mainPanelBoundingBox.bottom() -
+                            20 +
+                            (showTimerNote
+                                ? -timerNoteTextBoundingBox.height - 6
+                                : 0)
+                    )
+                })
             }
 
             // ===== QUEST PANEL =====
-            if (!!lfm.quest_id && (lfm.is_quest_guess ? showQuestGuesses : true)) {
+            if (
+                !!lfm.quest_id &&
+                (lfm.is_quest_guess ? showQuestGuesses : true)
+            ) {
                 // quest name
                 context.fillStyle =
                     lfm.is_quest_guess && lfm.is_eligible
@@ -520,8 +558,8 @@ const useRenderLfm = ({ lfmSprite, context }: Props) => {
                         line,
                         questNameBoundingBox.centerX(),
                         questNameBoundingBox.top() +
-                        index * questNameLineHeight +
-                        questNameLineHeight / 2
+                            index * questNameLineHeight +
+                            questNameLineHeight / 2
                     )
                 })
                 // quest tip
@@ -553,7 +591,8 @@ const useRenderLfm = ({ lfmSprite, context }: Props) => {
 
             // ===== CLASS PANEL =====
             if (
-                lfm.accepted_classes == null || lfm.accepted_classes.length === 0
+                lfm.accepted_classes == null ||
+                lfm.accepted_classes.length === 0
             ) {
                 context.drawImage(
                     lfmSprite,
@@ -570,7 +609,9 @@ const useRenderLfm = ({ lfmSprite, context }: Props) => {
                 lfm.accepted_classes.forEach((acceptedClass, index) => {
                     const row = Math.floor(index / 5)
                     const col = index % 5
-                    const acceptedClassKey = acceptedClass.toUpperCase().replace(/\s+/g, "_")
+                    const acceptedClassKey = acceptedClass
+                        .toUpperCase()
+                        .replace(/\s+/g, "_")
                     const classSprite = SPRITE_MAP.CLASSES[acceptedClassKey]
                     if (classSprite) {
                         context.drawImage(
@@ -579,8 +620,10 @@ const useRenderLfm = ({ lfmSprite, context }: Props) => {
                             classSprite.y,
                             classSprite.width,
                             classSprite.height,
-                            classesBoundingBox.x + col * (classSprite.width + 1),
-                            classesBoundingBox.y + row * (classSprite.height + 1),
+                            classesBoundingBox.x +
+                                col * (classSprite.width + 1),
+                            classesBoundingBox.y +
+                                row * (classSprite.height + 1),
                             classSprite.width,
                             classSprite.height
                         )
@@ -697,6 +740,8 @@ const useRenderLfm = ({ lfmSprite, context }: Props) => {
             }
 
             context.globalAlpha = 1
+
+            return lfmBoundingBox
         },
         [
             lfmSprite,

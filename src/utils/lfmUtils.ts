@@ -3,16 +3,35 @@ import { LFM_HEIGHT, LFM_AREA_PADDING } from "../constants/lfmPanel.ts"
 import { BoundingBox } from "../models/Geometry.ts"
 import { SPRITE_MAP } from "../constants/spriteMap.ts"
 
-const calculateCommonBoundingBoxes = (panelWidth: number) => {
+interface CommonBoundingBoxArgs {
+    panelWidth: number
+    lfmHeight?: number
+}
+export interface CommonBoundingBoxReturn {
+    lfmBoundingBox: BoundingBox
+    mainPanelBoundingBox: BoundingBox
+    questPanelBoundingBox: BoundingBox
+    classPanelBoundingBox: BoundingBox
+    levelPanelBoundingBox: BoundingBox
+    leaderRaceIconBoundingBox: BoundingBox
+    classesBoundingBox: BoundingBox
+    questPanelBoundingBoxWithPadding: BoundingBox
+    levelPanelBoundingBoxWithPadding: BoundingBox
+}
+
+const calculateCommonBoundingBoxes = ({
+    panelWidth,
+    lfmHeight = LFM_HEIGHT,
+}: CommonBoundingBoxArgs): CommonBoundingBoxReturn => {
     const lfmBoundingBox = new BoundingBox(
         0,
         0,
         panelWidth -
-        SPRITE_MAP.CONTENT_LEFT.width -
-        SPRITE_MAP.CONTENT_RIGHT.width -
-        LFM_AREA_PADDING.left -
-        LFM_AREA_PADDING.right,
-        LFM_HEIGHT
+            SPRITE_MAP.CONTENT_LEFT.width -
+            SPRITE_MAP.CONTENT_RIGHT.width -
+            LFM_AREA_PADDING.left -
+            LFM_AREA_PADDING.right,
+        lfmHeight
     )
     const mainPanelBoundingBox = new BoundingBox(
         lfmBoundingBox.x,
@@ -130,7 +149,8 @@ function areLfmsEquivalent(previous: Lfm, current: Lfm): boolean {
     if (previous.maximum_level !== current.maximum_level) return false
     if (previous.leader.name !== current.leader.name) return false
     if (previous.is_eligible !== current.is_eligible) return false
-    if (previous.accepted_classes_count !== current.accepted_classes_count) return false
+    if (previous.accepted_classes_count !== current.accepted_classes_count)
+        return false
 
     return true
 }
@@ -148,10 +168,7 @@ function areLfmOverlaysEquivalent(previous: Lfm, current: Lfm): boolean {
     for (let i = 0; i < allPreviousMembers.length; i++) {
         const member = allPreviousMembers[i]
         const currentMember = allCurrentMembers[i]
-        if (
-            !currentMember ||
-            member.location_id !== currentMember.location_id
-        )
+        if (!currentMember || member.location_id !== currentMember.location_id)
             return false
         if (member.total_level !== currentMember.total_level) return false
     }

@@ -79,6 +79,7 @@ interface Lfm {
     server_name: string
     is_eligible: boolean | null
     last_render_time: number | null
+    eligible_characters: Character[] | null
 }
 
 enum LfmActivityType {
@@ -94,7 +95,7 @@ interface LfmApiServerModel {
     lfms: { [key: number]: Lfm }
 }
 
-type ServerName = typeof SERVER_NAMES_LOWER[number]
+type ServerName = (typeof SERVER_NAMES_LOWER)[number]
 
 type LfmApiDataModel = {
     [K in ServerName]?: { number: Lfm }
@@ -127,5 +128,5 @@ export {
     FlatActivityEvent,
     QuestApiResponse,
     LfmApiModel,
-    LfmSpecificApiModel
+    LfmSpecificApiModel,
 }

@@ -13,6 +13,7 @@ import {
     areLfmOverlaysEquivalent,
     areLfmsEquivalent,
     calculateCommonBoundingBoxes,
+    CommonBoundingBoxReturn,
 } from "../../utils/lfmUtils.ts"
 import {
     FONTS,
@@ -28,6 +29,7 @@ import {
     TOTAL_LFM_PANEL_BORDER_HEIGHT,
 } from "../../constants/lfmPanel.ts"
 import { SPRITE_MAP } from "../../constants/spriteMap.ts"
+import { BoundingBox } from "../../models/Geometry.ts"
 
 interface Props {
     serverName: string
@@ -64,25 +66,56 @@ const LfmCanvas: React.FC<Props> = ({
         fontSize,
     } = useLfmContext()
     const commonBoundingBoxes = useMemo(
-        () => calculateCommonBoundingBoxes(panelWidth),
+        () =>
+            calculateCommonBoundingBoxes({ panelWidth, lfmHeight: LFM_HEIGHT }),
         [panelWidth]
     )
     const sortHeaders = useMemo(
         () => SORT_HEADERS(commonBoundingBoxes),
         [commonBoundingBoxes]
     )
-    // const fonts = useMemo(() => FONTS(fontSize), [fontSize])
+
+    const boundingBoxList: CommonBoundingBoxReturn[] = useMemo(
+        () =>
+            lfms.map((lfm) => {
+                if (lfm.is_eligible) {
+                    return calculateCommonBoundingBoxes({
+                        panelWidth,
+                        lfmHeight: LFM_HEIGHT + 0, // +20 for the expanded lfm height
+                    })
+                } else {
+                    return calculateCommonBoundingBoxes({
+                        panelWidth,
+                        lfmHeight: LFM_HEIGHT,
+                    })
+                }
+            }),
+        [lfms, commonBoundingBoxes.mainPanelBoundingBox.width]
+    )
+
     const panelHeight = useMemo(() => {
-        const height = raidView
-            ? LFM_HEIGHT * lfms.length
-            : LFM_HEIGHT * Math.max(MINIMUM_LFM_COUNT, lfms.length) +
-              TOTAL_LFM_PANEL_BORDER_HEIGHT +
-              SORT_HEADER_HEIGHT +
-              LFM_AREA_PADDING.top +
-              LFM_AREA_PADDING.bottom
+        if (raidView) {
+            const height =
+                LFM_HEIGHT * lfms.length + TOTAL_LFM_PANEL_BORDER_HEIGHT
+            setPanelHeight(height)
+            return height
+        }
+
+        const totalLfmHeight = boundingBoxList.reduce(
+            (acc, boundingBox) => acc + boundingBox.lfmBoundingBox.height,
+            0
+        )
+        const minimumTotalLfmHeight = MINIMUM_LFM_COUNT * LFM_HEIGHT
+
+        const height =
+            Math.max(totalLfmHeight, minimumTotalLfmHeight) +
+            TOTAL_LFM_PANEL_BORDER_HEIGHT +
+            SORT_HEADER_HEIGHT +
+            LFM_AREA_PADDING.top +
+            LFM_AREA_PADDING.bottom
         setPanelHeight(height)
         return height
-    }, [lfms, raidView])
+    }, [lfms, raidView, boundingBoxList])
     const [isFirstRender, setIsFirstRender] = useState(true)
     const [selectedLfmInfo, setSelectedLfmInfo] =
         useState<SelectedLfmInfo | null>(null)
@@ -220,9 +253,28 @@ const LfmCanvas: React.FC<Props> = ({
         }
 
         // Check if the mouse is over an lfm
-        const lfmIndex = Math.floor(
-            (y - (raidView ? 0 : LFM_TOP_PADDING)) / LFM_HEIGHT
-        )
+        let lfmIndex = -1
+        const lfmStartY = raidView ? 0 : LFM_TOP_PADDING
+        let currentTop = lfmStartY
+
+        for (let i = 0; i < boundingBoxList.length; i++) {
+            const boundingBox = boundingBoxList[i].lfmBoundingBox
+            const lfmBottom = currentTop + boundingBox.height
+
+            if (
+                y >= currentTop &&
+                y < lfmBottom &&
+                x >= LFM_LEFT_PADDING &&
+                x <=
+                    LFM_LEFT_PADDING +
+                        commonBoundingBoxes.mainPanelBoundingBox.width
+            ) {
+                lfmIndex = i
+                break
+            }
+
+            currentTop = lfmBottom
+        }
         if (
             x > LFM_LEFT_PADDING &&
             x <
@@ -357,6 +409,7 @@ const LfmCanvas: React.FC<Props> = ({
         // Loop through the lfms, and render the ones that changed
         lfms.forEach((lfm, index) => {
             // If the lfm has changed, or if the lfm hasn't been rendered in the last 60 seconds, then render it
+            const boundingBox = boundingBoxList[index]
             if (
                 globalRenderNeeded ||
                 shouldRenderAllLfms ||
@@ -365,12 +418,15 @@ const LfmCanvas: React.FC<Props> = ({
                 Date.now() - lfm.last_render_time > 60000
             ) {
                 // Render the lfm
-                renderLfm(lfm)
+                renderLfm(lfm, boundingBox)
                 lfm.last_render_time = Date.now()
                 wasLfmRendered = true
                 numberOfLfmsRendered++
             }
-            lfmContext?.translate(0, Math.floor(LFM_HEIGHT))
+            lfmContext?.translate(
+                0,
+                Math.floor(boundingBox.lfmBoundingBox.height)
+            )
         })
         lfmContext?.resetTransform()
 
@@ -497,6 +553,7 @@ const LfmCanvas: React.FC<Props> = ({
         setIsFirstRender(false)
     }, [
         lfms,
+        boundingBoxList,
         raidView,
         excludedLfmCount,
         image,

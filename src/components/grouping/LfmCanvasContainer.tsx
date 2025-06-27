@@ -11,6 +11,7 @@ import {
     ServerOfflineMessage,
     StaleDataPageMessage,
 } from "../global/CommonMessages.tsx"
+import { Character } from "../../models/Character.ts"
 
 interface Props {
     serverName: string
@@ -90,6 +91,7 @@ const GroupingContainer = ({
         // determine eligibility
         const determinedLfms = lfms.map((lfm) => {
             let isEligible = true
+            let eligibleCharacters: Character[] = []
 
             // level check
             if (!filterByMyCharacters) {
@@ -100,29 +102,33 @@ const GroupingContainer = ({
                     isEligible = false
                 }
             } else {
-                const characterLevels =
-                    registeredCharacters
-                        ?.filter((character) => {
-                            return (
-                                character.server_name?.toLowerCase() ===
-                                    serverName.toLowerCase() &&
-                                trackedCharacterIds.includes(character.id)
-                            )
-                        })
-                        ?.map((character) => character.total_level || 99) || []
+                const trackedCharacters =
+                    registeredCharacters?.filter((character) => {
+                        return (
+                            character.server_name?.toLowerCase() ===
+                                serverName.toLowerCase() &&
+                            trackedCharacterIds.includes(character.id)
+                        )
+                    }) || []
                 let localEligibility = false
-                characterLevels.forEach((level) => {
+                trackedCharacters.forEach((character) => {
+                    const characterLevel = character.total_level ?? 0
                     if (
-                        level >= lfm.minimum_level &&
-                        level <= lfm.maximum_level
+                        characterLevel >= lfm.minimum_level &&
+                        characterLevel <= lfm.maximum_level
                     ) {
                         localEligibility = true
+                        eligibleCharacters.push(character)
                     }
                 })
                 isEligible = localEligibility
             }
 
-            const newLfm: Lfm = { ...lfm, is_eligible: isEligible }
+            const newLfm: Lfm = {
+                ...lfm,
+                is_eligible: isEligible,
+                eligible_characters: eligibleCharacters,
+            }
             return newLfm
         })
 
