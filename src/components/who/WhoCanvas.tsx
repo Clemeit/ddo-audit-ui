@@ -610,7 +610,7 @@ const WhoCanvas: React.FC<Props> = ({
             )}
             <canvas
                 ref={mainCanvasRef}
-                id={serverName}
+                id="who-canvas"
                 width={panelWidth}
                 height={panelHeight}
                 style={{

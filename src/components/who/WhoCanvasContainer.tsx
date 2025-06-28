@@ -67,6 +67,22 @@ const WhoContainer = ({
         [serverInfoData, serverName]
     )
 
+    var handleScreenshot = function () {
+        const canvas = document.getElementById(
+            "who-canvas"
+        ) as HTMLCanvasElement
+        if (!canvas) {
+            console.error("Canvas with id 'who-canvas' not found.")
+            return
+        }
+        const dataUrl = canvas.toDataURL("image/png")
+        const link = document.createElement("a")
+        link.href = dataUrl
+        link.download = `${serverName}-who-screenshot.png`
+        document.body.appendChild(link)
+        link.click()
+    }
+
     function compareString(
         a: string | undefined,
         b: string | undefined,
@@ -236,6 +252,7 @@ const WhoContainer = ({
                         reloadCharacters={reloadCharacters}
                         isSecondaryPanel={isSecondaryPanel}
                         handleClosePanel={handleClosePanel}
+                        handleScreenshot={handleScreenshot}
                     />
                     <WhoCanvas
                         allCharacters={Object.values(characterData?.data ?? {})}

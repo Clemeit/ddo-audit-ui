@@ -20,13 +20,15 @@ interface Props {
     serverName: string
     isSecondaryPanel?: boolean
     handleClosePanel?: () => void
+    handleScreenshot?: () => void
 }
 
 const WhoToolbar = ({
     reloadCharacters,
     serverName,
     isSecondaryPanel,
-    handleClosePanel,
+    handleClosePanel = () => {},
+    handleScreenshot = () => {},
 }: Props) => {
     const {
         panelWidth,
@@ -203,6 +205,7 @@ const WhoToolbar = ({
                 linkDestination="/who"
                 isSecondaryPanel={isSecondaryPanel}
                 handleClosePanel={handleClosePanel}
+                handleScreenshot={handleScreenshot}
             />
         </>
     )
