@@ -57,6 +57,22 @@ const GroupingContainer = ({
         lifespan: 1000 * 60 * 60 * 12, // 12 hours
     })
 
+    var handleScreenshot = function () {
+        const canvas = document.getElementById(
+            "lfm-canvas"
+        ) as HTMLCanvasElement
+        if (!canvas) {
+            console.error("Canvas with id 'lfm-canvas' not found.")
+            return
+        }
+        const dataUrl = canvas.toDataURL("image/png")
+        const link = document.createElement("a")
+        link.href = dataUrl
+        link.download = `${serverName}-lfm-screenshot.png`
+        document.body.appendChild(link)
+        link.click()
+    }
+
     const isServerOffline = useMemo<boolean>(
         () =>
             serverInfoState === LoadingState.Loaded &&
@@ -205,6 +221,7 @@ const GroupingContainer = ({
                         }}
                         isSecondaryPanel={isSecondaryPanel}
                         handleClosePanel={handleClosePanel}
+                        handleScreenshot={handleScreenshot}
                     />
                     <LfmCanvas
                         serverName={serverName}

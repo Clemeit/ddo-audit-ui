@@ -29,13 +29,15 @@ interface Props {
     serverName: string
     isSecondaryPanel?: boolean
     handleClosePanel?: () => void
+    handleScreenshot?: () => void
 }
 
 const LfmToolbar = ({
     reloadLfms,
     serverName,
     isSecondaryPanel,
-    handleClosePanel,
+    handleClosePanel = () => {},
+    handleScreenshot = () => {},
 }: Props) => {
     const {
         minLevel,
@@ -505,6 +507,7 @@ const LfmToolbar = ({
                 panelWidth={panelWidth}
                 linkDestination="/grouping"
                 isSecondaryPanel={isSecondaryPanel}
+                handleScreenshot={handleScreenshot}
             />
         </>
     )

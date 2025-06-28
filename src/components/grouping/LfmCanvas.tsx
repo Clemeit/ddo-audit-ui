@@ -525,7 +525,7 @@ const LfmCanvas: React.FC<Props> = ({
     return (
         <canvas
             ref={mainCanvasRef}
-            id={serverName}
+            id="lfm-canvas"
             width={panelWidth}
             height={panelHeight}
             style={{

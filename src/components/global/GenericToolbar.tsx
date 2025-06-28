@@ -24,6 +24,7 @@ interface Props {
     linkDestination: string
     serverName: string
     isSecondaryPanel?: boolean
+    handleScreenshot?: () => void
 }
 
 const GenericToolbar = ({
@@ -34,6 +35,7 @@ const GenericToolbar = ({
     linkDestination,
     serverName = "",
     isSecondaryPanel,
+    handleScreenshot = () => {},
 }: Props) => {
     const { isFullScreen, setIsFullScreen } = useThemeContext()
     const [canManuallyReload, setCanManuallyReload] = useState(true)
@@ -98,10 +100,25 @@ const GenericToolbar = ({
                     </span>
                 </Stack>
             </Button>
-            <div className="item screenshot-button hide-on-mobile">
-                <ScreenshotSVG className="icon" />
-                <span className="hide-on-mobile">Screenshot</span>
-            </div>
+            <Button
+                asDiv
+                className="item hide-on-mobile"
+                onClick={() => {
+                    handleScreenshot()
+                    dismissCallout("grouping-screenshot-button")
+                }}
+                data-attribute="grouping-screenshot-button"
+            >
+                <Stack align="center" gap="4px">
+                    <ScreenshotSVG className="icon" />
+                    <span className="hide-on-mobile">
+                        Screenshot{" "}
+                        {isCalloutActive("grouping-screenshot-button") && (
+                            <Badge type="new" text="New" />
+                        )}
+                    </span>
+                </Stack>
+            </Button>
             <div
                 className="item fullscreen-button"
                 onClick={() => setIsFullScreen(!isFullScreen)}
