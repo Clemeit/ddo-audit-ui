@@ -157,13 +157,11 @@ const useRenderLfmOverlay = ({ lfmSprite, context }: Props) => {
                         maxColumnCount * (characterHeight + 2) + 10
                 } else {
                     totalOverlayHeight =
-                        (lfm.members.length + 1) * (characterHeight + 2) + 10
+                        (lfm.members.length + 1) * (characterHeight + 2) + 4
                 }
                 if (lfm.comment)
                     totalOverlayHeight +=
-                        commentBoundingBox.y + commentBoundingBox.height
-                if (showLfmActivity)
-                    totalOverlayHeight += activityEvents.length * 20 + 5
+                        commentBoundingBox.y + commentBoundingBox.height + 6
             } else {
                 // quest
                 totalOverlayHeight = OVERLAY_QUEST_INFO_SPACING
@@ -435,17 +433,55 @@ const useRenderLfmOverlay = ({ lfmSprite, context }: Props) => {
                     )
                 })
 
-                // draw activity history
-                context.translate(
-                    4 + OVERLAY_ACTIVITY_LEFT_PADDING,
-                    commentBoundingBox.y +
-                        commentTextLines.length * commentLineHeight +
-                        15
-                )
-
-                let lastElapsedMinutes = 0
-                let hasRenderedAtLeastOne = false
                 if (showLfmActivity) {
+                    const activityHistoryHeight =
+                        activityEvents.length * 20 + 28
+                    // draw activity history
+                    context.setTransform(1, 0, 0, 1, 0, 0)
+                    context.translate(0, totalOverlayHeight + 10)
+
+                    context.lineWidth = 1
+                    context.fillStyle = OVERLAY_COLORS.BLACK_BACKGROUND
+                    context.globalAlpha = 0.8
+                    context.fillRect(
+                        0,
+                        0,
+                        totalOverlayWidth,
+                        activityHistoryHeight
+                    )
+                    context.globalAlpha = 1
+                    context.fillStyle = OVERLAY_COLORS.SIDE_BAR
+                    context.fillRect(
+                        totalOverlayWidth - OVERLAY_SIDE_BAR_WIDTH - 2,
+                        0,
+                        OVERLAY_SIDE_BAR_WIDTH + 2,
+                        activityHistoryHeight
+                    )
+                    context.strokeStyle = OVERLAY_COLORS.OUTER_BORDER
+                    context.strokeRect(
+                        0,
+                        0,
+                        totalOverlayWidth,
+                        activityHistoryHeight
+                    )
+                    context.strokeStyle = OVERLAY_COLORS.INNER_BORDER
+                    context.strokeRect(
+                        1,
+                        1,
+                        totalOverlayWidth - OVERLAY_SIDE_BAR_WIDTH - 2,
+                        activityHistoryHeight - 2
+                    )
+
+                    context.font = OVERLAY_FONTS.ACTIVITY
+                    context.fillStyle = "white"
+                    context.textAlign = "left"
+                    context.textBaseline = "middle"
+                    context.fillText("Activity History", 8, 12)
+
+                    context.translate(4 + OVERLAY_ACTIVITY_LEFT_PADDING, 33)
+                    let lastElapsedMinutes = 0
+                    let hasRenderedAtLeastOne = false
+
                     activityEvents.forEach((event) => {
                         switch (event.tag) {
                             case LfmActivityType.POSTED:
@@ -544,10 +580,14 @@ const useRenderLfmOverlay = ({ lfmSprite, context }: Props) => {
                                 context.textBaseline = "middle"
                                 context.fillStyle =
                                     OVERLAY_COLORS.ACTIVITY_COMMENT
+                                const elapsedString =
+                                    elapsedMinutes < 60
+                                        ? `${elapsedMinutes}m`
+                                        : `${Math.floor(elapsedMinutes / 60)}h+`
                                 context.fillText(
                                     elapsedMinutes === 0
                                         ? "Now"
-                                        : `${elapsedMinutes}m`,
+                                        : elapsedString,
                                     -20,
                                     0
                                 )
@@ -565,6 +605,33 @@ const useRenderLfmOverlay = ({ lfmSprite, context }: Props) => {
 
                         context.translate(0, 20)
                     })
+
+                    context.setTransform(1, 0, 0, 1, 0, 0)
+                    context.translate(0, totalOverlayHeight + 7)
+                    totalOverlayHeight += activityHistoryHeight + 7
+
+                    context.drawImage(
+                        lfmSprite,
+                        SPRITE_MAP.CHAIN.x,
+                        SPRITE_MAP.CHAIN.y,
+                        SPRITE_MAP.CHAIN.width,
+                        SPRITE_MAP.CHAIN.height,
+                        4,
+                        -11,
+                        SPRITE_MAP.CHAIN.width,
+                        SPRITE_MAP.CHAIN.height
+                    )
+                    context.drawImage(
+                        lfmSprite,
+                        SPRITE_MAP.CHAIN.x,
+                        SPRITE_MAP.CHAIN.y,
+                        SPRITE_MAP.CHAIN.width,
+                        SPRITE_MAP.CHAIN.height,
+                        totalOverlayWidth - OVERLAY_SIDE_BAR_WIDTH - 10,
+                        -11,
+                        SPRITE_MAP.CHAIN.width,
+                        SPRITE_MAP.CHAIN.height
+                    )
                 }
             } else {
                 // Render Quest

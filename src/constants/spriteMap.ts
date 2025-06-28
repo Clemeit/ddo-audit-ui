@@ -119,6 +119,12 @@ const SPRITE_MAP = {
         width: 18,
         height: 18,
     },
+    CHAIN: {
+        x: 75,
+        y: 33,
+        width: 4,
+        height: 18,
+    },
     GROUP_VIEW_CHECKBOX: {
         CHECKED: {
             x: 206,

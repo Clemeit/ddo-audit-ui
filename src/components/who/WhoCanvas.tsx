@@ -12,7 +12,7 @@ import {
     MINIMUM_CHARACTER_COUNT,
 } from "../../constants/whoPanel.ts"
 // @ts-expect-error ts-migrate(2307) FIXME: Cannot find module '../../assets/png/lfm_sprite.png'.
-import LfmSprite from "../../assets/png/lfm_sprite.png"
+import LfmSprite from "../../assets/png/lfm_sprite_2.png"
 import useRenderWhoPanel from "../../hooks/useRenderWhoPanel.ts"
 import useRenderCharacter from "../../hooks/useRenderCharacter.ts"
 import {
