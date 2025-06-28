@@ -608,7 +608,7 @@ const useRenderLfmOverlay = ({ lfmSprite, context }: Props) => {
 
                     context.setTransform(1, 0, 0, 1, 0, 0)
                     context.translate(0, totalOverlayHeight + 7)
-                    totalOverlayHeight += activityHistoryHeight + 7
+                    totalOverlayHeight += activityHistoryHeight + 12
 
                     context.drawImage(
                         lfmSprite,
