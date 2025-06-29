@@ -64,8 +64,18 @@ function getCharacterLevelActivityById(
     })
 }
 
+function getCharacterRaidActivityByIds(characterIds: number[]) {
+    const params = new URLSearchParams()
+    params.append("character_ids", characterIds.join(","))
+
+    return axios.get(`${API_URL}/raids`, {
+        params,
+    })
+}
+
 export {
     getCharacterLocationActivityById,
     getCharacterStatusActivityById,
     getCharacterLevelActivityById,
+    getCharacterRaidActivityByIds,
 }

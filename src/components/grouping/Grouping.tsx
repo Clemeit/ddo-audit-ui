@@ -103,7 +103,7 @@ const Grouping = () => {
                     if (quest?.group_size === "Raid") {
                         const eligibleLfm: Lfm = {
                             ...lfm,
-                            is_eligible: true,
+                            metadata: { ...lfm.metadata, isEligible: true },
                         }
                         if (!currentRaids[serverName]) {
                             currentRaids[serverName] = [eligibleLfm]

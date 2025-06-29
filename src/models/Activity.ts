@@ -1,5 +1,6 @@
 interface ActivityEvent {
     timestamp: string
+    character_id: number
     data: any
 }
 

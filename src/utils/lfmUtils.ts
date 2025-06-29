@@ -89,7 +89,10 @@ function shouldLfmRerender(previous: Lfm, current: Lfm): boolean {
     if (previous.minimum_level !== current.minimum_level) return true
     if (previous.maximum_level !== current.maximum_level) return true
     if (previous.leader.name !== current.leader.name) return true
-    if (previous.is_eligible !== current.is_eligible) return true
+    if (previous.metadata?.isEligible !== current.metadata?.isEligible)
+        return true
+    if (previous.metadata?.raidActivity !== current.metadata?.raidActivity)
+        return true
 
     return false
 }
@@ -129,7 +132,10 @@ function areLfmsEquivalent(previous: Lfm, current: Lfm): boolean {
     if (previous.minimum_level !== current.minimum_level) return false
     if (previous.maximum_level !== current.maximum_level) return false
     if (previous.leader.name !== current.leader.name) return false
-    if (previous.is_eligible !== current.is_eligible) return false
+    if (previous.metadata?.isEligible !== current.metadata?.isEligible)
+        return false
+    if (previous.metadata?.raidActivity !== current.metadata?.raidActivity)
+        return false
     if (previous.accepted_classes_count !== current.accepted_classes_count)
         return false
 

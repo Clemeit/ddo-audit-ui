@@ -16,9 +16,10 @@ import {
     OVERLAY_WIDTH,
 } from "../constants/lfmPanel.ts"
 import { getLfmActivityEventsFlatMap } from "../utils/lfmUtils.ts"
-import { CLASS_LIST_LOWER } from "../constants/game.ts"
+import { CLASS_LIST_LOWER, RAID_TIMER_MILLIS } from "../constants/game.ts"
 import {
     convertMillisecondsToPrettyString,
+    pluralize,
     wrapText,
 } from "../utils/stringUtils.ts"
 import useTextRenderer from "./useTextRenderer.ts"
@@ -31,6 +32,7 @@ import {
 } from "../utils/socialUtils.ts"
 import { useAreaContext } from "../contexts/AreaContext.tsx"
 import { useQuestContext } from "../contexts/QuestContext.tsx"
+import { getActiveTimer } from "../utils/timerUtils.ts"
 
 interface Props {
     lfmSprite?: HTMLImageElement | null
@@ -49,6 +51,7 @@ const useRenderLfmOverlay = ({ lfmSprite, context }: Props) => {
         showBoundingBoxes,
         showLfmActivity,
         showCharacterGuildNames,
+        showEligibleCharacters,
         // fontSize,
         // showRaidTimerIndicator,
         // showMemberCount,
@@ -608,7 +611,309 @@ const useRenderLfmOverlay = ({ lfmSprite, context }: Props) => {
 
                     context.setTransform(1, 0, 0, 1, 0, 0)
                     context.translate(0, totalOverlayHeight + 7)
-                    totalOverlayHeight += activityHistoryHeight + 12
+                    totalOverlayHeight += activityHistoryHeight + 10
+
+                    context.drawImage(
+                        lfmSprite,
+                        SPRITE_MAP.CHAIN.x,
+                        SPRITE_MAP.CHAIN.y,
+                        SPRITE_MAP.CHAIN.width,
+                        SPRITE_MAP.CHAIN.height,
+                        4,
+                        -11,
+                        SPRITE_MAP.CHAIN.width,
+                        SPRITE_MAP.CHAIN.height
+                    )
+                    context.drawImage(
+                        lfmSprite,
+                        SPRITE_MAP.CHAIN.x,
+                        SPRITE_MAP.CHAIN.y,
+                        SPRITE_MAP.CHAIN.width,
+                        SPRITE_MAP.CHAIN.height,
+                        totalOverlayWidth - OVERLAY_SIDE_BAR_WIDTH - 10,
+                        -11,
+                        SPRITE_MAP.CHAIN.width,
+                        SPRITE_MAP.CHAIN.height
+                    )
+                }
+
+                if (
+                    showEligibleCharacters &&
+                    lfm.metadata?.eligibleCharacters?.length > 0
+                ) {
+                    const activeTimers = lfm.metadata.eligibleCharacters
+                        .map((character) =>
+                            getActiveTimer(
+                                character,
+                                lfm.quest_id,
+                                lfm.metadata?.raidActivity
+                            )
+                        )
+                        .filter(Boolean)
+                    const maximumEligibleCharacters = 5
+                    const willOverflow =
+                        lfm.metadata.eligibleCharacters.length >
+                        maximumEligibleCharacters
+                    const totalRaidTimerHeight = activeTimers?.length * 24
+                    const eligibleCharactersHeight =
+                        Math.min(
+                            maximumEligibleCharacters,
+                            lfm.metadata.eligibleCharacters.length
+                        ) *
+                            20 +
+                        28 +
+                        totalRaidTimerHeight +
+                        (willOverflow ? 20 : 0)
+                    // draw eligible characters
+                    context.setTransform(1, 0, 0, 1, 0, 0)
+                    context.translate(0, totalOverlayHeight + 10)
+
+                    context.lineWidth = 1
+                    context.fillStyle = OVERLAY_COLORS.BLACK_BACKGROUND
+                    context.globalAlpha = 0.8
+                    context.fillRect(
+                        0,
+                        0,
+                        totalOverlayWidth,
+                        eligibleCharactersHeight
+                    )
+                    context.globalAlpha = 1
+                    context.fillStyle = OVERLAY_COLORS.SIDE_BAR
+                    context.fillRect(
+                        totalOverlayWidth - OVERLAY_SIDE_BAR_WIDTH - 2,
+                        0,
+                        OVERLAY_SIDE_BAR_WIDTH + 2,
+                        eligibleCharactersHeight
+                    )
+                    context.strokeStyle = OVERLAY_COLORS.OUTER_BORDER
+                    context.strokeRect(
+                        0,
+                        0,
+                        totalOverlayWidth,
+                        eligibleCharactersHeight
+                    )
+                    context.strokeStyle = OVERLAY_COLORS.INNER_BORDER
+                    context.strokeRect(
+                        1,
+                        1,
+                        totalOverlayWidth - OVERLAY_SIDE_BAR_WIDTH - 2,
+                        eligibleCharactersHeight - 2
+                    )
+
+                    context.font = OVERLAY_FONTS.ACTIVITY
+                    context.fillStyle = "white"
+                    context.textAlign = "left"
+                    context.textBaseline = "middle"
+                    context.fillText("Eligible Characters", 8, 12)
+
+                    context.translate(4, 33)
+                    lfm.metadata.eligibleCharacters
+                        .sort((a, b) => a.id - b.id)
+                        .sort((a, b) => {
+                            // sort by raid timer first, then by name
+                            const aOnTimer = activeTimers?.some(
+                                (timer) => timer.character_id === a.id
+                            )
+                            const bOnTimer = activeTimers?.some(
+                                (timer) => timer.character_id === b.id
+                            )
+                            if (aOnTimer && !bOnTimer) return -1
+                            return 1
+                        })
+                        .slice(0, maximumEligibleCharacters)
+                        .forEach((character) => {
+                            // if the character is on timer, give them a red background
+                            const hasActiveTimer = activeTimers.some(
+                                (timer) => timer.character_id === character.id
+                            )
+                            if (hasActiveTimer) {
+                                // TODO: draw red background with gradient towards the edges
+                                const redGradient =
+                                    context.createLinearGradient(
+                                        0,
+                                        0,
+                                        OVERLAY_CHARACTER_WIDTH,
+                                        0
+                                    )
+                                redGradient.addColorStop(0, "red")
+                                redGradient.addColorStop(0.95, "red")
+                                redGradient.addColorStop(1, "black")
+                                context.fillStyle = redGradient
+                                context.globalAlpha = 0.2
+                                context.fillRect(
+                                    4,
+                                    -10,
+                                    OVERLAY_CHARACTER_WIDTH,
+                                    40
+                                )
+                                context.globalAlpha = 1
+                            }
+
+                            context.fillStyle = OVERLAY_COLORS.ACTIVITY_COMMENT
+                            context.font = OVERLAY_FONTS.ACTIVITY
+                            context.textAlign = "left"
+                            context.textBaseline = "middle"
+
+                            // draw race icon
+                            const raceIconBoundingBox =
+                                mapRaceAndGenderToRaceIconBoundingBox(
+                                    character.race || "Human",
+                                    character.gender || "Male"
+                                )
+                            context.drawImage(
+                                lfmSprite,
+                                raceIconBoundingBox.x,
+                                raceIconBoundingBox.y,
+                                raceIconBoundingBox.width,
+                                raceIconBoundingBox.height,
+                                5,
+                                -raceIconBoundingBox.height / 2,
+                                raceIconBoundingBox.width,
+                                raceIconBoundingBox.height
+                            )
+
+                            // draw character name
+                            context.fillText(
+                                character.name || "Anonymous",
+                                raceIconBoundingBox.width + 10,
+                                1
+                            )
+
+                            // draw class icons
+                            character.classes
+                                ?.filter((classData) =>
+                                    CLASS_LIST_LOWER.includes(
+                                        classData.name.toLowerCase()
+                                    )
+                                )
+                                .sort((a, b) => b.level - a.level)
+                                .forEach((classData, index) => {
+                                    const classIconBoundingBox =
+                                        mapClassToIconBoundingBox(
+                                            classData.name
+                                        )
+                                    context.drawImage(
+                                        lfmSprite,
+                                        classIconBoundingBox.x,
+                                        classIconBoundingBox.y,
+                                        classIconBoundingBox.width,
+                                        classIconBoundingBox.height,
+                                        165 +
+                                            index *
+                                                (classIconBoundingBox.width +
+                                                    1),
+                                        -raceIconBoundingBox.height / 2,
+                                        classIconBoundingBox.width,
+                                        classIconBoundingBox.height
+                                    )
+
+                                    // shadow under text
+                                    context.save()
+                                    context.shadowColor = "black"
+                                    context.shadowBlur = 1
+                                    context.shadowOffsetX = 0
+                                    context.shadowOffsetY = 0
+                                    context.textAlign = "right"
+                                    context.textBaseline = "bottom"
+                                    context.fillStyle =
+                                        OVERLAY_COLORS.MEMBER_CLASS_LEVEL
+                                    context.font =
+                                        OVERLAY_FONTS.MEMBER_CLASS_LEVEL
+                                    context.fillText(
+                                        classData.level.toString(),
+                                        166 +
+                                            classIconBoundingBox.width +
+                                            index *
+                                                (classIconBoundingBox.width +
+                                                    1),
+                                        raceIconBoundingBox.height / 2
+                                    )
+
+                                    context.restore()
+                                })
+
+                            // draw total level
+                            context.font = OVERLAY_FONTS.MEMBER_TOTAL_LEVEL
+                            context.fillStyle =
+                                OVERLAY_COLORS.MEMBER_TOTAL_LEVEL
+                            context.textAlign = "right"
+                            context.textBaseline = "middle"
+                            context.fillText(
+                                character.total_level?.toString() || "???",
+                                OVERLAY_CHARACTER_WIDTH - 10,
+                                1
+                            )
+
+                            if (hasActiveTimer) {
+                                // context.beginPath()
+                                // context.moveTo(25, 0)
+                                // context.lineTo(100, 0)
+                                // context.strokeStyle = "red"
+                                // context.lineWidth = 1
+                                // context.globalAlpha = 0.5
+                                // context.stroke()
+                                // context.globalAlpha = 1
+
+                                const mostRecentRelevantTimer = activeTimers
+                                    .sort(
+                                        (a, b) =>
+                                            new Date(b.timestamp).getTime() -
+                                            new Date(a.timestamp).getTime()
+                                    )
+                                    .find(
+                                        (activity) =>
+                                            activity.character_id ===
+                                            character.id
+                                    )
+
+                                // render the remaining time below the character
+                                const elapsedTime =
+                                    Date.now() -
+                                    new Date(
+                                        mostRecentRelevantTimer.timestamp
+                                    ).getTime()
+                                const remainingTime =
+                                    RAID_TIMER_MILLIS - elapsedTime
+                                const remainingTimeString =
+                                    convertMillisecondsToPrettyString(
+                                        remainingTime,
+                                        true
+                                    )
+                                context.translate(0, 20)
+                                context.fillStyle =
+                                    OVERLAY_COLORS.ACTIVITY_COMMENT
+                                context.font = OVERLAY_FONTS.ACTIVITY
+                                context.textAlign = "left"
+                                context.textBaseline = "middle"
+                                context.fillText(
+                                    `Raid timer: ${remainingTimeString}`,
+                                    SPRITE_MAP.RACES.HUMAN.width + 10,
+                                    0
+                                )
+                                context.translate(0, 4)
+                            }
+
+                            context.translate(0, 20)
+                        })
+
+                    if (willOverflow) {
+                        const hiddenCharactersCount =
+                            lfm.metadata.eligibleCharacters.length -
+                            maximumEligibleCharacters
+                        context.fillStyle = OVERLAY_COLORS.SECONDARY_TEXT
+                        context.font = OVERLAY_FONTS.ACTIVITY
+                        context.textAlign = "center"
+                        context.textBaseline = "middle"
+                        context.fillText(
+                            `+${hiddenCharactersCount} more eligible ${pluralize("character", hiddenCharactersCount)}...`,
+                            OVERLAY_CHARACTER_WIDTH / 2,
+                            0
+                        )
+                    }
+
+                    context.setTransform(1, 0, 0, 1, 0, 0)
+                    context.translate(0, totalOverlayHeight + 7)
+                    totalOverlayHeight += eligibleCharactersHeight + 10
 
                     context.drawImage(
                         lfmSprite,
@@ -749,6 +1054,7 @@ const useRenderLfmOverlay = ({ lfmSprite, context }: Props) => {
             showCharacterGuildNames,
             isMultiColumn,
             confineTextToBoundingBox,
+            showEligibleCharacters,
         ]
     )
 

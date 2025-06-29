@@ -81,6 +81,8 @@ const LfmToolbar = ({
         setShowLfmActivity,
         isMultiColumn,
         setIsMultiColumn,
+        showEligibleCharacters,
+        setShowEligibleCharacters,
     } = useLfmContext()
     const { isFullScreen, setIsFullScreen } = useThemeContext()
     const { isCalloutActive, callouts, dismissCallout } = useFeatureCallouts()
@@ -400,6 +402,14 @@ const LfmToolbar = ({
                                 }
                             >
                                 Show character guild names
+                            </Checkbox>
+                            <Checkbox
+                                checked={showEligibleCharacters}
+                                onChange={(e) =>
+                                    setShowEligibleCharacters(e.target.checked)
+                                }
+                            >
+                                Show your eligible characters
                             </Checkbox>
                             <Checkbox
                                 checked={showLfmActivity}

@@ -16,6 +16,7 @@ interface Props {
 }
 
 const useGetRegisteredCharacters = ({ enabled = true }: Props = {}) => {
+    // TODO: when on a specific server, only load characters from that server
     const [registeredCharacters, setRegisteredCharacters] = useState<
         Character[]
     >([])

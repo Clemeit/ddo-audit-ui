@@ -22,7 +22,6 @@ import useGetRegisteredCharacters from "../hooks/useGetRegisteredCharacters.ts"
 import { Character } from "../models/Character.ts"
 import logMessage from "../utils/logUtils.ts"
 import { useNotificationContext } from "./NotificationContext.tsx"
-import Button from "../components/global/Button.tsx"
 
 interface LfmContextProps {
     lfmDataCache: LfmApiDataModel
@@ -72,6 +71,8 @@ interface LfmContextProps {
     setShowLfmActivity: (show: boolean) => void
     isMultiColumn: boolean
     setIsMultiColumn: (value: boolean) => void
+    showEligibleCharacters: boolean
+    setShowEligibleCharacters: (value: boolean) => void
 }
 
 const LfmContext = createContext<LfmContextProps | undefined>(undefined)
@@ -125,6 +126,8 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
         useState<boolean>(true)
     const [showLfmPostedTime, setShowLfmPostedTime] = useState<boolean>(true)
     const [showLfmActivity, setShowLfmActivity] = useState<boolean>(true)
+    const [showEligibleCharacters, setShowEligibleCharacters] =
+        useState<boolean>(false)
 
     const { createNotification } = useNotificationContext()
 
@@ -157,6 +160,7 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
         setShowCharacterGuildNames(false)
         setShowLfmPostedTime(true)
         setShowLfmActivity(true)
+        setShowEligibleCharacters(false)
         logMessage("Tool settings reset to defaults", "info")
     }
 
@@ -207,6 +211,7 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
                 setMouseOverDelay(settings.mouseOverDelay)
                 setShowLfmActivity(settings.showLfmActivity)
                 setIsMultiColumn(settings.isMultiColumn)
+                setShowEligibleCharacters(settings.showEligibleCharacters)
             } catch (e) {
                 logMessage(
                     "Error applying settings from local storage, resetting to defaults",
@@ -263,6 +268,7 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
             mouseOverDelay,
             showLfmActivity,
             isMultiColumn,
+            showEligibleCharacters,
         })
     }, [
         minLevel,
@@ -285,6 +291,7 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
         mouseOverDelay,
         showLfmActivity,
         isMultiColumn,
+        showEligibleCharacters,
     ])
 
     useEffect(() => {
@@ -343,6 +350,8 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
                 setShowLfmActivity,
                 isMultiColumn,
                 setIsMultiColumn,
+                showEligibleCharacters,
+                setShowEligibleCharacters,
             }}
         >
             {children}

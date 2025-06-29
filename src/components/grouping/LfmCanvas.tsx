@@ -360,12 +360,12 @@ const LfmCanvas: React.FC<Props> = ({
                 globalRenderNeeded ||
                 shouldRenderAllLfms ||
                 !areLfmsEquivalent(lfm, previousState.lfms[index]) ||
-                lfm.last_render_time === null ||
-                Date.now() - lfm.last_render_time > 60000
+                lfm.metadata?.lastRenderTime === null ||
+                Date.now() - lfm.metadata?.lastRenderTime > 60000
             ) {
                 // Render the lfm
                 renderLfm(lfm)
-                lfm.last_render_time = Date.now()
+                lfm.metadata = { ...lfm.metadata, lastRenderTime: Date.now() }
                 wasLfmRendered = true
                 numberOfLfmsRendered++
             }

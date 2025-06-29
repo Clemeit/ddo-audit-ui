@@ -1,5 +1,6 @@
 const RANSACK_HOURS = 168
 const RANSACK_THRESHOLD = 7
+const RAID_TIMER_MILLIS = 66 * 60 * 60 * 1000
 const MIN_LEVEL = 1
 const MAX_LEVEL = 34
 
@@ -30,4 +31,5 @@ export {
     MAX_LEVEL,
     CLASS_LIST,
     CLASS_LIST_LOWER,
+    RAID_TIMER_MILLIS,
 }

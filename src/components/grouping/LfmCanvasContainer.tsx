@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react"
+import React, { useEffect, useMemo, useState } from "react"
 import LfmCanvas from "./LfmCanvas.tsx"
 import { Lfm, LfmSpecificApiModel } from "../../models/Lfm.ts"
 import { useLfmContext } from "../../contexts/LfmContext.tsx"
@@ -11,6 +11,8 @@ import {
     ServerOfflineMessage,
     StaleDataPageMessage,
 } from "../global/CommonMessages.tsx"
+import { getCharacterRaidActivityByIds } from "../../services/activityService.ts"
+import { ActivityEvent } from "../../models/Activity.ts"
 
 interface Props {
     serverName: string
@@ -56,6 +58,31 @@ const GroupingContainer = ({
         interval: 10000,
         lifespan: 1000 * 60 * 60 * 12, // 12 hours
     })
+    const [raidActivity, setRaidActivity] = useState<ActivityEvent[]>([])
+
+    useEffect(() => {
+        // Only look up characters that are:
+        // 1. Being tracked
+        // 2. Are on this server
+        const trackedCharactersOnThisServer = registeredCharacters.filter(
+            (character) =>
+                character.server_name.toLowerCase() ===
+                    serverName.toLowerCase() &&
+                trackedCharacterIds.includes(character.id)
+        )
+        if (
+            trackedCharactersOnThisServer &&
+            trackedCharactersOnThisServer.length
+        ) {
+            getCharacterRaidActivityByIds(
+                trackedCharactersOnThisServer.map((character) => character.id)
+            )
+                .then((activities) => {
+                    setRaidActivity(activities.data.data)
+                })
+                .catch(() => {})
+        }
+    }, [trackedCharacterIds])
 
     var handleScreenshot = function () {
         const canvas = document.getElementById(
@@ -116,35 +143,36 @@ const GroupingContainer = ({
                     isEligible = false
                 }
             } else {
-                const characterLevels =
-                    registeredCharacters
-                        ?.filter((character) => {
-                            return (
-                                character.server_name?.toLowerCase() ===
-                                    serverName.toLowerCase() &&
-                                trackedCharacterIds.includes(character.id)
-                            )
-                        })
-                        ?.map((character) => character.total_level || 99) || []
-                let localEligibility = false
-                characterLevels.forEach((level) => {
-                    if (
-                        level >= lfm.minimum_level &&
-                        level <= lfm.maximum_level
-                    ) {
-                        localEligibility = true
+                const eligibleCharacters = registeredCharacters?.filter(
+                    (character) => {
+                        return (
+                            character.server_name?.toLowerCase() ===
+                                serverName.toLowerCase() &&
+                            (character.total_level ?? 0) >= lfm.minimum_level &&
+                            (character.total_level ?? 0) <= lfm.maximum_level &&
+                            trackedCharacterIds.includes(character.id)
+                        )
                     }
-                })
-                isEligible = localEligibility
+                )
+                isEligible = eligibleCharacters.length > 0
+                if (eligibleCharacters.length > 0) {
+                    lfm.metadata = {
+                        ...lfm.metadata,
+                        eligibleCharacters: eligibleCharacters,
+                    }
+                }
             }
 
-            const newLfm: Lfm = { ...lfm, is_eligible: isEligible }
+            const newLfm: Lfm = {
+                ...lfm,
+                metadata: { ...lfm.metadata, isEligible: isEligible },
+            }
             return newLfm
         })
 
         // sort
         const filteredAndSortedLfms = determinedLfms
-            .filter((lfm) => showNotEligible || lfm.is_eligible)
+            .filter((lfm) => showNotEligible || lfm.metadata?.isEligible)
             .sort((a, b) => {
                 // this sort should take care of the case where the next sort
                 // operataion has ties
@@ -183,9 +211,24 @@ const GroupingContainer = ({
                         : averageLevelB - averageLevelA
                 }
             })
+
+        const hydratedLfms = filteredAndSortedLfms.map((lfm) => {
+            // Hydrate with any activity relevant to this LFM
+            const raidActivityForLfm = raidActivity.filter(
+                (activity) => activity.data === lfm.quest_id
+            )
+
+            lfm.metadata = {
+                ...lfm.metadata,
+                raidActivity: raidActivityForLfm,
+            }
+
+            return lfm
+        })
+
         return {
-            filteredAndSortedLfms,
-            excludedLfmCount: lfms.length - filteredAndSortedLfms.length,
+            hydratedLfms,
+            excludedLfmCount: lfms.length - hydratedLfms.length,
         }
     }, [
         lfmData,
@@ -197,6 +240,7 @@ const GroupingContainer = ({
         filterByMyCharacters,
         registeredCharacters,
         trackedCharacterIds,
+        raidActivity,
     ])
 
     return (
@@ -225,7 +269,7 @@ const GroupingContainer = ({
                     />
                     <LfmCanvas
                         serverName={serverName}
-                        lfms={filteredLfms.filteredAndSortedLfms || []}
+                        lfms={filteredLfms.hydratedLfms || []}
                         excludedLfmCount={filteredLfms.excludedLfmCount}
                         raidView={raidView}
                     />

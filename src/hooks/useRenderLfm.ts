@@ -361,7 +361,7 @@ const useRenderLfm = ({ lfmSprite, context }: Props) => {
             })
 
             // background and edges
-            context.fillStyle = lfm.is_eligible
+            context.fillStyle = lfm.metadata?.isEligible
                 ? LFM_COLORS.BLACK_BACKGROUND
                 : LFM_COLORS.INELIGIBLE_FILL
             context.fillRect(
@@ -372,7 +372,7 @@ const useRenderLfm = ({ lfmSprite, context }: Props) => {
             )
 
             // gradient fill
-            if (lfm.is_eligible) {
+            if (lfm.metadata?.isEligible) {
                 const gradient = context.createLinearGradient(
                     0,
                     0,
@@ -421,7 +421,7 @@ const useRenderLfm = ({ lfmSprite, context }: Props) => {
                 Math.floor(levelPanelBoundingBox.height)
             )
 
-            if (!lfm.is_eligible) {
+            if (!lfm.metadata?.isEligible) {
                 context.globalAlpha = 0.5
             }
 
@@ -510,7 +510,7 @@ const useRenderLfm = ({ lfmSprite, context }: Props) => {
             ) {
                 // quest name
                 context.fillStyle =
-                    lfm.is_quest_guess && lfm.is_eligible
+                    lfm.is_quest_guess && lfm.metadata?.isEligible
                         ? LFM_COLORS.GUESS_TEXT
                         : LFM_COLORS.STANDARD_TEXT
                 context.font = lfm.is_quest_guess
@@ -539,11 +539,6 @@ const useRenderLfm = ({ lfmSprite, context }: Props) => {
                     })
                 }
 
-                // get skull count:
-                // look in comment. if something matching "r" followed by a number, that's the skull count
-                // if something matching "reaper" followed by a number, that's the skull count
-                // if something matching "skull" preceded by a number, that's the skull count
-
                 // quest difficulty
                 context.font = fonts.COMMENT
                 context.fillText(
@@ -551,7 +546,6 @@ const useRenderLfm = ({ lfmSprite, context }: Props) => {
                     questDifficultyBoundingBox.centerX(),
                     questDifficultyBoundingBox.centerY()
                 )
-                // TODO: render the skull count (get from comment)
             }
 
             // ===== CLASS PANEL =====

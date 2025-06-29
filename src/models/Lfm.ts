@@ -1,4 +1,5 @@
 import { SERVER_NAMES_LOWER } from "../constants/servers"
+import { ActivityEvent } from "./Activity"
 import { Character } from "./Character"
 
 interface QuestLevel {
@@ -77,8 +78,12 @@ interface Lfm {
     activity: LfmActivity[]
     last_updated: string
     server_name: string
-    is_eligible: boolean | null
-    last_render_time: number | null
+    metadata?: {
+        isEligible?: boolean
+        eligibleCharacters?: Character[]
+        lastRenderTime?: number
+        raidActivity?: ActivityEvent[]
+    }
 }
 
 enum LfmActivityType {
