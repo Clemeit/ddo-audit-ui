@@ -40,16 +40,14 @@ const useRenderCharacter = ({ sprite, context }: Props) => {
     const fonts = useMemo(() => FONTS(), [])
     const areaContext = useAreaContext()
     const { areas } = useMemo(
-        () => (
-            { areas: areaContext.areas }
-        ),
+        () => ({ areas: areaContext.areas }),
         [areaContext.areas]
     )
 
     const renderCharacter = ({
         character,
         backgroundColorOverride,
-        characterIndex
+        characterIndex,
     }: RenderCharacterProps) => {
         if (!sprite || !context) return
 
@@ -150,9 +148,9 @@ const useRenderCharacter = ({ sprite, context }: Props) => {
         context.fillText(
             characterNameText,
             nameHeaderBoundingBox.x -
-            leftBound +
-            SPRITE_MAP.RACES.HUMAN.width +
-            5,
+                leftBound +
+                SPRITE_MAP.RACES.HUMAN.width +
+                5,
             13
         )
         if (CHARACTER_IDS.includes(character.id)) {
@@ -165,10 +163,10 @@ const useRenderCharacter = ({ sprite, context }: Props) => {
                 SPRITE_MAP.CROWN.width,
                 SPRITE_MAP.CROWN.height,
                 nameHeaderBoundingBox.x -
-                leftBound +
-                SPRITE_MAP.RACES.HUMAN.width +
-                characterNameWidth +
-                7,
+                    leftBound +
+                    SPRITE_MAP.RACES.HUMAN.width +
+                    characterNameWidth +
+                    7,
                 2,
                 SPRITE_MAP.CROWN.width,
                 SPRITE_MAP.CROWN.height
@@ -213,7 +211,7 @@ const useRenderCharacter = ({ sprite, context }: Props) => {
                     classIconBoundingBox.height,
                     Math.round(
                         classHeaderBoundingBox.x +
-                        index * (classIconBoundingBox.width + 1)
+                            index * (classIconBoundingBox.width + 1)
                     ),
                     Math.round(
                         (CHARACTER_HEIGHT - classIconBoundingBox.height) / 2
@@ -235,10 +233,10 @@ const useRenderCharacter = ({ sprite, context }: Props) => {
                 context.fillText(
                     classData.level.toString(),
                     classHeaderBoundingBox.x +
-                    classIconBoundingBox.width +
-                    index * (classIconBoundingBox.width + 1),
+                        classIconBoundingBox.width +
+                        index * (classIconBoundingBox.width + 1),
                     (CHARACTER_HEIGHT - classIconBoundingBox.height) / 2 +
-                    classIconBoundingBox.height
+                        classIconBoundingBox.height
                 )
 
                 context.restore()
@@ -259,11 +257,11 @@ const useRenderCharacter = ({ sprite, context }: Props) => {
             const guildName = character.is_anonymous
                 ? "???"
                 : truncateText(
-                    character.guild_name || "",
-                    guildHeaderBoundingBox.width - 10,
-                    context.font,
-                    context
-                )
+                      character.guild_name || "",
+                      guildHeaderBoundingBox.width - 10,
+                      context.font,
+                      context
+                  )
             context.fillText(
                 guildName,
                 Math.round(guildHeaderBoundingBox.centerX() - leftBound),

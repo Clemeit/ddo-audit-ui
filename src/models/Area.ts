@@ -12,4 +12,4 @@ interface AreaApiResponse {
     timestamp: number
 }
 
-export { Area, AreaApiResponse }
+export type { Area, AreaApiResponse }

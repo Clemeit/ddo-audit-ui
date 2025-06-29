@@ -12,4 +12,5 @@ interface ApiState<T> {
     error: string | null
 }
 
-export { LoadingState, ApiState }
+export { LoadingState }
+export type { ApiState }

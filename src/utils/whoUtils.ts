@@ -46,7 +46,7 @@ const calculateCommonFilterBoundingBoxes = (panelWidth: number) => {
             SPRITE_MAP.SINGLE_BORDER_LEFT.width -
             SPRITE_MAP.SINGLE_BORDER_RIGHT.width -
             totalClassFilterWidth) /
-        2
+            2
     const filterZoneOffsetY =
         SPRITE_MAP.HEADER_BAR.height +
         SPRITE_MAP.CONTENT_TOP.height +
@@ -56,7 +56,7 @@ const calculateCommonFilterBoundingBoxes = (panelWidth: number) => {
             SPRITE_MAP.SINGLE_BORDER_TOP.height -
             SPRITE_MAP.SINGLE_BORDER_BOTTOM.height -
             FILTER_ZONE_CONTENT_HEIGHT) /
-        2
+            2
 
     const filterHeaderTextBoundingBox = new BoundingBox(
         filterZoneOffsetX,
@@ -68,7 +68,7 @@ const calculateCommonFilterBoundingBoxes = (panelWidth: number) => {
         filterZoneOffsetX + 2,
         filterZoneOffsetY + 20,
         CLASS_LIST.length *
-        (SPRITE_MAP.CLASS_FILTER.FIGHTER.width + CLASS_FILTER_GAP),
+            (SPRITE_MAP.CLASS_FILTER.FIGHTER.width + CLASS_FILTER_GAP),
         SPRITE_MAP.CLASS_FILTER.FIGHTER.height
     )
     const anyCheckboxBoundingBox = new BoundingBox(
@@ -100,14 +100,14 @@ const calculateCommonFilterBoundingBoxes = (panelWidth: number) => {
     const levelRangeLowerInputBoundingBox = new BoundingBox(
         levelRangeHeaderTextBoundingBox.x,
         levelRangeHeaderTextBoundingBox.y +
-        levelRangeHeaderTextBoundingBox.height,
+            levelRangeHeaderTextBoundingBox.height,
         levelRangeInputBoxWidth,
         INPUT_BOX_HEIGHT
     )
     const levelRangeHeaderTextToInputGap = 30
     const levelRangeUpperInputBoundingBox = new BoundingBox(
         levelRangeLowerInputBoundingBox.right() +
-        levelRangeHeaderTextToInputGap,
+            levelRangeHeaderTextToInputGap,
         levelRangeLowerInputBoundingBox.y,
         levelRangeInputBoxWidth,
         INPUT_BOX_HEIGHT
@@ -158,7 +158,7 @@ const calculateCommonFilterBoundingBoxes = (panelWidth: number) => {
             LFM_COLUMN_WIDTH -
             CLASS_COLUMN_WIDTH -
             LEVEL_COLUMN_WIDTH) /
-        2,
+            2,
         HEADER_HEIGHT
     )
     const classHeaderBoundingBox = new BoundingBox(

@@ -30,7 +30,7 @@ export const QuestProvider = ({ children }: Props) => {
             !cachedQuests ||
             !cachedQuests.data ||
             new Date().getTime() - lastUpdated.getTime() >
-            CACHED_QUESTS_EXPIRY_TIME
+                CACHED_QUESTS_EXPIRY_TIME
         ) {
             // Cache is stale
             try {

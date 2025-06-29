@@ -11,4 +11,4 @@ interface Notification {
     actions?: React.ReactNode
 }
 
-export { Notification }
+export type { Notification }

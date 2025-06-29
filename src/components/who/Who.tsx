@@ -16,11 +16,8 @@ import {
     SERVERS_64_BITS_LOWER,
 } from "../../constants/servers.ts"
 import { pluralize, toSentenceCase } from "../../utils/stringUtils.ts"
-// @ts-expect-error NOFIX
 import { ReactComponent as Checkmark } from "../../assets/svg/checkmark.svg"
-// @ts-expect-error NOFIX
 import { ReactComponent as X } from "../../assets/svg/x.svg"
-// @ts-expect-error NOFIX
 import { ReactComponent as Pending } from "../../assets/svg/pending.svg"
 import Badge from "../global/Badge.tsx"
 import { LiveDataHaultedPageMessage } from "../global/CommonMessages.tsx"

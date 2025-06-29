@@ -23,4 +23,4 @@ interface ServerInfoApiDataModel {
     cormyr?: ServerInfo
 }
 
-export { ServerInfo, ServerInfoApiDataModel }
+export type { ServerInfo, ServerInfoApiDataModel }

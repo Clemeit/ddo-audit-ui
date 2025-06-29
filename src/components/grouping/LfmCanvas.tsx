@@ -5,7 +5,6 @@ import useRenderLfmPanel from "../../hooks/useRenderLfmPanel.ts"
 import useRenderLfmOverlay, {
     RenderType,
 } from "../../hooks/useRenderLfmOverlay.ts"
-// @ts-expect-error ts-migrate(2307) FIXME: Cannot find module '../../assets/png/lfm_sprite.png'.
 import LfmSprite from "../../assets/png/lfm_sprite_2.png"
 import { useLfmContext } from "../../contexts/LfmContext.tsx"
 import {

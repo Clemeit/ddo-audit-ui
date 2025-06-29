@@ -21,12 +21,10 @@ const useGetRegisteredCharacters = ({ enabled = true }: Props = {}) => {
     >([])
     const [registeredCharactersCached, setRegisteredCharactersCached] =
         useState<Character[]>([])
-    const [accessTokens, setAccessTokens] = useState<AccessToken[]>(
+    const [accessTokens, setAccessTokens] = useState<AccessToken[]>([])
+    const [verifiedCharacters, setVerifiedCharacters] = useState<Character[]>(
         []
     )
-    const [verifiedCharacters, setVerifiedCharacters] = useState<
-        Character[]
-    >([])
     const [verifiedCharactersCached, setVerifiedCharactersCached] = useState<
         Character[]
     >([])
@@ -69,7 +67,9 @@ const useGetRegisteredCharacters = ({ enabled = true }: Props = {}) => {
         )
         getCharactersByIds(characterIds)
             .then((response) => {
-                const characters: Character[] = Object.values(response.data?.data || {})
+                const characters: Character[] = Object.values(
+                    response.data?.data || {}
+                )
                 setRegisteredCharacters(characters)
                 setIsLoaded(true)
 
@@ -116,30 +116,34 @@ const useGetRegisteredCharacters = ({ enabled = true }: Props = {}) => {
     }, [reload, enabled])
 
     const publishedRegisteredCharacters = (): Character[] => {
-        if (registeredCharacters.length === 0 && registeredCharactersCached.length !== 0) {
+        if (
+            registeredCharacters.length === 0 &&
+            registeredCharactersCached.length !== 0
+        ) {
             return registeredCharactersCached
         }
         return registeredCharacters
     }
 
     const publishedVerifiedCharacters = (): Character[] => {
-        if (verifiedCharacters.length === 0 && verifiedCharactersCached.length !== 0) {
+        if (
+            verifiedCharacters.length === 0 &&
+            verifiedCharactersCached.length !== 0
+        ) {
             return verifiedCharactersCached
         }
         return verifiedCharacters
     }
 
     return {
-        registeredCharacters:
-            publishedRegisteredCharacters(),
-        verifiedCharacters:
-            publishedVerifiedCharacters(),
+        registeredCharacters: publishedRegisteredCharacters(),
+        verifiedCharacters: publishedVerifiedCharacters(),
         accessTokens,
         isLoaded,
         isError,
         reload,
         unregisterCharacter,
-        lastReload
+        lastReload,
     }
 }
 

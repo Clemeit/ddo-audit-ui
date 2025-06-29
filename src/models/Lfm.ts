@@ -94,7 +94,7 @@ interface LfmApiServerModel {
     lfms: { [key: number]: Lfm }
 }
 
-type ServerName = typeof SERVER_NAMES_LOWER[number]
+type ServerName = (typeof SERVER_NAMES_LOWER)[number]
 
 type LfmApiDataModel = {
     [K in ServerName]?: { number: Lfm }
@@ -113,19 +113,20 @@ interface LfmSortType {
     ascending: boolean
 }
 
-export {
+export type {
     QuestLevel,
     QuestXP,
     Quest,
     LfmActivityEvent,
     LfmActivity,
     Lfm,
-    LfmActivityType,
     LfmApiServerModel,
     LfmApiDataModel,
     LfmSortType,
     FlatActivityEvent,
     QuestApiResponse,
     LfmApiModel,
-    LfmSpecificApiModel
+    LfmSpecificApiModel,
 }
+
+export { LfmActivityType }

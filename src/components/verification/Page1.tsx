@@ -36,7 +36,6 @@ const Page1 = ({
     const navigate = useNavigate()
     const pollVerificationEndpointTimeout = useRef<NodeJS.Timeout | null>(null)
     const navigateToNextPageTimeout = useRef<NodeJS.Timeout | null>(null)
-    const [isDemoOpen, setIsDemoOpen] = useState<boolean>(false)
 
     const [verificationChallenge, setVerificationChallenge] =
         useState<Verification | null>(null)

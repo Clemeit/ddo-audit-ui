@@ -32,7 +32,7 @@ const StatusBarChart = ({ statusActivity, locationActivity }: Props) => {
         console.log("activityCopy", activityCopy)
 
         const days: { [key: string]: number } = {}
-        let totalTime = 0
+        // let totalTime = 0
         let startTime: Date | null = null
 
         const earliestEventDate = new Date(
@@ -78,7 +78,7 @@ const StatusBarChart = ({ statusActivity, locationActivity }: Props) => {
                             )
                             const currentDay = startTime.toDateString()
                             days[currentDay] += timeSpent
-                            totalTime += timeSpent
+                            // totalTime += timeSpent
                             startTime = startOfNextDay
                         }
                         startTime = null
@@ -98,7 +98,7 @@ const StatusBarChart = ({ statusActivity, locationActivity }: Props) => {
                 )
                 const currentDay = startTime.toDateString()
                 days[currentDay] += timeSpent
-                totalTime += timeSpent
+                // totalTime += timeSpent
                 startTime = startOfNextDay
             }
         }
@@ -282,8 +282,8 @@ const StatusBarChart = ({ statusActivity, locationActivity }: Props) => {
                                 return [
                                     value
                                         ? convertMillisecondsToPrettyString(
-                                            value
-                                        )
+                                              value
+                                          )
                                         : "No activity",
                                     "Online for",
                                 ]
@@ -291,8 +291,8 @@ const StatusBarChart = ({ statusActivity, locationActivity }: Props) => {
                                 return [
                                     value
                                         ? convertMillisecondsToPrettyString(
-                                            value
-                                        )
+                                              value
+                                          )
                                         : "No activity",
                                     "In quests for",
                                 ]

@@ -226,7 +226,7 @@ const Grouping = () => {
             <Stack direction="column" gap="20px">
                 {Object.entries(getCurrentRaids() || {}).map(
                     ([serverName, lfms]: [string, { [key: number]: Lfm }]) => (
-                        <div className="raid-card">
+                        <div className="raid-card" key={serverName}>
                             <Link
                                 key={serverName}
                                 to={`/grouping/${serverName}`}

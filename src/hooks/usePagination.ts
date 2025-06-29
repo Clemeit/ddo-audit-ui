@@ -1,7 +1,17 @@
 import React, { useEffect } from "react"
 import { useLocation, useNavigate } from "react-router-dom"
 
-const usePagination = ({ useQueryParams, clearOtherQueryParams, maxPage } : { useQueryParams: boolean, clearOtherQueryParams: boolean, maxPage: number } = { useQueryParams: false, clearOtherQueryParams: false, maxPage: 99 }) => {
+const usePagination = (
+    {
+        useQueryParams,
+        clearOtherQueryParams,
+        maxPage,
+    }: {
+        useQueryParams: boolean
+        clearOtherQueryParams: boolean
+        maxPage: number
+    } = { useQueryParams: false, clearOtherQueryParams: false, maxPage: 99 }
+) => {
     const location = useLocation()
     const navigate = useNavigate()
     const [currentPage, setCurrentPage] = React.useState(1)

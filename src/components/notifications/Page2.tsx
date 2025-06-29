@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react"
+import React, { useState } from "react"
 import { ContentCluster } from "../global/ContentCluster.tsx"
 import Stack from "../global/Stack.tsx"
 import "./Page2.css"
@@ -32,7 +32,11 @@ enum Difficulty {
     Reaper = "Reaper",
 }
 
-const Page2 = ({ setPage }: { setPage: Function }) => {
+interface Props {
+    setPage: Function
+}
+
+const Page2 = ({ setPage }: Props) => {
     const [conditionFunction, setConditionFunction] = useState("any")
     const [conditions, setConditions] = useState<Condition[]>([
         {

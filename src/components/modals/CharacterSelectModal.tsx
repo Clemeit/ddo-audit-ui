@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react"
 import { ContentCluster } from "../global/ContentCluster.tsx"
-import RegistrationTable from "../registration/RegistrationTable.tsx"
 import { Character } from "../../models/Character.ts"
 import Stack from "../global/Stack.tsx"
 import Button from "../global/Button.tsx"
@@ -14,7 +13,6 @@ import CharacterTable, {
     CharacterTableRow,
     ColumnType,
 } from "../tables/CharacterTable.tsx"
-import useIsMobile from "../../hooks/useIsMobile.ts"
 
 interface Props {
     previouslyAddedCharacters: Character[]
@@ -188,9 +186,9 @@ const CharacterSelectModal = ({
                         <div />
                         <Button
                             type="secondary"
-                            onClick={() => {
+                            onClick={() =>
                                 keepModalOpen ? resetModal() : handleClose()
-                            }}
+                            }
                         >
                             Done
                         </Button>
@@ -234,12 +232,14 @@ const CharacterSelectModal = ({
                         />
                         {!!validationErrorMessage.length &&
                             validationErrorMessage.map((message, index) => (
-                                <ValidationMessage
-                                    message={message}
-                                    visible={!!validationErrorMessage}
-                                    showIcon={false}
-                                    type={index === 0 ? "error" : "default"}
-                                />
+                                <div key={index}>
+                                    <ValidationMessage
+                                        message={message}
+                                        visible={!!validationErrorMessage}
+                                        showIcon={false}
+                                        type={index === 0 ? "error" : "default"}
+                                    />
+                                </div>
                             ))}
                     </div>
                 </div>

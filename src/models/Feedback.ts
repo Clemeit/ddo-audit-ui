@@ -1,4 +1,4 @@
 export interface FeedbackMessage {
-    message: string;
-    contact?: string;
+    message: string
+    contact?: string
 }

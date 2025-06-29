@@ -4,4 +4,4 @@ interface LocalStorageEntry<T> {
     data: T
 }
 
-export { LocalStorageEntry }
+export type { LocalStorageEntry }

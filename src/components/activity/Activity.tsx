@@ -111,10 +111,29 @@ const Activity = () => {
         }
     }, [location.search, verifiedCharacters, accessTokens])
 
-    function handleCharacterSelectionChange(e: any) {
+    function handleCharacterSelectionChange(
+        e: React.ChangeEvent<HTMLSelectElement>
+    ) {
+        if (!e.target.value) {
+            setSelectedCharacterAndAccessToken({
+                character: null,
+                accessToken: null,
+            })
+            // clear character from url
+            const searchParams = new URLSearchParams(location.search)
+            searchParams.delete("character")
+            window.history.replaceState(
+                null,
+                "",
+                `${location.pathname}?${searchParams.toString()}`
+            )
+            return
+        }
+
         const character =
             verifiedCharacters.find(
-                (character: Character) => character.id === e.target.value
+                (character: Character) =>
+                    character.id.toString() === e.target.value
             ) || null
         if (character && accessTokens) {
             const accessToken = accessTokens.find(

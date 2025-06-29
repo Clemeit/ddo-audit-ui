@@ -43,9 +43,7 @@ export class ErrorBoundary extends React.Component<
                         wrong. Sorry about that! Please refresh the page or come
                         back later.
                     </p>
-                    <Link to="/" onClick={this.handleResetError}>
-                        Return to the homepage
-                    </Link>
+                    <Link to="/">Return to the homepage</Link>
                 </div>
             )
         }

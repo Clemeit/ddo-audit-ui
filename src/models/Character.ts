@@ -45,9 +45,8 @@ interface CharacterApiDataModel {
     cormyr?: CharacterApiServerModel
 }
 
-
 interface CharacterSpecificApiDataModel {
-    data?: { [characterId: number]: Character}
+    data?: { [characterId: number]: Character }
 }
 
 interface CharacterSummaryModel {
@@ -89,7 +88,7 @@ interface CharacterSortBy {
     ascending: boolean
 }
 
-export {
+export type {
     Character,
     CharacterClass,
     CharacterApiServerModel,
@@ -97,5 +96,8 @@ export {
     CharacterSummaryApiDataModel,
     CharacterSummaryModel,
     CharacterSortBy,
-    CharacterSortType, OnlineCharacterIdsModel, OnlineCharacterIdsApiModel, CharacterSpecificApiDataModel
+    OnlineCharacterIdsModel,
+    OnlineCharacterIdsApiModel,
+    CharacterSpecificApiDataModel,
 }
+export { CharacterSortType }

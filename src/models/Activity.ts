@@ -17,4 +17,5 @@ enum CharacterActivityType {
     status = "status",
 }
 
-export { ActivityEvent, CharacterActivity, CharacterActivityType }
+export type { ActivityEvent, CharacterActivity }
+export { CharacterActivityType }

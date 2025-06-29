@@ -207,11 +207,11 @@ const Friends = () => {
                     <div />
                     <Button
                         type="secondary"
-                        onClick={() => {
+                        onClick={() =>
                             keepModalOpen
                                 ? clearCharacterSelection()
                                 : closeModal()
-                        }}
+                        }
                     >
                         Done
                     </Button>
@@ -253,12 +253,14 @@ const Friends = () => {
                     />
                     {!!validationErrorMessage.length &&
                         validationErrorMessage.map((message, index) => (
-                            <ValidationMessage
-                                message={message}
-                                visible={!!validationErrorMessage}
-                                showIcon={false}
-                                type={index === 0 ? "error" : "default"}
-                            />
+                            <div key={index}>
+                                <ValidationMessage
+                                    message={message}
+                                    visible={!!validationErrorMessage}
+                                    showIcon={false}
+                                    type={index === 0 ? "error" : "default"}
+                                />
+                            </div>
                         ))}
                 </div>
             </div>

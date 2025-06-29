@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react"
 import {
     getFriendsMetadata as getFriendsMetadataFromLocalStorage,
     setFriends as setFriendsInLocalStorage,
-    removeFriend as removeFriendInLocalStorage
+    removeFriend as removeFriendInLocalStorage,
 } from "../utils/localStorage.ts"
 import { getCharactersByIds } from "../services/characterService.ts"
 import { Character } from "../models/Character.ts"
@@ -13,11 +13,10 @@ interface Props {
 }
 
 const useGetFriends = ({ enabled = true }: Props = {}) => {
-    const [friends, setFriends] = useState<
-        Character[] | undefined
-    >(undefined)
-    const [friendsCached, setFriendsCached] =
-        useState<Character[] | undefined>(undefined)
+    const [friends, setFriends] = useState<Character[] | undefined>(undefined)
+    const [friendsCached, setFriendsCached] = useState<Character[] | undefined>(
+        undefined
+    )
     const [isLoaded, setIsLoaded] = useState<boolean>(false)
     const [isError, setIsError] = useState<boolean>(false)
     const [lastReload, setLastReload] = useState<Date>(new Date())
@@ -25,12 +24,8 @@ const useGetFriends = ({ enabled = true }: Props = {}) => {
     const reload = useCallback(() => {
         setIsLoaded(false)
         setLastReload(new Date())
-        const friendsMetadata =
-            getFriendsMetadataFromLocalStorage()
-        if (
-            !friendsMetadata ||
-            friendsMetadata.data?.length === 0
-        ) {
+        const friendsMetadata = getFriendsMetadataFromLocalStorage()
+        if (!friendsMetadata || friendsMetadata.data?.length === 0) {
             setFriends([])
             setIsLoaded(true)
             return
@@ -44,14 +39,14 @@ const useGetFriends = ({ enabled = true }: Props = {}) => {
         )
         getCharactersByIds(characterIds)
             .then((response) => {
-                const characters: Character[] = Object.values(response.data?.data || {})
+                const characters: Character[] = Object.values(
+                    response.data?.data || {}
+                )
                 setFriends(characters)
                 setIsLoaded(true)
 
                 // update cached data if it's older than CACHED_CHARACTER_EXPIRY_TIME
-                const lastUpdated = new Date(
-                    friendsMetadata.updatedAt
-                )
+                const lastUpdated = new Date(friendsMetadata.updatedAt)
                 if (
                     new Date().getTime() - lastUpdated.getTime() >
                     CACHED_CHARACTER_EXPIRY_TIME
@@ -77,13 +72,12 @@ const useGetFriends = ({ enabled = true }: Props = {}) => {
     }, [reload, enabled])
 
     return {
-        friends:
-            friends || friendsCached || [],
+        friends: friends || friendsCached || [],
         isLoaded,
         isError,
         reload,
         removeFriend,
-        lastReload
+        lastReload,
     }
 }
 

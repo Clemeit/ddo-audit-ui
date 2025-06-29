@@ -21,4 +21,4 @@ interface LogRequest {
     metadata?: Record<string, any>
 }
 
-export { LogRequest }
+export type { LogRequest }
