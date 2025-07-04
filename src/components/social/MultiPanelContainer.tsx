@@ -1,4 +1,4 @@
-import React from "react"
+import React, { useEffect } from "react"
 import { ContentCluster } from "../global/ContentCluster.tsx"
 import NavCardCluster from "../global/NavCardCluster.tsx"
 import NavigationCard from "../global/NavigationCard.tsx"
@@ -11,6 +11,7 @@ import WhoContainer from "../who/WhoCanvasContainer.tsx"
 import { SERVER_NAMES_LOWER } from "../../constants/servers.ts"
 import { ReactComponent as AddSVG } from "../../assets/svg/add.svg"
 import "./MultiPanelContainer.css"
+import { useLocation, useSearchParams } from "react-router-dom"
 
 export enum PrimaryType {
     Grouping = "grouping",
@@ -26,9 +27,83 @@ const MultiPanelContainer = ({ serverName, primaryType }: Props) => {
     const [isModalOpen, setIsModalOpen] = React.useState(false)
     const [secondaryPanel, setSecondaryPanel] =
         React.useState<React.ReactNode>()
-    const [secondaryType, setSecondaryType] = React.useState("")
+    // const [secondaryType, setSecondaryType] = React.useState("")
+    // const [secondaryServer, setSecondaryServer] = React.useState("")
 
-    const secondaryPanelTypeModalContent = () => (
+    // Fire useEffect when URL params change:
+    const location = useLocation()
+    const [searchParams, setSearchParams] = useSearchParams()
+    useEffect(() => {
+        const secondaryPanelType = searchParams.get("secondary-type")
+        const secondaryServerName = searchParams.get("secondary-server")
+        // console.log(secondaryPanelType, secondaryType)
+        // console.log(secondaryServerName, secondaryServer)
+        if (
+            (secondaryPanelType === "grouping" ||
+                secondaryPanelType === "who") &&
+            secondaryServerName !== null
+        ) {
+            if (!SERVER_NAMES_LOWER.includes(secondaryServerName.toLowerCase()))
+                return
+            // if (
+            //     secondaryType.toLocaleLowerCase() ===
+            //     secondaryPanelType.toLocaleLowerCase()
+            // )
+            //     return
+            // if (
+            //     secondaryServer.toLocaleLowerCase() ===
+            //     secondaryServerName.toLocaleLowerCase()
+            // )
+            //     return
+            console.log("ALERT")
+            // Valid input
+            // setSecondaryType(secondaryPanelType.toLowerCase())
+            // setSecondaryServer(secondaryServerName.toLowerCase())
+            if (secondaryPanelType === "grouping") {
+                setSecondaryPanel(
+                    <LfmContainer
+                        serverName={secondaryServerName}
+                        isSecondaryPanel={true}
+                        handleClosePanel={() => {
+                            setUrlParams(null, null)
+                            setSecondaryPanel(null)
+                        }}
+                    />
+                )
+            } else if (secondaryPanelType === "who") {
+                setSecondaryPanel(
+                    <WhoContainer
+                        serverName={secondaryServerName}
+                        isSecondaryPanel={true}
+                        handleClosePanel={() => {
+                            setUrlParams(null, null)
+                            setSecondaryPanel(null)
+                        }}
+                    />
+                )
+            }
+        }
+    }, [searchParams])
+
+    const setUrlParams = (type: string, serverName: string) => {
+        setSearchParams((prev) => {
+            const newParams = new URLSearchParams(prev)
+            if (type === null) {
+                newParams.delete("secondary-type")
+            } else if (type !== undefined) {
+                newParams.set("secondary-type", type)
+            }
+            if (serverName === null) {
+                newParams.delete("secondary-server")
+            } else if (serverName !== undefined) {
+                newParams.set("secondary-server", serverName)
+            }
+            newParams.delete("string-filter")
+            return newParams
+        })
+    }
+
+    const secondaryPanelTypeModalContent = (
         <div style={{ padding: "20px" }}>
             <ContentCluster title="Choose Secondary Panel">
                 <div style={{ maxWidth: "400px" }}>
@@ -37,13 +112,13 @@ const MultiPanelContainer = ({ serverName, primaryType }: Props) => {
                             noLink
                             fullWidth
                             type="grouping"
-                            onClick={() => setSecondaryType("grouping")}
+                            onClick={() => setUrlParams("grouping", null)}
                         />
                         <NavigationCard
                             noLink
                             fullWidth
                             type="who"
-                            onClick={() => setSecondaryType("who")}
+                            onClick={() => setUrlParams("who", null)}
                         />
                     </NavCardCluster>
                 </div>
@@ -51,7 +126,7 @@ const MultiPanelContainer = ({ serverName, primaryType }: Props) => {
         </div>
     )
 
-    const secondaryPanelServerModalContent = () => (
+    const secondaryPanelServerModalContent = (
         <div style={{ padding: "20px" }}>
             <ContentCluster title="Choose a Server">
                 <div style={{ maxWidth: "400px" }}>
@@ -66,27 +141,7 @@ const MultiPanelContainer = ({ serverName, primaryType }: Props) => {
                                 title={toSentenceCase(_serverName)}
                                 onClick={() => {
                                     setIsModalOpen(false)
-                                    if (secondaryType === "grouping") {
-                                        setSecondaryPanel(
-                                            <LfmContainer
-                                                serverName={_serverName}
-                                                isSecondaryPanel={true}
-                                                handleClosePanel={() => {
-                                                    setSecondaryPanel(undefined)
-                                                }}
-                                            />
-                                        )
-                                    } else if (secondaryType === "who") {
-                                        setSecondaryPanel(
-                                            <WhoContainer
-                                                serverName={_serverName}
-                                                isSecondaryPanel={true}
-                                                handleClosePanel={() => {
-                                                    setSecondaryPanel(undefined)
-                                                }}
-                                            />
-                                        )
-                                    }
+                                    setUrlParams(undefined, _serverName)
                                 }}
                                 badge={
                                     _serverName === serverName && (
@@ -105,8 +160,10 @@ const MultiPanelContainer = ({ serverName, primaryType }: Props) => {
         <>
             {isModalOpen && (
                 <Modal onClose={() => setIsModalOpen(false)}>
-                    {!secondaryType && secondaryPanelTypeModalContent()}
-                    {secondaryType && secondaryPanelServerModalContent()}
+                    {!searchParams.get("secondary-type") &&
+                        secondaryPanelTypeModalContent}
+                    {searchParams.get("secondary-type") &&
+                        secondaryPanelServerModalContent}
                 </Modal>
             )}
             <div
@@ -123,8 +180,7 @@ const MultiPanelContainer = ({ serverName, primaryType }: Props) => {
                     <button
                         className="add-panel-button hide-on-mobile"
                         onClick={() => {
-                            setSecondaryPanel(undefined)
-                            setSecondaryType("")
+                            setSecondaryPanel(null)
                             setIsModalOpen(true)
                         }}
                     >

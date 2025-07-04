@@ -102,7 +102,9 @@ export default createBrowserRouter(
                     <WhoProvider>
                         <LfmProvider>
                             <AreaProvider>
-                                <WhoSpecific />
+                                <QuestProvider>
+                                    <WhoSpecific />
+                                </QuestProvider>
                             </AreaProvider>
                         </LfmProvider>
                     </WhoProvider>

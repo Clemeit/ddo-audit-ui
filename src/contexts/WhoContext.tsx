@@ -12,6 +12,7 @@ import {
     DEFAULT_REFRESH_RATE,
     DEFAULT_WHO_PANEL_WIDTH,
 } from "../constants/whoPanel.ts"
+import { useSearchParams } from "react-router-dom"
 
 interface WhoContextProps {
     stringFilter: string
@@ -96,6 +97,7 @@ export const WhoProvider = ({ children }: { children: ReactNode }) => {
         useState<boolean>(false)
     const [shouldSaveExactMatch, setShouldSaveExactMatch] =
         useState<boolean>(false)
+    const [searchParams, setSearchParams] = useSearchParams()
 
     const loadSettingsFromLocalStorage = () => {
         const settings = getValue<any>(settingsStorageKey)
@@ -138,6 +140,31 @@ export const WhoProvider = ({ children }: { children: ReactNode }) => {
         loadSettingsFromLocalStorage()
         setIsLoaded(true)
     }, [])
+
+    // Initialize stringFilter from URL params on mount
+    useEffect(() => {
+        const urlStringFilter = searchParams.get("string-filter")
+        if (urlStringFilter && urlStringFilter !== stringFilter) {
+            setStringFilter(urlStringFilter)
+        }
+    }, [])
+
+    // Update URL when stringFilter changes
+    useEffect(() => {
+        if (stringFilter == null || stringFilter === "") {
+            setSearchParams((prev) => {
+                const newParams = new URLSearchParams(prev)
+                newParams.delete("string-filter")
+                return newParams
+            })
+        } else {
+            setSearchParams((prev) => {
+                const newParams = new URLSearchParams(prev)
+                newParams.set("string-filter", stringFilter)
+                return newParams
+            })
+        }
+    }, [stringFilter, setSearchParams])
 
     useEffect(() => {
         if (!isLoaded) return
