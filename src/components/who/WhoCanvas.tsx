@@ -27,6 +27,7 @@ interface Props {
     curatedCharacters: Character[]
     serverName: string
     areResultsTruncated: boolean
+    isSecondaryPanel?: boolean
 }
 
 const WhoCanvas: React.FC<Props> = ({
@@ -34,6 +35,7 @@ const WhoCanvas: React.FC<Props> = ({
     curatedCharacters = [],
     serverName = "",
     areResultsTruncated = false,
+    isSecondaryPanel = false,
 }) => {
     const {
         panelWidth,
@@ -41,8 +43,10 @@ const WhoCanvas: React.FC<Props> = ({
         setPanelHeight,
         classNameFilter,
         setClassNameFilter,
-        stringFilter,
-        setStringFilter,
+        primaryStringFilter,
+        setPrimaryStringFilter,
+        secondaryStringFilter: secondaryStringFilter,
+        setSecondaryStringFilter: setSecondaryStringFilter,
         minLevel,
         setMinLevel,
         maxLevel,
@@ -80,6 +84,13 @@ const WhoCanvas: React.FC<Props> = ({
     const [fauxMaxLevel, setFauxMaxLevel] = useState<string>(
         maxLevel.toString()
     )
+
+    const stringFilter = isSecondaryPanel
+        ? secondaryStringFilter
+        : primaryStringFilter
+    const setStringFilter = isSecondaryPanel
+        ? setSecondaryStringFilter
+        : setPrimaryStringFilter
 
     useEffect(() => {
         if (fauxMinLevel === "") {
@@ -530,7 +541,7 @@ const WhoCanvas: React.FC<Props> = ({
                         }}
                         type="text"
                         onChange={(e) => setStringFilter(e.target.value)}
-                        value={stringFilter}
+                        value={stringFilter || ""}
                         tabIndex={1}
                     />
                     <input
@@ -557,7 +568,7 @@ const WhoCanvas: React.FC<Props> = ({
                         }}
                         type="text"
                         onChange={(e) => setFauxMinLevel(e.target.value)}
-                        value={fauxMinLevel}
+                        value={fauxMinLevel || ""}
                         onBlur={(e) => {
                             if (!/^\d+$/.test(e.target.value)) {
                                 setFauxMinLevel(MIN_LEVEL.toString())

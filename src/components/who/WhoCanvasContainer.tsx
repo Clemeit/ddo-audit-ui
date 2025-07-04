@@ -27,11 +27,12 @@ interface Props {
 
 const WhoContainer = ({
     serverName,
-    isSecondaryPanel,
+    isSecondaryPanel = false,
     handleClosePanel,
 }: Props) => {
     const {
-        stringFilter,
+        primaryStringFilter,
+        secondaryStringFilter,
         sortBy,
         minLevel,
         maxLevel,
@@ -41,6 +42,10 @@ const WhoContainer = ({
         // refreshInterval, TODO: make this work
     } = useWhoContext()
     const [ignoreServerDown, setIgnoreServerDown] = useState<boolean>(false)
+
+    const stringFilter = isSecondaryPanel
+        ? secondaryStringFilter
+        : primaryStringFilter
 
     const {
         data: characterData,
@@ -109,8 +114,8 @@ const WhoContainer = ({
             characterData?.data ?? {}
         ).filter((character) => {
             let stringFilterMatch = false
-            const stringFilters = stringFilter.split(",")
-            stringFilters.forEach((localFilter) => {
+            const stringFilters = stringFilter?.split(",")
+            stringFilters?.forEach((localFilter) => {
                 const nameMatch = compareString(
                     character.name,
                     localFilter,
@@ -261,6 +266,7 @@ const WhoContainer = ({
                             curatedCharacters.areResultsTruncated
                         }
                         serverName={serverName}
+                        isSecondaryPanel={isSecondaryPanel}
                     />
                 </>
             ) : (

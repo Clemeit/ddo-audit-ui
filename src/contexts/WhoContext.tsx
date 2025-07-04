@@ -12,11 +12,16 @@ import {
     DEFAULT_REFRESH_RATE,
     DEFAULT_WHO_PANEL_WIDTH,
 } from "../constants/whoPanel.ts"
-import { useSearchParams } from "react-router-dom"
+import useSearchParamsState, {
+    SearchParamType,
+} from "../hooks/useSearchParamsState.ts"
+// import { useSearchParams } from "react-router-dom"
 
 interface WhoContextProps {
-    stringFilter: string
-    setStringFilter: React.Dispatch<React.SetStateAction<string>>
+    primaryStringFilter: string
+    setPrimaryStringFilter: React.Dispatch<React.SetStateAction<string>>
+    secondaryStringFilter: string
+    setSecondaryStringFilter: React.Dispatch<React.SetStateAction<string>>
     classNameFilter: string[]
     setClassNameFilter: React.Dispatch<React.SetStateAction<string[]>>
     minLevel: number
@@ -60,9 +65,22 @@ interface WhoContextProps {
 const WhoContext = createContext<WhoContextProps | undefined>(undefined)
 
 export const WhoProvider = ({ children }: { children: ReactNode }) => {
+    const { getSearchParam, setSearchParam, setSearchParams } =
+        useSearchParamsState()
+
     const settingsStorageKey = "who-settings"
     const [isLoaded, setIsLoaded] = useState<boolean>(false)
-    const [stringFilter, setStringFilter] = useState<string>("")
+    // const [stringFilter, setStringFilter] = useState<string>("")
+    // const [secondaryStringFilter, setSecondaryStringFilter] =
+    //     useState<string>("")
+    const primaryStringFilter = getSearchParam(SearchParamType.STRING_FILTER)
+    const secondaryStringFilter = getSearchParam(
+        SearchParamType.SECONDARY_STRING_FILTER
+    )
+    const setPrimaryStringFilter = (value: string) =>
+        setSearchParam(SearchParamType.STRING_FILTER, value)
+    const setSecondaryStringFilter = (value: string) =>
+        setSearchParam(SearchParamType.SECONDARY_STRING_FILTER, value)
     const [classNameFilter, setClassNameFilter] =
         useState<string[]>(CLASS_LIST_LOWER)
     const [minLevel, setMinLevel] = useState<number>(MIN_LEVEL)
@@ -97,7 +115,6 @@ export const WhoProvider = ({ children }: { children: ReactNode }) => {
         useState<boolean>(false)
     const [shouldSaveExactMatch, setShouldSaveExactMatch] =
         useState<boolean>(false)
-    const [searchParams, setSearchParams] = useSearchParams()
 
     const loadSettingsFromLocalStorage = () => {
         const settings = getValue<any>(settingsStorageKey)
@@ -105,7 +122,7 @@ export const WhoProvider = ({ children }: { children: ReactNode }) => {
             try {
                 if (settings.shouldSaveSettings) {
                     if (settings.shouldSaveStringFilter)
-                        setStringFilter(settings.stringFilter)
+                        setPrimaryStringFilter(settings.stringFilter)
                     if (settings.shouldSaveClassFilter)
                         setClassNameFilter(settings.classNameFilter)
                     if (settings.shouldSaveLevelFilter)
@@ -141,35 +158,37 @@ export const WhoProvider = ({ children }: { children: ReactNode }) => {
         setIsLoaded(true)
     }, [])
 
-    // Initialize stringFilter from URL params on mount
+    // // Initialize stringFilter from URL params on mount
     useEffect(() => {
-        const urlStringFilter = searchParams.get("string-filter")
-        if (urlStringFilter && urlStringFilter !== stringFilter) {
-            setStringFilter(urlStringFilter)
-        }
+        const primaryUrlStringFilter = getSearchParam(
+            SearchParamType.STRING_FILTER
+        )
+        const secondaryUrlStringFilter = getSearchParam(
+            SearchParamType.SECONDARY_STRING_FILTER
+        )
+        setPrimaryStringFilter(primaryUrlStringFilter || "")
+        setSecondaryStringFilter(secondaryUrlStringFilter || "")
     }, [])
 
-    // Update URL when stringFilter changes
-    useEffect(() => {
-        if (stringFilter == null || stringFilter === "") {
-            setSearchParams((prev) => {
-                const newParams = new URLSearchParams(prev)
-                newParams.delete("string-filter")
-                return newParams
-            })
-        } else {
-            setSearchParams((prev) => {
-                const newParams = new URLSearchParams(prev)
-                newParams.set("string-filter", stringFilter)
-                return newParams
-            })
-        }
-    }, [stringFilter, setSearchParams])
+    // // Update URL when stringFilter changes
+    // useEffect(() => {
+    //     setSearchParams([
+    //         {
+    //             searchParamType: SearchParamType.STRING_FILTER,
+    //             value: stringFilter,
+    //         },
+    //         {
+    //             searchParamType: SearchParamType.SECONDARY_STRING_FILTER,
+    //             value: secondaryStringFilter,
+    //         },
+    //     ])
+    //     console.log("HIT")
+    // }, [stringFilter, secondaryStringFilter, setSearchParams])
 
     useEffect(() => {
         if (!isLoaded) return
         setValue(settingsStorageKey, {
-            stringFilter,
+            primaryStringFilter,
             classNameFilter,
             minLevel,
             maxLevel,
@@ -190,7 +209,7 @@ export const WhoProvider = ({ children }: { children: ReactNode }) => {
             refreshInterval,
         })
     }, [
-        stringFilter,
+        primaryStringFilter,
         classNameFilter,
         minLevel,
         maxLevel,
@@ -214,8 +233,10 @@ export const WhoProvider = ({ children }: { children: ReactNode }) => {
     return (
         <WhoContext.Provider
             value={{
-                stringFilter,
-                setStringFilter,
+                primaryStringFilter,
+                setPrimaryStringFilter,
+                secondaryStringFilter,
+                setSecondaryStringFilter,
                 classNameFilter,
                 setClassNameFilter,
                 minLevel,

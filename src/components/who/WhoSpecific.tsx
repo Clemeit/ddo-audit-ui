@@ -8,7 +8,7 @@ import { useWhoContext } from "../../contexts/WhoContext.tsx"
 import Button from "../global/Button.tsx"
 import useFeatureCallouts from "../../hooks/useFeatureCallouts.ts"
 import MultiPanelContainer, {
-    PrimaryType,
+    PanelType,
 } from "../social/MultiPanelContainer.tsx"
 
 const WhoSpecific = () => {
@@ -56,7 +56,7 @@ const WhoSpecific = () => {
             )}
             <MultiPanelContainer
                 serverName={serverNameLowercase}
-                primaryType={PrimaryType.Who}
+                primaryType={PanelType.Who}
             />
             <Spacer className="hide-on-mobile" size="20px" />
         </Page>

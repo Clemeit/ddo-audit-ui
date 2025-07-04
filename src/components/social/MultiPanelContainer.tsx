@@ -11,97 +11,88 @@ import WhoContainer from "../who/WhoCanvasContainer.tsx"
 import { SERVER_NAMES_LOWER } from "../../constants/servers.ts"
 import { ReactComponent as AddSVG } from "../../assets/svg/add.svg"
 import "./MultiPanelContainer.css"
-import { useLocation, useSearchParams } from "react-router-dom"
+import useSearchParamsState, {
+    SearchParamType,
+} from "../../hooks/useSearchParamsState.ts"
 
-export enum PrimaryType {
+export enum PanelType {
     Grouping = "grouping",
     Who = "who",
 }
 
 interface Props {
     serverName: string
-    primaryType: PrimaryType
+    primaryType: PanelType
+}
+
+const VALID_PANEL_TYPES = Object.values(PanelType)
+
+const isValidPanelType = (type: string): type is PanelType => {
+    return VALID_PANEL_TYPES.includes(type as PanelType)
 }
 
 const MultiPanelContainer = ({ serverName, primaryType }: Props) => {
     const [isModalOpen, setIsModalOpen] = React.useState(false)
     const [secondaryPanel, setSecondaryPanel] =
         React.useState<React.ReactNode>()
-    // const [secondaryType, setSecondaryType] = React.useState("")
-    // const [secondaryServer, setSecondaryServer] = React.useState("")
+
+    const { getSearchParam, setSearchParam, setSearchParams } =
+        useSearchParamsState()
+    const secondaryPanelType = getSearchParam(
+        SearchParamType.SECONDARY_PANEL_TYPE
+    )
+    const secondaryPanelServer = getSearchParam(
+        SearchParamType.SECONDARY_PANEL_SERVER
+    )
+
+    const clearSecondarySearchParams = () => {
+        setSearchParams([
+            {
+                searchParamType: SearchParamType.SECONDARY_PANEL_TYPE,
+                value: null,
+            },
+            {
+                searchParamType: SearchParamType.SECONDARY_PANEL_SERVER,
+                value: null,
+            },
+        ])
+    }
 
     // Fire useEffect when URL params change:
-    const location = useLocation()
-    const [searchParams, setSearchParams] = useSearchParams()
     useEffect(() => {
-        const secondaryPanelType = searchParams.get("secondary-type")
-        const secondaryServerName = searchParams.get("secondary-server")
-        // console.log(secondaryPanelType, secondaryType)
-        // console.log(secondaryServerName, secondaryServer)
         if (
-            (secondaryPanelType === "grouping" ||
-                secondaryPanelType === "who") &&
-            secondaryServerName !== null
+            secondaryPanelType == null ||
+            secondaryPanelServer == null ||
+            !SERVER_NAMES_LOWER.includes(
+                secondaryPanelServer.toLocaleLowerCase()
+            ) ||
+            !isValidPanelType(secondaryPanelType.toLocaleLowerCase())
         ) {
-            if (!SERVER_NAMES_LOWER.includes(secondaryServerName.toLowerCase()))
-                return
-            // if (
-            //     secondaryType.toLocaleLowerCase() ===
-            //     secondaryPanelType.toLocaleLowerCase()
-            // )
-            //     return
-            // if (
-            //     secondaryServer.toLocaleLowerCase() ===
-            //     secondaryServerName.toLocaleLowerCase()
-            // )
-            //     return
-            console.log("ALERT")
-            // Valid input
-            // setSecondaryType(secondaryPanelType.toLowerCase())
-            // setSecondaryServer(secondaryServerName.toLowerCase())
-            if (secondaryPanelType === "grouping") {
-                setSecondaryPanel(
-                    <LfmContainer
-                        serverName={secondaryServerName}
-                        isSecondaryPanel={true}
-                        handleClosePanel={() => {
-                            setUrlParams(null, null)
-                            setSecondaryPanel(null)
-                        }}
-                    />
-                )
-            } else if (secondaryPanelType === "who") {
-                setSecondaryPanel(
-                    <WhoContainer
-                        serverName={secondaryServerName}
-                        isSecondaryPanel={true}
-                        handleClosePanel={() => {
-                            setUrlParams(null, null)
-                            setSecondaryPanel(null)
-                        }}
-                    />
-                )
-            }
+            setSecondaryPanel(null)
+            return
         }
-    }, [searchParams])
 
-    const setUrlParams = (type: string, serverName: string) => {
-        setSearchParams((prev) => {
-            const newParams = new URLSearchParams(prev)
-            if (type === null) {
-                newParams.delete("secondary-type")
-            } else if (type !== undefined) {
-                newParams.set("secondary-type", type)
-            }
-            if (serverName === null) {
-                newParams.delete("secondary-server")
-            } else if (serverName !== undefined) {
-                newParams.set("secondary-server", serverName)
-            }
-            newParams.delete("string-filter")
-            return newParams
-        })
-    }
+        const normalizedType = secondaryPanelType.toLowerCase() as PanelType
+        const normalizedServer = secondaryPanelServer.toLowerCase()
+
+        if (normalizedType === PanelType.Grouping) {
+            setSecondaryPanel(
+                <LfmContainer
+                    serverName={secondaryPanelServer.toLocaleLowerCase()}
+                    isSecondaryPanel={true}
+                    handleClosePanel={clearSecondarySearchParams}
+                />
+            )
+        } else if (normalizedType === PanelType.Who) {
+            setSecondaryPanel(
+                <WhoContainer
+                    serverName={secondaryPanelServer.toLocaleLowerCase()}
+                    isSecondaryPanel={true}
+                    handleClosePanel={clearSecondarySearchParams}
+                />
+            )
+        }
+    }, [secondaryPanelType, secondaryPanelServer])
 
     const secondaryPanelTypeModalContent = (
         <div style={{ padding: "20px" }}>
@@ -112,13 +103,23 @@ const MultiPanelContainer = ({ serverName, primaryType }: Props) => {
                             noLink
                             fullWidth
                             type="grouping"
-                            onClick={() => setUrlParams("grouping", null)}
+                            onClick={() =>
+                                setSearchParam(
+                                    SearchParamType.SECONDARY_PANEL_TYPE,
+                                    "grouping"
+                                )
+                            }
                         />
                         <NavigationCard
                             noLink
                             fullWidth
                             type="who"
-                            onClick={() => setUrlParams("who", null)}
+                            onClick={() =>
+                                setSearchParam(
+                                    SearchParamType.SECONDARY_PANEL_TYPE,
+                                    "who"
+                                )
+                            }
                         />
                     </NavCardCluster>
                 </div>
@@ -141,7 +142,10 @@ const MultiPanelContainer = ({ serverName, primaryType }: Props) => {
                                 title={toSentenceCase(_serverName)}
                                 onClick={() => {
                                     setIsModalOpen(false)
-                                    setUrlParams(undefined, _serverName)
+                                    setSearchParam(
+                                        SearchParamType.SECONDARY_PANEL_SERVER,
+                                        _serverName
+                                    )
                                 }}
                                 badge={
                                     _serverName === serverName && (
@@ -160,9 +164,9 @@ const MultiPanelContainer = ({ serverName, primaryType }: Props) => {
         <>
             {isModalOpen && (
                 <Modal onClose={() => setIsModalOpen(false)}>
-                    {!searchParams.get("secondary-type") &&
+                    {!getSearchParam(SearchParamType.SECONDARY_PANEL_TYPE) &&
                         secondaryPanelTypeModalContent}
-                    {searchParams.get("secondary-type") &&
+                    {getSearchParam(SearchParamType.SECONDARY_PANEL_TYPE) &&
                         secondaryPanelServerModalContent}
                 </Modal>
             )}
@@ -197,7 +201,7 @@ const MultiPanelContainer = ({ serverName, primaryType }: Props) => {
                             : { maxWidth: "100%" }
                     }
                 >
-                    {primaryType === PrimaryType.Grouping ? (
+                    {primaryType === PanelType.Grouping ? (
                         <LfmContainer serverName={serverName} />
                     ) : (
                         <WhoContainer serverName={serverName} />
