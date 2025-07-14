@@ -38,7 +38,6 @@ import { LfmProvider } from "./contexts/LfmContext.tsx"
 import { WhoProvider } from "./contexts/WhoContext.tsx"
 import { AreaProvider } from "./contexts/AreaContext.tsx"
 import { QuestProvider } from "./contexts/QuestContext.tsx"
-import { IgnoresProvider } from "./contexts/IgnoresContext.tsx"
 
 // Set up the router
 export default createBrowserRouter(
@@ -79,9 +78,7 @@ export default createBrowserRouter(
                         <WhoProvider>
                             <AreaProvider>
                                 <QuestProvider>
-                                    <IgnoresProvider>
-                                        <GroupingSpecific />
-                                    </IgnoresProvider>
+                                    <GroupingSpecific />
                                 </QuestProvider>
                             </AreaProvider>
                         </WhoProvider>
@@ -106,9 +103,7 @@ export default createBrowserRouter(
                     <WhoProvider>
                         <LfmProvider>
                             <AreaProvider>
-                                <IgnoresProvider>
-                                    <WhoSpecific />
-                                </IgnoresProvider>
+                                <WhoSpecific />
                             </AreaProvider>
                         </LfmProvider>
                     </WhoProvider>
@@ -130,9 +125,7 @@ export default createBrowserRouter(
                 path="/ignores"
                 element={
                     <AreaProvider>
-                        <IgnoresProvider>
-                            <Ignores />
-                        </IgnoresProvider>
+                        <Ignores />
                     </AreaProvider>
                 }
             />

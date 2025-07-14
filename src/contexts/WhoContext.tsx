@@ -54,10 +54,8 @@ interface WhoContextProps {
     setShowInQuestIndicator: React.Dispatch<React.SetStateAction<boolean>>
     refreshInterval: number
     setRefreshInterval: React.Dispatch<React.SetStateAction<number>>
-    applyFriendsListSettings: boolean
-    setApplyFriendsListSettings: React.Dispatch<React.SetStateAction<boolean>>
-    applyIgnoreListSettings: boolean
-    setApplyIgnoreListSettings: React.Dispatch<React.SetStateAction<boolean>>
+    hideIgnoredCharacters: boolean
+    setHideIgnoredCharacters: React.Dispatch<React.SetStateAction<boolean>>
     pinRegisteredCharacters: boolean
     setPinRegisteredCharacters: React.Dispatch<React.SetStateAction<boolean>>
     alwaysShowRegisteredCharacters: boolean
@@ -110,9 +108,7 @@ export const WhoProvider = ({ children }: { children: ReactNode }) => {
         useState<boolean>(false)
     const [shouldSaveExactMatch, setShouldSaveExactMatch] =
         useState<boolean>(false)
-    const [applyFriendsListSettings, setApplyFriendsListSettings] =
-        useState<boolean>(true)
-    const [applyIgnoreListSettings, setApplyIgnoreListSettings] =
+    const [hideIgnoredCharacters, setHideIgnoredCharacters] =
         useState<boolean>(true)
     const [pinRegisteredCharacters, setPinRegisteredCharacters] =
         useState<boolean>(false)
@@ -152,8 +148,7 @@ export const WhoProvider = ({ children }: { children: ReactNode }) => {
                 setShouldSaveExactMatch(settings.shouldSaveExactMatch)
                 setShowInQuestIndicator(settings.showInQuestIndicator)
                 setRefreshInterval(settings.refreshInterval)
-                setApplyFriendsListSettings(settings.applyFriendsListSettings)
-                setApplyIgnoreListSettings(settings.applyIgnoreListSettings)
+                setHideIgnoredCharacters(settings.hideIgnoredCharacters)
                 setPinFriends(settings.pinFriends)
                 setPinRegisteredCharacters(settings.pinRegisteredCharacters)
                 setAlwaysShowRegisteredCharacters(
@@ -193,8 +188,7 @@ export const WhoProvider = ({ children }: { children: ReactNode }) => {
             shouldSaveExactMatch,
             showInQuestIndicator,
             refreshInterval,
-            applyFriendsListSettings,
-            applyIgnoreListSettings,
+            hideIgnoredCharacters,
             pinRegisteredCharacters,
             pinFriends,
             alwaysShowRegisteredCharacters,
@@ -220,8 +214,7 @@ export const WhoProvider = ({ children }: { children: ReactNode }) => {
         shouldSaveExactMatch,
         showInQuestIndicator,
         refreshInterval,
-        applyFriendsListSettings,
-        applyIgnoreListSettings,
+        hideIgnoredCharacters,
         pinRegisteredCharacters,
         pinFriends,
         alwaysShowRegisteredCharacters,
@@ -271,10 +264,8 @@ export const WhoProvider = ({ children }: { children: ReactNode }) => {
                 setShowInQuestIndicator,
                 refreshInterval,
                 setRefreshInterval,
-                applyFriendsListSettings,
-                setApplyFriendsListSettings,
-                applyIgnoreListSettings,
-                setApplyIgnoreListSettings,
+                hideIgnoredCharacters,
+                setHideIgnoredCharacters,
                 pinRegisteredCharacters,
                 setPinRegisteredCharacters,
                 alwaysShowRegisteredCharacters,

@@ -25,7 +25,6 @@ import CharacterTable, {
     ColumnType,
 } from "../tables/CharacterTable.tsx"
 import Checkbox from "../global/Checkbox.tsx"
-import { useIgnoresContext } from "../../contexts/IgnoresContext.tsx"
 
 const ignoreTableSortFunction = (
     a: CharacterTableRow,
@@ -44,20 +43,6 @@ const ignoreTableSortFunction = (
 }
 
 const Ignores = () => {
-    const {
-        enableIgnores,
-        setEnableIgnores,
-        hideLfmsPostedByIgnores,
-        setHideLfmsPostedByIgnores,
-        hideLfmsContainingIgnores,
-        setHideLfmsContainingIgnores,
-        hideIgnoresFromWho,
-        setHideIgnoresFromWho,
-        showIndicatorForLfmsPostedByIgnores,
-        setShowIndicatorForLfmsPostedByIgnores,
-        showIndicatorForLfmsContainingIgnores,
-        setShowIndicatorForLfmsContainingIgnores,
-    } = useIgnoresContext()
     const {
         characters: ignores,
         isLoading,
@@ -139,70 +124,10 @@ const Ignores = () => {
                 </ContentCluster>
                 <ContentCluster title="Behavior">
                     <Stack gap="10px" direction="column">
-                        <span>Global</span>
-                        <Checkbox
-                            checked={enableIgnores}
-                            onChange={(e) => {
-                                setEnableIgnores(e.target.checked)
-                            }}
-                        >
-                            Enable Ignore List
-                        </Checkbox>
-                        <br />
-                        <span>Hiding Behavior</span>
-                        <Checkbox
-                            checked={hideLfmsPostedByIgnores}
-                            onChange={(e) => {
-                                setHideLfmsPostedByIgnores(e.target.checked)
-                            }}
-                            disabled={!enableIgnores}
-                        >
-                            Hide LFMs posted by ignored characters
-                        </Checkbox>
-                        <Checkbox
-                            checked={hideLfmsContainingIgnores}
-                            onChange={(e) => {
-                                setHideLfmsContainingIgnores(e.target.checked)
-                            }}
-                            disabled={!enableIgnores}
-                        >
-                            Hide LFMs if ignored characters are in the group
-                        </Checkbox>
-                        <Checkbox
-                            checked={hideIgnoresFromWho}
-                            onChange={(e) => {
-                                setHideIgnoresFromWho(e.target.checked)
-                            }}
-                            disabled={!enableIgnores}
-                        >
-                            Hide ignored characters from the Who list
-                        </Checkbox>
-                        <br />
-                        <span>Visual Behavior</span>
-                        <Checkbox
-                            checked={showIndicatorForLfmsPostedByIgnores}
-                            onChange={(e) => {
-                                setShowIndicatorForLfmsPostedByIgnores(
-                                    e.target.checked
-                                )
-                            }}
-                            disabled={!enableIgnores}
-                        >
-                            Show an indicator if an LFM is posted by an ignored
-                            character
-                        </Checkbox>
-                        <Checkbox
-                            checked={showIndicatorForLfmsContainingIgnores}
-                            onChange={(e) => {
-                                setShowIndicatorForLfmsContainingIgnores(
-                                    e.target.checked
-                                )
-                            }}
-                            disabled={!enableIgnores}
-                        >
-                            Show an indicator if an ignored character is in the
-                            group
-                        </Checkbox>
+                        <span>
+                            This can contain aggregated settings from both the
+                            Who and LFM context
+                        </span>
                     </Stack>
                 </ContentCluster>
                 <ContentCluster title="See Also...">

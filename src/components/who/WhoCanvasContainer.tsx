@@ -19,7 +19,6 @@ import { useAreaContext } from "../../contexts/AreaContext.tsx"
 import useGetCharacterList from "../../hooks/useGetCharacterList.ts"
 import { getFriends, getIgnores } from "../../utils/localStorage.ts"
 import useGetRegisteredCharacters from "../../hooks/useGetRegisteredCharacters.ts"
-import { useIgnoresContext } from "../../contexts/IgnoresContext.tsx"
 
 // TODO: group_id should be null and never "0"
 
@@ -42,15 +41,13 @@ const WhoContainer = ({
         classNameFilter,
         isGroupView,
         isExactMatch,
-        applyFriendsListSettings,
-        applyIgnoreListSettings,
+        hideIgnoredCharacters,
         pinRegisteredCharacters,
         pinFriends,
         alwaysShowFriends,
         alwaysShowRegisteredCharacters,
         // refreshInterval, TODO: make this work
     } = useWhoContext()
-    const { hideIgnoresFromWho } = useIgnoresContext()
     const { registeredCharacters } = useGetRegisteredCharacters()
     const [ignoreServerDown, setIgnoreServerDown] = useState<boolean>(false)
     const { characters: friends } = useGetCharacterList({
@@ -146,11 +143,7 @@ const WhoContainer = ({
         })
 
         let filteredCharacters = hydratedCharacters.filter((character) => {
-            if (
-                hideIgnoresFromWho &&
-                applyIgnoreListSettings &&
-                character.metadata?.isIgnored
-            ) {
+            if (hideIgnoredCharacters && character.metadata?.isIgnored) {
                 return false
             }
             if (
@@ -312,9 +305,7 @@ const WhoContainer = ({
         isGroupView,
         classNameFilter,
         isExactMatch,
-        applyFriendsListSettings,
-        applyIgnoreListSettings,
-        hideIgnoresFromWho,
+        hideIgnoredCharacters,
         pinRegisteredCharacters,
         pinFriends,
         alwaysShowFriends,
