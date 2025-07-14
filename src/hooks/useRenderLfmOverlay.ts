@@ -33,6 +33,8 @@ import {
 import { useAreaContext } from "../contexts/AreaContext.tsx"
 import { useQuestContext } from "../contexts/QuestContext.tsx"
 import { getActiveTimer } from "../utils/timerUtils.ts"
+import useGetCharacterList from "./useGetCharacterList.ts"
+import { getFriends as getFriendsFromLocalStorage } from "../utils/localStorage.ts"
 
 interface Props {
     lfmSprite?: HTMLImageElement | null
@@ -62,6 +64,9 @@ const useRenderLfmOverlay = ({ lfmSprite, context }: Props) => {
     const areaContext = useAreaContext()
     const questContext = useQuestContext()
     const { quests } = questContext
+    const { characters: friends } = useGetCharacterList({
+        getCharactersFromLocalStorage: getFriendsFromLocalStorage,
+    })
 
     const renderLfmOverlay = useCallback<
         (lfm: Lfm, renderType: RenderType) => { width: number; height: number }
@@ -229,26 +234,60 @@ const useRenderLfmOverlay = ({ lfmSprite, context }: Props) => {
                 // Render LFM
                 context.translate(4, 3)
 
-                const gradient = context.createLinearGradient(
+                const defaultGradient = context.createLinearGradient(
                     0,
                     0,
                     0,
                     characterHeight
                 )
-                gradient.addColorStop(0, OVERLAY_COLORS.CHARACTER_GRADIENT_EDGE)
-                gradient.addColorStop(
+                defaultGradient.addColorStop(
+                    0,
+                    OVERLAY_COLORS.CHARACTER_GRADIENT_EDGE
+                )
+                defaultGradient.addColorStop(
                     0.25,
                     OVERLAY_COLORS.CHARACTER_GRADIENT_CENTER
                 )
-                gradient.addColorStop(
+                defaultGradient.addColorStop(
                     0.75,
                     OVERLAY_COLORS.CHARACTER_GRADIENT_CENTER
                 )
-                gradient.addColorStop(1, OVERLAY_COLORS.CHARACTER_GRADIENT_EDGE)
+                defaultGradient.addColorStop(
+                    1,
+                    OVERLAY_COLORS.CHARACTER_GRADIENT_EDGE
+                )
+                const friendGradient = context.createLinearGradient(
+                    0,
+                    0,
+                    0,
+                    characterHeight
+                )
+                friendGradient.addColorStop(
+                    0,
+                    OVERLAY_COLORS.FRIEND_GRADIENT_EDGE
+                )
+                friendGradient.addColorStop(
+                    0.25,
+                    OVERLAY_COLORS.FRIEND_GRADIENT_CENTER
+                )
+                friendGradient.addColorStop(
+                    0.75,
+                    OVERLAY_COLORS.FRIEND_GRADIENT_CENTER
+                )
+                friendGradient.addColorStop(
+                    1,
+                    OVERLAY_COLORS.FRIEND_GRADIENT_EDGE
+                )
 
                 const characters = [lfm.leader, ...lfm.members]
                 characters.forEach((member, index) => {
-                    context.fillStyle = gradient
+                    const isFriend = friends.some(
+                        (friend) => friend.id === member.id
+                    )
+
+                    context.fillStyle = isFriend
+                        ? friendGradient
+                        : defaultGradient
                     context.fillRect(
                         0,
                         0,

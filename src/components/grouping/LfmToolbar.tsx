@@ -24,6 +24,7 @@ import useFeatureCallouts from "../../hooks/useFeatureCallouts.ts"
 import { useModalNavigation } from "../../hooks/useModalNavigation.ts"
 import GenericToolbar from "../global/GenericToolbar.tsx"
 import RadioButton from "../global/RadioButton.tsx"
+import Spacer from "../global/Spacer.tsx"
 
 interface Props {
     reloadLfms: () => void
@@ -84,6 +85,14 @@ const LfmToolbar = ({
         setIsMultiColumn,
         showEligibleCharacters,
         setShowEligibleCharacters,
+        hideGroupsPostedByIgnoredCharacters,
+        setHideGroupsPostedByIgnoredCharacters,
+        hideGroupsContainingIgnoredCharacters,
+        setHideGroupsContainingIgnoredCharacters,
+        showIndicationForGroupsPostedByFriends,
+        setShowIndicationForGroupsPostedByFriends,
+        showIndicationForGroupsContainingFriends,
+        setShowIndicationForGroupsContainingFriends,
     } = useLfmContext()
     const { isFullScreen, setIsFullScreen } = useThemeContext()
     const { isCalloutActive, callouts, dismissCallout } = useFeatureCallouts()
@@ -192,7 +201,7 @@ const LfmToolbar = ({
                         checked={filterByMyCharacters}
                         onChange={() => setFilterByMyCharacters(true)}
                     >
-                        Filter based on my current level
+                        Filter based on my registered characters
                     </RadioButton>
                     {filterByMyCharacters && (
                         <div className="filter-section multi-select">
@@ -323,6 +332,70 @@ const LfmToolbar = ({
                         </Button>
                     </Stack>
                 </Stack>
+            </ContentCluster>
+            <ContentCluster title="Social">
+                <Stack direction="column" gap="20px">
+                    <Stack direction="column" gap="10px">
+                        <Checkbox
+                            checked={showIndicationForGroupsPostedByFriends}
+                            onChange={(e) => {
+                                setShowIndicationForGroupsPostedByFriends(
+                                    e.target.checked
+                                )
+                            }}
+                        >
+                            Show an indicator for LFMs posted by friends
+                        </Checkbox>
+                        <Checkbox
+                            checked={showIndicationForGroupsContainingFriends}
+                            onChange={(e) => {
+                                setShowIndicationForGroupsContainingFriends(
+                                    e.target.checked
+                                )
+                            }}
+                        >
+                            Show an indicator for LFMs that friends are a part
+                            of
+                        </Checkbox>
+                        <div
+                            style={{
+                                marginLeft: "20px",
+                            }}
+                        >
+                            <Link to="/friends">Friends list</Link>
+                        </div>
+                    </Stack>
+                    <Stack direction="column" gap="10px">
+                        <Checkbox
+                            checked={hideGroupsPostedByIgnoredCharacters}
+                            onChange={(e) => {
+                                setHideGroupsPostedByIgnoredCharacters(
+                                    e.target.checked
+                                )
+                            }}
+                        >
+                            Hide LFMs posted by ignored characters
+                        </Checkbox>
+                        <Checkbox
+                            checked={hideGroupsContainingIgnoredCharacters}
+                            onChange={(e) => {
+                                setHideGroupsContainingIgnoredCharacters(
+                                    e.target.checked
+                                )
+                            }}
+                        >
+                            Hide LFMs that ignored characters are a part of
+                        </Checkbox>
+                        <div
+                            style={{
+                                marginLeft: "20px",
+                            }}
+                        >
+                            <Link to="/ignores">Ignore list</Link>
+                        </div>
+                    </Stack>
+                </Stack>
+                <Spacer size="20px" />
             </ContentCluster>
             <ContentCluster title="Tools">
                 <Stack direction="column" gap="10px">

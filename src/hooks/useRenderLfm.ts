@@ -37,6 +37,8 @@ const useRenderLfm = ({ lfmSprite, context }: Props) => {
         showQuestGuesses,
         showQuestTips,
         showLfmPostedTime,
+        showIndicationForGroupsPostedByFriends,
+        showIndicationForGroupsContainingFriends,
     } = useLfmContext()
     const { confineTextToBoundingBox } = useTextRenderer(context)
     const commonBoundingBoxes = useMemo(
@@ -372,17 +374,39 @@ const useRenderLfm = ({ lfmSprite, context }: Props) => {
             )
 
             // gradient fill
-            if (lfm.metadata?.isEligible) {
+            const shouldHighlightForFriends =
+                (lfm.metadata?.isPostedByFriend &&
+                    showIndicationForGroupsPostedByFriends) ||
+                (lfm.metadata?.includesFriend &&
+                    showIndicationForGroupsContainingFriends)
+            if (lfm.metadata?.isEligible || shouldHighlightForFriends) {
                 const gradient = context.createLinearGradient(
                     0,
                     0,
                     0,
                     lfmBoundingBox.height
                 )
-                gradient.addColorStop(0, LFM_COLORS.ELIGIBLE_GRADIENT_EDGE)
-                gradient.addColorStop(0.25, LFM_COLORS.ELIGIBLE_GRADIENT_CENTER)
-                gradient.addColorStop(0.75, LFM_COLORS.ELIGIBLE_GRADIENT_CENTER)
-                gradient.addColorStop(1, LFM_COLORS.ELIGIBLE_GRADIENT_EDGE)
+                let edgeColor = LFM_COLORS.ELIGIBLE_GRADIENT_EDGE
+                let centerColor = LFM_COLORS.ELIGIBLE_GRADIENT_CENTER
+                if (
+                    (lfm.metadata?.isPostedByFriend &&
+                        showIndicationForGroupsPostedByFriends) ||
+                    (lfm.metadata?.includesFriend &&
+                        showIndicationForGroupsContainingFriends)
+                ) {
+                    if (lfm.metadata?.isEligible) {
+                        edgeColor = LFM_COLORS.FRIEND_GRADIENT_EDGE
+                        centerColor = LFM_COLORS.FRIEND_GRADIENT_CENTER
+                    } else {
+                        edgeColor = LFM_COLORS.INELIGIBLE_FRIEND_GRADIENT_EDGE
+                        centerColor =
+                            LFM_COLORS.INELIGIBLE_FRIEND_GRADIENT_CENTER
+                    }
+                }
+                gradient.addColorStop(0, edgeColor)
+                gradient.addColorStop(0.25, centerColor)
+                gradient.addColorStop(0.75, centerColor)
+                gradient.addColorStop(1, edgeColor)
                 context.fillStyle = gradient
                 context.fillRect(
                     Math.floor(lfmBoundingBox.x),

@@ -146,15 +146,10 @@ const WhoContainer = ({
             if (hideIgnoredCharacters && character.metadata?.isIgnored) {
                 return false
             }
-            if (
-                pinFriends &&
-                alwaysShowFriends &&
-                character.metadata?.isFriend
-            ) {
+            if (alwaysShowFriends && character.metadata?.isFriend) {
                 return true
             }
             if (
-                pinRegisteredCharacters &&
                 alwaysShowRegisteredCharacters &&
                 character.metadata?.isRegistered
             ) {
@@ -282,6 +277,17 @@ const WhoContainer = ({
                                 (a.guild_name ?? "").localeCompare(
                                     b.guild_name ?? ""
                                 ) * (sortBy.ascending ? 1 : -1)
+                            )
+                        case CharacterSortType.Class:
+                            const aClassString = a.classes
+                                .map((classData) => classData.name)
+                                .join("")
+                            const bClassString = b.classes
+                                .map((classData) => classData.name)
+                                .join("")
+                            return (
+                                aClassString.localeCompare(bClassString) *
+                                (sortBy.ascending ? 1 : -1)
                             )
                         default:
                             return 0

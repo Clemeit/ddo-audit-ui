@@ -13,6 +13,11 @@ import {
 } from "../global/CommonMessages.tsx"
 import { getCharacterRaidActivityByIds } from "../../services/activityService.ts"
 import { ActivityEvent } from "../../models/Activity.ts"
+import useGetCharacterList from "../../hooks/useGetCharacterList.ts"
+import {
+    getFriends as getFriendsFromLocalStorage,
+    getIgnores as getIgnoresFromLocalStorage,
+} from "../../utils/localStorage.ts"
 
 interface Props {
     serverName: string
@@ -37,8 +42,16 @@ const GroupingContainer = ({
         filterByMyCharacters,
         registeredCharacters,
         trackedCharacterIds,
+        hideGroupsPostedByIgnoredCharacters,
+        hideGroupsContainingIgnoredCharacters,
     } = useLfmContext()
     const [ignoreServerDown, setIgnoreServerDown] = useState<boolean>(false)
+    const { characters: friends } = useGetCharacterList({
+        getCharactersFromLocalStorage: getFriendsFromLocalStorage,
+    })
+    const { characters: ignores } = useGetCharacterList({
+        getCharactersFromLocalStorage: getIgnoresFromLocalStorage,
+    })
 
     const {
         data: lfmData,
@@ -130,8 +143,25 @@ const GroupingContainer = ({
 
         const lfms = Object.values(lfmData?.data || {})
 
+        // handle ignored characters
+        const lfmsWithIgnoresFiltered = lfms.filter((lfm) => {
+            if (hideGroupsPostedByIgnoredCharacters) {
+                const isLeaderIgnored = ignores.some(
+                    (ignore) => ignore.id === lfm.leader.id
+                )
+                if (isLeaderIgnored) return false
+            }
+            if (hideGroupsContainingIgnoredCharacters) {
+                const hasIgnoredMember = lfm.members.some((member) =>
+                    ignores.some((ignore) => ignore.id === member.id)
+                )
+                if (hasIgnoredMember) return false
+            }
+            return true
+        })
+
         // determine eligibility
-        const determinedLfms = lfms.map((lfm) => {
+        const determinedLfms = lfmsWithIgnoresFiltered.map((lfm) => {
             let isEligible = true
 
             // level check
@@ -150,7 +180,15 @@ const GroupingContainer = ({
                                 serverName.toLowerCase() &&
                             (character.total_level ?? 0) >= lfm.minimum_level &&
                             (character.total_level ?? 0) <= lfm.maximum_level &&
-                            trackedCharacterIds.includes(character.id)
+                            trackedCharacterIds.includes(character.id) &&
+                            (lfm.accepted_classes.length === 0 ||
+                                lfm.accepted_classes.some((acceptedClass) =>
+                                    character.classes?.some(
+                                        (characterClass) =>
+                                            characterClass.name ===
+                                            acceptedClass
+                                    )
+                                ))
                         )
                     }
                 )
@@ -217,10 +255,20 @@ const GroupingContainer = ({
             const raidActivityForLfm = raidActivity.filter(
                 (activity) => activity.data === lfm.quest_id
             )
+            const isPostedByFriend = friends.some(
+                (friend) => friend.id === lfm.leader.id
+            )
+            const includesFriend =
+                isPostedByFriend ||
+                lfm.members.some((member) =>
+                    friends.some((friend) => friend.id === member.id)
+                )
 
             lfm.metadata = {
                 ...lfm.metadata,
                 raidActivity: raidActivityForLfm,
+                isPostedByFriend,
+                includesFriend,
             }
 
             return lfm
@@ -228,7 +276,8 @@ const GroupingContainer = ({
 
         return {
             hydratedLfms,
-            excludedLfmCount: lfms.length - hydratedLfms.length,
+            excludedLfmCount:
+                lfmsWithIgnoresFiltered.length - hydratedLfms.length,
         }
     }, [
         lfmData,
@@ -241,6 +290,8 @@ const GroupingContainer = ({
         registeredCharacters,
         trackedCharacterIds,
         raidActivity,
+        friends,
+        ignores,
     ])
 
     return (

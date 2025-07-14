@@ -161,6 +161,16 @@ function areLfmOverlaysEquivalent(previous: Lfm, current: Lfm): boolean {
     }
     // check history
     if (previous.activity?.length !== current.activity?.length) return false
+    if (
+        previous.metadata?.eligibleCharacters?.length !==
+        current.metadata?.eligibleCharacters?.length
+    )
+        return false
+    if (
+        previous.metadata?.raidActivity.length !==
+        current.metadata?.raidActivity.length
+    )
+        return false
 
     return true
 }

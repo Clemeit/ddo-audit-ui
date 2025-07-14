@@ -109,26 +109,18 @@ const WhoToolbar = ({
                                 setPinRegisteredCharacters(e.target.checked)
                             }}
                         >
-                            Pin my registered characters
+                            Pin my online registered characters
                         </Checkbox>
-                        {pinRegisteredCharacters && (
-                            <div
-                                style={{
-                                    marginLeft: "20px",
-                                }}
-                            >
-                                <Checkbox
-                                    checked={alwaysShowRegisteredCharacters}
-                                    onChange={(e) => {
-                                        setAlwaysShowRegisteredCharacters(
-                                            e.target.checked
-                                        )
-                                    }}
-                                >
-                                    Always show registered characters
-                                </Checkbox>
-                            </div>
-                        )}
+                        <Checkbox
+                            checked={alwaysShowRegisteredCharacters}
+                            onChange={(e) => {
+                                setAlwaysShowRegisteredCharacters(
+                                    e.target.checked
+                                )
+                            }}
+                        >
+                            Always show my online registered characters
+                        </Checkbox>
                         <div
                             style={{
                                 marginLeft: "20px",
@@ -146,24 +138,16 @@ const WhoToolbar = ({
                                 setPinFriends(e.target.checked)
                             }}
                         >
-                            Pin my friends
+                            Pin my online friends
                         </Checkbox>
-                        {pinFriends && (
-                            <div
-                                style={{
-                                    marginLeft: "20px",
-                                }}
-                            >
-                                <Checkbox
-                                    checked={alwaysShowFriends}
-                                    onChange={(e) => {
-                                        setAlwaysShowFriends(e.target.checked)
-                                    }}
-                                >
-                                    Always show friends
-                                </Checkbox>
-                            </div>
-                        )}
+                        <Checkbox
+                            checked={alwaysShowFriends}
+                            onChange={(e) => {
+                                setAlwaysShowFriends(e.target.checked)
+                            }}
+                        >
+                            Always show my online friends
+                        </Checkbox>
                         <div
                             style={{
                                 marginLeft: "20px",

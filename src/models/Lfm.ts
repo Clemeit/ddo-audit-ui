@@ -83,6 +83,8 @@ interface Lfm {
         eligibleCharacters?: Character[]
         lastRenderTime?: number
         raidActivity?: ActivityEvent[]
+        isPostedByFriend?: boolean
+        includesFriend?: boolean
     }
 }
 

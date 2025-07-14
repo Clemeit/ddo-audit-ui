@@ -11,6 +11,7 @@ import WhoContainer from "../who/WhoCanvasContainer.tsx"
 import { SERVER_NAMES_LOWER } from "../../constants/servers.ts"
 import { ReactComponent as AddSVG } from "../../assets/svg/add.svg"
 import "./MultiPanelContainer.css"
+import { useModalNavigation } from "../../hooks/useModalNavigation.ts"
 
 export enum PrimaryType {
     Grouping = "grouping",
@@ -23,32 +24,37 @@ interface Props {
 }
 
 const MultiPanelContainer = ({ serverName, primaryType }: Props) => {
-    const [isModalOpen, setIsModalOpen] = React.useState(false)
     const [secondaryPanel, setSecondaryPanel] =
         React.useState<React.ReactNode>()
     const [secondaryType, setSecondaryType] = React.useState("")
 
+    const {
+        isModalOpen,
+        openModal: handleOpenModal,
+        closeModal: handleCloseModal,
+    } = useModalNavigation({
+        modalKey: "multi-panel-container",
+    })
+
     const secondaryPanelTypeModalContent = () => (
-        <div style={{ padding: "20px" }}>
-            <ContentCluster title="Choose Secondary Panel">
-                <div style={{ maxWidth: "400px" }}>
-                    <NavCardCluster>
-                        <NavigationCard
-                            noLink
-                            fullWidth
-                            type="grouping"
-                            onClick={() => setSecondaryType("grouping")}
-                        />
-                        <NavigationCard
-                            noLink
-                            fullWidth
-                            type="who"
-                            onClick={() => setSecondaryType("who")}
-                        />
-                    </NavCardCluster>
-                </div>
-            </ContentCluster>
-        </div>
+        <ContentCluster title="Choose Secondary Panel">
+            <div style={{ maxWidth: "400px" }}>
+                <NavCardCluster>
+                    <NavigationCard
+                        noLink
+                        fullWidth
+                        type="grouping"
+                        onClick={() => setSecondaryType("grouping")}
+                    />
+                    <NavigationCard
+                        noLink
+                        fullWidth
+                        type="who"
+                        onClick={() => setSecondaryType("who")}
+                    />
+                </NavCardCluster>
+            </div>
+        </ContentCluster>
     )
 
     const secondaryPanelServerModalContent = () => (
@@ -65,7 +71,7 @@ const MultiPanelContainer = ({ serverName, primaryType }: Props) => {
                                 destination={`/grouping/${_serverName}`}
                                 title={toSentenceCase(_serverName)}
                                 onClick={() => {
-                                    setIsModalOpen(false)
+                                    handleCloseModal()
                                     if (secondaryType === "grouping") {
                                         setSecondaryPanel(
                                             <LfmContainer
@@ -104,7 +110,7 @@ const MultiPanelContainer = ({ serverName, primaryType }: Props) => {
     return (
         <>
             {isModalOpen && (
-                <Modal onClose={() => setIsModalOpen(false)} fullScreenOnMobile>
+                <Modal onClose={handleCloseModal} fullScreenOnMobile>
                     {!secondaryType && secondaryPanelTypeModalContent()}
                     {secondaryType && secondaryPanelServerModalContent()}
                 </Modal>
@@ -125,7 +131,7 @@ const MultiPanelContainer = ({ serverName, primaryType }: Props) => {
                         onClick={() => {
                             setSecondaryPanel(undefined)
                             setSecondaryType("")
-                            setIsModalOpen(true)
+                            handleOpenModal()
                         }}
                     >
                         <div>

@@ -37,8 +37,12 @@ const Registration = () => {
         unregisterCharacter,
         lastReload,
     } = useGetRegisteredCharacters()
-    const { pinRegisteredCharacters, setPinRegisteredCharacters } =
-        useWhoContext()
+    const {
+        pinRegisteredCharacters,
+        setPinRegisteredCharacters,
+        alwaysShowRegisteredCharacters,
+        setAlwaysShowRegisteredCharacters,
+    } = useWhoContext()
 
     const { trackedCharacterIds, setTrackedCharacterIds } = useLfmContext()
     const navigate = useNavigate()
@@ -206,7 +210,19 @@ const Registration = () => {
                                 setPinRegisteredCharacters(e.target.checked)
                             }
                         >
-                            Pin registered characters to the top of the Who list
+                            Pin my registered characters to the top of the Who
+                            list
+                        </Checkbox>
+                        <Checkbox
+                            checked={alwaysShowRegisteredCharacters}
+                            onChange={(e) =>
+                                setAlwaysShowRegisteredCharacters(
+                                    e.target.checked
+                                )
+                            }
+                        >
+                            Always show my online registered characters in the
+                            Who list
                         </Checkbox>
                     </Stack>
                 </ContentCluster>
