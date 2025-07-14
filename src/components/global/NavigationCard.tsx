@@ -37,7 +37,7 @@ const typeToTitleMap = {
     feedback: "Give Feedback",
     activity: "Character Activity",
     health: "Site and API Health",
-    ignore: "Ignore List",
+    ignores: "Ignore List",
 }
 
 const typeToDescriptionMap = {
@@ -59,7 +59,7 @@ const typeToDescriptionMap = {
         "Your feedback is important. Let me know what you think of the project.",
     activity: "View your verified characters' detailed activity history.",
     health: "Monitor DDO Audit's data collection, website, and API health.",
-    ignore: "Hide LFMs posted by certain players or containing certain words.",
+    ignores: "Hide LFMs posted by certain players or containing certain words.",
 }
 
 const typeToIconMap = {
@@ -78,7 +78,7 @@ const typeToIconMap = {
     feedback: <FeedbackSVG className="shrinkable-icon" />,
     activity: <Activity className="shrinkable-icon" />,
     health: <Health className="shrinkable-icon" />,
-    ignore: <Ignore className="shrinkable-icon" />,
+    ignores: <Ignore className="shrinkable-icon" />,
 }
 
 interface Props {

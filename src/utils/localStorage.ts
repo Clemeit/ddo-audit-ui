@@ -7,6 +7,7 @@ import { Quest } from "../models/Lfm.ts"
 const ACCESS_TOKENS_KEY = "access-tokens"
 const REGISTERED_CHARACTERS_KEY = "registered-characters"
 const FRIENDS_KEY = "friends"
+const IGNORES_KEY = "ignores"
 const CACHED_AREAS_KEY = "cached-areas"
 const CACHED_QUEST_KEY = "cached-quests"
 
@@ -87,6 +88,27 @@ function addFriend(character: Character): void {
 
 function removeFriend(character: Character): void {
     removeItem<Character>(FRIENDS_KEY, character, (a, b) => a.id === b.id)
+}
+
+// Ignores functions
+function getIgnores(): Character[] {
+    return getData<Character>(IGNORES_KEY)
+}
+
+function getIgnoresMetadata(): LocalStorageEntry<Character[]> {
+    return getMetadata<Character>(IGNORES_KEY)
+}
+
+function setIgnores(characters: Character[]): void {
+    setData<Character>(IGNORES_KEY, characters)
+}
+
+function addIgnore(character: Character): void {
+    addItem<Character>(IGNORES_KEY, character, (a, b) => a.id === b.id)
+}
+
+function removeIgnore(character: Character): void {
+    removeItem<Character>(IGNORES_KEY, character, (a, b) => a.id === b.id)
 }
 
 // Areas functions
@@ -209,6 +231,11 @@ export {
     addFriend,
     removeFriend,
     setFriends,
+    getIgnores,
+    getIgnoresMetadata,
+    addIgnore,
+    removeIgnore,
+    setIgnores,
     getValue,
     setValue,
     getAreas,

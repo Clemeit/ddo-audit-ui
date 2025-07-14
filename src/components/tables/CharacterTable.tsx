@@ -25,6 +25,16 @@ interface Props {
     noCharactersMessage?: string
     isLoaded?: boolean
     visibleColumns?: ColumnType[]
+    tableSortFunction?: (a: CharacterTableRow, b: CharacterTableRow) => number
+}
+
+const defaultTableSortFunction = (
+    a: CharacterTableRow,
+    b: CharacterTableRow
+): number => {
+    if (a.character.name === b.character.name)
+        return a.character.id - b.character.id
+    return (a.character.name || "").localeCompare(b.character.name || "")
 }
 
 const CharacterTable = ({
@@ -35,12 +45,13 @@ const CharacterTable = ({
         ColumnType.STATUS,
         ColumnType.NAME,
         ColumnType.SERVER_NAME,
-        ColumnType.LEVEL,
         ColumnType.GUILD,
+        ColumnType.LEVEL,
         ColumnType.CLASSES,
         ColumnType.LOCATION,
         ColumnType.ACTIONS,
     ],
+    tableSortFunction = defaultTableSortFunction,
 }: Props) => {
     const areaContext = useAreaContext()
     const { areas } = areaContext
@@ -151,8 +162,8 @@ const CharacterTable = ({
                 {visibleColumns.includes(ColumnType.NAME) && nameCell}
                 {visibleColumns.includes(ColumnType.SERVER_NAME) &&
                     serverNameCell}
-                {visibleColumns.includes(ColumnType.LEVEL) && totalLevelCell}
                 {visibleColumns.includes(ColumnType.GUILD) && guildNameCell}
+                {visibleColumns.includes(ColumnType.LEVEL) && totalLevelCell}
                 {visibleColumns.includes(ColumnType.CLASSES) && classesCell}
                 {visibleColumns.includes(ColumnType.LOCATION) && locationCell}
                 {visibleColumns.includes(ColumnType.ACTIONS) && actionsCell}
@@ -162,14 +173,7 @@ const CharacterTable = ({
 
     const getTableBody = () => {
         if (characterRows.length > 0) {
-            return characterRows
-                .sort((a, b) => a.character.id - b.character.id)
-                .sort((a, b) =>
-                    (a.character.name || "").localeCompare(
-                        b.character.name || ""
-                    )
-                )
-                .map(characterRow)
+            return characterRows.sort(tableSortFunction).map(characterRow)
         }
         if (!isLoaded) {
             return isLoadingRow

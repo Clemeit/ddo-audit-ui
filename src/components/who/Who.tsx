@@ -23,10 +23,14 @@ import Badge from "../global/Badge.tsx"
 import { LiveDataHaultedPageMessage } from "../global/CommonMessages.tsx"
 import NavigationCard from "../global/NavigationCard.tsx"
 import useGetRegisteredCharacters from "../../hooks/useGetRegisteredCharacters.ts"
+import useGetCharacterList from "../../hooks/useGetCharacterList.ts"
+import { getFriends } from "../../utils/localStorage.ts"
 
 const Who = () => {
-    const fakeFriends: number[] = [] // TODO: load from friends list when that gets built
     const { registeredCharacters } = useGetRegisteredCharacters()
+    const { characters: friends } = useGetCharacterList({
+        getCharactersFromLocalStorage: getFriends,
+    })
 
     const { data: characterIdsData, state: characterIdsState } =
         usePollApi<OnlineCharacterIdsApiModel>({
@@ -57,7 +61,7 @@ const Who = () => {
         const characterCount = serverData?.character_count || 0
         const friendCount =
             characterIdsData?.data?.[serverName]?.filter((id) =>
-                fakeFriends.includes(id)
+                friends.find((character) => character.id === id)
             ).length || 0
         const areRegisteredCharactersOnline = characterIdsData?.data?.[
             serverName

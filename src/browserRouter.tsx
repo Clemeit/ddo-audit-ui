@@ -31,12 +31,14 @@ const Timers = lazy(() => import("./components/timers/Timers.tsx"))
 const Feedback = lazy(() => import("./components/feedback/Feedback.tsx"))
 const Friends = lazy(() => import("./components/friends/Friends.tsx"))
 const About = lazy(() => import("./components/about/About.tsx"))
+const Ignores = lazy(() => import("./components/ignores/Ignores.tsx"))
 
 // Providers
 import { LfmProvider } from "./contexts/LfmContext.tsx"
 import { WhoProvider } from "./contexts/WhoContext.tsx"
 import { AreaProvider } from "./contexts/AreaContext.tsx"
 import { QuestProvider } from "./contexts/QuestContext.tsx"
+import { IgnoresProvider } from "./contexts/IgnoresContext.tsx"
 
 // Set up the router
 export default createBrowserRouter(
@@ -77,7 +79,9 @@ export default createBrowserRouter(
                         <WhoProvider>
                             <AreaProvider>
                                 <QuestProvider>
-                                    <GroupingSpecific />
+                                    <IgnoresProvider>
+                                        <GroupingSpecific />
+                                    </IgnoresProvider>
                                 </QuestProvider>
                             </AreaProvider>
                         </WhoProvider>
@@ -102,7 +106,9 @@ export default createBrowserRouter(
                     <WhoProvider>
                         <LfmProvider>
                             <AreaProvider>
-                                <WhoSpecific />
+                                <IgnoresProvider>
+                                    <WhoSpecific />
+                                </IgnoresProvider>
                             </AreaProvider>
                         </LfmProvider>
                     </WhoProvider>
@@ -117,6 +123,16 @@ export default createBrowserRouter(
                 element={
                     <AreaProvider>
                         <Friends />
+                    </AreaProvider>
+                }
+            />
+            <Route
+                path="/ignores"
+                element={
+                    <AreaProvider>
+                        <IgnoresProvider>
+                            <Ignores />
+                        </IgnoresProvider>
                     </AreaProvider>
                 }
             />

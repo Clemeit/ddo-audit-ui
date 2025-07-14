@@ -28,7 +28,7 @@ const Directory = () => {
                         <NavigationCard type="grouping" />
                         <NavigationCard type="who" />
                         <NavigationCard type="friends" />
-                        <NavigationCard type="ignore" />
+                        <NavigationCard type="ignores" />
                     </NavCardCluster>
                 </ContentCluster>
                 <ContentCluster title="Character Tools">

@@ -200,7 +200,7 @@ const CharacterSelectModal = ({
 
     const findCharacterContent = (
         <div style={{ padding: "10px 40px", width: "300px" }}>
-            <ContentCluster title="Add a Character">
+            <ContentCluster title="Find a Character">
                 <div className="selection-form-content">
                     <div
                         style={{

@@ -8,12 +8,14 @@ interface Props {
     children?: React.ReactNode
     checked: boolean
     onChange: (e: React.ChangeEvent<HTMLInputElement>) => void
+    disabled?: boolean
 }
 
 const Checkbox = ({
     children = null,
     checked = false,
     onChange = () => {},
+    disabled = false,
 }: Props) => {
     const [id] = useState(uuid())
 
@@ -38,6 +40,7 @@ const Checkbox = ({
                 id={id}
                 checked={checked}
                 onChange={handleChange}
+                disabled={disabled}
             />
             {children}
         </label>

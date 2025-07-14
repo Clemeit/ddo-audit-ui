@@ -59,6 +59,12 @@ const bannerRouteMapping = {
         miniature: true,
         showButtons: false,
     },
+    ignores: {
+        title: "Ignore List",
+        subtitle: "Block characters",
+        miniature: true,
+        showButtons: false,
+    },
     activity: {
         title: "Activity",
         subtitle: "Detailed Character Activity",
