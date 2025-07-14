@@ -6,8 +6,8 @@ import { getElementInnerText } from "../../utils/elementUtils.ts"
 
 interface Props {
     children?: React.ReactNode
-    checked: boolean
-    onChange: (e: React.ChangeEvent<HTMLInputElement>) => void
+    checked?: boolean
+    onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void
     disabled?: boolean
 }
 

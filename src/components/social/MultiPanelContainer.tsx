@@ -104,7 +104,7 @@ const MultiPanelContainer = ({ serverName, primaryType }: Props) => {
     return (
         <>
             {isModalOpen && (
-                <Modal onClose={() => setIsModalOpen(false)}>
+                <Modal onClose={() => setIsModalOpen(false)} fullScreenOnMobile>
                     {!secondaryType && secondaryPanelTypeModalContent()}
                     {secondaryType && secondaryPanelServerModalContent()}
                 </Modal>
