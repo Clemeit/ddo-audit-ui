@@ -14,6 +14,6 @@
     box-shadow: inset 0 0 20px var(--shadow);
 }
 
-.lfm-settings-modal {
+.lfm-settings-modal-content {
     padding: 20px;
 }

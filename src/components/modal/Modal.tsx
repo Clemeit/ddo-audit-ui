@@ -1,4 +1,4 @@
-import React, { useEffect } from "react"
+import React, { useEffect, useRef } from "react"
 import { ReactComponent as CloseSVG } from "../../assets/svg/close.svg"
 import "./Modal.css"
 import useIsMobile from "../../hooks/useIsMobile.ts"
@@ -19,20 +19,28 @@ const Modal = ({
     maxWidth = "400px",
     fullScreenOnMobile = false,
 }: Props) => {
+    const modalRef = useRef<HTMLDivElement>(null)
+
     useEffect(() => {
-        // event listener for closing modal on escape key press
-        const handleKeyDown = (e: KeyboardEvent) => {
-            if (e.key === "Escape") {
-                onClose()
-            }
+        // Prevent body scroll when modal is open
+        const originalOverflow = document.body.style.overflow
+        document.body.style.overflow = "hidden"
+
+        // Ensure modal gets focus after render
+        if (modalRef.current) {
+            modalRef.current.focus()
         }
-        document.body.style.overflowY = "hidden"
-        document.addEventListener("keydown", handleKeyDown)
+
         return () => {
-            document.removeEventListener("keydown", handleKeyDown)
-            document.body.style.overflowY = "scroll"
+            document.body.style.overflow = originalOverflow
         }
     }, [])
+
+    const handleKeyDown = (e: React.KeyboardEvent) => {
+        if (e.key === "Escape") {
+            onClose()
+        }
+    }
 
     return (
         <>
@@ -41,6 +49,9 @@ const Modal = ({
             )}
             <div
                 className={`modal-container ${centeredContent ? "centered-content" : ""} ${fullScreenOnMobile ? "full-screen-on-mobile" : ""}`}
+                onKeyDown={handleKeyDown}
+                tabIndex={-1}
+                ref={modalRef}
             >
                 <div
                     className={`modal-content ${centeredContent ? "centered-content" : ""}`}
