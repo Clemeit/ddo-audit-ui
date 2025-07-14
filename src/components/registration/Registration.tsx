@@ -21,6 +21,11 @@ import { convertMillisecondsToPrettyString } from "../../utils/stringUtils.ts"
 import CharacterTable, { CharacterTableRow } from "../tables/CharacterTable.tsx"
 import CharacterSelectModal from "../modals/CharacterSelectModal.tsx"
 import { useLfmContext } from "../../contexts/LfmContext.tsx"
+import useLimitedInterval from "../../hooks/useLimitedInterval.ts"
+import { MsFromHours, MsFromSeconds } from "../../utils/timeUtils.ts"
+import { useModalNavigation } from "../../hooks/useModalNavigation.ts"
+import Checkbox from "../global/Checkbox.tsx"
+import { useWhoContext } from "../../contexts/WhoContext.tsx"
 
 const Registration = () => {
     const {
@@ -32,11 +37,17 @@ const Registration = () => {
         unregisterCharacter,
         lastReload,
     } = useGetRegisteredCharacters()
+    const { pinRegisteredCharacters, setPinRegisteredCharacters } =
+        useWhoContext()
 
     const { trackedCharacterIds, setTrackedCharacterIds } = useLfmContext()
     const navigate = useNavigate()
-    const [showCharacterSelectModal, setShowCharacterSelectModal] =
-        useState<boolean>(false)
+
+    const {
+        isModalOpen,
+        openModal: handleOpenModal,
+        closeModal: handleCloseModal,
+    } = useModalNavigation()
 
     const onUnregisterCharacter = (character: Character) => {
         // Remove the character from tracked characters (lfm)
@@ -97,29 +108,25 @@ const Registration = () => {
     }, [registeredCharacters, accessTokens])
 
     // Registering a new character:
-    const [millisSinceReload, setMillisSinceReload] = useState<number>(0)
-    const [firstLoad] = useState<Date>(new Date())
+    const [millisSinceLastReload, setMillisSinceLastReload] =
+        useState<number>(0)
 
-    React.useEffect(() => {
-        setMillisSinceReload(new Date().getTime() - lastReload.getTime())
-
-        const updateReloadStatus = setInterval(() => {
-            if (new Date().getTime() - firstLoad.getTime() > 1000 * 60 * 60 * 5)
-                return
-            const millis = new Date().getTime() - lastReload.getTime()
-            if (millis > 30000) reloadCharacters()
-            setMillisSinceReload(millis)
-        }, 10000)
-
-        return () => clearInterval(updateReloadStatus)
-    }, [lastReload])
+    useLimitedInterval({
+        callback: () => {
+            setMillisSinceLastReload(
+                Math.round((Date.now() - lastReload.getTime()) / 5000) * 5000
+            )
+        },
+        intervalMs: MsFromSeconds(5),
+        ttlMs: MsFromHours(5),
+    })
 
     function getLastReloadString() {
         if (registeredCharacters.length === 0) {
             return "---"
         }
         const prettyString = convertMillisecondsToPrettyString(
-            millisSinceReload,
+            millisSinceLastReload,
             true,
             true,
             true
@@ -149,11 +156,11 @@ const Registration = () => {
             description="Register your characters to automatically filter LFMs and see your raid timers."
             className="registration"
         >
-            {showCharacterSelectModal && (
+            {isModalOpen && (
                 <CharacterSelectModal
                     previouslyAddedCharacters={registeredCharacters}
                     onCharacterSelected={addCharacter}
-                    onClose={() => setShowCharacterSelectModal(false)}
+                    onClose={handleCloseModal}
                 />
             )}
             <ContentClusterGroup>
@@ -182,12 +189,25 @@ const Registration = () => {
                     <Spacer size="20px" />
                     <Stack gap="10px" fullWidth justify="space-between">
                         <div />
-                        <Button
-                            type="primary"
-                            onClick={() => setShowCharacterSelectModal(true)}
-                        >
+                        <Button type="primary" onClick={handleOpenModal}>
                             Add a character
                         </Button>
+                    </Stack>
+                </ContentCluster>
+                <ContentCluster
+                    title="Behavior"
+                    subtitle="Control how the Who List handles friends. These settings can also be found on the Who List page."
+                >
+                    <h3>Who List</h3>
+                    <Stack gap="10px" direction="column">
+                        <Checkbox
+                            checked={pinRegisteredCharacters}
+                            onChange={(e) =>
+                                setPinRegisteredCharacters(e.target.checked)
+                            }
+                        >
+                            Pin registered characters to the top of the Who list
+                        </Checkbox>
                     </Stack>
                 </ContentCluster>
                 <ContentCluster title="About this Feature">
@@ -225,6 +245,8 @@ const Registration = () => {
                     <NavCardCluster>
                         <NavigationCard type="timers" />
                         <NavigationCard type="activity" />
+                        <NavigationCard type="friends" />
+                        <NavigationCard type="ignores" />
                     </NavCardCluster>
                 </ContentCluster>
             </ContentClusterGroup>

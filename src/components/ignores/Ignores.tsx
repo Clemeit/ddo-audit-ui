@@ -25,6 +25,9 @@ import CharacterTable, {
     ColumnType,
 } from "../tables/CharacterTable.tsx"
 import Checkbox from "../global/Checkbox.tsx"
+import { useModalNavigation } from "../../hooks/useModalNavigation.ts"
+import { useWhoContext, WhoProvider } from "../../contexts/WhoContext.tsx"
+import { useLfmContext } from "../../contexts/LfmContext.tsx"
 
 const ignoreTableSortFunction = (
     a: CharacterTableRow,
@@ -57,7 +60,18 @@ const Ignores = () => {
         addCharacterToLocalStorage: addIgnore,
         removeCharacterFromLocalStorage: removeIgnore,
     })
-    const [showAddIgnoreModal, setShowAddIgnoreModal] = useState<boolean>(false)
+    const {
+        isModalOpen,
+        openModal: handleOpenModal,
+        closeModal: handleCloseModal,
+    } = useModalNavigation()
+    const { hideIgnoredCharacters, setHideIgnoredCharacters } = useWhoContext()
+    const {
+        hideGroupsPostedByIgnoredCharacters,
+        setHideGroupsPostedByIgnoredCharacters,
+        hideGroupsContainingIgnoredCharacters,
+        setHideGroupsContainingIgnoredCharacters,
+    } = useLfmContext()
 
     const characterRows = useMemo<CharacterTableRow[]>(
         () =>
@@ -82,11 +96,11 @@ const Ignores = () => {
             title="Ignore List"
             description="Adding characters to your ignore list will enable additional LFM filtering and viewing options."
         >
-            {showAddIgnoreModal && (
+            {isModalOpen && (
                 <CharacterSelectModal
                     previouslyAddedCharacters={ignores}
                     onCharacterSelected={addCharacter}
-                    onClose={() => setShowAddIgnoreModal(false)}
+                    onClose={handleCloseModal}
                 />
             )}
             <ContentClusterGroup>
@@ -114,21 +128,65 @@ const Ignores = () => {
                     <Spacer size="20px" />
                     <Stack gap="10px" fullWidth justify="space-between">
                         <div />
-                        <Button
-                            type="primary"
-                            onClick={() => setShowAddIgnoreModal(true)}
-                        >
+                        <Button type="primary" onClick={handleOpenModal}>
                             Ignore a character
                         </Button>
                     </Stack>
                 </ContentCluster>
-                <ContentCluster title="Behavior">
+                <ContentCluster
+                    title="Behavior"
+                    subtitle="Control how the LFM viewer and Who list handle ignored characters. These settings can also be found on their respective pages."
+                >
+                    <h3>LFM Viewer</h3>
                     <Stack gap="10px" direction="column">
-                        <span>
-                            This can contain aggregated settings from both the
-                            Who and LFM context
-                        </span>
+                        <Checkbox
+                            checked={hideGroupsPostedByIgnoredCharacters}
+                            onChange={(e) =>
+                                setHideGroupsPostedByIgnoredCharacters(
+                                    e.target.checked
+                                )
+                            }
+                        >
+                            Hide groups posted by ignored characters
+                        </Checkbox>
+                        <Checkbox
+                            checked={hideGroupsContainingIgnoredCharacters}
+                            onChange={(e) =>
+                                setHideGroupsContainingIgnoredCharacters(
+                                    e.target.checked
+                                )
+                            }
+                        >
+                            Hide groups when an ignored character is a member of
+                            the party
+                        </Checkbox>
                     </Stack>
+                    <h3>Who List</h3>
+                    <Stack gap="10px" direction="column">
+                        <Checkbox
+                            checked={hideIgnoredCharacters}
+                            onChange={(e) =>
+                                setHideIgnoredCharacters(e.target.checked)
+                            }
+                        >
+                            Hide ignored characters from the Who list
+                        </Checkbox>
+                    </Stack>
+                </ContentCluster>
+                <ContentCluster title="About this Feature">
+                    <p>
+                        Adding characters to your ignore list will enable
+                        additional LFM viewer and Who list filtering and viewing
+                        options, including:
+                    </p>
+                    <ul>
+                        <li>Hiding LFMs posted by ignored characters</li>
+                        <li>
+                            Hiding LFMs when an ignored character is part of the
+                            group
+                        </li>
+                        <li>Hiding ignored characters from the Who list</li>
+                    </ul>
                 </ContentCluster>
                 <ContentCluster title="See Also...">
                     <NavCardCluster>

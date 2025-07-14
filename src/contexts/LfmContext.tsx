@@ -22,6 +22,8 @@ import useGetRegisteredCharacters from "../hooks/useGetRegisteredCharacters.ts"
 import { Character } from "../models/Character.ts"
 import logMessage from "../utils/logUtils.ts"
 import { useNotificationContext } from "./NotificationContext.tsx"
+import useLimitedInterval from "../hooks/useLimitedInterval.ts"
+import { MsFromHours, MsFromMinutes } from "../utils/timeUtils.ts"
 
 interface LfmContextProps {
     lfmDataCache: LfmApiDataModel
@@ -73,6 +75,14 @@ interface LfmContextProps {
     setIsMultiColumn: (value: boolean) => void
     showEligibleCharacters: boolean
     setShowEligibleCharacters: (value: boolean) => void
+    hideGroupsPostedByIgnoredCharacters: boolean
+    setHideGroupsPostedByIgnoredCharacters: (value: boolean) => void
+    hideGroupsContainingIgnoredCharacters: boolean
+    setHideGroupsContainingIgnoredCharacters: (value: boolean) => void
+    showIndicationForGroupsPostedByFriends: boolean
+    setShowIndicationForGroupsPostedByFriends: (value: boolean) => void
+    showIndicationForGroupsContainingFriends: boolean
+    setShowIndicationForGroupsContainingFriends: (value: boolean) => void
 }
 
 const LfmContext = createContext<LfmContextProps | undefined>(undefined)
@@ -128,6 +138,24 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
     const [showLfmActivity, setShowLfmActivity] = useState<boolean>(true)
     const [showEligibleCharacters, setShowEligibleCharacters] =
         useState<boolean>(false)
+
+    // social
+    const [
+        hideGroupsPostedByIgnoredCharacters,
+        setHideGroupsPostedByIgnoredCharacters,
+    ] = useState<boolean>(false)
+    const [
+        hideGroupsContainingIgnoredCharacters,
+        setHideGroupsContainingIgnoredCharacters,
+    ] = useState<boolean>(false)
+    const [
+        showIndicationForGroupsPostedByFriends,
+        setShowIndicationForGroupsPostedByFriends,
+    ] = useState<boolean>(true)
+    const [
+        showIndicationForGroupsContainingFriends,
+        setShowIndicationForGroupsContainingFriends,
+    ] = useState<boolean>(true)
 
     const { createNotification } = useNotificationContext()
 
@@ -212,6 +240,18 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
                 setShowLfmActivity(settings.showLfmActivity)
                 setIsMultiColumn(settings.isMultiColumn)
                 setShowEligibleCharacters(settings.showEligibleCharacters)
+                setHideGroupsPostedByIgnoredCharacters(
+                    settings.hideGroupsPostedByIgnoredCharacters
+                )
+                setHideGroupsContainingIgnoredCharacters(
+                    settings.hideGroupsContainingIgnoredCharacters
+                )
+                setShowIndicationForGroupsPostedByFriends(
+                    settings.showIndicationForGroupsPostedByFriends
+                )
+                setShowIndicationForGroupsContainingFriends(
+                    settings.showIndicationForGroupsContainingFriends
+                )
             } catch (e) {
                 logMessage(
                     "Error applying settings from local storage, resetting to defaults",
@@ -235,14 +275,15 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
         }
     }, [resetDisplaySettings])
 
+    useLimitedInterval({
+        callback: reloadRegisteredCharacters,
+        intervalMs: MsFromMinutes(1),
+        ttlMs: MsFromHours(8),
+    })
+
     useEffect(() => {
-        // load from local storage
         loadSettingsFromLocalStorage()
         setIsLoaded(true)
-
-        // reload registered characters every minute
-        const interval = setInterval(reloadRegisteredCharacters, 60000)
-        return () => clearInterval(interval)
     }, [reloadRegisteredCharacters, loadSettingsFromLocalStorage])
 
     useEffect(() => {
@@ -269,6 +310,10 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
             showLfmActivity,
             isMultiColumn,
             showEligibleCharacters,
+            hideGroupsPostedByIgnoredCharacters,
+            hideGroupsContainingIgnoredCharacters,
+            showIndicationForGroupsPostedByFriends,
+            showIndicationForGroupsContainingFriends,
         })
     }, [
         minLevel,
@@ -292,6 +337,10 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
         showLfmActivity,
         isMultiColumn,
         showEligibleCharacters,
+        hideGroupsPostedByIgnoredCharacters,
+        hideGroupsContainingIgnoredCharacters,
+        showIndicationForGroupsPostedByFriends,
+        showIndicationForGroupsContainingFriends,
     ])
 
     useEffect(() => {
@@ -352,6 +401,14 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
                 setIsMultiColumn,
                 showEligibleCharacters,
                 setShowEligibleCharacters,
+                hideGroupsPostedByIgnoredCharacters,
+                setHideGroupsPostedByIgnoredCharacters,
+                hideGroupsContainingIgnoredCharacters,
+                setHideGroupsContainingIgnoredCharacters,
+                showIndicationForGroupsPostedByFriends,
+                setShowIndicationForGroupsPostedByFriends,
+                showIndicationForGroupsContainingFriends,
+                setShowIndicationForGroupsContainingFriends,
             }}
         >
             {children}

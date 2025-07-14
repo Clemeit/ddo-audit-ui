@@ -199,90 +199,83 @@ const CharacterSelectModal = ({
     )
 
     const findCharacterContent = (
-        <div style={{ padding: "10px 40px", width: "300px" }}>
-            <ContentCluster title="Find a Character">
-                <div className="selection-form-content">
-                    <div
+        <ContentCluster title="Find a Character">
+            <div className="selection-form-content">
+                <div
+                    style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: "5px",
+                        width: "100%",
+                        boxSizing: "border-box",
+                    }}
+                >
+                    <label htmlFor="character-name">Character name</label>
+                    <input
+                        id="character-name"
+                        type="text"
+                        value={characterName}
+                        onChange={(e) => {
+                            setCharacterName(e.target.value)
+                            setValidationErrorMessage([])
+                        }}
+                        onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                                registerCharacter()
+                            }
+                        }}
                         style={{
-                            display: "flex",
-                            flexDirection: "column",
-                            gap: "5px",
                             width: "100%",
                             boxSizing: "border-box",
                         }}
-                    >
-                        <label htmlFor="character-name">Character name</label>
-                        <input
-                            id="character-name"
-                            type="text"
-                            value={characterName}
-                            onChange={(e) => {
-                                setCharacterName(e.target.value)
-                                setValidationErrorMessage([])
-                            }}
-                            onKeyDown={(e) => {
-                                if (e.key === "Enter") {
-                                    registerCharacter()
-                                }
-                            }}
-                            style={{
-                                width: "100%",
-                                boxSizing: "border-box",
-                            }}
-                        />
-                        {!!validationErrorMessage.length &&
-                            validationErrorMessage.map((message, index) => (
-                                <div key={index}>
-                                    <ValidationMessage
-                                        message={message}
-                                        visible={!!validationErrorMessage}
-                                        showIcon={false}
-                                        type={index === 0 ? "error" : "default"}
-                                    />
-                                </div>
-                            ))}
-                    </div>
+                    />
+                    {!!validationErrorMessage.length &&
+                        validationErrorMessage.map((message, index) => (
+                            <div key={index}>
+                                <ValidationMessage
+                                    message={message}
+                                    visible={!!validationErrorMessage}
+                                    showIcon={false}
+                                    type={index === 0 ? "error" : "default"}
+                                />
+                            </div>
+                        ))}
                 </div>
-                <div className="selection-form-footer">
-                    <Stack
-                        direction="column"
-                        gap="10px"
-                        align="center"
+            </div>
+            <div className="selection-form-footer">
+                <Stack direction="column" gap="10px" align="center" fullWidth>
+                    <Button
+                        type="primary"
+                        onClick={() => {
+                            if (!validationErrorMessage.length)
+                                registerCharacter()
+                        }}
                         fullWidth
+                        disabled={isFetching || !!validationErrorMessage.length}
                     >
-                        <Button
-                            type="primary"
-                            onClick={() => {
-                                if (!validationErrorMessage.length)
-                                    registerCharacter()
-                            }}
-                            fullWidth
-                            disabled={
-                                isFetching || !!validationErrorMessage.length
-                            }
-                        >
-                            Add
-                        </Button>
-                        <Checkbox
-                            checked={keepModalOpen}
-                            onChange={() => {
-                                setKeepModalOpen(!keepModalOpen)
-                                focusCharacterNameField()
-                            }}
-                        >
-                            Keep open
-                        </Checkbox>
-                    </Stack>
-                </div>
-            </ContentCluster>
-        </div>
+                        Add
+                    </Button>
+                    <Checkbox
+                        checked={keepModalOpen}
+                        onChange={() => {
+                            setKeepModalOpen(!keepModalOpen)
+                            focusCharacterNameField()
+                        }}
+                    >
+                        Keep open
+                    </Checkbox>
+                </Stack>
+            </div>
+        </ContentCluster>
     )
 
     return (
-        <Modal onClose={onClose}>
-            {showRefineSelection
-                ? refineSelectionContent
-                : findCharacterContent}
+        <Modal onClose={onClose} fullScreenOnMobile>
+            <div className="character-select-modal-content">
+                {showRefineSelection
+                    ? refineSelectionContent
+                    : findCharacterContent}
+            </div>
         </Modal>
     )
 }
