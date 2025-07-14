@@ -49,7 +49,7 @@ const About = () => {
                         characters. Anonymous characters <u>are</u> counted in
                         the population reports. Anonymous characters{" "}
                         <u>are not</u> counted in any demographic reports and
-                        will never show up in our Who panel. Our API includes
+                        will never show up in our Who List. Our API includes
                         anonymous characters, but their data has been
                         anonymized.
                     </p>

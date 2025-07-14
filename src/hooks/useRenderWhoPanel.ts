@@ -80,7 +80,7 @@ const useRenderWhoPanel = ({ sprite, context }: Props) => {
                     panelWidth,
                     SPRITE_MAP.HEADER_BAR.height
                 ),
-                text: "Who Panel - DDO Audit",
+                text: "Who List - DDO Audit",
                 font: fonts.MAIN_HEADER,
                 left: SPRITE_MAP.HEADER_LEFT,
                 center: SPRITE_MAP.HEADER_BAR,

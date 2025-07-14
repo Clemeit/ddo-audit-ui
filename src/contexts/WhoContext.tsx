@@ -112,9 +112,9 @@ export const WhoProvider = ({ children }: { children: ReactNode }) => {
         useState<boolean>(true)
     const [pinRegisteredCharacters, setPinRegisteredCharacters] =
         useState<boolean>(false)
-    const [pinFriends, setPinFriends] = useState<boolean>(false)
     const [alwaysShowRegisteredCharacters, setAlwaysShowRegisteredCharacters] =
         useState<boolean>(false)
+    const [pinFriends, setPinFriends] = useState<boolean>(false)
     const [alwaysShowFriends, setAlwaysShowFriends] = useState<boolean>(false)
 
     const loadSettingsFromLocalStorage = () => {

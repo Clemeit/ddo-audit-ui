@@ -26,6 +26,10 @@ import { MsFromHours, MsFromSeconds } from "../../utils/timeUtils.ts"
 import { StaleDataPageMessage } from "../global/CommonMessages.tsx"
 import { MAX_FRIENDS } from "../../constants/client.ts"
 import { convertMillisecondsToPrettyString } from "../../utils/stringUtils.ts"
+import { useModalNavigation } from "../../hooks/useModalNavigation.ts"
+import { useLfmContext } from "../../contexts/LfmContext.tsx"
+import { useWhoContext } from "../../contexts/WhoContext.tsx"
+import Checkbox from "../global/Checkbox.tsx"
 
 const friendTableSortFunction = (
     a: CharacterTableRow,
@@ -60,7 +64,6 @@ const Friends = () => {
     })
     const [millisSinceLastReload, setMillisSinceLastReload] =
         useState<number>(0)
-    const [showAddFriendModal, setShowAddFriendModal] = useState<boolean>(false)
     const { isActive } = useLimitedInterval({
         callback: reload,
         intervalMs: MsFromSeconds(15),
@@ -77,6 +80,23 @@ const Friends = () => {
         intervalMs: MsFromSeconds(5),
         ttlMs: MsFromHours(5),
     })
+    const {
+        isModalOpen,
+        openModal: handleOpenModal,
+        closeModal: handleCloseModal,
+    } = useModalNavigation()
+    const {
+        showIndicationForGroupsPostedByFriends,
+        setShowIndicationForGroupsPostedByFriends,
+        showIndicationForGroupsContainingFriends,
+        setShowIndicationForGroupsContainingFriends,
+    } = useLfmContext()
+    const {
+        pinFriends,
+        setPinFriends,
+        alwaysShowFriends,
+        setAlwaysShowFriends,
+    } = useWhoContext()
 
     const characterRows = useMemo<CharacterTableRow[]>(
         () =>
@@ -119,11 +139,11 @@ const Friends = () => {
             description="Add your friends so that you can see what they're up to!"
         >
             {!isActive && <StaleDataPageMessage />}
-            {showAddFriendModal && (
+            {isModalOpen && (
                 <CharacterSelectModal
                     previouslyAddedCharacters={friends}
                     onCharacterSelected={addCharacter}
-                    onClose={() => setShowAddFriendModal(false)}
+                    onClose={handleCloseModal}
                 />
             )}
             <ContentClusterGroup>
@@ -156,7 +176,7 @@ const Friends = () => {
                         <div />
                         <Button
                             type="primary"
-                            onClick={() => setShowAddFriendModal(true)}
+                            onClick={handleOpenModal}
                             disabled={friends.length >= MAX_FRIENDS}
                         >
                             {friends.length >= MAX_FRIENDS
@@ -164,6 +184,80 @@ const Friends = () => {
                                 : "Add a friend"}
                         </Button>
                     </Stack>
+                </ContentCluster>
+                <ContentCluster
+                    title="Behavior"
+                    subtitle="Control how the LFM viewer and Who list handle friends. These settings can also be found on their respective pages."
+                >
+                    <h3>LFM Viewer</h3>
+                    <Stack gap="10px" direction="column">
+                        <Checkbox
+                            checked={showIndicationForGroupsPostedByFriends}
+                            onChange={(e) =>
+                                setShowIndicationForGroupsPostedByFriends(
+                                    e.target.checked
+                                )
+                            }
+                        >
+                            Show an indicator for LFMs posted by friends
+                        </Checkbox>
+                        <Checkbox
+                            checked={showIndicationForGroupsContainingFriends}
+                            onChange={(e) =>
+                                setShowIndicationForGroupsContainingFriends(
+                                    e.target.checked
+                                )
+                            }
+                        >
+                            Show an indicator for LFMs that friends are a part
+                            of
+                        </Checkbox>
+                    </Stack>
+                    <h3>Who List</h3>
+                    <Stack gap="10px" direction="column">
+                        <Checkbox
+                            checked={pinFriends}
+                            onChange={(e) => setPinFriends(e.target.checked)}
+                        >
+                            Pin friends to the top of the Who list
+                        </Checkbox>
+                        <Checkbox
+                            checked={alwaysShowFriends}
+                            onChange={(e) =>
+                                setAlwaysShowFriends(e.target.checked)
+                            }
+                        >
+                            Always show online friends in the Who list
+                        </Checkbox>
+                    </Stack>
+                </ContentCluster>
+                <ContentCluster title="About this Feature">
+                    <p>
+                        Adding friends allows you to easily check whether or not
+                        they're online. It also provides the LFM viewer and Who
+                        list with additional features including:
+                    </p>
+                    <ul>
+                        <li>
+                            A visual indication that an LFM is posted by a
+                            friend
+                        </li>
+                        <li>
+                            A visual indication when a friend is part of a group
+                        </li>
+                        <li>
+                            A visual indicationin the Who list when a friend is
+                            online
+                        </li>
+                        <li>
+                            The ability to pin online friends to the top of the
+                            Who list
+                        </li>
+                    </ul>
+                    <p>
+                        More features may be added in the future, such as push
+                        notifications when friends are online.
+                    </p>
                 </ContentCluster>
                 <ContentCluster title="See Also...">
                     <NavCardCluster>

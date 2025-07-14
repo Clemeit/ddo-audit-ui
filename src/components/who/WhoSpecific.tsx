@@ -24,7 +24,7 @@ const WhoSpecific = () => {
     return (
         <Page
             title={`DDO Live Character Viewer for ${serverNameSentenceCase}`}
-            description={`Browse ${serverNamePossessiveCase} Who panel! Are your friends online? Is your guild forming up for raid night? Now you know!`}
+            description={`Browse ${serverNamePossessiveCase} Who List! Are your friends online? Is your guild forming up for raid night? Now you know!`}
             centered
             noPadding
             contentMaxWidth
@@ -36,9 +36,9 @@ const WhoSpecific = () => {
                     message={
                         <>
                             <span>
-                                The Who panel now refreshes much more
-                                frequently. If you filter the panel down to
-                                fewer characters, it will update even faster.
+                                The Who List now refreshes much more frequently.
+                                If you filter the panel down to fewer
+                                characters, it will update even faster.
                             </span>
                             <Button
                                 onClick={() =>

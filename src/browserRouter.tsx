@@ -2,6 +2,7 @@ import React, { lazy } from "react"
 import {
     createBrowserRouter,
     createRoutesFromElements,
+    Outlet,
     Route,
 } from "react-router-dom"
 
@@ -34,10 +35,12 @@ const About = lazy(() => import("./components/about/About.tsx"))
 const Ignores = lazy(() => import("./components/ignores/Ignores.tsx"))
 
 // Providers
-import { LfmProvider } from "./contexts/LfmContext.tsx"
-import { WhoProvider } from "./contexts/WhoContext.tsx"
-import { AreaProvider } from "./contexts/AreaContext.tsx"
-import { QuestProvider } from "./contexts/QuestContext.tsx"
+import {
+    SocialDataProvider,
+    GroupingDataProvider,
+    WhoDataProvider,
+    RegistrationDataProvider,
+} from "./contexts/CombinedProviders.tsx"
 
 // Set up the router
 export default createBrowserRouter(
@@ -49,66 +52,34 @@ export default createBrowserRouter(
             <Route
                 path="/registration"
                 element={
-                    <LfmProvider>
-                        <AreaProvider>
-                            <Registration />
-                        </AreaProvider>
-                    </LfmProvider>
+                    <RegistrationDataProvider>
+                        <Registration />
+                    </RegistrationDataProvider>
                 }
             />
             <Route path="/activity" element={<Activity />} />
             <Route
                 path="/grouping"
                 element={
-                    <LfmProvider>
-                        <WhoProvider>
-                            <AreaProvider>
-                                <QuestProvider>
-                                    <Grouping />
-                                </QuestProvider>
-                            </AreaProvider>
-                        </WhoProvider>
-                    </LfmProvider>
+                    <GroupingDataProvider>
+                        <Outlet />
+                    </GroupingDataProvider>
                 }
-            />
-            <Route
-                path="/grouping/:id"
-                element={
-                    <LfmProvider>
-                        <WhoProvider>
-                            <AreaProvider>
-                                <QuestProvider>
-                                    <GroupingSpecific />
-                                </QuestProvider>
-                            </AreaProvider>
-                        </WhoProvider>
-                    </LfmProvider>
-                }
-            />
+            >
+                <Route index element={<Grouping />} />
+                <Route path=":id" element={<GroupingSpecific />} />
+            </Route>
             <Route
                 path="/who"
                 element={
-                    <WhoProvider>
-                        <LfmProvider>
-                            <AreaProvider>
-                                <Who />
-                            </AreaProvider>
-                        </LfmProvider>
-                    </WhoProvider>
+                    <WhoDataProvider>
+                        <Outlet />
+                    </WhoDataProvider>
                 }
-            />
-            <Route
-                path="/who/:id"
-                element={
-                    <WhoProvider>
-                        <LfmProvider>
-                            <AreaProvider>
-                                <WhoSpecific />
-                            </AreaProvider>
-                        </LfmProvider>
-                    </WhoProvider>
-                }
-            />
+            >
+                <Route index element={<Who />} />
+                <Route path=":id" element={<WhoSpecific />} />
+            </Route>
             <Route path="/notifications" element={<Notifications />} />
             <Route path="/timers" element={<Timers />} />
             <Route path="/servers" element={<Servers />} />
@@ -116,17 +87,17 @@ export default createBrowserRouter(
             <Route
                 path="/friends"
                 element={
-                    <AreaProvider>
+                    <SocialDataProvider>
                         <Friends />
-                    </AreaProvider>
+                    </SocialDataProvider>
                 }
             />
             <Route
                 path="/ignores"
                 element={
-                    <AreaProvider>
+                    <SocialDataProvider>
                         <Ignores />
-                    </AreaProvider>
+                    </SocialDataProvider>
                 }
             />
             <Route path="/about" element={<About />} />

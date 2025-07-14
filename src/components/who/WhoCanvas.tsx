@@ -186,7 +186,7 @@ const WhoCanvas: React.FC<Props> = ({
         }
     }, [mainCanvasRef.current])
 
-    // Render the who panel
+    // Render the who list
     useEffect(() => {
         if (!image) return
         if (!mainCanvasRef.current) return
