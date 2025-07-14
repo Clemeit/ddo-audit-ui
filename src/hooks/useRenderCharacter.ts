@@ -64,10 +64,22 @@ const useRenderCharacter = ({ sprite, context }: Props) => {
                 0,
                 CHARACTER_HEIGHT
             )
-            gradient.addColorStop(0, WHO_COLORS.CHARACTER_GRADIENT_EDGE)
-            gradient.addColorStop(0.25, WHO_COLORS.CHARACTER_GRADIENT_CENTER)
-            gradient.addColorStop(0.75, WHO_COLORS.CHARACTER_GRADIENT_CENTER)
-            gradient.addColorStop(1, WHO_COLORS.CHARACTER_GRADIENT_EDGE)
+            let edgeColor = WHO_COLORS.CHARACTER_GRADIENT_EDGE
+            if (character.metadata?.isFriend) {
+                edgeColor = WHO_COLORS.FRIEND_GRADIENT_EDGE
+            } else if (character.metadata?.isRegistered) {
+                edgeColor = WHO_COLORS.REGISTERED_GRADIENT_EDGE
+            }
+            let centerColor = WHO_COLORS.CHARACTER_GRADIENT_CENTER
+            if (character.metadata?.isFriend) {
+                centerColor = WHO_COLORS.FRIEND_GRADIENT_CENTER
+            } else if (character.metadata?.isRegistered) {
+                centerColor = WHO_COLORS.REGISTERED_GRADIENT_CENTER
+            }
+            gradient.addColorStop(0, edgeColor)
+            gradient.addColorStop(0.25, centerColor)
+            gradient.addColorStop(0.75, centerColor)
+            gradient.addColorStop(1, edgeColor)
             context.fillStyle = gradient
             context.fillRect(0, 0, filterZone.width, CHARACTER_HEIGHT)
         }

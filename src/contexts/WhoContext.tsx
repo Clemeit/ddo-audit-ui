@@ -54,6 +54,20 @@ interface WhoContextProps {
     setShowInQuestIndicator: React.Dispatch<React.SetStateAction<boolean>>
     refreshInterval: number
     setRefreshInterval: React.Dispatch<React.SetStateAction<number>>
+    applyFriendsListSettings: boolean
+    setApplyFriendsListSettings: React.Dispatch<React.SetStateAction<boolean>>
+    applyIgnoreListSettings: boolean
+    setApplyIgnoreListSettings: React.Dispatch<React.SetStateAction<boolean>>
+    pinRegisteredCharacters: boolean
+    setPinRegisteredCharacters: React.Dispatch<React.SetStateAction<boolean>>
+    alwaysShowRegisteredCharacters: boolean
+    setAlwaysShowRegisteredCharacters: React.Dispatch<
+        React.SetStateAction<boolean>
+    >
+    pinFriends: boolean
+    setPinFriends: React.Dispatch<React.SetStateAction<boolean>>
+    alwaysShowFriends: boolean
+    setAlwaysShowFriends: React.Dispatch<React.SetStateAction<boolean>>
 }
 
 const WhoContext = createContext<WhoContextProps | undefined>(undefined)
@@ -96,6 +110,16 @@ export const WhoProvider = ({ children }: { children: ReactNode }) => {
         useState<boolean>(false)
     const [shouldSaveExactMatch, setShouldSaveExactMatch] =
         useState<boolean>(false)
+    const [applyFriendsListSettings, setApplyFriendsListSettings] =
+        useState<boolean>(true)
+    const [applyIgnoreListSettings, setApplyIgnoreListSettings] =
+        useState<boolean>(true)
+    const [pinRegisteredCharacters, setPinRegisteredCharacters] =
+        useState<boolean>(false)
+    const [pinFriends, setPinFriends] = useState<boolean>(false)
+    const [alwaysShowRegisteredCharacters, setAlwaysShowRegisteredCharacters] =
+        useState<boolean>(false)
+    const [alwaysShowFriends, setAlwaysShowFriends] = useState<boolean>(false)
 
     const loadSettingsFromLocalStorage = () => {
         const settings = getValue<any>(settingsStorageKey)
@@ -128,6 +152,14 @@ export const WhoProvider = ({ children }: { children: ReactNode }) => {
                 setShouldSaveExactMatch(settings.shouldSaveExactMatch)
                 setShowInQuestIndicator(settings.showInQuestIndicator)
                 setRefreshInterval(settings.refreshInterval)
+                setApplyFriendsListSettings(settings.applyFriendsListSettings)
+                setApplyIgnoreListSettings(settings.applyIgnoreListSettings)
+                setPinFriends(settings.pinFriends)
+                setPinRegisteredCharacters(settings.pinRegisteredCharacters)
+                setAlwaysShowRegisteredCharacters(
+                    settings.alwaysShowRegisteredCharacters
+                )
+                setAlwaysShowFriends(settings.alwaysShowFriends)
             } catch (e) {
                 console.error(e)
             }
@@ -161,6 +193,12 @@ export const WhoProvider = ({ children }: { children: ReactNode }) => {
             shouldSaveExactMatch,
             showInQuestIndicator,
             refreshInterval,
+            applyFriendsListSettings,
+            applyIgnoreListSettings,
+            pinRegisteredCharacters,
+            pinFriends,
+            alwaysShowRegisteredCharacters,
+            alwaysShowFriends,
         })
     }, [
         stringFilter,
@@ -182,6 +220,12 @@ export const WhoProvider = ({ children }: { children: ReactNode }) => {
         shouldSaveExactMatch,
         showInQuestIndicator,
         refreshInterval,
+        applyFriendsListSettings,
+        applyIgnoreListSettings,
+        pinRegisteredCharacters,
+        pinFriends,
+        alwaysShowRegisteredCharacters,
+        alwaysShowFriends,
     ])
 
     return (
@@ -227,6 +271,18 @@ export const WhoProvider = ({ children }: { children: ReactNode }) => {
                 setShowInQuestIndicator,
                 refreshInterval,
                 setRefreshInterval,
+                applyFriendsListSettings,
+                setApplyFriendsListSettings,
+                applyIgnoreListSettings,
+                setApplyIgnoreListSettings,
+                pinRegisteredCharacters,
+                setPinRegisteredCharacters,
+                alwaysShowRegisteredCharacters,
+                setAlwaysShowRegisteredCharacters,
+                pinFriends,
+                setPinFriends,
+                alwaysShowFriends,
+                setAlwaysShowFriends,
             }}
         >
             {children}

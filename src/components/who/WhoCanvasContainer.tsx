@@ -16,6 +16,10 @@ import {
 import WhoToolbar from "./WhoToolbar.tsx"
 import { MAXIMUM_CHARACTER_COUNT } from "../../constants/whoPanel.ts"
 import { useAreaContext } from "../../contexts/AreaContext.tsx"
+import useGetCharacterList from "../../hooks/useGetCharacterList.ts"
+import { getFriends, getIgnores } from "../../utils/localStorage.ts"
+import useGetRegisteredCharacters from "../../hooks/useGetRegisteredCharacters.ts"
+import { useIgnoresContext } from "../../contexts/IgnoresContext.tsx"
 
 // TODO: group_id should be null and never "0"
 
@@ -38,10 +42,23 @@ const WhoContainer = ({
         classNameFilter,
         isGroupView,
         isExactMatch,
+        applyFriendsListSettings,
+        applyIgnoreListSettings,
+        pinRegisteredCharacters,
+        pinFriends,
+        alwaysShowFriends,
+        alwaysShowRegisteredCharacters,
         // refreshInterval, TODO: make this work
     } = useWhoContext()
+    const { hideIgnoresFromWho } = useIgnoresContext()
+    const { registeredCharacters } = useGetRegisteredCharacters()
     const [ignoreServerDown, setIgnoreServerDown] = useState<boolean>(false)
-
+    const { characters: friends } = useGetCharacterList({
+        getCharactersFromLocalStorage: getFriends,
+    })
+    const { characters: ignores } = useGetCharacterList({
+        getCharactersFromLocalStorage: getIgnores,
+    })
     const {
         data: characterData,
         state: characterState,
@@ -83,6 +100,7 @@ const WhoContainer = ({
         link.click()
     }
 
+    // TODO: move this to a utility function
     function compareString(
         a: string | undefined,
         b: string | undefined,
@@ -105,9 +123,51 @@ const WhoContainer = ({
         characters: Character[]
         areResultsTruncated: boolean
     }>(() => {
-        let filteredCharacters = Object.values(
-            characterData?.data ?? {}
-        ).filter((character) => {
+        const characters = Object.values(characterData?.data ?? {})
+
+        const hydratedCharacters: Character[] = characters.map((character) => {
+            const isFriend = friends.some(
+                (friend) => friend.id === character.id
+            )
+            const isIgnored = ignores.some(
+                (ignore) => ignore.id === character.id
+            )
+            const isRegistered = registeredCharacters.some(
+                (registered) => registered.id === character.id
+            )
+            return {
+                ...character,
+                metadata: {
+                    isFriend,
+                    isRegistered,
+                    isIgnored,
+                },
+            }
+        })
+
+        let filteredCharacters = hydratedCharacters.filter((character) => {
+            if (
+                hideIgnoresFromWho &&
+                applyIgnoreListSettings &&
+                character.metadata?.isIgnored
+            ) {
+                return false
+            }
+            if (
+                pinFriends &&
+                alwaysShowFriends &&
+                character.metadata?.isFriend
+            ) {
+                return true
+            }
+            if (
+                pinRegisteredCharacters &&
+                alwaysShowRegisteredCharacters &&
+                character.metadata?.isRegistered
+            ) {
+                return true
+            }
+
             let stringFilterMatch = false
             const stringFilters = stringFilter.split(",")
             stringFilters.forEach((localFilter) => {
@@ -193,6 +253,20 @@ const WhoContainer = ({
             sortedCharacters = filteredCharacters
                 .sort((a, b) => a.id - b.id)
                 .sort((a, b) => {
+                    if (pinRegisteredCharacters) {
+                        if (a.metadata?.isRegistered) {
+                            return -1
+                        } else if (b.metadata?.isRegistered) {
+                            return 1
+                        }
+                    }
+                    if (pinFriends) {
+                        if (a.metadata?.isFriend) {
+                            return -1
+                        } else if (b.metadata?.isFriend) {
+                            return 1
+                        }
+                    }
                     switch (sortBy.type) {
                         case CharacterSortType.Lfm:
                             return (
@@ -238,6 +312,13 @@ const WhoContainer = ({
         isGroupView,
         classNameFilter,
         isExactMatch,
+        applyFriendsListSettings,
+        applyIgnoreListSettings,
+        hideIgnoresFromWho,
+        pinRegisteredCharacters,
+        pinFriends,
+        alwaysShowFriends,
+        alwaysShowRegisteredCharacters,
     ])
 
     return (

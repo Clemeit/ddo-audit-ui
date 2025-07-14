@@ -25,6 +25,11 @@ interface Character {
     public_comment?: string
     last_updated?: string
     last_saved?: string
+    metadata?: {
+        isFriend?: boolean
+        isRegistered?: boolean
+        isIgnored?: boolean
+    }
 }
 
 interface CharacterApiServerModel {

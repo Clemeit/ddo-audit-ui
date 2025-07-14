@@ -14,6 +14,7 @@ import {
     MAXIMUM_REFRESH_RATE,
     MINIMUM_REFRESH_RATE,
 } from "../../constants/whoPanel.ts"
+import Link from "../global/Link.tsx"
 
 interface Props {
     reloadCharacters: () => void
@@ -50,6 +51,18 @@ const WhoToolbar = ({
         setShowInQuestIndicator,
         refreshInterval,
         setRefreshInterval,
+        applyFriendsListSettings,
+        setApplyFriendsListSettings,
+        applyIgnoreListSettings,
+        setApplyIgnoreListSettings,
+        pinRegisteredCharacters,
+        setPinRegisteredCharacters,
+        pinFriends,
+        setPinFriends,
+        alwaysShowFriends,
+        setAlwaysShowFriends,
+        alwaysShowRegisteredCharacters,
+        setAlwaysShowRegisteredCharacters,
     } = useWhoContext()
     const [showSettingsModal, setShowSettingsModal] = useState<boolean>(false)
 
@@ -90,7 +103,99 @@ const WhoToolbar = ({
                             />
                         </Stack>
                     </ContentCluster>
-                    <ContentCluster title="Settings">
+                    <ContentCluster title="Character Settings">
+                        <Stack direction="column" gap="20px">
+                            <Stack direction="column" gap="10px">
+                                <Checkbox
+                                    checked={pinRegisteredCharacters}
+                                    onChange={(e) => {
+                                        setPinRegisteredCharacters(
+                                            e.target.checked
+                                        )
+                                    }}
+                                >
+                                    Pin my registered characters
+                                </Checkbox>
+                                {pinRegisteredCharacters && (
+                                    <div
+                                        style={{
+                                            marginLeft: "20px",
+                                        }}
+                                    >
+                                        <Checkbox
+                                            checked={
+                                                alwaysShowRegisteredCharacters
+                                            }
+                                            onChange={(e) => {
+                                                setAlwaysShowRegisteredCharacters(
+                                                    e.target.checked
+                                                )
+                                            }}
+                                        >
+                                            Always show registered characters
+                                        </Checkbox>
+                                    </div>
+                                )}
+                                <div
+                                    style={{
+                                        marginLeft: "20px",
+                                    }}
+                                >
+                                    <Link to="/registration">
+                                        Registered characters
+                                    </Link>
+                                </div>
+                            </Stack>
+                            <Stack direction="column" gap="10px">
+                                <Checkbox
+                                    checked={pinFriends}
+                                    onChange={(e) => {
+                                        setPinFriends(e.target.checked)
+                                    }}
+                                >
+                                    Pin my friends
+                                </Checkbox>
+                                {pinFriends && (
+                                    <div
+                                        style={{
+                                            marginLeft: "20px",
+                                        }}
+                                    >
+                                        <Checkbox
+                                            checked={alwaysShowFriends}
+                                            onChange={(e) => {
+                                                setAlwaysShowFriends(
+                                                    e.target.checked
+                                                )
+                                            }}
+                                        >
+                                            Always show friends
+                                        </Checkbox>
+                                    </div>
+                                )}
+                            </Stack>
+                            <Stack direction="column" gap="10px">
+                                <Checkbox
+                                    checked={applyIgnoreListSettings}
+                                    onChange={(e) => {
+                                        setApplyIgnoreListSettings(
+                                            e.target.checked
+                                        )
+                                    }}
+                                >
+                                    Apply ignore list settings
+                                </Checkbox>
+                                <div
+                                    style={{
+                                        marginLeft: "20px",
+                                    }}
+                                >
+                                    <Link to="/ignores">Change settings</Link>
+                                </div>
+                            </Stack>
+                        </Stack>
+                    </ContentCluster>
+                    <ContentCluster title="Filters">
                         <Stack direction="column" gap="10px">
                             <Checkbox
                                 checked={shouldSaveSettings}
@@ -185,13 +290,22 @@ const WhoToolbar = ({
             shouldSaveExactMatch,
             showInQuestIndicator,
             refreshInterval,
+            applyFriendsListSettings,
+            applyIgnoreListSettings,
+            pinRegisteredCharacters,
+            pinFriends,
+            alwaysShowFriends,
+            alwaysShowRegisteredCharacters,
         ]
     )
 
     return (
         <>
             {showSettingsModal && (
-                <Modal onClose={() => setShowSettingsModal(false)}>
+                <Modal
+                    onClose={() => setShowSettingsModal(false)}
+                    fullScreenOnMobile
+                >
                     {settingModalContent}
                 </Modal>
             )}
