@@ -33,8 +33,7 @@ import {
 import { useAreaContext } from "../contexts/AreaContext.tsx"
 import { useQuestContext } from "../contexts/QuestContext.tsx"
 import { getActiveTimer } from "../utils/timerUtils.ts"
-import useGetCharacterList from "./useGetCharacterList.ts"
-import { getFriends as getFriendsFromLocalStorage } from "../utils/localStorage.ts"
+import useGetFriends from "./useGetFriends.ts"
 
 interface Props {
     lfmSprite?: HTMLImageElement | null
@@ -64,9 +63,7 @@ const useRenderLfmOverlay = ({ lfmSprite, context }: Props) => {
     const areaContext = useAreaContext()
     const questContext = useQuestContext()
     const { quests } = questContext
-    const { characters: friends } = useGetCharacterList({
-        getCharactersFromLocalStorage: getFriendsFromLocalStorage,
-    })
+    const { friends } = useGetFriends()
 
     const renderLfmOverlay = useCallback<
         (lfm: Lfm, renderType: RenderType) => { width: number; height: number }

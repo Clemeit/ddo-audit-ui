@@ -23,14 +23,11 @@ import Badge from "../global/Badge.tsx"
 import { LiveDataHaultedPageMessage } from "../global/CommonMessages.tsx"
 import NavigationCard from "../global/NavigationCard.tsx"
 import useGetRegisteredCharacters from "../../hooks/useGetRegisteredCharacters.ts"
-import useGetCharacterList from "../../hooks/useGetCharacterList.ts"
-import { getFriends } from "../../utils/localStorage.ts"
+import useGetFriends from "../../hooks/useGetFriends.ts"
 
 const Who = () => {
     const { registeredCharacters } = useGetRegisteredCharacters()
-    const { characters: friends } = useGetCharacterList({
-        getCharactersFromLocalStorage: getFriends,
-    })
+    const { friends } = useGetFriends()
 
     const { data: characterIdsData, state: characterIdsState } =
         usePollApi<OnlineCharacterIdsApiModel>({

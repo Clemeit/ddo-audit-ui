@@ -13,13 +13,6 @@ import Button from "../global/Button.tsx"
 import { Character } from "../../models/Character.ts"
 import { ReactComponent as Delete } from "../../assets/svg/delete.svg"
 import CharacterSelectModal from "../modals/CharacterSelectModal.tsx"
-import useGetCharacterList from "../../hooks/useGetCharacterList.ts"
-import {
-    getFriends,
-    setFriends,
-    addFriend,
-    removeFriend,
-} from "../../utils/localStorage.ts"
 import CharacterTable, { CharacterTableRow } from "../tables/CharacterTable.tsx"
 import useLimitedInterval from "../../hooks/useLimitedInterval.ts"
 import { MsFromHours, MsFromSeconds } from "../../utils/timeUtils.ts"
@@ -30,6 +23,7 @@ import { useModalNavigation } from "../../hooks/useModalNavigation.ts"
 import { useLfmContext } from "../../contexts/LfmContext.tsx"
 import { useWhoContext } from "../../contexts/WhoContext.tsx"
 import Checkbox from "../global/Checkbox.tsx"
+import useGetFriends from "../../hooks/useGetFriends.ts"
 
 const friendTableSortFunction = (
     a: CharacterTableRow,
@@ -49,23 +43,18 @@ const friendTableSortFunction = (
 
 const Friends = () => {
     const {
-        characters: friends,
-        isLoading,
-        isError,
-        reload,
-        addCharacter,
-        removeCharacter,
-        lastFetch,
-    } = useGetCharacterList({
-        getCharactersFromLocalStorage: getFriends,
-        setCharactersInLocalStorage: setFriends,
-        addCharacterToLocalStorage: addFriend,
-        removeCharacterFromLocalStorage: removeFriend,
-    })
+        friends,
+        isFriendsLoading,
+        isFriendsError,
+        reloadFriends,
+        addFriend,
+        removeFriend,
+        lastFriendsFetch,
+    } = useGetFriends()
     const [millisSinceLastReload, setMillisSinceLastReload] =
         useState<number>(0)
     const { isActive } = useLimitedInterval({
-        callback: reload,
+        callback: reloadFriends,
         intervalMs: MsFromSeconds(15),
         ttlMs: MsFromHours(5),
     })
@@ -74,7 +63,8 @@ const Friends = () => {
     useLimitedInterval({
         callback: () => {
             setMillisSinceLastReload(
-                Math.round((Date.now() - lastFetch.getTime()) / 5000) * 5000
+                Math.round((Date.now() - lastFriendsFetch.getTime()) / 5000) *
+                    5000
             )
         },
         intervalMs: MsFromSeconds(5),
@@ -107,7 +97,7 @@ const Friends = () => {
                         <Delete
                             className="clickable-icon"
                             onClick={() => {
-                                removeCharacter(friend)
+                                removeFriend(friend)
                             }}
                         />
                     ),
@@ -142,7 +132,7 @@ const Friends = () => {
             {isModalOpen && (
                 <CharacterSelectModal
                     previouslyAddedCharacters={friends}
-                    onCharacterSelected={addCharacter}
+                    onCharacterSelected={addFriend}
                     onClose={handleCloseModal}
                 />
             )}
@@ -154,7 +144,7 @@ const Friends = () => {
                     <CharacterTable
                         characterRows={characterRows}
                         noCharactersMessage="No friends added"
-                        isLoaded={!isLoading}
+                        isLoaded={!isFriendsLoading}
                         tableSortFunction={friendTableSortFunction}
                     />
                     <div
@@ -169,7 +159,7 @@ const Friends = () => {
                     <ValidationMessage
                         type="error"
                         message="Failed to load characters. Showing cached data."
-                        visible={isError}
+                        visible={isFriendsError}
                     />
                     <Spacer size="20px" />
                     <Stack gap="10px" fullWidth justify="space-between">

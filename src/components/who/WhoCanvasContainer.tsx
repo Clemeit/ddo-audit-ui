@@ -16,9 +16,9 @@ import {
 import WhoToolbar from "./WhoToolbar.tsx"
 import { MAXIMUM_CHARACTER_COUNT } from "../../constants/whoPanel.ts"
 import { useAreaContext } from "../../contexts/AreaContext.tsx"
-import useGetCharacterList from "../../hooks/useGetCharacterList.ts"
-import { getFriends, getIgnores } from "../../utils/localStorage.ts"
 import useGetRegisteredCharacters from "../../hooks/useGetRegisteredCharacters.ts"
+import useGetFriends from "../../hooks/useGetFriends.ts"
+import useGetIgnores from "../../hooks/useGetIgnores.ts"
 
 // TODO: group_id should be null and never "0"
 
@@ -50,12 +50,8 @@ const WhoContainer = ({
     } = useWhoContext()
     const { registeredCharacters } = useGetRegisteredCharacters()
     const [ignoreServerDown, setIgnoreServerDown] = useState<boolean>(false)
-    const { characters: friends } = useGetCharacterList({
-        getCharactersFromLocalStorage: getFriends,
-    })
-    const { characters: ignores } = useGetCharacterList({
-        getCharactersFromLocalStorage: getIgnores,
-    })
+    const { friends } = useGetFriends()
+    const { ignores } = useGetIgnores()
     const {
         data: characterData,
         state: characterState,

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import LfmCanvas from "./LfmCanvas.tsx"
 import { Lfm, LfmSpecificApiModel } from "../../models/Lfm.ts"
 import { useLfmContext } from "../../contexts/LfmContext.tsx"
@@ -13,11 +13,8 @@ import {
 } from "../global/CommonMessages.tsx"
 import { getCharacterRaidActivityByIds } from "../../services/activityService.ts"
 import { ActivityEvent } from "../../models/Activity.ts"
-import useGetCharacterList from "../../hooks/useGetCharacterList.ts"
-import {
-    getFriends as getFriendsFromLocalStorage,
-    getIgnores as getIgnoresFromLocalStorage,
-} from "../../utils/localStorage.ts"
+import useGetFriends from "../../hooks/useGetFriends.ts"
+import useGetIgnores from "../../hooks/useGetIgnores.ts"
 
 interface Props {
     serverName: string
@@ -46,12 +43,8 @@ const GroupingContainer = ({
         hideGroupsContainingIgnoredCharacters,
     } = useLfmContext()
     const [ignoreServerDown, setIgnoreServerDown] = useState<boolean>(false)
-    const { characters: friends } = useGetCharacterList({
-        getCharactersFromLocalStorage: getFriendsFromLocalStorage,
-    })
-    const { characters: ignores } = useGetCharacterList({
-        getCharactersFromLocalStorage: getIgnoresFromLocalStorage,
-    })
+    const { friends } = useGetFriends()
+    const { ignores } = useGetIgnores()
 
     const {
         data: lfmData,

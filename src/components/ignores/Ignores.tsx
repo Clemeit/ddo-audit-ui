@@ -13,7 +13,6 @@ import Button from "../global/Button.tsx"
 import { Character } from "../../models/Character.ts"
 import { ReactComponent as Delete } from "../../assets/svg/delete.svg"
 import CharacterSelectModal from "../modals/CharacterSelectModal.tsx"
-import useGetCharacterList from "../../hooks/useGetCharacterList.ts"
 import {
     getIgnores,
     setIgnores,
@@ -28,6 +27,7 @@ import Checkbox from "../global/Checkbox.tsx"
 import { useModalNavigation } from "../../hooks/useModalNavigation.ts"
 import { useWhoContext, WhoProvider } from "../../contexts/WhoContext.tsx"
 import { useLfmContext } from "../../contexts/LfmContext.tsx"
+import useGetIgnores from "../../hooks/useGetIgnores.ts"
 
 const ignoreTableSortFunction = (
     a: CharacterTableRow,
@@ -47,19 +47,12 @@ const ignoreTableSortFunction = (
 
 const Ignores = () => {
     const {
-        characters: ignores,
-        isLoading,
-        isLoaded,
-        isError,
-        reload,
-        addCharacter,
-        removeCharacter,
-    } = useGetCharacterList({
-        getCharactersFromLocalStorage: getIgnores,
-        setCharactersInLocalStorage: setIgnores,
-        addCharacterToLocalStorage: addIgnore,
-        removeCharacterFromLocalStorage: removeIgnore,
-    })
+        ignores,
+        isIgnoresLoading,
+        isIgnoresError,
+        addIgnore,
+        removeIgnore,
+    } = useGetIgnores()
     const {
         isModalOpen,
         openModal: handleOpenModal,
@@ -82,7 +75,7 @@ const Ignores = () => {
                         <Delete
                             className="clickable-icon"
                             onClick={() => {
-                                removeCharacter(ignore)
+                                removeIgnore(ignore)
                             }}
                         />
                     ),
@@ -99,7 +92,7 @@ const Ignores = () => {
             {isModalOpen && (
                 <CharacterSelectModal
                     previouslyAddedCharacters={ignores}
-                    onCharacterSelected={addCharacter}
+                    onCharacterSelected={addIgnore}
                     onClose={handleCloseModal}
                 />
             )}
@@ -111,7 +104,7 @@ const Ignores = () => {
                     <CharacterTable
                         characterRows={characterRows}
                         noCharactersMessage="No ignored characters added"
-                        isLoaded={!isLoading}
+                        isLoaded={!isIgnoresLoading}
                         tableSortFunction={ignoreTableSortFunction}
                         visibleColumns={[
                             ColumnType.NAME,
@@ -123,7 +116,7 @@ const Ignores = () => {
                     <ValidationMessage
                         type="error"
                         message="Failed to load characters. Showing cached data."
-                        visible={isError}
+                        visible={isIgnoresError}
                     />
                     <Spacer size="20px" />
                     <Stack gap="10px" fullWidth justify="space-between">
