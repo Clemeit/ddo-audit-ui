@@ -177,7 +177,7 @@ const Who = () => {
                     />
                 ))
         },
-        [gameInfoData, gameInfoState, registeredCharacters]
+        [gameInfoData, gameInfoState, registeredCharacters, cardDescription]
     )
 
     return (
