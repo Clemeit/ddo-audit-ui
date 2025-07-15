@@ -7,6 +7,7 @@ import {
 import Page from "../global/Page.tsx"
 import NavCardCluster from "../global/NavCardCluster.tsx"
 import { BETTER_STACK_URL } from "../../constants/client.ts"
+import Badge from "../global/Badge.tsx"
 
 const Directory = () => {
     return (
@@ -18,9 +19,18 @@ const Directory = () => {
                 <ContentCluster title="Population and Activity">
                     <NavCardCluster>
                         <NavigationCard type="live" />
-                        <NavigationCard type="servers" />
-                        <NavigationCard type="quests" />
-                        <NavigationCard type="trends" />
+                        <NavigationCard
+                            type="servers"
+                            badge={<Badge text="Soon" type="soon" />}
+                        />
+                        <NavigationCard
+                            type="quests"
+                            badge={<Badge text="Soon" type="soon" />}
+                        />
+                        <NavigationCard
+                            type="trends"
+                            badge={<Badge text="Soon" type="soon" />}
+                        />
                     </NavCardCluster>
                 </ContentCluster>
                 <ContentCluster title="Social Tools">
@@ -34,14 +44,23 @@ const Directory = () => {
                 <ContentCluster title="Character Tools">
                     <NavCardCluster>
                         <NavigationCard type="registration" />
-                        <NavigationCard type="timers" />
-                        <NavigationCard type="activity" />
+                        <NavigationCard
+                            type="timers"
+                            badge={<Badge text="Soon" type="soon" />}
+                        />
+                        <NavigationCard
+                            type="activity"
+                            badge={<Badge text="Soon" type="soon" />}
+                        />
                     </NavCardCluster>
                 </ContentCluster>
                 <ContentCluster title="Additional Resources">
                     <NavCardCluster>
                         <NavigationCard type="about" />
-                        <NavigationCard type="api" />
+                        <NavigationCard
+                            type="api"
+                            badge={<Badge text="Soon" type="soon" />}
+                        />
                         <NavigationCard type="feedback" />
                         <NavigationCard
                             type="health"
