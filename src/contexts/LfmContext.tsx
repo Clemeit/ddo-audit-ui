@@ -83,6 +83,8 @@ interface LfmContextProps {
     setShowIndicationForGroupsPostedByFriends: (value: boolean) => void
     showIndicationForGroupsContainingFriends: boolean
     setShowIndicationForGroupsContainingFriends: (value: boolean) => void
+    highlightRaids: boolean
+    setHighlightRaids: (value: boolean) => void
 }
 
 const LfmContext = createContext<LfmContextProps | undefined>(undefined)
@@ -125,6 +127,7 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
         DEFAULT_MOUSE_OVER_DELAY
     )
     const [isMultiColumn, setIsMultiColumn] = useState<boolean>(true)
+    const [highlightRaids, setHighlightRaids] = useState<boolean>(false)
 
     // tools:
     const [showRaidTimerIndicator, setShowRaidTimerIndicator] =
@@ -177,6 +180,7 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
         setIsDynamicWidth(false)
         setIsFullScreen(false)
         setIsMultiColumn(false)
+        setHighlightRaids(false)
         logMessage("Display settings reset to defaults", "info")
     }, [setIsFullScreen])
 
@@ -252,6 +256,7 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
                 setShowIndicationForGroupsContainingFriends(
                     settings.showIndicationForGroupsContainingFriends
                 )
+                setHighlightRaids(settings.highlightRaids)
             } catch (e) {
                 logMessage(
                     "Error applying settings from local storage, resetting to defaults",
@@ -314,6 +319,7 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
             hideGroupsContainingIgnoredCharacters,
             showIndicationForGroupsPostedByFriends,
             showIndicationForGroupsContainingFriends,
+            highlightRaids,
         })
     }, [
         minLevel,
@@ -341,6 +347,7 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
         hideGroupsContainingIgnoredCharacters,
         showIndicationForGroupsPostedByFriends,
         showIndicationForGroupsContainingFriends,
+        highlightRaids,
     ])
 
     useEffect(() => {
@@ -409,6 +416,8 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
                 setShowIndicationForGroupsPostedByFriends,
                 showIndicationForGroupsContainingFriends,
                 setShowIndicationForGroupsContainingFriends,
+                highlightRaids,
+                setHighlightRaids,
             }}
         >
             {children}

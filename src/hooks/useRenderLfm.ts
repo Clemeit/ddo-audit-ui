@@ -39,6 +39,7 @@ const useRenderLfm = ({ lfmSprite, context }: Props) => {
         showLfmPostedTime,
         showIndicationForGroupsPostedByFriends,
         showIndicationForGroupsContainingFriends,
+        highlightRaids,
     } = useLfmContext()
     const { confineTextToBoundingBox } = useTextRenderer(context)
     const commonBoundingBoxes = useMemo(
@@ -379,7 +380,13 @@ const useRenderLfm = ({ lfmSprite, context }: Props) => {
                     showIndicationForGroupsPostedByFriends) ||
                 (lfm.metadata?.includesFriend &&
                     showIndicationForGroupsContainingFriends)
-            if (lfm.metadata?.isEligible || shouldHighlightForFriends) {
+            const shouldHighlightRaid =
+                highlightRaids && quest?.group_size === "Raid"
+            if (
+                lfm.metadata?.isEligible ||
+                shouldHighlightForFriends ||
+                shouldHighlightRaid
+            ) {
                 const gradient = context.createLinearGradient(
                     0,
                     0,
@@ -388,19 +395,30 @@ const useRenderLfm = ({ lfmSprite, context }: Props) => {
                 )
                 let edgeColor = LFM_COLORS.ELIGIBLE_GRADIENT_EDGE
                 let centerColor = LFM_COLORS.ELIGIBLE_GRADIENT_CENTER
-                if (
-                    (lfm.metadata?.isPostedByFriend &&
-                        showIndicationForGroupsPostedByFriends) ||
-                    (lfm.metadata?.includesFriend &&
-                        showIndicationForGroupsContainingFriends)
-                ) {
+                if (shouldHighlightRaid) {
                     if (lfm.metadata?.isEligible) {
-                        edgeColor = LFM_COLORS.FRIEND_GRADIENT_EDGE
-                        centerColor = LFM_COLORS.FRIEND_GRADIENT_CENTER
+                        edgeColor = LFM_COLORS.ELIGIBLE_RAID_GRADIENT_EDGE
+                        centerColor = LFM_COLORS.ELIGIBLE_RAID_GRADIENT_CENTER
                     } else {
-                        edgeColor = LFM_COLORS.INELIGIBLE_FRIEND_GRADIENT_EDGE
-                        centerColor =
-                            LFM_COLORS.INELIGIBLE_FRIEND_GRADIENT_CENTER
+                        edgeColor = LFM_COLORS.INELIGIBLE_RAID_GRADIENT_EDGE
+                        centerColor = LFM_COLORS.INELIGIBLE_RAID_GRADIENT_CENTER
+                    }
+                } else {
+                    if (
+                        (lfm.metadata?.isPostedByFriend &&
+                            showIndicationForGroupsPostedByFriends) ||
+                        (lfm.metadata?.includesFriend &&
+                            showIndicationForGroupsContainingFriends)
+                    ) {
+                        if (lfm.metadata?.isEligible) {
+                            edgeColor = LFM_COLORS.FRIEND_GRADIENT_EDGE
+                            centerColor = LFM_COLORS.FRIEND_GRADIENT_CENTER
+                        } else {
+                            edgeColor =
+                                LFM_COLORS.INELIGIBLE_FRIEND_GRADIENT_EDGE
+                            centerColor =
+                                LFM_COLORS.INELIGIBLE_FRIEND_GRADIENT_CENTER
+                        }
                     }
                 }
                 gradient.addColorStop(0, edgeColor)

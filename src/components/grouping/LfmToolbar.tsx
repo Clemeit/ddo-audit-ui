@@ -93,6 +93,8 @@ const LfmToolbar = ({
         setShowIndicationForGroupsPostedByFriends,
         showIndicationForGroupsContainingFriends,
         setShowIndicationForGroupsContainingFriends,
+        highlightRaids,
+        setHighlightRaids,
     } = useLfmContext()
     const { isFullScreen, setIsFullScreen } = useThemeContext()
     const { isCalloutActive, callouts, dismissCallout } = useFeatureCallouts()
@@ -321,6 +323,12 @@ const LfmToolbar = ({
                         onChange={(e) => setIsMultiColumn(e.target.checked)}
                     >
                         Show raid group members in two columns
+                    </Checkbox>
+                    <Checkbox
+                        checked={highlightRaids}
+                        onChange={(e) => setHighlightRaids(e.target.checked)}
+                    >
+                        Highlight raid groups
                     </Checkbox>
                     <Stack fullWidth justify="flex-end">
                         <Button
