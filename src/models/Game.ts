@@ -23,4 +23,24 @@ interface ServerInfoApiDataModel {
     cormyr?: ServerInfo
 }
 
-export type { ServerInfo, ServerInfoApiDataModel }
+interface PopulationDataPoint {
+    character_count: number
+    lfm_count: number
+}
+
+interface PopulationPointInTime {
+    timestamp?: string
+    data?: Record<string, PopulationDataPoint>
+}
+
+interface PopulationEndpointResponse {
+    data: PopulationPointInTime[]
+}
+
+export type {
+    ServerInfo,
+    ServerInfoApiDataModel,
+    PopulationDataPoint,
+    PopulationPointInTime,
+    PopulationEndpointResponse,
+}
