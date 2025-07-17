@@ -1,4 +1,3 @@
-import React from "react"
 import { ReactComponent as X } from "../../assets/svg/x.svg"
 import { ReactComponent as Warning } from "../../assets/svg/warning.svg"
 import "./ValidationMessage.css"
@@ -43,7 +42,7 @@ const ValidationMessage = ({
                         )}
                     </div>
                 )}
-                <div style={{ color: typeToColorMap[type] }}>{message}</div>
+                <span style={{ color: typeToColorMap[type] }}>{message}</span>
             </Stack>
         </div>
     )

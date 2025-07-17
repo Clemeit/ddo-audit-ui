@@ -1,4 +1,4 @@
-import React from "react"
+import React, { useState } from "react"
 import {
     ContentCluster,
     ContentClusterGroup,
@@ -9,6 +9,8 @@ import Button from "../global/Button.tsx"
 import WebLink from "../global/WebLink.tsx"
 import ColoredText from "../global/ColoredText.tsx"
 import { postFeedback } from "../../services/feedbackService.ts"
+import ValidationMessage from "../global/ValidationMessage.tsx"
+import Spacer from "../global/Spacer.tsx"
 
 const Feedback = () => {
     const [message, setMessage] = React.useState("")
@@ -17,17 +19,26 @@ const Feedback = () => {
         React.useState(false)
     const [ticketNumber, setTicketNumber] = React.useState("")
     const [isLoading, setIsLoading] = React.useState(false)
+    const [showNoMessageValidation, setShowNoMessageValidation] =
+        useState<boolean>(false)
+
+    const resetForm = () => {
+        setMessage("")
+        setWasFeedbackSubmitted(false)
+        setTicketNumber("")
+        setIsLoading(false)
+    }
 
     const submitFeedback = () => {
-        if (!message) {
-            alert("Please enter a message.")
+        if (!message || !message.trim()) {
+            setShowNoMessageValidation(true)
             return
         }
 
         setIsLoading(true)
 
         const feedback = {
-            message,
+            message: message.trim(),
             contact: contactInfo || undefined,
         }
 
@@ -57,8 +68,8 @@ const Feedback = () => {
                         e.preventDefault()
                     }}
                 >
-                    <Stack direction="column" gap="10px" fullWidth>
-                        <div className="full-width">
+                    <Stack direction="column" gap="20px">
+                        <Stack gap="10px" direction="column" fullWidth>
                             <label
                                 htmlFor="suggestion-input"
                                 className="input-label"
@@ -67,7 +78,6 @@ const Feedback = () => {
                             </label>
                             <textarea
                                 id="suggestion-input"
-                                // multi-line:
                                 rows={4}
                                 placeholder="What's on your mind?"
                                 className="full-width"
@@ -75,20 +85,27 @@ const Feedback = () => {
                                     boxSizing: "border-box",
                                 }}
                                 value={message}
-                                onChange={(e) => setMessage(e.target.value)}
+                                onChange={(e) => {
+                                    setMessage(e.target.value)
+                                    setShowNoMessageValidation(false)
+                                }}
                             />
-                        </div>
-                        <div className="full-width">
+                            <ValidationMessage
+                                message="The message field is required"
+                                visible={showNoMessageValidation}
+                            />
+                        </Stack>
+                        <Stack gap="10px" direction="column" fullWidth>
                             <label
-                                htmlFor="contact-info-input"
+                                htmlFor="suggestion-input"
                                 className="input-label"
                             >
-                                Contact info (optional):
+                                (Optional) Contact info:
                             </label>
                             <input
                                 id="contact-info-input"
                                 type="text"
-                                placeholder="Discord, Forum name, email, etc."
+                                placeholder="Discord name, forums link, email, etc."
                                 className="full-width"
                                 style={{
                                     boxSizing: "border-box",
@@ -96,7 +113,7 @@ const Feedback = () => {
                                 value={contactInfo}
                                 onChange={(e) => setContactInfo(e.target.value)}
                             />
-                        </div>
+                        </Stack>
                         <Stack gap="10px" fullWidth justify="space-between">
                             <div className="hide-on-mobile" />
                             <Button
@@ -145,6 +162,10 @@ const Feedback = () => {
                     Ticket reference number: {ticketNumber}
                 </ColoredText>
             )}
+            <Spacer size="20px" />
+            <Button type="secondary" onClick={() => resetForm()}>
+                Submit another message
+            </Button>
         </ContentCluster>
     )
 

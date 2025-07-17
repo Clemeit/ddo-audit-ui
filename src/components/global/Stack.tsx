@@ -4,6 +4,7 @@ import "./Stack.css"
 interface Props {
     direction?: React.CSSProperties["flexDirection"]
     gap?: string
+    lineHeight?: string
     children?: React.ReactNode
     fullWidth?: boolean
     justify?:
@@ -17,17 +18,20 @@ interface Props {
     className?: string
     rest?: any
     fullColumnOnMobile?: boolean
+    wrap?: boolean
 }
 
 const Stack: React.FC<Props> = ({
     direction = "row",
     gap = "0px",
+    lineHeight = "unset",
     children,
     fullWidth = false,
     justify = "flex-start",
     align = "flex-start",
     className = "",
     fullColumnOnMobile = false,
+    wrap = false,
     ...rest
 }) => {
     return (
@@ -40,6 +44,8 @@ const Stack: React.FC<Props> = ({
                 width: fullWidth ? "100%" : "auto",
                 justifyContent: justify,
                 alignItems: align,
+                flexWrap: wrap ? "wrap" : "nowrap",
+                lineHeight: lineHeight,
             }}
             {...rest}
         >
