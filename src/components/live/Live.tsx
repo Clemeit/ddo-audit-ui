@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from "react"
+import React, { useEffect, useMemo, useState } from "react"
 import {
     ContentCluster,
     ContentClusterGroup,
@@ -11,6 +11,7 @@ import usePollApi from "../../hooks/usePollApi.ts"
 import NavCardCluster from "../global/NavCardCluster.tsx"
 import { LoadingState } from "../../models/Api.ts"
 import {
+    PopulationDataPoint,
     PopulationPointInTime,
     ServerInfoApiDataModel,
 } from "../../models/Game.ts"
@@ -18,10 +19,17 @@ import {
     DataLoadingErrorPageMessage,
     LiveDataHaultedPageMessage,
 } from "../global/CommonMessages.tsx"
-import { getPopulationData1Day } from "../../services/gameService.ts"
-import { ResponsiveLine } from "@nivo/line"
+import {
+    getPopulationData1Day,
+    getTotalPopulation1Month,
+    getTotalPopulation1Week,
+} from "../../services/gameService.ts"
 import { convertToNivoFormat } from "../../utils/nivoUtils.ts"
-import { ResponsiveContainer } from "recharts"
+import GenericLine from "../charts/GenericLine.tsx"
+import { NewsResponse } from "../../models/Service.ts"
+import { getNews } from "../../services/newsService.ts"
+import NewsCluster from "./NewsCluster.tsx"
+import { MakeASuggestionButton } from "../buttons/Buttons.tsx"
 
 const Live = () => {
     const {
@@ -37,11 +45,24 @@ const Live = () => {
     const [populationData24Hours, setPopulationData24Hours] = React.useState<
         PopulationPointInTime[]
     >([])
+    const [populationTotalsData1Week, setPopulationTotalsData1Week] =
+        React.useState<Record<string, PopulationDataPoint>>({})
+    const [populationTotalsData1Month, setPopulationTotalsData1Month] =
+        React.useState<Record<string, PopulationDataPoint>>({})
+    const [news, setNews] = useState<NewsResponse>(null)
 
     useEffect(() => {
         getPopulationData1Day().then((response) => {
-            console.log(response.data.data)
             setPopulationData24Hours(response.data.data)
+        })
+        getTotalPopulation1Week().then((response) => {
+            setPopulationTotalsData1Week(response.data.data)
+        })
+        getTotalPopulation1Month().then((response) => {
+            setPopulationTotalsData1Month(response.data.data)
+        })
+        getNews().then((response) => {
+            setNews(response.data)
         })
     }, [])
 
@@ -49,7 +70,66 @@ const Live = () => {
         () => convertToNivoFormat(populationData24Hours),
         [populationData24Hours]
     )
-    console.log("Nivo Data:", nivoData)
+
+    const mostPopulatedServerThisWeek = useMemo(() => {
+        let maxTotalPopulation = 0
+        let mostPopulatedServerName = ""
+
+        Object.entries(populationTotalsData1Week || {}).forEach(
+            ([serverName, serverData]) => {
+                if (serverData.character_count > maxTotalPopulation) {
+                    maxTotalPopulation = serverData.character_count
+                    mostPopulatedServerName = serverName
+                }
+            }
+        )
+        return mostPopulatedServerName
+    }, [populationTotalsData1Week])
+
+    const mostPopulatedServerThisMonth = useMemo(() => {
+        let maxTotalPopulation = 0
+        let mostPopulatedServerName = ""
+
+        Object.entries(populationTotalsData1Month || {}).forEach(
+            ([serverName, serverData]) => {
+                if (serverData.character_count > maxTotalPopulation) {
+                    maxTotalPopulation = serverData.character_count
+                    mostPopulatedServerName = serverName
+                }
+            }
+        )
+        return mostPopulatedServerName
+    }, [populationTotalsData1Month])
+
+    const livePopulationTitle = useMemo(() => {
+        if (!serverInfoData) return "Loading..."
+
+        let totalPopulation = 0
+        let totalLfmCount = 0
+
+        for (const server of Object.values(serverInfoData)) {
+            totalPopulation += server.character_count || 0
+            totalLfmCount += server.lfm_count || 0
+        }
+
+        const snarkyComment =
+            totalPopulation === 0
+                ? "Maybe they're all anonymous."
+                : "Are you one of them?"
+        return (
+            <>
+                There are currently{" "}
+                <span className="blue-text">
+                    {totalPopulation.toLocaleString()}
+                </span>{" "}
+                characters online and{" "}
+                <span className="orange-text">
+                    {totalLfmCount.toLocaleString()}
+                </span>{" "}
+                LFMs posted. {snarkyComment}
+            </>
+        )
+    }, [serverInfoData])
 
     return (
         <Page
@@ -70,57 +150,25 @@ const Live = () => {
                     />
                 </ContentCluster>
                 <ContentCluster title="Quick Info">
-                    <QuickInfo />
+                    <QuickInfo
+                        serverInfoData={serverInfoData}
+                        mostPopulatedServerThisWeek={
+                            mostPopulatedServerThisWeek
+                        }
+                        mostPopulatedServerThisMonth={
+                            mostPopulatedServerThisMonth
+                        }
+                    />
                 </ContentCluster>
-                <ContentCluster title="Of Special Note"></ContentCluster>
+                <ContentCluster title="Of Special Note">
+                    <NewsCluster news={news} />
+                    <br />
+                    <MakeASuggestionButton type="secondary" />
+                </ContentCluster>
                 <ContentCluster title="Frequently Asked Questions"></ContentCluster>
                 <ContentCluster title="Live Population">
-                    <ResponsiveContainer width="100%" height={400}>
-                        <ResponsiveLine
-                            data={nivoData}
-                            margin={{
-                                bottom: 60,
-                                left: 60,
-                                right: 60,
-                                top: 60,
-                            }}
-                            xScale={{
-                                type: "time",
-                                format: "%Y-%m-%dT%H:%M:%SZ",
-                                useUTC: true,
-                                precision: "minute",
-                            }}
-                            xFormat="time:%Y-%m-%d %H:%M"
-                            theme={{
-                                axis: {
-                                    ticks: {
-                                        text: {
-                                            fill: "var(--text)",
-                                            fontSize: 14,
-                                        },
-                                    },
-                                    legend: {
-                                        text: {
-                                            fill: "var(--text)",
-                                            fontSize: 14,
-                                        },
-                                    },
-                                },
-                            }}
-                            enableGridX={false}
-                            enablePoints={false}
-                            lineWidth={3}
-                            axisBottom={{
-                                tickSize: 5,
-                                tickPadding: 5,
-                                tickRotation: -45,
-                                legend: "Time",
-                                legendOffset: 50,
-                                format: "%H:%M",
-                                tickValues: "every 1 hour",
-                            }}
-                        />
-                    </ResponsiveContainer>
+                    <p>{livePopulationTitle}</p>
+                    <GenericLine nivoData={nivoData} showLegend />
                 </ContentCluster>
                 <ContentCluster title="Historical Population">
                     <NavCardCluster>
