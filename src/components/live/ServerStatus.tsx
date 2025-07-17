@@ -1,4 +1,4 @@
-import React, { useMemo } from "react"
+import React, { useCallback, useMemo } from "react"
 import "./ServerStatus.css"
 import { ServerInfo, ServerInfoApiDataModel } from "../../models/Game.ts"
 import { ReactComponent as Checkmark } from "../../assets/svg/checkmark.svg"
@@ -19,90 +19,72 @@ const ServerStatus = ({
     serverInfoData: ServerInfoApiDataModel | null
     serverInfoState: LoadingState
 }) => {
-    const mostRecentCheck = useMemo(() => {
+    const mostRecentStatusCheck = useMemo(() => {
         if (serverInfoData === null) {
-            return {
-                mostRecentStatusCheck: new Date(0),
-                timeDifferenceInSeconds: -1,
-            }
+            return new Date(0)
         }
 
         const statusCheckTimesAsDates: Date[] = Object.values(serverInfoData)
             .map((server) => new Date(server.last_status_check))
             .filter((date) => !isNaN(date.getTime())) // Filter out invalid dates
-        const mostRecentStatusCheck = new Date(
-            Math.max(...statusCheckTimesAsDates.map((date) => date.getTime()))
+
+        // If no valid dates found, return epoch
+        if (statusCheckTimesAsDates.length === 0) {
+            return new Date(0)
+        }
+
+        const maxTime = Math.max(
+            ...statusCheckTimesAsDates.map((date) => date.getTime())
         )
-        // get current time in UTC
-        const currentTime = new Date()
-        const timeDifferenceInSeconds = Math.floor(
-            (currentTime.getTime() - mostRecentStatusCheck.getTime()) / 1000
-        )
-        return { mostRecentStatusCheck, timeDifferenceInSeconds }
+        const mostRecent = new Date(maxTime)
+
+        // Additional safety check
+        if (isNaN(mostRecent.getTime())) {
+            return new Date(0)
+        }
+
+        return mostRecent
     }, [serverInfoData])
 
-    const isLoading = () => {
+    const timeDifferenceInSeconds = useMemo(() => {
+        if (serverInfoData === null || mostRecentStatusCheck.getTime() === 0) {
+            return null
+        }
+
+        const currentTime = new Date()
+        const timeDiff = Math.floor(
+            (currentTime.getTime() - mostRecentStatusCheck.getTime()) / 1000
+        )
+
+        return timeDiff
+    }, [serverInfoData, mostRecentStatusCheck])
+
+    const isLoading = useCallback(() => {
         return (
             serverInfoState === LoadingState.Initial ||
             serverInfoState === LoadingState.Loading ||
             serverInfoData === null ||
-            Object.keys(serverInfoData).length === 0
+            Object.keys(serverInfoData || {}).length === 0
         )
-    }
+    }, [serverInfoState, serverInfoData])
 
-    const lastCheckedMessage = () => {
+    const lastCheckedMessage = useCallback(() => {
         if (isLoading()) {
             return <span className="secondary-text">Loading...</span>
         }
 
-        const { timeDifferenceInSeconds } = mostRecentCheck
-
-        let delayStatementSpan = <span />
-        if (timeDifferenceInSeconds === -1) {
-            delayStatementSpan = (
-                <span className="secondary-text">
-                    a long time ago in a galaxy far, far away... (something
-                    broke)
-                </span>
-            )
-        } else if (timeDifferenceInSeconds < 10) {
-            delayStatementSpan = (
-                <span className="secondary-text">
-                    just now <span className="orange-text">(live data)</span>
-                </span>
-            )
-        } else if (timeDifferenceInSeconds < 30) {
-            delayStatementSpan = (
-                <span className="secondary-text">a few seconds ago</span>
-            )
-        } else if (timeDifferenceInSeconds < 60) {
-            delayStatementSpan = (
-                <span className="secondary-text">less than a minute ago</span>
-            )
-        } else if (timeDifferenceInSeconds < 120) {
-            delayStatementSpan = (
-                <span className="secondary-text">about a minute ago</span>
-            )
-        } else {
-            delayStatementSpan = (
-                <span className="secondary-text">
-                    {convertMillisecondsToPrettyString(
-                        timeDifferenceInSeconds * 1000,
-                        true
-                    )}{" "}
-                    ago
-                </span>
-            )
-        }
-
+        const roundedDate = new Date(
+            Math.floor(mostRecentStatusCheck.getTime() / 5000) * 5000
+        )
         return (
             <span className="secondary-text">
-                Server status was last checked {delayStatementSpan}
+                Server status was last checked at{" "}
+                {roundedDate.toLocaleTimeString()}
             </span>
         )
-    }
+    }, [isLoading, mostRecentStatusCheck])
 
-    const serverStatusDisplay = () => {
+    const serverStatusDisplay = useCallback(() => {
         if (isLoading()) {
             return (
                 <div className="server-status-container">
@@ -155,14 +137,12 @@ const ServerStatus = ({
                     ))}
             </div>
         )
-    }
+    }, [isLoading, serverInfoData])
 
-    const validationMessage = () => {
+    const validationMessage = useCallback(() => {
         if (serverInfoState !== LoadingState.Loaded) {
             return null
         }
-
-        const { timeDifferenceInSeconds } = mostRecentCheck
 
         return (
             <ValidationMessage
@@ -171,9 +151,9 @@ const ServerStatus = ({
                 visible={timeDifferenceInSeconds >= 120}
             />
         )
-    }
+    }, [serverInfoState, timeDifferenceInSeconds])
 
-    const display = () => {
+    const display = useCallback(() => {
         if (serverInfoState === LoadingState.Error) {
             return <p>Something went wrong. Please refresh the page.</p>
         }
@@ -185,7 +165,12 @@ const ServerStatus = ({
                 {serverStatusDisplay()}
             </div>
         )
-    }
+    }, [
+        serverInfoState,
+        lastCheckedMessage,
+        validationMessage,
+        serverStatusDisplay,
+    ])
 
     return <div>{display()}</div>
 }

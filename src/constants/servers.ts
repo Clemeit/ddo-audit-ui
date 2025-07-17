@@ -1,7 +1,6 @@
 const SERVER_NAMES = [
     "Argonnessen",
     "Cannith",
-    "Cormyr",
     "Ghallanda",
     "Khyber",
     "Orien",
@@ -9,6 +8,7 @@ const SERVER_NAMES = [
     "Thelanis",
     "Wayfinder",
     "Hardcore",
+    "Cormyr",
     "Shadowdale",
     "Thrane",
     "Moonsea",
@@ -28,6 +28,10 @@ const SERVERS_64_BITS_LOWER = SERVERS_64_BITS.map((server) =>
     server.toLowerCase()
 )
 
+const getServerIndex = (serverName: string): number => {
+    return SERVER_NAMES_LOWER.indexOf(serverName.toLowerCase())
+}
+
 export {
     SERVER_NAMES,
     SERVER_NAMES_LOWER,
@@ -35,4 +39,5 @@ export {
     VIP_SERVER_NAMES_LOWER,
     SERVERS_64_BITS,
     SERVERS_64_BITS_LOWER,
+    getServerIndex,
 }

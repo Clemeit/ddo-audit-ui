@@ -1,0 +1,32 @@
+.legend-container {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    user-select: none;
+
+    /* When hovering over any legend item, reduce opacity of all items */
+    &:has(.legend-item:hover) .legend-item {
+        opacity: 0.5;
+    }
+
+    /* Keep the hovered item at full opacity */
+    &:has(.legend-item:hover) .legend-item:hover {
+        opacity: 1;
+    }
+}
+
+.legend-item {
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+
+    .legend-icon {
+        width: 15px;
+        height: 15px;
+        border-radius: 50%;
+    }
+
+    &.excluded {
+        opacity: 0.5;
+        text-decoration: line-through;
+    }
+}
