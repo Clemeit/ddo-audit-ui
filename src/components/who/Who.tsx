@@ -191,11 +191,11 @@ const Who = () => {
             <ContentClusterGroup>
                 <ContentCluster title="Select a Server">
                     <NavCardCluster>
-                        {getServerSelectContent("32bit")}
+                        {getServerSelectContent("64bit")}
                     </NavCardCluster>
                     <hr />
                     <NavCardCluster>
-                        {getServerSelectContent("64bit")}
+                        {getServerSelectContent("32bit")}
                     </NavCardCluster>
                 </ContentCluster>
                 <ContentCluster title="See Also...">
