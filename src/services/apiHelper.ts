@@ -2,6 +2,10 @@ import { API_URL, API_VERSION } from "../constants/client.ts"
 import axios from "axios"
 import axiosRetry from "axios-retry"
 
+export interface ServiceRequestProps {
+    signal?: AbortSignal
+}
+
 // Configure axios to use retries
 axiosRetry(axios, {
     retries: 3,

@@ -1,4 +1,10 @@
-import React, { createContext, useState, useContext, useEffect } from "react"
+import React, {
+    createContext,
+    useState,
+    useContext,
+    useEffect,
+    useCallback,
+} from "react"
 import { Notification } from "../models/Client"
 import { v4 as uuid } from "uuid"
 
@@ -27,7 +33,7 @@ export const NotificationProvider = ({ children }: Props) => {
         }, lifetime)
     }
 
-    const createNotification = (notification: Notification) => {
+    const createNotification = useCallback((notification: Notification) => {
         const nofiticationId = notification.id || uuid()
         setNotifications((prev) => [
             ...prev,
@@ -36,12 +42,12 @@ export const NotificationProvider = ({ children }: Props) => {
         if (notification.lifetime) {
             timeoutNotification(nofiticationId, notification.lifetime)
         }
-    }
+    }, [])
 
-    const dismissNotification = (id?: string) => {
+    const dismissNotification = useCallback((id?: string) => {
         if (!id) return
         setNotifications((prev) => prev.filter((n) => n.id !== id))
-    }
+    }, [])
 
     useEffect(() => {
         // event listener for closing modal on escape key press

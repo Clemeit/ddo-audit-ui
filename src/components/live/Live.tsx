@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react"
+import React, { useMemo } from "react"
 import {
     ContentCluster,
     ContentClusterGroup,
@@ -10,26 +10,21 @@ import QuickInfo from "./QuickInfo.tsx"
 import usePollApi from "../../hooks/usePollApi.ts"
 import NavCardCluster from "../global/NavCardCluster.tsx"
 import { LoadingState } from "../../models/Api.ts"
-import {
-    PopulationDataPoint,
-    PopulationPointInTime,
-    ServerInfoApiDataModel,
-} from "../../models/Game.ts"
+import { ServerInfoApiDataModel } from "../../models/Game.ts"
 import {
     DataLoadingErrorPageMessage,
     LiveDataHaultedPageMessage,
 } from "../global/CommonMessages.tsx"
-import {
-    getPopulationData1Day,
-    getTotalPopulation1Month,
-    getTotalPopulation1Week,
-} from "../../services/gameService.ts"
 import { convertToNivoFormat } from "../../utils/nivoUtils.ts"
 import GenericLine from "../charts/GenericLine.tsx"
-import { NewsResponse } from "../../models/Service.ts"
-import { getNews } from "../../services/newsService.ts"
 import NewsCluster from "./NewsCluster.tsx"
 import { MakeASuggestionButton } from "../buttons/Buttons.tsx"
+import FAQSection from "./FAQSection.tsx"
+import { getDefaultServerName } from "../../utils/serverUtils.ts"
+import { useLiveData } from "./useLiveData.tsx"
+import { findMostPopulatedServer } from "../../utils/gameUtils.ts"
+import { useNotificationContext } from "../../contexts/NotificationContext.tsx"
+import logMessage from "../../utils/logUtils.ts"
 
 const Live = () => {
     const {
@@ -42,64 +37,54 @@ const Live = () => {
         lifespan: 1000 * 60 * 60 * 12, // 24 hours
     })
 
-    const [populationData24Hours, setPopulationData24Hours] = React.useState<
-        PopulationPointInTime[]
-    >([])
-    const [populationTotalsData1Week, setPopulationTotalsData1Week] =
-        React.useState<Record<string, PopulationDataPoint>>({})
-    const [populationTotalsData1Month, setPopulationTotalsData1Month] =
-        React.useState<Record<string, PopulationDataPoint>>({})
-    const [news, setNews] = useState<NewsResponse>(null)
+    const {
+        populationData24Hours,
+        populationTotalsData1Week,
+        populationTotalsData1Month,
+        news,
+        loading: dataLoading,
+        error: dataError,
+    } = useLiveData()
 
-    useEffect(() => {
-        getPopulationData1Day().then((response) => {
-            setPopulationData24Hours(response.data.data)
-        })
-        getTotalPopulation1Week().then((response) => {
-            setPopulationTotalsData1Week(response.data.data)
-        })
-        getTotalPopulation1Month().then((response) => {
-            setPopulationTotalsData1Month(response.data.data)
-        })
-        getNews().then((response) => {
-            setNews(response.data)
-        })
-    }, [])
+    const { createNotification } = useNotificationContext()
+
+    // Handle error notifications
+    React.useEffect(() => {
+        if (dataError) {
+            try {
+                logMessage("Error fetching data", "error", {
+                    metadata: { error: dataError },
+                })
+                createNotification({
+                    title: "Error fetching data",
+                    message:
+                        "There was an error fetching the data for this page. Please try again later.",
+                    subMessage: dataError,
+                    type: "error",
+                })
+            } catch {}
+        }
+    }, [dataError, createNotification])
 
     const nivoData = useMemo(
         () => convertToNivoFormat(populationData24Hours),
         [populationData24Hours]
     )
 
-    const mostPopulatedServerThisWeek = useMemo(() => {
-        let maxTotalPopulation = 0
-        let mostPopulatedServerName = ""
+    const mostPopulatedServerThisWeek = useMemo(
+        () => findMostPopulatedServer(populationTotalsData1Week),
+        [populationTotalsData1Week]
+    )
 
-        Object.entries(populationTotalsData1Week || {}).forEach(
-            ([serverName, serverData]) => {
-                if (serverData.character_count > maxTotalPopulation) {
-                    maxTotalPopulation = serverData.character_count
-                    mostPopulatedServerName = serverName
-                }
-            }
-        )
-        return mostPopulatedServerName
-    }, [populationTotalsData1Week])
+    const mostPopulatedServerThisMonth = useMemo(
+        () => findMostPopulatedServer(populationTotalsData1Month),
+        [populationTotalsData1Month]
+    )
 
-    const mostPopulatedServerThisMonth = useMemo(() => {
-        let maxTotalPopulation = 0
-        let mostPopulatedServerName = ""
-
-        Object.entries(populationTotalsData1Month || {}).forEach(
-            ([serverName, serverData]) => {
-                if (serverData.character_count > maxTotalPopulation) {
-                    maxTotalPopulation = serverData.character_count
-                    mostPopulatedServerName = serverName
-                }
-            }
-        )
-        return mostPopulatedServerName
-    }, [populationTotalsData1Month])
+    const defaultServerName = useMemo(
+        () => getDefaultServerName(serverInfoData),
+        [serverInfoData]
+    )
 
     const livePopulationTitle = useMemo(() => {
         if (!serverInfoData) return "Loading..."
@@ -131,6 +116,8 @@ const Live = () => {
         )
     }, [serverInfoData])
 
+    const hasAnyError = serverInfoState === LoadingState.Error || !!dataError
+
     return (
         <Page
             title="DDO Server Status"
@@ -139,9 +126,7 @@ const Live = () => {
             {serverInfoState === LoadingState.Haulted && (
                 <LiveDataHaultedPageMessage />
             )}
-            {serverInfoState === LoadingState.Error && (
-                <DataLoadingErrorPageMessage />
-            )}
+            {hasAnyError && <DataLoadingErrorPageMessage />}
             <ContentClusterGroup>
                 <ContentCluster title="Server Status">
                     <ServerStatus
@@ -151,7 +136,7 @@ const Live = () => {
                 </ContentCluster>
                 <ContentCluster title="Quick Info">
                     <QuickInfo
-                        serverInfoData={serverInfoData}
+                        defaultServerName={defaultServerName}
                         mostPopulatedServerThisWeek={
                             mostPopulatedServerThisWeek
                         }
@@ -160,17 +145,27 @@ const Live = () => {
                         }
                     />
                 </ContentCluster>
-                <ContentCluster title="Of Special Note">
+                <ContentCluster title="DDO Audit News">
                     <NewsCluster news={news} />
                     <br />
                     <MakeASuggestionButton type="secondary" />
                 </ContentCluster>
-                <ContentCluster title="Frequently Asked Questions"></ContentCluster>
+                <ContentCluster title="Frequently Asked Questions">
+                    <FAQSection
+                        defaultServerName={defaultServerName}
+                        mostPopulatedServerThisWeek={
+                            mostPopulatedServerThisWeek
+                        }
+                        mostPopulatedServerThisMonth={
+                            mostPopulatedServerThisMonth
+                        }
+                    />
+                </ContentCluster>
                 <ContentCluster title="Live Population">
                     <p>{livePopulationTitle}</p>
                     <GenericLine nivoData={nivoData} showLegend />
                 </ContentCluster>
-                <ContentCluster title="Historical Population">
+                <ContentCluster title="See Also...">
                     <NavCardCluster>
                         <NavigationCard type="servers" />
                         <NavigationCard type="trends" />

@@ -163,12 +163,15 @@ const About = () => {
                         is done using Postgres. The data collection layer was
                         rewritten - still using C# but this version if hopefully
                         a lot more robust. The entire project is containerized
-                        using Docker. The backend sourcecode is public, and you
+                        using Docker. The backend source code is public, and you
                         can view it at{" "}
                         <WebLink href="https://github.com/Clemeit/ddo-audit-service">
                             Clemeit/ddo-audit-service
                         </WebLink>
-                        .
+                        . The frontend source code is over at{" "}
+                        <WebLink href="https://github.com/Clemeit/ddo-audit-ui">
+                            Clemeit/ddo-audit-ui
+                        </WebLink>
                     </p>
                     <p>
                         DDO Audit has been a great learning opportunity, and I'm

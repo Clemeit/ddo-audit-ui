@@ -1,10 +1,10 @@
-import axios from "axios"
 import { NewsResponse } from "../models/Service.ts"
+import { getRequest } from "./apiHelper.ts"
 
-const API_URL = "https://api.hcnxsryjficudzazjxty.com/v1/service/news"
+const SERVICE_ENDPOINT = "service/news"
 
-function getNews(): Promise<Record<string, NewsResponse>> {
-    return axios.get(API_URL)
+function getNews(signal?: AbortSignal): Promise<NewsResponse> {
+    return getRequest(SERVICE_ENDPOINT, { signal })
 }
 
 export { getNews }

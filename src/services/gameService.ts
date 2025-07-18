@@ -1,59 +1,71 @@
-import axios from "axios"
 import {
-    PopulationDataPoint,
     PopulationEndpointResponse,
+    PopulationTotalsEndpointResponse,
 } from "../models/Game.ts"
+import { getRequest, ServiceRequestProps } from "./apiHelper.ts"
 
-const API_URL = "https://api.hcnxsryjficudzazjxty.com/v1/game"
+const GAME_ENDPOINT = "game"
 
-function getServerInfo() {
-    return axios.get(`${API_URL}/server-info`)
+function getServerInfo({ signal }: ServiceRequestProps) {
+    return getRequest(`${GAME_ENDPOINT}/server-info`, { signal })
 }
 
-function getServerInfoByServerName(serverName: string) {
-    return axios.get(`${API_URL}/server-info/${serverName}`)
+function getServerInfoByServerName(serverName: string, signal?: AbortSignal) {
+    return getRequest(`${GAME_ENDPOINT}/server-info/${serverName}`, { signal })
 }
 
-// TODO: These return types need to be defined. This is disgusting.
-function getPopulationData1Day(): Promise<
-    Record<string, PopulationEndpointResponse>
-> {
-    return axios.get(`${API_URL}/population/day`)
+function getPopulationData1Day(
+    signal?: AbortSignal
+): Promise<PopulationEndpointResponse> {
+    return getRequest<PopulationEndpointResponse>(
+        `${GAME_ENDPOINT}/population/day`,
+        { signal }
+    )
 }
 
-// TODO: These return types need to be defined. This is disgusting.
-function getPopulationData1Week(): Promise<
-    Record<string, PopulationEndpointResponse>
-> {
-    return axios.get(`${API_URL}/population/week`)
+function getPopulationData1Week(
+    signal?: AbortSignal
+): Promise<PopulationEndpointResponse> {
+    return getRequest<PopulationEndpointResponse>(
+        `${GAME_ENDPOINT}/population/week`,
+        { signal }
+    )
 }
 
-// TODO: These return types need to be defined. This is disgusting.
-function getPopulationData1Month(): Promise<
-    Record<string, PopulationEndpointResponse>
-> {
-    return axios.get(`${API_URL}/population/month`)
+function getPopulationData1Month(
+    signal?: AbortSignal
+): Promise<PopulationEndpointResponse> {
+    return getRequest<PopulationEndpointResponse>(
+        `${GAME_ENDPOINT}/population/month`,
+        { signal }
+    )
 }
 
-// TODO: These return types need to be defined. This is disgusting.
-function getTotalPopulation1Day(): Promise<
-    Record<string, Record<string, Record<string, PopulationDataPoint>>>
-> {
-    return axios.get(`${API_URL}/population/totals/day`)
+function getTotalPopulation1Day(
+    signal?: AbortSignal
+): Promise<PopulationTotalsEndpointResponse> {
+    return getRequest<PopulationTotalsEndpointResponse>(
+        `${GAME_ENDPOINT}/population/totals/day`,
+        { signal }
+    )
 }
 
-// TODO: These return types need to be defined. This is disgusting.
-function getTotalPopulation1Week(): Promise<
-    Record<string, Record<string, Record<string, PopulationDataPoint>>>
-> {
-    return axios.get(`${API_URL}/population/totals/week`)
+function getTotalPopulation1Week(
+    signal?: AbortSignal
+): Promise<PopulationTotalsEndpointResponse> {
+    return getRequest<PopulationTotalsEndpointResponse>(
+        `${GAME_ENDPOINT}/population/totals/week`,
+        { signal }
+    )
 }
 
-// TODO: These return types need to be defined. This is disgusting.
-function getTotalPopulation1Month(): Promise<
-    Record<string, Record<string, Record<string, PopulationDataPoint>>>
-> {
-    return axios.get(`${API_URL}/population/totals/month`)
+function getTotalPopulation1Month(
+    signal?: AbortSignal
+): Promise<PopulationTotalsEndpointResponse> {
+    return getRequest<PopulationTotalsEndpointResponse>(
+        `${GAME_ENDPOINT}/population/totals/month`,
+        { signal }
+    )
 }
 
 export {

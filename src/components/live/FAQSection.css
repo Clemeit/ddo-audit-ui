@@ -1,0 +1,8 @@
+.faq-question {
+    color: var(--orange-text);
+    margin-bottom: 0px;
+}
+
+.faq-answer-text {
+    margin-top: 5px;
+}

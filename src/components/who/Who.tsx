@@ -201,6 +201,7 @@ const Who = () => {
                 <ContentCluster title="See Also...">
                     <NavCardCluster>
                         <NavigationCard type="friends" />
+                        <NavigationCard type="ignores" />
                     </NavCardCluster>
                 </ContentCluster>
             </ContentClusterGroup>

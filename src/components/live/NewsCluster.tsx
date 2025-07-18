@@ -1,8 +1,8 @@
-import { NewsResponse, NewsItem } from "../../models/Service.ts"
+import { NewsItem } from "../../models/Service.ts"
 import { dateToLongString } from "../../utils/dateUtils.ts"
 
 interface Props {
-    news?: NewsResponse
+    news?: NewsItem[]
 }
 
 const NewsCluster = ({ news }: Props) => {
@@ -10,13 +10,13 @@ const NewsCluster = ({ news }: Props) => {
         return <p>Loading...</p>
     }
 
-    if (!news.data?.length) {
-        return <p>No news available</p>
+    if (!news.length) {
+        return <p>There's nothing going on here!</p>
     }
 
     return (
         <div role="feed" aria-label="News updates">
-            {news.data
+            {news
                 .sort(
                     (a, b) =>
                         new Date(b.date).getTime() - new Date(a.date).getTime()

@@ -37,10 +37,17 @@ interface PopulationEndpointResponse {
     data: PopulationPointInTime[]
 }
 
+interface PopulationTotalsEndpointResponse {
+    data: {
+        [serverName: string]: PopulationDataPoint
+    }
+}
+
 export type {
     ServerInfo,
     ServerInfoApiDataModel,
     PopulationDataPoint,
     PopulationPointInTime,
     PopulationEndpointResponse,
+    PopulationTotalsEndpointResponse,
 }

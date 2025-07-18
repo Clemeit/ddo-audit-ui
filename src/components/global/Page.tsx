@@ -32,7 +32,7 @@ const Page = ({
             {!isOnline && (
                 <div
                     className="banner-message"
-                    style={{ backgroundColor: "#0055aa" }}
+                    style={{ backgroundColor: "#aa0000ff" }}
                 >
                     You're offline
                 </div>

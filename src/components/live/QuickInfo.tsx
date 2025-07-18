@@ -3,18 +3,18 @@ import { getDefaultServerName } from "../../utils/serverUtils.ts"
 import ServerLink from "../global/ServerLink.tsx"
 
 interface Props {
-    serverInfoData: ServerInfoApiDataModel
+    defaultServerName: string
     mostPopulatedServerThisWeek: string
     mostPopulatedServerThisMonth: string
 }
 
 const QuickInfo = ({
-    serverInfoData,
+    defaultServerName,
     mostPopulatedServerThisWeek,
     mostPopulatedServerThisMonth,
 }: Props) => {
     if (
-        !serverInfoData ||
+        !defaultServerName ||
         !mostPopulatedServerThisWeek ||
         !mostPopulatedServerThisMonth
     ) {
@@ -52,13 +52,13 @@ const QuickInfo = ({
         <ul>
             <li>
                 The default server is{" "}
-                <ServerLink serverName={getDefaultServerName(serverInfoData)} />
+                <ServerLink serverName={defaultServerName} />
             </li>
             <li>{getMostPopulatedStatement()}</li>
             <li>
                 In the last quarter, we've cataloged{" "}
-                <span className="blue-text">123,456</span> unique characters and{" "}
-                <span className="orange-text">12,345</span> unique guilds
+                <span className="blue-text">----</span> unique characters and{" "}
+                <span className="orange-text">----</span> unique guilds
             </li>
         </ul>
     )
