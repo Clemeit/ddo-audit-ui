@@ -14,3 +14,9 @@
     background-color: var(--highlight);
     filter: drop-shadow(2px 2px 2px var(--shadow));
 }
+
+@media (max-width: 768px) {
+    .raid-card {
+        padding: 5px;
+    }
+}

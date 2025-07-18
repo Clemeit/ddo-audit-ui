@@ -33,7 +33,6 @@ function convertToNivoFormat(data: PopulationPointInTime[]): NivoSeries[] {
             })
         }
     })
-    console.log("Converted Nivo Data:", series)
     return series
 }
 
