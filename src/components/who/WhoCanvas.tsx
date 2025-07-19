@@ -10,6 +10,7 @@ import {
     GROUP_COLORS,
     MAXIMUM_CHARACTER_COUNT,
     MINIMUM_CHARACTER_COUNT,
+    WHO_COLORS,
 } from "../../constants/whoPanel.ts"
 import LfmSprite from "../../assets/png/lfm_sprite_2.png"
 import useRenderWhoPanel from "../../hooks/useRenderWhoPanel.ts"
@@ -27,14 +28,16 @@ interface Props {
     curatedCharacters: Character[]
     serverName: string
     areResultsTruncated: boolean
+    isLoading: boolean
 }
 
-const WhoCanvas: React.FC<Props> = ({
+const WhoCanvas = ({
     allCharacters = [],
     curatedCharacters = [],
     serverName = "",
     areResultsTruncated = false,
-}) => {
+    isLoading,
+}: Props) => {
     const {
         panelWidth,
         isDynamicWidth,
@@ -201,8 +204,8 @@ const WhoCanvas: React.FC<Props> = ({
         let charactersRendered = false
         let truncatedMessageRendered = false
         let numberOfCharactersRendered = 0
-
         const shouldRenderWhoPanel =
+            isLoading ||
             previousState.onlineCharacterCount !== allCharacters.length ||
             previousState.anonymousCharacterCount !== anonymousCharacterCount ||
             previousState.curatedCharacters.length !==
@@ -221,6 +224,7 @@ const WhoCanvas: React.FC<Props> = ({
                 characters: allCharacters,
                 displayedCharacters: curatedCharacters,
                 panelHeight,
+                isLoading,
             })
             panelRendered = true
         }

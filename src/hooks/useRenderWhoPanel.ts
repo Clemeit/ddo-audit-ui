@@ -17,6 +17,7 @@ interface RenderWhoPanelProps {
     characters?: Character[]
     displayedCharacters?: Character[]
     panelHeight: number
+    isLoading: boolean
 }
 
 const useRenderWhoPanel = ({ sprite, context }: Props) => {
@@ -53,13 +54,12 @@ const useRenderWhoPanel = ({ sprite, context }: Props) => {
     )
 
     const renderWhoPanel = useCallback(
-        (
-            {
-                characters,
-                displayedCharacters,
-                panelHeight,
-            }: RenderWhoPanelProps = { panelHeight: 0 }
-        ) => {
+        ({
+            characters,
+            displayedCharacters,
+            panelHeight = 0,
+            isLoading = false,
+        }: RenderWhoPanelProps) => {
             if (!context || !sprite) return
             if (panelHeight === 0) return
             context.imageSmoothingEnabled = false
@@ -417,6 +417,17 @@ const useRenderWhoPanel = ({ sprite, context }: Props) => {
                 SPRITE_MAP.LFM_SORT_ICON.width,
                 SPRITE_MAP.LFM_SORT_ICON.height
             )
+
+            if (isLoading) {
+                if (context) {
+                    context.fillStyle = WHO_COLORS.BLACK_BACKGROUND
+                    context.fillRect(50, 330, panelWidth - 100, 40)
+                    context.fillStyle = WHO_COLORS.SECONDARY_TEXT
+                    context.font = fonts.MISC_INFO_MESSAGE
+                    context.textAlign = "center"
+                    context.fillText(`Content loading...`, panelWidth / 2, 350)
+                }
+            }
         },
         [
             sprite,

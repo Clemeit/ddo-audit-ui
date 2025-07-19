@@ -1,6 +1,5 @@
-import { ServerInfoApiDataModel } from "../../models/Game.ts"
-import { getDefaultServerName } from "../../utils/serverUtils.ts"
 import ServerLink from "../global/ServerLink.tsx"
+import QuickInfoSkeleton from "./QuickInfoSkeleton.tsx"
 
 interface Props {
     defaultServerName: string
@@ -18,15 +17,7 @@ const QuickInfo = ({
         !mostPopulatedServerThisWeek ||
         !mostPopulatedServerThisMonth
     ) {
-        // Additional padding reduces CLS on eventual load
-        return (
-            <p>
-                Loading...
-                <br />
-                <br />
-                <br />
-            </p>
-        )
+        return <QuickInfoSkeleton />
     }
 
     const getMostPopulatedStatement = () => {

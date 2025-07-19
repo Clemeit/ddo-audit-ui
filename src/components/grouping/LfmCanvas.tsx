@@ -33,6 +33,7 @@ interface Props {
     lfms: Lfm[]
     raidView: boolean
     excludedLfmCount?: number
+    isLoading: boolean
 }
 
 interface SelectedLfmInfo {
@@ -46,6 +47,7 @@ const LfmCanvas: React.FC<Props> = ({
     lfms,
     raidView,
     excludedLfmCount = 0,
+    isLoading = false,
 }) => {
     const {
         panelWidth,
@@ -404,7 +406,7 @@ const LfmCanvas: React.FC<Props> = ({
             if (context) {
                 context.clearRect(0, 0, panelWidth, panelHeight)
                 context.fillStyle = LFM_COLORS.SECONDARY_TEXT
-                context.font = fonts.GROUPS_HIDDEN_MESSAGE
+                context.font = fonts.MISC_INFO_MESSAGE
                 context.textAlign = "center"
                 context.fillText(
                     `${excludedLfmCount} ${excludedLfmCount !== 1 ? "groups were" : "group was"} hidden by your filter settings`,
@@ -412,6 +414,17 @@ const LfmCanvas: React.FC<Props> = ({
                     150
                 )
                 wasFilterMessageRendered = true
+            }
+        }
+
+        if (isLoading) {
+            const context = lfmCanvasRef.current?.getContext("2d")
+            if (context) {
+                context.clearRect(0, 0, panelWidth, panelHeight)
+                context.fillStyle = LFM_COLORS.SECONDARY_TEXT
+                context.font = fonts.MISC_INFO_MESSAGE
+                context.textAlign = "center"
+                context.fillText(`Content loading...`, panelWidth / 2, 150)
             }
         }
 
@@ -519,6 +532,7 @@ const LfmCanvas: React.FC<Props> = ({
         showCharacterGuildNames,
         showLfmPostedTime,
         fontSize,
+        isLoading,
     ])
 
     return (

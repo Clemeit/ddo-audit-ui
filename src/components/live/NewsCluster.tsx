@@ -7,11 +7,11 @@ interface Props {
 
 const NewsCluster = ({ news }: Props) => {
     if (news == null) {
-        return <p>Loading...</p>
+        return <p style={{ marginBottom: 0 }}>Loading...</p>
     }
 
     if (!news.length) {
-        return <p>There's nothing going on here!</p>
+        return <p style={{ marginBottom: 0 }}>There's nothing going on here!</p>
     }
 
     return (

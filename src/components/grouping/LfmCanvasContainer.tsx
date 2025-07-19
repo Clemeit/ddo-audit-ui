@@ -316,6 +316,7 @@ const GroupingContainer = ({
                         lfms={filteredLfms.hydratedLfms || []}
                         excludedLfmCount={filteredLfms.excludedLfmCount}
                         raidView={raidView}
+                        isLoading={lfmState !== LoadingState.Loaded}
                     />
                 </>
             )}

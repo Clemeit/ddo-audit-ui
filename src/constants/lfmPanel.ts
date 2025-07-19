@@ -51,7 +51,7 @@ const FONTS = (baseFontSize: number = DEFAULT_BASE_FONT_SIZE) => ({
     LEVEL_RANGE: `${baseFontSize + 2}px Arial`,
     MAIN_HEADER: "14px 'Trebuchet MS'",
     SORT_HEADER: "12px 'Trebuchet MS'",
-    GROUPS_HIDDEN_MESSAGE: `italic ${baseFontSize + 6}px 'Trebuchet MS`,
+    MISC_INFO_MESSAGE: `italic ${baseFontSize + 6}px 'Trebuchet MS`,
 })
 
 const LFM_COLORS = {

@@ -24,6 +24,7 @@ import { LiveDataHaultedPageMessage } from "../global/CommonMessages.tsx"
 import NavigationCard from "../global/NavigationCard.tsx"
 import useGetRegisteredCharacters from "../../hooks/useGetRegisteredCharacters.ts"
 import useGetFriends from "../../hooks/useGetFriends.ts"
+import Skeleton from "../global/Skeleton.tsx"
 
 const Who = () => {
     const { registeredCharacters } = useGetRegisteredCharacters()
@@ -141,7 +142,7 @@ const Who = () => {
                             key={serverName}
                             destination={`/who/${serverName}`}
                             title={toSentenceCase(serverName)}
-                            content="Loading data..."
+                            content={<Skeleton width="120px" />}
                             icon={<Pending className="shrinkable-icon" />}
                         />
                     ))

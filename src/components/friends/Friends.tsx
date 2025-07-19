@@ -108,7 +108,7 @@ const Friends = () => {
 
     const getLastReloadString = () => {
         if (friends.length === 0) {
-            return "---"
+            return ""
         }
         const prettyString = convertMillisecondsToPrettyString(
             millisSinceLastReload,

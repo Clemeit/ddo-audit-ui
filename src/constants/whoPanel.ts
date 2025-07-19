@@ -60,6 +60,7 @@ const FONTS = (baseFontSize: number = DEFAULT_BASE_FONT_SIZE) => ({
     CHARACTER_GUILD_NAME: `${baseFontSize + 2}px 'Trebuchet MS'`,
     CHARACTER_LOCATION: `${baseFontSize - 2}px 'Trebuchet MS'`,
     MEMBER_CLASS_LEVEL: "14px 'Trebuchet MS'",
+    MISC_INFO_MESSAGE: `italic 20px 'Trebuchet MS`,
 })
 
 const WHO_COLORS = {
@@ -76,6 +77,7 @@ const WHO_COLORS = {
     REGISTERED_GRADIENT_EDGE: "#27363bff",
     CHARACTER_BORDER: "#898E6F",
     CHARACTER_TEXT: "#EEEDD1",
+    SECONDARY_TEXT: "#B6B193",
 }
 
 export {

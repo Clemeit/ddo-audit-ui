@@ -335,6 +335,7 @@ const WhoContainer = ({
                             curatedCharacters.areResultsTruncated
                         }
                         serverName={serverName}
+                        isLoading={characterState !== LoadingState.Loaded}
                     />
                 </>
             ) : (

@@ -1,4 +1,4 @@
-import React, { useCallback } from "react"
+import React, { useCallback, useEffect, useState } from "react"
 import Page from "../global/Page.tsx"
 import {
     ContentCluster,
@@ -27,6 +27,7 @@ import {
 } from "../../constants/servers.ts"
 import ColoredText from "../global/ColoredText.tsx"
 import "./Grouping.css"
+import Skeleton from "../global/Skeleton.tsx"
 
 const Grouping = () => {
     const { data: lfmData, state: lfmState } = usePollApi<LfmApiModel>({
@@ -40,9 +41,31 @@ const Grouping = () => {
             interval: 10000,
             lifespan: 1000 * 60 * 60 * 12, // 12 hours
         })
+    const [hasAllDataLoadedOnce, setHasAllDataLoadedOnce] =
+        useState<boolean>(false)
+
+    useEffect(() => {
+        if (
+            lfmState === LoadingState.Loaded &&
+            serverInfoState === LoadingState.Loaded
+        ) {
+            setHasAllDataLoadedOnce(true)
+        }
+    }, [lfmState, serverInfoState])
+
     const questContext = useQuestContext()
 
-    const cardDescription = (serverData?: { number: Lfm }) => {
+    const isInitialLoading = () => {
+        return (
+            !hasAllDataLoadedOnce &&
+            (serverInfoState === LoadingState.Initial ||
+                serverInfoState === LoadingState.Loading ||
+                lfmState === LoadingState.Initial ||
+                lfmState === LoadingState.Loading)
+        )
+    }
+
+    const cardDescription = (serverData?: { [key: number]: Lfm }) => {
         const serverLfms = Object.values(serverData || {})
         const lfmCount = Object.keys(serverLfms).length
         const raidCount = Object.values(serverLfms).filter(
@@ -115,41 +138,16 @@ const Grouping = () => {
             }
         )
         return currentRaids
-    }, [lfmData])
+    }, [lfmData, questContext])
 
     const getServerSelectContent = (type: "32bit" | "64bit") => {
-        if (
-            serverInfoState === LoadingState.Initial ||
-            serverInfoState === LoadingState.Loading
-        ) {
-            return SERVER_NAMES_LOWER.filter((serverName) => {
-                if (type === "32bit") {
-                    return SERVERS_64_BITS_LOWER.includes(serverName) === false
-                } else if (type === "64bit") {
-                    return SERVERS_64_BITS_LOWER.includes(serverName) === true
-                }
-                return true
-            })
-                .sort(([serverNameA], [serverNameB]) =>
-                    serverNameA.localeCompare(serverNameB)
-                )
-                .map((serverName) => (
-                    <ServerNavigationCard
-                        key={serverName}
-                        destination={`/grouping/${serverName}`}
-                        title={toSentenceCase(serverName)}
-                        content="Loading data..."
-                        icon={<Pending className="shrinkable-icon" />}
-                        badge={cardBadge(serverName)}
-                    />
-                ))
-        }
+        // Show skeleton loaders only during initial load
+        if (isInitialLoading()) {
+            const serverList = serverInfoData
+                ? Object.keys(serverInfoData)
+                : SERVER_NAMES_LOWER
 
-        if (
-            lfmState === LoadingState.Initial ||
-            lfmState === LoadingState.Loading
-        ) {
-            return Object.keys(serverInfoData || {})
+            return serverList
                 .filter((serverName) => {
                     if (type === "32bit") {
                         return (
@@ -162,7 +160,7 @@ const Grouping = () => {
                     }
                     return true
                 })
-                .sort(([serverNameA], [serverNameB]) =>
+                .sort((serverNameA, serverNameB) =>
                     serverNameA.localeCompare(serverNameB)
                 )
                 .map((serverName) => (
@@ -170,8 +168,18 @@ const Grouping = () => {
                         key={serverName}
                         destination={`/grouping/${serverName}`}
                         title={toSentenceCase(serverName)}
-                        content="Loading data..."
-                        icon={cardIcon(serverName)}
+                        content={
+                            <Skeleton
+                                width={`${120 + (serverName.length % 3) * 20}px`}
+                            />
+                        }
+                        icon={
+                            serverInfoData ? (
+                                cardIcon(serverName)
+                            ) : (
+                                <Pending className="shrinkable-icon" />
+                            )
+                        }
                         badge={cardBadge(serverName)}
                     />
                 ))
@@ -187,8 +195,8 @@ const Grouping = () => {
                 }
                 return true
             })
-            .sort(([server_name_a], [server_name_b]) =>
-                server_name_a.localeCompare(server_name_b)
+            .sort(([serverNameA], [serverNameB]) =>
+                serverNameA.localeCompare(serverNameB)
             )
             .map(([serverName, serverData]) => (
                 <ServerNavigationCard
@@ -203,15 +211,8 @@ const Grouping = () => {
     }
 
     const getCurrentRaidsContent = useCallback(() => {
-        if (
-            serverInfoState === LoadingState.Initial ||
-            serverInfoState === LoadingState.Loading ||
-            lfmState === LoadingState.Initial ||
-            lfmState === LoadingState.Loading
-        ) {
-            return (
-                <ColoredText color="secondary">Loading content...</ColoredText>
-            )
+        if (isInitialLoading()) {
+            return <ColoredText color="secondary">Loading raids!</ColoredText>
         }
 
         if (Object.entries(getCurrentRaids() || {}).length === 0) {
@@ -225,13 +226,9 @@ const Grouping = () => {
         return (
             <Stack direction="column" gap="20px">
                 {Object.entries(getCurrentRaids() || {}).map(
-                    ([serverName, lfms]: [string, { [key: number]: Lfm }]) => (
+                    ([serverName, lfms]: [string, Lfm[]]) => (
                         <div className="raid-card" key={serverName}>
-                            <Link
-                                key={serverName}
-                                to={`/grouping/${serverName}`}
-                                noDecoration
-                            >
+                            <Link to={`/grouping/${serverName}`} noDecoration>
                                 <h3
                                     style={{
                                         marginTop: "0px",
@@ -242,8 +239,9 @@ const Grouping = () => {
                                 </h3>
                                 <GroupingCanvas
                                     serverName={serverName}
-                                    lfms={Object.values(lfms)}
+                                    lfms={lfms}
                                     raidView
+                                    isLoading={false}
                                 />
                             </Link>
                         </div>
@@ -251,7 +249,7 @@ const Grouping = () => {
                 )}
             </Stack>
         )
-    }, [serverInfoState, lfmData, getCurrentRaids])
+    }, [serverInfoState, lfmData, getCurrentRaids, hasAllDataLoadedOnce])
 
     return (
         <Page
@@ -275,12 +273,22 @@ const Grouping = () => {
                     {getCurrentRaidsContent()}
                 </ContentCluster>
                 <ContentCluster title="Notifications">
-                    <p>
-                        You currently have 0 notification rules set up.
-                        Configure rules on the{" "}
-                        <Link to="/notifications">notification settings</Link>{" "}
-                        page.
-                    </p>
+                    <Stack direction="row" gap="10px" align="center">
+                        <p
+                            style={{
+                                textDecoration: "line-through",
+                                margin: 0,
+                            }}
+                        >
+                            You currently have 0 notification rules set up.
+                            Configure rules on the{" "}
+                            <Link to="/notifications">
+                                notification settings
+                            </Link>{" "}
+                            page.
+                        </p>
+                        <Badge text="Soon" type="soon" />
+                    </Stack>
                 </ContentCluster>
                 <ContentCluster title="See Also...">
                     <NavCardCluster>
