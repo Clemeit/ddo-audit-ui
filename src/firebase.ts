@@ -17,36 +17,43 @@ const firebaseConfig = {
     measurementId: "G-L54PGXRRZV",
 }
 
+function initializeMessaging(app: any) {
+    const messaging = getMessaging(app)
+    getToken(messaging, {
+        vapidKey: process.env.FIREBASE_VAPID_KEY || "",
+    })
+        .then((currentToken) => {
+            if (currentToken) {
+                // Send the token to your server and update the UI if necessary
+                // ...
+                console.log("currentToken: ", currentToken)
+            } else {
+                // Show permission request UI
+                console.log(
+                    "No registration token available. Request permission to generate one."
+                )
+                // ...
+            }
+        })
+        .catch((err) => {
+            console.log("An error occurred while retrieving token. ", err)
+            // ...
+        })
+
+    onMessage(messaging, (payload) => {
+        console.log("Message received. ", payload)
+    })
+}
+
 function init() {
     // Initialize Firebase
     try {
         const app = initializeApp(firebaseConfig)
         const analytics = getAnalytics(app)
-        const messaging = getMessaging(app)
-        getToken(messaging, {
-            vapidKey: process.env.FIREBASE_VAPID_KEY || "",
-        })
-            .then((currentToken) => {
-                if (currentToken) {
-                    // Send the token to your server and update the UI if necessary
-                    // ...
-                    console.log("currentToken: ", currentToken)
-                } else {
-                    // Show permission request UI
-                    console.log(
-                        "No registration token available. Request permission to generate one."
-                    )
-                    // ...
-                }
-            })
-            .catch((err) => {
-                console.log("An error occurred while retrieving token. ", err)
-                // ...
-            })
-        if (messaging != null) {
-            onMessage(messaging, (payload) => {
-                console.log("Message received. ", payload)
-            })
+
+        // Only initialize messaging if user has granted permission
+        if ("Notification" in window && Notification.permission === "granted") {
+            initializeMessaging(app)
         }
     } catch (err) {
         console.log("Firebase initialize error: ", err)
