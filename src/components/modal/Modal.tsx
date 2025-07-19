@@ -10,6 +10,7 @@ interface Props {
     centeredContent?: boolean
     maxWidth?: string
     fullScreenOnMobile?: boolean
+    freezeBodyScroll?: boolean
 }
 const Modal = ({
     children,
@@ -18,13 +19,14 @@ const Modal = ({
     centeredContent = false,
     maxWidth = "400px",
     fullScreenOnMobile = false,
+    freezeBodyScroll = false,
 }: Props) => {
     const modalRef = useRef<HTMLDivElement>(null)
 
     useEffect(() => {
         // Prevent body scroll when modal is open
         const originalOverflow = document.body.style.overflow
-        document.body.style.overflow = "hidden"
+        if (freezeBodyScroll) document.body.style.overflow = "hidden"
 
         // Ensure modal gets focus after render
         if (modalRef.current) {
@@ -32,7 +34,8 @@ const Modal = ({
         }
 
         return () => {
-            document.body.style.overflow = originalOverflow
+            if (freezeBodyScroll)
+                document.body.style.overflow = originalOverflow
         }
     }, [])
 

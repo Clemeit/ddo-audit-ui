@@ -16,8 +16,16 @@
     justify-content: center;
     font-size: 1rem;
 
+    user-select: none;
+
     &.full-width {
         width: 100% !important;
+    }
+
+    &.disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        pointer-events: none;
     }
 }
 

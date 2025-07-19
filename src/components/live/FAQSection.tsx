@@ -31,9 +31,9 @@ const FAQSection = ({
     const allFaqData: FAQItem[] = [
         {
             question: "What is DDO's most populated server?",
-            answer: `${getMostPopulatedServerString()} This changes from time to time based on the current default server.`,
+            answer: `${getMostPopulatedServerString()} This fluctuates based on the current default server.`,
             fallbackAnswer:
-                "Server population varies based on time of day and current events. Check our Live page for real-time server population data.",
+                "Server population varies based on time of day and other factors. Check our Live page for real-time server population data.",
             dependencies: [
                 mostPopulatedServerThisWeek,
                 mostPopulatedServerThisMonth,
@@ -62,7 +62,7 @@ const FAQSection = ({
             answer: 'Server status can be checked on our "Live" page. Server status is checked every few seconds and is updated in real-time.',
         },
         {
-            question: "Is DDO still active in 2025?",
+            question: `Is DDO still active in ${new Date().getFullYear()}?`,
             answer: "Yes, DDO is still quite active and receives periodic updates and content releases.",
         },
     ]

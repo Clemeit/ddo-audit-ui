@@ -16,6 +16,7 @@
     flex-direction: row;
     align-items: center;
     overflow-x: hidden;
+    overflow-y: hidden;
     filter: drop-shadow(0 0 5px var(--shadow));
     gap: 10px;
     transition:

@@ -33,6 +33,8 @@ const Feedback = lazy(() => import("./components/feedback/Feedback.tsx"))
 const Friends = lazy(() => import("./components/friends/Friends.tsx"))
 const About = lazy(() => import("./components/about/About.tsx"))
 const Ignores = lazy(() => import("./components/ignores/Ignores.tsx"))
+const Trends = lazy(() => import("./components/trends/Trends.tsx"))
+const Quests = lazy(() => import("./components/quests/Quests.tsx"))
 
 // Providers
 import {
@@ -100,6 +102,8 @@ export default createBrowserRouter(
                     </SocialDataProvider>
                 }
             />
+            <Route path="/trends" element={<Trends />} />
+            <Route path="/quests" element={<Quests />} />
             <Route path="/about" element={<About />} />
             <Route path="*" element={<NotFound />} />
         </Route>

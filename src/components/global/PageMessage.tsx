@@ -4,6 +4,7 @@ import { ReactComponent as InfoSVG } from "../../assets/svg/info.svg"
 import { ReactComponent as ErrorSVG } from "../../assets/svg/x.svg"
 import { ReactComponent as WarningSVG } from "../../assets/svg/warning.svg"
 import { ReactComponent as SuccessSVG } from "../../assets/svg/checkmark.svg"
+import { ReactComponent as CloseSVG } from "../../assets/svg/close.svg"
 import Stack from "../global/Stack.tsx"
 
 interface Props {
@@ -12,6 +13,7 @@ interface Props {
     message?: React.ReactNode
     width?: string
     maxWidth?: string
+    onDismiss?: () => void
 }
 
 const PageMessage = ({
@@ -20,6 +22,7 @@ const PageMessage = ({
     message = <span>Message</span>,
     width = "unset",
     maxWidth = "unset",
+    onDismiss,
 }: Props) => {
     return (
         <div
@@ -30,6 +33,17 @@ const PageMessage = ({
                 maxWidth,
             }}
         >
+            {onDismiss && (
+                <div
+                    className="page-message-close"
+                    onClick={onDismiss}
+                    role="button"
+                    tabIndex={0}
+                    aria-label="Close message"
+                >
+                    <CloseSVG />
+                </div>
+            )}
             <Stack direction="column" gap="10px">
                 <Stack direction="row" align="center">
                     {type === "info" && (

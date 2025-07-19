@@ -88,6 +88,7 @@ interface Props {
     onClick?: () => void
     fullWidth?: boolean
     externalLink?: string
+    disabled?: boolean
 }
 
 const NavigationCard = ({
@@ -97,6 +98,7 @@ const NavigationCard = ({
     onClick,
     fullWidth,
     externalLink,
+    disabled,
 }: Props) => {
     const handleClick = () => {
         logMessage("Navigation card clicked", "info", {
@@ -106,6 +108,9 @@ const NavigationCard = ({
                 type,
             },
         })
+        if (disabled) {
+            return
+        }
         onClick?.()
     }
 
@@ -132,6 +137,7 @@ const NavigationCard = ({
             <button
                 onClick={handleClick}
                 className={`navigation-card ${fullWidth ? "full-width" : ""}`}
+                disabled={disabled}
             >
                 <span className="navigation-card-title">
                     {typeToIconMap[type]}
@@ -148,7 +154,7 @@ const NavigationCard = ({
     return (
         <Link
             to={`/${type}`}
-            className={`navigation-card ${fullWidth ? "full-width" : ""}`}
+            className={`navigation-card ${fullWidth ? "full-width" : ""} ${disabled ? "disabled" : ""}`}
         >
             <span className="navigation-card-title">
                 {typeToIconMap[type]}

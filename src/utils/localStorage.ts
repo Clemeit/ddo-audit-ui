@@ -10,6 +10,37 @@ const FRIENDS_KEY = "friends"
 const IGNORES_KEY = "ignores"
 const CACHED_AREAS_KEY = "cached-areas"
 const CACHED_QUEST_KEY = "cached-quests"
+const BOOLEAN_FLAGS_KEY = "boolean-flags"
+
+export const BOOLEAN_FLAGS = {
+    hideAlphaRelease: "hide-alpha-release",
+}
+
+function getBooleanFlags(): Record<string, boolean> {
+    const flags = getValue<Record<string, boolean>>(BOOLEAN_FLAGS_KEY)
+    return flags || {}
+}
+
+function setBooleanFlag(key: string, value: boolean): void {
+    const flags = getBooleanFlags()
+    flags[key] = value
+    setValue(BOOLEAN_FLAGS_KEY, flags)
+}
+
+function removeBooleanFlag(key: string): void {
+    const flags = getBooleanFlags()
+    delete flags[key]
+    setValue(BOOLEAN_FLAGS_KEY, flags)
+}
+
+function getBooleanFlag(key: string): boolean | null {
+    const flags = getBooleanFlags()
+    return flags[key] ?? null
+}
+
+function clearBooleanFlags(): void {
+    setValue(BOOLEAN_FLAGS_KEY, {})
+}
 
 // Access Token functions
 function getAccessTokens(): AccessToken[] {
@@ -242,4 +273,9 @@ export {
     setAreas,
     getQuests,
     setQuests,
+    getBooleanFlags,
+    setBooleanFlag,
+    removeBooleanFlag,
+    getBooleanFlag,
+    clearBooleanFlags,
 }

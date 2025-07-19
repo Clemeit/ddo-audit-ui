@@ -8,9 +8,16 @@ interface Props {
     className?: string
     children: React.ReactNode
     noDecoration?: boolean
+    disabled?: boolean
 }
 
-const Link = ({ to = "/", className = "", children, noDecoration }: Props) => {
+const Link = ({
+    to = "/",
+    className = "",
+    children,
+    noDecoration,
+    disabled,
+}: Props) => {
     const handleClick = () => {
         logMessage("Link clicked", "info", {
             action: "click",
@@ -22,7 +29,7 @@ const Link = ({ to = "/", className = "", children, noDecoration }: Props) => {
     return (
         <ReactLink
             to={to}
-            className={`link ${className ? className : ""}`}
+            className={`link ${className ? className : ""} ${disabled ? "disabled" : ""}`}
             onClick={handleClick}
             style={{
                 textDecoration: noDecoration ? "none" : "",

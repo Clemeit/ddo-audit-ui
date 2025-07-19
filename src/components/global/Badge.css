@@ -1,6 +1,7 @@
 .badge {
     padding: 2px 5px;
     border-radius: 4px;
+    word-break: keep-all;
 }
 
 .badge.badge-small {

@@ -28,7 +28,6 @@ const Page = ({
 
     return (
         <div className={className}>
-            {/* Banner messages would go here */}
             {!isOnline && (
                 <div
                     className="banner-message"

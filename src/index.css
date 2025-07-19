@@ -207,6 +207,11 @@ table tbody tr:last-of-type {
 
 .link {
     color: var(--link-blue);
+
+    &.disabled {
+        opacity: 0.5;
+        pointer-events: none;
+    }
 }
 
 .clickable-icon {

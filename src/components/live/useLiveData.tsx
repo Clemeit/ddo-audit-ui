@@ -10,6 +10,7 @@ import {
 } from "../../services/gameService.ts"
 import { NewsItem } from "../../models/Service.ts"
 import { getNews } from "../../services/newsService.ts"
+import logMessage from "../../utils/logUtils.ts"
 
 export const useLiveData = () => {
     const [populationData24Hours, setPopulationData24Hours] = useState<
@@ -53,6 +54,9 @@ export const useLiveData = () => {
                     const errorMessage =
                         e instanceof Error ? e.message : String(e)
                     setError(errorMessage)
+                    logMessage("Error fetching live data", "error", {
+                        metadata: { error: errorMessage },
+                    })
                 }
             } finally {
                 if (!controller.signal.aborted) {

@@ -127,7 +127,7 @@ const Registration = () => {
 
     function getLastReloadString() {
         if (registeredCharacters.length === 0) {
-            return "---"
+            return ""
         }
         const prettyString = convertMillisecondsToPrettyString(
             millisSinceLastReload,
@@ -198,34 +198,6 @@ const Registration = () => {
                         </Button>
                     </Stack>
                 </ContentCluster>
-                <ContentCluster
-                    title="Behavior"
-                    subtitle="Control how the Who List handles friends. These settings can also be found on the Who List page."
-                >
-                    <h3>Who List</h3>
-                    <Stack gap="10px" direction="column">
-                        <Checkbox
-                            checked={pinRegisteredCharacters}
-                            onChange={(e) =>
-                                setPinRegisteredCharacters(e.target.checked)
-                            }
-                        >
-                            Pin my registered characters to the top of the Who
-                            list
-                        </Checkbox>
-                        <Checkbox
-                            checked={alwaysShowRegisteredCharacters}
-                            onChange={(e) =>
-                                setAlwaysShowRegisteredCharacters(
-                                    e.target.checked
-                                )
-                            }
-                        >
-                            Always show my online registered characters in the
-                            Who list
-                        </Checkbox>
-                    </Stack>
-                </ContentCluster>
                 <ContentCluster title="About this Feature">
                     <p>
                         Registering your characters is entirely optional. You do
@@ -256,6 +228,35 @@ const Registration = () => {
                         </Link>{" "}
                         for more information.
                     </p>
+                </ContentCluster>
+                <ContentCluster
+                    title="Behavior"
+                    subtitle="Control how the Who List handles friends. These settings can also be found on the Who List page."
+                >
+                    <h3>Who List</h3>
+                    <Stack gap="10px" direction="column">
+                        <Checkbox
+                            checked={pinRegisteredCharacters}
+                            onChange={(e) =>
+                                setPinRegisteredCharacters(e.target.checked)
+                            }
+                        >
+                            Pin my registered characters to the top of the Who
+                            list
+                        </Checkbox>
+                        <Checkbox
+                            checked={alwaysShowRegisteredCharacters}
+                            onChange={(e) =>
+                                setAlwaysShowRegisteredCharacters(
+                                    e.target.checked
+                                )
+                            }
+                        >
+                            Always show my online registered characters in the
+                            Who list
+                        </Checkbox>
+                    </Stack>
+                    <Spacer size="20px" />
                 </ContentCluster>
                 <ContentCluster title="See Also...">
                     <NavCardCluster>

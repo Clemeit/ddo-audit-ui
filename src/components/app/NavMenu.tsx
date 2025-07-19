@@ -39,6 +39,7 @@ const NavMenu = () => {
             <Link
                 to="/servers"
                 className={`nav-item ${location.pathname.startsWith("/servers") ? "active" : ""}`}
+                disabled
             >
                 <ServersSVG className="nav-icon" />
                 <span>Servers</span>
@@ -60,6 +61,7 @@ const NavMenu = () => {
             <Link
                 to="/trends"
                 className={`nav-item hide-on-mobile ${location.pathname.startsWith("/trends") ? "active" : ""}`}
+                disabled
             >
                 <TrendsSVG className="nav-icon" />
                 <span>Trends</span>
