@@ -1,8 +1,11 @@
 {
     "short_name": "DDO Audit",
-    "name": "DDO Audit",
-    "description": "Real-time Player Concurrency Data and LFM Viewer",
+    "name": "DDO Audit - Real-time DDO Tracker",
+    "description": "Real-time Player Concurrency Data and LFM Viewer for Dungeons and Dragons Online",
     "id": "/ddoaudit/?source=pwa",
+    "categories": ["games", "entertainment", "utilities"],
+    "lang": "en-US",
+    "dir": "ltr",
     "icons": [
         {
             "src": "/icons/logo.svg",

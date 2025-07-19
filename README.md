@@ -8,5 +8,5 @@ A real-time player population tracking project and live LFM viewer for Dungeons 
 
 ## Links:
 
-- **Main website**: [https://www.ddoaudit.com](https://www.ddoaudit.com)
+- **Main website**: [https://www.hcnxsryjficudzazjxty.com](https://www.hcnxsryjficudzazjxty.com)
 - **Backend repository**: [https://github.com/Clemeit/ddo-audit-service](https://github.com/Clemeit/ddo-audit-service)

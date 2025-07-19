@@ -2,6 +2,7 @@ import React from "react"
 import { Helmet } from "react-helmet-async"
 import "./Page.css"
 import useNetworkStatus from "../../hooks/useNetworkStatus.ts"
+import BreadcrumbSchema from "./BreadcrumbSchema.tsx"
 
 interface Props {
     children: React.ReactNode
@@ -41,6 +42,10 @@ const Page = ({
             <Helmet>
                 <title>{title}</title>
                 <meta name="description" content={description} />
+                <link
+                    rel="canonical"
+                    href={`https://www.hcnxsryjficudzazjxty.com${window.location.pathname}`}
+                />
                 <meta
                     property="og:image"
                     content={logo}
@@ -51,7 +56,16 @@ const Page = ({
                     content={logo}
                     data-react-helmet="true"
                 />
+                <meta name="twitter:title" content={title} />
+                <meta name="twitter:description" content={description} />
+                <meta
+                    property="og:url"
+                    content={`https://www.hcnxsryjficudzazjxty.com${window.location.pathname}`}
+                />
+                <meta property="og:title" content={title} />
+                <meta property="og:description" content={description} />
             </Helmet>
+            <BreadcrumbSchema />
             <div className={`page ${noPadding ? "no-padding" : ""}`}>
                 <div
                     className={`page-content ${centered ? "centered" : ""} ${contentMaxWidth ? "content-max-width" : ""}`}
