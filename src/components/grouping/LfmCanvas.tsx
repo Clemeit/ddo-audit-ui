@@ -5,7 +5,7 @@ import useRenderLfmPanel from "../../hooks/useRenderLfmPanel.ts"
 import useRenderLfmOverlay, {
     RenderType,
 } from "../../hooks/useRenderLfmOverlay.ts"
-import LfmSprite from "../../assets/png/lfm_sprite_2.png"
+import LfmSprite from "../../assets/png/lfm_sprite_2.webp"
 import { useLfmContext } from "../../contexts/LfmContext.tsx"
 import {
     areLfmArraysEqual,
