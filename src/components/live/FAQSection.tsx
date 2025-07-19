@@ -2,24 +2,27 @@ import { toSentenceCase } from "../../utils/stringUtils.ts"
 import { SERVER_NAMES } from "../../constants/servers.ts"
 import ServerLink from "../global/ServerLink.tsx"
 import "./FAQSection.css"
+import ColoredText from "../global/ColoredText.tsx"
 
 interface Props {
     defaultServerName: string
     mostPopulatedServerThisWeek: string
     mostPopulatedServerThisMonth: string
+    uniqueCharactersThisQuarter: number
 }
 
 interface FAQItem {
     question: string
     answer: string
     fallbackAnswer?: string
-    dependencies?: string[]
+    dependencies?: any[]
 }
 
 const FAQSection = ({
     defaultServerName,
     mostPopulatedServerThisWeek,
     mostPopulatedServerThisMonth,
+    uniqueCharactersThisQuarter,
 }: Props) => {
     const getMostPopulatedServerString = (): string => {
         if (mostPopulatedServerThisMonth !== mostPopulatedServerThisWeek) {
@@ -48,7 +51,10 @@ const FAQSection = ({
         },
         {
             question: "How many players does DDO have?",
-            answer: "Estimating the total number of players is difficult, and isn't something that DDO Audit does. However, we have cataloged 123,456 unique characters in the past quarter.",
+            answer: `Estimating the total number of players is difficult, and isn't something that DDO Audit does. However, we have cataloged ${uniqueCharactersThisQuarter?.toLocaleString()} unique characters in the past quarter.`,
+            fallbackAnswer:
+                "Estimating the total number of players is difficult, and isn't something that DDO Audit does. However, you can get a rough idea of player count by checking the number of unique characters we've cataloged this past quarter.",
+            dependencies: [uniqueCharactersThisQuarter],
         },
         {
             question: "What is DDO's best server?",
@@ -74,7 +80,11 @@ const FAQSection = ({
     const isFaqItemReady = (item: FAQItem): boolean => {
         return (
             !item.dependencies ||
-            item.dependencies.every((dep) => dep && dep.trim() !== "")
+            item.dependencies.every(
+                (dep) =>
+                    dep &&
+                    (typeof dep === "string" ? dep.trim() !== "" : dep !== null)
+            )
         )
     }
 
@@ -95,12 +105,15 @@ const FAQSection = ({
         })),
     }
 
-    const replaceServerNamesWithServerLinks = (text: string): JSX.Element => {
-        // Create a regex pattern that matches any server name (case insensitive)
+    const convertToRichText = (text: string): JSX.Element => {
+        // Create a regex pattern that matches server names and numbers (with optional commas)
         const serverNamesPattern = SERVER_NAMES.join("|")
-        const regex = new RegExp(`\\b(${serverNamesPattern})\\b`, "gi")
+        const regex = new RegExp(
+            `\\b(${serverNamesPattern}|\\d{1,3}(?:,\\d{3})*(?:\\.\\d+)?)\\b`,
+            "gi"
+        )
 
-        // Split the text by server names while preserving the matched parts
+        // Split the text by server names and numbers while preserving the matched parts
         const parts = text.split(regex)
 
         return (
@@ -111,9 +124,16 @@ const FAQSection = ({
                         (serverName) =>
                             serverName.toLowerCase() === part.toLowerCase()
                     )
+                    const isNumeric = !isNaN(Number(part.replace(/,/g, "")))
 
                     if (isServerName) {
                         return <ServerLink key={index} serverName={part} />
+                    } else if (isNumeric && part.trim() !== "") {
+                        return (
+                            <ColoredText color="orange" key={index}>
+                                {part}
+                            </ColoredText>
+                        )
                     } else {
                         return <span key={index}>{part}</span>
                     }
@@ -151,9 +171,7 @@ const FAQSection = ({
                         >
                             {isFaqItemReady(item) ? (
                                 <p className="faq-answer-text" itemProp="text">
-                                    {replaceServerNamesWithServerLinks(
-                                        item.answer
-                                    )}
+                                    {convertToRichText(item.answer)}
                                 </p>
                             ) : (
                                 <p className="faq-answer-text" itemProp="text">

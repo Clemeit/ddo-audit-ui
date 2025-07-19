@@ -182,6 +182,9 @@ const Live = () => {
                         mostPopulatedServerThisMonth={
                             mostPopulatedServerThisMonth
                         }
+                        uniqueCharactersThisQuarter={
+                            uniqueDataThisQuarter?.data?.unique_character_count
+                        }
                     />
                 </ContentCluster>
                 <ContentCluster title="Live Population">

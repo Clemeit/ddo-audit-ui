@@ -63,6 +63,7 @@ const LfmCanvas: React.FC<Props> = ({
         showCharacterGuildNames,
         showLfmPostedTime,
         fontSize,
+        highlightRaids,
     } = useLfmContext()
     const commonBoundingBoxes = useMemo(
         () => calculateCommonBoundingBoxes(panelWidth),
@@ -104,6 +105,7 @@ const LfmCanvas: React.FC<Props> = ({
         showCharacterGuildNames,
         showLfmPostedTime,
         fontSize,
+        highlightRaids,
     })
     const fonts = useMemo(() => FONTS(), [])
 
@@ -124,6 +126,7 @@ const LfmCanvas: React.FC<Props> = ({
     const { renderLfm } = useRenderLfm({
         lfmSprite: image,
         context: lfmCanvasRef.current?.getContext("2d"),
+        raidView: raidView,
     })
     const { renderLfmPanelToCanvas } = useRenderLfmPanel({
         sprite: image,
@@ -301,7 +304,8 @@ const LfmCanvas: React.FC<Props> = ({
             previousState.showQuestTips !== showQuestTips ||
             previousState.showCharacterGuildNames !== showCharacterGuildNames ||
             previousState.showLfmPostedTime !== showLfmPostedTime ||
-            previousState.fontSize !== fontSize
+            previousState.fontSize !== fontSize ||
+            previousState.highlightRaids !== highlightRaids
 
         const shouldRenderFilterMessage =
             excludedLfmCount !== previousState.excludedLfmCount
@@ -505,6 +509,7 @@ const LfmCanvas: React.FC<Props> = ({
             showCharacterGuildNames,
             showLfmPostedTime,
             fontSize,
+            highlightRaids,
         }))
         setIsFirstRender(false)
     }, [
@@ -533,6 +538,7 @@ const LfmCanvas: React.FC<Props> = ({
         showLfmPostedTime,
         fontSize,
         isLoading,
+        highlightRaids,
     ])
 
     return (

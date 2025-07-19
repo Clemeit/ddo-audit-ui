@@ -306,12 +306,12 @@ const LfmToolbar = ({
                         >
                             Show bounding boxes
                         </Checkbox> */}
-                    <Checkbox
+                    {/* <Checkbox
                         checked={isDynamicWidth}
                         onChange={(e) => setIsDynamicWidth(e.target.checked)}
                     >
                         Dynamic width
-                    </Checkbox>
+                    </Checkbox> */}
                     <Checkbox
                         checked={isFullScreen}
                         onChange={(e) => setIsFullScreen(e.target.checked)}

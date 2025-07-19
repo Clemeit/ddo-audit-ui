@@ -25,9 +25,10 @@ import { useQuestContext } from "../contexts/QuestContext.tsx"
 interface Props {
     lfmSprite?: HTMLImageElement | null
     context?: CanvasRenderingContext2D | null
+    raidView?: boolean
 }
 
-const useRenderLfm = ({ lfmSprite, context }: Props) => {
+const useRenderLfm = ({ lfmSprite, context, raidView = false }: Props) => {
     const {
         panelWidth,
         showBoundingBoxes,
@@ -381,12 +382,8 @@ const useRenderLfm = ({ lfmSprite, context }: Props) => {
                 (lfm.metadata?.includesFriend &&
                     showIndicationForGroupsContainingFriends)
             const shouldHighlightRaid =
-                highlightRaids && quest?.group_size === "Raid"
-            if (
-                lfm.metadata?.isEligible ||
-                shouldHighlightForFriends ||
-                shouldHighlightRaid
-            ) {
+                !raidView && highlightRaids && quest?.group_size === "Raid"
+            if (lfm.metadata?.isEligible || shouldHighlightForFriends) {
                 const gradient = context.createLinearGradient(
                     0,
                     0,
@@ -395,32 +392,22 @@ const useRenderLfm = ({ lfmSprite, context }: Props) => {
                 )
                 let edgeColor = LFM_COLORS.ELIGIBLE_GRADIENT_EDGE
                 let centerColor = LFM_COLORS.ELIGIBLE_GRADIENT_CENTER
-                if (shouldHighlightRaid) {
+                if (
+                    (lfm.metadata?.isPostedByFriend &&
+                        showIndicationForGroupsPostedByFriends) ||
+                    (lfm.metadata?.includesFriend &&
+                        showIndicationForGroupsContainingFriends)
+                ) {
                     if (lfm.metadata?.isEligible) {
-                        edgeColor = LFM_COLORS.ELIGIBLE_RAID_GRADIENT_EDGE
-                        centerColor = LFM_COLORS.ELIGIBLE_RAID_GRADIENT_CENTER
+                        edgeColor = LFM_COLORS.FRIEND_GRADIENT_EDGE
+                        centerColor = LFM_COLORS.FRIEND_GRADIENT_CENTER
                     } else {
-                        edgeColor = LFM_COLORS.INELIGIBLE_RAID_GRADIENT_EDGE
-                        centerColor = LFM_COLORS.INELIGIBLE_RAID_GRADIENT_CENTER
-                    }
-                } else {
-                    if (
-                        (lfm.metadata?.isPostedByFriend &&
-                            showIndicationForGroupsPostedByFriends) ||
-                        (lfm.metadata?.includesFriend &&
-                            showIndicationForGroupsContainingFriends)
-                    ) {
-                        if (lfm.metadata?.isEligible) {
-                            edgeColor = LFM_COLORS.FRIEND_GRADIENT_EDGE
-                            centerColor = LFM_COLORS.FRIEND_GRADIENT_CENTER
-                        } else {
-                            edgeColor =
-                                LFM_COLORS.INELIGIBLE_FRIEND_GRADIENT_EDGE
-                            centerColor =
-                                LFM_COLORS.INELIGIBLE_FRIEND_GRADIENT_CENTER
-                        }
+                        edgeColor = LFM_COLORS.INELIGIBLE_FRIEND_GRADIENT_EDGE
+                        centerColor =
+                            LFM_COLORS.INELIGIBLE_FRIEND_GRADIENT_CENTER
                     }
                 }
+
                 gradient.addColorStop(0, edgeColor)
                 gradient.addColorStop(0.25, centerColor)
                 gradient.addColorStop(0.75, centerColor)
@@ -431,6 +418,35 @@ const useRenderLfm = ({ lfmSprite, context }: Props) => {
                     Math.floor(lfmBoundingBox.y),
                     Math.floor(lfmBoundingBox.width),
                     Math.floor(lfmBoundingBox.height)
+                )
+            }
+            if (shouldHighlightRaid) {
+                const gradient = context.createLinearGradient(
+                    0,
+                    0,
+                    0,
+                    lfmBoundingBox.height
+                )
+                let edgeColor = LFM_COLORS.ELIGIBLE_GRADIENT_EDGE
+                let centerColor = LFM_COLORS.ELIGIBLE_GRADIENT_CENTER
+                if (lfm.metadata?.isEligible) {
+                    edgeColor = LFM_COLORS.ELIGIBLE_RAID_GRADIENT_EDGE
+                    centerColor = LFM_COLORS.ELIGIBLE_RAID_GRADIENT_CENTER
+                } else {
+                    edgeColor = LFM_COLORS.INELIGIBLE_RAID_GRADIENT_EDGE
+                    centerColor = LFM_COLORS.INELIGIBLE_RAID_GRADIENT_CENTER
+                }
+                gradient.addColorStop(0, edgeColor)
+                gradient.addColorStop(0.25, centerColor)
+                gradient.addColorStop(0.75, centerColor)
+                gradient.addColorStop(1, edgeColor)
+                context.strokeStyle = gradient
+                context.lineWidth = 3
+                context.strokeRect(
+                    Math.floor(lfmBoundingBox.x + 3),
+                    Math.floor(lfmBoundingBox.y + 3),
+                    Math.floor(lfmBoundingBox.width - 6),
+                    Math.floor(lfmBoundingBox.height - 6)
                 )
             }
 
@@ -754,6 +770,7 @@ const useRenderLfm = ({ lfmSprite, context }: Props) => {
             showQuestGuesses,
             confineTextToBoundingBox,
             calculateQuestInfoYPositions,
+            highlightRaids,
         ]
     )
 
