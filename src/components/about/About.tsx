@@ -27,7 +27,7 @@ const About = () => {
             description="Learn about the DDO Audit project! Read our mission statement, methodology, and contributing parties."
         >
             {!hideAlphaRelease && (
-                <div style={{ margin: "-20px 0 40px 0" }}>
+                <div className="alpha-release-message">
                     <AlphaReleasePageMessage
                         onDismiss={() => {
                             setHideAlphaRelease(true)
@@ -91,7 +91,8 @@ const About = () => {
                         A special thanks to the incredibly talented and generous
                         developers over at Dungeon Helper. Their support played
                         an integral role in the development of this project's
-                        Live LFM and Who panels. Visit their various projects:{" "}
+                        Live LFM Viewer and Who List. Visit their various
+                        projects:{" "}
                         <WebLink href="https://vaultofkundarak.com/">
                             VoK Item Database
                         </WebLink>

@@ -6,12 +6,14 @@ interface Props {
     href: string
     className?: string
     children: React.ReactNode
+    disabled?: boolean
 }
 
 const WebLink = ({
     href = "www.ddoaudit.com",
     className = "",
     children,
+    disabled = false,
 }: Props) => {
     const onClick = () => {
         logMessage("Web link clicked", "info", {
@@ -26,7 +28,7 @@ const WebLink = ({
             href={href}
             rel="noreferrer"
             target="_blank"
-            className={`link ${className ? className : ""}`}
+            className={`link ${className ? className : ""} ${disabled ? "disabled" : ""}`}
             onClick={onClick}
         >
             {children}

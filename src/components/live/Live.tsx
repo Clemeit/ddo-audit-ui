@@ -26,6 +26,9 @@ import { findMostPopulatedServer } from "../../utils/gameUtils.ts"
 import { useNotificationContext } from "../../contexts/NotificationContext.tsx"
 import logMessage from "../../utils/logUtils.ts"
 
+import { AlphaReleasePageMessage } from "../global/CommonMessages.tsx"
+import { BOOLEAN_FLAGS } from "../../utils/localStorage.ts"
+import useBooleanFlag from "../../hooks/useBooleanFlags.ts"
 const Live = () => {
     const {
         data: serverInfoData,
@@ -42,6 +45,7 @@ const Live = () => {
         populationTotalsData1Week,
         populationTotalsData1Month,
         news,
+        uniqueDataThisQuarter,
         loading: dataLoading,
         error: dataError,
     } = useLiveData()
@@ -118,11 +122,24 @@ const Live = () => {
 
     const hasAnyError = serverInfoState === LoadingState.Error || !!dataError
 
+    const [hideAlphaRelease, setHideAlphaRelease] = useBooleanFlag(
+        BOOLEAN_FLAGS.hideAlphaRelease
+    )
+
     return (
         <Page
             title="DDO Server Status"
             description="DDO server status, most populated server, current default server, and recent population trends."
         >
+            {!hideAlphaRelease && (
+                <div className="alpha-release-message">
+                    <AlphaReleasePageMessage
+                        onDismiss={() => {
+                            setHideAlphaRelease(true)
+                        }}
+                    />
+                </div>
+            )}
             {serverInfoState === LoadingState.Haulted && (
                 <LiveDataHaultedPageMessage />
             )}
@@ -142,6 +159,12 @@ const Live = () => {
                         }
                         mostPopulatedServerThisMonth={
                             mostPopulatedServerThisMonth
+                        }
+                        uniqueCharactersThisQuarter={
+                            uniqueDataThisQuarter?.data?.unique_character_count
+                        }
+                        uniqueGuildsThisQuarter={
+                            uniqueDataThisQuarter?.data?.unique_guild_count
                         }
                     />
                 </ContentCluster>

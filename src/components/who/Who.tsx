@@ -26,6 +26,9 @@ import useGetRegisteredCharacters from "../../hooks/useGetRegisteredCharacters.t
 import useGetFriends from "../../hooks/useGetFriends.ts"
 import Skeleton from "../global/Skeleton.tsx"
 
+import { AlphaReleasePageMessage } from "../global/CommonMessages.tsx"
+import { BOOLEAN_FLAGS } from "../../utils/localStorage.ts"
+import useBooleanFlag from "../../hooks/useBooleanFlags.ts"
 const Who = () => {
     const { registeredCharacters } = useGetRegisteredCharacters()
     const { friends } = useGetFriends()
@@ -181,11 +184,24 @@ const Who = () => {
         [gameInfoData, gameInfoState, registeredCharacters, cardDescription]
     )
 
+    const [hideAlphaRelease, setHideAlphaRelease] = useBooleanFlag(
+        BOOLEAN_FLAGS.hideAlphaRelease
+    )
+
     return (
         <Page
             title="DDO Live Character Viewer"
             description="Browse players from any server with a live character viewer. Are your friends online? Is your guild forming up for a late-night raid? Now you know!"
         >
+            {!hideAlphaRelease && (
+                <div className="alpha-release-message">
+                    <AlphaReleasePageMessage
+                        onDismiss={() => {
+                            setHideAlphaRelease(true)
+                        }}
+                    />
+                </div>
+            )}
             {gameInfoState === LoadingState.Haulted && (
                 <LiveDataHaultedPageMessage />
             )}

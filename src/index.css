@@ -296,6 +296,10 @@ table tbody tr:last-of-type {
     outline: none;
 }
 
+.alpha-release-message {
+    margin: -20px 0 40px 0;
+}
+
 /* mobile */
 @media (max-width: 768px) {
     html {
@@ -326,6 +330,10 @@ table tbody tr:last-of-type {
 
     .input-label {
         font-size: 1.2rem;
+    }
+
+    .alpha-release-message {
+        margin: 0 0 20px 0;
     }
 }
 

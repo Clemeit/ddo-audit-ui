@@ -29,6 +29,10 @@ import ColoredText from "../global/ColoredText.tsx"
 import "./Grouping.css"
 import Skeleton from "../global/Skeleton.tsx"
 
+import { AlphaReleasePageMessage } from "../global/CommonMessages.tsx"
+import { BOOLEAN_FLAGS } from "../../utils/localStorage.ts"
+import useBooleanFlag from "../../hooks/useBooleanFlags.ts"
+
 const Grouping = () => {
     const { data: lfmData, state: lfmState } = usePollApi<LfmApiModel>({
         endpoint: "lfms",
@@ -251,11 +255,24 @@ const Grouping = () => {
         )
     }, [serverInfoState, lfmData, getCurrentRaids, hasAllDataLoadedOnce])
 
+    const [hideAlphaRelease, setHideAlphaRelease] = useBooleanFlag(
+        BOOLEAN_FLAGS.hideAlphaRelease
+    )
+
     return (
         <Page
             title="DDO Live LFM Viewer"
             description="View a live LFM panel to find public groups - before you even log in! See which groups are currently looking for more players and what content is currently being run."
         >
+            {!hideAlphaRelease && (
+                <div className="alpha-release-message">
+                    <AlphaReleasePageMessage
+                        onDismiss={() => {
+                            setHideAlphaRelease(true)
+                        }}
+                    />
+                </div>
+            )}
             {lfmState === LoadingState.Haulted && (
                 <LiveDataHaultedPageMessage />
             )}
@@ -282,7 +299,7 @@ const Grouping = () => {
                         >
                             You currently have 0 notification rules set up.
                             Configure rules on the{" "}
-                            <Link to="/notifications">
+                            <Link to="/notifications" disabled>
                                 notification settings
                             </Link>{" "}
                             page.

@@ -128,7 +128,7 @@ const Ignores = () => {
                 </ContentCluster>
                 <ContentCluster
                     title="Behavior"
-                    subtitle="Control how the LFM viewer and Who list handle ignored characters. These settings can also be found on their respective pages."
+                    subtitle="Control how the LFM Viewer and Who List handle ignored characters. These settings can also be found on their respective pages."
                 >
                     <h3>LFM Viewer</h3>
                     <Stack gap="10px" direction="column">
@@ -162,14 +162,14 @@ const Ignores = () => {
                                 setHideIgnoredCharacters(e.target.checked)
                             }
                         >
-                            Hide ignored characters from the Who list
+                            Hide ignored characters from the Who List
                         </Checkbox>
                     </Stack>
                 </ContentCluster>
                 <ContentCluster title="About this Feature">
                     <p>
                         Adding characters to your ignore list will enable
-                        additional LFM viewer and Who list filtering and viewing
+                        additional LFM Viewer and Who List filtering and viewing
                         options, including:
                     </p>
                     <ul>
@@ -178,7 +178,7 @@ const Ignores = () => {
                             Hiding LFMs when an ignored character is part of the
                             group
                         </li>
-                        <li>Hiding ignored characters from the Who list</li>
+                        <li>Hiding ignored characters from the Who List</li>
                     </ul>
                 </ContentCluster>
                 <ContentCluster title="See Also...">

@@ -2,6 +2,7 @@
     "short_name": "DDO Audit",
     "name": "DDO Audit",
     "description": "Real-time Player Concurrency Data and LFM Viewer",
+    "id": "/?source=pwa",
     "icons": [
         {
             "src": "/icons/logo.svg",
@@ -31,28 +32,10 @@
     ],
     "shortcuts": [
         {
-            "name": "Servers",
-            "short_name": "Servers",
-            "description": "Check server status",
-            "url": "/servers",
-            "icons": [
-                {
-                    "src": "/icons/servers-192px.png",
-                    "sizes": "192x192",
-                    "type": "image/png"
-                },
-                {
-                    "src": "/icons/servers-512px.png",
-                    "sizes": "512x512",
-                    "type": "image/png"
-                }
-            ]
-        },
-        {
             "name": "Grouping",
-            "short_name": "Grouping",
-            "description": "Live LFM viewer",
-            "url": "/grouping",
+            "short_name": "LFM Viewer",
+            "description": "View live group listings",
+            "url": "/grouping?source=pwa",
             "icons": [
                 {
                     "src": "/icons/grouping-192px.png",
@@ -68,9 +51,9 @@
         },
         {
             "name": "Who",
-            "short_name": "Who",
-            "description": "Lookup players",
-            "url": "/who",
+            "short_name": "Live Who List",
+            "description": "Search online players",
+            "url": "/who?source=pwa",
             "icons": [
                 {
                     "src": "/icons/who-192px.png",
@@ -85,7 +68,8 @@
             ]
         }
     ],
-    "start_url": "/",
+    "start_url": "/?source=pwa",
+    "scope": "/",
     "display": "standalone",
     "theme_color": "#232323",
     "background_color": "#232323"

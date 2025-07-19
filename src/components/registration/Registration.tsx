@@ -201,7 +201,7 @@ const Registration = () => {
                 <ContentCluster title="About this Feature">
                     <p>
                         Registering your characters is entirely optional. You do
-                        not need to provide log-in credentials.{" "}
+                        not need to provide login credentials.{" "}
                         <span className="orange-text">
                             You should <strong>never</strong> provide DDO Audit
                             with any personal or account information such as
@@ -209,9 +209,9 @@ const Registration = () => {
                         </span>
                     </p>
                     <p>
-                        Once a character is registered, the LFM viewer can
+                        Once a character is registered, the LFM Viewer can
                         automatically filter based on that character's server
-                        and level. The LFM viewer will also show an indicator on
+                        and level. The LFM Viewer will also show an indicator on
                         a post if you're currently on timer for that raid. You
                         can view raid timers on the{" "}
                         <Link to="/timers" className="link">
@@ -220,7 +220,7 @@ const Registration = () => {
                         .
                     </p>
                     <p>
-                        You can also Verify ownership of a character to unlock
+                        You can also verify ownership of a character to unlock
                         additional features such as quest ransack, questing
                         history, level-up trends, and more. See the{" "}
                         <Link to="/activity" className="link">
@@ -242,7 +242,7 @@ const Registration = () => {
                             }
                         >
                             Pin my registered characters to the top of the Who
-                            list
+                            List
                         </Checkbox>
                         <Checkbox
                             checked={alwaysShowRegisteredCharacters}
@@ -253,7 +253,7 @@ const Registration = () => {
                             }
                         >
                             Always show my online registered characters in the
-                            Who list
+                            Who List
                         </Checkbox>
                     </Stack>
                     <Spacer size="20px" />

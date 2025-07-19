@@ -45,7 +45,7 @@ const typeToDescriptionMap = {
     servers: "Server population, character demographics, and activity trends.",
     quests: "Content popularity, average completion time, and XP/minute.",
     trends: "Long-term trends, daily counts, and important game events.",
-    grouping: "Easily find grounds with a live LFM viewer for each server.",
+    grouping: "Easily find grounds with a live LFM Viewer for each server.",
     who: "Explore a list of online players with a live character viewer.",
     transfers:
         "Which servers are gaining players and which servers are losing them.",
@@ -119,6 +119,7 @@ const NavigationCard = ({
             <WebLink
                 href={externalLink}
                 className={`navigation-card ${fullWidth ? "full-width" : ""}`}
+                disabled={disabled}
             >
                 <span className="navigation-card-title">
                     {typeToIconMap[type]}

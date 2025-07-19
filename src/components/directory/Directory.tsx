@@ -22,8 +22,9 @@ const Directory = () => {
             title="DDO Audit | Character Tracking and LFM Viewer"
             description="A live summary of DDO's current player population and LFM status. View population trends, check server status, browse live grouping panels, check to see if your friends are online, and decide what server is best for you!"
         >
+            {" "}
             {!hideAlphaRelease && (
-                <div style={{ margin: "-20px 0 40px 0" }}>
+                <div className="alpha-release-message">
                     <AlphaReleasePageMessage
                         onDismiss={() => {
                             setHideAlphaRelease(true)
@@ -87,6 +88,8 @@ const Directory = () => {
                         <NavigationCard
                             type="health"
                             externalLink={BETTER_STACK_URL}
+                            badge={<Badge text="Soon" type="soon" />}
+                            disabled
                         />
                     </NavCardCluster>
                 </ContentCluster>

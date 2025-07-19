@@ -177,7 +177,7 @@ const Friends = () => {
                 </ContentCluster>
                 <ContentCluster
                     title="Behavior"
-                    subtitle="Control how the LFM viewer and Who list handle friends. These settings can also be found on their respective pages."
+                    subtitle="Control how the LFM Viewer and Who List handle friends. These settings can also be found on their respective pages."
                 >
                     <h3>LFM Viewer</h3>
                     <Stack gap="10px" direction="column">
@@ -209,7 +209,7 @@ const Friends = () => {
                             checked={pinFriends}
                             onChange={(e) => setPinFriends(e.target.checked)}
                         >
-                            Pin friends to the top of the Who list
+                            Pin friends to the top of the Who List
                         </Checkbox>
                         <Checkbox
                             checked={alwaysShowFriends}
@@ -217,14 +217,14 @@ const Friends = () => {
                                 setAlwaysShowFriends(e.target.checked)
                             }
                         >
-                            Always show online friends in the Who list
+                            Always show online friends in the Who List
                         </Checkbox>
                     </Stack>
                 </ContentCluster>
                 <ContentCluster title="About this Feature">
                     <p>
                         Adding friends allows you to easily check whether or not
-                        they're online. It also provides the LFM viewer and Who
+                        they're online. It also provides the LFM Viewer and Who
                         list with additional features including:
                     </p>
                     <ul>
@@ -236,12 +236,12 @@ const Friends = () => {
                             A visual indication when a friend is part of a group
                         </li>
                         <li>
-                            A visual indicationin the Who list when a friend is
+                            A visual indicationin the Who List when a friend is
                             online
                         </li>
                         <li>
                             The ability to pin online friends to the top of the
-                            Who list
+                            Who List
                         </li>
                     </ul>
                     <p>

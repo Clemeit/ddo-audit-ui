@@ -59,7 +59,7 @@ export default createBrowserRouter(
                     </RegistrationDataProvider>
                 }
             />
-            <Route path="/activity" element={<Activity />} />
+            {/* <Route path="/activity" element={<Activity />} /> */}
             <Route
                 path="/grouping"
                 element={
@@ -82,9 +82,9 @@ export default createBrowserRouter(
                 <Route index element={<Who />} />
                 <Route path=":id" element={<WhoSpecific />} />
             </Route>
-            <Route path="/notifications" element={<Notifications />} />
-            <Route path="/timers" element={<Timers />} />
-            <Route path="/servers" element={<Servers />} />
+            {/* <Route path="/notifications" element={<Notifications />} /> */}
+            {/* <Route path="/timers" element={<Timers />} /> */}
+            {/* <Route path="/servers" element={<Servers />} /> */}
             <Route path="/feedback" element={<Feedback />} />
             <Route
                 path="/friends"
@@ -102,8 +102,8 @@ export default createBrowserRouter(
                     </SocialDataProvider>
                 }
             />
-            <Route path="/trends" element={<Trends />} />
-            <Route path="/quests" element={<Quests />} />
+            {/* <Route path="/trends" element={<Trends />} /> */}
+            {/* <Route path="/quests" element={<Quests />} /> */}
             <Route path="/about" element={<About />} />
             <Route path="*" element={<NotFound />} />
         </Route>
