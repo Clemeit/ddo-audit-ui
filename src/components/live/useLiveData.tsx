@@ -2,28 +2,30 @@ import { useEffect, useState } from "react"
 import {
     PopulationDataPoint,
     PopulationPointInTime,
+    UniquePopulationEndpointResponse,
 } from "../../models/Game.ts"
 import {
     getPopulationData1Day,
     getTotalPopulation1Month,
     getTotalPopulation1Week,
+    getUniquePopulation1Quarter,
 } from "../../services/gameService.ts"
 import { NewsItem } from "../../models/Service.ts"
 import { getNews } from "../../services/newsService.ts"
 import logMessage from "../../utils/logUtils.ts"
 
 export const useLiveData = () => {
-    const [populationData24Hours, setPopulationData24Hours] = useState<
-        PopulationPointInTime[]
-    >([])
-    const [populationTotalsData1Week, setPopulationTotalsData1Week] = useState<
-        Record<string, PopulationDataPoint>
-    >({})
+    const [populationData24Hours, setPopulationData24Hours] =
+        useState<PopulationPointInTime[]>(undefined)
+    const [populationTotalsData1Week, setPopulationTotalsData1Week] =
+        useState<Record<string, PopulationDataPoint>>(undefined)
     const [populationTotalsData1Month, setPopulationTotalsData1Month] =
-        useState<Record<string, PopulationDataPoint>>({})
-    const [news, setNews] = useState<NewsItem[] | null>(null)
+        useState<Record<string, PopulationDataPoint>>(undefined)
+    const [uniqueDataThisQuarter, setUniqueDataThisQuarter] =
+        useState<UniquePopulationEndpointResponse>(undefined)
+    const [news, setNews] = useState<NewsItem[]>(undefined)
     const [loading, setLoading] = useState(true)
-    const [error, setError] = useState<string | null>(null)
+    const [error, setError] = useState<string>(undefined)
 
     useEffect(() => {
         const controller = new AbortController()
@@ -36,11 +38,13 @@ export const useLiveData = () => {
                     populationTotals1Week,
                     populationTotals1Month,
                     news,
+                    uniquePopulationQuarter,
                 ] = await Promise.all([
                     getPopulationData1Day(controller.signal),
                     getTotalPopulation1Week(controller.signal),
                     getTotalPopulation1Month(controller.signal),
                     getNews(controller.signal),
+                    getUniquePopulation1Quarter(controller.signal),
                 ])
 
                 if (!controller.signal.aborted) {
@@ -48,6 +52,7 @@ export const useLiveData = () => {
                     setPopulationTotalsData1Week(populationTotals1Week.data)
                     setPopulationTotalsData1Month(populationTotals1Month.data)
                     setNews(news.data)
+                    setUniqueDataThisQuarter(uniquePopulationQuarter)
                 }
             } catch (e) {
                 if (!controller.signal.aborted) {
@@ -73,6 +78,7 @@ export const useLiveData = () => {
         populationTotalsData1Week,
         populationTotalsData1Month,
         news,
+        uniqueDataThisQuarter,
         loading,
         error,
     }
