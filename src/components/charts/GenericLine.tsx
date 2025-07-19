@@ -1,18 +1,42 @@
 import { ResponsiveLine } from "@nivo/line"
-import React, { useMemo } from "react"
+import React, { useMemo, useState } from "react"
 import { NivoSeries } from "../../utils/nivoUtils.ts"
 import Stack from "../global/Stack.tsx"
 import { ResponsiveContainer } from "recharts"
 import GenericLegend from "./GenericLegend.tsx"
-import { getServerColor } from "../../utils/chartUtils.ts"
+import LineChartTooltip from "./LineChartTooltip.tsx"
+import { createHighlightColorFunction } from "./chartColorUtils.ts"
+import {
+    LINE_CHART_MARGIN,
+    LINE_CHART_Y_SCALE,
+    LINE_CHART_X_SCALE,
+    LINE_CHART_THEME,
+    LINE_CHART_AXIS_BOTTOM,
+    LINE_CHART_DEFAULTS,
+} from "./lineChartConfig.ts"
+import { dateToLongStringWithTime } from "../../utils/dateUtils.ts"
 
 interface GenericLineProps {
     nivoData: NivoSeries[]
     showLegend?: boolean
+    xScale?: any
+    axisBottom?: any
+    margin?: any
+    dateFormatter?: (date: Date) => string
+    yFormatter?: (value: number) => string
 }
 
-const GenericLine = ({ nivoData, showLegend }: GenericLineProps) => {
-    const [excludedSeries, setExcludedSeries] = React.useState<string[]>([])
+const GenericLine = ({
+    nivoData,
+    showLegend,
+    xScale = LINE_CHART_X_SCALE,
+    axisBottom = LINE_CHART_AXIS_BOTTOM,
+    margin = LINE_CHART_MARGIN,
+    dateFormatter = (date: Date) => dateToLongStringWithTime(date),
+    yFormatter = (value: number) => value.toString(),
+}: GenericLineProps) => {
+    const [excludedSeries, setExcludedSeries] = useState<string[]>([])
+    const [highlightedSeries, setHighlightedSeries] = useState<string>()
 
     const handleItemClick = (serverId: string) => {
         setExcludedSeries((prev) =>
@@ -21,6 +45,12 @@ const GenericLine = ({ nivoData, showLegend }: GenericLineProps) => {
                 : [...prev, serverId]
         )
     }
+
+    const handleItemHover = (serverId: string) => {
+        setHighlightedSeries(serverId)
+    }
+
+    const getServerColor = createHighlightColorFunction(highlightedSeries)
 
     const filteredData = useMemo(() => {
         return nivoData.filter((series) => !excludedSeries.includes(series.id))
@@ -31,62 +61,34 @@ const GenericLine = ({ nivoData, showLegend }: GenericLineProps) => {
             <ResponsiveContainer width="100%" height={400}>
                 <ResponsiveLine
                     data={filteredData}
-                    margin={{
-                        bottom: 60,
-                        left: 40,
-                        right: 10,
-                        top: 30,
-                    }}
+                    margin={margin}
                     colors={(d) => getServerColor(d.id)}
-                    yScale={{
-                        type: "linear",
-                        min: 0,
-                        max: "auto",
-                        stacked: false,
-                        reverse: false,
-                    }}
-                    xScale={{
-                        type: "time",
-                        format: "%Y-%m-%dT%H:%M:%SZ",
-                        useUTC: true,
-                        precision: "minute",
-                    }}
-                    xFormat="time:%Y-%m-%d %H:%M"
-                    curve="catmullRom"
-                    theme={{
-                        axis: {
-                            ticks: {
-                                text: {
-                                    fill: "var(--text)",
-                                    fontSize: 14,
-                                },
-                            },
-                            legend: {
-                                text: {
-                                    fill: "var(--text)",
-                                    fontSize: 14,
-                                },
-                            },
-                        },
-                    }}
-                    enableGridX={true}
-                    enablePoints={false}
-                    lineWidth={3}
-                    axisBottom={{
-                        tickSize: 5,
-                        tickPadding: 5,
-                        tickRotation: -45,
-                        legend: "Time",
-                        legendOffset: 50,
-                        format: "%H:%M",
-                        tickValues: "every 1 hour",
-                    }}
+                    yScale={LINE_CHART_Y_SCALE}
+                    xScale={xScale}
+                    xFormat={LINE_CHART_DEFAULTS.xFormat}
+                    curve={LINE_CHART_DEFAULTS.curve}
+                    theme={LINE_CHART_THEME}
+                    enableGridX={LINE_CHART_DEFAULTS.enableGridX}
+                    enablePoints={LINE_CHART_DEFAULTS.enablePoints}
+                    lineWidth={LINE_CHART_DEFAULTS.lineWidth}
+                    enableSlices={LINE_CHART_DEFAULTS.enableSlices}
+                    useMesh={LINE_CHART_DEFAULTS.useMesh}
+                    sliceTooltip={({ slice }) => (
+                        <LineChartTooltip
+                            slice={slice}
+                            getServerColor={getServerColor}
+                            dateFormatter={dateFormatter}
+                            yFormatter={yFormatter}
+                        />
+                    )}
+                    axisBottom={axisBottom}
                 />
             </ResponsiveContainer>
             {showLegend && (
                 <GenericLegend
                     nivoData={nivoData}
                     onItemClick={handleItemClick}
+                    onItemHover={handleItemHover}
                     excludedSeries={excludedSeries}
                 />
             )}

@@ -18,6 +18,7 @@
 .legend-item {
     cursor: pointer;
     transition: opacity 0.2s ease;
+    padding: 2px 10px;
 
     .legend-icon {
         width: 15px;

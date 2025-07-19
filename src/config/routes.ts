@@ -35,6 +35,12 @@ const bannerRouteMapping = {
         miniature: true,
         showButtons: false,
     },
+    quests: {
+        title: "Quest Activity",
+        subtitle: "Completion Times and Popularity",
+        miniature: true,
+        showButtons: false,
+    },
     about: {
         title: "About DDO Audit",
         subtitle: "Real-time Player Concurrency Data and LFM Viewer",

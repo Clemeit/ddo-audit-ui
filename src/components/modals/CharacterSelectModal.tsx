@@ -55,8 +55,8 @@ const CharacterSelectModal = ({
     }
 
     const handleClose = () => {
-        resetModal()
         onClose()
+        resetModal()
     }
 
     const handleCharacterSelected = (character: Character) => {

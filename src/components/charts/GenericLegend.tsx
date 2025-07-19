@@ -51,7 +51,7 @@ const GenericLegend = ({
 
     return (
         <div className="legend-container" role="list" aria-label="Chart legend">
-            <Stack direction="row" gap="20px" justify="center" wrap>
+            <Stack direction="row" justify="center" wrap>
                 {legendItems.map((item) => {
                     if (!item) return null
 
