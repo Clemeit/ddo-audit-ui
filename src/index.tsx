@@ -9,6 +9,20 @@ import { HelmetProvider } from "react-helmet-async"
 import { NotificationProvider } from "./contexts/NotificationContext.tsx"
 import * as serviceWorkerRegistration from "./serviceWorkerRegistration.ts"
 import init from "./firebase.ts"
+// Import banner image to get the correct webpack path for preloading
+import bannerImage from "./assets/webp/banner.webp"
+
+// Preload the banner image for improved LCP
+const preloadBannerImage = () => {
+    const link = document.createElement("link")
+    link.rel = "preload"
+    link.as = "image"
+    link.href = bannerImage
+    document.head.appendChild(link)
+}
+
+// Execute preload immediately
+preloadBannerImage()
 
 init()
 
@@ -27,4 +41,8 @@ root.render(
 // to log results (for example: reportWebVitals(console.log))
 // or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
 reportWebVitals()
-serviceWorkerRegistration.register()
+
+// Register service worker conditionally to improve bfcache compatibility
+if ("serviceWorker" in navigator && process.env.NODE_ENV === "production") {
+    serviceWorkerRegistration.register()
+}
