@@ -10,6 +10,7 @@ import { toSentenceCase } from "../../utils/stringUtils.ts"
 import { ReactComponent as Checkmark } from "../../assets/svg/checkmark.svg"
 import { ReactComponent as X } from "../../assets/svg/x.svg"
 import { ReactComponent as Pending } from "../../assets/svg/pending.svg"
+import { WIPPageMessage } from "../global/CommonMessages.tsx"
 
 const Servers = () => {
     // const { serverInfo } = useGetLiveData()
@@ -70,6 +71,7 @@ const Servers = () => {
             title="Servers"
             description="DDO's server populations, character demographics, content popularity, and long-term trends. Check time zone activity and choose which server is best for you!"
         >
+            <WIPPageMessage />
             <ContentCluster title="Select a Server">
                 {/* <NavCardCluster>{getServerSelectContent()}</NavCardCluster> */}
             </ContentCluster>
