@@ -12,6 +12,7 @@ interface Props {
     centered?: boolean
     noPadding?: boolean
     contentMaxWidth?: boolean
+    logo?: string
 }
 
 const Page = ({
@@ -23,6 +24,7 @@ const Page = ({
     centered = false,
     noPadding = false,
     contentMaxWidth = false,
+    logo = "/icons/logo-512px.png",
 }: Props) => {
     const isOnline = useNetworkStatus()
 
@@ -41,12 +43,12 @@ const Page = ({
                 <meta name="description" content={description} />
                 <meta
                     property="og:image"
-                    content="/icons/logo-512px.png"
+                    content={logo}
                     data-react-helmet="true"
                 />
                 <meta
                     property="twitter:image"
-                    content="/icons/logo-512px.png"
+                    content={logo}
                     data-react-helmet="true"
                 />
             </Helmet>

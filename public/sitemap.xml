@@ -198,28 +198,22 @@
       <changefreq>weekly</changefreq>
       <priority>0.6</priority>
    </url>
-   <url>
-      <loc>https://www.ddoaudit.com/transfers</loc>
-      <lastmod>2022-02-08T00:00:00+00:00</lastmod>
-      <changefreq>daily</changefreq>
-      <priority>0.5</priority>
-   </url>
-   <url>
+   <!-- <url>
       <loc>https://www.ddoaudit.com/quests</loc>
       <lastmod>2022-02-08T00:00:00+00:00</lastmod>
       <changefreq>weekly</changefreq>
       <priority>0.4</priority>
-   </url>
+   </url> -->
    <url>
       <loc>https://www.ddoaudit.com/about</loc>
       <lastmod>2022-02-08T00:00:00+00:00</lastmod>
       <changefreq>yearly</changefreq>
       <priority>0.8</priority>
    </url>
-   <url>
+   <!-- <url>
       <loc>https://www.ddoaudit.com/api</loc>
       <lastmod>2022-02-08T00:00:00+00:00</lastmod>
       <changefreq>yearly</changefreq>
       <priority>0.2</priority>
-   </url>
+   </url> -->
 </urlset>
