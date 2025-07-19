@@ -231,7 +231,7 @@ const Registration = () => {
                 </ContentCluster>
                 <ContentCluster
                     title="Behavior"
-                    subtitle="Control how the Who List handles friends. These settings can also be found on the Who List page."
+                    subtitle="Control how the Who List handles registered characters. These settings can also be found on the Who List page."
                 >
                     <h3>Who List</h3>
                     <Stack gap="10px" direction="column">
