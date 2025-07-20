@@ -18,6 +18,7 @@ export const useServiceWorkerUpdate = () => {
                                 "controllerchange",
                                 handleControllerChange
                             )
+                            // Force a hard reload to bypass any caching issues
                             window.location.reload()
                         }
 
@@ -30,6 +31,14 @@ export const useServiceWorkerUpdate = () => {
                         registration.waiting.postMessage({
                             type: "SKIP_WAITING",
                         })
+
+                        // Fallback: if controllerchange doesn't fire within 5 seconds, force reload
+                        setTimeout(() => {
+                            console.warn(
+                                "Service worker update timeout, forcing reload"
+                            )
+                            window.location.reload()
+                        }, 5000)
                     } else {
                         // Fallback: just reload
                         window.location.reload()
@@ -50,6 +59,8 @@ export const useServiceWorkerUpdate = () => {
                         }
                     )
                     dismissNotification(notificationId)
+                    // Force reload on error
+                    window.location.reload()
                 }
             }
 

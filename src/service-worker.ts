@@ -74,8 +74,18 @@ registerRoute(
 // registration.waiting.postMessage({type: 'SKIP_WAITING'})
 self.addEventListener("message", (event) => {
     if (event.data && event.data.type === "SKIP_WAITING") {
-        self.skipWaiting()
+        // Force skipWaiting and claim clients immediately
+        self.skipWaiting().then(() => {
+            // Claim all clients to ensure immediate control
+            return self.clients.claim()
+        })
     }
+})
+
+// Handle activation to ensure proper cleanup of old caches
+self.addEventListener("activate", (event) => {
+    // Take control of all clients immediately
+    event.waitUntil(self.clients.claim())
 })
 
 // Any other custom service worker logic can go here.
