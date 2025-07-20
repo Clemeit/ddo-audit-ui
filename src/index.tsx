@@ -7,10 +7,11 @@ import browserRouter from "./browserRouter.tsx"
 import { ThemeProvider } from "./contexts/ThemeContext.tsx"
 import { HelmetProvider } from "react-helmet-async"
 import { NotificationProvider } from "./contexts/NotificationContext.tsx"
-import * as serviceWorkerRegistration from "./serviceWorkerRegistration.ts"
+import { ServiceWorkerUpdater } from "./components/global/ServiceWorkerUpdater.tsx"
 import init from "./firebase.ts"
 // Import banner image to get the correct webpack path for preloading
 import bannerImage from "./assets/webp/banner.webp"
+import logMessage from "./utils/logUtils.ts"
 
 // Preload the banner image for improved LCP
 const preloadBannerImage = () => {
@@ -31,18 +32,13 @@ root.render(
     <HelmetProvider>
         <ThemeProvider>
             <NotificationProvider>
+                <ServiceWorkerUpdater />
                 <RouterProvider router={browserRouter} />
             </NotificationProvider>
         </ThemeProvider>
     </HelmetProvider>
 )
 
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-reportWebVitals()
-
-// Register service worker conditionally to improve bfcache compatibility
-if ("serviceWorker" in navigator && process.env.NODE_ENV === "production") {
-    serviceWorkerRegistration.register()
-}
+reportWebVitals((onPerfEntry: any) =>
+    logMessage("Web vitals", "info", { metadata: onPerfEntry })
+)
