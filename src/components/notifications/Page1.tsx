@@ -1,18 +1,22 @@
-import React, { useState } from "react"
+import { useState } from "react"
 import { ContentCluster } from "../global/ContentCluster.tsx"
 import Stack from "../global/Stack.tsx"
 import Spacer from "../global/Spacer.tsx"
 import Button from "../global/Button.tsx"
-import TestNotification from "./TestNotification.tsx"
 import PageMessage from "../global/PageMessage.tsx"
+import { useModalNavigation } from "../../hooks/useModalNavigation.ts"
+import YesNoModal from "../modal/YesNoModal.tsx"
+import firebaseMessaging from "../../services/firebaseMessaging.ts"
 
 interface Props {
     setPage: Function
     isSubscribed: boolean
     onSubscribe: () => Promise<void>
     onUnsubscribe: () => Promise<void>
+    onForceUnsubscribe?: () => Promise<void>
     fcmToken: string | null
     showPreferencesLink?: boolean
+    forceUnsubscribeAvailable?: boolean
 }
 
 const Page1 = ({
@@ -20,10 +24,16 @@ const Page1 = ({
     isSubscribed,
     onSubscribe,
     onUnsubscribe,
+    onForceUnsubscribe,
     fcmToken,
     showPreferencesLink = false,
+    forceUnsubscribeAvailable = false,
 }: Props) => {
     const [rules, setRules] = useState([])
+
+    const sendTestSystemNotification = async () => {
+        await firebaseMessaging.sendTestNotification()
+    }
 
     const getNotificationStatus = () => {
         if (Notification.permission === "denied") {
@@ -62,9 +72,21 @@ const Page1 = ({
     }
 
     const notificationStatus = getNotificationStatus()
+    const { isModalOpen, openModal, closeModal } = useModalNavigation()
 
     return (
         <>
+            {isModalOpen && (
+                <YesNoModal
+                    title="Unsubscribe from Notifications?"
+                    text="Are you sure you want to unsubscribe from push notifications? You will no longer receive real-time updates."
+                    onYes={() => {
+                        onUnsubscribe()
+                        closeModal()
+                    }}
+                    onNo={closeModal}
+                />
+            )}
             {notificationStatus}
             <ContentCluster title="Push Notifications">
                 <p>
@@ -98,12 +120,33 @@ const Page1 = ({
                         </details>
                     )}
 
-                    <Stack gap="10px" fullWidth justify="flex-start">
+                    <Stack
+                        gap="10px"
+                        direction="column"
+                        fullWidth
+                        justify="flex-start"
+                    >
+                        {showPreferencesLink && isSubscribed && (
+                            <Stack gap="10px">
+                                <Button
+                                    type="secondary"
+                                    onClick={() => setPage(3)}
+                                >
+                                    Notification Preferences
+                                </Button>
+                                <Button
+                                    type="secondary"
+                                    onClick={sendTestSystemNotification}
+                                >
+                                    Test System Notification
+                                </Button>
+                            </Stack>
+                        )}
                         {isSubscribed ? (
                             <Button
                                 type="secondary"
                                 className="critical"
-                                onClick={onUnsubscribe}
+                                onClick={openModal}
                             >
                                 Disable Push Notifications
                             </Button>
@@ -112,18 +155,46 @@ const Page1 = ({
                                 Enable Push Notifications
                             </Button>
                         )}
-                        {showPreferencesLink && isSubscribed && (
-                            <Button type="secondary" onClick={() => setPage(3)}>
-                                Notification Preferences
-                            </Button>
+
+                        {forceUnsubscribeAvailable && onForceUnsubscribe && (
+                            <>
+                                <div
+                                    style={{
+                                        fontSize: "12px",
+                                        color: "#dc3545",
+                                        marginTop: "10px",
+                                        padding: "8px",
+                                        backgroundColor: "#f8f9fa",
+                                        border: "1px solid #dee2e6",
+                                        borderRadius: "4px",
+                                    }}
+                                >
+                                    ⚠️ If you're still receiving notifications
+                                    after disabling them, use this option to
+                                    perform a complete cleanup of all
+                                    notification data.
+                                </div>
+                                <Button
+                                    type="secondary"
+                                    className="critical"
+                                    onClick={onForceUnsubscribe}
+                                    style={{
+                                        fontSize: "12px",
+                                        padding: "8px 12px",
+                                        backgroundColor: "#dc3545",
+                                        borderColor: "#dc3545",
+                                    }}
+                                >
+                                    Force Complete Cleanup
+                                </Button>
+                            </>
                         )}
                     </Stack>
                 </Stack>
+                <Spacer size="20px" />
             </ContentCluster>
 
             <Spacer size="20px" />
-
-            {isSubscribed && <TestNotification />}
 
             <ContentCluster title="Notification Rules">
                 {rules.length === 0 && (

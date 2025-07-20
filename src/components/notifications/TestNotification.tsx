@@ -1,6 +1,6 @@
 import React from "react"
 import Button from "../global/Button"
-import firebaseMessaging from "../../services/firebaseMessaging"
+import firebaseMessaging from "../../services/firebaseMessaging.ts"
 
 const TestNotification = () => {
     const sendTestSystemNotification = async () => {

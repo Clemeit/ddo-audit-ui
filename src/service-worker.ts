@@ -158,7 +158,7 @@ messaging.onBackgroundMessage(function (payload) {
                     "New notification"
 
                 const notificationOptions = {
-                    body: notificationBody,
+                    body: "THIS BODY IS FROM service-worker.ts", //notificationBody,
                     icon: "/icons/logo-192px.png",
                     badge: "/icons/logo-192px.png",
                     tag: "ddo-notification",
@@ -177,7 +177,7 @@ messaging.onBackgroundMessage(function (payload) {
                 }
 
                 return self.registration.showNotification(
-                    notificationTitle,
+                    "notificationTitle from service-worker.ts",
                     notificationOptions
                 )
             } else {
