@@ -566,6 +566,8 @@ const useRenderLfm = ({ lfmSprite, context, raidView = false }: Props) => {
                 !!lfm.quest_id &&
                 (lfm.is_quest_guess ? showQuestGuesses : true)
             ) {
+                if (quest == null) return
+
                 // quest name
                 context.fillStyle =
                     lfm.is_quest_guess && lfm.metadata?.isEligible
