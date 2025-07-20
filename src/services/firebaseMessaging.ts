@@ -7,7 +7,7 @@ import {
 import { initializeApp } from "firebase/app"
 
 const firebaseConfig = {
-    apiKey: process.env.REACT_APP_FIREBASE_API_KEY || "",
+    apiKey: "AIzaSyBPQk8DKDZvO88IL5War-0k-GLFmCvqeIg",
     authDomain: "hcnxsryjficudzazjxty.firebaseapp.com",
     projectId: "hcnxsryjficudzazjxty",
     storageBucket: "hcnxsryjficudzazjxty.firebasestorage.app",
@@ -45,7 +45,8 @@ export class FirebaseMessagingService {
 
     public async getToken(): Promise<string | null> {
         try {
-            const vapidKey = process.env.REACT_APP_FIREBASE_VAPID_KEY
+            const vapidKey =
+                "BHURfrHrbo1yse50tNgR-NY_kfrd8oLuzTOugV448qabSRjwKmZh8G63yRA0d_CXtSSU773dXwaFPGMdQkCU0R0"
             if (!vapidKey) {
                 console.error("VAPID key not found in environment variables")
                 return null

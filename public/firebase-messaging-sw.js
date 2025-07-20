@@ -6,7 +6,7 @@ importScripts('https://www.gstatic.com/firebasejs/9.0.0/firebase-messaging-compa
 // Note: In a real production app, you should load these from a secure endpoint
 // rather than hardcoding them in the service worker
 firebase.initializeApp({
-    apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
+    apiKey: "AIzaSyBPQk8DKDZvO88IL5War-0k-GLFmCvqeIg",
     authDomain: "hcnxsryjficudzazjxty.firebaseapp.com",
     projectId: "hcnxsryjficudzazjxty",
     storageBucket: "hcnxsryjficudzazjxty.firebasestorage.app",
