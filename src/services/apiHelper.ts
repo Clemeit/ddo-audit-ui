@@ -48,7 +48,7 @@ export const getRequest = async <T>(
 // Function to make POST requests
 export const postRequest = async <T>(
     endpoint: string,
-    options: { signal?: AbortSignal; data?: any } = {}
+    options: { signal?: AbortSignal; data?: any; headers?: any } = {}
 ) => {
     return genericRequest<T>("post", endpoint, options.data, options)
 }

@@ -9,9 +9,9 @@ import {
     getTotalPopulation1Month,
     getTotalPopulation1Week,
     getUniquePopulation1Quarter,
-} from "../../services/gameService.ts"
+} from "../../services/populationService.ts"
 import { NewsItem } from "../../models/Service.ts"
-import { getNews } from "../../services/newsService.ts"
+import { getNews } from "../../services/serviceService.ts"
 import logMessage from "../../utils/logUtils.ts"
 
 export const useLiveData = () => {

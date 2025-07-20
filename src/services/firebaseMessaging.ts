@@ -4,20 +4,22 @@ import {
     onMessage,
     deleteToken,
 } from "firebase/messaging"
-import { initializeApp } from "firebase/app"
+import { getApp } from "firebase/app"
+import { vapidKey } from "../config/firebaseConfig"
 
-const firebaseConfig = {
-    apiKey: "AIzaSyBPQk8DKDZvO88IL5War-0k-GLFmCvqeIg",
-    authDomain: "hcnxsryjficudzazjxty.firebaseapp.com",
-    projectId: "hcnxsryjficudzazjxty",
-    storageBucket: "hcnxsryjficudzazjxty.firebasestorage.app",
-    messagingSenderId: "808002047047",
-    appId: "1:808002047047:web:251d7d87c213ffd1233562",
-    measurementId: "G-L54PGXRRZV",
+// Get the already initialized Firebase app instead of creating a new one
+let app, messaging
+
+try {
+    app = getApp()
+    messaging = getMessaging(app)
+    console.log("✅ Firebase app and messaging initialized successfully")
+} catch (error) {
+    console.error("❌ Error initializing Firebase app/messaging:", error)
+    console.log(
+        "This might mean Firebase wasn't initialized yet in firebase.ts"
+    )
 }
-
-const app = initializeApp(firebaseConfig)
-const messaging = getMessaging(app)
 
 export class FirebaseMessagingService {
     private static instance: FirebaseMessagingService
@@ -45,8 +47,6 @@ export class FirebaseMessagingService {
 
     public async getToken(): Promise<string | null> {
         try {
-            const vapidKey =
-                "BHURfrHrbo1yse50tNgR-NY_kfrd8oLuzTOugV448qabSRjwKmZh8G63yRA0d_CXtSSU773dXwaFPGMdQkCU0R0"
             if (!vapidKey) {
                 console.error("VAPID key not found in environment variables")
                 return null
@@ -111,22 +111,30 @@ export class FirebaseMessagingService {
     }
 
     public setupForegroundMessageHandler(): void {
-        onMessage(messaging, (payload) => {
-            console.log("Foreground message received:", payload)
+        console.log("Setting up foreground message handler...")
 
-            // Show system notification even when app is in foreground
-            if (payload.notification && "serviceWorker" in navigator) {
+        onMessage(messaging, (payload) => {
+            console.log("🔥 FOREGROUND MESSAGE RECEIVED:", payload)
+
+            // Always show notification when app is in foreground
+            if ("serviceWorker" in navigator) {
                 navigator.serviceWorker.ready.then((registration) => {
                     const notificationTitle =
-                        payload.notification.title || "DDO Audit"
+                        payload.notification?.title ||
+                        payload.data?.title ||
+                        "DDO Audit"
+                    const notificationBody =
+                        payload.notification?.body ||
+                        payload.data?.body ||
+                        "New notification"
+
                     const notificationOptions = {
-                        body: payload.notification.body || "New notification",
+                        body: notificationBody,
                         icon: "/icons/logo-192px.png",
                         badge: "/icons/logo-192px.png",
-                        tag: "ddo-notification-" + Date.now(),
+                        tag: "ddo-notification",
                         data: payload.data || {},
-                        requireInteraction: false,
-                        silent: false,
+                        requireInteraction: true,
                         actions: [
                             {
                                 action: "open",
@@ -139,6 +147,9 @@ export class FirebaseMessagingService {
                         ],
                     }
 
+                    console.log(
+                        "Showing foreground notification via service worker"
+                    )
                     registration.showNotification(
                         notificationTitle,
                         notificationOptions
@@ -146,19 +157,34 @@ export class FirebaseMessagingService {
                 })
             }
         })
+
+        console.log("Foreground message handler setup complete")
     }
 
     public async subscribeToPushNotifications(): Promise<string | null> {
+        console.log("🚀 Starting push notification subscription...")
+
         const hasPermission = await this.requestPermission()
         if (!hasPermission) {
-            console.log("Notification permission denied")
+            console.log("❌ Notification permission denied")
             return null
         }
+
+        console.log("✅ Permission granted, setting up foreground handler...")
 
         // Set up foreground message handler
         this.setupForegroundMessageHandler()
 
-        return await this.getToken()
+        console.log("🎯 Getting FCM token...")
+        const token = await this.getToken()
+
+        if (token) {
+            console.log("✅ Successfully subscribed to push notifications")
+        } else {
+            console.log("❌ Failed to get FCM token")
+        }
+
+        return token
     }
 
     public async unsubscribeFromPushNotifications(): Promise<boolean> {

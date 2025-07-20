@@ -1,5 +1,6 @@
 import ServerLink from "../global/ServerLink.tsx"
 import Skeleton from "../global/Skeleton.tsx"
+import { ReactComponent as InfoSVG } from "../../assets/svg/info.svg"
 
 interface Props {
     defaultServerName: string
@@ -71,11 +72,21 @@ const QuickInfo = ({
     }
 
     return (
-        <ul>
-            <li>{getDefaultServerStatement()}</li>
-            <li>{getMostPopulatedStatement()}</li>
-            <li>{getUniqueCharactersAndGuildsStatement()}</li>
-        </ul>
+        <>
+            <span>
+                <InfoSVG
+                    className="page-message-icon"
+                    style={{ fill: `var(--info)` }}
+                />
+                Data collection has not been running for an entire quarter, so
+                the following data may not be accurate.
+            </span>
+            <ul>
+                <li>{getDefaultServerStatement()}</li>
+                <li>{getMostPopulatedStatement()}</li>
+                <li>{getUniqueCharactersAndGuildsStatement()}</li>
+            </ul>
+        </>
     )
 }
 

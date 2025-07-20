@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from "react"
+import { useEffect, useState } from "react"
 import { PopulationPointInTime } from "../../models/Game"
 import {
     getPopulationData1Week,
     getPopulationData1Month,
-} from "../../services/gameService"
+} from "../../services/populationService.ts"
 import logMessage from "../../utils/logUtils"
 
 const useTrendsData = () => {

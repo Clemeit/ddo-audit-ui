@@ -1,0 +1,34 @@
+
+
+.banner-message {
+    /* position: fixed; */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    padding: 5px 10px;
+    color: var(--text-color);
+    font-size: 1.2rem;
+    z-index: 1;
+    
+    &.critical {
+        background-color: var(--red2);
+    }
+    &.warning {
+        background-color: var(--orange2);
+    }
+    &.info {
+        color: black !important;
+        background-color: var(--blue1);
+    }
+    &.positive {
+        background-color: var(--green3);
+    }
+
+    &.dismissable {
+        cursor: pointer;
+    }
+    &.dismissable:hover {
+        filter: brightness(1.1);
+    }
+}
