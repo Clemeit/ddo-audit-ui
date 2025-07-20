@@ -166,9 +166,6 @@ const LfmCanvas: React.FC<Props> = ({
                 const rect = mainCanvasRef.current.getBoundingClientRect()
                 setCanvasScaleWidth(mainCanvasRef.current.width / rect.width)
                 setCanvasScaleHeight(mainCanvasRef.current.height / rect.height)
-                // console.log(
-                //     `canvasScaleWidth: ${canvasScaleWidth}, canvasScaleHeight: ${canvasScaleHeight}`
-                // )
             }
         }
 
@@ -333,7 +330,6 @@ const LfmCanvas: React.FC<Props> = ({
             !shouldRenderFilterMessage &&
             !shouldRenderAllLfms
         ) {
-            // console.log("Skipping render.")
             return
         }
 
@@ -352,7 +348,6 @@ const LfmCanvas: React.FC<Props> = ({
         }
 
         if (globalRenderNeeded || shouldRenderAllLfms) {
-            // console.log("Rendering all LFMs")
             lfmContext?.clearRect(0, 0, panelWidth, panelHeight)
         }
         lfmContext?.translate(
@@ -486,10 +481,6 @@ const LfmCanvas: React.FC<Props> = ({
                 // }
             }
         }
-
-        // if (numberOfLfmsRendered > 0)
-        //     console.log(`Number of LFMs rendered: ${numberOfLfmsRendered}`)
-        // if (wasOverlayRendered) console.log("Overlay rendered.")
 
         setPreviousState((prev) => ({
             lfms,

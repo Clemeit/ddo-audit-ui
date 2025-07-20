@@ -22,6 +22,11 @@ jobs:
             - name: Install dependencies
               run: yarn install --frozen-lockfile
 
+            - name: Create production .env file
+              run: |
+                  echo "REACT_APP_FIREBASE_API_KEY=${{ secrets.REACT_APP_FIREBASE_API_KEY }}" > .env
+                  echo "REACT_APP_FIREBASE_VAPID_KEY=${{ secrets.REACT_APP_FIREBASE_VAPID_KEY }}" >> .env
+
             - name: Build project
               run: yarn build
 
@@ -37,7 +42,7 @@ jobs:
                   host: ${{ secrets.SSH_HOST }}
                   username: ${{ secrets.SSH_USER }}
                   key: ${{ secrets.SSH_KEY }}
-                  source: "build/*"
+                  source: "build/*,.env"
                   target: "/var/www/ddoaudit-stage.com/html/client/"
                   version: "1.6.13"
 
@@ -51,6 +56,11 @@ jobs:
             - name: Checkout code
               uses: actions/checkout@v3
 
+            - name: Create production .env file
+              run: |
+                  echo "REACT_APP_FIREBASE_API_KEY=${{ secrets.REACT_APP_FIREBASE_API_KEY }}" > .env
+                  echo "REACT_APP_FIREBASE_VAPID_KEY=${{ secrets.REACT_APP_FIREBASE_VAPID_KEY }}" >> .env
+
             - name: Download build artifact
               uses: actions/download-artifact@v4
               with:
@@ -63,6 +73,6 @@ jobs:
                   host: ${{ secrets.SSH_HOST }}
                   username: ${{ secrets.SSH_USER }}
                   key: ${{ secrets.SSH_KEY }}
-                  source: "build/*"
+                  source: "build/*,.env"
                   target: "/var/www/ddoaudit.com/html/client/"
                   version: "1.6.13"

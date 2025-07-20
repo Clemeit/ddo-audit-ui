@@ -82,7 +82,7 @@ export default createBrowserRouter(
                 <Route index element={<Who />} />
                 <Route path=":id" element={<WhoSpecific />} />
             </Route>
-            {/* <Route path="/notifications" element={<Notifications />} /> */}
+            <Route path="/notifications" element={<Notifications />} />
             {/* <Route path="/timers" element={<Timers />} /> */}
             {/* <Route path="/servers" element={<Servers />} /> */}
             <Route path="/feedback" element={<Feedback />} />

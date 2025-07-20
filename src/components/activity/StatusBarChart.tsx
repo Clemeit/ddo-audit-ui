@@ -29,7 +29,6 @@ const StatusBarChart = ({ statusActivity, locationActivity }: Props) => {
                     1000 * 60 * 60 * 24 * 8
             ),
         ]
-        console.log("activityCopy", activityCopy)
 
         const days: { [key: string]: number } = {}
         // let totalTime = 0
@@ -103,15 +102,6 @@ const StatusBarChart = ({ statusActivity, locationActivity }: Props) => {
             }
         }
 
-        // console.log(days)
-        // console.log(convertMillisecondsToPrettyString(totalTime))
-        // console.log(
-        //     Object.entries(days).map(([date, time]) => ({
-        //         date,
-        //         playtime: time,
-        //     }))
-        // )
-
         return Object.entries(days)
             .map(([date, time]) => ({
                 date,
@@ -147,16 +137,6 @@ const StatusBarChart = ({ statusActivity, locationActivity }: Props) => {
         ) {
             days[date.toDateString()] = 0
         }
-
-        console.log(
-            "bbbbbbp",
-            activityCopy.sort((a, b) => {
-                return (
-                    new Date(a.timestamp).getTime() -
-                    new Date(b.timestamp).getTime()
-                )
-            })
-        )
 
         activityCopy
             .sort((a, b) => {
@@ -211,15 +191,6 @@ const StatusBarChart = ({ statusActivity, locationActivity }: Props) => {
                 startTime = startOfNextDay
             }
         }
-
-        // console.log(days)
-        // console.log(convertMillisecondsToPrettyString(totalTime))
-        // console.log(
-        //     Object.entries(days).map(([date, time]) => ({
-        //         date,
-        //         playtime: time,
-        //     }))
-        // )
 
         return Object.entries(days)
             .map(([date, time]) => ({
