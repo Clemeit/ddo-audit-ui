@@ -22,16 +22,11 @@ jobs:
             - name: Install dependencies
               run: yarn install --frozen-lockfile
 
-            - name: Create production .env file
-              run: |
-                  echo "REACT_APP_FIREBASE_API_KEY=${{ secrets.REACT_APP_FIREBASE_API_KEY }}" > .env
-                  echo "REACT_APP_FIREBASE_VAPID_KEY=${{ secrets.REACT_APP_FIREBASE_VAPID_KEY }}" >> .env
-
-            - name: Build project
+            - name: Build project with environment variables
+              env:
+                  REACT_APP_FIREBASE_API_KEY: ${{ secrets.REACT_APP_FIREBASE_API_KEY }}
+                  REACT_APP_FIREBASE_VAPID_KEY: ${{ secrets.REACT_APP_FIREBASE_VAPID_KEY }}
               run: yarn build
-
-            - name: Copy .env to build directory
-              run: cp .env build/
 
             - name: Upload build artifact
               uses: actions/upload-artifact@v4
@@ -59,19 +54,11 @@ jobs:
             - name: Checkout code
               uses: actions/checkout@v3
 
-            - name: Create production .env file
-              run: |
-                  echo "REACT_APP_FIREBASE_API_KEY=${{ secrets.REACT_APP_FIREBASE_API_KEY }}" > .env
-                  echo "REACT_APP_FIREBASE_VAPID_KEY=${{ secrets.REACT_APP_FIREBASE_VAPID_KEY }}" >> .env
-
             - name: Download build artifact
               uses: actions/download-artifact@v4
               with:
                   name: build
                   path: build
-
-            - name: Copy .env to build directory
-              run: cp .env build/
 
             - name: Copy build files to remote server
               uses: appleboy/scp-action@v1.0.0
