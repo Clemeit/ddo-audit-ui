@@ -35,6 +35,7 @@ const Directory = () => {
             <ContentClusterGroup>
                 <ContentCluster title="Population and Activity">
                     <NavCardCluster>
+                        <p>minor test</p>
                         <NavigationCard type="live" />
                         <NavigationCard
                             type="servers"
