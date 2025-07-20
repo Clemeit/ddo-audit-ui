@@ -6,7 +6,7 @@ on:
     workflow_dispatch:
 
 jobs:
-    build-and-deploy-stage:
+    build:
         if: github.ref == 'refs/heads/master' || github.event_name == 'workflow_dispatch'
         runs-on: ubuntu-latest
 
@@ -31,6 +31,17 @@ jobs:
                   name: build
                   path: build
 
+    deploy-to-stage:
+        needs: build
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Download build artifact
+              uses: actions/download-artifact@v4
+              with:
+                  name: build
+                  path: build
+
             - name: Copy build files to remote server
               uses: appleboy/scp-action@v1.0.0
               with:
@@ -42,15 +53,12 @@ jobs:
                   version: "1.6.13"
 
     deploy-to-prod:
-        needs: build-and-deploy-stage
+        needs: build
         # if: github.event_name == 'workflow_dispatch'
         runs-on: ubuntu-latest
         environment: production
 
         steps:
-            - name: Checkout code
-              uses: actions/checkout@v3
-
             - name: Download build artifact
               uses: actions/download-artifact@v4
               with:
