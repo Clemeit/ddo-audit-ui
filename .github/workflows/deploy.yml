@@ -30,6 +30,9 @@ jobs:
             - name: Build project
               run: yarn build
 
+            - name: Copy .env to build directory
+              run: cp .env build/
+
             - name: Upload build artifact
               uses: actions/upload-artifact@v4
               with:
@@ -42,7 +45,7 @@ jobs:
                   host: ${{ secrets.SSH_HOST }}
                   username: ${{ secrets.SSH_USER }}
                   key: ${{ secrets.SSH_KEY }}
-                  source: "build/*,.env"
+                  source: "build/*"
                   target: "/var/www/ddoaudit-stage.com/html/client/"
                   version: "1.6.13"
 
@@ -67,12 +70,15 @@ jobs:
                   name: build
                   path: build
 
+            - name: Copy .env to build directory
+              run: cp .env build/
+
             - name: Copy build files to remote server
               uses: appleboy/scp-action@v1.0.0
               with:
                   host: ${{ secrets.SSH_HOST }}
                   username: ${{ secrets.SSH_USER }}
                   key: ${{ secrets.SSH_KEY }}
-                  source: "build/*,.env"
+                  source: "build/*"
                   target: "/var/www/ddoaudit.com/html/client/"
                   version: "1.6.13"
