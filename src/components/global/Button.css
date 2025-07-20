@@ -35,6 +35,15 @@
     background-color: var(--background);
     color: white;
     border: 1px solid white;
+
+    &.critical {
+        border: 1px solid red !important;
+
+        &:hover {
+            border: 1px solid red !important;
+            box-shadow: 0px 0px 10px 0px red !important;
+        }
+    }
 }
 
 .button.secondary > span {

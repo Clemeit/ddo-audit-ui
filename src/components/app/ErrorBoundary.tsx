@@ -1,6 +1,7 @@
 import React from "react"
 import "./ErrorBoundary.css"
 import Link from "../global/Link.tsx"
+import logMessage from "../../utils/logUtils.ts"
 
 interface ErrorBoundaryState {
     hasError: boolean
@@ -25,6 +26,9 @@ export class ErrorBoundary extends React.Component<
 
     componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
         console.error(error, errorInfo)
+        logMessage("Error caught in ErrorBoundary", "error", {
+            metadata: { error, errorInfo },
+        })
     }
 
     handleResetError = () => {

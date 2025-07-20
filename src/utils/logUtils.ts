@@ -1,4 +1,4 @@
-import { postLog } from "../services/logService.ts"
+import { postLog } from "../services/serviceService.ts"
 import { LogRequest } from "../models/Log.ts"
 
 // Utility function to detect browser name and version

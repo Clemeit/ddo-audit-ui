@@ -71,6 +71,10 @@ const FAQSection = ({
             question: `Is DDO still active in ${new Date().getFullYear()}?`,
             answer: "Yes, DDO is still quite active and receives periodic updates and content releases.",
         },
+        {
+            question: "What is DDO Audit?",
+            answer: "DDO Audit is a community-driven project that tracks DDO server populations, player activity, and provides insights into the game's health and trends. It also serves as a Live LFM and character viewer.",
+        },
     ]
 
     // Use all FAQ data to prevent layout shift

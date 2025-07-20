@@ -35,7 +35,6 @@ export const QuestProvider = ({ children }: Props) => {
             // Cache is stale
             try {
                 const result = await getRequest<QuestApiResponse>("quests")
-                console.log("result", result)
                 setQuests(
                     result.data.reduce(
                         (acc: { [key: number]: Quest }, quest) => {

@@ -36,7 +36,9 @@ const ServerNavigationCard = ({
                 {badge}
             </span>
             {content && (
-                <p className="server-navigation-card-content">{content}</p>
+                <span className="server-navigation-card-content">
+                    {content}
+                </span>
             )}
         </Link>
     ) : (

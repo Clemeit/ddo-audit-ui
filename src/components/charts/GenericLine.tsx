@@ -24,6 +24,7 @@ interface GenericLineProps {
     margin?: any
     dateFormatter?: (date: Date) => string
     yFormatter?: (value: number) => string
+    spotlightSeries?: string[]
 }
 
 const GenericLine = ({
@@ -34,9 +35,11 @@ const GenericLine = ({
     margin = LINE_CHART_MARGIN,
     dateFormatter = (date: Date) => dateToLongStringWithTime(date),
     yFormatter = (value: number) => value.toString(),
+    spotlightSeries = [],
 }: GenericLineProps) => {
     const [excludedSeries, setExcludedSeries] = useState<string[]>([])
-    const [highlightedSeries, setHighlightedSeries] = useState<string>()
+    const [highlightedSeries, setHighlightedSeries] =
+        useState<string[]>(spotlightSeries)
 
     const handleItemClick = (serverId: string) => {
         setExcludedSeries((prev) =>
@@ -47,7 +50,11 @@ const GenericLine = ({
     }
 
     const handleItemHover = (serverId: string) => {
-        setHighlightedSeries(serverId)
+        if (!serverId) {
+            setHighlightedSeries([])
+            return
+        }
+        setHighlightedSeries([serverId])
     }
 
     const getServerColor = createHighlightColorFunction(highlightedSeries)

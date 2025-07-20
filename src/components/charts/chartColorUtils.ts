@@ -5,13 +5,13 @@ import { getServerColor as getServerColorFromLookup } from "../../utils/chartUti
  * @param highlightedSeries - The currently highlighted series ID, if any
  * @returns A function that returns the appropriate color for a given series ID
  */
-export const createHighlightColorFunction = (highlightedSeries?: string) => {
+export const createHighlightColorFunction = (highlightedSeries?: string[]) => {
     return (serverId: string): string => {
-        if (!highlightedSeries) {
+        if (!highlightedSeries || highlightedSeries.length === 0) {
             return getServerColorFromLookup(serverId)
         }
 
-        if (serverId === highlightedSeries) {
+        if (highlightedSeries.includes(serverId)) {
             return getServerColorFromLookup(serverId)
         }
 

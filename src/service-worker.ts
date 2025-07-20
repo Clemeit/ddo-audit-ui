@@ -14,7 +14,33 @@ import { precacheAndRoute, createHandlerBoundToURL } from "workbox-precaching"
 import { registerRoute } from "workbox-routing"
 import { StaleWhileRevalidate } from "workbox-strategies"
 
+// Import Firebase for messaging (v9+ modular SDK)
+/// <reference lib="webworker" />
 declare const self: ServiceWorkerGlobalScope
+
+// Import Firebase v9+ modular SDK
+importScripts(
+    "https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"
+)
+importScripts(
+    "https://www.gstatic.com/firebasejs/9.23.0/firebase-messaging-compat.js"
+)
+
+// Initialize Firebase
+// @ts-ignore
+firebase.initializeApp({
+    apiKey: "AIzaSyBPQk8DKDZvO88IL5War-0k-GLFmCvqeIg",
+    authDomain: "hcnxsryjficudzazjxty.firebaseapp.com",
+    projectId: "hcnxsryjficudzazjxty",
+    storageBucket: "hcnxsryjficudzazjxty.firebasestorage.app",
+    messagingSenderId: "808002047047",
+    appId: "1:808002047047:web:251d7d87c213ffd1233562",
+    measurementId: "G-L54PGXRRZV",
+})
+
+// Get Firebase messaging instance
+// @ts-ignore
+const messaging = firebase.messaging()
 
 clientsClaim()
 
@@ -74,8 +100,126 @@ registerRoute(
 // registration.waiting.postMessage({type: 'SKIP_WAITING'})
 self.addEventListener("message", (event) => {
     if (event.data && event.data.type === "SKIP_WAITING") {
-        self.skipWaiting()
+        // Force skipWaiting and claim clients immediately
+        self.skipWaiting().then(() => {
+            // Claim all clients to ensure immediate control
+            return self.clients.claim()
+        })
     }
+})
+
+// Handle activation to ensure proper cleanup of old caches
+self.addEventListener("activate", (event) => {
+    // Take control of all clients immediately
+    event.waitUntil(self.clients.claim())
+})
+
+// Firebase messaging - handle background messages
+messaging.onBackgroundMessage(function (payload) {
+    console.log("[service-worker] Received background message ", payload)
+
+    // Check if any client (browser tab) is currently focused
+    return self.clients
+        .matchAll({ type: "window" })
+        .then(function (clientList) {
+            let isAppInForeground = false
+
+            console.log("[service-worker] Found clients:", clientList.length)
+
+            for (let i = 0; i < clientList.length; i++) {
+                console.log(
+                    "[service-worker] Client",
+                    i,
+                    "focused:",
+                    clientList[i].focused,
+                    "url:",
+                    clientList[i].url
+                )
+                if (clientList[i].focused) {
+                    isAppInForeground = true
+                    break
+                }
+            }
+
+            console.log(
+                "[service-worker] App in foreground:",
+                isAppInForeground
+            )
+
+            // Only show notification if app is NOT in foreground
+            if (!isAppInForeground) {
+                console.log("[service-worker] Showing background notification")
+
+                const notificationTitle =
+                    payload.notification?.title ||
+                    payload.data?.title ||
+                    "DDO Audit"
+                const notificationBody =
+                    payload.notification?.body ||
+                    payload.data?.body ||
+                    "New notification"
+
+                const notificationOptions = {
+                    body: notificationBody,
+                    icon: "/icons/logo-192px.png",
+                    badge: "/icons/logo-192px.png",
+                    tag: "ddo-notification",
+                    data: payload.data || {},
+                    requireInteraction: true,
+                    actions: [
+                        {
+                            action: "open",
+                            title: "Open App",
+                        },
+                        {
+                            action: "dismiss",
+                            title: "Dismiss",
+                        },
+                    ],
+                }
+
+                return self.registration.showNotification(
+                    notificationTitle,
+                    notificationOptions
+                )
+            } else {
+                console.log(
+                    "[service-worker] App is in foreground, not showing notification"
+                )
+            }
+        })
+})
+
+// Handle notification click
+self.addEventListener("notificationclick", function (event) {
+    console.log("[service-worker] Notification click received.")
+
+    event.notification.close()
+
+    if (event.action === "open" || !event.action) {
+        // Open the app
+        event.waitUntil(
+            self.clients
+                .matchAll({ type: "window", includeUncontrolled: true })
+                .then(function (clientList) {
+                    // If the app is already open, focus it
+                    for (let i = 0; i < clientList.length; i++) {
+                        const client = clientList[i]
+                        if (
+                            client.url.includes(self.location.origin) &&
+                            "focus" in client
+                        ) {
+                            return client.focus()
+                        }
+                    }
+                    // If the app is not open, open it
+                    if (self.clients.openWindow) {
+                        return self.clients.openWindow("/")
+                    }
+                })
+        )
+    }
+    // Dismiss action just closes the notification (already done above)
 })
 
 // Any other custom service worker logic can go here.

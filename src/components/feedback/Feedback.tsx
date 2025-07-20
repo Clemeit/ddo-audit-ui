@@ -8,9 +8,10 @@ import Stack from "../global/Stack.tsx"
 import Button from "../global/Button.tsx"
 import WebLink from "../global/WebLink.tsx"
 import ColoredText from "../global/ColoredText.tsx"
-import { postFeedback } from "../../services/feedbackService.ts"
+import { postFeedback } from "../../services/serviceService.ts"
 import ValidationMessage from "../global/ValidationMessage.tsx"
 import Spacer from "../global/Spacer.tsx"
+import logMessage from "../../utils/logUtils.ts"
 
 const Feedback = () => {
     const [message, setMessage] = React.useState("")
@@ -29,7 +30,7 @@ const Feedback = () => {
         setIsLoading(false)
     }
 
-    const submitFeedback = () => {
+    const submitFeedback = async () => {
         if (!message || !message.trim()) {
             setShowNoMessageValidation(true)
             return
@@ -42,19 +43,25 @@ const Feedback = () => {
             contact: contactInfo || undefined,
         }
 
-        postFeedback(feedback)
-            .then((response) => {
-                setMessage("")
-                setContactInfo("")
-                setWasFeedbackSubmitted(true)
-                setTicketNumber(response.data.data.ticket || "N/A")
+        try {
+            const response = await postFeedback(feedback)
+            setWasFeedbackSubmitted(true)
+            setMessage("")
+            setContactInfo("")
+            setTicketNumber(response.data.ticket || "N/A")
+        } catch (error) {
+            console.error("Error submitting feedback:", error)
+            setIsLoading(false)
+            alert(
+                "There was an error submitting your feedback. Please try again later."
+            )
+            logMessage("Error submitting feedback", "error", {
+                metadata: { error },
             })
-            .catch((error) => {
-                console.error("Error submitting feedback:", error)
-                alert(
-                    "There was an error submitting your feedback. Please try again later."
-                )
-            })
+            return
+        } finally {
+            setIsLoading(false)
+        }
     }
 
     const feedbackCluster = (

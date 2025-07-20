@@ -25,10 +25,14 @@ import { useLiveData } from "./useLiveData.tsx"
 import { findMostPopulatedServer } from "../../utils/gameUtils.ts"
 import { useNotificationContext } from "../../contexts/NotificationContext.tsx"
 import logMessage from "../../utils/logUtils.ts"
+import { ReactComponent as InfoSVG } from "../../assets/svg/info.svg"
 
 import { AlphaReleasePageMessage } from "../global/CommonMessages.tsx"
 import { BOOLEAN_FLAGS } from "../../utils/localStorage.ts"
 import useBooleanFlag from "../../hooks/useBooleanFlags.ts"
+import Stack from "../global/Stack.tsx"
+import Badge from "../global/Badge.tsx"
+
 const Live = () => {
     const {
         data: serverInfoData,
@@ -74,6 +78,18 @@ const Live = () => {
         () => convertToNivoFormat(populationData24Hours),
         [populationData24Hours]
     )
+
+    const isDataNormalized = useMemo(() => {
+        if (!populationData24Hours || populationData24Hours.length === 0) {
+            return false
+        }
+
+        return populationData24Hours.every((point) =>
+            Object.values(point.data).every(
+                (value) => value.character_count <= 1 && value.lfm_count <= 1
+            )
+        )
+    }, [populationData24Hours])
 
     const mostPopulatedServerThisWeek = useMemo(
         () => findMostPopulatedServer(populationTotalsData1Week),
@@ -189,12 +205,44 @@ const Live = () => {
                 </ContentCluster>
                 <ContentCluster title="Live Population">
                     <p>{livePopulationTitle}</p>
-                    <GenericLine nivoData={nivoData} showLegend />
+                    {isDataNormalized && (
+                        <Stack align="center" gap="2px">
+                            <InfoSVG
+                                className="page-message-icon"
+                                style={{ fill: `var(--info)` }}
+                            />
+                            <span className="warning-text">
+                                Note: Data is normalized to show population
+                                trends. Exact population numbers are not shown.
+                            </span>
+                        </Stack>
+                    )}
+                    <GenericLine
+                        nivoData={nivoData}
+                        showLegend
+                        spotlightSeries={[
+                            "cormyr",
+                            "shadowdale",
+                            "thrane",
+                            "moonsea",
+                        ]}
+                        yFormatter={(value: number) =>
+                            `${Math.round(value * 100).toString()}% of max`
+                        }
+                    />
                 </ContentCluster>
                 <ContentCluster title="See Also...">
                     <NavCardCluster>
-                        <NavigationCard type="servers" />
-                        <NavigationCard type="trends" />
+                        <NavigationCard
+                            type="servers"
+                            disabled
+                            badge={<Badge text="Soon" type="soon" />}
+                        />
+                        <NavigationCard
+                            type="trends"
+                            disabled
+                            badge={<Badge text="Soon" type="soon" />}
+                        />
                     </NavCardCluster>
                 </ContentCluster>
             </ContentClusterGroup>

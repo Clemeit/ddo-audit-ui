@@ -300,7 +300,7 @@ const Grouping = () => {
                         >
                             You currently have 0 notification rules set up.
                             Configure rules on the{" "}
-                            <Link to="/notifications" disabled>
+                            <Link to="/notifications">
                                 notification settings
                             </Link>{" "}
                             page.

@@ -16,6 +16,7 @@ import { ReactComponent as TimerSVG } from "../../assets/svg/timer.svg"
 import { ReactComponent as Activity } from "../../assets/svg/activity.svg"
 import { ReactComponent as Health } from "../../assets/svg/health.svg"
 import { ReactComponent as Ignore } from "../../assets/svg/ignore.svg"
+import { ReactComponent as Notifications } from "../../assets/svg/notifications.svg"
 
 import Link from "./Link.tsx"
 import WebLink from "./WebLink.tsx"
@@ -38,6 +39,7 @@ const typeToTitleMap = {
     activity: "Character Activity",
     health: "Site and API Health",
     ignores: "Ignore List",
+    notifications: "Notifications",
 }
 
 const typeToDescriptionMap = {
@@ -60,6 +62,7 @@ const typeToDescriptionMap = {
     activity: "View your verified characters' detailed activity history.",
     health: "Monitor DDO Audit's data collection, website, and API health.",
     ignores: "Hide LFMs posted by certain players or containing certain words.",
+    notifications: "Manage LFM and friend push notification preferences.",
 }
 
 const typeToIconMap = {
@@ -79,6 +82,7 @@ const typeToIconMap = {
     activity: <Activity className="shrinkable-icon" />,
     health: <Health className="shrinkable-icon" />,
     ignores: <Ignore className="shrinkable-icon" />,
+    notifications: <Notifications className="shrinkable-icon" />,
 }
 
 interface Props {

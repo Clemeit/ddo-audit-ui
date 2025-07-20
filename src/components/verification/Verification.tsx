@@ -21,7 +21,6 @@ const VerificationPage = () => {
     })
 
     const accessTokens = getAccessTokensFromLocalStorage()
-    console.log("accessTokens", accessTokens)
 
     const [currentCharacter, setCurrentCharacter] = useState<Character | null>(
         null

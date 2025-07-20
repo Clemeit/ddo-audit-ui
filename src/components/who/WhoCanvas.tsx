@@ -172,9 +172,6 @@ const WhoCanvas = ({
                 const rect = mainCanvasRef.current.getBoundingClientRect()
                 setCanvasScaleWidth(mainCanvasRef.current.width / rect.width)
                 setCanvasScaleHeight(mainCanvasRef.current.height / rect.height)
-                // console.log(
-                //     `canvasScaleWidth: ${canvasScaleWidth}, canvasScaleHeight: ${canvasScaleHeight}`
-                // )
             }
         }
 
@@ -318,9 +315,6 @@ const WhoCanvas = ({
                 mainContext.drawImage(whoPanelRef.current, 0, 0)
                 mainContext.drawImage(whoCharactersRef.current, 0, 0)
             }
-            // console.log(`Rendered ${numberOfCharactersRendered} characters`)
-        } else {
-            // console.log("Skipped render")
         }
 
         setPreviousState({
@@ -339,9 +333,6 @@ const WhoCanvas = ({
             truncatedMessage,
             showInQuestIndicator,
         })
-
-        // console.log("numberOfCharactersRendered", numberOfCharactersRendered)
-        // console.log("panelRendered", panelRendered)
     }, [
         allCharacters,
         curatedCharacters,
