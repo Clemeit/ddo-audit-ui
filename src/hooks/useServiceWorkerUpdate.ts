@@ -10,25 +10,32 @@ export const useServiceWorkerUpdate = () => {
     const handleServiceWorkerUpdate = useCallback(
         (registration: ServiceWorkerRegistration) => {
             const reloadPage = (notificationId: string) => {
-                // Tell the new service worker to skip waiting and become active immediately
                 try {
                     if (registration.waiting) {
+                        // Set up the listener BEFORE posting the message
+                        const handleControllerChange = () => {
+                            navigator.serviceWorker.removeEventListener(
+                                "controllerchange",
+                                handleControllerChange
+                            )
+                            window.location.reload()
+                        }
+
+                        navigator.serviceWorker.addEventListener(
+                            "controllerchange",
+                            handleControllerChange
+                        )
+
+                        // Tell the new service worker to skip waiting
                         registration.waiting.postMessage({
                             type: "SKIP_WAITING",
                         })
-
-                        // Listen for the new service worker to take control
-                        navigator.serviceWorker.addEventListener(
-                            "controllerchange",
-                            () => {
-                                // Reload the page to get the latest content
-                                window.location.reload()
-                            }
-                        )
                     } else {
-                        // Fallback: just reload (though this might not show new content)
+                        // Fallback: just reload
                         window.location.reload()
                     }
+
+                    dismissNotification(notificationId)
                 } catch (error) {
                     logMessage(
                         "Failed to skip waiting for service worker",
@@ -54,7 +61,7 @@ export const useServiceWorkerUpdate = () => {
                 title: "Update Available",
                 message: "A new version of DDO Audit is available.",
                 type: "info",
-                lifetime: MsFromSeconds(10), // Don't auto-dismiss
+                lifetime: MsFromSeconds(10),
                 actions: React.createElement(UpdateNotificationActions, {
                     onRefresh: () => reloadPage(notificationId),
                     onDismiss: () => dismissNotification(notificationId),
