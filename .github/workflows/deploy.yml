@@ -57,6 +57,18 @@ jobs:
                   name: build
                   path: build
 
+            - name: Test SSH connection
+              uses: appleboy/ssh-action@v1.0.3
+              with:
+                  host: ${{ secrets.SSH_HOST }}
+                  username: ${{ secrets.SSH_USER }}
+                  key: ${{ secrets.SSH_KEY }}
+                  script: |
+                      echo "SSH connection successful"
+                      ls -la /var/www/hcnxsryjficudzazjxty.com/html/client/
+                      whoami
+                      pwd
+
             - name: Copy build files to remote server
               uses: appleboy/scp-action@v1.0.0
               with:
