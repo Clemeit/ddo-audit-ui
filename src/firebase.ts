@@ -8,24 +8,8 @@ function init() {
         const app = initializeApp(firebaseConfig)
         const analytics = getAnalytics(app)
 
-        // Register service worker for Firebase messaging
-        if ("serviceWorker" in navigator) {
-            navigator.serviceWorker
-                .register("/firebase-messaging-sw.js")
-                .then((registration) => {
-                    console.log(
-                        "Firebase messaging service worker registered successfully:",
-                        registration.scope
-                    )
-                })
-                .catch((err) => {
-                    console.log(
-                        "Firebase messaging service worker registration failed: ",
-                        err
-                    )
-                })
-        }
-
+        // Note: Firebase messaging is now integrated into the main service worker
+        // No need to register a separate firebase-messaging-sw.js
         console.log("Firebase initialized successfully")
         return app
     } catch (err) {
