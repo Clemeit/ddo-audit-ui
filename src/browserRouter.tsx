@@ -1,4 +1,4 @@
-import React, { lazy } from "react"
+import { lazy } from "react"
 import {
     createBrowserRouter,
     createRoutesFromElements,
@@ -12,7 +12,7 @@ import Directory from "./components/directory/Directory.tsx"
 import Live from "./components/live/Live.tsx"
 import Grouping from "./components/grouping/Grouping.tsx"
 import GroupingSpecific from "./components/grouping/GroupingSpecific.tsx"
-import Servers from "./components/servers/Servers.tsx"
+// import Servers from "./components/servers/Servers.tsx"
 import Who from "./components/who/Who.tsx"
 import WhoSpecific from "./components/who/WhoSpecific.tsx"
 
@@ -23,18 +23,18 @@ const Verification = lazy(
 const Registration = lazy(
     () => import("./components/registration/Registration.tsx")
 )
-const Activity = lazy(() => import("./components/activity/Activity.tsx"))
+// const Activity = lazy(() => import("./components/activity/Activity.tsx"))
 const NotFound = lazy(() => import("./components/app/NotFound.tsx"))
-const Notifications = lazy(
-    () => import("./components/notifications/Notifications.tsx")
-)
-const Timers = lazy(() => import("./components/timers/Timers.tsx"))
+// const Notifications = lazy(
+//     () => import("./components/notifications/Notifications.tsx")
+// )
+// const Timers = lazy(() => import("./components/timers/Timers.tsx"))
 const Feedback = lazy(() => import("./components/feedback/Feedback.tsx"))
 const Friends = lazy(() => import("./components/friends/Friends.tsx"))
 const About = lazy(() => import("./components/about/About.tsx"))
 const Ignores = lazy(() => import("./components/ignores/Ignores.tsx"))
-const Trends = lazy(() => import("./components/trends/Trends.tsx"))
-const Quests = lazy(() => import("./components/quests/Quests.tsx"))
+// const Trends = lazy(() => import("./components/trends/Trends.tsx"))
+// const Quests = lazy(() => import("./components/quests/Quests.tsx"))
 
 // Providers
 import {
@@ -82,7 +82,7 @@ export default createBrowserRouter(
                 <Route index element={<Who />} />
                 <Route path=":id" element={<WhoSpecific />} />
             </Route>
-            <Route path="/notifications" element={<Notifications />} />
+            {/* <Route path="/notifications" element={<Notifications />} /> */}
             {/* <Route path="/timers" element={<Timers />} /> */}
             {/* <Route path="/servers" element={<Servers />} /> */}
             <Route path="/feedback" element={<Feedback />} />

@@ -31,7 +31,6 @@ const Directory = () => {
                     />
                 </div>
             )}
-            <span>This is some content</span>
             <ContentClusterGroup>
                 <ContentCluster title="Population and Activity">
                     <NavCardCluster>
@@ -57,7 +56,11 @@ const Directory = () => {
                     <NavCardCluster>
                         <NavigationCard type="grouping" />
                         <NavigationCard type="who" />
-                        <NavigationCard type="notifications" />
+                        <NavigationCard
+                            type="notifications"
+                            badge={<Badge text="Soon" type="soon" />}
+                            disabled
+                        />
                         <NavigationCard type="friends" />
                         <NavigationCard type="ignores" />
                     </NavCardCluster>
