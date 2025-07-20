@@ -32,13 +32,14 @@ jobs:
                   path: build
 
             - name: Copy build files to remote server
-              uses: appleboy/scp-action@v0.1.7
+              uses: appleboy/scp-action@v1.0.0
               with:
                   host: ${{ secrets.SSH_HOST }}
                   username: ${{ secrets.SSH_USER }}
                   key: ${{ secrets.SSH_KEY }}
                   source: "build/*"
                   target: "/var/www/ddoaudit-stage.com/html/client/"
+                  version: "1.6.13"
 
     deploy-to-prod:
         needs: build-and-deploy-stage
@@ -47,6 +48,9 @@ jobs:
         environment: production
 
         steps:
+            - name: Checkout code
+              uses: actions/checkout@v3
+
             - name: Download build artifact
               uses: actions/download-artifact@v4
               with:
@@ -54,10 +58,11 @@ jobs:
                   path: build
 
             - name: Copy build files to remote server
-              uses: appleboy/scp-action@v0.1.7
+              uses: appleboy/scp-action@v1.0.0
               with:
                   host: ${{ secrets.SSH_HOST }}
                   username: ${{ secrets.SSH_USER }}
                   key: ${{ secrets.SSH_KEY }}
                   source: "build/*"
                   target: "/var/www/hcnxsryjficudzazjxty.com/html/client/"
+                  version: "1.6.13"
