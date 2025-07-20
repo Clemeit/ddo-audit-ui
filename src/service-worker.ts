@@ -14,14 +14,16 @@ import { precacheAndRoute, createHandlerBoundToURL } from "workbox-precaching"
 import { registerRoute } from "workbox-routing"
 import { StaleWhileRevalidate } from "workbox-strategies"
 
-// Import Firebase for messaging
+// Import Firebase for messaging (v9+ modular SDK)
 /// <reference lib="webworker" />
 declare const self: ServiceWorkerGlobalScope
 
-// Import Firebase scripts
-importScripts("https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js")
+// Import Firebase v9+ modular SDK
 importScripts(
-    "https://www.gstatic.com/firebasejs/9.0.0/firebase-messaging-compat.js"
+    "https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"
+)
+importScripts(
+    "https://www.gstatic.com/firebasejs/9.23.0/firebase-messaging-compat.js"
 )
 
 // Initialize Firebase
@@ -158,7 +160,7 @@ messaging.onBackgroundMessage(function (payload) {
                     "New notification"
 
                 const notificationOptions = {
-                    body: "THIS BODY IS FROM service-worker.ts", //notificationBody,
+                    body: notificationBody,
                     icon: "/icons/logo-192px.png",
                     badge: "/icons/logo-192px.png",
                     tag: "ddo-notification",
@@ -177,7 +179,7 @@ messaging.onBackgroundMessage(function (payload) {
                 }
 
                 return self.registration.showNotification(
-                    "notificationTitle from service-worker.ts",
+                    notificationTitle,
                     notificationOptions
                 )
             } else {

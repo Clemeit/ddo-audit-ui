@@ -53,9 +53,15 @@ export class FirebaseMessagingService {
                 return null
             }
 
-            // Try to get token with VAPID key
+            // Wait for service worker to be ready and use our existing service worker
+            const registration = await navigator.serviceWorker.ready
+
+            // Try to get token with VAPID key and our service worker
             try {
-                const token = await getToken(messaging, { vapidKey })
+                const token = await getToken(messaging, {
+                    vapidKey,
+                    serviceWorkerRegistration: registration,
+                })
                 if (token) {
                     this.currentToken = token
                     console.log("FCM Token:", token)
@@ -137,7 +143,7 @@ export class FirebaseMessagingService {
                         "New notification"
 
                     const notificationOptions = {
-                        body: "THIS BODY IS FROM firebaseMessaging", //notificationBody,
+                        body: notificationBody,
                         icon: "/icons/logo-192px.png",
                         badge: "/icons/logo-192px.png",
                         tag: "ddo-notification",
@@ -159,7 +165,7 @@ export class FirebaseMessagingService {
                         "Showing foreground notification via service worker"
                     )
                     registration.showNotification(
-                        "notificationTitle from firebaseMessaging.ts",
+                        notificationTitle,
                         notificationOptions
                     )
                 })
@@ -171,6 +177,9 @@ export class FirebaseMessagingService {
 
     public async subscribeToPushNotifications(): Promise<string | null> {
         console.log("🚀 Starting push notification subscription...")
+
+        // Ensure service worker is registered and ready
+        await this.ensureServiceWorkerRegistered()
 
         const hasPermission = await this.requestPermission()
         if (!hasPermission) {
@@ -193,6 +202,42 @@ export class FirebaseMessagingService {
         }
 
         return token
+    }
+
+    private async ensureServiceWorkerRegistered(): Promise<void> {
+        if ("serviceWorker" in navigator) {
+            try {
+                // Wait for existing registration or register if needed
+                let registration =
+                    await navigator.serviceWorker.getRegistration()
+
+                if (!registration) {
+                    console.log("🔧 No service worker found, registering...")
+                    registration =
+                        await navigator.serviceWorker.register(
+                            "/service-worker.js"
+                        )
+                    console.log(
+                        "✅ Service worker registered:",
+                        registration.scope
+                    )
+                } else {
+                    console.log(
+                        "✅ Service worker already registered:",
+                        registration.scope
+                    )
+                }
+
+                // Wait for service worker to be ready
+                await navigator.serviceWorker.ready
+                console.log("✅ Service worker ready")
+            } catch (error) {
+                console.error("❌ Service worker registration failed:", error)
+                throw error
+            }
+        } else {
+            throw new Error("Service workers not supported")
+        }
     }
 
     public async unsubscribeFromPushNotifications(): Promise<boolean> {
