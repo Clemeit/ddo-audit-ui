@@ -64,5 +64,5 @@ jobs:
                   username: ${{ secrets.SSH_USER }}
                   key: ${{ secrets.SSH_KEY }}
                   source: "build/*"
-                  target: "/var/www/hcnxsryjficudzazjxty.com/html/client/"
+                  target: "/var/www/ddoaudit.com/html/client/"
                   version: "1.6.13"
