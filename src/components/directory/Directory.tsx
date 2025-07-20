@@ -57,6 +57,7 @@ const Directory = () => {
                     <NavCardCluster>
                         <NavigationCard type="grouping" />
                         <NavigationCard type="who" />
+                        <NavigationCard type="notifications" />
                         <NavigationCard type="friends" />
                         <NavigationCard type="ignores" />
                     </NavCardCluster>

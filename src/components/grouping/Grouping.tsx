@@ -291,22 +291,20 @@ const Grouping = () => {
                     {getCurrentRaidsContent()}
                 </ContentCluster>
                 <ContentCluster title="Notifications">
-                    <Stack direction="row" gap="10px" align="center">
-                        <p
-                            style={{
-                                textDecoration: "line-through",
-                                margin: 0,
-                            }}
-                        >
-                            You currently have 0 notification rules set up.
-                            Configure rules on the{" "}
-                            <Link to="/notifications" disabled>
-                                notification settings
-                            </Link>{" "}
-                            page.
-                        </p>
-                        <Badge text="Soon" type="soon" />
-                    </Stack>
+                    {/* <Stack direction="row" gap="10px" align="center"> */}
+                    <p
+                    // style={{
+                    //     textDecoration: "line-through",
+                    //     margin: 0,
+                    // }}
+                    >
+                        You currently have 0 notification rules set up.
+                        Configure rules on the{" "}
+                        <Link to="/notifications">notification settings</Link>{" "}
+                        page.
+                    </p>
+                    {/* <Badge text="Soon" type="soon" />
+                    </Stack> */}
                 </ContentCluster>
                 <ContentCluster title="See Also...">
                     <NavCardCluster>
