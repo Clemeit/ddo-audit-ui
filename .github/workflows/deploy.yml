@@ -57,23 +57,12 @@ jobs:
                   name: build
                   path: build
 
-            - name: Debug - List files
-              run: |
-                  echo "=== Current directory ==="
-                  pwd
-                  echo "=== Files in current directory ==="
-                  ls -la
-                  echo "=== Files in build directory ==="
-                  ls -la build/
-                  echo "=== Files in build subdirectory (if exists) ==="
-                  ls -la build/build/ || echo "No build/build directory"
-
             - name: Copy build files to remote server
               uses: appleboy/scp-action@v1.0.0
               with:
                   host: ${{ secrets.SSH_HOST }}
                   username: ${{ secrets.SSH_USER }}
                   key: ${{ secrets.SSH_KEY }}
-                  source: "build/"
+                  source: "build/*"
                   target: "/var/www/hcnxsryjficudzazjxty.com/html/client/"
                   version: "1.6.13"
