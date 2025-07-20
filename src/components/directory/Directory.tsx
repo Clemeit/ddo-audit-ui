@@ -22,7 +22,6 @@ const Directory = () => {
             title="DDO Audit | Character Tracking and LFM Viewer"
             description="A live summary of DDO's current player population and LFM status. View population trends, check server status, browse live grouping panels, check to see if your friends are online, and decide what server is best for you!"
         >
-            {" "}
             {!hideAlphaRelease && (
                 <div className="alpha-release-message">
                     <AlphaReleasePageMessage
@@ -32,6 +31,7 @@ const Directory = () => {
                     />
                 </div>
             )}
+            <span>This is some content</span>
             <ContentClusterGroup>
                 <ContentCluster title="Population and Activity">
                     <NavCardCluster>
