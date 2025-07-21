@@ -136,7 +136,11 @@ const CharacterTable = ({
         )
         const nameCell = (
             <td className="character-cell">
-                <span>
+                <span
+                    style={{
+                        whiteSpace: "nowrap",
+                    }}
+                >
                     {character.is_anonymous ? "Anonymous" : character.name}
                 </span>
             </td>

@@ -173,29 +173,27 @@ const CharacterSelectModal = ({
     }
 
     const refineSelectionContent = (
-        <div style={{ padding: "10px" }}>
-            <ContentCluster title="Select a Character">
-                <div className="selection-form-content">
-                    <CharacterTable
-                        characterRows={characterRows}
-                        visibleColumns={visibleColumns}
-                    />
-                </div>
-                <div className="selection-form-footer">
-                    <Stack fullWidth justify="space-between">
-                        <div />
-                        <Button
-                            type="secondary"
-                            onClick={() =>
-                                keepModalOpen ? resetModal() : handleClose()
-                            }
-                        >
-                            Done
-                        </Button>
-                    </Stack>
-                </div>
-            </ContentCluster>
-        </div>
+        <ContentCluster title="Select a Character">
+            <div className="selection-form-content">
+                <CharacterTable
+                    characterRows={characterRows}
+                    visibleColumns={visibleColumns}
+                />
+            </div>
+            <div className="selection-form-footer">
+                <Stack fullWidth justify="space-between">
+                    <div />
+                    <Button
+                        type="secondary"
+                        onClick={() =>
+                            keepModalOpen ? resetModal() : handleClose()
+                        }
+                    >
+                        Done
+                    </Button>
+                </Stack>
+            </div>
+        </ContentCluster>
     )
 
     const findCharacterContent = (
