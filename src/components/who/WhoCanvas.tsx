@@ -22,6 +22,7 @@ import {
 import { CLASS_LIST_LOWER, MAX_LEVEL, MIN_LEVEL } from "../../constants/game.ts"
 import { BoundingBox } from "../../models/Geometry.ts"
 import { SPRITE_MAP } from "../../constants/spriteMap.ts"
+import { useAreaContext } from "../../contexts/AreaContext.tsx"
 
 interface Props {
     allCharacters: Character[]
@@ -129,6 +130,8 @@ const WhoCanvas = ({
         context: whoCharactersRef.current.getContext("2d"),
     })
 
+    const { areas } = useAreaContext()
+
     const [previousState, setPreviousState] = useState({
         onlineCharacterCount: -1,
         anonymousCharacterCount: 0,
@@ -144,6 +147,7 @@ const WhoCanvas = ({
         maxLevel,
         truncatedMessage: "",
         showInQuestIndicator,
+        areas,
     })
 
     // Load the lfm sprite
@@ -215,7 +219,9 @@ const WhoCanvas = ({
             previousState.isExactMatch !== isExactMatch ||
             previousState.stringFilter !== stringFilter ||
             previousState.minLevel !== minLevel ||
-            previousState.maxLevel !== maxLevel
+            previousState.maxLevel !== maxLevel ||
+            previousState.areas !== areas
+
         if (shouldRenderWhoPanel) {
             renderWhoPanel({
                 characters: allCharacters,
@@ -332,6 +338,7 @@ const WhoCanvas = ({
             maxLevel,
             truncatedMessage,
             showInQuestIndicator,
+            areas,
         })
     }, [
         allCharacters,
@@ -345,6 +352,7 @@ const WhoCanvas = ({
         isExactMatch,
         sortBy,
         showInQuestIndicator,
+        areas,
     ])
 
     const handleCanvasClick = (e: React.MouseEvent<HTMLCanvasElement>) => {

@@ -7,6 +7,7 @@ import { BoundingBox } from "../models/Geometry.ts"
 import { CLASS_LIST_LOWER } from "../constants/game.ts"
 import { Character, CharacterSortType } from "../models/Character.ts"
 import { calculateCommonFilterBoundingBoxes } from "../utils/whoUtils.ts"
+import { useAreaContext } from "../contexts/AreaContext.tsx"
 
 interface Props {
     sprite?: HTMLImageElement | null
@@ -28,6 +29,7 @@ const useRenderWhoPanel = ({ sprite, context }: Props) => {
         sprite,
         context,
     })
+    const { areas } = useAreaContext()
     const {
         filterZone,
         filterHeaderTextBoundingBox,
@@ -437,6 +439,7 @@ const useRenderWhoPanel = ({ sprite, context }: Props) => {
             classNameFilter,
             isExactMatch,
             sortBy,
+            areas,
         ]
     )
 
