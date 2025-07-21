@@ -40,7 +40,7 @@ const QuickInfo = ({
                     The most populated server this month was{" "}
                     <ServerLink serverName={mostPopulatedServerThisMonth} />,
                     but <ServerLink serverName={mostPopulatedServerThisWeek} />{" "}
-                    was more popular this past week
+                    surpassed it this week
                 </span>
             )
         }
