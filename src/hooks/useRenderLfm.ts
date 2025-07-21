@@ -800,6 +800,7 @@ const useRenderLfm = ({ lfmSprite, context, raidView = false }: Props) => {
             confineTextToBoundingBox,
             calculateQuestInfoYPositions,
             highlightRaids,
+            quests,
         ]
     )
 

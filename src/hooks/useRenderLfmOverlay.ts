@@ -584,7 +584,7 @@ const useRenderLfmOverlay = ({ lfmSprite, context }: Props) => {
                                 activityDataText =
                                     event.data === "0"
                                         ? "No quest"
-                                        : eventQuest?.name
+                                        : eventQuest?.name || "Unknown quest"
                                 break
                             case LfmActivityType.COMMENT:
                                 activityDataText = event.data || "No comment"
@@ -1138,6 +1138,8 @@ const useRenderLfmOverlay = ({ lfmSprite, context }: Props) => {
             isMultiColumn,
             confineTextToBoundingBox,
             showEligibleCharacters,
+            questContext,
+            areaContext,
         ]
     )
 

@@ -59,7 +59,7 @@ function wrapText(
     context: CanvasRenderingContext2D,
     maxLines?: number
 ) {
-    if (text.length === 0) return [""]
+    if (!text || text.length === 0) return [""]
 
     const previousFont = context.font
     context.font = font

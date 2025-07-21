@@ -134,8 +134,20 @@ function areLfmsEquivalent(previous: Lfm, current: Lfm): boolean {
     if (previous.leader.name !== current.leader.name) return false
     if (previous.metadata?.isEligible !== current.metadata?.isEligible)
         return false
-    if (previous.metadata?.raidActivity !== current.metadata?.raidActivity)
-        return false
+
+    // Deep comparison for raidActivity array
+    const prevRaidActivity = previous.metadata?.raidActivity || []
+    const currRaidActivity = current.metadata?.raidActivity || []
+    if (prevRaidActivity.length !== currRaidActivity.length) return false
+    for (let i = 0; i < prevRaidActivity.length; i++) {
+        if (
+            JSON.stringify(prevRaidActivity[i]) !==
+            JSON.stringify(currRaidActivity[i])
+        ) {
+            return false
+        }
+    }
+
     if (previous.accepted_classes_count !== current.accepted_classes_count)
         return false
 
