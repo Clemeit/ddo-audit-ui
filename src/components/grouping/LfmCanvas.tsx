@@ -5,7 +5,7 @@ import useRenderLfmPanel from "../../hooks/useRenderLfmPanel.ts"
 import useRenderLfmOverlay, {
     RenderType,
 } from "../../hooks/useRenderLfmOverlay.ts"
-import LfmSprite from "../../assets/png/lfm_sprite_2.webp"
+import LfmSprite from "../../assets/png/lfm_sprite_6.webp"
 import { useLfmContext } from "../../contexts/LfmContext.tsx"
 import {
     areLfmArraysEqual,
@@ -106,6 +106,7 @@ const LfmCanvas: React.FC<Props> = ({
         showLfmPostedTime,
         fontSize,
         highlightRaids,
+        isLoading,
     })
     const fonts = useMemo(() => FONTS(), [])
 
@@ -285,16 +286,17 @@ const LfmCanvas: React.FC<Props> = ({
 
         // Check if global render is needed. This happens when the panel size changes.
         const globalRenderNeeded =
+            lfms.length !== previousState.lfms.length ||
             isFirstRender ||
             panelWidth !== previousState.panelWidth ||
             panelHeight !== previousState.panelHeight
 
         const shouldRenderPanel =
             raidView !== previousState.raidView ||
-            sortBy !== previousState.sortBy
+            sortBy !== previousState.sortBy ||
+            previousState.isLoading !== isLoading
 
         const shouldRenderAllLfms =
-            lfms.length !== previousState.lfms.length ||
             previousState.showRaidTimerIndicator !== showRaidTimerIndicator ||
             previousState.showMemberCount !== showMemberCount ||
             previousState.showQuestGuesses !== showQuestGuesses ||
@@ -302,7 +304,8 @@ const LfmCanvas: React.FC<Props> = ({
             previousState.showCharacterGuildNames !== showCharacterGuildNames ||
             previousState.showLfmPostedTime !== showLfmPostedTime ||
             previousState.fontSize !== fontSize ||
-            previousState.highlightRaids !== highlightRaids
+            previousState.highlightRaids !== highlightRaids ||
+            previousState.isLoading !== isLoading
 
         const shouldRenderFilterMessage =
             excludedLfmCount !== previousState.excludedLfmCount
@@ -501,6 +504,7 @@ const LfmCanvas: React.FC<Props> = ({
             showLfmPostedTime,
             fontSize,
             highlightRaids,
+            isLoading,
         }))
         setIsFirstRender(false)
     }, [

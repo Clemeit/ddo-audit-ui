@@ -1,6 +1,8 @@
 import axios from "axios"
+import { getRequest } from "./apiHelper"
+import { RaidActivityEndpointResponse } from "../models/Activity"
 
-const API_URL = "https://api.hcnxsryjficudzazjxty.com/v1/activity"
+const ACTIVITY_ENDPOINT = "activity"
 
 function getCharacterLocationActivityById(
     id: number,
@@ -16,7 +18,7 @@ function getCharacterLocationActivityById(
     if (limit) params.append("limit", limit.toString())
     if (areaName) params.append("area_name", areaName)
 
-    return axios.get(`${API_URL}/${id}/location`, {
+    return getRequest(`${ACTIVITY_ENDPOINT}/${id}/location`, {
         headers: {
             Authorization: accessToken,
         },
@@ -36,7 +38,7 @@ function getCharacterStatusActivityById(
     if (endDate) params.append("end_date", endDate)
     if (limit) params.append("limit", limit.toString())
 
-    return axios.get(`${API_URL}/${id}/status`, {
+    return getRequest(`${ACTIVITY_ENDPOINT}/${id}/status`, {
         headers: {
             Authorization: accessToken,
         },
@@ -56,7 +58,7 @@ function getCharacterLevelActivityById(
     if (endDate) params.append("end_date", endDate)
     if (limit) params.append("limit", limit.toString())
 
-    return axios.get(`${API_URL}/${id}/level`, {
+    return getRequest(`${ACTIVITY_ENDPOINT}/${id}/level`, {
         headers: {
             Authorization: accessToken,
         },
@@ -64,11 +66,13 @@ function getCharacterLevelActivityById(
     })
 }
 
-function getCharacterRaidActivityByIds(characterIds: number[]) {
+function getCharacterRaidActivityByIds(
+    characterIds: number[]
+): Promise<RaidActivityEndpointResponse> {
     const params = new URLSearchParams()
     params.append("character_ids", characterIds.join(","))
 
-    return axios.get(`${API_URL}/raids`, {
+    return getRequest(`${ACTIVITY_ENDPOINT}/raids`, {
         params,
     })
 }

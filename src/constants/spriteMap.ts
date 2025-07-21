@@ -125,6 +125,12 @@ const SPRITE_MAP = {
         width: 4,
         height: 18,
     },
+    TIMER: {
+        x: 245,
+        y: 0,
+        width: 24,
+        height: 26,
+    },
     GROUP_VIEW_CHECKBOX: {
         CHECKED: {
             x: 206,

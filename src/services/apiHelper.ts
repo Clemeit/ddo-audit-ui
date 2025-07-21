@@ -40,7 +40,12 @@ const genericRequest = async <T>(
 // Function to make GET requests
 export const getRequest = async <T>(
     endpoint: string,
-    options: { signal?: AbortSignal } = {}
+    options: {
+        signal?: AbortSignal
+        data?: any
+        headers?: any
+        params?: any
+    } = {}
 ) => {
     return genericRequest<T>("get", endpoint, undefined, options)
 }
@@ -48,7 +53,12 @@ export const getRequest = async <T>(
 // Function to make POST requests
 export const postRequest = async <T>(
     endpoint: string,
-    options: { signal?: AbortSignal; data?: any; headers?: any } = {}
+    options: {
+        signal?: AbortSignal
+        data?: any
+        headers?: any
+        params?: any
+    } = {}
 ) => {
     return genericRequest<T>("post", endpoint, options.data, options)
 }

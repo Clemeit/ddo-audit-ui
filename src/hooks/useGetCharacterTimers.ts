@@ -1,51 +1,54 @@
 import { useEffect, useState } from "react"
 import { Character } from "../models/Character"
-import { Quest } from "../models/Lfm"
-import { getCharacterTimersByIds } from "../services/characterService.ts"
+import { getCharacterRaidActivityByIds } from "../services/activityService"
 
 interface Props {
     verifiedCharacters: Character[]
 }
 
 interface QuestInstances {
-    quest: Quest
-    instances: string[]
+    timestamp: string
+    quest_ids: number[]
 }
 
 interface CharacterTimers {
     character: Character
-    questInstances: QuestInstances[]
+    raidActivity: QuestInstances[]
 }
 
 const useGetCharacterTimers = ({ verifiedCharacters }: Props) => {
     const [characterTimers, setCharacterTimers] = useState<CharacterTimers[]>(
         []
     )
+    console.log("characterTimers", characterTimers)
 
     useEffect(() => {
-        if (!verifiedCharacters || verifiedCharacters.length === 0) return
-        // get timers for each character
-        const characterIds = verifiedCharacters.map((character) => character.id)
-        getCharacterTimersByIds(characterIds)
-            .then((response) => {
-                const timers = response.data?.data
-                const characterTimers = timers.map((timer) => {
-                    const character = verifiedCharacters.find(
-                        (c) => c.id === timer.character_id
+        ;(async () => {
+            if (!verifiedCharacters || verifiedCharacters.length === 0) return
+            // get timers for each character
+            const characterIds = verifiedCharacters.map(
+                (character) => character.id
+            )
+            const raidActivity =
+                await getCharacterRaidActivityByIds(characterIds)
+            if (!raidActivity?.data?.length) return
+            const characterTimers: CharacterTimers[] = verifiedCharacters.map(
+                (character) => {
+                    const activityForCharacter = raidActivity.data.filter(
+                        (activity) => activity.character_id === character.id
                     )
-                    const questInstances = timer.quests.map((quest) => {
-                        const instances = quest.instances.map(
-                            (instance) => instance.name
-                        )
-                        return { quest, instances }
-                    })
-                    return { character, questInstances }
-                })
-                setCharacterTimers(characterTimers)
-            })
-            .catch((error) => {
-                console.error("Error getting character timers", error)
-            })
+                    return {
+                        character,
+                        raidActivity: activityForCharacter.map((event) => ({
+                            timestamp: event.timestamp,
+                            quest_ids: event.data.quest_ids,
+                        })),
+                    }
+                }
+            )
+
+            setCharacterTimers(characterTimers)
+        })()
     }, [verifiedCharacters])
 
     return { characterTimers }

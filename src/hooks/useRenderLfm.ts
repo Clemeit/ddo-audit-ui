@@ -21,6 +21,7 @@ import { convertMillisecondsToPrettyString } from "../utils/stringUtils.ts"
 import { SPRITE_MAP } from "../constants/spriteMap.ts"
 import { mapRaceAndGenderToRaceIconBoundingBox } from "../utils/socialUtils.ts"
 import { useQuestContext } from "../contexts/QuestContext.tsx"
+import { getActiveTimer } from "../utils/timerUtils.ts"
 
 interface Props {
     lfmSprite?: HTMLImageElement | null
@@ -606,6 +607,32 @@ const useRenderLfm = ({ lfmSprite, context, raidView = false }: Props) => {
                     questDifficultyBoundingBox.centerX(),
                     questDifficultyBoundingBox.centerY()
                 )
+
+                // raid timer icon
+                const showRaidTimerIcon =
+                    lfm.metadata?.eligibleCharacters?.length > 0 &&
+                    lfm.metadata.eligibleCharacters
+                        .map((character) =>
+                            getActiveTimer(
+                                character,
+                                lfm.quest_id,
+                                lfm.metadata?.raidActivity
+                            )
+                        )
+                        .filter(Boolean).length > 0
+                if (showRaidTimerIcon) {
+                    context.drawImage(
+                        lfmSprite,
+                        SPRITE_MAP.TIMER.x,
+                        SPRITE_MAP.TIMER.y,
+                        SPRITE_MAP.TIMER.width,
+                        SPRITE_MAP.TIMER.height,
+                        questPanelBoundingBoxWithPadding.right() - 17,
+                        questPanelBoundingBoxWithPadding.y,
+                        SPRITE_MAP.TIMER.width - 6,
+                        SPRITE_MAP.TIMER.height - 6
+                    )
+                }
             }
 
             // ===== CLASS PANEL =====

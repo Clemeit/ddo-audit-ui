@@ -34,6 +34,7 @@ import { useAreaContext } from "../contexts/AreaContext.tsx"
 import { useQuestContext } from "../contexts/QuestContext.tsx"
 import { getActiveTimer } from "../utils/timerUtils.ts"
 import useGetFriends from "./useGetFriends.ts"
+import { ActivityEvent } from "../models/Activity.ts"
 
 interface Props {
     lfmSprite?: HTMLImageElement | null
@@ -91,6 +92,22 @@ const useRenderLfmOverlay = ({ lfmSprite, context }: Props) => {
 
             if (willWrap)
                 totalOverlayWidth = OVERLAY_WIDTH + OVERLAY_CHARACTER_WIDTH + 3
+
+            let activeTimers: ActivityEvent[] = []
+            if (
+                showEligibleCharacters &&
+                lfm.metadata?.eligibleCharacters?.length > 0
+            ) {
+                activeTimers = lfm.metadata.eligibleCharacters
+                    .map((character) =>
+                        getActiveTimer(
+                            character,
+                            lfm.quest_id,
+                            lfm.metadata?.raidActivity
+                        )
+                    )
+                    .filter(Boolean)
+            }
 
             const {
                 textLines: commentTextLines,
@@ -201,6 +218,9 @@ const useRenderLfmOverlay = ({ lfmSprite, context }: Props) => {
                             )
                         }
                     })
+                }
+                if (activeTimers.length > 0) {
+                    totalOverlayHeight += activeTimers.length * 20 + 28 + 10
                 }
             }
 
@@ -673,19 +693,7 @@ const useRenderLfmOverlay = ({ lfmSprite, context }: Props) => {
                     )
                 }
 
-                if (
-                    showEligibleCharacters &&
-                    lfm.metadata?.eligibleCharacters?.length > 0
-                ) {
-                    const activeTimers = lfm.metadata.eligibleCharacters
-                        .map((character) =>
-                            getActiveTimer(
-                                character,
-                                lfm.quest_id,
-                                lfm.metadata?.raidActivity
-                            )
-                        )
-                        .filter(Boolean)
+                if (activeTimers.length > 0) {
                     const maximumEligibleCharacters = 5
                     const willOverflow =
                         lfm.metadata.eligibleCharacters.length >
@@ -1062,6 +1070,45 @@ const useRenderLfmOverlay = ({ lfmSprite, context }: Props) => {
                         if (lfm.difficulty) {
                             renderQuestInfo("Difficulty:", lfm.difficulty)
                         }
+                    }
+
+                    if (activeTimers.length > 0) {
+                        context.resetTransform()
+                        context.translate(
+                            totalOverlayWidth / 2 - OVERLAY_SIDE_BAR_WIDTH / 2,
+                            totalOverlayHeight - activeTimers.length * 20 - 25
+                        )
+                        context.font = OVERLAY_FONTS.QUEST_INFO_HEADER
+                        context.textAlign = "center"
+                        context.textBaseline = "middle"
+                        context.fillText("Raid Timers:", 0, 0)
+                        context.translate(0, 20)
+                        context.font = OVERLAY_FONTS.QUEST_INFO
+
+                        activeTimers.forEach((timer) => {
+                            const character =
+                                lfm.metadata?.eligibleCharacters?.find(
+                                    (c) => c.id === timer.character_id
+                                )
+                            if (character) {
+                                const elapsedTime =
+                                    Date.now() -
+                                    new Date(timer.timestamp).getTime()
+                                const remainingTime =
+                                    RAID_TIMER_MILLIS - elapsedTime
+                                const remainingTimeString =
+                                    convertMillisecondsToPrettyString(
+                                        remainingTime,
+                                        true
+                                    )
+                                context.fillText(
+                                    `${character.name}: ${remainingTimeString}`,
+                                    0,
+                                    0
+                                )
+                                context.translate(0, 20)
+                            }
+                        })
                     }
                 }
             }

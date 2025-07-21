@@ -12,9 +12,10 @@ import {
     StaleDataPageMessage,
 } from "../global/CommonMessages.tsx"
 import { getCharacterRaidActivityByIds } from "../../services/activityService.ts"
-import { ActivityEvent } from "../../models/Activity.ts"
+import { ActivityEvent, RaidActivityEvent } from "../../models/Activity.ts"
 import useGetFriends from "../../hooks/useGetFriends.ts"
 import useGetIgnores from "../../hooks/useGetIgnores.ts"
+import logMessage from "../../utils/logUtils.ts"
 
 interface Props {
     serverName: string
@@ -64,30 +65,43 @@ const GroupingContainer = ({
         interval: 10000,
         lifespan: 1000 * 60 * 60 * 12, // 12 hours
     })
-    const [raidActivity, setRaidActivity] = useState<ActivityEvent[]>([])
+    const [raidActivity, setRaidActivity] = useState<RaidActivityEvent[]>([])
 
     useEffect(() => {
         // Only look up characters that are:
         // 1. Being tracked
         // 2. Are on this server
-        const trackedCharactersOnThisServer = registeredCharacters.filter(
-            (character) =>
-                character.server_name.toLowerCase() ===
-                    serverName.toLowerCase() &&
-                trackedCharacterIds.includes(character.id)
-        )
-        if (
-            trackedCharactersOnThisServer &&
-            trackedCharactersOnThisServer.length
-        ) {
-            getCharacterRaidActivityByIds(
-                trackedCharactersOnThisServer.map((character) => character.id)
+        ;(async () => {
+            const trackedCharactersOnThisServer = registeredCharacters.filter(
+                (character) =>
+                    character.server_name.toLowerCase() ===
+                        serverName.toLowerCase() &&
+                    trackedCharacterIds.includes(character.id)
             )
-                .then((activities) => {
-                    setRaidActivity(activities.data.data)
-                })
-                .catch(() => {})
-        }
+            if (
+                trackedCharactersOnThisServer &&
+                trackedCharactersOnThisServer.length
+            ) {
+                try {
+                    const raidActivity = await getCharacterRaidActivityByIds(
+                        trackedCharactersOnThisServer.map(
+                            (character) => character.id
+                        )
+                    )
+                    setRaidActivity(raidActivity.data)
+                    console.log("raidActivity", raidActivity)
+                } catch (error) {
+                    logMessage("Error fetching raid activity:", "error", {
+                        metadata: {
+                            error:
+                                error instanceof Error ? error.message : error,
+                            trackedCharacterIds,
+                            serverName,
+                        },
+                    })
+                }
+            }
+        })()
     }, [trackedCharacterIds])
 
     var handleScreenshot = function () {
@@ -246,7 +260,8 @@ const GroupingContainer = ({
         const hydratedLfms = filteredAndSortedLfms.map((lfm) => {
             // Hydrate with any activity relevant to this LFM
             const raidActivityForLfm = raidActivity.filter(
-                (activity) => activity.data === lfm.quest_id
+                (activity) =>
+                    activity.data?.quest_ids?.includes(lfm.quest_id) || false
             )
             const isPostedByFriend = friends.some(
                 (friend) => friend.id === lfm.leader.id

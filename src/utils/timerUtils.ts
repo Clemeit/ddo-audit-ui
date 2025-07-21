@@ -15,7 +15,7 @@ function getActiveTimer(
         )
         .find((activity) => {
             if (activity.character_id !== character.id) return false
-            if (activity.data !== questId) return false
+            if (!activity.data.quest_ids.includes(questId)) return false
             const elapsedTime =
                 Date.now() - new Date(activity.timestamp).getTime()
             const remainingTime = RAID_TIMER_MILLIS - elapsedTime

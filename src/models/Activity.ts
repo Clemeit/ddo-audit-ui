@@ -18,5 +18,22 @@ enum CharacterActivityType {
     status = "status",
 }
 
-export type { ActivityEvent, CharacterActivity }
+interface RaidActivityEvent {
+    timestamp: string
+    character_id: number
+    data: {
+        quest_ids: number[]
+    }
+}
+
+interface RaidActivityEndpointResponse {
+    data: RaidActivityEvent[]
+}
+
+export type {
+    ActivityEvent,
+    CharacterActivity,
+    RaidActivityEvent,
+    RaidActivityEndpointResponse,
+}
 export { CharacterActivityType }

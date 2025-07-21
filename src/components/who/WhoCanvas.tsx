@@ -12,7 +12,7 @@ import {
     MINIMUM_CHARACTER_COUNT,
     WHO_COLORS,
 } from "../../constants/whoPanel.ts"
-import LfmSprite from "../../assets/png/lfm_sprite_2.webp"
+import LfmSprite from "../../assets/png/lfm_sprite_6.webp"
 import useRenderWhoPanel from "../../hooks/useRenderWhoPanel.ts"
 import useRenderCharacter from "../../hooks/useRenderCharacter.ts"
 import {
