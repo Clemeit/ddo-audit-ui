@@ -14,7 +14,7 @@ export const ServiceWorkerUpdater = () => {
             serviceWorkerRegistration.register({
                 onUpdate: handleServiceWorkerUpdate,
                 onSuccess: () => {
-                    console.log("Service worker registered successfully")
+                    // console.log("Service worker registered successfully")
                 },
             })
         }

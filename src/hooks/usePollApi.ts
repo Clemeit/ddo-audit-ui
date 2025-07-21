@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react"
 import { getRequest } from "../services/apiHelper.ts"
 import { LoadingState } from "../models/Api.ts"
+import logMessage from "../utils/logUtils.ts"
 
 interface UsePollApiProps {
     endpoint: string
@@ -46,9 +47,18 @@ const usePollApi = <T>({
                 const result = await getRequest<T>(endpoint, { signal })
                 setData(result)
                 setState(LoadingState.Loaded)
-            } catch (err) {
-                setError(err as Error)
+            } catch (error) {
+                setError(error as Error)
                 setState(LoadingState.Error)
+                logMessage("Error fetching data", "error", {
+                    metadata: {
+                        error:
+                            error instanceof Error
+                                ? error.message
+                                : String(error),
+                        stack: error instanceof Error ? error.stack : undefined,
+                    },
+                })
             } finally {
                 clearTimeout(loadingStateTimeout)
                 if (!signal.aborted) {

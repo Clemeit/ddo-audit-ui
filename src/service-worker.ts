@@ -116,7 +116,7 @@ self.addEventListener("activate", (event) => {
 
 // Firebase messaging - handle background messages
 messaging.onBackgroundMessage(function (payload) {
-    console.log("[service-worker] Received background message ", payload)
+    // console.log("[service-worker] Received background message ", payload)
 
     // Check if any client (browser tab) is currently focused
     return self.clients
@@ -124,31 +124,31 @@ messaging.onBackgroundMessage(function (payload) {
         .then(function (clientList) {
             let isAppInForeground = false
 
-            console.log("[service-worker] Found clients:", clientList.length)
+            // console.log("[service-worker] Found clients:", clientList.length)
 
             for (let i = 0; i < clientList.length; i++) {
-                console.log(
-                    "[service-worker] Client",
-                    i,
-                    "focused:",
-                    clientList[i].focused,
-                    "url:",
-                    clientList[i].url
-                )
+                // console.log(
+                //     "[service-worker] Client",
+                //     i,
+                //     "focused:",
+                //     clientList[i].focused,
+                //     "url:",
+                //     clientList[i].url
+                // )
                 if (clientList[i].focused) {
                     isAppInForeground = true
                     break
                 }
             }
 
-            console.log(
-                "[service-worker] App in foreground:",
-                isAppInForeground
-            )
+            // console.log(
+            //     "[service-worker] App in foreground:",
+            //     isAppInForeground
+            // )
 
             // Only show notification if app is NOT in foreground
             if (!isAppInForeground) {
-                console.log("[service-worker] Showing background notification")
+                // console.log("[service-worker] Showing background notification")
 
                 const notificationTitle =
                     payload.notification?.title ||
@@ -183,16 +183,16 @@ messaging.onBackgroundMessage(function (payload) {
                     notificationOptions
                 )
             } else {
-                console.log(
-                    "[service-worker] App is in foreground, not showing notification"
-                )
+                // console.log(
+                //     "[service-worker] App is in foreground, not showing notification"
+                // )
             }
         })
 })
 
 // Handle notification click
 self.addEventListener("notificationclick", function (event) {
-    console.log("[service-worker] Notification click received.")
+    // console.log("[service-worker] Notification click received.")
 
     event.notification.close()
 

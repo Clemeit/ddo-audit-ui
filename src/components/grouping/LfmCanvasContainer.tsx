@@ -89,7 +89,6 @@ const GroupingContainer = ({
                         )
                     )
                     setRaidActivity(raidActivity.data)
-                    console.log("raidActivity", raidActivity)
                 } catch (error) {
                     logMessage("Error fetching raid activity:", "error", {
                         metadata: {

@@ -12,6 +12,7 @@ import { postFeedback } from "../../services/serviceService.ts"
 import ValidationMessage from "../global/ValidationMessage.tsx"
 import Spacer from "../global/Spacer.tsx"
 import logMessage from "../../utils/logUtils.ts"
+import { useNotificationContext } from "../../contexts/NotificationContext.tsx"
 
 const Feedback = () => {
     const [message, setMessage] = React.useState("")
@@ -22,6 +23,8 @@ const Feedback = () => {
     const [isLoading, setIsLoading] = React.useState(false)
     const [showNoMessageValidation, setShowNoMessageValidation] =
         useState<boolean>(false)
+
+    const { createNotification } = useNotificationContext()
 
     const resetForm = () => {
         setMessage("")
@@ -52,9 +55,12 @@ const Feedback = () => {
         } catch (error) {
             console.error("Error submitting feedback:", error)
             setIsLoading(false)
-            alert(
-                "There was an error submitting your feedback. Please try again later."
-            )
+            createNotification({
+                title: "Error",
+                message:
+                    "There was an error submitting your feedback. Please try again later.",
+                type: "error",
+            })
             logMessage("Error submitting feedback", "error", {
                 metadata: { error },
             })

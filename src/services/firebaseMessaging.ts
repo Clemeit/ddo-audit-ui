@@ -14,12 +14,18 @@ let app, messaging
 try {
     app = getApp()
     messaging = getMessaging(app)
-    console.log("✅ Firebase app and messaging initialized successfully")
+    // console.log("✅ Firebase app and messaging initialized successfully")
 } catch (error) {
-    console.error("❌ Error initializing Firebase app/messaging:", error)
-    console.log(
-        "This might mean Firebase wasn't initialized yet in firebase.ts"
-    )
+    // console.error("❌ Error initializing Firebase app/messaging:", error)
+    // console.log(
+    //     "This might mean Firebase wasn't initialized yet in firebase.ts"
+    // )
+    logMessage("Firebase messaging initialization failed", "error", {
+        metadata: {
+            error: error instanceof Error ? error.message : String(error),
+            stack: error instanceof Error ? error.stack : undefined,
+        },
+    })
 }
 
 export class FirebaseMessagingService {
@@ -41,7 +47,14 @@ export class FirebaseMessagingService {
             const permission = await Notification.requestPermission()
             return permission === "granted"
         } catch (error) {
-            console.error("Error requesting notification permission:", error)
+            // console.error("Error requesting notification permission:", error)
+            logMessage("Error requesting notification permission", "error", {
+                metadata: {
+                    error:
+                        error instanceof Error ? error.message : String(error),
+                    stack: error instanceof Error ? error.stack : undefined,
+                },
+            })
             return false
         }
     }
@@ -64,7 +77,7 @@ export class FirebaseMessagingService {
                 })
                 if (token) {
                     this.currentToken = token
-                    console.log("FCM Token:", token)
+                    // console.log("FCM Token:", token)
 
                     // Save token to localStorage for persistence
                     localStorage.setItem("fcm_token", token)
@@ -75,18 +88,31 @@ export class FirebaseMessagingService {
 
                     return token
                 } else {
-                    console.log("No registration token available.")
+                    // console.log("No registration token available.")
+                    logMessage("No registration token available", "warn")
                     return null
                 }
             } catch (vapidError) {
-                console.error("Error with VAPID key:", vapidError)
-                console.log(
-                    "VAPID key might be invalid. Please check your Firebase Console."
-                )
+                // console.error("Error with VAPID key:", vapidError)
+                // console.log(
+                //     "VAPID key might be invalid. Please check your Firebase Console."
+                // )
+                logMessage("Error with VAPID key", "error", {
+                    metadata: {
+                        error:
+                            vapidError instanceof Error
+                                ? vapidError.message
+                                : String(vapidError),
+                        stack:
+                            vapidError instanceof Error
+                                ? vapidError.stack
+                                : undefined,
+                    },
+                })
                 throw vapidError // Re-throw the original error for debugging
             }
         } catch (error) {
-            console.error("Error getting FCM token:", error)
+            // console.error("Error getting FCM token:", error)
             logMessage("Error getting FCM token", "error", {
                 message: error instanceof Error ? error.message : String(error),
             })
@@ -111,11 +137,18 @@ export class FirebaseMessagingService {
             if (success) {
                 this.currentToken = null
                 localStorage.removeItem("fcm_token")
-                console.log("FCM token deleted successfully")
+                // console.log("FCM token deleted successfully")
             }
             return success
         } catch (error) {
-            console.error("Error deleting FCM token:", error)
+            // console.error("Error deleting FCM token:", error)
+            logMessage("Error deleting FCM token", "error", {
+                metadata: {
+                    error:
+                        error instanceof Error ? error.message : String(error),
+                    stack: error instanceof Error ? error.stack : undefined,
+                },
+            })
             return false
         }
     }
@@ -125,10 +158,10 @@ export class FirebaseMessagingService {
     }
 
     public setupForegroundMessageHandler(): void {
-        console.log("Setting up foreground message handler...")
+        // console.log("Setting up foreground message handler...")
 
         onMessage(messaging, (payload) => {
-            console.log("🔥 FOREGROUND MESSAGE RECEIVED:", payload)
+            // console.log("🔥 FOREGROUND MESSAGE RECEIVED:", payload)
 
             // Always show notification when app is in foreground
             if ("serviceWorker" in navigator) {
@@ -161,9 +194,9 @@ export class FirebaseMessagingService {
                         ],
                     }
 
-                    console.log(
-                        "Showing foreground notification via service worker"
-                    )
+                    // console.log(
+                    //     "Showing foreground notification via service worker"
+                    // )
                     registration.showNotification(
                         notificationTitle,
                         notificationOptions
@@ -172,33 +205,43 @@ export class FirebaseMessagingService {
             }
         })
 
-        console.log("Foreground message handler setup complete")
+        // console.log("Foreground message handler setup complete")
     }
 
     public async subscribeToPushNotifications(): Promise<string | null> {
-        console.log("🚀 Starting push notification subscription...")
+        // console.log("🚀 Starting push notification subscription...")
 
         // Ensure service worker is registered and ready
         await this.ensureServiceWorkerRegistered()
 
         const hasPermission = await this.requestPermission()
         if (!hasPermission) {
-            console.log("❌ Notification permission denied")
+            // console.log("❌ Notification permission denied")
+            logMessage("Notification permission denied", "warn", {
+                metadata: {
+                    error: "User denied notification permission",
+                },
+            })
             return null
         }
 
-        console.log("✅ Permission granted, setting up foreground handler...")
+        // console.log("✅ Permission granted, setting up foreground handler...")
 
         // Set up foreground message handler
         this.setupForegroundMessageHandler()
 
-        console.log("🎯 Getting FCM token...")
+        // console.log("🎯 Getting FCM token...")
         const token = await this.getToken()
 
         if (token) {
-            console.log("✅ Successfully subscribed to push notifications")
+            // console.log("✅ Successfully subscribed to push notifications")
         } else {
-            console.log("❌ Failed to get FCM token")
+            // console.log("❌ Failed to get FCM token")
+            logMessage("Failed to get FCM token", "error", {
+                metadata: {
+                    error: "Could not retrieve FCM token after permission granted",
+                },
+            })
         }
 
         return token
@@ -212,30 +255,40 @@ export class FirebaseMessagingService {
                     await navigator.serviceWorker.getRegistration()
 
                 if (!registration) {
-                    console.log("🔧 No service worker found, registering...")
+                    // console.log("🔧 No service worker found, registering...")
                     registration =
                         await navigator.serviceWorker.register(
                             "/service-worker.js"
                         )
-                    console.log(
-                        "✅ Service worker registered:",
-                        registration.scope
-                    )
+                    // console.log(
+                    //     "✅ Service worker registered:",
+                    //     registration.scope
+                    // )
                 } else {
-                    console.log(
-                        "✅ Service worker already registered:",
-                        registration.scope
-                    )
+                    // console.log(
+                    //     "✅ Service worker already registered:",
+                    //     registration.scope
+                    // )
                 }
 
                 // Wait for service worker to be ready
                 await navigator.serviceWorker.ready
-                console.log("✅ Service worker ready")
+                // console.log("✅ Service worker ready")
             } catch (error) {
                 console.error("❌ Service worker registration failed:", error)
+                logMessage("Service worker registration failed", "error", {
+                    metadata: {
+                        error:
+                            error instanceof Error
+                                ? error.message
+                                : String(error),
+                        stack: error instanceof Error ? error.stack : undefined,
+                    },
+                })
                 throw error
             }
         } else {
+            logMessage("Service workers not supported in this browser", "error")
             throw new Error("Service workers not supported")
         }
     }
@@ -261,7 +314,7 @@ export class FirebaseMessagingService {
             this.currentToken = null
             localStorage.removeItem("fcm_token")
             localStorage.removeItem("notification_preferences")
-            console.log("Local notification data cleared")
+            // console.log("Local notification data cleared")
         } catch (error) {
             errors.push(`Local storage cleanup error: ${error}`)
             success = false
@@ -275,12 +328,17 @@ export class FirebaseMessagingService {
                 this.removeTokenFromServer(storedToken)
             }
         } catch (error) {
-            console.warn("Could not remove token from server:", error)
+            // console.warn("Could not remove token from server:", error)
             // Don't mark as failure since server communication is optional
         }
 
         if (errors.length > 0) {
-            console.error("Unsubscription completed with errors:", errors)
+            // console.error("Unsubscription completed with errors:", errors)
+            logMessage("Unsubscription completed with errors", "error", {
+                metadata: {
+                    errors: errors.join(", "),
+                },
+            })
         }
 
         return success
@@ -288,8 +346,7 @@ export class FirebaseMessagingService {
 
     public removeTokenFromServer(token: string): void {
         // This would call your backend to remove the token from the server
-        console.log("Removing token from server:", token)
-
+        // console.log("Removing token from server:", token)
         // Example API call (implement according to your backend):
         // fetch('/api/fcm-tokens', {
         //     method: 'DELETE',
@@ -305,7 +362,7 @@ export class FirebaseMessagingService {
     }
 
     public async forceCompleteUnsubscribe(): Promise<boolean> {
-        console.log("🧹 Starting complete unsubscription cleanup...")
+        // console.log("🧹 Starting complete unsubscription cleanup...")
 
         // This is a more aggressive cleanup that ensures the user is truly unsubscribed
         let success = true
@@ -335,7 +392,7 @@ export class FirebaseMessagingService {
                 localStorage.removeItem(key)
             })
             this.currentToken = null
-            console.log("✅ Local storage cleared")
+            // console.log("✅ Local storage cleared")
         } catch (error) {
             errors.push(`Local storage cleanup error: ${error}`)
             success = false
@@ -349,10 +406,10 @@ export class FirebaseMessagingService {
                 for (let registration of registrations) {
                     // Only unregister if it's specifically for notifications
                     // Be careful here - you might want to keep your service worker for other features
-                    console.log(
-                        "Service worker registration found:",
-                        registration.scope
-                    )
+                    // console.log(
+                    //     "Service worker registration found:",
+                    //     registration.scope
+                    // )
                     // registration.unregister() // Uncomment if you want to unregister SW
                 }
             }
@@ -362,12 +419,21 @@ export class FirebaseMessagingService {
         }
 
         if (errors.length > 0) {
-            console.error(
-                "Complete unsubscription finished with errors:",
-                errors
+            // console.error(
+            //     "Complete unsubscription finished with errors:",
+            //     errors
+            // )
+            logMessage(
+                "Complete unsubscription finished with errors",
+                "error",
+                {
+                    metadata: {
+                        errors: errors.join(", "),
+                    },
+                }
             )
         } else {
-            console.log("✅ Complete unsubscription successful")
+            // console.log("✅ Complete unsubscription successful")
         }
 
         return success
@@ -408,9 +474,8 @@ export class FirebaseMessagingService {
     public sendTokenToServer(token: string, userPreferences?: any): void {
         // This is where you would send the token to your backend server
         // to store it and associate it with the user's notification preferences
-        console.log("Token to send to server:", token)
-        console.log("User preferences:", userPreferences)
-
+        // console.log("Token to send to server:", token)
+        // console.log("User preferences:", userPreferences)
         // Example API call (implement according to your backend):
         // fetch('/api/fcm-tokens', {
         //     method: 'POST',
@@ -434,7 +499,7 @@ export class FirebaseMessagingService {
                 requireInteraction: false,
             })
         } else {
-            console.warn("Notification permission not granted")
+            // console.warn("Notification permission not granted")
         }
     }
 }

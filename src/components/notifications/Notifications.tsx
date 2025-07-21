@@ -48,9 +48,9 @@ const Notifications = () => {
 
             // If we think they're subscribed but they actually can't receive notifications
             if (isSubscribed && !notificationStatus.canReceive) {
-                console.log(
-                    "Detected that user can no longer receive notifications, updating state"
-                )
+                // console.log(
+                //     "Detected that user can no longer receive notifications, updating state"
+                // )
                 setIsSubscribed(false)
                 setFcmToken(null)
             }
@@ -66,7 +66,7 @@ const Notifications = () => {
     }, [notificationPreferences, isSubscribed, fcmToken])
 
     async function requestPermission() {
-        console.log("Requesting permission...")
+        // console.log("Requesting permission...")
         try {
             const token = await firebaseMessaging.subscribeToPushNotifications()
             if (token) {
@@ -76,12 +76,33 @@ const Notifications = () => {
                     token,
                     notificationPreferences
                 )
-                console.log("Push notifications enabled successfully")
+                // console.log("Push notifications enabled successfully")
             } else {
-                console.log("Permission denied or error occurred")
+                logMessage(
+                    "Push notifications permission denied or error occurred",
+                    "warn",
+                    {
+                        metadata: {
+                            error: "Permission denied or error occurred while subscribing to push notifications.",
+                        },
+                    }
+                )
+                // console.log("Permission denied or error occurred")
             }
         } catch (error) {
-            console.error("Error requesting permission:", error)
+            // console.error("Error requesting permission:", error)
+            logMessage(
+                "Error requesting push notifications permission",
+                "error",
+                {
+                    metadata: {
+                        error:
+                            error instanceof Error
+                                ? error.message
+                                : String(error),
+                    },
+                }
+            )
         }
     }
 
@@ -96,17 +117,17 @@ const Notifications = () => {
             setFcmToken(null)
 
             if (success) {
-                console.log("Push notifications disabled successfully")
-                logMessage("Push notifications disabled successfully", "info")
+                // console.log("Push notifications disabled successfully")
+                // logMessage("Push notifications disabled successfully", "info")
                 createNotification({
                     title: "Success",
                     message: "Push notifications have been disabled.",
                     type: "success",
                 })
             } else {
-                console.warn(
-                    "Push notifications disabled with some cleanup issues"
-                )
+                // console.warn(
+                //     "Push notifications disabled with some cleanup issues"
+                // )
                 logMessage(
                     "Push notifications disabled with some cleanup issues",
                     "warn"
@@ -119,7 +140,7 @@ const Notifications = () => {
                 })
             }
         } catch (error) {
-            console.error("Error unsubscribing:", error)
+            // console.error("Error unsubscribing:", error)
 
             // Even on error, try to clean up local state to prevent user confusion
             setIsSubscribed(false)
@@ -131,7 +152,7 @@ const Notifications = () => {
                 localStorage.removeItem("fcm_token")
                 localStorage.removeItem("notification_preferences")
             } catch (storageError) {
-                console.error("Could not clear local storage:", storageError)
+                // console.error("Could not clear local storage:", storageError)
             }
 
             logMessage("Error disabling push notifications", "error", {
@@ -173,7 +194,7 @@ const Notifications = () => {
                 })
             }
         } catch (error) {
-            console.error("Error in force unsubscribe:", error)
+            // console.error("Error in force unsubscribe:", error)
             createNotification({
                 title: "Force Cleanup Error",
                 message:

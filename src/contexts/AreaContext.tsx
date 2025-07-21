@@ -8,6 +8,7 @@ import {
 } from "../utils/localStorage.ts"
 import { getRequest } from "../services/apiHelper.ts"
 import { CACHED_AREAS_EXPIRY_TIME } from "../constants/client.ts"
+import logMessage from "../utils/logUtils.ts"
 
 interface AreaContextProps {
     areas: { [key: number]: Area }
@@ -42,8 +43,17 @@ export const AreaProvider = ({ children }: Props) => {
                     }, {})
                 )
                 setAreasInLocalStorage(result.data)
-            } catch {
+            } catch (error) {
                 setAreas({})
+                logMessage("Error fetching areas", "error", {
+                    metadata: {
+                        error:
+                            error instanceof Error
+                                ? error.message
+                                : String(error),
+                        stack: error instanceof Error ? error.stack : undefined,
+                    },
+                })
             }
         } else {
             // Cache OK

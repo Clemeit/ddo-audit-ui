@@ -7,6 +7,7 @@ import PageMessage from "../global/PageMessage.tsx"
 import { useModalNavigation } from "../../hooks/useModalNavigation.ts"
 import YesNoModal from "../modal/YesNoModal.tsx"
 import firebaseMessaging from "../../services/firebaseMessaging.ts"
+import { useNotificationContext } from "../../contexts/NotificationContext.tsx"
 
 interface Props {
     setPage: Function
@@ -31,8 +32,19 @@ const Page1 = ({
 }: Props) => {
     const [rules, setRules] = useState([])
 
+    const { createNotification } = useNotificationContext()
+
     const sendTestSystemNotification = async () => {
-        await firebaseMessaging.sendTestNotification()
+        try {
+            await firebaseMessaging.sendTestNotification()
+        } catch (error) {
+            createNotification({
+                title: "Error",
+                message:
+                    "Failed to send test notification. Please try again later.",
+                type: "error",
+            })
+        }
     }
 
     const getNotificationStatus = () => {
