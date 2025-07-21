@@ -26,7 +26,7 @@ const FAQSection = ({
 }: Props) => {
     const getMostPopulatedServerString = (): string => {
         if (mostPopulatedServerThisMonth !== mostPopulatedServerThisWeek) {
-            return `${toSentenceCase(mostPopulatedServerThisMonth)} was recently DDO's most populated server, but it has recently been passed by ${toSentenceCase(mostPopulatedServerThisWeek)}.`
+            return `${toSentenceCase(mostPopulatedServerThisMonth)} has been DDO's most populated server for a while, but it was recently passed by ${toSentenceCase(mostPopulatedServerThisWeek)}.`
         }
         return `${toSentenceCase(mostPopulatedServerThisMonth)} is currently DDO's most populated server.`
     }
