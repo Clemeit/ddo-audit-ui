@@ -51,6 +51,7 @@ const MultiPanelContainer = ({ serverName, primaryType }: Props) => {
                         fullWidth
                         type="who"
                         onClick={() => setSecondaryType("who")}
+                        disabled={primaryType === PrimaryType.Who}
                     />
                 </NavCardCluster>
             </div>

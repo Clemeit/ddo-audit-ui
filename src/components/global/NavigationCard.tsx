@@ -141,7 +141,7 @@ const NavigationCard = ({
         return (
             <button
                 onClick={handleClick}
-                className={`navigation-card ${fullWidth ? "full-width" : ""}`}
+                className={`navigation-card ${fullWidth ? "full-width" : ""} ${disabled ? "disabled" : ""}`}
                 disabled={disabled}
             >
                 <span className="navigation-card-title">
