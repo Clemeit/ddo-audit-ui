@@ -30,6 +30,11 @@ const Page = ({
 }: Props) => {
     const isOnline = useNetworkStatus()
 
+    // Convert relative logo path to absolute URL for social media meta tags
+    const absoluteLogoUrl = logo.startsWith("http")
+        ? logo
+        : `https://www.ddoaudit.com${logo}`
+
     return (
         <div className={className}>
             {!isOnline && (
@@ -45,12 +50,12 @@ const Page = ({
                 />
                 <meta
                     property="og:image"
-                    content={logo}
+                    content={absoluteLogoUrl}
                     data-react-helmet="true"
                 />
                 <meta
                     property="twitter:image"
-                    content={logo}
+                    content={absoluteLogoUrl}
                     data-react-helmet="true"
                 />
                 <meta name="twitter:title" content={title} />
