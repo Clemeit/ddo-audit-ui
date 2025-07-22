@@ -8,8 +8,6 @@ import useRenderLfmOverlay, {
 import LfmSprite from "../../assets/png/lfm_sprite_6.webp"
 import { useLfmContext } from "../../contexts/LfmContext.tsx"
 import {
-    areLfmArraysEqual,
-    areLfmOverlaysEquivalent,
     areLfmsEquivalent,
     calculateCommonBoundingBoxes,
 } from "../../utils/lfmUtils.ts"

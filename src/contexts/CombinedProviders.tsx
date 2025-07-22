@@ -32,7 +32,9 @@ export const GroupingDataProvider = ({ children }: Props) => (
 export const WhoDataProvider = ({ children }: Props) => (
     <WhoProvider>
         <LfmProvider>
-            <AreaProvider>{children}</AreaProvider>
+            <AreaProvider>
+                <QuestProvider>{children}</QuestProvider>
+            </AreaProvider>
         </LfmProvider>
     </WhoProvider>
 )
