@@ -48,25 +48,24 @@ const Page = ({
                     rel="canonical"
                     href={`https://www.ddoaudit.com${window.location.pathname}`}
                 />
-
-                {/* Open Graph tags */}
-                <meta property="og:title" content={title} />
-                <meta property="og:description" content={description} />
-                <meta property="og:site_name" content="DDO Audit" />
-                <meta property="og:type" content="website" />
+                <meta
+                    property="og:image"
+                    content={absoluteLogoUrl}
+                    data-react-helmet="true"
+                />
+                <meta
+                    property="twitter:image"
+                    content={absoluteLogoUrl}
+                    data-react-helmet="true"
+                />
+                <meta name="twitter:title" content={title} />
+                <meta name="twitter:description" content={description} />
                 <meta
                     property="og:url"
                     content={`https://www.ddoaudit.com${window.location.pathname}`}
                 />
-                <meta property="og:image" content={absoluteLogoUrl} />
-
-                {/* Twitter Card tags */}
-                <meta name="twitter:card" content="summary_large_image" />
-                <meta name="twitter:site" content="@ddoaudit" />
-                <meta name="twitter:creator" content="@ddoaudit" />
-                <meta name="twitter:title" content={title} />
-                <meta name="twitter:description" content={description} />
-                <meta name="twitter:image" content={absoluteLogoUrl} />
+                <meta property="og:title" content={title} />
+                <meta property="og:description" content={description} />
             </Helmet>
             <BreadcrumbSchema />
             <div className={`page ${noPadding ? "no-padding" : ""}`}>
