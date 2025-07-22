@@ -1,13 +1,13 @@
-import axios from "axios"
+import { getRequest } from "./apiHelper.ts"
 
-const API_URL = "https://api.hcnxsryjficudzazjxty.com/v1/lfms"
+const LFM_ENDPOINT = "lfms"
 
 function getAllLfms() {
-    return axios.get(`${API_URL}`)
+    return getRequest(`${LFM_ENDPOINT}`)
 }
 
 function getLfmsByServerName(serverName: string) {
-    return axios.get(`${API_URL}/${serverName.toLowerCase()}`)
+    return getRequest(`${LFM_ENDPOINT}/${serverName.toLowerCase()}`)
 }
 
 export { getAllLfms, getLfmsByServerName }

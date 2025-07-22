@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef } from "react"
 import { ContentCluster } from "../global/ContentCluster.tsx"
 import { Character } from "../../models/Character.ts"
 import { ReactComponent as Checkmark } from "../../assets/svg/checkmark.svg"
@@ -47,8 +47,7 @@ const Page2 = ({
         if (accessToken?.character_id) {
             getVerificationChallengeByCharacterId(accessToken?.character_id)
                 .then((response) => {
-                    const verificationResponse: Verification =
-                        response.data.data
+                    const verificationResponse = response.data
                     setVerificationChallenge(verificationResponse)
 
                     // check

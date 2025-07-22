@@ -1,9 +1,12 @@
-import axios from "axios"
+import { VerificationResponse } from "../models/Verification"
+import { getRequest } from "./apiHelper"
 
-const API_URL = "https://api.hcnxsryjficudzazjxty.com/v1/verification"
+const VERIFICATION_ENDPOINT = "verification"
 
 function getVerificationChallengeByCharacterId(character_id: number) {
-    return axios.get(`${API_URL}/${character_id}`)
+    return getRequest<VerificationResponse>(
+        `${VERIFICATION_ENDPOINT}/${character_id}`
+    )
 }
 
 export { getVerificationChallengeByCharacterId }

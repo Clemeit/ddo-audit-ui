@@ -68,9 +68,7 @@ const useGetRegisteredCharacters = ({ enabled = true }: Props = {}) => {
         )
         getCharactersByIds(characterIds)
             .then((response) => {
-                const characters: Character[] = Object.values(
-                    response.data?.data || {}
-                )
+                const characters = Object.values(response.data || {})
                 setRegisteredCharacters(characters)
                 setIsLoaded(true)
 
@@ -80,17 +78,7 @@ const useGetRegisteredCharacters = ({ enabled = true }: Props = {}) => {
                     )
                 )
                 setVerifiedCharacters(verifiedCharacters)
-
-                // update cached data if it's older than CACHED_CHARACTER_EXPIRY_TIME
-                const lastUpdated = new Date(
-                    registeredCharactersMetadata.updatedAt
-                )
-                if (
-                    new Date().getTime() - lastUpdated.getTime() >
-                    CACHED_CHARACTER_EXPIRY_TIME
-                ) {
-                    setRegisteredCharactersInLocalStorage(characters)
-                }
+                setRegisteredCharactersInLocalStorage(characters)
                 setIsError(false)
             })
             .catch(() => {

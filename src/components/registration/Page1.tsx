@@ -64,9 +64,8 @@ const Page1 = () => {
 
         getCharacterByNameAndServer(characterName, characterServer)
             .then((response) => {
-                if (response && response.status === HttpStatusCode.Ok) {
-                    const responseData = response.data
-                    const characterData: Character = responseData.data
+                if (response && response.data) {
+                    const characterData = response.data
                     saveCharacterToLocalStorage(characterData)
                 } else {
                     setValidationErrorMessage("Error registering character")

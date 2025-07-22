@@ -48,8 +48,7 @@ const Page1 = ({
         if (character && character.id) {
             getVerificationChallengeByCharacterId(character.id)
                 .then((response) => {
-                    const verificationResponse: Verification =
-                        response.data.data
+                    const verificationResponse = response.data
                     setVerificationChallenge(verificationResponse)
 
                     // check

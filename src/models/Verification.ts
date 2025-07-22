@@ -12,4 +12,8 @@ interface AccessToken {
     access_token: string
 }
 
-export type { Verification, AccessToken }
+interface VerificationResponse {
+    data: Verification
+}
+
+export type { Verification, AccessToken, VerificationResponse }

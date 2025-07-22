@@ -79,6 +79,17 @@ interface OnlineCharacterIdsApiModel {
     data?: OnlineCharacterIdsModel
 }
 
+interface SingleCharacterResponseModel {
+    data?: Character
+    source?: string
+    message?: string
+}
+
+interface MultipleCharacterResponseModel {
+    data?: { [characterId: string]: Character }
+    message?: string
+}
+
 enum CharacterSortType {
     Name = "name",
     Level = "level",
@@ -104,5 +115,7 @@ export type {
     OnlineCharacterIdsModel,
     OnlineCharacterIdsApiModel,
     CharacterSpecificApiDataModel,
+    SingleCharacterResponseModel,
+    MultipleCharacterResponseModel,
 }
 export { CharacterSortType }

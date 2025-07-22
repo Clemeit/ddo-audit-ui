@@ -39,9 +39,7 @@ export const WhoDataProvider = ({ children }: Props) => (
 
 // Light registration stack: LfmProvider > WhoProvider > AreaProvider
 export const RegistrationDataProvider = ({ children }: Props) => (
-    <LfmProvider>
-        <WhoProvider>
-            <AreaProvider>{children}</AreaProvider>
-        </WhoProvider>
-    </LfmProvider>
+    <WhoProvider>
+        <AreaProvider>{children}</AreaProvider>
+    </WhoProvider>
 )

@@ -1,22 +1,33 @@
-import axios from "axios"
+import {
+    MultipleCharacterResponseModel,
+    SingleCharacterResponseModel,
+} from "../models/Character.ts"
+import { getRequest } from "./apiHelper.ts"
 
-// TODO: replace this with the base URL, should be stored in an environment variable
-const API_URL = "https://api.hcnxsryjficudzazjxty.com/v1/characters"
+const CHARACTER_ENDPOINT = "characters"
 
 function getCharacterByNameAndServer(name: string, server: string) {
-    return axios.get(`${API_URL}/${server}/${name}`)
+    return getRequest<SingleCharacterResponseModel>(
+        `${CHARACTER_ENDPOINT}/${server}/${name}`
+    )
 }
 
 function getCharacterByName(name: string) {
-    return axios.get(`${API_URL}/any/${name}`)
+    return getRequest<MultipleCharacterResponseModel>(
+        `${CHARACTER_ENDPOINT}/any/${name}`
+    )
 }
 
 function getCharacterById(id: string) {
-    return axios.get(`${API_URL}/${id}`)
+    return getRequest<SingleCharacterResponseModel>(
+        `${CHARACTER_ENDPOINT}/${id}`
+    )
 }
 
 function getCharactersByIds(ids: number[]) {
-    return axios.get(`${API_URL}/ids/${ids.join(",")}`)
+    return getRequest<MultipleCharacterResponseModel>(
+        `${CHARACTER_ENDPOINT}/ids/${ids.join(",")}`
+    )
 }
 
 export {

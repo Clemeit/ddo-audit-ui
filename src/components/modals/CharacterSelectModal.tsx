@@ -106,14 +106,11 @@ const CharacterSelectModal = ({
 
         getCharacterByName(characterName)
             .then((response) => {
-                if (response && response.status === HttpStatusCode.Ok) {
+                if (response && response.data) {
                     // If there's exactly 1 character, we're done. Otherwise,
                     // present the use with the characters and allow them to
                     // choose which one(s) to register.
-                    const responseData = response.data
-                    const localFoundCharacters: Character[] = Object.values(
-                        responseData.data
-                    )
+                    const localFoundCharacters = Object.values(response.data)
                     // Check to see if every character is already registered
                     if (
                         localFoundCharacters.every((character) =>
@@ -153,7 +150,7 @@ const CharacterSelectModal = ({
                 if (error.status === HttpStatusCode.NotFound) {
                     setValidationErrorMessage([
                         "Character not found",
-                        "Ensure that the character has logged in recently and is not anonymous",
+                        "Ensure that the character is not anonymous",
                     ])
                 } else {
                     setValidationErrorMessage([

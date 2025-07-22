@@ -33,11 +33,7 @@ const Page = ({
     return (
         <div className={className}>
             {!isOnline && (
-                <BannerMessage
-                    message="You're offline"
-                    type="critical"
-                    dismissable
-                />
+                <BannerMessage message="You're offline" type="critical" />
             )}
 
             <Helmet>

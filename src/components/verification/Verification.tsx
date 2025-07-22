@@ -34,7 +34,7 @@ const VerificationPage = () => {
             if (id) {
                 getCharacterById(id)
                     .then((response) => {
-                        setCurrentCharacter(response.data.data)
+                        setCurrentCharacter(response.data)
                         setIsLoaded(true)
                     })
                     .catch(() => {})

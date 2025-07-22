@@ -56,9 +56,7 @@ const useGetCharacterList = ({
         getCharactersByIds(_cachedCharacterIds)
             .then((response) => {
                 try {
-                    const _liveCharacters: Character[] = Object.values(
-                        response.data?.data || {}
-                    )
+                    const _liveCharacters = Object.values(response.data || {})
                     setLiveCharacters(_liveCharacters)
                     setHasFetchedFromServer(true)
                     setIsError(false)

@@ -20,12 +20,12 @@ import { Link, useNavigate } from "react-router-dom"
 import { convertMillisecondsToPrettyString } from "../../utils/stringUtils.ts"
 import CharacterTable, { CharacterTableRow } from "../tables/CharacterTable.tsx"
 import CharacterSelectModal from "../modals/CharacterSelectModal.tsx"
-import { useLfmContext } from "../../contexts/LfmContext.tsx"
 import useLimitedInterval from "../../hooks/useLimitedInterval.ts"
 import { MsFromHours, MsFromSeconds } from "../../utils/timeUtils.ts"
 import { useModalNavigation } from "../../hooks/useModalNavigation.ts"
 import Checkbox from "../global/Checkbox.tsx"
 import { useWhoContext } from "../../contexts/WhoContext.tsx"
+import useTrackedCharacters from "../../hooks/useTrackedCharacters.ts"
 
 const Registration = () => {
     const {
@@ -44,7 +44,8 @@ const Registration = () => {
         setAlwaysShowRegisteredCharacters,
     } = useWhoContext()
 
-    const { trackedCharacterIds, setTrackedCharacterIds } = useLfmContext()
+    const { trackedCharacterIds, setTrackedCharacterIds } =
+        useTrackedCharacters()
     const navigate = useNavigate()
 
     const {
@@ -54,7 +55,7 @@ const Registration = () => {
     } = useModalNavigation()
 
     const onUnregisterCharacter = (character: Character) => {
-        // Remove the character from tracked characters (lfm)
+        // Remove the character from tracked characters
         if (trackedCharacterIds.includes(character.id)) {
             setTrackedCharacterIds(
                 trackedCharacterIds.filter((id) => id !== character.id)
