@@ -48,14 +48,14 @@ const usePollApi = <T>({
                 setData(result)
                 setState(LoadingState.Loaded)
             } catch (error) {
+                const errorMessage =
+                    error instanceof Error ? error.message : String(error)
+                if (errorMessage.includes("CanceledError")) return
                 setError(error as Error)
                 setState(LoadingState.Error)
                 logMessage("Error fetching data", "error", {
                     metadata: {
-                        error:
-                            error instanceof Error
-                                ? error.message
-                                : String(error),
+                        error: errorMessage,
                         stack: error instanceof Error ? error.stack : undefined,
                     },
                 })

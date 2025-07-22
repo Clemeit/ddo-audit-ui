@@ -56,9 +56,14 @@ const Live = () => {
 
     const { createNotification } = useNotificationContext()
 
+    const hasCriticalError =
+        serverInfoState === LoadingState.Error ||
+        (!!serverInfoError &&
+            !serverInfoError.message.includes("CanceledError"))
+
     // Handle error notifications
     React.useEffect(() => {
-        if (dataError) {
+        if (hasCriticalError) {
             try {
                 logMessage("Error fetching data", "error", {
                     metadata: { error: dataError },
@@ -72,7 +77,7 @@ const Live = () => {
                 })
             } catch {}
         }
-    }, [dataError, createNotification])
+    }, [hasCriticalError, createNotification])
 
     const nivoData = useMemo(
         () => convertToNivoFormat(populationData24Hours),
@@ -136,8 +141,6 @@ const Live = () => {
         )
     }, [serverInfoData])
 
-    const hasAnyError = serverInfoState === LoadingState.Error || !!dataError
-
     const [hideAlphaRelease, setHideAlphaRelease] = useBooleanFlag(
         BOOLEAN_FLAGS.hideAlphaRelease
     )
@@ -159,7 +162,7 @@ const Live = () => {
             {serverInfoState === LoadingState.Haulted && (
                 <LiveDataHaultedPageMessage />
             )}
-            {hasAnyError && <DataLoadingErrorPageMessage />}
+            {hasCriticalError && <DataLoadingErrorPageMessage />}
             <ContentClusterGroup>
                 <ContentCluster title="Server Status">
                     <ServerStatus
