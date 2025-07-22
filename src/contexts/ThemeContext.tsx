@@ -1,4 +1,5 @@
 import React, { createContext, useState, useEffect, useContext } from "react"
+import { getData, setData } from "../utils/localStorage"
 
 interface ThemeContextProps {
     theme: string
@@ -14,14 +15,16 @@ interface Props {
 }
 
 export const ThemeProvider = ({ children }: Props) => {
+    const themeKey = "theme"
+
     const [theme, setTheme] = useState(() => {
-        return localStorage.getItem("theme") || "dark-theme"
+        return getData<string>(themeKey) || "dark-theme"
     })
     const [isFullScreen, setIsFullScreen] = useState(false)
 
     useEffect(() => {
         document.body.className = theme
-        localStorage.setItem("theme", theme)
+        setData<string>(themeKey, theme)
     }, [theme])
 
     const toggleTheme = () => {

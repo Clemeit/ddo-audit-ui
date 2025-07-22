@@ -52,7 +52,7 @@ const ContentCluster = ({
                                         message:
                                             "Section link has been copied to clipboard",
                                         type: "success",
-                                        lifetime: 3000,
+                                        ttl: 3000,
                                     })
                                 })
                                 .catch(() => {
@@ -62,7 +62,7 @@ const ContentCluster = ({
                                         message:
                                             "URL updated - you can copy it from the address bar",
                                         type: "info",
-                                        lifetime: 3000,
+                                        ttl: 3000,
                                     })
                                 })
                         }}

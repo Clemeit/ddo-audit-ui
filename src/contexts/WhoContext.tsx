@@ -7,7 +7,7 @@ import React, {
 } from "react"
 import { CLASS_LIST_LOWER, MAX_LEVEL, MIN_LEVEL } from "../constants/game.ts"
 import { CharacterSortBy, CharacterSortType } from "../models/Character.ts"
-import { setValue, getValue } from "../utils/localStorage.ts"
+import { getData, setData } from "../utils/localStorage.ts"
 import {
     DEFAULT_REFRESH_RATE,
     DEFAULT_WHO_PANEL_WIDTH,
@@ -118,7 +118,7 @@ export const WhoProvider = ({ children }: { children: ReactNode }) => {
     const [alwaysShowFriends, setAlwaysShowFriends] = useState<boolean>(false)
 
     const loadSettingsFromLocalStorage = () => {
-        const settings = getValue<any>(settingsStorageKey)
+        const settings = getData<any>(settingsStorageKey)
         if (settings) {
             try {
                 if (settings.shouldSaveSettings) {
@@ -168,7 +168,7 @@ export const WhoProvider = ({ children }: { children: ReactNode }) => {
 
     useEffect(() => {
         if (!isLoaded) return
-        setValue(settingsStorageKey, {
+        setData(settingsStorageKey, {
             stringFilter,
             classNameFilter,
             minLevel,

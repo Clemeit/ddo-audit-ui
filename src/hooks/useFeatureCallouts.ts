@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react"
+import { addItem, getData } from "../utils/localStorage"
 
 const useFeatureCallouts = () => {
     const callouts = [
@@ -7,14 +8,14 @@ const useFeatureCallouts = () => {
         "show-lfm-posted-time",
         "faster-who-updating",
     ]
+    const calloutsKey = "feature-callouts"
 
     const [dismissedCallouts, setDismissedCallouts] = useState<string[]>([])
     const [isLoaded, setIsLoaded] = useState(false)
 
     useEffect(() => {
-        const dismissedCallouts = JSON.parse(
-            localStorage.getItem("dismissed-callouts") || "[]"
-        )
+        const dismissedCallouts = getData<string[]>(calloutsKey) || []
+        console.log("dismissedCallouts", dismissedCallouts)
         setDismissedCallouts(dismissedCallouts)
         setIsLoaded(true)
     }, [])
@@ -22,10 +23,7 @@ const useFeatureCallouts = () => {
     const dismissCallout = (callout: string) => {
         if (dismissedCallouts.includes(callout)) return
         setDismissedCallouts([...dismissedCallouts, callout])
-        localStorage.setItem(
-            "dismissed-callouts",
-            JSON.stringify([...dismissedCallouts, callout])
-        )
+        addItem<string>(calloutsKey, callout, (a, b) => a === b)
     }
 
     const filteredCallouts = useMemo(

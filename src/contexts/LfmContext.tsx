@@ -13,8 +13,8 @@ import {
 } from "../constants/lfmPanel.ts"
 import { useThemeContext } from "./ThemeContext.tsx"
 import {
-    setValue,
-    getValue as getValueFromLocalStorage,
+    setData as setDataToLocalStorage,
+    getData as getDataFromLocalStorage,
 } from "../utils/localStorage.ts"
 import { LfmApiDataModel, LfmSortType } from "../models/Lfm.ts"
 import { MAX_LEVEL, MIN_LEVEL } from "../constants/game.ts"
@@ -199,7 +199,7 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
     const loadSettingsFromLocalStorage = useCallback(() => {
         let settings: any = null
         try {
-            settings = getValueFromLocalStorage<any>(settingsStorageKey)
+            settings = getDataFromLocalStorage<any>(settingsStorageKey)
         } catch (e) {
             logMessage(
                 "Error loading settings from local storage, resetting to defaults",
@@ -294,7 +294,7 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
     useEffect(() => {
         // save to local storage
         if (!isLoaded) return
-        setValue<any>(settingsStorageKey, {
+        setDataToLocalStorage<any>(settingsStorageKey, {
             minLevel,
             maxLevel,
             filterByMyCharacters,

@@ -1,11 +1,34 @@
-import React, { useCallback } from "react"
+import React, { useCallback, useEffect } from "react"
 import { useNotificationContext } from "../contexts/NotificationContext"
 import { UpdateNotificationActions } from "../components/global/UpdateNotificationActions"
 import logMessage from "../utils/logUtils"
-import { MsFromSeconds } from "../utils/timeUtils"
+import { MsFromDays, MsFromSeconds } from "../utils/timeUtils"
+import { getData, setData } from "../utils/localStorage"
 
 export const useServiceWorkerUpdate = () => {
     const { createNotification, dismissNotification } = useNotificationContext()
+    const updateDismissKey = "update-dismissed"
+
+    const onDismissNotification = useCallback((notificationId: string) => {
+        const now = new Date().toISOString()
+        try {
+            setData<string>(updateDismissKey, now)
+        } catch (error) {
+            logMessage(
+                "Failed to set update dismissal time in localStorage",
+                "error",
+                {
+                    metadata: {
+                        error:
+                            error instanceof Error
+                                ? error.message
+                                : String(error),
+                    },
+                }
+            )
+        }
+        dismissNotification(notificationId)
+    }, [])
 
     const handleServiceWorkerUpdate = useCallback(
         (registration: ServiceWorkerRegistration) => {
@@ -64,6 +87,18 @@ export const useServiceWorkerUpdate = () => {
                 }
             }
 
+            const lastDismissal = getData<string>(updateDismissKey)
+            if (lastDismissal) {
+                const lastDismissalDate = new Date(lastDismissal)
+                const now = new Date()
+                const timeSinceLastDismissal =
+                    now.getTime() - lastDismissalDate.getTime()
+
+                if (timeSinceLastDismissal < MsFromDays(2)) {
+                    return
+                }
+            }
+
             // Create a notification ID for dismissal
             const notificationId = `sw-update-${Date.now()}`
 
@@ -72,10 +107,10 @@ export const useServiceWorkerUpdate = () => {
                 title: "Update Available",
                 message: "A new version of DDO Audit is available.",
                 type: "info",
-                lifetime: MsFromSeconds(10),
+                ttl: MsFromSeconds(10),
                 actions: React.createElement(UpdateNotificationActions, {
                     onRefresh: () => reloadPage(notificationId),
-                    onDismiss: () => dismissNotification(notificationId),
+                    onDismiss: () => onDismissNotification(notificationId),
                 }),
             })
         },

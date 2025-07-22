@@ -25,12 +25,12 @@ interface Props {
 export const NotificationProvider = ({ children }: Props) => {
     const [notifications, setNotifications] = useState<Notification[]>([])
 
-    const timeoutNotification = (id: string, lifetime: number) => {
+    const timeoutNotification = (id: string, ttl: number) => {
         setTimeout(() => {
             setNotifications((prev) =>
                 prev.filter((notification) => notification.id !== id)
             )
-        }, lifetime)
+        }, ttl)
     }
 
     const createNotification = useCallback((notification: Notification) => {
@@ -39,8 +39,8 @@ export const NotificationProvider = ({ children }: Props) => {
             ...prev,
             { ...notification, id: nofiticationId },
         ])
-        if (notification.lifetime) {
-            timeoutNotification(nofiticationId, notification.lifetime)
+        if (notification.ttl) {
+            timeoutNotification(nofiticationId, notification.ttl)
         }
     }, [])
 

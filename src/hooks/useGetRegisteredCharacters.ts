@@ -9,7 +9,6 @@ import {
 import { getCharactersByIds } from "../services/characterService.ts"
 import { Character } from "../models/Character.ts"
 import { AccessToken } from "../models/Verification.ts"
-import { CACHED_CHARACTER_EXPIRY_TIME } from "../constants/client.ts"
 
 interface Props {
     enabled?: boolean
@@ -55,7 +54,7 @@ const useGetRegisteredCharacters = ({ enabled = true }: Props = {}) => {
         setAccessTokens(accessTokens)
 
         const verifiedCharactersCached =
-            registeredCharactersMetadata.data.filter((character: Character) =>
+            registeredCharactersMetadata.data?.filter((character: Character) =>
                 accessTokens.some(
                     (token) => token.character_id === character.id
                 )
@@ -63,7 +62,7 @@ const useGetRegisteredCharacters = ({ enabled = true }: Props = {}) => {
         setVerifiedCharactersCached(verifiedCharactersCached)
 
         // for every ID, look up the character data and add it to the list
-        const characterIds = registeredCharactersMetadata.data.map(
+        const characterIds = registeredCharactersMetadata.data?.map(
             (character: Character) => character.id
         )
         getCharactersByIds(characterIds)

@@ -5,6 +5,7 @@ import Button from "../global/Button"
 import PageMessage from "../global/PageMessage"
 import Spacer from "../global/Spacer"
 import Link from "../global/Link"
+import { getData, setData } from "../../utils/localStorage"
 
 interface NotificationPreferences {
     lfmUpdates: boolean
@@ -42,14 +43,16 @@ const NotificationPreferences = ({
         scheduleStartHour: 9,
         scheduleEndHour: 22,
     })
+    const notificationStorageKey = "notification_preferences"
 
     useEffect(() => {
         // Load preferences from localStorage
-        const savedPrefs = localStorage.getItem("notification_preferences")
+        const savedPrefs = getData<NotificationPreferences>(
+            notificationStorageKey
+        )
         if (savedPrefs) {
             try {
-                const parsed = JSON.parse(savedPrefs)
-                setPreferences(parsed)
+                setPreferences(savedPrefs)
             } catch (error) {
                 console.error("Error loading notification preferences:", error)
             }
@@ -58,10 +61,7 @@ const NotificationPreferences = ({
 
     useEffect(() => {
         // Save preferences to localStorage and notify parent
-        localStorage.setItem(
-            "notification_preferences",
-            JSON.stringify(preferences)
-        )
+        setData<NotificationPreferences>(notificationStorageKey, preferences)
         onPreferencesChange(preferences)
     }, [preferences, onPreferencesChange])
 

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react"
-import { setValue, getValue } from "../utils/localStorage.ts"
+import { getData, setData } from "../utils/localStorage.ts"
 
 /**
  * A lightweight hook that provides only tracked character IDs functionality
@@ -12,7 +12,7 @@ const useTrackedCharacters = () => {
     // Load tracked character IDs from localStorage on mount
     useEffect(() => {
         try {
-            const settings = getValue<any>(settingsStorageKey)
+            const settings = getData<any>(settingsStorageKey)
             if (settings?.trackedCharacterIds) {
                 setTrackedCharacterIds(settings.trackedCharacterIds)
             }
@@ -27,8 +27,8 @@ const useTrackedCharacters = () => {
     // Save tracked character IDs to localStorage when they change
     useEffect(() => {
         try {
-            const existingSettings = getValue<any>(settingsStorageKey) || {}
-            setValue<any>(settingsStorageKey, {
+            const existingSettings = getData<any>(settingsStorageKey) || {}
+            setData<any>(settingsStorageKey, {
                 ...existingSettings,
                 trackedCharacterIds,
             })
