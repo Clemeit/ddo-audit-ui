@@ -53,10 +53,9 @@ const About = () => {
                 </ContentCluster>
                 <ContentCluster title="Methodology">
                     <p>
-                        Data is collected from the game client every few
-                        seconds. This data contains information that is visible
-                        in the in-game "Who" panel (character name, gender,
-                        race, etc.).{" "}
+                        Data is collected from the game every few seconds. This
+                        data contains information that is visible in the in-game
+                        "Who" panel (character name, gender, race, etc.).{" "}
                         <ColoredText color="orange">
                             We do not collect, store, or publish personal
                             information.

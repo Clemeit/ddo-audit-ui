@@ -206,16 +206,14 @@ const Live = () => {
                 <ContentCluster title="Live Population">
                     <p>{livePopulationTitle}</p>
                     {isDataNormalized && (
-                        <Stack align="center" gap="2px">
+                        <span>
                             <InfoSVG
                                 className="page-message-icon"
                                 style={{ fill: `var(--info)` }}
                             />
-                            <span className="warning-text">
-                                Note: Data is normalized to show population
-                                trends. Exact population numbers are not shown.
-                            </span>
-                        </Stack>
+                            Note: Data is normalized to show population trends.
+                            Exact population numbers are not shown.
+                        </span>
                     )}
                     <GenericLine
                         nivoData={nivoData}

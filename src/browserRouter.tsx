@@ -12,7 +12,7 @@ import Directory from "./components/directory/Directory.tsx"
 import Live from "./components/live/Live.tsx"
 import Grouping from "./components/grouping/Grouping.tsx"
 import GroupingSpecific from "./components/grouping/GroupingSpecific.tsx"
-// import Servers from "./components/servers/Servers.tsx"
+import Servers from "./components/servers/Servers.tsx"
 import Who from "./components/who/Who.tsx"
 import WhoSpecific from "./components/who/WhoSpecific.tsx"
 
@@ -84,7 +84,10 @@ export default createBrowserRouter(
             </Route>
             {/* <Route path="/notifications" element={<Notifications />} /> */}
             {/* <Route path="/timers" element={<Timers />} /> */}
-            {/* <Route path="/servers" element={<Servers />} /> */}
+            <Route path="/servers" element={<Outlet />}>
+                <Route index element={<Servers />} />
+                <Route path=":id" element={<Servers />} />
+            </Route>
             <Route path="/feedback" element={<Feedback />} />
             <Route
                 path="/friends"

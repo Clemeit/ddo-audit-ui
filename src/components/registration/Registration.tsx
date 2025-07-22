@@ -16,7 +16,7 @@ import Stack from "../global/Stack.tsx"
 import ValidationMessage from "../global/ValidationMessage.tsx"
 import "./Registration.css"
 import NavCardCluster from "../global/NavCardCluster.tsx"
-import { Link, useNavigate } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import { convertMillisecondsToPrettyString } from "../../utils/stringUtils.ts"
 import CharacterTable, { CharacterTableRow } from "../tables/CharacterTable.tsx"
 import CharacterSelectModal from "../modals/CharacterSelectModal.tsx"
@@ -26,6 +26,8 @@ import { useModalNavigation } from "../../hooks/useModalNavigation.ts"
 import Checkbox from "../global/Checkbox.tsx"
 import { useWhoContext } from "../../contexts/WhoContext.tsx"
 import useTrackedCharacters from "../../hooks/useTrackedCharacters.ts"
+import Badge from "../global/Badge.tsx"
+import Link from "../global/Link.tsx"
 
 const Registration = () => {
     const {
@@ -215,7 +217,7 @@ const Registration = () => {
                         and level. The LFM Viewer will also show an indicator on
                         a post if you're currently on timer for that raid. You
                         can view raid timers on the{" "}
-                        <Link to="/timers" className="link">
+                        <Link to="/timers" className="link" disabled>
                             Timers page
                         </Link>
                         .
@@ -224,7 +226,7 @@ const Registration = () => {
                         You can also verify ownership of a character to unlock
                         additional features such as quest ransack, questing
                         history, level-up trends, and more. See the{" "}
-                        <Link to="/activity" className="link">
+                        <Link to="/activity" className="link" disabled>
                             Activity page
                         </Link>{" "}
                         for more information.
@@ -261,8 +263,16 @@ const Registration = () => {
                 </ContentCluster>
                 <ContentCluster title="See Also...">
                     <NavCardCluster>
-                        <NavigationCard type="timers" />
-                        <NavigationCard type="activity" />
+                        <NavigationCard
+                            type="timers"
+                            badge={<Badge text="Soon" type="soon" />}
+                            disabled
+                        />
+                        <NavigationCard
+                            type="activity"
+                            badge={<Badge text="Soon" type="soon" />}
+                            disabled
+                        />
                         <NavigationCard type="friends" />
                         <NavigationCard type="ignores" />
                     </NavCardCluster>

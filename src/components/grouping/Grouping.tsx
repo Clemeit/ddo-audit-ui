@@ -313,7 +313,7 @@ const Grouping = () => {
                         >
                             You currently have 0 notification rules set up.
                             Configure rules on the{" "}
-                            <Link to="/notifications">
+                            <Link to="/notifications" disabled>
                                 notification settings
                             </Link>{" "}
                             page.
@@ -324,7 +324,11 @@ const Grouping = () => {
                 <ContentCluster title="See Also...">
                     <NavCardCluster>
                         <NavigationCard type="registration" />
-                        <NavigationCard type="timers" />
+                        <NavigationCard
+                            type="timers"
+                            badge={<Badge text="Soon" type="soon" />}
+                            disabled
+                        />
                     </NavCardCluster>
                 </ContentCluster>
             </ContentClusterGroup>
