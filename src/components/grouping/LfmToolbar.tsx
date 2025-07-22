@@ -1,4 +1,3 @@
-import React from "react"
 import "./LfmToolbar.css"
 import Link from "../global/Link.tsx"
 import { useThemeContext } from "../../contexts/ThemeContext.tsx"
@@ -499,6 +498,7 @@ const LfmToolbar = ({
                     <Modal
                         onClose={handleCloseSettingsModal}
                         fullScreenOnMobile
+                        freezeBodyScroll
                     >
                         {settingModalContent}
                     </Modal>

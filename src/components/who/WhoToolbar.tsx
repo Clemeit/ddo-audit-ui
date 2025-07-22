@@ -247,7 +247,11 @@ const WhoToolbar = ({
     return (
         <>
             {showSettingsModal && (
-                <Modal onClose={handleCloseModal} fullScreenOnMobile>
+                <Modal
+                    onClose={handleCloseModal}
+                    fullScreenOnMobile
+                    freezeBodyScroll
+                >
                     {settingModalContent}
                 </Modal>
             )}
