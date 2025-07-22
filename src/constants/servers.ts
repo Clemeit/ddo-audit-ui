@@ -1,4 +1,4 @@
-const SERVER_NAMES = [
+const SERVER_NAMES = Object.freeze([
     "Argonnessen",
     "Cannith",
     "Ghallanda",
@@ -12,20 +12,27 @@ const SERVER_NAMES = [
     "Shadowdale",
     "Thrane",
     "Moonsea",
-]
+])
 
-const SERVER_NAMES_LOWER = SERVER_NAMES.map((server) => server.toLowerCase())
+const SERVER_NAMES_LOWER = Object.freeze(
+    SERVER_NAMES.map((server) => server.toLowerCase())
+)
 
-const VIP_SERVER_NAMES: string[] = []
+const VIP_SERVER_NAMES: readonly string[] = Object.freeze([])
 
 const VIP_SERVER_NAMES_LOWER = VIP_SERVER_NAMES.map((server) =>
     server.toLowerCase()
 )
 
-const SERVERS_64_BITS: string[] = ["Cormyr", "Shadowdale", "Thrane", "Moonsea"]
+const SERVERS_64_BITS: readonly string[] = Object.freeze([
+    "Cormyr",
+    "Shadowdale",
+    "Thrane",
+    "Moonsea",
+])
 
-const SERVERS_64_BITS_LOWER = SERVERS_64_BITS.map((server) =>
-    server.toLowerCase()
+const SERVERS_64_BITS_LOWER = Object.freeze(
+    SERVERS_64_BITS.map((server) => server.toLowerCase())
 )
 
 const getServerIndex = (serverName: string): number => {

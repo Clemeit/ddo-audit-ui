@@ -88,14 +88,19 @@ const ServerStatus = ({
         if (isLoading()) {
             return (
                 <div className="server-status-container">
-                    {SERVER_NAMES.sort(([server_name_a], [server_name_b]) =>
-                        server_name_a.localeCompare(server_name_b)
-                    ).map((serverName) => (
-                        <div key={serverName} className="server-status">
-                            <Pending className="status-icon" title="Loading" />
-                            <span>{serverName}</span>
-                        </div>
-                    ))}
+                    {[...SERVER_NAMES]
+                        .sort((server_name_a, server_name_b) =>
+                            server_name_a.localeCompare(server_name_b)
+                        )
+                        .map((serverName) => (
+                            <div key={serverName} className="server-status">
+                                <Pending
+                                    className="status-icon"
+                                    title="Loading"
+                                />
+                                <span>{serverName}</span>
+                            </div>
+                        ))}
                 </div>
             )
         }

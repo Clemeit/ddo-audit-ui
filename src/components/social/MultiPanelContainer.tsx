@@ -119,26 +119,29 @@ const MultiPanelContainer = ({ serverName, primaryType }: Props) => {
     }
 
     const secondaryPanelServerModalContent = () => {
-        const sortedServerNames = SERVER_NAMES_LOWER.sort((a, b) => {
-            // Servers in SERVERS_64_BITS_LOWER should be at the start
-            if (
-                SERVERS_64_BITS_LOWER.includes(a) &&
-                !SERVERS_64_BITS_LOWER.includes(b)
-            ) {
-                return -1
-            }
-            if (
-                !SERVERS_64_BITS_LOWER.includes(a) &&
-                SERVERS_64_BITS_LOWER.includes(b)
-            ) {
-                return 1
-            }
-            return a.localeCompare(b)
-        }).sort((a, b) => {
-            // Sort by current server first
-            if (a === serverName.toLowerCase()) return -1
-            if (b === serverName.toLowerCase()) return 1
-        })
+        const sortedServerNames = [...SERVER_NAMES_LOWER]
+            .sort((a, b) => {
+                // Servers in SERVERS_64_BITS_LOWER should be at the start
+                if (
+                    SERVERS_64_BITS_LOWER.includes(a) &&
+                    !SERVERS_64_BITS_LOWER.includes(b)
+                ) {
+                    return -1
+                }
+                if (
+                    !SERVERS_64_BITS_LOWER.includes(a) &&
+                    SERVERS_64_BITS_LOWER.includes(b)
+                ) {
+                    return 1
+                }
+                return a.localeCompare(b)
+            })
+            .sort((a, b) => {
+                // Sort by current server first
+                if (a === serverName.toLowerCase()) return -1
+                if (b === serverName.toLowerCase()) return 1
+                return 0
+            })
 
         return (
             <ContentCluster title="Choose a Server">
