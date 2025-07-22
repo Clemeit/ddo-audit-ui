@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import Page from "../global/Page.tsx"
 import {
     ContentCluster,
@@ -18,7 +18,10 @@ import GroupingCanvas from "./LfmCanvas.tsx"
 import Stack from "../global/Stack.tsx"
 import Badge from "../global/Badge.tsx"
 import NavCardCluster from "../global/NavCardCluster.tsx"
-import { LiveDataHaultedPageMessage } from "../global/CommonMessages.tsx"
+import {
+    DataLoadingErrorPageMessage,
+    LiveDataHaultedPageMessage,
+} from "../global/CommonMessages.tsx"
 import { ServerInfoApiDataModel } from "../../models/Game.ts"
 import { useQuestContext } from "../../contexts/QuestContext.tsx"
 import {
@@ -66,6 +69,15 @@ const Grouping = () => {
                 serverInfoState === LoadingState.Loading ||
                 lfmState === LoadingState.Initial ||
                 lfmState === LoadingState.Loading)
+        )
+    }
+
+    const loadingFailed = () => {
+        return (
+            serverInfoState === LoadingState.Error ||
+            lfmState === LoadingState.Error ||
+            serverInfoState === LoadingState.Haulted ||
+            lfmState === LoadingState.Haulted
         )
     }
 
@@ -274,6 +286,7 @@ const Grouping = () => {
                     />
                 </div>
             )}
+            {loadingFailed() && <DataLoadingErrorPageMessage />}
             {lfmState === LoadingState.Haulted && (
                 <LiveDataHaultedPageMessage />
             )}

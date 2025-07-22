@@ -1,4 +1,4 @@
-import React, { useCallback } from "react"
+import { useCallback, useEffect, useState } from "react"
 import usePollApi from "../../hooks/usePollApi.ts"
 import { ServerInfo } from "../../models/Game.ts"
 import { ServerInfoApiDataModel } from "../../models/Game.ts"
@@ -20,7 +20,10 @@ import { ReactComponent as Checkmark } from "../../assets/svg/checkmark.svg"
 import { ReactComponent as X } from "../../assets/svg/x.svg"
 import { ReactComponent as Pending } from "../../assets/svg/pending.svg"
 import Badge from "../global/Badge.tsx"
-import { LiveDataHaultedPageMessage } from "../global/CommonMessages.tsx"
+import {
+    DataLoadingErrorPageMessage,
+    LiveDataHaultedPageMessage,
+} from "../global/CommonMessages.tsx"
 import NavigationCard from "../global/NavigationCard.tsx"
 import useGetRegisteredCharacters from "../../hooks/useGetRegisteredCharacters.ts"
 import useGetFriends from "../../hooks/useGetFriends.ts"
@@ -39,15 +42,45 @@ const Who = () => {
             interval: 15000,
             lifespan: 1000 * 60 * 60 * 12, // 12 hours
         })
-    const { data: gameInfoData, state: gameInfoState } =
+    const { data: serverInfoData, state: serverInfoState } =
         usePollApi<ServerInfoApiDataModel>({
             endpoint: "game/server-info",
             interval: 5000,
             lifespan: 1000 * 60 * 60 * 12, // 12 hours
         })
+    const [hasAllDataLoadedOnce, setHasAllDataLoadedOnce] =
+        useState<boolean>(false)
+
+    useEffect(() => {
+        if (
+            characterIdsState === LoadingState.Loaded &&
+            serverInfoState === LoadingState.Loaded
+        ) {
+            setHasAllDataLoadedOnce(true)
+        }
+    }, [characterIdsState, serverInfoState])
+
+    const isInitialLoading = () => {
+        return (
+            !hasAllDataLoadedOnce &&
+            (serverInfoState === LoadingState.Initial ||
+                serverInfoState === LoadingState.Loading ||
+                characterIdsState === LoadingState.Initial ||
+                characterIdsState === LoadingState.Loading)
+        )
+    }
+
+    const loadingFailed = () => {
+        return (
+            serverInfoState === LoadingState.Error ||
+            characterIdsState === LoadingState.Error ||
+            serverInfoState === LoadingState.Haulted ||
+            characterIdsState === LoadingState.Haulted
+        )
+    }
 
     const cardIcon = (serverName: string) => {
-        const isOnline = gameInfoData?.[serverName]?.is_online
+        const isOnline = serverInfoData?.[serverName]?.is_online
         switch (isOnline) {
             case true:
                 return <Checkmark className="shrinkable-icon" />
@@ -100,7 +133,7 @@ const Who = () => {
     }
 
     const cardBadge = (serverName: string) => {
-        if (gameInfoData?.[serverName]?.is_vip_only) {
+        if (serverInfoData?.[serverName]?.is_vip_only) {
             return (
                 <Badge
                     text="VIP"
@@ -122,36 +155,52 @@ const Who = () => {
 
     const getServerSelectContent = useCallback(
         (type: "32bit" | "64bit") => {
-            if (
-                gameInfoState === LoadingState.Initial ||
-                gameInfoState === LoadingState.Loading
-            ) {
-                // server info not yet loaded
-                return SERVER_NAMES_LOWER.filter((serverName) => {
-                    if (type === "32bit") {
-                        return (
-                            SERVERS_64_BITS_LOWER.includes(serverName) === false
-                        )
-                    } else if (type === "64bit") {
-                        return (
-                            SERVERS_64_BITS_LOWER.includes(serverName) === true
-                        )
-                    }
-                    return true
-                })
-                    .sort((a, b) => a.localeCompare(b))
+            if (isInitialLoading()) {
+                const serverList = serverInfoData
+                    ? Object.keys(serverInfoData)
+                    : SERVER_NAMES_LOWER
+
+                return serverList
+                    .filter((serverName) => {
+                        if (type === "32bit") {
+                            return (
+                                SERVERS_64_BITS_LOWER.includes(serverName) ===
+                                false
+                            )
+                        } else if (type === "64bit") {
+                            return (
+                                SERVERS_64_BITS_LOWER.includes(serverName) ===
+                                true
+                            )
+                        }
+                        return true
+                    })
+                    .sort((serverNameA, serverNameB) =>
+                        serverNameA.localeCompare(serverNameB)
+                    )
                     .map((serverName) => (
                         <ServerNavigationCard
                             key={serverName}
                             destination={`/who/${serverName}`}
                             title={toSentenceCase(serverName)}
-                            content={<Skeleton width="120px" />}
-                            icon={<Pending className="shrinkable-icon" />}
+                            content={
+                                <Skeleton
+                                    width={`${120 + (serverName.length % 3) * 20}px`}
+                                />
+                            }
+                            icon={
+                                serverInfoData ? (
+                                    cardIcon(serverName)
+                                ) : (
+                                    <Pending className="shrinkable-icon" />
+                                )
+                            }
+                            badge={cardBadge(serverName)}
                         />
                     ))
             }
 
-            return Object.entries(gameInfoData || {})
+            return Object.entries(serverInfoData || {})
                 .filter(([serverName]) =>
                     SERVER_NAMES_LOWER.includes(serverName)
                 )
@@ -181,7 +230,7 @@ const Who = () => {
                     />
                 ))
         },
-        [gameInfoData, gameInfoState, registeredCharacters, cardDescription]
+        [serverInfoData, serverInfoState, registeredCharacters, cardDescription]
     )
 
     const [hideAlphaRelease, setHideAlphaRelease] = useBooleanFlag(
@@ -203,7 +252,8 @@ const Who = () => {
                     />
                 </div>
             )}
-            {gameInfoState === LoadingState.Haulted && (
+            {loadingFailed() && <DataLoadingErrorPageMessage />}
+            {serverInfoState === LoadingState.Haulted && (
                 <LiveDataHaultedPageMessage />
             )}
             <ContentClusterGroup>

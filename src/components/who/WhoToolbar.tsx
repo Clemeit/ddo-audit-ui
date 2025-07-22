@@ -8,11 +8,6 @@ import {
 import Stack from "../global/Stack.tsx"
 import Checkbox from "../global/Checkbox.tsx"
 import Modal from "../modal/Modal.tsx"
-import {
-    DEFAULT_REFRESH_RATE,
-    MAXIMUM_REFRESH_RATE,
-    MINIMUM_REFRESH_RATE,
-} from "../../constants/whoPanel.ts"
 import Link from "../global/Link.tsx"
 import { useModalNavigation } from "../../hooks/useModalNavigation.ts"
 
@@ -49,8 +44,6 @@ const WhoToolbar = ({
         setShouldSaveExactMatch,
         showInQuestIndicator,
         setShowInQuestIndicator,
-        refreshInterval,
-        setRefreshInterval,
         hideIgnoredCharacters,
         setHideIgnoredCharacters,
         pinRegisteredCharacters,
@@ -81,7 +74,7 @@ const WhoToolbar = ({
                     >
                         Show in-quest indicator
                     </Checkbox>
-                    <label htmlFor="refreshIntervalSlider">
+                    {/* <label htmlFor="refreshIntervalSlider">
                         Refresh every: {(refreshInterval / 1000).toString()} sec
                         {refreshInterval === DEFAULT_REFRESH_RATE && (
                             <span className="secondary-text"> (default)</span>
@@ -97,7 +90,7 @@ const WhoToolbar = ({
                         onChange={(e) =>
                             setRefreshInterval(parseInt(e.target.value))
                         }
-                    />
+                    /> */}
                 </Stack>
             </ContentCluster>
             <ContentCluster title="Social">
