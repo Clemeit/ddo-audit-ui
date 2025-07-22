@@ -43,30 +43,30 @@ const Page = ({
 
             <Helmet>
                 <title>{title}</title>
-                <meta name="og:title" content={title} />
-                <meta name="og:description" content={description} />
+                <meta name="description" content={description} />
                 <link
                     rel="canonical"
                     href={`https://www.ddoaudit.com${window.location.pathname}`}
                 />
-                <meta
-                    property="og:image"
-                    content={absoluteLogoUrl}
-                    data-react-helmet="true"
-                />
-                <meta
-                    property="twitter:image"
-                    content={absoluteLogoUrl}
-                    data-react-helmet="true"
-                />
-                <meta name="twitter:title" content={title} />
-                <meta name="twitter:description" content={description} />
+
+                {/* Open Graph tags */}
+                <meta property="og:title" content={title} />
+                <meta property="og:description" content={description} />
+                <meta property="og:site_name" content="DDO Audit" />
+                <meta property="og:type" content="website" />
                 <meta
                     property="og:url"
                     content={`https://www.ddoaudit.com${window.location.pathname}`}
                 />
-                <meta property="og:title" content={title} />
-                <meta property="og:description" content={description} />
+                <meta property="og:image" content={absoluteLogoUrl} />
+
+                {/* Twitter Card tags */}
+                <meta name="twitter:card" content="summary_large_image" />
+                <meta name="twitter:site" content="@ddoaudit" />
+                <meta name="twitter:creator" content="@ddoaudit" />
+                <meta name="twitter:title" content={title} />
+                <meta name="twitter:description" content={description} />
+                <meta name="twitter:image" content={absoluteLogoUrl} />
             </Helmet>
             <BreadcrumbSchema />
             <div className={`page ${noPadding ? "no-padding" : ""}`}>
