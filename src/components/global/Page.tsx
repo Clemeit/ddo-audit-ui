@@ -43,7 +43,8 @@ const Page = ({
 
             <Helmet>
                 <title>{title}</title>
-                <meta name="description" content={description} />
+                <meta name="og:title" content={title} />
+                <meta name="og:description" content={description} />
                 <link
                     rel="canonical"
                     href={`https://www.ddoaudit.com${window.location.pathname}`}
