@@ -275,7 +275,7 @@ const Grouping = () => {
         <Page
             title="DDO Live LFM Viewer"
             description="View a live LFM panel to find public groups - before you even log in! See which groups are currently looking for more players and what content is currently being run."
-            logo="/icons/grouping-512px.png"
+            logo="/icons/grouping-192px.png"
         >
             {!hideAlphaRelease && (
                 <div className="alpha-release-message">

@@ -21,7 +21,7 @@ const WhoSpecific = () => {
             centered
             noPadding
             contentMaxWidth
-            logo="/icons/who-512px.png"
+            logo="/icons/who-192px.png"
         >
             {!isFullScreen && <Spacer className="hide-on-mobile" size="20px" />}
             <MultiPanelContainer

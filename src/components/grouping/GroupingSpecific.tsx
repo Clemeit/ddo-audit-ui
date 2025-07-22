@@ -23,7 +23,7 @@ const GroupingSpecific = () => {
             centered
             noPadding
             contentMaxWidth
-            logo="/icons/grouping-512px.png"
+            logo="/icons/grouping-192px.png"
         >
             {!isFullScreen && <Spacer className="hide-on-mobile" size="20px" />}
             <MultiPanelContainer

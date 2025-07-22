@@ -241,7 +241,7 @@ const Who = () => {
         <Page
             title="DDO Live Character Viewer"
             description="Browse players from any server with a live character viewer. Are your friends online? Is your guild forming up for a late-night raid? Now you know!"
-            logo="/icons/who-512px.png"
+            logo="/icons/who-192px.png"
         >
             {!hideAlphaRelease && (
                 <div className="alpha-release-message">

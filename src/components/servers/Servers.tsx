@@ -70,7 +70,7 @@ const Servers = () => {
         <Page
             title="Servers"
             description="DDO's server populations, character demographics, content popularity, and long-term trends. Check time zone activity and choose which server is best for you!"
-            logo="/icons/servers-512px.png"
+            logo="/icons/servers-192px.png"
         >
             <WIPPageMessage />
             <ContentCluster title="Select a Server">

@@ -26,7 +26,7 @@ const Page = ({
     centered = false,
     noPadding = false,
     contentMaxWidth = false,
-    logo = "/icons/logo-512px.png",
+    logo = "/icons/logo-192px.png",
 }: Props) => {
     const isOnline = useNetworkStatus()
 
