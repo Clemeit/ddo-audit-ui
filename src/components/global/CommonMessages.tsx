@@ -126,34 +126,50 @@ export const AlphaReleasePageMessage = ({ onDismiss = null }) => (
 
 export const ServerOfflineMessage = ({
     handleDismiss,
+    handleReportBug,
 }: {
     handleDismiss: () => void
-}) => (
-    <div style={{ padding: "0px 10px" }}>
-        <h3
-            style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "5px",
-            }}
-        >
-            <X className="status-icon" title="Offline" />
-            <span>Server Offline</span>
-        </h3>
-        <p>
-            Check the{" "}
-            <Link className="link" to="/live">
-                Live page
-            </Link>{" "}
-            for live server status. If you think this is an error,
-        </p>
-        <Stack gap="10px" fullColumnOnMobile>
-            <Button onClick={handleDismiss} fullWidthOnMobile>
-                Load data anyway
-            </Button>
-            <Button type="secondary" onClick={() => {}} fullWidthOnMobile>
-                Report bug
-            </Button>
-        </Stack>
-    </div>
-)
+    handleReportBug: () => void
+}) => {
+    const [isReported, setIsReported] = React.useState(false)
+
+    const onReportBug = () => {
+        setIsReported(true)
+        handleReportBug()
+    }
+
+    return (
+        <div style={{ padding: "0px 10px" }}>
+            <h3
+                style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "5px",
+                }}
+            >
+                <X className="status-icon" title="Offline" />
+                <span>Server Offline</span>
+            </h3>
+            <p>
+                Check the{" "}
+                <Link className="link" to="/live">
+                    Live page
+                </Link>{" "}
+                for live server status. If you think this is an error,
+            </p>
+            <Stack gap="10px" fullColumnOnMobile>
+                <Button onClick={handleDismiss} fullWidthOnMobile>
+                    Load data anyway
+                </Button>
+                <Button
+                    type="secondary"
+                    onClick={onReportBug}
+                    fullWidthOnMobile
+                    disabled={isReported}
+                >
+                    {isReported ? "Thanks!" : "Report bug"}
+                </Button>
+            </Stack>
+        </div>
+    )
+}

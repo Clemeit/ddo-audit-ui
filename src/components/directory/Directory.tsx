@@ -1,4 +1,3 @@
-import React from "react"
 import NavigationCard from "../global/NavigationCard.tsx"
 import {
     ContentCluster,
@@ -31,7 +30,6 @@ const Directory = () => {
                     />
                 </div>
             )}
-            <span>This is a test</span>
             <ContentClusterGroup>
                 <ContentCluster title="Population and Activity">
                     <NavCardCluster>

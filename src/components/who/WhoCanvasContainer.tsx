@@ -19,6 +19,7 @@ import { useAreaContext } from "../../contexts/AreaContext.tsx"
 import useGetRegisteredCharacters from "../../hooks/useGetRegisteredCharacters.ts"
 import useGetFriends from "../../hooks/useGetFriends.ts"
 import useGetIgnores from "../../hooks/useGetIgnores.ts"
+import logMessage from "../../utils/logUtils.ts"
 
 // TODO: group_id should be null and never "0"
 
@@ -342,6 +343,17 @@ const WhoContainer = ({
                 <ServerOfflineMessage
                     handleDismiss={() => {
                         setIgnoreServerDown(true)
+                    }}
+                    handleReportBug={() => {
+                        logMessage(
+                            "User reported server offline bug",
+                            "error",
+                            {
+                                metadata: {
+                                    serverInfoData,
+                                },
+                            }
+                        )
                     }}
                 />
             )}

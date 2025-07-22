@@ -312,6 +312,17 @@ const GroupingContainer = ({
                     handleDismiss={() => {
                         setIgnoreServerDown(true)
                     }}
+                    handleReportBug={() => {
+                        logMessage(
+                            "User reported server offline bug",
+                            "error",
+                            {
+                                metadata: {
+                                    serverInfoData,
+                                },
+                            }
+                        )
+                    }}
                 />
             ) : (
                 <>
