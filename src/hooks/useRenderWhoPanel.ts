@@ -340,7 +340,6 @@ const useRenderWhoPanel = ({ sprite, context }: Props) => {
             context.setTransform(1, 0, 0, 1, 0, 0)
 
             // render sort headers
-            // TODO: refactor this to use a loop
             const headers = [
                 {
                     boundingBox: lfmHeaderBoundingBox,

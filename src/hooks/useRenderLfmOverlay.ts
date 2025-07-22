@@ -771,7 +771,6 @@ const useRenderLfmOverlay = ({ lfmSprite, context }: Props) => {
                                 (timer) => timer.character_id === character.id
                             )
                             if (hasActiveTimer) {
-                                // TODO: draw red background with gradient towards the edges
                                 const redGradient =
                                     context.createLinearGradient(
                                         0,

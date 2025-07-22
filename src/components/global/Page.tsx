@@ -41,7 +41,7 @@ const Page = ({
                 <meta name="description" content={description} />
                 <link
                     rel="canonical"
-                    href={`https://www.hcnxsryjficudzazjxty.com${window.location.pathname}`}
+                    href={`https://www.ddoaudit.com${window.location.pathname}`}
                 />
                 <meta
                     property="og:image"
@@ -57,7 +57,7 @@ const Page = ({
                 <meta name="twitter:description" content={description} />
                 <meta
                     property="og:url"
-                    content={`https://www.hcnxsryjficudzazjxty.com${window.location.pathname}`}
+                    content={`https://www.ddoaudit.com${window.location.pathname}`}
                 />
                 <meta property="og:title" content={title} />
                 <meta property="og:description" content={description} />

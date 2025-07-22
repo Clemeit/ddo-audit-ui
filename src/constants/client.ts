@@ -11,7 +11,7 @@ const GITHUB_LINK = "https://github.com/Clemeit/ddo-audit-ui"
 // Determine API URL based on environment variables
 const getApiUrl = () => {
     const apiPort = process.env.REACT_APP_API_PORT
-    const baseUrl = "https://api.hcnxsryjficudzazjxty.com"
+    const baseUrl = "https://api.ddoaudit.com"
 
     if (apiPort) {
         // Parse the base URL to get the hostname

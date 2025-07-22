@@ -12,7 +12,7 @@ const BreadcrumbSchema = () => {
     const generateBreadcrumbs = (): BreadcrumbItem[] => {
         const pathSegments = location.pathname.split("/").filter(Boolean)
         const breadcrumbs: BreadcrumbItem[] = [
-            { name: "Home", url: "https://www.hcnxsryjficudzazjxty.com/" },
+            { name: "Home", url: "https://www.ddoaudit.com/" },
         ]
 
         let currentPath = ""
@@ -21,7 +21,7 @@ const BreadcrumbSchema = () => {
             const name = segment.charAt(0).toUpperCase() + segment.slice(1)
             breadcrumbs.push({
                 name,
-                url: `https://www.hcnxsryjficudzazjxty.com${currentPath}`,
+                url: `https://www.ddoaudit.com${currentPath}`,
             })
         })
 

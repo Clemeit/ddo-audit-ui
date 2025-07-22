@@ -9,47 +9,47 @@ import Notifications from "../global/Notifications.tsx"
 // Check if localStorage is set. If not, show enter token form
 // If so, show the app
 
-const value = localStorage.getItem("access-token")
+// const value = localStorage.getItem("access-token")
 
-const enterTokenForm = () => {
-    return (
-        <form>
-            <input id="token-input" type="text" placeholder="Enter token" />
-            <button
-                type="submit"
-                onClick={() => {
-                    localStorage.setItem(
-                        "access-token",
-                        (
-                            document.getElementById(
-                                "token-input"
-                            ) as HTMLInputElement
-                        ).value
-                    )
-                    window.location.reload()
-                }}
-            >
-                Enter
-            </button>
-        </form>
-    )
-}
+// const enterTokenForm = () => {
+//     return (
+//         <form>
+//             <input id="token-input" type="text" placeholder="Enter token" />
+//             <button
+//                 type="submit"
+//                 onClick={() => {
+//                     localStorage.setItem(
+//                         "access-token",
+//                         (
+//                             document.getElementById(
+//                                 "token-input"
+//                             ) as HTMLInputElement
+//                         ).value
+//                     )
+//                     window.location.reload()
+//                 }}
+//             >
+//                 Enter
+//             </button>
+//         </form>
+//     )
+// }
 
 function App() {
     return (
         <ErrorBoundary>
-            {value === "clemeit" ? (
-                <>
-                    <Header />
-                    <Outlet />
-                    <ScrollRestoration />
-                    <Footer />
-                    <Notifications />
-                    <ContentPush />
-                </>
-            ) : (
+            {/* {value === "clemeit" ? ( */}
+            <>
+                <Header />
+                <Outlet />
+                <ScrollRestoration />
+                <Footer />
+                <Notifications />
+                <ContentPush />
+            </>
+            {/* ) : (
                 enterTokenForm()
-            )}
+            )} */}
         </ErrorBoundary>
     )
 }
