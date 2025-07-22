@@ -6,8 +6,7 @@ on:
     workflow_dispatch:
 
 jobs:
-    build:
-        if: github.ref == 'refs/heads/master' || github.event_name == 'workflow_dispatch'
+    deploy-to-stage:
         runs-on: ubuntu-latest
 
         steps:
@@ -22,25 +21,10 @@ jobs:
             - name: Install dependencies
               run: yarn install --frozen-lockfile
 
-            - name: Build project
+            - name: Build project for stage
+              env:
+                  REACT_APP_API_PORT: 8443
               run: yarn build
-
-            - name: Upload build artifact
-              uses: actions/upload-artifact@v4
-              with:
-                  name: build
-                  path: build
-
-    deploy-to-stage:
-        needs: build
-        runs-on: ubuntu-latest
-
-        steps:
-            - name: Download build artifact
-              uses: actions/download-artifact@v4
-              with:
-                  name: build
-                  path: build
 
             - name: Copy build files to remote server
               uses: appleboy/scp-action@v1.0.0
@@ -53,17 +37,24 @@ jobs:
                   version: "1.6.13"
 
     deploy-to-prod:
-        needs: build
         if: github.event_name == 'workflow_dispatch'
         runs-on: ubuntu-latest
         environment: production
 
         steps:
-            - name: Download build artifact
-              uses: actions/download-artifact@v4
+            - name: Checkout code
+              uses: actions/checkout@v3
+
+            - name: Set up Node.js
+              uses: actions/setup-node@v3
               with:
-                  name: build
-                  path: build
+                  node-version: "20"
+
+            - name: Install dependencies
+              run: yarn install --frozen-lockfile
+
+            - name: Build project for stage
+              run: yarn build
 
             - name: Copy build files to remote server
               uses: appleboy/scp-action@v1.0.0
