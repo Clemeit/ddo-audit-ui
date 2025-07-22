@@ -102,6 +102,13 @@ const CharacterSelectModal = ({
             return
         }
 
+        // Ensure the name is alphanumeric including hyphens, and less than 30 characters
+        const nameRegex = /^[a-zA-Z0-9-]{1,30}$/
+        if (!nameRegex.test(characterName)) {
+            setValidationErrorMessage(["Invalid character name"])
+            return
+        }
+
         setIsFetching(true)
 
         getCharacterByName(characterName)
