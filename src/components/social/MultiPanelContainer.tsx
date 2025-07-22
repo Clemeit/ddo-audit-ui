@@ -8,7 +8,10 @@ import Badge from "../global/Badge.tsx"
 import Modal from "../modal/Modal.tsx"
 import LfmContainer from "../grouping/LfmCanvasContainer.tsx"
 import WhoContainer from "../who/WhoCanvasContainer.tsx"
-import { SERVER_NAMES_LOWER } from "../../constants/servers.ts"
+import {
+    SERVER_NAMES_LOWER,
+    SERVERS_64_BITS_LOWER,
+} from "../../constants/servers.ts"
 import { ReactComponent as AddSVG } from "../../assets/svg/add.svg"
 import "./MultiPanelContainer.css"
 import { useModalNavigation } from "../../hooks/useModalNavigation.ts"
@@ -58,55 +61,97 @@ const MultiPanelContainer = ({ serverName, primaryType }: Props) => {
         </ContentCluster>
     )
 
-    const secondaryPanelServerModalContent = () => (
-        <div style={{ padding: "20px" }}>
+    const getServerNavigationCard = (_serverName: string) => {
+        const isCurrentServer = _serverName === serverName.toLowerCase()
+        const is64BitServer = SERVERS_64_BITS_LOWER.includes(_serverName)
+
+        const onClickHandler = () => {
+            handleCloseModal()
+            if (secondaryType === "grouping") {
+                setSecondaryPanel(
+                    <LfmContainer
+                        serverName={_serverName}
+                        isSecondaryPanel={true}
+                        handleClosePanel={() => {
+                            setSecondaryPanel(undefined)
+                        }}
+                    />
+                )
+            } else if (secondaryType === "who") {
+                setSecondaryPanel(
+                    <WhoContainer
+                        serverName={_serverName}
+                        isSecondaryPanel={true}
+                        handleClosePanel={() => {
+                            setSecondaryPanel(undefined)
+                        }}
+                    />
+                )
+            }
+        }
+
+        const badge = isCurrentServer ? (
+            <Badge
+                text="Current"
+                size="small"
+                backgroundColor="var(--orange1)"
+            />
+        ) : is64BitServer ? (
+            <Badge
+                text="64-bit"
+                size="small"
+                backgroundColor="var(--magenta3)"
+            />
+        ) : null
+
+        return (
+            <ServerNavigationCard
+                noLink
+                miniature
+                fullWidth
+                key={_serverName}
+                destination={`/grouping/${_serverName}`}
+                title={toSentenceCase(_serverName)}
+                onClick={onClickHandler}
+                badge={badge}
+            />
+        )
+    }
+
+    const secondaryPanelServerModalContent = () => {
+        const sortedServerNames = SERVER_NAMES_LOWER.sort((a, b) => {
+            // Servers in SERVERS_64_BITS_LOWER should be at the start
+            if (
+                SERVERS_64_BITS_LOWER.includes(a) &&
+                !SERVERS_64_BITS_LOWER.includes(b)
+            ) {
+                return -1
+            }
+            if (
+                !SERVERS_64_BITS_LOWER.includes(a) &&
+                SERVERS_64_BITS_LOWER.includes(b)
+            ) {
+                return 1
+            }
+            return a.localeCompare(b)
+        }).sort((a, b) => {
+            // Sort by current server first
+            if (a === serverName.toLowerCase()) return -1
+            if (b === serverName.toLowerCase()) return 1
+        })
+
+        return (
             <ContentCluster title="Choose a Server">
                 <div style={{ maxWidth: "400px" }}>
                     <NavCardCluster>
-                        {SERVER_NAMES_LOWER.map((_serverName) => (
-                            <ServerNavigationCard
-                                noLink
-                                miniature
-                                fullWidth
-                                key={_serverName}
-                                destination={`/grouping/${_serverName}`}
-                                title={toSentenceCase(_serverName)}
-                                onClick={() => {
-                                    handleCloseModal()
-                                    if (secondaryType === "grouping") {
-                                        setSecondaryPanel(
-                                            <LfmContainer
-                                                serverName={_serverName}
-                                                isSecondaryPanel={true}
-                                                handleClosePanel={() => {
-                                                    setSecondaryPanel(undefined)
-                                                }}
-                                            />
-                                        )
-                                    } else if (secondaryType === "who") {
-                                        setSecondaryPanel(
-                                            <WhoContainer
-                                                serverName={_serverName}
-                                                isSecondaryPanel={true}
-                                                handleClosePanel={() => {
-                                                    setSecondaryPanel(undefined)
-                                                }}
-                                            />
-                                        )
-                                    }
-                                }}
-                                badge={
-                                    _serverName === serverName && (
-                                        <Badge text="Current" size="small" />
-                                    )
-                                }
-                            />
-                        ))}
+                        {sortedServerNames.map((_serverName) =>
+                            getServerNavigationCard(_serverName)
+                        )}
                     </NavCardCluster>
                 </div>
             </ContentCluster>
-        </div>
-    )
+        )
+    }
 
     return (
         <>
