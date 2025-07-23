@@ -8,10 +8,11 @@ export interface ServiceRequestProps {
 
 // Configure axios to use retries
 axiosRetry(axios, {
-    retries: 3,
+    retries: 5,
     retryDelay: (...arg) => axiosRetry.exponentialDelay(...arg, 1000),
     retryCondition(error) {
-        return error.response ? error.response.status >= 500 : false
+        // Retry on server errors (5xx) OR network errors (no response)
+        return error.response ? error.response.status >= 500 : true
     },
 })
 
