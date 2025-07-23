@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import usePollApi from "../../hooks/usePollApi.ts"
 import {
     Character,
@@ -70,6 +70,12 @@ const WhoContainer = ({
             interval: 10000,
             lifespan: 1000 * 60 * 60 * 12, // 12 hours
         })
+    const [hadFirstLoad, setHadFirstLoad] = useState<boolean>(false)
+    useEffect(() => {
+        if (characterState === LoadingState.Loaded && !hadFirstLoad) {
+            setHadFirstLoad(true)
+        }
+    }, [characterState])
 
     const isServerOffline = useMemo<boolean>(
         () =>
@@ -336,7 +342,10 @@ const WhoContainer = ({
                             curatedCharacters.areResultsTruncated
                         }
                         serverName={serverName}
-                        isLoading={characterState !== LoadingState.Loaded}
+                        isLoading={
+                            characterState !== LoadingState.Loaded &&
+                            !hadFirstLoad
+                        }
                     />
                 </>
             ) : (

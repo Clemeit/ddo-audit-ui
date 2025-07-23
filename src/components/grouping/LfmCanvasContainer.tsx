@@ -65,6 +65,12 @@ const GroupingContainer = ({
         interval: 10000,
         lifespan: 1000 * 60 * 60 * 12, // 12 hours
     })
+    const [hadFirstLoad, setHadFirstLoad] = useState<boolean>(false)
+    useEffect(() => {
+        if (lfmState === LoadingState.Loaded && !hadFirstLoad) {
+            setHadFirstLoad(true)
+        }
+    }, [lfmState])
     const [raidActivity, setRaidActivity] = useState<RaidActivityEvent[]>([])
 
     useEffect(() => {
@@ -341,7 +347,9 @@ const GroupingContainer = ({
                         lfms={filteredLfms.hydratedLfms || []}
                         excludedLfmCount={filteredLfms.excludedLfmCount}
                         raidView={raidView}
-                        isLoading={lfmState !== LoadingState.Loaded}
+                        isLoading={
+                            lfmState !== LoadingState.Loaded && !hadFirstLoad
+                        }
                     />
                 </>
             )}
