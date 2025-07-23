@@ -7,12 +7,13 @@ import { getData, setData } from "../utils/localStorage"
 
 export const useServiceWorkerUpdate = () => {
     const { createNotification, dismissNotification } = useNotificationContext()
-    const updateDismissKey = "update-dismissed"
+    const UPDATE_DISMISSED_KEY = "update-dismissed"
+    const UPDATE_SHOWN_KEY = "update-dismissed"
 
     const onDismissNotification = useCallback((notificationId: string) => {
         const now = new Date().toISOString()
         try {
-            setData<string>(updateDismissKey, now)
+            setData<string>(UPDATE_DISMISSED_KEY, now)
         } catch (error) {
             logMessage(
                 "Failed to set update dismissal time in localStorage",
@@ -87,7 +88,7 @@ export const useServiceWorkerUpdate = () => {
                 }
             }
 
-            const lastDismissal = getData<string>(updateDismissKey)
+            const lastDismissal = getData<string>(UPDATE_DISMISSED_KEY)
             if (lastDismissal) {
                 const lastDismissalDate = new Date(lastDismissal)
                 const now = new Date()
@@ -97,6 +98,35 @@ export const useServiceWorkerUpdate = () => {
                 if (timeSinceLastDismissal < MsFromDays(2)) {
                     return
                 }
+            }
+
+            const lastDisplay = getData<string>(UPDATE_SHOWN_KEY)
+            if (lastDisplay) {
+                const lastDisplayDate = new Date(lastDisplay)
+                const now = new Date()
+                const timeSinceLastDisplay =
+                    now.getTime() - lastDisplayDate.getTime()
+
+                if (timeSinceLastDisplay < MsFromDays(2)) {
+                    return
+                }
+            }
+
+            try {
+                setData<string>(UPDATE_SHOWN_KEY, new Date().toISOString())
+            } catch (error) {
+                logMessage(
+                    "Failed to set update display time in localStorage",
+                    "error",
+                    {
+                        metadata: {
+                            error:
+                                error instanceof Error
+                                    ? error.message
+                                    : String(error),
+                        },
+                    }
+                )
             }
 
             // Create a notification ID for dismissal
