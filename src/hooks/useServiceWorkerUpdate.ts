@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from "react"
+import React, { useCallback } from "react"
 import { useNotificationContext } from "../contexts/NotificationContext"
 import { UpdateNotificationActions } from "../components/global/UpdateNotificationActions"
 import logMessage from "../utils/logUtils"
@@ -8,7 +8,7 @@ import { getData, setData } from "../utils/localStorage"
 export const useServiceWorkerUpdate = () => {
     const { createNotification, dismissNotification } = useNotificationContext()
     const UPDATE_DISMISSED_KEY = "update-dismissed"
-    const UPDATE_SHOWN_KEY = "update-dismissed"
+    const UPDATE_SHOWN_KEY = "update-shown"
 
     const onDismissNotification = useCallback((notificationId: string) => {
         const now = new Date().toISOString()
