@@ -693,7 +693,7 @@ const useRenderLfmOverlay = ({ lfmSprite, context }: Props) => {
                     )
                 }
 
-                if (activeTimers.length > 0) {
+                if (lfm.metadata?.eligibleCharacters?.length > 0) {
                     const maximumEligibleCharacters = 5
                     const willOverflow =
                         lfm.metadata.eligibleCharacters.length >
