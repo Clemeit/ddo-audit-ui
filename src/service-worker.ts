@@ -97,9 +97,14 @@ registerRoute(
 )
 
 // This allows the web app to trigger skipWaiting via
-// registration.waiting.postMessage({type: 'SKIP_WAITING'})
+// registration.waiting.postMessage({type: 'SKIP_WAITING'}) or
+// registration.waiting.postMessage({action: 'skipWaiting'})
 self.addEventListener("message", (event) => {
-    if (event.data && event.data.type === "SKIP_WAITING") {
+    if (
+        event.data &&
+        (event.data.type === "SKIP_WAITING" ||
+            event.data.action === "skipWaiting")
+    ) {
         // Force skipWaiting and claim clients immediately
         self.skipWaiting().then(() => {
             // Claim all clients to ensure immediate control
@@ -110,8 +115,29 @@ self.addEventListener("message", (event) => {
 
 // Handle activation to ensure proper cleanup of old caches
 self.addEventListener("activate", (event) => {
-    // Take control of all clients immediately
-    event.waitUntil(self.clients.claim())
+    event.waitUntil(
+        Promise.all([
+            // Take control of all clients immediately
+            self.clients.claim(),
+            // Clean up old caches
+            caches.keys().then((cacheNames) => {
+                return Promise.all(
+                    cacheNames.map((cacheName) => {
+                        // Keep current Workbox caches and our images cache
+                        // Workbox caches typically start with 'workbox-' prefix
+                        if (
+                            !cacheName.startsWith("workbox-") &&
+                            cacheName !== "images" &&
+                            !cacheName.includes("precache") // Keep precache
+                        ) {
+                            console.log("Deleting old cache:", cacheName)
+                            return caches.delete(cacheName)
+                        }
+                    })
+                )
+            }),
+        ])
+    )
 })
 
 // Firebase messaging - handle background messages
