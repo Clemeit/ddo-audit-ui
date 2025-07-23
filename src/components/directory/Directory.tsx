@@ -91,8 +91,6 @@ const Directory = () => {
                         <NavigationCard
                             type="health"
                             externalLink={BETTER_STACK_URL}
-                            badge={<Badge text="Soon" type="soon" />}
-                            disabled
                         />
                     </NavCardCluster>
                 </ContentCluster>
