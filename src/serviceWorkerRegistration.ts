@@ -77,26 +77,7 @@ function registerValidSW(swUrl: string, config?: Config) {
                 }
 
                 newWorker.addEventListener("statechange", () => {
-                    if (
-                        newWorker.state === "installed" &&
-                        navigator.serviceWorker.controller
-                    ) {
-                        // New service worker is ready - execute callback for user notification
-                        if (config && config.onUpdate) {
-                            config.onUpdate(registration)
-                        }
-                    }
-                })
-            })
-
-            // Keep the original onupdatefound for backward compatibility
-            registration.onupdatefound = () => {
-                const installingWorker = registration.installing
-                if (installingWorker == null) {
-                    return
-                }
-                installingWorker.onstatechange = () => {
-                    if (installingWorker.state === "installed") {
+                    if (newWorker.state === "installed") {
                         if (navigator.serviceWorker.controller) {
                             // At this point, the updated precached content has been fetched,
                             // but the previous service worker will still serve the older
@@ -106,7 +87,7 @@ function registerValidSW(swUrl: string, config?: Config) {
                                     "tabs for this page are closed. See https://cra.link/PWA."
                             )
 
-                            // Execute callback
+                            // Execute callback for update
                             if (config && config.onUpdate) {
                                 config.onUpdate(registration)
                             }
@@ -116,14 +97,14 @@ function registerValidSW(swUrl: string, config?: Config) {
                             // "Content is cached for offline use." message.
                             console.log("Content is cached for offline use.")
 
-                            // Execute callback
+                            // Execute callback for success
                             if (config && config.onSuccess) {
                                 config.onSuccess(registration)
                             }
                         }
                     }
-                }
-            }
+                })
+            })
         })
         .catch((error) => {
             console.error("Error during service worker registration:", error)
