@@ -7,6 +7,7 @@ const useFeatureCallouts = () => {
         "show-lfm-activity",
         "show-lfm-posted-time",
         "faster-who-updating",
+        "show-eligible-characters",
     ]
     const calloutsKey = "feature-callouts"
 

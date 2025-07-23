@@ -442,11 +442,15 @@ const LfmToolbar = ({
                     </Checkbox>
                     <Checkbox
                         checked={showEligibleCharacters}
-                        onChange={(e) =>
+                        onChange={(e) => {
                             setShowEligibleCharacters(e.target.checked)
-                        }
+                            dismissCallout("show-eligible-characters")
+                        }}
                     >
-                        Show your eligible characters
+                        Show your eligible characters{" "}
+                        {isCalloutActive("show-eligible-characters") && (
+                            <Badge type="new" text="New" />
+                        )}
                     </Checkbox>
                     <Checkbox
                         checked={showLfmActivity}
