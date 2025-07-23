@@ -66,6 +66,30 @@ function registerValidSW(swUrl: string, config?: Config) {
     navigator.serviceWorker
         .register(swUrl)
         .then((registration) => {
+            // Check for updates every time the app loads (cache busting)
+            registration.update()
+
+            // Listen for new service worker waiting
+            registration.addEventListener("updatefound", () => {
+                const newWorker = registration.installing
+                if (newWorker == null) {
+                    return
+                }
+
+                newWorker.addEventListener("statechange", () => {
+                    if (
+                        newWorker.state === "installed" &&
+                        navigator.serviceWorker.controller
+                    ) {
+                        // New service worker is ready - execute callback for user notification
+                        if (config && config.onUpdate) {
+                            config.onUpdate(registration)
+                        }
+                    }
+                })
+            })
+
+            // Keep the original onupdatefound for backward compatibility
             registration.onupdatefound = () => {
                 const installingWorker = registration.installing
                 if (installingWorker == null) {
