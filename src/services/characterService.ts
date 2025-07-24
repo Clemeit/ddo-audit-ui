@@ -24,9 +24,10 @@ function getCharacterById(id: string) {
     )
 }
 
-function getCharactersByIds(ids: number[]) {
+function getCharactersByIds(ids: number[], options?: { signal?: AbortSignal }) {
     return getRequest<MultipleCharacterResponseModel>(
-        `${CHARACTER_ENDPOINT}/ids/${ids.join(",")}`
+        `${CHARACTER_ENDPOINT}/ids/${ids.join(",")}`,
+        options
     )
 }
 
