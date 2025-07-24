@@ -228,7 +228,7 @@ const useRenderLfmPanel = ({
                 context.textAlign = "left"
                 sortHeaders.forEach(({ type, boundingBox, displayText }) => {
                     const sortHeaderType =
-                        sortBy.type === type
+                        sortBy?.type === type
                             ? "SORT_HEADER_HIGHLIGHTED"
                             : "SORT_HEADER"
                     const actualBoundingBox = new BoundingBox(
@@ -248,9 +248,9 @@ const useRenderLfmPanel = ({
                         left: SPRITE_MAP[sortHeaderType].LEFT,
                         center: SPRITE_MAP[sortHeaderType].CENTER,
                         right: SPRITE_MAP[sortHeaderType].RIGHT,
-                        textOffsetX: sortBy.type === type ? 20 : 10,
+                        textOffsetX: sortBy?.type === type ? 20 : 10,
                     })
-                    if (sortBy.type === type) {
+                    if (sortBy?.type === type) {
                         // draw a little triangle to indicate sorting
                         context.save()
                         context.shadowBlur = 2
