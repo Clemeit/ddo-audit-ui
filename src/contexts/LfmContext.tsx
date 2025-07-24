@@ -179,7 +179,7 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
         setShowBoundingBoxes(false)
         setIsDynamicWidth(false)
         setIsFullScreen(false)
-        setIsMultiColumn(false)
+        setIsMultiColumn(true)
         setHighlightRaids(false)
         logMessage("Display settings reset to defaults", "info")
     }, [setIsFullScreen])
@@ -189,96 +189,246 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
         setShowMemberCount(true)
         setShowQuestGuesses(true)
         setShowQuestTips(true)
-        setShowCharacterGuildNames(false)
+        setShowCharacterGuildNames(true)
         setShowLfmPostedTime(true)
         setShowLfmActivity(true)
         setShowEligibleCharacters(false)
+        setHideGroupsPostedByIgnoredCharacters(false)
+        setHideGroupsContainingIgnoredCharacters(false)
+        setShowIndicationForGroupsPostedByFriends(true)
+        setShowIndicationForGroupsContainingFriends(true)
         logMessage("Tool settings reset to defaults", "info")
+    }
+
+    const applyDefaultSettings = useCallback(() => {
+        // Apply all default values
+        setMinLevel(MIN_LEVEL)
+        setMaxLevel(MAX_LEVEL)
+        setFilterByMyCharacters(false)
+        setShowNotEligible(true)
+        setFontSize(DEFAULT_BASE_FONT_SIZE)
+        setPanelWidth(DEFAULT_LFM_PANEL_WIDTH)
+        setSortBy({ type: "level", ascending: true })
+        setShowRaidTimerIndicator(true)
+        setShowMemberCount(true)
+        setShowQuestGuesses(true)
+        setShowQuestTips(true)
+        setShowCharacterGuildNames(true)
+        setTrackedCharacterIds([])
+        setShowLfmPostedTime(true)
+        setMouseOverDelay(DEFAULT_MOUSE_OVER_DELAY)
+        setShowLfmActivity(true)
+        setIsMultiColumn(true)
+        setShowEligibleCharacters(false)
+        setHideGroupsPostedByIgnoredCharacters(false)
+        setHideGroupsContainingIgnoredCharacters(false)
+        setShowIndicationForGroupsPostedByFriends(true)
+        setShowIndicationForGroupsContainingFriends(true)
+        setHighlightRaids(false)
+    }, [])
+
+    const validateAndParseSettings = (settings: any): boolean => {
+        // Basic type validation
+        if (!settings || typeof settings !== "object") {
+            return false
+        }
+
+        // Validate critical numeric values
+        if (
+            settings.minLevel !== undefined &&
+            (typeof settings.minLevel !== "number" ||
+                settings.minLevel < MIN_LEVEL ||
+                settings.minLevel > MAX_LEVEL)
+        ) {
+            return false
+        }
+        if (
+            settings.maxLevel !== undefined &&
+            (typeof settings.maxLevel !== "number" ||
+                settings.maxLevel < MIN_LEVEL ||
+                settings.maxLevel > MAX_LEVEL)
+        ) {
+            return false
+        }
+        if (
+            settings.fontSize !== undefined &&
+            (isNaN(parseInt(settings.fontSize)) ||
+                parseInt(settings.fontSize) < 8 ||
+                parseInt(settings.fontSize) > 72)
+        ) {
+            return false
+        }
+        if (
+            settings.panelWidth !== undefined &&
+            (isNaN(parseInt(settings.panelWidth)) ||
+                parseInt(settings.panelWidth) < 100 ||
+                parseInt(settings.panelWidth) > 2000)
+        ) {
+            return false
+        }
+        if (
+            settings.mouseOverDelay !== undefined &&
+            (typeof settings.mouseOverDelay !== "number" ||
+                settings.mouseOverDelay < 0 ||
+                settings.mouseOverDelay > 10000)
+        ) {
+            return false
+        }
+
+        // Validate arrays
+        if (
+            settings.trackedCharacterIds !== undefined &&
+            !Array.isArray(settings.trackedCharacterIds)
+        ) {
+            return false
+        }
+
+        // Validate sortBy object structure
+        if (
+            settings.sortBy !== undefined &&
+            (typeof settings.sortBy !== "object" ||
+                !settings.sortBy.type ||
+                typeof settings.sortBy.ascending !== "boolean")
+        ) {
+            return false
+        }
+
+        return true
     }
 
     const loadSettingsFromLocalStorage = useCallback(() => {
         let settings: any = null
+        let shouldResetToDefaults = false
+        let errorMessage = ""
+
         try {
             settings = getDataFromLocalStorage<any>(settingsStorageKey)
+
+            // If settings exist but are invalid, we need to reset
+            if (settings && !validateAndParseSettings(settings)) {
+                shouldResetToDefaults = true
+                errorMessage =
+                    "Settings validation failed - corrupted or invalid data detected"
+            }
         } catch (e) {
-            logMessage(
-                "Error loading settings from local storage, resetting to defaults",
-                "error",
-                {
-                    metadata: {
-                        error: e instanceof Error ? e.message : String(e),
-                    },
-                }
-            )
-            resetFilterSettings()
-            resetDisplaySettings()
-            resetToolSettings()
-            createNotification({
-                title: new Date().toLocaleTimeString(),
-                message:
-                    "An error occurred while loading your settings. Your settings have been reset to defaults. Sorry about that!",
-                subMessage: "This error has been logged.",
-                // lifetime: 10000,
-                type: "error",
-            })
+            shouldResetToDefaults = true
+            errorMessage = `Error loading settings from localStorage: ${e instanceof Error ? e.message : String(e)}`
         }
-        if (settings) {
-            try {
-                setMinLevel(settings.minLevel)
-                setMaxLevel(settings.maxLevel)
-                setFilterByMyCharacters(settings.filterByMyCharacters)
-                setShowNotEligible(settings.showNotEligible)
-                setFontSize(parseInt(settings.fontSize))
-                setPanelWidth(parseInt(settings.panelWidth))
-                setShowBoundingBoxes(settings.showBoundingBoxes)
-                setSortBy(settings.sortBy)
-                setIsDynamicWidth(settings.isDynamicWidth)
-                setShowRaidTimerIndicator(settings.showRaidTimerIndicator)
-                setShowMemberCount(settings.showMemberCount)
-                setShowQuestGuesses(settings.showQuestGuesses)
-                setShowQuestTips(settings.showQuestTips)
-                setShowCharacterGuildNames(settings.showCharacterGuildNames)
-                setTrackedCharacterIds(settings.trackedCharacterIds)
-                setShowLfmPostedTime(settings.showLfmPostedTime)
-                setMouseOverDelay(settings.mouseOverDelay)
-                setShowLfmActivity(settings.showLfmActivity)
-                setIsMultiColumn(settings.isMultiColumn)
-                setShowEligibleCharacters(settings.showEligibleCharacters)
-                setHideGroupsPostedByIgnoredCharacters(
-                    settings.hideGroupsPostedByIgnoredCharacters
-                )
-                setHideGroupsContainingIgnoredCharacters(
-                    settings.hideGroupsContainingIgnoredCharacters
-                )
-                setShowIndicationForGroupsPostedByFriends(
-                    settings.showIndicationForGroupsPostedByFriends
-                )
-                setShowIndicationForGroupsContainingFriends(
-                    settings.showIndicationForGroupsContainingFriends
-                )
-                setHighlightRaids(settings.highlightRaids)
-            } catch (e) {
+
+        if (shouldResetToDefaults || !settings) {
+            if (shouldResetToDefaults) {
                 logMessage(
-                    "Error applying settings from local storage, resetting to defaults",
+                    "Settings corrupted or invalid, resetting to defaults",
                     "error",
                     {
                         metadata: {
-                            settings,
-                            error: e instanceof Error ? e.message : String(e),
+                            error: errorMessage,
+                            corruptedSettings: settings,
                         },
                     }
                 )
                 createNotification({
                     title: new Date().toLocaleTimeString(),
                     message:
-                        "An error occurred while applying your settings. You can try resetting them if this problem continues.",
+                        "Your settings were corrupted or invalid and have been reset to defaults. Sorry about that!",
                     subMessage: "This error has been logged.",
-                    // lifetime: 10000,
                     type: "error",
                 })
             }
+
+            // Apply defaults and save them to localStorage to overwrite bad data
+            applyDefaultSettings()
+            return
         }
-    }, [resetDisplaySettings])
+
+        // Settings are valid, apply them safely with additional fallbacks
+        try {
+            setMinLevel(settings.minLevel ?? MIN_LEVEL)
+            setMaxLevel(settings.maxLevel ?? MAX_LEVEL)
+            setFilterByMyCharacters(
+                Boolean(settings.filterByMyCharacters ?? false)
+            )
+            setShowNotEligible(Boolean(settings.showNotEligible ?? true))
+
+            const parsedFontSize = parseInt(
+                settings.fontSize ?? String(DEFAULT_BASE_FONT_SIZE)
+            )
+            setFontSize(
+                isNaN(parsedFontSize) ? DEFAULT_BASE_FONT_SIZE : parsedFontSize
+            )
+
+            const parsedPanelWidth = parseInt(
+                settings.panelWidth ?? String(DEFAULT_LFM_PANEL_WIDTH)
+            )
+            setPanelWidth(
+                isNaN(parsedPanelWidth)
+                    ? DEFAULT_LFM_PANEL_WIDTH
+                    : parsedPanelWidth
+            )
+
+            setSortBy(settings.sortBy ?? { type: "level", ascending: true })
+            setShowRaidTimerIndicator(
+                Boolean(settings.showRaidTimerIndicator ?? true)
+            )
+            setShowMemberCount(Boolean(settings.showMemberCount ?? true))
+            setShowQuestGuesses(Boolean(settings.showQuestGuesses ?? true))
+            setShowQuestTips(Boolean(settings.showQuestTips ?? true))
+            setShowCharacterGuildNames(
+                Boolean(settings.showCharacterGuildNames ?? true)
+            )
+            setTrackedCharacterIds(
+                Array.isArray(settings.trackedCharacterIds)
+                    ? settings.trackedCharacterIds
+                    : []
+            )
+            setShowLfmPostedTime(Boolean(settings.showLfmPostedTime ?? true))
+            setMouseOverDelay(
+                settings.mouseOverDelay ?? DEFAULT_MOUSE_OVER_DELAY
+            )
+            setShowLfmActivity(Boolean(settings.showLfmActivity ?? true))
+            setIsMultiColumn(Boolean(settings.isMultiColumn ?? true))
+            setShowEligibleCharacters(
+                Boolean(settings.showEligibleCharacters ?? false)
+            )
+            setHideGroupsPostedByIgnoredCharacters(
+                Boolean(settings.hideGroupsPostedByIgnoredCharacters ?? false)
+            )
+            setHideGroupsContainingIgnoredCharacters(
+                Boolean(settings.hideGroupsContainingIgnoredCharacters ?? false)
+            )
+            setShowIndicationForGroupsPostedByFriends(
+                Boolean(settings.showIndicationForGroupsPostedByFriends ?? true)
+            )
+            setShowIndicationForGroupsContainingFriends(
+                Boolean(
+                    settings.showIndicationForGroupsContainingFriends ?? true
+                )
+            )
+            setHighlightRaids(Boolean(settings.highlightRaids ?? false))
+        } catch (e) {
+            logMessage(
+                "Error applying validated settings, falling back to defaults",
+                "error",
+                {
+                    metadata: {
+                        settings,
+                        error: e instanceof Error ? e.message : String(e),
+                    },
+                }
+            )
+
+            // If there's still an error applying validated settings, use defaults
+            applyDefaultSettings()
+
+            createNotification({
+                title: new Date().toLocaleTimeString(),
+                message:
+                    "An unexpected error occurred while applying your settings. They have been reset to defaults.",
+                subMessage: "This error has been logged.",
+                type: "error",
+            })
+        }
+    }, [applyDefaultSettings, createNotification])
 
     useLimitedInterval({
         callback: reloadRegisteredCharacters,
@@ -289,38 +439,58 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
     useEffect(() => {
         loadSettingsFromLocalStorage()
         setIsLoaded(true)
-    }, [reloadRegisteredCharacters, loadSettingsFromLocalStorage])
+    }, [loadSettingsFromLocalStorage])
 
     useEffect(() => {
-        // save to local storage
+        // Only save to localStorage after initial load to avoid overwriting with undefined values
         if (!isLoaded) return
-        setDataToLocalStorage<any>(settingsStorageKey, {
-            minLevel,
-            maxLevel,
-            filterByMyCharacters,
-            showNotEligible,
-            fontSize,
-            panelWidth,
-            showBoundingBoxes,
-            sortBy,
-            isDynamicWidth,
-            showRaidTimerIndicator,
-            showMemberCount,
-            showQuestGuesses,
-            showQuestTips,
-            showCharacterGuildNames,
-            trackedCharacterIds,
-            showLfmPostedTime,
-            mouseOverDelay,
-            showLfmActivity,
-            isMultiColumn,
-            showEligibleCharacters,
-            hideGroupsPostedByIgnoredCharacters,
-            hideGroupsContainingIgnoredCharacters,
-            showIndicationForGroupsPostedByFriends,
-            showIndicationForGroupsContainingFriends,
-            highlightRaids,
-        })
+
+        try {
+            const settingsToSave = {
+                minLevel,
+                maxLevel,
+                filterByMyCharacters,
+                showNotEligible,
+                fontSize,
+                panelWidth,
+                showBoundingBoxes,
+                sortBy,
+                isDynamicWidth,
+                showRaidTimerIndicator,
+                showMemberCount,
+                showQuestGuesses,
+                showQuestTips,
+                showCharacterGuildNames,
+                trackedCharacterIds,
+                showLfmPostedTime,
+                mouseOverDelay,
+                showLfmActivity,
+                isMultiColumn,
+                showEligibleCharacters,
+                hideGroupsPostedByIgnoredCharacters,
+                hideGroupsContainingIgnoredCharacters,
+                showIndicationForGroupsPostedByFriends,
+                showIndicationForGroupsContainingFriends,
+                highlightRaids,
+            }
+
+            // Validate the settings before saving
+            if (validateAndParseSettings(settingsToSave)) {
+                setDataToLocalStorage<any>(settingsStorageKey, settingsToSave)
+            } else {
+                logMessage(
+                    "Attempted to save invalid settings to localStorage - skipping save",
+                    "warn",
+                    { metadata: { settingsToSave } }
+                )
+            }
+        } catch (e) {
+            logMessage("Error saving settings to localStorage", "error", {
+                metadata: {
+                    error: e instanceof Error ? e.message : String(e),
+                },
+            })
+        }
     }, [
         minLevel,
         maxLevel,
