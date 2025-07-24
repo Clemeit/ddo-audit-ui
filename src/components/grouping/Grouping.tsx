@@ -31,12 +31,25 @@ import {
 import ColoredText from "../global/ColoredText.tsx"
 import "./Grouping.css"
 import Skeleton from "../global/Skeleton.tsx"
+import ComponentErrorBoundary from "../global/ComponentErrorBoundary.tsx"
+import GroupingErrorFallback from "./GroupingErrorFallback.tsx"
 
 import { AlphaReleasePageMessage } from "../global/CommonMessages.tsx"
 import { BOOLEAN_FLAGS } from "../../utils/localStorage.ts"
 import useBooleanFlag from "../../hooks/useBooleanFlags.ts"
 
 const Grouping = () => {
+    return (
+        <ComponentErrorBoundary
+            componentName="Grouping"
+            fallback={GroupingErrorFallback}
+        >
+            <GroupingContent />
+        </ComponentErrorBoundary>
+    )
+}
+
+const GroupingContent = () => {
     const { data: lfmData, state: lfmState } = usePollApi<LfmApiModel>({
         endpoint: "lfms",
         interval: 10000,
@@ -131,6 +144,9 @@ const Grouping = () => {
     }
 
     const getCurrentRaids = useCallback(() => {
+        if (!questContext || !lfmData) {
+            return {}
+        }
         const currentRaids: Record<string, Lfm[]> = {}
         Object.entries(lfmData?.data || {}).forEach(
             ([serverName, serverData]) => {
