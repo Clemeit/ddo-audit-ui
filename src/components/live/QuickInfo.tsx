@@ -22,6 +22,14 @@ const QuickInfo = ({
             return <Skeleton width="210px" />
         }
 
+        if (defaultServerName === "unknown") {
+            return (
+                <span>
+                    The default server is currently unknown - check back later
+                </span>
+            )
+        }
+
         return (
             <span>
                 The default server is{" "}
