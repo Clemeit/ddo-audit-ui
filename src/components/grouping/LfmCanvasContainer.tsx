@@ -266,14 +266,30 @@ const GroupingContainer = ({
                               a?.leader?.name || ""
                           )
                 } else if (sortBy?.type === "quest") {
-                    const questAName =
-                        Object.values(quests || {}).find(
-                            (quest) => quest?.id === a?.quest_id
-                        )?.name || ""
-                    const questBName =
-                        Object.values(quests || {}).find(
-                            (quest) => quest?.id === b?.quest_id
-                        )?.name || ""
+                    const questA = Object.values(quests || {}).find(
+                        (quest) => quest?.id === a?.quest_id
+                    )
+                    const questB = Object.values(quests || {}).find(
+                        (quest) => quest?.id === b?.quest_id
+                    )
+                    const questAName = questA?.name || ""
+                    const questBName = questB?.name || ""
+
+                    // Handle LFMs without quests by placing them at the end
+                    const aHasQuest = !!questA && a?.quest_id !== 0
+                    const bHasQuest = !!questB && b?.quest_id !== 0
+
+                    if (!aHasQuest && !bHasQuest) {
+                        return 0 // Both have no quest, maintain original order
+                    }
+                    if (!aHasQuest) {
+                        return sortBy?.ascending ? 1 : -1 // Place no-quest LFMs at end when ascending, start when descending
+                    }
+                    if (!bHasQuest) {
+                        return sortBy?.ascending ? -1 : 1 // Place no-quest LFMs at end when ascending, start when descending
+                    }
+
+                    // Both have quests, sort by quest name
                     return sortBy?.ascending
                         ? questAName.localeCompare(questBName)
                         : questBName.localeCompare(questAName)
