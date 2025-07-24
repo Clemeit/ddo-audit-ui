@@ -25,7 +25,8 @@ const QuickInfo = ({
         if (defaultServerName === "unknown") {
             return (
                 <span>
-                    The default server is currently unknown - check back later
+                    The default server is currently unknown because the game
+                    servers are offline
                 </span>
             )
         }

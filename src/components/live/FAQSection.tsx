@@ -30,6 +30,18 @@ const FAQSection = ({
         }
         return `${toSentenceCase(mostPopulatedServerThisMonth)} is currently DDO's most populated server.`
     }
+    const getDefaultServerString = (): string => {
+        if (defaultServerName == "unknown") {
+            return "DDO's default server is currently unknown because the game servers are offline. Please check back later."
+        }
+        return `${toSentenceCase(defaultServerName)} is currently DDO's default server and will likely have the most new players. This changes periodically to help balance the game's population.`
+    }
+    const getBestServerString = (): string => {
+        if (defaultServerName == "unknown") {
+            return "The best server for you will depend on a myriad of factors including time zone, guild activity, a server's physical location, and your play style. You can check our 'Servers' page for more information about current server populations, or try starting out on the default server."
+        }
+        return `The best server for you will depend on a myriad of factors including time zone, guild activity, a server's physical location, and your play style. You can check our 'Servers' page for more information, or try starting out on ${toSentenceCase(defaultServerName)} which is currently DDO's default server.`
+    }
 
     const allFaqData: FAQItem[] = [
         {
@@ -44,9 +56,9 @@ const FAQSection = ({
         },
         {
             question: "What is DDO's default server?",
-            answer: `${toSentenceCase(defaultServerName)} is currently DDO's default server and will likely have the most new players. This changes periodically to help balance the game's population.`,
+            answer: getDefaultServerString(),
             fallbackAnswer:
-                "DDO's default server changes periodically to help balance the game's population. Check our Servers page for current default server information.",
+                "DDO's default server changes periodically to help balance the game's population. Check our Live page for current default server information.",
             dependencies: [defaultServerName],
         },
         {
@@ -58,7 +70,7 @@ const FAQSection = ({
         },
         {
             question: "What is DDO's best server?",
-            answer: `The best server for you will depend on a myriad of factors including time zone, guild activity, a server's physical location, and your play style. You can check our "Servers" page for more information, or try starting out on ${toSentenceCase(defaultServerName)} which is currently DDO's default server.`,
+            answer: getBestServerString(),
             fallbackAnswer:
                 'The best server for you will depend on a myriad of factors including time zone, guild activity, a server\'s physical location, and your play style. You can check our "Servers" page for more information about current server populations.',
             dependencies: [defaultServerName],
