@@ -12,6 +12,7 @@ import logMessage from "../utils/logUtils.ts"
 
 interface AreaContextProps {
     areas: { [key: number]: Area }
+    reloadAreas: () => void
 }
 
 const AreaContext = createContext<AreaContextProps | undefined>(undefined)
@@ -23,25 +24,29 @@ interface Props {
 export const AreaProvider = ({ children }: Props) => {
     const [areas, setAreas] = useState<{ [key: number]: Area }>({})
 
-    const populateAreas = async () => {
+    const populateAreas = async (fetchFromServer: boolean = false) => {
         // Get from cache
         const cachedAreas = getAreasFromLocalStorage()
         const lastUpdated = new Date(cachedAreas.updatedAt || 0)
         if (
+            fetchFromServer ||
             !cachedAreas ||
             !cachedAreas.data ||
+            !cachedAreas.updatedAt ||
             new Date().getTime() - lastUpdated.getTime() >
                 CACHED_AREAS_EXPIRY_TIME
         ) {
             // Cache is stale
             try {
                 const result = await getRequest<AreaApiResponse>("areas")
-                setAreas(
-                    result.data.reduce((acc: { [key: number]: Area }, area) => {
+                const areaObj = result.data.reduce(
+                    (acc, area) => {
                         acc[area.id] = area
                         return acc
-                    }, {})
+                    },
+                    {} as { [key: number]: Area }
                 )
+                setAreas(areaObj)
                 setAreasInLocalStorage(result.data)
             } catch (error) {
                 setAreas({})
@@ -57,15 +62,14 @@ export const AreaProvider = ({ children }: Props) => {
             }
         } else {
             // Cache OK
-            setAreas(
-                cachedAreas.data.reduce(
-                    (acc: { [key: number]: Area }, area) => {
-                        acc[area.id] = area
-                        return acc
-                    },
-                    {}
-                )
+            const areaObj = cachedAreas.data.reduce(
+                (acc, area) => {
+                    acc[area.id] = area
+                    return acc
+                },
+                {} as { [key: number]: Area }
             )
+            setAreas(areaObj)
         }
     }
 
@@ -73,8 +77,15 @@ export const AreaProvider = ({ children }: Props) => {
         populateAreas()
     }, [])
 
+    const areasMemoized = React.useMemo(() => ({ areas }), [areas])
+
     return (
-        <AreaContext.Provider value={{ areas }}>
+        <AreaContext.Provider
+            value={{
+                areas: areasMemoized.areas,
+                reloadAreas: () => populateAreas(true),
+            }}
+        >
             {children}
         </AreaContext.Provider>
     )

@@ -12,6 +12,7 @@ import logMessage from "../utils/logUtils.ts"
 
 interface QuestContextProps {
     quests: { [key: number]: Quest }
+    reloadQuests: () => void
 }
 
 const QuestContext = createContext<QuestContextProps | undefined>(undefined)
@@ -23,28 +24,29 @@ interface Props {
 export const QuestProvider = ({ children }: Props) => {
     const [quests, setQuests] = useState<{ [key: number]: Quest }>({})
 
-    const populateQuests = async () => {
+    const populateQuests = async (fetchFromServer: boolean = false) => {
         // Get from cache
         const cachedQuests = getQuestsFromLocalStorage()
         const lastUpdated = new Date(cachedQuests.updatedAt || 0)
         if (
+            fetchFromServer ||
             !cachedQuests ||
             !cachedQuests.data ||
+            !cachedQuests.updatedAt ||
             new Date().getTime() - lastUpdated.getTime() >
                 CACHED_QUESTS_EXPIRY_TIME
         ) {
             // Cache is stale
             try {
                 const result = await getRequest<QuestApiResponse>("quests")
-                setQuests(
-                    result.data.reduce(
-                        (acc: { [key: number]: Quest }, quest) => {
-                            acc[quest.id] = quest
-                            return acc
-                        },
-                        {}
-                    )
+                const questObj = result.data.reduce(
+                    (acc, quest) => {
+                        acc[quest.id] = quest
+                        return acc
+                    },
+                    {} as { [key: number]: Quest }
                 )
+                setQuests(questObj)
                 setQuestsInLocalStorage(result.data)
             } catch (error) {
                 setQuests({})
@@ -60,15 +62,14 @@ export const QuestProvider = ({ children }: Props) => {
             }
         } else {
             // Cache OK
-            setQuests(
-                cachedQuests.data.reduce(
-                    (acc: { [key: number]: Quest }, quest) => {
-                        acc[quest.id] = quest
-                        return acc
-                    },
-                    {}
-                )
+            const questsObj = cachedQuests.data.reduce(
+                (acc, quest) => {
+                    acc[quest.id] = quest
+                    return acc
+                },
+                {} as { [key: number]: Quest }
             )
+            setQuests(questsObj)
         }
     }
 
@@ -76,8 +77,15 @@ export const QuestProvider = ({ children }: Props) => {
         populateQuests()
     }, [])
 
+    const questsMemoized = React.useMemo(() => ({ quests }), [quests])
+
     return (
-        <QuestContext.Provider value={{ quests }}>
+        <QuestContext.Provider
+            value={{
+                quests: questsMemoized.quests,
+                reloadQuests: () => populateQuests(true),
+            }}
+        >
             {children}
         </QuestContext.Provider>
     )

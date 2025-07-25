@@ -241,7 +241,7 @@ const GroupingContainer = ({
                 }
                 return newLfm
             })
-            .filter((lfm): lfm is Lfm => lfm !== null)
+            .filter((lfm) => lfm != null)
 
         // sort
         const filteredAndSortedLfms = determinedLfms
@@ -252,11 +252,6 @@ const GroupingContainer = ({
                 return (a?.id ?? 0) - (b?.id ?? 0)
             })
             .sort((a, b) => {
-                // might use some other method instead of average, but this'll do for now
-                const averageLevelA =
-                    ((a?.minimum_level ?? 0) + (a?.maximum_level ?? 0)) / 2
-                const averageLevelB =
-                    ((b?.minimum_level ?? 0) + (b?.maximum_level ?? 0)) / 2
                 if (sortBy?.type === "leader") {
                     return sortBy?.ascending
                         ? (a?.leader?.name || "").localeCompare(
@@ -300,10 +295,20 @@ const GroupingContainer = ({
                         : (b?.accepted_classes?.length ?? 0) -
                               (a?.accepted_classes?.length ?? 0)
                 } else {
-                    // default to level
-                    return sortBy?.ascending
-                        ? averageLevelA - averageLevelB
-                        : averageLevelB - averageLevelA
+                    // sort by level. First sort by minimum level, then by maximum level
+                    const aMinLevel = a?.minimum_level ?? 0
+                    const aMaxLevel = a?.maximum_level ?? 0
+                    const bMinLevel = b?.minimum_level ?? 0
+                    const bMaxLevel = b?.maximum_level ?? 0
+                    if (aMinLevel !== bMinLevel) {
+                        return sortBy?.ascending
+                            ? aMinLevel - bMinLevel
+                            : bMinLevel - aMinLevel
+                    } else {
+                        return sortBy?.ascending
+                            ? aMaxLevel - bMaxLevel
+                            : bMaxLevel - aMaxLevel
+                    }
                 }
             })
 
