@@ -32,7 +32,7 @@ const useRenderLfmPanel = ({
         () => calculateCommonBoundingBoxes(panelWidth),
         [panelWidth]
     )
-    const fonts = useMemo(() => FONTS(0), [])
+    const fonts = useMemo(() => FONTS(), [])
     const sortHeaders = useMemo(
         () => SORT_HEADERS(commonBoundingBoxes),
         [commonBoundingBoxes]
@@ -43,7 +43,11 @@ const useRenderLfmPanel = ({
     })
 
     const renderLfmPanelToCanvas = useCallback(
-        (panelHeight: number) => {
+        (
+            panelHeight: number,
+            renderedLfmCount: number,
+            excludedLfmCount: number
+        ) => {
             if (!context || !sprite) return
             context.imageSmoothingEnabled = false
 
@@ -176,6 +180,7 @@ const useRenderLfmPanel = ({
                     LFM_HEIGHT
                 )
             }
+
             context.setTransform(1, 0, 0, 1, 0, 0)
 
             if (!raidView) {
@@ -276,6 +281,20 @@ const useRenderLfmPanel = ({
                         context.restore()
                     }
                 })
+            }
+
+            if (!raidView) {
+                if (renderedLfmCount === 0 && excludedLfmCount > 0) {
+                    context.setTransform(1, 0, 0, 1, 0, 0)
+                    context.fillStyle = LFM_COLORS.SECONDARY_TEXT
+                    context.font = fonts.MISC_INFO_MESSAGE
+                    context.textAlign = "center"
+                    context.fillText(
+                        `${excludedLfmCount} ${excludedLfmCount !== 1 ? "groups were" : "group was"} hidden by your filter settings`,
+                        panelWidth / 2,
+                        150
+                    )
+                }
             }
         },
         [

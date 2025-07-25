@@ -322,7 +322,7 @@ const LfmCanvas: React.FC<Props> = ({
     // Render the panel when panel-related props change
     useEffect(() => {
         if (!image) return
-        renderLfmPanelToCanvas(panelHeight)
+        renderLfmPanelToCanvas(panelHeight, lfms.length, excludedLfmCount)
     }, [
         image,
         renderLfmPanelToCanvas,
@@ -330,6 +330,8 @@ const LfmCanvas: React.FC<Props> = ({
         raidView,
         sortBy,
         isLoading,
+        lfms.length,
+        excludedLfmCount,
     ])
 
     // Memoize current display settings to detect changes
@@ -474,26 +476,6 @@ const LfmCanvas: React.FC<Props> = ({
         getLfmKey,
     ])
 
-    // Handle filter message when no LFMs are shown
-    useEffect(() => {
-        if (!image) return
-
-        const context = lfmCanvasRef.current?.getContext("2d")
-        if (!context) return
-
-        if (lfms.length === 0 && excludedLfmCount > 0) {
-            context.clearRect(0, 0, panelWidth, panelHeight)
-            context.fillStyle = LFM_COLORS.SECONDARY_TEXT
-            context.font = fonts.MISC_INFO_MESSAGE
-            context.textAlign = "center"
-            context.fillText(
-                `${excludedLfmCount} ${excludedLfmCount !== 1 ? "groups were" : "group was"} hidden by your filter settings`,
-                panelWidth / 2,
-                150
-            )
-        }
-    }, [image, lfms.length, excludedLfmCount, panelWidth, panelHeight, fonts])
-
     // Handle loading state
     useEffect(() => {
         if (!image || !isLoading) return
@@ -505,7 +487,7 @@ const LfmCanvas: React.FC<Props> = ({
         context.fillStyle = LFM_COLORS.SECONDARY_TEXT
         context.font = fonts.MISC_INFO_MESSAGE
         context.textAlign = "center"
-        context.fillText(`Content loading...`, panelWidth / 2, 150)
+        context.fillText("Content loading...", panelWidth / 2, 150)
     }, [image, isLoading, panelWidth, panelHeight, fonts])
 
     // Handle overlay rendering
