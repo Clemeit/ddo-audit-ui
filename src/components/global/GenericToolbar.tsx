@@ -111,12 +111,7 @@ const GenericToolbar = ({
             >
                 <Stack align="center" gap="4px">
                     <ScreenshotSVG className="icon" />
-                    <span className="hide-on-mobile">
-                        Screenshot{" "}
-                        {isCalloutActive("grouping-screenshot-button") && (
-                            <Badge type="new" text="New" />
-                        )}
-                    </span>
+                    <span className="hide-on-mobile">Screenshot</span>
                 </Stack>
             </Button>
             <div
