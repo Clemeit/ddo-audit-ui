@@ -133,7 +133,7 @@ const useRenderLfm = ({ lfmSprite, context, raidView = false }: Props) => {
     )
 
     const renderLfm = useCallback(
-        (lfm: Lfm) => {
+        (lfm: Lfm, isElgibilityBoundary: boolean = false) => {
             if (!context || !lfmSprite) return
             context.imageSmoothingEnabled = false
             const fonts = FONTS(fontSize)
@@ -479,6 +479,23 @@ const useRenderLfm = ({ lfmSprite, context, raidView = false }: Props) => {
                 Math.floor(levelPanelBoundingBox.width),
                 Math.floor(levelPanelBoundingBox.height)
             )
+            if (isElgibilityBoundary) {
+                context.strokeStyle = LFM_COLORS.ELIGIBILITY_DIVIDER
+                context.setLineDash([5, 3])
+                context.lineWidth = 1
+                context.beginPath()
+                context.moveTo(
+                    Math.floor(lfmBoundingBox.x),
+                    Math.floor(lfmBoundingBox.height) - 0.5
+                )
+                context.lineTo(
+                    Math.floor(lfmBoundingBox.x + lfmBoundingBox.width),
+                    Math.floor(lfmBoundingBox.height) - 0.5
+                )
+                context.stroke()
+                context.lineWidth = 1
+                context.setLineDash([])
+            }
 
             if (!lfm.metadata?.isEligible) {
                 context.globalAlpha = 0.5

@@ -64,9 +64,6 @@ interface LfmContextProps {
     setTrackedCharacterIds: (ids: number[]) => void
     showLfmPostedTime: boolean
     setShowLfmPostedTime: (show: boolean) => void
-    resetFilterSettings: () => void
-    resetDisplaySettings: () => void
-    resetToolSettings: () => void
     mouseOverDelay: number
     setMouseOverDelay: (delay: number) => void
     showLfmActivity: boolean
@@ -85,6 +82,13 @@ interface LfmContextProps {
     setShowIndicationForGroupsContainingFriends: (value: boolean) => void
     highlightRaids: boolean
     setHighlightRaids: (value: boolean) => void
+    hideAllLevelGroups: boolean
+    setHideAllLevelGroups: (value: boolean) => void
+    showEligibilityDividers: boolean
+    setShowEligibilityDividers: (value: boolean) => void
+    resetFilterSettings: () => void
+    resetDisplaySettings: () => void
+    resetToolSettings: () => void
 }
 
 const LfmContext = createContext<LfmContextProps | undefined>(undefined)
@@ -128,6 +132,9 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
     )
     const [isMultiColumn, setIsMultiColumn] = useState<boolean>(true)
     const [highlightRaids, setHighlightRaids] = useState<boolean>(false)
+    const [hideAllLevelGroups, setHideAllLevelGroups] = useState<boolean>(false)
+    const [showEligibilityDividers, setShowEligibilityDividers] =
+        useState<boolean>(true)
 
     // tools:
     const [showRaidTimerIndicator, setShowRaidTimerIndicator] =
@@ -181,6 +188,8 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
         setIsFullScreen(false)
         setIsMultiColumn(true)
         setHighlightRaids(false)
+        setHideAllLevelGroups(false)
+        setShowEligibilityDividers(true)
         logMessage("Display settings reset to defaults", "info")
     }, [setIsFullScreen])
 
@@ -225,6 +234,8 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
         setShowIndicationForGroupsPostedByFriends(true)
         setShowIndicationForGroupsContainingFriends(true)
         setHighlightRaids(false)
+        setHideAllLevelGroups(false)
+        setShowEligibilityDividers(true)
     }, [])
 
     const validateAndParseSettings = (settings: any): boolean => {
@@ -405,6 +416,10 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
                 )
             )
             setHighlightRaids(Boolean(settings.highlightRaids ?? false))
+            setHideAllLevelGroups(Boolean(settings.hideAllLevelGroups ?? false))
+            setShowEligibilityDividers(
+                Boolean(settings.showEligibilityDividers ?? true)
+            )
         } catch (e) {
             logMessage(
                 "Error applying validated settings, falling back to defaults",
@@ -472,6 +487,8 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
                 showIndicationForGroupsPostedByFriends,
                 showIndicationForGroupsContainingFriends,
                 highlightRaids,
+                hideAllLevelGroups,
+                showEligibilityDividers,
             }
 
             // Validate the settings before saving
@@ -518,6 +535,8 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
         showIndicationForGroupsPostedByFriends,
         showIndicationForGroupsContainingFriends,
         highlightRaids,
+        hideAllLevelGroups,
+        showEligibilityDividers,
     ])
 
     useEffect(() => {
@@ -567,9 +586,6 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
                 setTrackedCharacterIds,
                 showLfmPostedTime,
                 setShowLfmPostedTime,
-                resetDisplaySettings,
-                resetFilterSettings,
-                resetToolSettings,
                 mouseOverDelay,
                 setMouseOverDelay,
                 showLfmActivity,
@@ -588,6 +604,13 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
                 setShowIndicationForGroupsContainingFriends,
                 highlightRaids,
                 setHighlightRaids,
+                hideAllLevelGroups,
+                setHideAllLevelGroups,
+                showEligibilityDividers,
+                setShowEligibilityDividers,
+                resetDisplaySettings,
+                resetFilterSettings,
+                resetToolSettings,
             }}
         >
             {children}

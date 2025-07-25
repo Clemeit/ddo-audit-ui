@@ -43,6 +43,7 @@ const GroupingContainer = ({
         trackedCharacterIds,
         hideGroupsPostedByIgnoredCharacters,
         hideGroupsContainingIgnoredCharacters,
+        hideAllLevelGroups,
     } = useLfmContext()
     const [ignoreServerDown, setIgnoreServerDown] = useState<boolean>(false)
     const { friends } = useGetFriends()
@@ -168,8 +169,8 @@ const GroupingContainer = ({
             (lfm) => lfm != null
         )
 
-        // handle ignored characters
-        const lfmsWithIgnoresFiltered = lfms.filter((lfm) => {
+        // filter out ignored groups
+        const lfmsFilteredByUserSettings = lfms.filter((lfm) => {
             if (!lfm) return false
 
             if (hideGroupsPostedByIgnoredCharacters) {
@@ -184,11 +185,16 @@ const GroupingContainer = ({
                 )
                 if (hasIgnoredMember) return false
             }
+            if (hideAllLevelGroups) {
+                const minLevel = lfm?.minimum_level ?? 0
+                const maxLevel = lfm?.maximum_level ?? 999
+                if (minLevel == 1 && maxLevel == 34) return false
+            }
             return true
         })
 
         // determine eligibility
-        const determinedLfms = lfmsWithIgnoresFiltered
+        const determinedLfms = lfmsFilteredByUserSettings
             .map((lfm) => {
                 if (!lfm) return null
 
@@ -345,7 +351,7 @@ const GroupingContainer = ({
         return {
             hydratedLfms,
             excludedLfmCount:
-                (lfmsWithIgnoresFiltered?.length ?? 0) -
+                (lfmsFilteredByUserSettings?.length ?? 0) -
                 (hydratedLfms?.length ?? 0),
         }
     }, [
@@ -362,6 +368,7 @@ const GroupingContainer = ({
         friends,
         ignores,
         quests,
+        hideAllLevelGroups,
     ])
 
     return (
