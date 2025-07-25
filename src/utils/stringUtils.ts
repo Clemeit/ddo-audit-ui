@@ -14,6 +14,12 @@ function convertMillisecondsToPrettyString(
     useFullWords: boolean = false,
     onlyIncludeLargest: boolean = false
 ): string {
+    if (millis == 0) {
+        return "0 seconds"
+    } else if (millis < 0) {
+        return "in the past"
+    }
+
     const seconds = Math.floor(millis / 1000)
     const minutes = Math.floor(seconds / 60)
     const hours = Math.floor(minutes / 60)

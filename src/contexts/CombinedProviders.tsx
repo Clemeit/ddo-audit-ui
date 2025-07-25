@@ -45,3 +45,10 @@ export const RegistrationDataProvider = ({ children }: Props) => (
         <AreaProvider>{children}</AreaProvider>
     </WhoProvider>
 )
+
+// Quest and Area data stack: QuestProvider > AreaProvider
+export const QuestAndAreaDataProvider = ({ children }: Props) => (
+    <QuestProvider>
+        <AreaProvider>{children}</AreaProvider>
+    </QuestProvider>
+)

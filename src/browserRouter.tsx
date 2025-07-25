@@ -28,7 +28,7 @@ const NotFound = lazy(() => import("./components/app/NotFound.tsx"))
 // const Notifications = lazy(
 //     () => import("./components/notifications/Notifications.tsx")
 // )
-// const Timers = lazy(() => import("./components/timers/Timers.tsx"))
+const Timers = lazy(() => import("./components/timers/Timers.tsx"))
 const Feedback = lazy(() => import("./components/feedback/Feedback.tsx"))
 const Friends = lazy(() => import("./components/friends/Friends.tsx"))
 const About = lazy(() => import("./components/about/About.tsx"))
@@ -42,6 +42,7 @@ import {
     GroupingDataProvider,
     WhoDataProvider,
     RegistrationDataProvider,
+    QuestAndAreaDataProvider,
 } from "./contexts/CombinedProviders.tsx"
 
 // Set up the router
@@ -83,7 +84,14 @@ export default createBrowserRouter(
                 <Route path=":id" element={<WhoSpecific />} />
             </Route>
             {/* <Route path="/notifications" element={<Notifications />} /> */}
-            {/* <Route path="/timers" element={<Timers />} /> */}
+            <Route
+                path="/timers"
+                element={
+                    <QuestAndAreaDataProvider>
+                        <Timers />
+                    </QuestAndAreaDataProvider>
+                }
+            />
             <Route path="/servers" element={<Outlet />}>
                 <Route index element={<Servers />} />
                 <Route path=":id" element={<Servers />} />

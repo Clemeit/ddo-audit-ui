@@ -4,20 +4,20 @@ import { getCharacterRaidActivityByIds } from "../services/activityService"
 import logMessage from "../utils/logUtils"
 
 interface Props {
-    verifiedCharacters: Character[]
+    registeredCharacters: Character[]
 }
 
-interface QuestInstances {
+export interface QuestInstances {
     timestamp: string
     quest_ids: number[]
 }
 
-interface CharacterTimers {
+export interface CharacterTimers {
     character: Character
     raidActivity: QuestInstances[]
 }
 
-const useGetCharacterTimers = ({ verifiedCharacters }: Props) => {
+const useGetCharacterTimers = ({ registeredCharacters }: Props) => {
     const [characterTimers, setCharacterTimers] = useState<CharacterTimers[]>(
         []
     )
@@ -25,17 +25,17 @@ const useGetCharacterTimers = ({ verifiedCharacters }: Props) => {
     useEffect(() => {
         ;(async () => {
             try {
-                if (!verifiedCharacters || verifiedCharacters.length === 0)
+                if (!registeredCharacters || registeredCharacters.length === 0)
                     return
                 // get timers for each character
-                const characterIds = verifiedCharacters.map(
+                const characterIds = registeredCharacters.map(
                     (character) => character.id
                 )
                 const raidActivity =
                     await getCharacterRaidActivityByIds(characterIds)
                 if (!raidActivity?.data?.length) return
                 const characterTimers: CharacterTimers[] =
-                    verifiedCharacters.map((character) => {
+                    registeredCharacters.map((character) => {
                         const activityForCharacter = raidActivity.data.filter(
                             (activity) => activity.character_id === character.id
                         )
@@ -61,7 +61,7 @@ const useGetCharacterTimers = ({ verifiedCharacters }: Props) => {
                 })
             }
         })()
-    }, [verifiedCharacters])
+    }, [registeredCharacters])
 
     return { characterTimers }
 }
