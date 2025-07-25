@@ -84,18 +84,6 @@ const LfmCanvas: React.FC<Props> = ({
 
     const fonts = useMemo(() => FONTS(), [])
 
-    const panelHeight = useMemo(() => {
-        const height = raidView
-            ? LFM_HEIGHT * lfms.length
-            : LFM_HEIGHT * Math.max(MINIMUM_LFM_COUNT, lfms.length) +
-              TOTAL_LFM_PANEL_BORDER_HEIGHT +
-              SORT_HEADER_HEIGHT +
-              LFM_AREA_PADDING.top +
-              LFM_AREA_PADDING.bottom
-        setPanelHeight(height)
-        return height
-    }, [lfms.length, raidView, setPanelHeight])
-
     // State
     const [selectedLfmInfo, setSelectedLfmInfo] =
         useState<SelectedLfmInfo | null>(null)
@@ -124,6 +112,9 @@ const LfmCanvas: React.FC<Props> = ({
     // Canvas refs
     const [image, setImage] = useState<HTMLImageElement | null>(null)
     const mainCanvasRef = useRef<HTMLCanvasElement>(null)
+    const backBufferCanvasRef = useRef<HTMLCanvasElement>(
+        document.createElement("canvas")
+    )
     const lfmPanelCanvasRef = useRef<HTMLCanvasElement>(
         document.createElement("canvas")
     )
@@ -134,6 +125,73 @@ const LfmCanvas: React.FC<Props> = ({
         document.createElement("canvas")
     )
     const mouseMoveTimeout = useRef<number | null>(null)
+
+    const panelHeightRef = useRef(100)
+    useEffect(() => {
+        const height = raidView
+            ? LFM_HEIGHT * lfms.length
+            : LFM_HEIGHT * Math.max(MINIMUM_LFM_COUNT, lfms.length) +
+              TOTAL_LFM_PANEL_BORDER_HEIGHT +
+              SORT_HEADER_HEIGHT +
+              LFM_AREA_PADDING.top +
+              LFM_AREA_PADDING.bottom
+
+        // 1. Resize the backBufferCanvasRef to match the new panel height
+        // 2. Copy the mainCanvasRef to the backBufferCanvasRef
+        // 3. Resize the mainCanvasRef to match the new panel height
+        // 4. Draw the backBufferCanvasRef onto the mainCanvasRef
+        if (backBufferCanvasRef.current) {
+            backBufferCanvasRef.current.width = panelWidth
+            backBufferCanvasRef.current.height = height
+        }
+        const backBufferContext = backBufferCanvasRef.current.getContext("2d")
+        if (backBufferContext) {
+            backBufferContext.clearRect(
+                0,
+                0,
+                panelWidth,
+                panelHeightRef.current
+            )
+            const mainContext = mainCanvasRef.current?.getContext("2d")
+            if (mainContext) {
+                backBufferContext.drawImage(mainCanvasRef.current, 0, 0)
+            }
+            const lfmPanelContext = lfmPanelCanvasRef.current?.getContext("2d")
+            if (lfmPanelContext) {
+                backBufferContext.drawImage(lfmPanelCanvasRef.current, 0, 0)
+            }
+            const lfmContext = lfmCanvasRef.current?.getContext("2d")
+            if (lfmContext) {
+                backBufferContext.drawImage(lfmCanvasRef.current, 0, 0)
+            }
+        }
+        if (mainCanvasRef.current) {
+            mainCanvasRef.current.width = panelWidth
+            mainCanvasRef.current.height = panelHeightRef.current
+        }
+        if (lfmPanelCanvasRef.current) {
+            lfmPanelCanvasRef.current.width = panelWidth
+            lfmPanelCanvasRef.current.height = height
+        }
+        if (lfmCanvasRef.current) {
+            lfmCanvasRef.current.width = panelWidth
+            lfmCanvasRef.current.height = height
+        }
+        if (overlayCanvasRef.current) {
+            overlayCanvasRef.current.width = panelWidth
+            overlayCanvasRef.current.height = height
+        }
+        if (backBufferCanvasRef.current) {
+            const mainContext = mainCanvasRef.current?.getContext("2d")
+            if (mainContext) {
+                mainContext.clearRect(0, 0, panelWidth, panelHeightRef.current)
+                mainContext.drawImage(backBufferCanvasRef.current, 0, 0)
+            }
+        }
+
+        setPanelHeight(height)
+        panelHeightRef.current = height
+    }, [lfms.length, raidView, setPanelHeight])
 
     // Canvas scaling
     const [canvasScaleWidth, setCanvasScaleWidth] = useState(1)
@@ -196,13 +254,13 @@ const LfmCanvas: React.FC<Props> = ({
             overlayCanvasRef.current
         ) {
             lfmPanelCanvasRef.current.width = panelWidth
-            lfmPanelCanvasRef.current.height = panelHeight
+            lfmPanelCanvasRef.current.height = panelHeightRef.current
             lfmCanvasRef.current.width = panelWidth
-            lfmCanvasRef.current.height = panelHeight
+            lfmCanvasRef.current.height = panelHeightRef.current
             overlayCanvasRef.current.width = panelWidth
-            overlayCanvasRef.current.height = panelHeight
+            overlayCanvasRef.current.height = panelHeightRef.current
         }
-    }, [panelWidth, panelHeight])
+    }, [panelWidth, panelHeightRef.current])
 
     // Handle canvas scaling
     useEffect(() => {
@@ -344,11 +402,15 @@ const LfmCanvas: React.FC<Props> = ({
     // Render the panel when panel-related props change
     useEffect(() => {
         if (!image) return
-        renderLfmPanelToCanvas(panelHeight, lfms.length, excludedLfmCount)
+        renderLfmPanelToCanvas(
+            panelHeightRef.current,
+            lfms.length,
+            excludedLfmCount
+        )
     }, [
         image,
         renderLfmPanelToCanvas,
-        panelHeight,
+        panelHeightRef.current,
         raidView,
         sortBy,
         isLoading,
@@ -424,7 +486,7 @@ const LfmCanvas: React.FC<Props> = ({
 
         if (shouldRenderAll) {
             // Clear entire canvas and render all LFMs
-            lfmContext.clearRect(0, 0, panelWidth, panelHeight)
+            lfmContext.clearRect(0, 0, panelWidth, panelHeightRef.current)
             lfmContext.save()
             lfmContext.translate(
                 Math.floor(LFM_LEFT_PADDING),
@@ -508,7 +570,7 @@ const LfmCanvas: React.FC<Props> = ({
         lfms,
         renderLfm,
         panelWidth,
-        panelHeight,
+        panelHeightRef.current,
         currentDisplaySettings,
         previousLfmCount,
         getLfmKey,
@@ -522,12 +584,12 @@ const LfmCanvas: React.FC<Props> = ({
         const context = lfmCanvasRef.current?.getContext("2d")
         if (!context) return
 
-        context.clearRect(0, 0, panelWidth, panelHeight)
+        context.clearRect(0, 0, panelWidth, panelHeightRef.current)
         context.fillStyle = LFM_COLORS.SECONDARY_TEXT
         context.font = fonts.MISC_INFO_MESSAGE
         context.textAlign = "center"
         context.fillText("Content loading...", panelWidth / 2, 150)
-    }, [image, isLoading, panelWidth, panelHeight, fonts])
+    }, [image, isLoading, panelWidth, panelHeightRef.current, fonts])
 
     // Handle overlay rendering
     useEffect(() => {
@@ -552,7 +614,7 @@ const LfmCanvas: React.FC<Props> = ({
     }, [
         image,
         panelWidth,
-        panelHeight,
+        panelHeightRef.current,
         selectedLfmInfo,
         overlayDimensions,
         lfms.length, // Only track length changes
@@ -569,7 +631,7 @@ const LfmCanvas: React.FC<Props> = ({
         if (!mainContext || !image) return
 
         mainContext.imageSmoothingEnabled = false
-        mainContext.clearRect(0, 0, panelWidth, panelHeight)
+        mainContext.clearRect(0, 0, panelWidth, panelHeightRef.current)
 
         // Draw panel
         mainContext.drawImage(lfmPanelCanvasRef.current, 0, 0)
@@ -585,7 +647,10 @@ const LfmCanvas: React.FC<Props> = ({
                 0
             )
             const positionY = Math.max(
-                Math.min(position.y, panelHeight - overlayDimensions.height),
+                Math.min(
+                    position.y,
+                    panelHeightRef.current - overlayDimensions.height
+                ),
                 0
             )
             mainContext.drawImage(
@@ -596,11 +661,19 @@ const LfmCanvas: React.FC<Props> = ({
         }
 
         setNeedsComposite(false)
+        // requestAnimationFrame(() => {
+        //     if (mainCanvasRef.current) {
+        //         mainCanvasRef.current.style.width = isDynamicWidth
+        //             ? "100%"
+        //             : `${panelWidth}px`
+        //         mainCanvasRef.current.style.height = `${panelHeightRef.current}px`
+        //     }
+        // })
     }, [
         needsComposite,
         image,
         panelWidth,
-        panelHeight,
+        panelHeightRef.current,
         selectedLfmInfo,
         overlayDimensions,
     ])
@@ -610,7 +683,7 @@ const LfmCanvas: React.FC<Props> = ({
             ref={mainCanvasRef}
             id="lfm-canvas"
             width={panelWidth}
-            height={panelHeight}
+            height={panelHeightRef.current}
             style={{
                 maxWidth: "100%",
                 width: isDynamicWidth ? "100%" : "unset",

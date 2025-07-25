@@ -35,6 +35,7 @@ const About = lazy(() => import("./components/about/About.tsx"))
 const Ignores = lazy(() => import("./components/ignores/Ignores.tsx"))
 // const Trends = lazy(() => import("./components/trends/Trends.tsx"))
 // const Quests = lazy(() => import("./components/quests/Quests.tsx"))
+const TempCanvas = lazy(() => import("./components/global/TempCanvas.tsx"))
 
 // Providers
 import {
@@ -108,6 +109,7 @@ export default createBrowserRouter(
             {/* <Route path="/trends" element={<Trends />} /> */}
             {/* <Route path="/quests" element={<Quests />} /> */}
             <Route path="/about" element={<About />} />
+            <Route path="/temp-canvas" element={<TempCanvas />} />
             <Route path="*" element={<NotFound />} />
         </Route>
     )
