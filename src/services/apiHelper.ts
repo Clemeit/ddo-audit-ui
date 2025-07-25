@@ -33,8 +33,13 @@ const genericRequest = async <T>(
         })
         return response.data as T
     } catch (error) {
-        console.error(`${method.toUpperCase()} request failed:`, error)
-        throw error
+        if (!signal?.aborted) {
+            console.error(`${method.toUpperCase()} request failed:`, error)
+            throw error
+        } else {
+            console.warn(`${method.toUpperCase()} request aborted:`, error)
+            return null // TODO: Is this legit?
+        }
     }
 }
 

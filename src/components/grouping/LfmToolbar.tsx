@@ -23,6 +23,7 @@ import GenericToolbar from "../global/GenericToolbar.tsx"
 import RadioButton from "../global/RadioButton.tsx"
 import Spacer from "../global/Spacer.tsx"
 import FeaturedItem from "../global/FeaturedItem.tsx"
+import { MAX_LEVEL } from "../../constants/game.ts"
 
 interface Props {
     reloadLfms: () => void
@@ -179,6 +180,8 @@ const LfmToolbar = ({
                                                 parseInt(e.target.value)
                                             )
                                         }
+                                        min={1}
+                                        max={MAX_LEVEL}
                                     />
                                     <input
                                         type="number"
@@ -190,6 +193,8 @@ const LfmToolbar = ({
                                                 parseInt(e.target.value)
                                             )
                                         }
+                                        min={1}
+                                        max={MAX_LEVEL}
                                     />
                                 </Stack>
                             </Stack>
