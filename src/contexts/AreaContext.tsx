@@ -82,7 +82,7 @@ export const AreaProvider = ({ children }: Props) => {
     return (
         <AreaContext.Provider
             value={{
-                areas: areasMemoized,
+                areas: areasMemoized.areas,
                 reloadAreas: () => populateAreas(true),
             }}
         >
