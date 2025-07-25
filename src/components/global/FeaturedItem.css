@@ -1,0 +1,7 @@
+.badge-wrapper {
+    cursor: pointer;
+
+    &:hover {
+        filter: brightness(1.2)
+    }
+}

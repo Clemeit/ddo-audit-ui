@@ -64,6 +64,8 @@ const LfmCanvas: React.FC<Props> = ({
         showLfmPostedTime,
         fontSize,
         highlightRaids,
+        showNotEligible,
+        showEligibilityDividers,
     } = useLfmContext()
 
     const areaContext = useAreaContext()
@@ -114,6 +116,7 @@ const LfmCanvas: React.FC<Props> = ({
         fontSize,
         highlightRaids,
         raidView,
+        showEligibilityDividers,
     })
     const previousAreaContextRef = useRef(areaContext)
     const previousQuestContextRef = useRef(questContext)
@@ -156,6 +159,25 @@ const LfmCanvas: React.FC<Props> = ({
     const getLfmKey = useCallback((lfm: Lfm): string => {
         return `${lfm.leader.name}_${lfm.quest_id}_${lfm.comment}_${lfm.members.length}`
     }, [])
+
+    // Helper function to check if two consecutive LFMs have different eligible characters
+    const doLfmsHaveDifferentEligibleCharacters = useCallback(
+        (lfm1: Lfm | undefined, lfm2: Lfm | undefined): boolean => {
+            if (!lfm1 || !lfm2) return false
+            const eligible1 = new Set(
+                lfm1?.metadata?.eligibleCharacters?.map((c) => c.id) || []
+            )
+            const eligible2 = new Set(
+                lfm2?.metadata?.eligibleCharacters?.map((c) => c.id) || []
+            )
+            if (eligible1.size !== eligible2.size) return true
+            for (const id of eligible1) {
+                if (!eligible2.has(id)) return true
+            }
+            return false
+        },
+        []
+    )
 
     // Load the lfm sprite
     useEffect(() => {
@@ -346,6 +368,7 @@ const LfmCanvas: React.FC<Props> = ({
             fontSize,
             highlightRaids,
             raidView,
+            showEligibilityDividers,
         }),
         [
             showRaidTimerIndicator,
@@ -357,6 +380,7 @@ const LfmCanvas: React.FC<Props> = ({
             fontSize,
             highlightRaids,
             raidView,
+            showEligibilityDividers,
         ]
     )
 
@@ -407,10 +431,17 @@ const LfmCanvas: React.FC<Props> = ({
                 raidView ? 0 : Math.floor(LFM_TOP_PADDING)
             )
 
-            lfms.forEach((lfm) => {
+            lfms.forEach((lfm, index) => {
+                const isEligibilityBoundary =
+                    doLfmsHaveDifferentEligibleCharacters(
+                        lfm,
+                        lfms[index + 1]
+                    ) &&
+                    !showNotEligible &&
+                    showEligibilityDividers
                 const lfmKey = getLfmKey(lfm)
                 const now = Date.now()
-                renderLfm(lfm)
+                renderLfm(lfm, isEligibilityBoundary)
                 lfm.metadata = { ...lfm.metadata, lastRenderTime: now }
                 lastRenderTimesRef.current.set(lfmKey, now)
                 lfmContext.translate(0, Math.floor(LFM_HEIGHT))
@@ -440,6 +471,13 @@ const LfmCanvas: React.FC<Props> = ({
 
                 if (needsRender) {
                     renderedCount++
+                    const isEligibilityBoundary =
+                        doLfmsHaveDifferentEligibleCharacters(
+                            lfm,
+                            lfms[index + 1]
+                        ) &&
+                        !showNotEligible &&
+                        showEligibilityDividers
                     // Clear only this LFM's area and re-render it
                     lfmContext.save()
                     lfmContext.clearRect(
@@ -450,7 +488,7 @@ const LfmCanvas: React.FC<Props> = ({
                     )
                     const lfmKey = getLfmKey(lfm)
                     const now = Date.now()
-                    renderLfm(lfm)
+                    renderLfm(lfm, isEligibilityBoundary)
                     lfm.metadata = {
                         ...lfm.metadata,
                         lastRenderTime: now,
@@ -474,6 +512,7 @@ const LfmCanvas: React.FC<Props> = ({
         currentDisplaySettings,
         previousLfmCount,
         getLfmKey,
+        doLfmsHaveDifferentEligibleCharacters,
     ])
 
     // Handle loading state

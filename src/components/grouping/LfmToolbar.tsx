@@ -17,13 +17,12 @@ import {
 } from "../global/ContentCluster.tsx"
 import { Character } from "../../models/Character.ts"
 import YesNoModal from "../modal/YesNoModal.tsx"
-import Badge from "../global/Badge.tsx"
 import Checkbox from "../global/Checkbox.tsx"
-import useFeatureCallouts from "../../hooks/useFeatureCallouts.ts"
 import { useModalNavigation } from "../../hooks/useModalNavigation.ts"
 import GenericToolbar from "../global/GenericToolbar.tsx"
 import RadioButton from "../global/RadioButton.tsx"
 import Spacer from "../global/Spacer.tsx"
+import FeaturedItem from "../global/FeaturedItem.tsx"
 
 interface Props {
     reloadLfms: () => void
@@ -52,11 +51,6 @@ const LfmToolbar = ({
         fontSize,
         setFontSize,
         panelWidth,
-        setPanelWidth,
-        showBoundingBoxes,
-        setShowBoundingBoxes,
-        isDynamicWidth,
-        setIsDynamicWidth,
         showRaidTimerIndicator,
         setShowRaidTimerIndicator,
         showMemberCount,
@@ -94,9 +88,12 @@ const LfmToolbar = ({
         setShowIndicationForGroupsContainingFriends,
         highlightRaids,
         setHighlightRaids,
+        hideAllLevelGroups,
+        setHideAllLevelGroups,
+        showEligibilityDividers,
+        setShowEligibilityDividers,
     } = useLfmContext()
     const { isFullScreen, setIsFullScreen } = useThemeContext()
-    const { isCalloutActive, callouts, dismissCallout } = useFeatureCallouts()
     const {
         isModalOpen: showSettingsModal,
         openModal: handleOpenSettingsModal,
@@ -323,12 +320,37 @@ const LfmToolbar = ({
                     >
                         Show raid group members in two columns
                     </Checkbox>
-                    <Checkbox
-                        checked={highlightRaids}
-                        onChange={(e) => setHighlightRaids(e.target.checked)}
-                    >
-                        Highlight raid groups
-                    </Checkbox>
+                    <FeaturedItem calloutId="highlight-raids">
+                        <Checkbox
+                            checked={highlightRaids}
+                            onChange={(e) =>
+                                setHighlightRaids(e.target.checked)
+                            }
+                        >
+                            Highlight raid groups
+                        </Checkbox>
+                    </FeaturedItem>
+                    <FeaturedItem calloutId="hide-all-level-groups">
+                        <Checkbox
+                            checked={hideAllLevelGroups}
+                            onChange={(e) =>
+                                setHideAllLevelGroups(e.target.checked)
+                            }
+                        >
+                            Hide groups posting for levels 1-34
+                        </Checkbox>
+                    </FeaturedItem>
+                    <FeaturedItem calloutId="grouping-eligibility-dividers">
+                        <Checkbox
+                            checked={showEligibilityDividers}
+                            onChange={(e) =>
+                                setShowEligibilityDividers(e.target.checked)
+                            }
+                        >
+                            Show dividers between eligible groups
+                        </Checkbox>
+                    </FeaturedItem>
+
                     <Stack fullWidth justify="flex-end">
                         <Button
                             onClick={handleOpenResetDisplayModal}
@@ -345,21 +367,21 @@ const LfmToolbar = ({
                     <Stack direction="column" gap="10px">
                         <Checkbox
                             checked={showIndicationForGroupsPostedByFriends}
-                            onChange={(e) => {
+                            onChange={(e) =>
                                 setShowIndicationForGroupsPostedByFriends(
                                     e.target.checked
                                 )
-                            }}
+                            }
                         >
                             Show an indicator for LFMs posted by friends
                         </Checkbox>
                         <Checkbox
                             checked={showIndicationForGroupsContainingFriends}
-                            onChange={(e) => {
+                            onChange={(e) =>
                                 setShowIndicationForGroupsContainingFriends(
                                     e.target.checked
                                 )
-                            }}
+                            }
                         >
                             Show an indicator for LFMs that friends are a part
                             of
@@ -375,21 +397,21 @@ const LfmToolbar = ({
                     <Stack direction="column" gap="10px">
                         <Checkbox
                             checked={hideGroupsPostedByIgnoredCharacters}
-                            onChange={(e) => {
+                            onChange={(e) =>
                                 setHideGroupsPostedByIgnoredCharacters(
                                     e.target.checked
                                 )
-                            }}
+                            }
                         >
                             Hide LFMs posted by ignored characters
                         </Checkbox>
                         <Checkbox
                             checked={hideGroupsContainingIgnoredCharacters}
-                            onChange={(e) => {
+                            onChange={(e) =>
                                 setHideGroupsContainingIgnoredCharacters(
                                     e.target.checked
                                 )
-                            }}
+                            }
                         >
                             Hide LFMs that ignored characters are a part of
                         </Checkbox>
@@ -440,42 +462,36 @@ const LfmToolbar = ({
                     >
                         Show character guild names
                     </Checkbox>
-                    <Checkbox
-                        checked={showEligibleCharacters}
-                        onChange={(e) => {
-                            setShowEligibleCharacters(e.target.checked)
-                            dismissCallout("show-eligible-characters")
-                        }}
-                    >
-                        Show your eligible characters{" "}
-                        {isCalloutActive("show-eligible-characters") && (
-                            <Badge type="new" text="New" />
-                        )}
-                    </Checkbox>
-                    <Checkbox
-                        checked={showLfmActivity}
-                        onChange={(e) => {
-                            setShowLfmActivity(e.target.checked)
-                            dismissCallout("show-lfm-activity")
-                        }}
-                    >
-                        Show LFM activity history{" "}
-                        {isCalloutActive("show-lfm-activity") && (
-                            <Badge type="new" text="New" />
-                        )}
-                    </Checkbox>
-                    <Checkbox
-                        checked={showLfmPostedTime}
-                        onChange={(e) => {
-                            setShowLfmPostedTime(e.target.checked)
-                            dismissCallout("show-lfm-posted-time")
-                        }}
-                    >
-                        Show LFM posted time{" "}
-                        {isCalloutActive("show-lfm-posted-time") && (
-                            <Badge type="new" text="New" />
-                        )}
-                    </Checkbox>
+                    <FeaturedItem calloutId="show-eligible-characters">
+                        <Checkbox
+                            checked={showEligibleCharacters}
+                            onChange={(e) =>
+                                setShowEligibleCharacters(e.target.checked)
+                            }
+                        >
+                            Show your eligible characters
+                        </Checkbox>
+                    </FeaturedItem>
+                    <FeaturedItem calloutId="show-lfm-activity">
+                        <Checkbox
+                            checked={showLfmActivity}
+                            onChange={(e) =>
+                                setShowLfmActivity(e.target.checked)
+                            }
+                        >
+                            Show LFM activity history
+                        </Checkbox>
+                    </FeaturedItem>
+                    <FeaturedItem calloutId="show-lfm-posted-time">
+                        <Checkbox
+                            checked={showLfmPostedTime}
+                            onChange={(e) =>
+                                setShowLfmPostedTime(e.target.checked)
+                            }
+                        >
+                            Show LFM posted time
+                        </Checkbox>
+                    </FeaturedItem>
                     <Stack fullWidth justify="flex-end">
                         <Button
                             onClick={handleOpenResetToolsModal}
