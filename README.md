@@ -4,7 +4,7 @@ A real-time player population tracking project and live LFM viewer for Dungeons 
 
 ## ⚠️ Trouble Viewing the Website?
 
-See [my Reddit post](https://www.reddit.com/r/ddo/comments/1m8k5a1/ddo_audit_64bit_alpha_release/) on how to clear the website's cache and/or service workers.
+See [my Reddit post](https://www.reddit.com/r/ddo/comments/1m8k5a1/ddo_audit_64bit_alpha_release/) on how to clear the website's cache and service workers.
 
 ## Tech Stack
 
