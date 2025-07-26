@@ -37,6 +37,8 @@ function getOperatingSystem(): string | undefined {
     if (userAgent.includes("Linux")) return "Linux"
     if (userAgent.includes("Android")) return "Android"
     if (userAgent.includes("iOS")) return "iOS"
+    if (userAgent.includes("iPad")) return "iPadOS"
+    if (userAgent.includes("iPhone")) return "iOS"
 
     return undefined
 }
