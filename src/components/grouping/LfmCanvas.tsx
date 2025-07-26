@@ -573,7 +573,7 @@ const LfmCanvas: React.FC<Props> = ({
         currentDisplaySettings,
     ])
 
-    // Composite all canvases to main canvas
+    // Composite all canvases to main canvas using the back buffer as an intermediary
     useEffect(() => {
         if (!needsComposite) return
         const canvasHeight = raidView
