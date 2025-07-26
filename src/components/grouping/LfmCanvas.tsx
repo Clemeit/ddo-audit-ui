@@ -12,6 +12,7 @@ import {
     calculateCommonBoundingBoxes,
 } from "../../utils/lfmUtils.ts"
 import {
+    DEFAULT_LFM_PANEL_WIDTH,
     FONTS,
     LFM_AREA_PADDING,
     LFM_COLORS,
@@ -123,7 +124,12 @@ const LfmCanvas: React.FC<Props> = ({
 
     // Canvas refs
     const [image, setImage] = useState<HTMLImageElement | null>(null)
-    const mainCanvasRef = useRef<HTMLCanvasElement>(null)
+    const mainCanvasRef = useRef<HTMLCanvasElement>(
+        document.createElement("canvas")
+    )
+    const backBufferCanvasRef = useRef<HTMLCanvasElement>(
+        document.createElement("canvas")
+    )
     const lfmPanelCanvasRef = useRef<HTMLCanvasElement>(
         document.createElement("canvas")
     )
@@ -134,6 +140,9 @@ const LfmCanvas: React.FC<Props> = ({
         document.createElement("canvas")
     )
     const mouseMoveTimeout = useRef<number | null>(null)
+
+    const physicalCanvasWidth = useRef<number>(DEFAULT_LFM_PANEL_WIDTH)
+    const physicalCanvasHeight = useRef<number>(200)
 
     // Canvas scaling
     const [canvasScaleWidth, setCanvasScaleWidth] = useState(1)
@@ -191,10 +200,13 @@ const LfmCanvas: React.FC<Props> = ({
     // Set the canvases to the correct size
     useEffect(() => {
         if (
+            backBufferCanvasRef.current &&
             lfmPanelCanvasRef.current &&
             lfmCanvasRef.current &&
             overlayCanvasRef.current
         ) {
+            backBufferCanvasRef.current.width = panelWidth
+            backBufferCanvasRef.current.height = panelHeight
             lfmPanelCanvasRef.current.width = panelWidth
             lfmPanelCanvasRef.current.height = panelHeight
             lfmCanvasRef.current.width = panelWidth
@@ -561,21 +573,28 @@ const LfmCanvas: React.FC<Props> = ({
         currentDisplaySettings,
     ])
 
-    // Composite all canvases to main canvas
+    // Composite all canvases to main canvas using the back buffer as an intermediary
     useEffect(() => {
         if (!needsComposite) return
+        const canvasHeight = raidView
+            ? LFM_HEIGHT * lfms.length
+            : LFM_HEIGHT * Math.max(MINIMUM_LFM_COUNT, lfms.length) +
+              TOTAL_LFM_PANEL_BORDER_HEIGHT +
+              SORT_HEADER_HEIGHT +
+              LFM_AREA_PADDING.top +
+              LFM_AREA_PADDING.bottom
 
-        const mainContext = mainCanvasRef.current?.getContext("2d")
-        if (!mainContext || !image) return
+        const backBufferContext = backBufferCanvasRef.current?.getContext("2d")
+        if (!backBufferContext || !image) return
 
-        mainContext.imageSmoothingEnabled = false
-        mainContext.clearRect(0, 0, panelWidth, panelHeight)
+        backBufferContext.imageSmoothingEnabled = false
+        backBufferContext.clearRect(0, 0, panelWidth, panelHeight)
 
         // Draw panel
-        mainContext.drawImage(lfmPanelCanvasRef.current, 0, 0)
+        backBufferContext.drawImage(lfmPanelCanvasRef.current, 0, 0)
 
         // Draw LFMs
-        mainContext.drawImage(lfmCanvasRef.current, 0, 0)
+        backBufferContext.drawImage(lfmCanvasRef.current, 0, 0)
 
         // Draw overlay if selected
         if (selectedLfmInfo) {
@@ -588,12 +607,16 @@ const LfmCanvas: React.FC<Props> = ({
                 Math.min(position.y, panelHeight - overlayDimensions.height),
                 0
             )
-            mainContext.drawImage(
+            backBufferContext.drawImage(
                 overlayCanvasRef.current,
                 positionX,
                 positionY
             )
         }
+
+        const mainContext = mainCanvasRef.current?.getContext("2d")
+        mainContext.drawImage(backBufferCanvasRef.current, 0, 0)
+        physicalCanvasHeight.current = canvasHeight
 
         setNeedsComposite(false)
     }, [
@@ -609,8 +632,8 @@ const LfmCanvas: React.FC<Props> = ({
         <canvas
             ref={mainCanvasRef}
             id="lfm-canvas"
-            width={panelWidth}
-            height={panelHeight}
+            width={physicalCanvasWidth.current}
+            height={physicalCanvasHeight.current}
             style={{
                 maxWidth: "100%",
                 width: isDynamicWidth ? "100%" : "unset",
