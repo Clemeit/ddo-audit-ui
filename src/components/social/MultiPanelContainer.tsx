@@ -1,4 +1,4 @@
-import React, { useEffect } from "react"
+import React from "react"
 import { ContentCluster } from "../global/ContentCluster.tsx"
 import NavCardCluster from "../global/NavCardCluster.tsx"
 import NavigationCard from "../global/NavigationCard.tsx"
@@ -15,14 +15,6 @@ import {
 import { ReactComponent as AddSVG } from "../../assets/svg/add.svg"
 import "./MultiPanelContainer.css"
 import { useModalNavigation } from "../../hooks/useModalNavigation.ts"
-import useSearchParamsState, {
-    SearchParamType,
-} from "../../hooks/useSearchParamsState.ts"
-
-export enum PanelType {
-    Grouping = "grouping",
-    Who = "who",
-}
 
 export enum PrimaryType {
     Grouping = "grouping",
@@ -34,17 +26,10 @@ interface Props {
     primaryType: PrimaryType
 }
 
-const VALID_PANEL_TYPES = Object.values(PanelType)
-
-const isValidPanelType = (type: string): type is PanelType => {
-    return VALID_PANEL_TYPES.includes(type as PanelType)
-}
-
 const MultiPanelContainer = ({ serverName, primaryType }: Props) => {
     const [secondaryPanel, setSecondaryPanel] =
         React.useState<React.ReactNode>()
-    const [secondaryPanelType, setSecondaryPanelType] =
-        React.useState<PanelType | null>(null)
+    const [secondaryType, setSecondaryType] = React.useState("")
 
     const {
         isModalOpen,
@@ -54,68 +39,6 @@ const MultiPanelContainer = ({ serverName, primaryType }: Props) => {
         modalKey: "multi-panel-container",
     })
 
-    const { getSearchParam, setSearchParams } = useSearchParamsState()
-    const secondaryPanelTypeParam = getSearchParam(
-        SearchParamType.SECONDARY_PANEL_TYPE
-    )
-    const secondaryPanelServerParam = getSearchParam(
-        SearchParamType.SECONDARY_PANEL_SERVER
-    )
-    const clearSecondarySearchParams = () => {
-        setSearchParams([
-            {
-                searchParamType: SearchParamType.SECONDARY_PANEL_TYPE,
-                value: null,
-            },
-            {
-                searchParamType: SearchParamType.SECONDARY_PANEL_SERVER,
-                value: null,
-            },
-        ])
-    }
-
-    useEffect(() => {
-        if (
-            secondaryPanelTypeParam == null ||
-            secondaryPanelServerParam == null ||
-            !SERVER_NAMES_LOWER.includes(
-                secondaryPanelServerParam.toLocaleLowerCase()
-            ) ||
-            !isValidPanelType(secondaryPanelTypeParam.toLocaleLowerCase())
-        ) {
-            setSecondaryPanel(null)
-            return
-        }
-
-        const normalizedType =
-            secondaryPanelTypeParam.toLowerCase() as PanelType
-        const normalizedServer = secondaryPanelServerParam.toLowerCase()
-
-        if (normalizedType === PanelType.Grouping) {
-            setSecondaryPanel(
-                <LfmContainer
-                    serverName={normalizedServer.toLocaleLowerCase()}
-                    isSecondaryPanel={true}
-                    handleClosePanel={clearSecondarySearchParams}
-                />
-            )
-        } else if (normalizedType === PanelType.Who) {
-            setSecondaryPanel(
-                <WhoContainer
-                    serverName={normalizedServer.toLocaleLowerCase()}
-                    isSecondaryPanel={true}
-                    handleClosePanel={clearSecondarySearchParams}
-                />
-            )
-        }
-    }, [
-        secondaryPanelTypeParam,
-        secondaryPanelServerParam,
-        setSecondaryPanel,
-        setSecondaryPanelType,
-        serverName,
-    ])
-
     const secondaryPanelTypeModalContent = () => (
         <ContentCluster title="Choose Secondary Panel">
             <div style={{ maxWidth: "400px" }}>
@@ -124,15 +47,13 @@ const MultiPanelContainer = ({ serverName, primaryType }: Props) => {
                         noLink
                         fullWidth
                         type="grouping"
-                        onClick={() =>
-                            setSecondaryPanelType(PanelType.Grouping)
-                        }
+                        onClick={() => setSecondaryType("grouping")}
                     />
                     <NavigationCard
                         noLink
                         fullWidth
                         type="who"
-                        onClick={() => setSecondaryPanelType(PanelType.Who)}
+                        onClick={() => setSecondaryType("who")}
                         disabled={primaryType === PrimaryType.Who}
                     />
                 </NavCardCluster>
@@ -144,40 +65,29 @@ const MultiPanelContainer = ({ serverName, primaryType }: Props) => {
         const isCurrentServer = _serverName === serverName.toLowerCase()
         const is64BitServer = SERVERS_64_BITS_LOWER.includes(_serverName)
 
-        const onClickHandler = async () => {
-            if (secondaryPanelType === PanelType.Grouping) {
+        const onClickHandler = () => {
+            handleCloseModal()
+            if (secondaryType === "grouping") {
                 setSecondaryPanel(
                     <LfmContainer
                         serverName={_serverName}
                         isSecondaryPanel={true}
                         handleClosePanel={() => {
-                            clearSecondarySearchParams()
+                            setSecondaryPanel(undefined)
                         }}
                     />
                 )
-            } else if (secondaryPanelType === PanelType.Who) {
+            } else if (secondaryType === "who") {
                 setSecondaryPanel(
                     <WhoContainer
                         serverName={_serverName}
                         isSecondaryPanel={true}
                         handleClosePanel={() => {
-                            clearSecondarySearchParams()
+                            setSecondaryPanel(undefined)
                         }}
                     />
                 )
             }
-            await handleCloseModal()
-            setSearchParams([
-                {
-                    searchParamType: SearchParamType.SECONDARY_PANEL_TYPE,
-                    value: secondaryPanelType,
-                },
-                {
-                    searchParamType: SearchParamType.SECONDARY_PANEL_SERVER,
-                    value: _serverName,
-                },
-            ])
-            setSecondaryPanelType(undefined)
         }
 
         const badge = isCurrentServer ? (
@@ -250,8 +160,8 @@ const MultiPanelContainer = ({ serverName, primaryType }: Props) => {
         <>
             {isModalOpen && (
                 <Modal onClose={handleCloseModal} fullScreenOnMobile>
-                    {!secondaryPanelType && secondaryPanelTypeModalContent()}
-                    {secondaryPanelType && secondaryPanelServerModalContent()}
+                    {!secondaryType && secondaryPanelTypeModalContent()}
+                    {secondaryType && secondaryPanelServerModalContent()}
                 </Modal>
             )}
             <div
@@ -268,8 +178,8 @@ const MultiPanelContainer = ({ serverName, primaryType }: Props) => {
                     <button
                         className="add-panel-button hide-on-mobile"
                         onClick={() => {
-                            setSecondaryPanelType(null)
-                            setSecondaryPanel(null)
+                            setSecondaryPanel(undefined)
+                            setSecondaryType("")
                             handleOpenModal()
                         }}
                     >
