@@ -17,16 +17,16 @@ export const useModalNavigation = (options: UseModalNavigationOptions = {}) => {
     // Modal state is derived from location state
     const isModalOpen = location.state?.[modalKey] === true
 
-    const openModal = () => {
-        navigate(location.pathname + location.search, {
+    const openModal = async () => {
+        await navigate(location.pathname + location.search, {
             state: { ...location.state, [modalKey]: true },
             replace: false,
         })
     }
 
-    const closeModal = () => {
+    const closeModal = async () => {
         // Navigate back to close the modal
-        navigate(-1)
+        await navigate(-1)
     }
 
     return {

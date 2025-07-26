@@ -144,7 +144,7 @@ const MultiPanelContainer = ({ serverName, primaryType }: Props) => {
         const isCurrentServer = _serverName === serverName.toLowerCase()
         const is64BitServer = SERVERS_64_BITS_LOWER.includes(_serverName)
 
-        const onClickHandler = () => {
+        const onClickHandler = async () => {
             if (secondaryPanelType === PanelType.Grouping) {
                 setSecondaryPanel(
                     <LfmContainer
@@ -166,6 +166,7 @@ const MultiPanelContainer = ({ serverName, primaryType }: Props) => {
                     />
                 )
             }
+            await handleCloseModal()
             setSearchParams([
                 {
                     searchParamType: SearchParamType.SECONDARY_PANEL_TYPE,
