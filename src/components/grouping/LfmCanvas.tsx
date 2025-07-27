@@ -13,6 +13,8 @@ import {
 } from "../../utils/lfmUtils.ts"
 import {
     DEFAULT_LFM_PANEL_WIDTH,
+    DOUBLE_CLICK_DELAY,
+    DOUBLE_CLICK_DISTANCE_THRESHOLD,
     FONTS,
     LFM_AREA_PADDING,
     LFM_COLORS,
@@ -237,6 +239,10 @@ const LfmCanvas: React.FC<Props> = ({
         }
     }, [])
 
+    const { quests } = useQuestContext()
+    const lastClickPositionRef = useRef({ x: 0, y: 0 })
+    const lastClickTimestampRef = useRef(new Date().getTime())
+
     // Mouse event handlers
     const handleCanvasClick = useCallback(
         (e: React.MouseEvent<HTMLCanvasElement>, isHover = false) => {
@@ -246,6 +252,19 @@ const LfmCanvas: React.FC<Props> = ({
 
             const x = (e.clientX - rect.left) * canvasScaleWidth
             const y = (e.clientY - rect.top) * canvasScaleHeight
+
+            const isDoubleClick =
+                new Date().getTime() - lastClickTimestampRef.current <
+                    DOUBLE_CLICK_DELAY &&
+                Math.abs(x - lastClickPositionRef.current.x) <
+                    DOUBLE_CLICK_DISTANCE_THRESHOLD &&
+                Math.abs(y - lastClickPositionRef.current.y) <
+                    DOUBLE_CLICK_DISTANCE_THRESHOLD &&
+                !isHover
+            if (!isHover) {
+                lastClickPositionRef.current = { x, y }
+                lastClickTimestampRef.current = new Date().getTime()
+            }
 
             if (!isHover) {
                 // Check if the mouse is over a sort header
@@ -295,6 +314,22 @@ const LfmCanvas: React.FC<Props> = ({
                         LFM_LEFT_PADDING
                         ? RenderType.LFM
                         : RenderType.QUEST
+
+                if (renderType === RenderType.QUEST && isDoubleClick) {
+                    // Launch the Wiki!
+                    const lfm = lfms[lfmIndex]
+                    if (lfm && lfm.quest_id) {
+                        const quest = quests[lfm.quest_id] ?? null
+                        if (quest && quest.name) {
+                            window.open(
+                                "https://ddowiki.com/page/" +
+                                    quest.name.replace(/ /g, "_"),
+                                "_blank"
+                            )
+                            return
+                        }
+                    }
+                }
 
                 if (
                     renderType === RenderType.QUEST &&
