@@ -242,6 +242,8 @@ const LfmCanvas: React.FC<Props> = ({
     const { quests } = useQuestContext()
     const lastClickPositionRef = useRef({ x: 0, y: 0 })
     const lastClickTimestampRef = useRef(new Date().getTime())
+    const lastClickIndexRef = useRef(-1)
+    const lastClickRenderTypeRef = useRef<RenderType>(null)
 
     // Mouse event handlers
     const handleCanvasClick = useCallback(
@@ -252,6 +254,15 @@ const LfmCanvas: React.FC<Props> = ({
 
             const x = (e.clientX - rect.left) * canvasScaleWidth
             const y = (e.clientY - rect.top) * canvasScaleHeight
+            const lfmIndex = Math.floor(
+                (y - (raidView ? 0 : LFM_TOP_PADDING)) / LFM_HEIGHT
+            )
+            const renderType =
+                x <
+                commonBoundingBoxes.mainPanelBoundingBox.right() +
+                    LFM_LEFT_PADDING
+                    ? RenderType.LFM
+                    : RenderType.QUEST
 
             const isDoubleClick =
                 new Date().getTime() - lastClickTimestampRef.current <
@@ -260,10 +271,14 @@ const LfmCanvas: React.FC<Props> = ({
                     DOUBLE_CLICK_DISTANCE_THRESHOLD &&
                 Math.abs(y - lastClickPositionRef.current.y) <
                     DOUBLE_CLICK_DISTANCE_THRESHOLD &&
+                lastClickIndexRef.current === lfmIndex &&
+                lastClickRenderTypeRef.current === renderType &&
                 !isHover
             if (!isHover) {
                 lastClickPositionRef.current = { x, y }
                 lastClickTimestampRef.current = new Date().getTime()
+                lastClickIndexRef.current = lfmIndex
+                lastClickRenderTypeRef.current = renderType
             }
 
             if (!isHover) {
@@ -296,10 +311,6 @@ const LfmCanvas: React.FC<Props> = ({
             }
 
             // Check if the mouse is over an lfm
-            const lfmIndex = Math.floor(
-                (y - (raidView ? 0 : LFM_TOP_PADDING)) / LFM_HEIGHT
-            )
-
             if (
                 x > LFM_LEFT_PADDING &&
                 x <
@@ -308,13 +319,6 @@ const LfmCanvas: React.FC<Props> = ({
                 lfmIndex >= 0 &&
                 lfmIndex < lfms.length
             ) {
-                const renderType =
-                    x <
-                    commonBoundingBoxes.mainPanelBoundingBox.right() +
-                        LFM_LEFT_PADDING
-                        ? RenderType.LFM
-                        : RenderType.QUEST
-
                 if (renderType === RenderType.QUEST && isDoubleClick) {
                     // Launch the Wiki!
                     const lfm = lfms[lfmIndex]
