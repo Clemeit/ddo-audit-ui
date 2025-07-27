@@ -48,6 +48,8 @@ const WhoContainer = ({
         alwaysShowFriends,
         alwaysShowRegisteredCharacters,
         // refreshInterval, TODO: make this work
+        setOnlineRegisteredCharacters,
+        isMyGroupView,
     } = useWhoContext()
     const { registeredCharacters } = useGetRegisteredCharacters()
     const [ignoreServerDown, setIgnoreServerDown] = useState<boolean>(false)
@@ -123,7 +125,9 @@ const WhoContainer = ({
         characters: Character[]
         areResultsTruncated: boolean
     }>(() => {
-        const characters = Object.values(characterData?.data ?? {})
+        const characters = Object.freeze(
+            Object.values(characterData?.data ?? {})
+        )
 
         const hydratedCharacters: Character[] = characters.map((character) => {
             const isFriend = friends.some(
@@ -301,6 +305,16 @@ const WhoContainer = ({
         const areResultsTruncated =
             sortedCharacters.length > MAXIMUM_CHARACTER_COUNT
 
+        const onlineRegisteredCharacters = hydratedCharacters
+            .filter((character) => character.is_in_party)
+            .filter((character) => character.metadata?.isRegistered)
+        console.log(
+            "characters",
+            characters.filter((ch) => ch.name === "Brazy")
+        )
+        console.log("onlineRegisteredCharacters", onlineRegisteredCharacters)
+        setOnlineRegisteredCharacters(onlineRegisteredCharacters)
+
         return {
             characters: sortedCharacters.slice(0, MAXIMUM_CHARACTER_COUNT),
             areResultsTruncated,
@@ -319,6 +333,8 @@ const WhoContainer = ({
         pinFriends,
         alwaysShowFriends,
         alwaysShowRegisteredCharacters,
+        registeredCharacters,
+        isMyGroupView,
     ])
 
     return (

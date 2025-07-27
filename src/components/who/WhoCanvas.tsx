@@ -37,7 +37,7 @@ const WhoCanvas = ({
     curatedCharacters = [],
     serverName = "",
     areResultsTruncated = false,
-    isLoading,
+    isLoading = false,
 }: Props) => {
     const {
         panelWidth,
@@ -58,6 +58,9 @@ const WhoCanvas = ({
         sortBy,
         setSortBy,
         showInQuestIndicator,
+        onlineRegisteredCharacters,
+        isMyGroupView,
+        setIsMyGroupView,
     } = useWhoContext()
     const {
         lfmHeaderBoundingBox,
@@ -148,6 +151,8 @@ const WhoCanvas = ({
         truncatedMessage: "",
         showInQuestIndicator,
         areas,
+        onlineRegisteredCharacters,
+        isMyGroupView,
     })
 
     // Load the lfm sprite
@@ -220,7 +225,10 @@ const WhoCanvas = ({
             previousState.stringFilter !== stringFilter ||
             previousState.minLevel !== minLevel ||
             previousState.maxLevel !== maxLevel ||
-            previousState.areas !== areas
+            previousState.areas !== areas ||
+            previousState.onlineRegisteredCharacters !==
+                onlineRegisteredCharacters ||
+            previousState.isMyGroupView !== isMyGroupView
 
         if (shouldRenderWhoPanel) {
             renderWhoPanel({
@@ -339,6 +347,8 @@ const WhoCanvas = ({
             truncatedMessage,
             showInQuestIndicator,
             areas,
+            onlineRegisteredCharacters,
+            isMyGroupView,
         })
     }, [
         allCharacters,
@@ -353,6 +363,8 @@ const WhoCanvas = ({
         sortBy,
         showInQuestIndicator,
         areas,
+        isMyGroupView,
+        onlineRegisteredCharacters,
     ])
 
     const handleCanvasClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
@@ -363,14 +375,55 @@ const WhoCanvas = ({
         const x = (e.clientX - rect.left) * canvasScaleWidth
         const y = (e.clientY - rect.top) * canvasScaleHeight
 
+        const showMyGroupView =
+            onlineRegisteredCharacters.length > 0 && !isMyGroupView
+
         // group view checkbox
         if (
-            x >= groupViewCheckboxBoundingBox.x - 2 &&
-            x <= groupViewCheckboxBoundingBox.right() + 4 &&
+            x >=
+                groupViewCheckboxBoundingBox.x -
+                    2 -
+                    (showMyGroupView ? 15 : 0) &&
+            x <=
+                groupViewCheckboxBoundingBox.right() +
+                    4 -
+                    (showMyGroupView ? 15 : 0) &&
             y >= groupViewCheckboxBoundingBox.y - 2 &&
             y <= groupViewCheckboxBoundingBox.bottom() + 4
         ) {
+            if (isGroupView && isMyGroupView) {
+                setIsMyGroupView(false)
+                setStringFilter("")
+            }
             setIsGroupView((prev) => !prev)
+        }
+
+        // my group view checkbox
+        if (showMyGroupView) {
+            if (
+                x >=
+                    groupViewCheckboxBoundingBox.x -
+                        2 +
+                        (showMyGroupView ? 15 : 0) &&
+                x <=
+                    groupViewCheckboxBoundingBox.right() +
+                        4 +
+                        (showMyGroupView ? 15 : 0) &&
+                y >= groupViewCheckboxBoundingBox.y - 2 &&
+                y <= groupViewCheckboxBoundingBox.bottom() + 4
+            ) {
+                // setIsGroupView((prev) => !prev)
+                setMinLevel(MIN_LEVEL)
+                setMaxLevel(MAX_LEVEL)
+                setClassNameFilter(CLASS_LIST_LOWER)
+                const filterString = onlineRegisteredCharacters
+                    .map((character) => character.name)
+                    .filter(Boolean)
+                    .join(",")
+                setStringFilter(filterString)
+                setIsGroupView(true)
+                setIsMyGroupView(true)
+            }
         }
 
         // "any" checkbox

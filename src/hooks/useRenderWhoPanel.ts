@@ -22,9 +22,16 @@ interface RenderWhoPanelProps {
 }
 
 const useRenderWhoPanel = ({ sprite, context }: Props) => {
-    const { panelWidth, classNameFilter, isExactMatch, sortBy, isGroupView } =
-        useWhoContext()
-    const fonts = useMemo(() => FONTS(0), [])
+    const {
+        panelWidth,
+        classNameFilter,
+        isExactMatch,
+        sortBy,
+        isGroupView,
+        onlineRegisteredCharacters,
+        isMyGroupView,
+    } = useWhoContext()
+    const fonts = useMemo(() => FONTS(), [])
     const { renderBox, renderHeader, renderSortHeader } = useRenderBox({
         sprite,
         context,
@@ -262,6 +269,8 @@ const useRenderWhoPanel = ({ sprite, context }: Props) => {
             )
 
             // render group view text and checkbox
+            const hasOnlineRegisteredCharacters =
+                onlineRegisteredCharacters.length > 0 && !isMyGroupView
             context.fillStyle = WHO_COLORS.YELLOW_TEXT
             context.fillText(
                 "Group View:",
@@ -275,11 +284,27 @@ const useRenderWhoPanel = ({ sprite, context }: Props) => {
                 SPRITE_MAP.GROUP_VIEW_CHECKBOX[groupViewCheckboxType].y,
                 SPRITE_MAP.GROUP_VIEW_CHECKBOX[groupViewCheckboxType].width,
                 SPRITE_MAP.GROUP_VIEW_CHECKBOX[groupViewCheckboxType].height,
-                groupViewCheckboxBoundingBox.x,
+                groupViewCheckboxBoundingBox.x -
+                    (hasOnlineRegisteredCharacters ? 15 : 0),
                 groupViewCheckboxBoundingBox.y,
                 SPRITE_MAP.GROUP_VIEW_CHECKBOX[groupViewCheckboxType].width,
                 SPRITE_MAP.GROUP_VIEW_CHECKBOX[groupViewCheckboxType].height
             )
+            if (hasOnlineRegisteredCharacters) {
+                context.filter = "hue-rotate(150deg) saturate(250%)"
+                context.drawImage(
+                    sprite,
+                    SPRITE_MAP.GROUP_VIEW_CHECKBOX["UNCHECKED"].x,
+                    SPRITE_MAP.GROUP_VIEW_CHECKBOX["UNCHECKED"].y,
+                    SPRITE_MAP.GROUP_VIEW_CHECKBOX["UNCHECKED"].width,
+                    SPRITE_MAP.GROUP_VIEW_CHECKBOX["UNCHECKED"].height,
+                    groupViewCheckboxBoundingBox.x + 15,
+                    groupViewCheckboxBoundingBox.y,
+                    SPRITE_MAP.GROUP_VIEW_CHECKBOX["UNCHECKED"].width,
+                    SPRITE_MAP.GROUP_VIEW_CHECKBOX["UNCHECKED"].height
+                )
+                context.filter = "hue-rotate(0deg)"
+            }
 
             // render exact match checkbox
             const exactMatchCheckboxType = isExactMatch
@@ -439,6 +464,8 @@ const useRenderWhoPanel = ({ sprite, context }: Props) => {
             isExactMatch,
             sortBy,
             areas,
+            onlineRegisteredCharacters,
+            isMyGroupView,
         ]
     )
 

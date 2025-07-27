@@ -6,7 +6,11 @@ import React, {
     useEffect,
 } from "react"
 import { CLASS_LIST_LOWER, MAX_LEVEL, MIN_LEVEL } from "../constants/game.ts"
-import { CharacterSortBy, CharacterSortType } from "../models/Character.ts"
+import {
+    Character,
+    CharacterSortBy,
+    CharacterSortType,
+} from "../models/Character.ts"
 import { getData, setData } from "../utils/localStorage.ts"
 import {
     DEFAULT_REFRESH_RATE,
@@ -66,6 +70,12 @@ interface WhoContextProps {
     setPinFriends: React.Dispatch<React.SetStateAction<boolean>>
     alwaysShowFriends: boolean
     setAlwaysShowFriends: React.Dispatch<React.SetStateAction<boolean>>
+    onlineRegisteredCharacters: Character[]
+    setOnlineRegisteredCharacters: React.Dispatch<
+        React.SetStateAction<Character[]>
+    >
+    isMyGroupView: boolean
+    setIsMyGroupView: React.Dispatch<React.SetStateAction<boolean>>
 }
 
 const WhoContext = createContext<WhoContextProps | undefined>(undefined)
@@ -116,6 +126,9 @@ export const WhoProvider = ({ children }: { children: ReactNode }) => {
         useState<boolean>(false)
     const [pinFriends, setPinFriends] = useState<boolean>(true)
     const [alwaysShowFriends, setAlwaysShowFriends] = useState<boolean>(false)
+    const [onlineRegisteredCharacters, setOnlineRegisteredCharacters] =
+        useState<Character[]>([])
+    const [isMyGroupView, setIsMyGroupView] = useState<boolean>(false)
 
     const loadSettingsFromLocalStorage = () => {
         const settings = getData<any>(settingsStorageKey)
@@ -274,6 +287,10 @@ export const WhoProvider = ({ children }: { children: ReactNode }) => {
                 setPinFriends,
                 alwaysShowFriends,
                 setAlwaysShowFriends,
+                onlineRegisteredCharacters,
+                setOnlineRegisteredCharacters,
+                isMyGroupView,
+                setIsMyGroupView,
             }}
         >
             {children}
