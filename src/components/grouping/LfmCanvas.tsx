@@ -28,6 +28,7 @@ import {
     TOTAL_LFM_PANEL_BORDER_HEIGHT,
 } from "../../constants/lfmPanel.ts"
 import { SPRITE_MAP } from "../../constants/spriteMap.ts"
+import { useQuestContext } from "../../contexts/QuestContext.tsx"
 import { useAreaContext } from "../../contexts/AreaContext.tsx"
 
 interface Props {
@@ -71,6 +72,7 @@ const LfmCanvas: React.FC<Props> = ({
     } = useLfmContext()
 
     const areaContext = useAreaContext()
+    const questContext = useQuestContext()
 
     // Memoized values
     const commonBoundingBoxes = useMemo(
@@ -120,6 +122,7 @@ const LfmCanvas: React.FC<Props> = ({
         showEligibilityDividers,
     })
     const previousAreaContextRef = useRef(areaContext)
+    const previousQuestContextRef = useRef(questContext)
 
     // Canvas refs
     const [image, setImage] = useState<HTMLImageElement | null>(null)
@@ -236,6 +239,7 @@ const LfmCanvas: React.FC<Props> = ({
         }
     }, [])
 
+    const { quests } = useQuestContext()
     const lastClickPositionRef = useRef({ x: 0, y: 0 })
     const lastClickTimestampRef = useRef(new Date().getTime())
     const lastClickIndexRef = useRef(-1)
@@ -319,10 +323,11 @@ const LfmCanvas: React.FC<Props> = ({
                     // Launch the Wiki!
                     const lfm = lfms[lfmIndex]
                     if (lfm && lfm.quest_id) {
-                        if (lfm.quest && lfm.quest.name) {
+                        const quest = quests[lfm.quest_id] ?? null
+                        if (quest && quest.name) {
                             window.open(
                                 "https://ddowiki.com/page/" +
-                                    lfm.quest.name.replace(/ /g, "_"),
+                                    quest.name.replace(/ /g, "_"),
                                 "_blank"
                             )
                             return
@@ -457,12 +462,15 @@ const LfmCanvas: React.FC<Props> = ({
         // Check if contexts have changed
         const areaContextChanged =
             areaContext !== previousAreaContextRef.current
+        const questContextChanged =
+            questContext !== previousQuestContextRef.current
 
         // Check if we need to render all LFMs
         const shouldRenderAll =
             lfms.length !== previousLfmCount ||
             displaySettingsChanged ||
             areaContextChanged ||
+            questContextChanged ||
             previousLfms.length === 0 // First render
 
         if (shouldRenderAll) {
@@ -495,6 +503,7 @@ const LfmCanvas: React.FC<Props> = ({
             setPreviousLfmCount(lfms.length)
             previousDisplaySettingsRef.current = { ...currentDisplaySettings }
             previousAreaContextRef.current = areaContext
+            previousQuestContextRef.current = questContext
         } else {
             // Only render LFMs that have changed
             lfmContext.save()

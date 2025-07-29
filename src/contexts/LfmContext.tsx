@@ -86,8 +86,6 @@ interface LfmContextProps {
     setHideAllLevelGroups: (value: boolean) => void
     showEligibilityDividers: boolean
     setShowEligibilityDividers: (value: boolean) => void
-    onlyShowRaids: boolean
-    setOnlyShowRaids: (value: boolean) => void
     resetFilterSettings: () => void
     resetDisplaySettings: () => void
     resetToolSettings: () => void
@@ -137,7 +135,6 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
     const [hideAllLevelGroups, setHideAllLevelGroups] = useState<boolean>(false)
     const [showEligibilityDividers, setShowEligibilityDividers] =
         useState<boolean>(true)
-    const [onlyShowRaids, setOnlyShowRaids] = useState<boolean>(false)
 
     // tools:
     const [showRaidTimerIndicator, setShowRaidTimerIndicator] =
@@ -193,7 +190,6 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
         setHighlightRaids(false)
         setHideAllLevelGroups(false)
         setShowEligibilityDividers(true)
-        setOnlyShowRaids(false)
         logMessage("Display settings reset to defaults", "info")
     }, [setIsFullScreen])
 
@@ -240,7 +236,6 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
         setHighlightRaids(false)
         setHideAllLevelGroups(false)
         setShowEligibilityDividers(true)
-        setOnlyShowRaids(false)
     }, [])
 
     const validateAndParseSettings = (settings: any): boolean => {
@@ -425,7 +420,6 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
             setShowEligibilityDividers(
                 Boolean(settings.showEligibilityDividers ?? true)
             )
-            setOnlyShowRaids(Boolean(settings.onlyShowRaids ?? false))
         } catch (e) {
             logMessage(
                 "Error applying validated settings, falling back to defaults",
@@ -495,7 +489,6 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
                 highlightRaids,
                 hideAllLevelGroups,
                 showEligibilityDividers,
-                onlyShowRaids,
             }
 
             // Validate the settings before saving
@@ -544,7 +537,6 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
         highlightRaids,
         hideAllLevelGroups,
         showEligibilityDividers,
-        onlyShowRaids,
     ])
 
     useEffect(() => {
@@ -616,8 +608,6 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
                 setHideAllLevelGroups,
                 showEligibilityDividers,
                 setShowEligibilityDividers,
-                onlyShowRaids,
-                setOnlyShowRaids,
                 resetDisplaySettings,
                 resetFilterSettings,
                 resetToolSettings,
