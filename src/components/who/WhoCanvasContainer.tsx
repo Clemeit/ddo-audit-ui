@@ -47,6 +47,7 @@ const WhoContainer = ({
         pinFriends,
         alwaysShowFriends,
         alwaysShowRegisteredCharacters,
+        maximumRenderedCharacterCount,
         // refreshInterval, TODO: make this work
     } = useWhoContext()
     const { registeredCharacters } = useGetRegisteredCharacters()
@@ -299,10 +300,13 @@ const WhoContainer = ({
         }
 
         const areResultsTruncated =
-            sortedCharacters.length > MAXIMUM_CHARACTER_COUNT
+            sortedCharacters.length > maximumRenderedCharacterCount
 
         return {
-            characters: sortedCharacters.slice(0, MAXIMUM_CHARACTER_COUNT),
+            characters: sortedCharacters.slice(
+                0,
+                maximumRenderedCharacterCount
+            ),
             areResultsTruncated,
         }
     }, [
@@ -319,6 +323,7 @@ const WhoContainer = ({
         pinFriends,
         alwaysShowFriends,
         alwaysShowRegisteredCharacters,
+        maximumRenderedCharacterCount,
     ])
 
     return (

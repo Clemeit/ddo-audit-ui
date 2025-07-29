@@ -1,5 +1,4 @@
 import { useWhoContext } from "../../contexts/WhoContext.tsx"
-import Badge from "../global/Badge.tsx"
 import GenericToolbar from "../global/GenericToolbar.tsx"
 import {
     ContentCluster,
@@ -10,6 +9,12 @@ import Checkbox from "../global/Checkbox.tsx"
 import Modal from "../modal/Modal.tsx"
 import Link from "../global/Link.tsx"
 import { useModalNavigation } from "../../hooks/useModalNavigation.ts"
+import {
+    DEFAULT_CHARACTER_COUNT,
+    MAXIMUM_CHARACTER_COUNT,
+    MINIMUM_CHARACTER_COUNT,
+} from "../../constants/whoPanel.ts"
+import { ReactComponent as WarningSVG } from "../../assets/svg/warning.svg"
 
 interface Props {
     reloadCharacters: () => void
@@ -35,7 +40,7 @@ const WhoToolbar = ({
         shouldSaveStringFilter,
         setShouldSaveClassFilter,
         shouldSaveLevelFilter,
-        // setShouldSaveLevelFilter,
+        setShouldSaveLevelFilter,
         shouldSaveSortBy,
         setShouldSaveSortBy,
         shouldSaveGroupView,
@@ -54,6 +59,8 @@ const WhoToolbar = ({
         setAlwaysShowFriends,
         alwaysShowRegisteredCharacters,
         setAlwaysShowRegisteredCharacters,
+        maximumRenderedCharacterCount,
+        setMaximumRenderedCharacterCount,
     } = useWhoContext()
 
     const {
@@ -74,23 +81,36 @@ const WhoToolbar = ({
                     >
                         Show in-quest indicator
                     </Checkbox>
-                    {/* <label htmlFor="refreshIntervalSlider">
-                        Refresh every: {(refreshInterval / 1000).toString()} sec
-                        {refreshInterval === DEFAULT_REFRESH_RATE && (
+                    <label htmlFor="maxChracterRenderSlider">
+                        Display the first{" "}
+                        {maximumRenderedCharacterCount.toString()} characters
+                        {maximumRenderedCharacterCount ===
+                            DEFAULT_CHARACTER_COUNT && (
                             <span className="secondary-text"> (default)</span>
                         )}
                     </label>
                     <input
-                        id="refreshIntervalSlider"
+                        id="maxChracterRenderSlider"
                         type="range"
-                        min={MINIMUM_REFRESH_RATE}
-                        max={MAXIMUM_REFRESH_RATE}
-                        step={3000}
-                        value={refreshInterval}
+                        min={MINIMUM_CHARACTER_COUNT}
+                        max={MAXIMUM_CHARACTER_COUNT}
+                        step={10}
+                        value={maximumRenderedCharacterCount}
                         onChange={(e) =>
-                            setRefreshInterval(parseInt(e.target.value))
+                            setMaximumRenderedCharacterCount(
+                                parseInt(e.target.value)
+                            )
                         }
-                    /> */}
+                    />
+                    {maximumRenderedCharacterCount > 200 && (
+                        <span>
+                            <WarningSVG
+                                className="page-message-icon"
+                                style={{ fill: `var(--warning)` }}
+                            />
+                            This can slow down or crash your browser!
+                        </span>
+                    )}
                 </Stack>
             </ContentCluster>
             <ContentCluster title="Social">
@@ -211,8 +231,13 @@ const WhoToolbar = ({
                             >
                                 Exact match checkbox
                             </Checkbox>
-                            <Checkbox checked={false} onChange={(e) => {}}>
-                                Level filters <Badge text="Soon" type="soon" />
+                            <Checkbox
+                                checked={shouldSaveLevelFilter}
+                                onChange={(e) => {
+                                    setShouldSaveLevelFilter(e.target.checked)
+                                }}
+                            >
+                                Level filters
                             </Checkbox>
                             <Checkbox
                                 checked={shouldSaveSortBy}

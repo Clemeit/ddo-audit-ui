@@ -58,6 +58,9 @@ const WhoCanvas = ({
         sortBy,
         setSortBy,
         showInQuestIndicator,
+        maximumRenderedCharacterCount,
+        shouldSaveLevelFilter,
+        shouldSaveSettings,
     } = useWhoContext()
     const {
         lfmHeaderBoundingBox,
@@ -78,14 +81,13 @@ const WhoCanvas = ({
         () => calculateCommonFilterBoundingBoxes(panelWidth),
         [panelWidth]
     )
-    const [fauxMinLevel, setFauxMinLevel] = useState<string>(
-        minLevel.toString()
-    )
-    const [fauxMaxLevel, setFauxMaxLevel] = useState<string>(
-        maxLevel.toString()
-    )
+    const [fauxMinLevel, setFauxMinLevel] = useState<string>(String(MIN_LEVEL))
+    const [fauxMaxLevel, setFauxMaxLevel] = useState<string>(String(MAX_LEVEL))
+
+    const loadedLevels = useRef<boolean>(false)
 
     useEffect(() => {
+        if (!loadedLevels.current) return
         if (fauxMinLevel === "") {
             setMinLevel(0)
         } else {
@@ -158,6 +160,22 @@ const WhoCanvas = ({
             setImage(img)
         }
     }, [])
+
+    useEffect(() => {
+        const setLevelTimeout = setTimeout(() => {
+            if (shouldSaveSettings && shouldSaveLevelFilter) {
+                setFauxMinLevel(String(minLevel))
+                setFauxMaxLevel(String(maxLevel))
+            }
+            loadedLevels.current = true
+        }, 100)
+        return () => clearTimeout(setLevelTimeout)
+    }, [
+        shouldSaveSettings,
+        shouldSaveLevelFilter,
+        setFauxMinLevel,
+        setFauxMaxLevel,
+    ])
 
     // Set the canvases to the correct size
     useEffect(() => {
@@ -286,7 +304,7 @@ const WhoCanvas = ({
         whoPanelContext?.resetTransform()
 
         // render truncated message
-        const truncatedMessage = `Showing the first ${MAXIMUM_CHARACTER_COUNT} of ${allCharacters.length} characters`
+        const truncatedMessage = `Showing the first ${maximumRenderedCharacterCount} of ${allCharacters.length} characters`
         if (
             whoPanelContext &&
             areResultsTruncated &&
