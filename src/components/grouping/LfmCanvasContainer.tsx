@@ -1,6 +1,11 @@
 import { useEffect, useMemo, useState } from "react"
 import LfmCanvas from "./LfmCanvas.tsx"
-import { Lfm, LfmSpecificApiModel, Quest } from "../../models/Lfm.ts"
+import {
+    constructUnknownQuest,
+    Lfm,
+    LfmSpecificApiModel,
+    Quest,
+} from "../../models/Lfm.ts"
 import { useLfmContext } from "../../contexts/LfmContext.tsx"
 import LfmToolbar from "./LfmToolbar.tsx"
 import usePollApi from "../../hooks/usePollApi.ts"
@@ -348,8 +353,12 @@ const GroupingContainer = ({
             }
 
             const quest = getQuestById(lfm.quest_id)
-            if (quest) {
-                lfm.quest = quest
+            if (lfm.quest_id !== 0) {
+                if (quest) {
+                    lfm.quest = quest
+                } else {
+                    lfm.quest = constructUnknownQuest(lfm.quest_id)
+                }
             }
 
             return lfm

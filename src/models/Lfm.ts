@@ -37,6 +37,9 @@ interface Quest {
     patron: string
     average_time: number
     tip: string
+    metadata?: {
+        isUnknown?: boolean
+    }
 }
 
 interface QuestApiResponse {
@@ -120,6 +123,37 @@ interface LfmSortType {
     ascending: boolean
 }
 
+const constructUnknownQuest = (questId: number): Quest => {
+    return {
+        id: questId,
+        alt_id: undefined,
+        area_id: undefined,
+        name: "Unknown Quest",
+        heroic_normal_cr: undefined,
+        epic_normal_cr: undefined,
+        xp: {
+            heroic_normal: undefined,
+            heroic_hard: undefined,
+            heroic_elite: undefined,
+            epic_normal: undefined,
+            epic_hard: undefined,
+            epic_elite: undefined,
+        },
+        is_free_to_play: undefined,
+        is_free_to_vip: undefined,
+        required_adventure_pack: undefined,
+        adventure_area: undefined,
+        quest_journal_group: undefined,
+        group_size: undefined,
+        patron: undefined,
+        average_time: undefined,
+        tip: undefined,
+        metadata: {
+            isUnknown: true,
+        },
+    }
+}
+
 export type {
     QuestLevel,
     QuestXP,
@@ -136,4 +170,4 @@ export type {
     LfmSpecificApiModel,
 }
 
-export { LfmActivityType }
+export { LfmActivityType, constructUnknownQuest }
