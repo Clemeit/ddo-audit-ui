@@ -62,8 +62,7 @@ const useRenderLfmOverlay = ({ lfmSprite, context }: Props) => {
     const fonts = useMemo(() => FONTS(14), [])
     const { confineTextToBoundingBox } = useTextRenderer(context)
     const areaContext = useAreaContext()
-    const questContext = useQuestContext()
-    const { quests } = questContext
+    const { quests } = useQuestContext()
     const { friends } = useGetFriends()
 
     const renderLfmOverlay = useCallback<
@@ -76,7 +75,7 @@ const useRenderLfmOverlay = ({ lfmSprite, context }: Props) => {
             if (!context || !lfmSprite) return { width: 0, height: 0 }
             if (renderType === RenderType.QUEST && lfm.quest_id == null)
                 return { width: 0, height: 0 }
-            const quest = quests[lfm.quest_id || 0] || quests[0]
+            const quest = lfm.quest
             context.imageSmoothingEnabled = false
             const willWrap =
                 renderType === RenderType.LFM &&
@@ -189,7 +188,7 @@ const useRenderLfmOverlay = ({ lfmSprite, context }: Props) => {
                 totalOverlayHeight = OVERLAY_QUEST_INFO_SPACING
                 if (quest) {
                     let infoFields: any[] = []
-                    if (quest.id === 0) {
+                    if (quest.metadata?.isUnknown) {
                         infoFields = [quest.name, lfm.quest_id]
                     } else {
                         infoFields = [
@@ -1013,7 +1012,7 @@ const useRenderLfmOverlay = ({ lfmSprite, context }: Props) => {
                         renderQuestInfo("Quest:", quest.name)
                     }
 
-                    if (quest.id === 0) {
+                    if (quest.metadata?.isUnknown) {
                         renderQuestInfo(
                             "Quest ID:",
                             lfm.quest_id?.toString() || "N/A"
@@ -1140,7 +1139,7 @@ const useRenderLfmOverlay = ({ lfmSprite, context }: Props) => {
             isMultiColumn,
             confineTextToBoundingBox,
             showEligibleCharacters,
-            questContext,
+            quests,
             areaContext,
         ]
     )

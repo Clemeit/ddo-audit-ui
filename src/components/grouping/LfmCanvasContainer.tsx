@@ -1,6 +1,11 @@
 import { useEffect, useMemo, useState } from "react"
 import LfmCanvas from "./LfmCanvas.tsx"
-import { Lfm, LfmSpecificApiModel } from "../../models/Lfm.ts"
+import {
+    constructUnknownQuest,
+    Lfm,
+    LfmSpecificApiModel,
+    Quest,
+} from "../../models/Lfm.ts"
 import { useLfmContext } from "../../contexts/LfmContext.tsx"
 import LfmToolbar from "./LfmToolbar.tsx"
 import usePollApi from "../../hooks/usePollApi.ts"
@@ -44,11 +49,17 @@ const GroupingContainer = ({
         hideGroupsPostedByIgnoredCharacters,
         hideGroupsContainingIgnoredCharacters,
         hideAllLevelGroups,
+        onlyShowRaids,
     } = useLfmContext()
     const [ignoreServerDown, setIgnoreServerDown] = useState<boolean>(false)
     const { friends } = useGetFriends()
     const { ignores } = useGetIgnores()
     const { quests } = useQuestContext()
+
+    const getQuestById = (id: number): Quest => {
+        if (id == undefined) return null
+        return quests[id]
+    }
 
     const {
         data: lfmData,
@@ -267,12 +278,8 @@ const GroupingContainer = ({
                               a?.leader?.name || ""
                           )
                 } else if (sortBy?.type === "quest") {
-                    const questA = Object.values(quests || {}).find(
-                        (quest) => quest?.id === a?.quest_id
-                    )
-                    const questB = Object.values(quests || {}).find(
-                        (quest) => quest?.id === b?.quest_id
-                    )
+                    const questA = getQuestById(a.quest_id)
+                    const questB = getQuestById(b.quest_id)
                     const questAName = questA?.name || ""
                     const questBName = questB?.name || ""
 
@@ -345,14 +352,27 @@ const GroupingContainer = ({
                 includesFriend,
             }
 
+            const quest = getQuestById(lfm.quest_id)
+            if (lfm.quest_id !== 0) {
+                if (quest) {
+                    lfm.quest = quest
+                } else {
+                    lfm.quest = constructUnknownQuest(lfm.quest_id)
+                }
+            }
+
             return lfm
         })
 
+        const filteredByQuestType = onlyShowRaids
+            ? hydratedLfms.filter((lfm) => lfm.quest?.group_size === "Raid")
+            : hydratedLfms
+
         return {
-            hydratedLfms,
+            lfms: filteredByQuestType,
             excludedLfmCount:
                 (lfmsFilteredByUserSettings?.length ?? 0) -
-                (hydratedLfms?.length ?? 0),
+                (filteredByQuestType?.length ?? 0),
         }
     }, [
         lfmData,
@@ -369,6 +389,7 @@ const GroupingContainer = ({
         ignores,
         quests,
         hideAllLevelGroups,
+        onlyShowRaids,
     ])
 
     return (
@@ -408,7 +429,7 @@ const GroupingContainer = ({
                     />
                     <LfmCanvas
                         serverName={serverName}
-                        lfms={filteredLfms.hydratedLfms || []}
+                        lfms={filteredLfms.lfms || []}
                         excludedLfmCount={filteredLfms.excludedLfmCount}
                         raidView={raidView}
                         isLoading={

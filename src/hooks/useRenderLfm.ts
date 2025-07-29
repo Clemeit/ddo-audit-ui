@@ -137,7 +137,7 @@ const useRenderLfm = ({ lfmSprite, context, raidView = false }: Props) => {
             if (!context || !lfmSprite) return
             context.imageSmoothingEnabled = false
             const fonts = FONTS(fontSize)
-            const quest = quests[lfm.quest_id || 0] ?? quests[0]
+            const quest = lfm.quest
 
             // set up this lfm's bounds
             const {
@@ -584,7 +584,7 @@ const useRenderLfm = ({ lfmSprite, context, raidView = false }: Props) => {
                 !!lfm.quest_id &&
                 (lfm.is_quest_guess ? showQuestGuesses : true)
             ) {
-                if (quest == null) return
+                if (quest == undefined) return
 
                 // quest name
                 context.fillStyle =
