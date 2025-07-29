@@ -228,7 +228,9 @@ const Live = () => {
                             "moonsea",
                         ]}
                         yFormatter={(value: number) =>
-                            `${Math.round(value * 100).toString()}% of max`
+                            isDataNormalized
+                                ? `${Math.round(value * 100).toString()}% of max`
+                                : value.toString()
                         }
                     />
                 </ContentCluster>
