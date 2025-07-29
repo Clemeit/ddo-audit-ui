@@ -93,6 +93,8 @@ const LfmToolbar = ({
         setHideAllLevelGroups,
         showEligibilityDividers,
         setShowEligibilityDividers,
+        onlyShowRaids,
+        setOnlyShowRaids,
     } = useLfmContext()
     const { isFullScreen, setIsFullScreen } = useThemeContext()
     const {
@@ -355,7 +357,14 @@ const LfmToolbar = ({
                             Show dividers between eligible groups
                         </Checkbox>
                     </FeaturedItem>
-
+                    <FeaturedItem calloutId="only-show-raid-groups">
+                        <Checkbox
+                            checked={onlyShowRaids}
+                            onChange={(e) => setOnlyShowRaids(e.target.checked)}
+                        >
+                            Only show raid groups
+                        </Checkbox>
+                    </FeaturedItem>
                     <Stack fullWidth justify="flex-end">
                         <Button
                             onClick={handleOpenResetDisplayModal}
