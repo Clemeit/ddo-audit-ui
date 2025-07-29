@@ -547,12 +547,6 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
         onlyShowRaids,
     ])
 
-    useEffect(() => {
-        if (!isDynamicWidth) {
-            setPanelWidth(DEFAULT_LFM_PANEL_WIDTH)
-        }
-    }, [isDynamicWidth])
-
     return (
         <LfmContext.Provider
             value={{

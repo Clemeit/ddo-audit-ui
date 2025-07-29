@@ -4,14 +4,23 @@ import React, {
     useState,
     ReactNode,
     useEffect,
+    useCallback,
 } from "react"
 import { CLASS_LIST_LOWER, MAX_LEVEL, MIN_LEVEL } from "../constants/game.ts"
 import { CharacterSortBy, CharacterSortType } from "../models/Character.ts"
-import { getData, setData } from "../utils/localStorage.ts"
 import {
+    getData as getDataFromLocalStorage,
+    setData as setDataToLocalStorage,
+} from "../utils/localStorage.ts"
+import {
+    DEFAULT_CHARACTER_COUNT,
     DEFAULT_REFRESH_RATE,
     DEFAULT_WHO_PANEL_WIDTH,
+    MAXIMUM_CHARACTER_COUNT,
+    MINIMUM_CHARACTER_COUNT,
 } from "../constants/whoPanel.ts"
+import logMessage from "../utils/logUtils.ts"
+import { useNotificationContext } from "./NotificationContext.tsx"
 
 interface WhoContextProps {
     stringFilter: string
@@ -66,6 +75,10 @@ interface WhoContextProps {
     setPinFriends: React.Dispatch<React.SetStateAction<boolean>>
     alwaysShowFriends: boolean
     setAlwaysShowFriends: React.Dispatch<React.SetStateAction<boolean>>
+    maximumRenderedCharacterCount: number
+    setMaximumRenderedCharacterCount: React.Dispatch<
+        React.SetStateAction<number>
+    >
 }
 
 const WhoContext = createContext<WhoContextProps | undefined>(undefined)
@@ -116,84 +129,279 @@ export const WhoProvider = ({ children }: { children: ReactNode }) => {
         useState<boolean>(false)
     const [pinFriends, setPinFriends] = useState<boolean>(true)
     const [alwaysShowFriends, setAlwaysShowFriends] = useState<boolean>(false)
+    const [maximumRenderedCharacterCount, setMaximumRenderedCharacterCount] =
+        useState<number>(DEFAULT_CHARACTER_COUNT)
 
-    const loadSettingsFromLocalStorage = () => {
-        const settings = getData<any>(settingsStorageKey)
-        if (settings) {
-            try {
-                if (settings.shouldSaveSettings) {
-                    if (settings.shouldSaveStringFilter)
-                        setStringFilter(settings.stringFilter)
-                    if (settings.shouldSaveClassFilter)
-                        setClassNameFilter(settings.classNameFilter)
-                    if (settings.shouldSaveLevelFilter)
-                        setMinLevel(parseInt(settings.minLevel))
-                    if (settings.shouldSaveLevelFilter)
-                        setMaxLevel(parseInt(settings.maxLevel))
-                    if (settings.shouldSaveGroupView)
-                        setIsGroupView(settings.isGroupView)
-                    setShouldIncludeRegion(settings.shouldIncludeRegion)
-                    if (settings.shouldSaveExactMatch)
-                        setIsExactMatch(settings.isExactMatch)
-                    if (settings.shouldSaveSortBy) setSortBy(settings.sortBy)
-                    setPanelWidth(settings.panelWidth)
-                    setIsDynamicWidth(settings.isDynamicWidth)
-                }
-                setShouldSaveSettings(settings.shouldSaveSettings)
-                setShouldSaveClassFilter(settings.shouldSaveClassFilter)
-                setShouldSaveStringFilter(settings.shouldSaveStringFilter)
-                setShouldSaveLevelFilter(settings.shouldSaveLevelFilter)
-                setShouldSaveSortBy(settings.shouldSaveSortBy)
-                setShouldSaveGroupView(settings.shouldSaveGroupView)
-                setShouldSaveExactMatch(settings.shouldSaveExactMatch)
-                setShowInQuestIndicator(settings.showInQuestIndicator)
-                setRefreshInterval(settings.refreshInterval)
-                setHideIgnoredCharacters(settings.hideIgnoredCharacters)
-                setPinFriends(settings.pinFriends)
-                setPinRegisteredCharacters(settings.pinRegisteredCharacters)
-                setAlwaysShowRegisteredCharacters(
-                    settings.alwaysShowRegisteredCharacters
-                )
-                setAlwaysShowFriends(settings.alwaysShowFriends)
-            } catch (e) {
-                console.error(e)
-            }
+    const { createNotification } = useNotificationContext()
+
+    const validateAndParseSettings = (settings: any): boolean => {
+        // Basic type validation
+        if (!settings || typeof settings !== "object") {
+            return false
         }
+
+        // Validate critical numeric values
+        if (
+            settings.minLevel !== undefined &&
+            (typeof settings.minLevel !== "number" ||
+                settings.minLevel < MIN_LEVEL ||
+                settings.minLevel > MAX_LEVEL)
+        ) {
+            return false
+        }
+        if (
+            settings.maxLevel !== undefined &&
+            (typeof settings.maxLevel !== "number" ||
+                settings.maxLevel < MIN_LEVEL ||
+                settings.maxLevel > MAX_LEVEL)
+        ) {
+            return false
+        }
+        if (
+            settings.maximumRenderedCharacterCount !== undefined &&
+            (typeof settings.maximumRenderedCharacterCount !== "number" ||
+                settings.maximumRenderedCharacterCount <
+                    MINIMUM_CHARACTER_COUNT ||
+                settings.maximumRenderedCharacterCount >
+                    MAXIMUM_CHARACTER_COUNT)
+        ) {
+            return false
+        }
+
+        return true
     }
+
+    const applyDefaultSettings = useCallback(() => {
+        setStringFilter("")
+        setClassNameFilter(CLASS_LIST_LOWER)
+        setMinLevel(MIN_LEVEL)
+        setMaxLevel(MAX_LEVEL)
+        setIsGroupView(false)
+        setShouldIncludeRegion(false)
+        setIsExactMatch(false)
+        setSortBy({
+            type: CharacterSortType.Level,
+            ascending: true,
+        })
+        setPanelHeight(DEFAULT_WHO_PANEL_WIDTH)
+        setPanelHeight(0)
+        setIsDynamicWidth(false)
+        setShowInQuestIndicator(true)
+        setRefreshInterval(DEFAULT_REFRESH_RATE)
+        setShouldSaveSettings(false)
+        setShouldSaveClassFilter(false)
+        setShouldSaveStringFilter(false)
+        setShouldSaveLevelFilter(false)
+        setShouldSaveSortBy(false)
+        setShouldSaveGroupView(false)
+        setShouldSaveExactMatch(false)
+        setHideIgnoredCharacters(true)
+        setPinRegisteredCharacters(true)
+        setAlwaysShowRegisteredCharacters(false)
+        setPinFriends(true)
+        setAlwaysShowFriends(false)
+        setMaximumRenderedCharacterCount(DEFAULT_CHARACTER_COUNT)
+    }, [])
+
+    const loadSettingsFromLocalStorage = useCallback(() => {
+        let settings: any = null
+        let shouldResetToDefaults = false
+        let errorMessage = ""
+
+        try {
+            settings = getDataFromLocalStorage<any>(settingsStorageKey)
+
+            // If settings exist but are invalid, we need to reset
+            if (settings && !validateAndParseSettings(settings)) {
+                shouldResetToDefaults = true
+                errorMessage =
+                    "Settings validation failed - corrupted or invalid data detected"
+            }
+        } catch (e) {
+            shouldResetToDefaults = true
+            errorMessage = `Error loading settings from localStorage: ${e instanceof Error ? e.message : String(e)}`
+        }
+
+        if (shouldResetToDefaults || !settings) {
+            if (shouldResetToDefaults) {
+                logMessage(
+                    "Settings corrupted or invalid, resetting to defaults",
+                    "error",
+                    {
+                        metadata: {
+                            error: errorMessage,
+                            corruptedSettings: settings,
+                        },
+                    }
+                )
+                createNotification({
+                    title: new Date().toLocaleTimeString(),
+                    message:
+                        "Your settings were corrupted or invalid and have been reset to defaults. Sorry about that!",
+                    subMessage: "This error has been logged.",
+                    type: "error",
+                })
+            }
+
+            // Apply defaults and save them to localStorage to overwrite bad data
+            applyDefaultSettings()
+            return
+        }
+
+        try {
+            if (settings.shouldSaveSettings) {
+                if (settings.shouldSaveStringFilter)
+                    setStringFilter(String(settings.stringFilter))
+                if (settings.shouldSaveClassFilter)
+                    setClassNameFilter(
+                        Array.isArray(settings.classNameFilter)
+                            ? settings.classNameFilter
+                            : CLASS_LIST_LOWER
+                    )
+                if (settings.shouldSaveLevelFilter)
+                    setMinLevel(
+                        parseInt(settings.minLevel ?? String(MIN_LEVEL))
+                    )
+                if (settings.shouldSaveLevelFilter)
+                    setMaxLevel(
+                        parseInt(settings.maxLevel ?? String(MAX_LEVEL))
+                    )
+                if (settings.shouldSaveGroupView)
+                    setIsGroupView(Boolean(settings.isGroupView ?? false))
+                setShouldIncludeRegion(
+                    Boolean(settings.shouldIncludeRegion ?? false)
+                )
+                if (settings.shouldSaveExactMatch)
+                    setIsExactMatch(Boolean(settings.isExactMatch ?? false))
+                if (settings.shouldSaveSortBy) setSortBy(settings.sortBy)
+                setPanelWidth(
+                    parseInt(
+                        settings.panelWidth ?? String(DEFAULT_WHO_PANEL_WIDTH)
+                    )
+                )
+                setIsDynamicWidth(Boolean(settings.isDynamicWidth ?? false))
+            }
+            setShouldSaveSettings(Boolean(settings.shouldSaveSettings ?? false))
+            setShouldSaveClassFilter(
+                Boolean(settings.shouldSaveClassFilter ?? false)
+            )
+            setShouldSaveStringFilter(
+                Boolean(settings.shouldSaveStringFilter ?? false)
+            )
+            setShouldSaveLevelFilter(
+                Boolean(settings.shouldSaveLevelFilter ?? false)
+            )
+            setShouldSaveSortBy(Boolean(settings.shouldSaveSortBy ?? false))
+            setShouldSaveGroupView(
+                Boolean(settings.shouldSaveGroupView ?? false)
+            )
+            setShouldSaveExactMatch(
+                Boolean(settings.shouldSaveExactMatch ?? false)
+            )
+            setShowInQuestIndicator(
+                Boolean(settings.showInQuestIndicator ?? true)
+            )
+            setRefreshInterval(
+                parseInt(
+                    settings.refreshInterval ?? String(DEFAULT_REFRESH_RATE)
+                )
+            )
+            setHideIgnoredCharacters(
+                Boolean(settings.hideIgnoredCharacters ?? true)
+            )
+            setPinFriends(Boolean(settings.pinFriends ?? true))
+            setPinRegisteredCharacters(
+                Boolean(settings.pinRegisteredCharacters ?? true)
+            )
+            setAlwaysShowRegisteredCharacters(
+                Boolean(settings.alwaysShowRegisteredCharacters ?? false)
+            )
+            setAlwaysShowFriends(Boolean(settings.alwaysShowFriends ?? false))
+            setMaximumRenderedCharacterCount(
+                parseInt(
+                    settings.maximumRenderedCharacterCount ??
+                        String(DEFAULT_CHARACTER_COUNT)
+                )
+            )
+        } catch (e) {
+            logMessage(
+                "Error applying validated settings, falling back to defaults",
+                "error",
+                {
+                    metadata: {
+                        settings,
+                        error: e instanceof Error ? e.message : String(e),
+                    },
+                }
+            )
+
+            // If there's still an error applying validated settings, use defaults
+            applyDefaultSettings()
+
+            createNotification({
+                title: new Date().toLocaleTimeString(),
+                message:
+                    "An unexpected error occurred while applying your settings. They have been reset to defaults.",
+                subMessage: "This error has been logged.",
+                type: "error",
+            })
+        }
+    }, [applyDefaultSettings, createNotification])
 
     useEffect(() => {
         loadSettingsFromLocalStorage()
         setIsLoaded(true)
-    }, [])
+    }, [loadSettingsFromLocalStorage])
 
     useEffect(() => {
         if (!isLoaded) return
-        setData(settingsStorageKey, {
-            stringFilter,
-            classNameFilter,
-            minLevel,
-            maxLevel,
-            isGroupView,
-            shouldIncludeRegion,
-            isExactMatch,
-            sortBy,
-            panelWidth,
-            isDynamicWidth,
-            shouldSaveSettings,
-            shouldSaveClassFilter,
-            shouldSaveStringFilter,
-            shouldSaveLevelFilter,
-            shouldSaveSortBy,
-            shouldSaveGroupView,
-            shouldSaveExactMatch,
-            showInQuestIndicator,
-            refreshInterval,
-            hideIgnoredCharacters,
-            pinRegisteredCharacters,
-            pinFriends,
-            alwaysShowRegisteredCharacters,
-            alwaysShowFriends,
-        })
+
+        try {
+            const settingsToSave = {
+                stringFilter,
+                classNameFilter,
+                minLevel,
+                maxLevel,
+                isGroupView,
+                shouldIncludeRegion,
+                isExactMatch,
+                sortBy,
+                panelWidth,
+                isDynamicWidth,
+                shouldSaveSettings,
+                shouldSaveClassFilter,
+                shouldSaveStringFilter,
+                shouldSaveLevelFilter,
+                shouldSaveSortBy,
+                shouldSaveGroupView,
+                shouldSaveExactMatch,
+                showInQuestIndicator,
+                refreshInterval,
+                hideIgnoredCharacters,
+                pinRegisteredCharacters,
+                pinFriends,
+                alwaysShowRegisteredCharacters,
+                alwaysShowFriends,
+                maximumRenderedCharacterCount,
+            }
+
+            // Validate the settings before saving
+            if (validateAndParseSettings(settingsToSave)) {
+                setDataToLocalStorage<any>(settingsStorageKey, settingsToSave)
+            } else {
+                logMessage(
+                    "Attempted to save invalid settings to localStorage - skipping save",
+                    "warn",
+                    { metadata: { settingsToSave } }
+                )
+            }
+        } catch (e) {
+            logMessage("Error saving settings to localStorage", "error", {
+                metadata: {
+                    error: e instanceof Error ? e.message : String(e),
+                },
+            })
+        }
     }, [
         stringFilter,
         classNameFilter,
@@ -219,6 +427,7 @@ export const WhoProvider = ({ children }: { children: ReactNode }) => {
         pinFriends,
         alwaysShowRegisteredCharacters,
         alwaysShowFriends,
+        maximumRenderedCharacterCount,
     ])
 
     return (
@@ -274,6 +483,8 @@ export const WhoProvider = ({ children }: { children: ReactNode }) => {
                 setPinFriends,
                 alwaysShowFriends,
                 setAlwaysShowFriends,
+                maximumRenderedCharacterCount,
+                setMaximumRenderedCharacterCount,
             }}
         >
             {children}
