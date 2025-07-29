@@ -62,8 +62,7 @@ const useRenderLfmOverlay = ({ lfmSprite, context }: Props) => {
     const fonts = useMemo(() => FONTS(14), [])
     const { confineTextToBoundingBox } = useTextRenderer(context)
     const areaContext = useAreaContext()
-    const questContext = useQuestContext()
-    const { quests } = questContext
+    const { quests } = useQuestContext()
     const { friends } = useGetFriends()
 
     const renderLfmOverlay = useCallback<
@@ -76,7 +75,7 @@ const useRenderLfmOverlay = ({ lfmSprite, context }: Props) => {
             if (!context || !lfmSprite) return { width: 0, height: 0 }
             if (renderType === RenderType.QUEST && lfm.quest_id == null)
                 return { width: 0, height: 0 }
-            const quest = quests[lfm.quest_id || 0] || quests[0]
+            const quest = lfm.quest
             context.imageSmoothingEnabled = false
             const willWrap =
                 renderType === RenderType.LFM &&
@@ -1140,7 +1139,7 @@ const useRenderLfmOverlay = ({ lfmSprite, context }: Props) => {
             isMultiColumn,
             confineTextToBoundingBox,
             showEligibleCharacters,
-            questContext,
+            quests,
             areaContext,
         ]
     )
