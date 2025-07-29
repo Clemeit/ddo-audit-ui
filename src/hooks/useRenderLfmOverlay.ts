@@ -188,7 +188,7 @@ const useRenderLfmOverlay = ({ lfmSprite, context }: Props) => {
                 totalOverlayHeight = OVERLAY_QUEST_INFO_SPACING
                 if (quest) {
                     let infoFields: any[] = []
-                    if (quest.id === 0) {
+                    if (quest.metadata?.isUnknown) {
                         infoFields = [quest.name, lfm.quest_id]
                     } else {
                         infoFields = [
@@ -1012,7 +1012,7 @@ const useRenderLfmOverlay = ({ lfmSprite, context }: Props) => {
                         renderQuestInfo("Quest:", quest.name)
                     }
 
-                    if (quest.id === 0) {
+                    if (quest.metadata?.isUnknown) {
                         renderQuestInfo(
                             "Quest ID:",
                             lfm.quest_id?.toString() || "N/A"
