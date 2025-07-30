@@ -1,10 +1,10 @@
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import Page from "../global/Page.tsx"
 import {
     ContentCluster,
     ContentClusterGroup,
 } from "../global/ContentCluster.tsx"
-import { toSentenceCase } from "../../utils/stringUtils.ts"
+import { pluralize, toSentenceCase } from "../../utils/stringUtils.ts"
 import usePollApi from "../../hooks/usePollApi.ts"
 import { Lfm, LfmApiModel, Quest } from "../../models/Lfm.ts"
 import ServerNavigationCard from "../global/ServerNavigationCard.tsx"
@@ -98,19 +98,49 @@ const GroupingContent = () => {
         )
     }
 
-    const cardDescription = (serverData?: { [key: number]: Lfm }) => {
+    const fauxData: Record<string, {}> = useMemo(
+        () =>
+            SERVER_NAMES_LOWER.reduce((acc, serverName) => {
+                acc[serverName] = undefined
+                return acc
+            }, {}),
+        []
+    )
+
+    const cardDescription = (
+        serverName: string,
+        serverData?: { [key: number]: Lfm }
+    ) => {
+        if (serverData === undefined) {
+            return (
+                <Skeleton width={`${120 + (serverName.length % 3) * 20}px`} />
+            )
+        }
+
         const serverLfms = Object.values(serverData || {})
         const lfmCount = Object.keys(serverLfms).length
         const raidCount = Object.values(serverLfms).filter(
-            (lfm) => lfm.quest?.group_size === "Raid"
+            (lfm) =>
+                lfm.quest_id !== 0 &&
+                getQuestById(lfm.quest_id)?.group_size === "Raid"
         ).length
+
+        const mainContent = (
+            <span style={{ color: "var(--orange-text)" }}>
+                {lfmCount} {pluralize("group", lfmCount)}
+            </span>
+        )
+        const raidContent = raidCount > 0 && (
+            <span>
+                {" "}
+                | {raidCount} {pluralize("raid", raidCount)}
+            </span>
+        )
+
         return (
             <>
-                <span style={{ color: "var(--orange-text)" }}>
-                    {lfmCount} group{lfmCount === 1 ? "" : "s"}
-                </span>
-                {raidCount > 0 &&
-                    ` | ${raidCount} raid${raidCount === 1 ? "" : "s"}`}
+                {mainContent}
+                {raidContent}
             </>
         )
     }
@@ -177,7 +207,6 @@ const GroupingContent = () => {
     }, [lfmData, quests])
 
     const getServerSelectContent = (type: "32bit" | "64bit") => {
-        // Show skeleton loaders only during initial load
         if (isInitialLoading()) {
             const serverList = serverInfoData
                 ? Object.keys(serverInfoData)
@@ -221,9 +250,9 @@ const GroupingContent = () => {
                 ))
         }
 
-        return Object.entries(lfmData?.data || {})
-            .filter(([serverName]) => SERVER_NAMES_LOWER.includes(serverName))
-            .filter(([serverName]) => {
+        return Object.entries(lfmData?.data || fauxData)
+            ?.filter(([serverName]) => SERVER_NAMES_LOWER.includes(serverName))
+            ?.filter(([serverName]) => {
                 if (type === "32bit") {
                     return SERVERS_64_BITS_LOWER.includes(serverName) === false
                 } else if (type === "64bit") {
@@ -231,15 +260,15 @@ const GroupingContent = () => {
                 }
                 return true
             })
-            .sort(([serverNameA], [serverNameB]) =>
+            ?.sort(([serverNameA], [serverNameB]) =>
                 serverNameA.localeCompare(serverNameB)
             )
-            .map(([serverName, serverData]) => (
+            ?.map(([serverName, serverData]) => (
                 <ServerNavigationCard
                     key={serverName}
                     destination={`/grouping/${serverName}`}
                     title={toSentenceCase(serverName)}
-                    content={cardDescription(serverData)}
+                    content={cardDescription(serverName, serverData)}
                     icon={cardIcon(serverName)}
                     badge={cardBadge(serverName)}
                 />
