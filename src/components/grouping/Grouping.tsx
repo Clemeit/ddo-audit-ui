@@ -6,7 +6,7 @@ import {
 } from "../global/ContentCluster.tsx"
 import { toSentenceCase } from "../../utils/stringUtils.ts"
 import usePollApi from "../../hooks/usePollApi.ts"
-import { Lfm, LfmApiModel } from "../../models/Lfm.ts"
+import { Lfm, LfmApiModel, Quest } from "../../models/Lfm.ts"
 import ServerNavigationCard from "../global/ServerNavigationCard.tsx"
 import NavigationCard from "../global/NavigationCard.tsx"
 import Link from "../global/Link.tsx"
@@ -73,7 +73,11 @@ const GroupingContent = () => {
         }
     }, [lfmState, serverInfoState])
 
-    const questContext = useQuestContext()
+    const { quests } = useQuestContext()
+    const getQuestById = (id: number): Quest => {
+        if (id == undefined) return null
+        return quests[id]
+    }
 
     const isInitialLoading = () => {
         return (
@@ -144,33 +148,33 @@ const GroupingContent = () => {
     }
 
     const getCurrentRaids = useCallback(() => {
-        if (!questContext || !lfmData) {
+        if (!quests || !lfmData) {
             return {}
         }
         const currentRaids: Record<string, Lfm[]> = {}
         Object.entries(lfmData?.data || {}).forEach(
             ([serverName, serverData]) => {
-                Object.values(serverData || {})?.forEach((lfm: Lfm) => {
-                    const quest =
-                        lfm.quest_id && lfm.quest_id !== 0
-                            ? questContext.quests[lfm.quest_id || 0]
-                            : null
-                    if (quest?.group_size === "Raid") {
-                        const eligibleLfm: Lfm = {
-                            ...lfm,
-                            metadata: { ...lfm.metadata, isEligible: true },
+                Object.values(serverData || {})
+                    ?.filter((lfm: Lfm) => lfm.quest_id !== 0)
+                    ?.forEach((lfm: Lfm) => {
+                        const quest = getQuestById(lfm.quest_id)
+                        if (quest && quest?.group_size === "Raid") {
+                            const eligibleLfm: Lfm = {
+                                ...lfm,
+                                quest: quest,
+                                metadata: { ...lfm.metadata, isEligible: true },
+                            }
+                            if (!currentRaids[serverName]) {
+                                currentRaids[serverName] = [eligibleLfm]
+                            } else {
+                                currentRaids[serverName].push(eligibleLfm)
+                            }
                         }
-                        if (!currentRaids[serverName]) {
-                            currentRaids[serverName] = [eligibleLfm]
-                        } else {
-                            currentRaids[serverName].push(eligibleLfm)
-                        }
-                    }
-                })
+                    })
             }
         )
         return currentRaids
-    }, [lfmData, questContext])
+    }, [lfmData, quests])
 
     const getServerSelectContent = (type: "32bit" | "64bit") => {
         // Show skeleton loaders only during initial load
