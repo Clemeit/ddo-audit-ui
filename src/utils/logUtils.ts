@@ -62,7 +62,7 @@ function getScreenInfo(): {
 }
 
 // Utility function to generate a session ID (persisted in sessionStorage)
-function getSessionId(): string {
+export function getSessionId(): string {
     let sessionId = sessionStorage.getItem("ddo_session_id")
     if (!sessionId) {
         sessionId = `session_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`
@@ -72,7 +72,7 @@ function getSessionId(): string {
 }
 
 // Utility function to generate a session ID (persisted in sessionStorage)
-function getUserId(): string {
+export function getUserId(): string {
     let userId = localStorage.getItem("ddo_user_id")
     if (!userId) {
         userId = `user_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`

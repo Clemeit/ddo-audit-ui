@@ -11,7 +11,7 @@ import ColoredText from "../global/ColoredText.tsx"
 import { postFeedback } from "../../services/serviceService.ts"
 import ValidationMessage from "../global/ValidationMessage.tsx"
 import Spacer from "../global/Spacer.tsx"
-import logMessage from "../../utils/logUtils.ts"
+import logMessage, { getSessionId, getUserId } from "../../utils/logUtils.ts"
 import { useNotificationContext } from "../../contexts/NotificationContext.tsx"
 
 const Feedback = () => {
@@ -44,6 +44,8 @@ const Feedback = () => {
         const feedback = {
             message: message.trim(),
             contact: contactInfo || undefined,
+            user_id: getUserId(),
+            session_id: getSessionId(),
         }
 
         try {
