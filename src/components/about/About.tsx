@@ -189,6 +189,7 @@ const About = () => {
                         <WebLink href="https://github.com/Clemeit/ddo-audit-ui">
                             Clemeit/ddo-audit-ui
                         </WebLink>
+                        .
                     </p>
                     <p>
                         DDO Audit has been a great learning opportunity, and I'm
