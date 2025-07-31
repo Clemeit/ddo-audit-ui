@@ -157,6 +157,9 @@ const GroupingContent = () => {
     }
 
     const cardBadge = (serverName: string) => {
+        if (!serverName) {
+            return null
+        }
         if (serverInfoData?.[serverName]?.is_vip_only) {
             return (
                 <Badge
@@ -175,6 +178,7 @@ const GroupingContent = () => {
                 />
             )
         }
+        return null
     }
 
     const getCurrentRaids = useCallback(() => {
