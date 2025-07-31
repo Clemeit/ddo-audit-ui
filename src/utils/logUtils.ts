@@ -89,7 +89,7 @@ export function getCommitHash(): string | undefined {
 // Utility function to get the commit hash from environment variables
 export function getBuildTime(): string | undefined {
     const buildTime = process.env.REACT_APP_BUILD_TIMESTAMP
-    return buildTime ? new Date(buildTime).toLocaleDateString() : undefined
+    return buildTime ? new Date(buildTime).toLocaleString() : undefined
 }
 
 // Utility function to get route information

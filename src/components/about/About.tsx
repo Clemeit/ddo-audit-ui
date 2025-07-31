@@ -221,20 +221,23 @@ const About = () => {
             </ContentClusterGroup>
             <Stack direction="column" fullWidth>
                 <hr style={{ width: "100px" }} />
-                <ColoredText color="secondary">
-                    <i>
-                        Source commit:{" "}
-                        <WebLink
-                            href={`https://github.com/Clemeit/ddo-audit-ui/commit/${getCommitHash()}`}
-                            noDecoration
-                        >
-                            <span>{getCommitHash()?.slice(0, 7)}</span>
-                        </WebLink>
-                    </i>
-                </ColoredText>
-                <ColoredText color="secondary">
-                    <i>Built at: {getBuildTime()}</i>
-                </ColoredText>
+                <Stack direction="row" gap="5px">
+                    <ColoredText color="secondary">
+                        <i>Source commit:</i>
+                    </ColoredText>
+                    <WebLink
+                        href={`https://github.com/Clemeit/ddo-audit-ui/commit/${getCommitHash()}`}
+                        noDecoration
+                    >
+                        <i>{getCommitHash()?.slice(0, 7)}</i>
+                    </WebLink>
+                </Stack>
+                <Stack direction="row" gap="5px">
+                    <ColoredText color="secondary">
+                        <i>Built at</i>
+                    </ColoredText>
+                    <i>{getBuildTime()}</i>
+                </Stack>
             </Stack>
         </Page>
     )
