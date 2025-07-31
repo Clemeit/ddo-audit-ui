@@ -19,6 +19,12 @@ jobs:
               with:
                   node-version: "20"
 
+            - name: Set commit hash as environment variable
+              run: echo "REACT_APP_COMMIT_SHA=${{ github.sha }}" >> $GITHUB_ENV
+
+            - name: Set build timestamp as environment variable
+              run: echo "REACT_APP_BUILD_TIMESTAMP=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> $GITHUB_ENV
+
             - name: Install dependencies
               run: yarn install --frozen-lockfile
 
@@ -50,6 +56,12 @@ jobs:
               uses: actions/setup-node@v3
               with:
                   node-version: "20"
+
+            - name: Set commit hash as environment variable
+              run: echo "REACT_APP_COMMIT_SHA=${{ github.sha }}" >> $GITHUB_ENV
+
+            - name: Set build timestamp as environment variable
+              run: echo "REACT_APP_BUILD_TIMESTAMP=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> $GITHUB_ENV
 
             - name: Install dependencies
               run: yarn install --frozen-lockfile

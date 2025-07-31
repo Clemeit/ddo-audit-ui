@@ -81,6 +81,17 @@ export function getUserId(): string {
     return userId
 }
 
+// Utility function to get the commit hash from environment variables
+export function getCommitHash(): string | undefined {
+    return process.env.REACT_APP_COMMIT_SHA || undefined
+}
+
+// Utility function to get the commit hash from environment variables
+export function getBuildTime(): string | undefined {
+    const buildTime = process.env.REACT_APP_BUILD_TIMESTAMP
+    return buildTime ? new Date(buildTime).toLocaleDateString() : undefined
+}
+
 // Utility function to get route information
 function getRouteInfo(): { route?: string; page_title?: string } {
     const route = window.location.pathname

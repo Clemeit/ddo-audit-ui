@@ -15,6 +15,7 @@ import ColoredText from "../global/ColoredText.tsx"
 import { AlphaReleasePageMessage } from "../global/CommonMessages.tsx"
 import useBooleanFlag from "../../hooks/useBooleanFlags.ts"
 import { BOOLEAN_FLAGS } from "../../utils/localStorage.ts"
+import { getBuildTime, getCommitHash } from "../../utils/logUtils.ts"
 
 const About = () => {
     const [hideAlphaRelease, setHideAlphaRelease] = useBooleanFlag(
@@ -218,6 +219,23 @@ const About = () => {
                     </ul>
                 </ContentCluster>
             </ContentClusterGroup>
+            <Stack direction="column" fullWidth>
+                <hr style={{ width: "100px" }} />
+                <ColoredText color="secondary">
+                    <i>
+                        Source commit:{" "}
+                        <WebLink
+                            href={`https://github.com/Clemeit/ddo-audit-ui/commit/${getCommitHash()}`}
+                            noDecoration
+                        >
+                            <span>{getCommitHash()?.slice(0, 7)}</span>
+                        </WebLink>
+                    </i>
+                </ColoredText>
+                <ColoredText color="secondary">
+                    <i>Built at: {getBuildTime()}</i>
+                </ColoredText>
+            </Stack>
         </Page>
     )
 }

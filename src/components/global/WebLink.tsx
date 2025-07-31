@@ -6,6 +6,7 @@ interface Props {
     href: string
     className?: string
     children: React.ReactNode
+    noDecoration?: boolean
     disabled?: boolean
 }
 
@@ -13,6 +14,7 @@ const WebLink = ({
     href = "www.ddoaudit.com",
     className = "",
     children,
+    noDecoration,
     disabled = false,
 }: Props) => {
     const onClick = () => {
@@ -30,6 +32,9 @@ const WebLink = ({
             target="_blank"
             className={`link ${className ? className : ""} ${disabled ? "disabled" : ""}`}
             onClick={onClick}
+            style={{
+                textDecoration: noDecoration ? "none" : "",
+            }}
         >
             {children}
         </a>

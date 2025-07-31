@@ -118,12 +118,24 @@ hr {
     color: var(--orange1);
 }
 
-.blue-text {
+.blue-text,
+.blue-text > * {
     color: var(--blue1);
 }
 
-.green-text {
+.green-text,
+.green-text > * {
     color: var(--green1);
+}
+
+.secondary-text,
+.secondary-text > * {
+    color: var(--secondary-text);
+}
+
+.red-text,
+.red-text > * {
+    color: var(--red1);
 }
 
 input,
@@ -195,14 +207,6 @@ table tbody tr:nth-of-type(odd) {
 
 table tbody tr:last-of-type {
     border-bottom: 5px solid var(--gray6);
-}
-
-.secondary-text {
-    color: var(--secondary-text);
-}
-
-.red-text {
-    color: var(--red1);
 }
 
 .link {
