@@ -18,6 +18,7 @@ interface LogRequest {
     action?: string
     ip_address?: string
     country?: string
+    commit_hash?: string
     metadata?: Record<string, any>
 }
 

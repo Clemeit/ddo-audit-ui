@@ -3,6 +3,7 @@ interface FeedbackMessage {
     contact?: string
     user_id?: string
     session_id?: string
+    commit_hash?: string
 }
 
 interface FeedbackEndpointResponse {

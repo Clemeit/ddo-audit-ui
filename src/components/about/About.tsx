@@ -235,7 +235,7 @@ const About = () => {
                 </Stack>
                 <Stack direction="row" gap="5px">
                     <ColoredText color="secondary">
-                        <i>Built at</i>
+                        <i>Built at:</i>
                     </ColoredText>
                     <i>{getBuildTime()}</i>
                 </Stack>

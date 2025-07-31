@@ -112,6 +112,7 @@ export default function logMessage(
     const session_id = getSessionId()
     const { route, page_title } = getRouteInfo()
     const user_id = getUserId()
+    const commit_hash = getCommitHash() || "local_dev"
 
     const logEntry: LogRequest = {
         message,
@@ -129,6 +130,7 @@ export default function logMessage(
         page_title,
         referrer: document.referrer || undefined,
         route,
+        commit_hash,
         ...options,
     }
 
