@@ -25,7 +25,7 @@ import {
     NoVerifiedCharacters,
 } from "../global/CommonMessages.tsx"
 import NavCardCluster from "../global/NavCardCluster.tsx"
-import StatusBarChart from "./StatusBarChart.tsx"
+// import StatusBarChart from "./StatusBarChart.tsx"
 
 // TODO: Location table updates:
 // - Show quest name when a location belongs to a quest.
@@ -346,10 +346,10 @@ const Activity = () => {
                     activityType={CharacterActivityType.status}
                     loadingState={statusActivityLoadingState}
                 />
-                <StatusBarChart
+                {/* <StatusBarChart
                     statusActivity={statusActivity}
                     locationActivity={locationActivity}
-                />
+                /> */}
                 <ActivityTable
                     characterActivity={levelActivity}
                     activityType={CharacterActivityType.total_level}

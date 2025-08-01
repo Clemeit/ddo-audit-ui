@@ -30,7 +30,6 @@ import { ReactComponent as InfoSVG } from "../../assets/svg/info.svg"
 import { AlphaReleasePageMessage } from "../global/CommonMessages.tsx"
 import { BOOLEAN_FLAGS } from "../../utils/localStorage.ts"
 import useBooleanFlag from "../../hooks/useBooleanFlags.ts"
-import Stack from "../global/Stack.tsx"
 import Badge from "../global/Badge.tsx"
 
 const Live = () => {

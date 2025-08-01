@@ -1,8 +1,7 @@
 import { ResponsiveLine } from "@nivo/line"
-import React, { useMemo, useState } from "react"
+import { useMemo, useState } from "react"
 import { NivoSeries } from "../../utils/nivoUtils.ts"
 import Stack from "../global/Stack.tsx"
-import { ResponsiveContainer } from "recharts"
 import GenericLegend from "./GenericLegend.tsx"
 import LineChartTooltip from "./LineChartTooltip.tsx"
 import { createHighlightColorFunction } from "./chartColorUtils.ts"
@@ -15,6 +14,7 @@ import {
     LINE_CHART_DEFAULTS,
 } from "./lineChartConfig.ts"
 import { dateToLongStringWithTime } from "../../utils/dateUtils.ts"
+import "./Charts.css"
 
 interface GenericLineProps {
     nivoData: NivoSeries[]
@@ -65,7 +65,7 @@ const GenericLine = ({
 
     return (
         <Stack direction="column" gap="10px">
-            <ResponsiveContainer width="100%" height={400}>
+            <div className="chart-container">
                 <ResponsiveLine
                     data={filteredData}
                     margin={margin}
@@ -90,7 +90,10 @@ const GenericLine = ({
                     )}
                     axisBottom={axisBottom}
                 />
-            </ResponsiveContainer>
+            </div>
+            {/* <ResponsiveContainer width="100%" height={400}> */}
+
+            {/* </ResponsiveContainer> */}
             {showLegend && (
                 <GenericLegend
                     nivoData={nivoData}
