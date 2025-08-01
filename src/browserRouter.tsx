@@ -5,6 +5,7 @@ import {
     Outlet,
     Route,
 } from "react-router-dom"
+import { lazyRetry } from "./utils/routerUtils.ts"
 
 // Import common pages
 import App from "./components/app/App.tsx"
@@ -16,26 +17,6 @@ import Servers from "./components/servers/Servers.tsx"
 import Who from "./components/who/Who.tsx"
 import WhoSpecific from "./components/who/WhoSpecific.tsx"
 
-// Lazy load uncommon pages
-const Verification = lazy(
-    () => import("./components/verification/Verification.tsx")
-)
-const Registration = lazy(
-    () => import("./components/registration/Registration.tsx")
-)
-// const Activity = lazy(() => import("./components/activity/Activity.tsx"))
-const NotFound = lazy(() => import("./components/app/NotFound.tsx"))
-// const Notifications = lazy(
-//     () => import("./components/notifications/Notifications.tsx")
-// )
-// const Timers = lazy(() => import("./components/timers/Timers.tsx"))
-const Feedback = lazy(() => import("./components/feedback/Feedback.tsx"))
-const Friends = lazy(() => import("./components/friends/Friends.tsx"))
-const About = lazy(() => import("./components/about/About.tsx"))
-const Ignores = lazy(() => import("./components/ignores/Ignores.tsx"))
-// const Trends = lazy(() => import("./components/trends/Trends.tsx"))
-// const Quests = lazy(() => import("./components/quests/Quests.tsx"))
-
 // Providers
 import {
     SocialDataProvider,
@@ -43,6 +24,36 @@ import {
     WhoDataProvider,
     RegistrationDataProvider,
 } from "./contexts/CombinedProviders.tsx"
+
+// Lazy load uncommon pages
+const Verification = lazy(() =>
+    lazyRetry(() => import("./components/verification/Verification.tsx"))
+)
+const Registration = lazy(() =>
+    lazyRetry(() => import("./components/registration/Registration.tsx"))
+)
+// const Activity = lazy(() => lazyRetry(() => import("./components/activity/Activity.tsx")))
+const NotFound = lazy(() =>
+    lazyRetry(() => import("./components/app/NotFound.tsx"))
+)
+// const Notifications = lazy(
+//     () => lazyRetry(() => import("./components/notifications/Notifications.tsx"))
+// )
+// const Timers = lazy(() => lazyRetry(() => import("./components/timers/Timers.tsx")))
+const Feedback = lazy(() =>
+    lazyRetry(() => import("./components/feedback/Feedback.tsx"))
+)
+const Friends = lazy(() =>
+    lazyRetry(() => import("./components/friends/Friends.tsx"))
+)
+const About = lazy(() =>
+    lazyRetry(() => import("./components/about/About.tsx"))
+)
+const Ignores = lazy(() =>
+    lazyRetry(() => import("./components/ignores/Ignores.tsx"))
+)
+// const Trends = lazy(() => lazyRetry(() => import("./components/trends/Trends.tsx")))
+// const Quests = lazy(() => lazyRetry(() => import("./components/quests/Quests.tsx")))
 
 // Set up the router
 export default createBrowserRouter(
