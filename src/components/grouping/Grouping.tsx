@@ -125,23 +125,18 @@ const GroupingContent = () => {
                 getQuestById(lfm.quest_id)?.group_size === "Raid"
         ).length
 
-        const mainContent = (
-            <span style={{ color: "var(--orange-text)" }}>
-                {lfmCount} {pluralize("group", lfmCount)}
-            </span>
-        )
-        const raidContent = raidCount > 0 && (
-            <span>
-                {" "}
-                | {raidCount} {pluralize("raid", raidCount)}
-            </span>
-        )
-
         return (
-            <>
-                {mainContent}
-                {raidContent}
-            </>
+            <span>
+                <span style={{ color: "var(--orange-text)" }}>
+                    {lfmCount} {pluralize("group", lfmCount)}
+                </span>
+                {raidCount > 0 ? (
+                    <span>
+                        {" | "}
+                        {raidCount} {pluralize("raid", raidCount)}
+                    </span>
+                ) : null}
+            </span>
         )
     }
 
@@ -211,72 +206,47 @@ const GroupingContent = () => {
     }, [lfmData, quests])
 
     const getServerSelectContent = (type: "32bit" | "64bit") => {
-        if (isInitialLoading()) {
-            const serverList = serverInfoData
-                ? Object.keys(serverInfoData)
-                : SERVER_NAMES_LOWER
+        const allServerNames = [...SERVER_NAMES_LOWER].sort((a, b) =>
+            a.localeCompare(b)
+        )
+        const filteredServerNames = allServerNames.filter((serverName) => {
+            if (type === "32bit") {
+                return SERVERS_64_BITS_LOWER.includes(serverName) === false
+            } else if (type === "64bit") {
+                return SERVERS_64_BITS_LOWER.includes(serverName) === true
+            }
+            return true
+        })
 
-            return serverList
-                .filter((serverName) => {
-                    if (type === "32bit") {
-                        return (
-                            SERVERS_64_BITS_LOWER.includes(serverName) === false
-                        )
-                    } else if (type === "64bit") {
-                        return (
-                            SERVERS_64_BITS_LOWER.includes(serverName) === true
-                        )
-                    }
-                    return true
-                })
-                .sort((serverNameA, serverNameB) =>
-                    serverNameA.localeCompare(serverNameB)
-                )
-                .map((serverName) => (
-                    <ServerNavigationCard
-                        key={serverName}
-                        destination={`/grouping/${serverName}`}
-                        title={toSentenceCase(serverName)}
-                        content={
-                            <Skeleton
-                                width={`${120 + (serverName.length % 3) * 20}px`}
-                            />
-                        }
-                        icon={
-                            serverInfoData ? (
-                                cardIcon(serverName)
-                            ) : (
-                                <Pending className="shrinkable-icon" />
-                            )
-                        }
-                        badge={cardBadge(serverName)}
-                    />
-                ))
-        }
-
-        return Object.entries(lfmData?.data || fauxData)
-            ?.filter(([serverName]) => SERVER_NAMES_LOWER.includes(serverName))
-            ?.filter(([serverName]) => {
-                if (type === "32bit") {
-                    return SERVERS_64_BITS_LOWER.includes(serverName) === false
-                } else if (type === "64bit") {
-                    return SERVERS_64_BITS_LOWER.includes(serverName) === true
-                }
-                return true
-            })
-            ?.sort(([serverNameA], [serverNameB]) =>
-                serverNameA.localeCompare(serverNameB)
-            )
-            ?.map(([serverName, serverData]) => (
+        return filteredServerNames.map((serverName) => {
+            // Use lfmData?.data if available, otherwise fallback to fauxData
+            const serverData =
+                lfmData?.data?.[serverName] ?? fauxData[serverName]
+            return (
                 <ServerNavigationCard
                     key={serverName}
                     destination={`/grouping/${serverName}`}
                     title={toSentenceCase(serverName)}
-                    content={cardDescription(serverName, serverData)}
-                    icon={cardIcon(serverName)}
+                    content={
+                        isInitialLoading() ? (
+                            <Skeleton
+                                width={`${120 + (serverName.length % 3) * 20}px`}
+                            />
+                        ) : (
+                            cardDescription(serverName, serverData)
+                        )
+                    }
+                    icon={
+                        serverInfoData ? (
+                            cardIcon(serverName)
+                        ) : (
+                            <Pending className="shrinkable-icon" />
+                        )
+                    }
                     badge={cardBadge(serverName)}
                 />
-            ))
+            )
+        })
     }
 
     const getCurrentRaidsContent = useCallback(() => {
