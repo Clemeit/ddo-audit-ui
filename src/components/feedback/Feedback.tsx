@@ -175,7 +175,7 @@ const Feedback = () => {
             <p>
                 Thanks!
                 <br />
-                <i>Clemeit of Thelanis</i>
+                <i>Clemeit of Thrane</i>
             </p>
             {wasFeedbackSubmitted && (
                 <ColoredText color="secondary">

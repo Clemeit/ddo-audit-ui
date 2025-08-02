@@ -199,7 +199,7 @@ const About = () => {
                     <p>
                         See you in game,
                         <br />
-                        <i>Clemeit of Thelanis</i>
+                        <i>Clemeit of Thrane</i>
                     </p>
                 </ContentCluster>
                 <ContentCluster

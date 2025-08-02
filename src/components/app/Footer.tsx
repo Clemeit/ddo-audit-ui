@@ -16,7 +16,7 @@ const Footer = () => {
     return isMobile || !showFooter ? null : (
         <div className="footer">
             <p>
-                DDO Audit is brought to you by Clemeit of Thelanis.
+                DDO Audit is brought to you by Clemeit of Thrane.
                 <br />
                 This utility is subject to change without notice.
             </p>
