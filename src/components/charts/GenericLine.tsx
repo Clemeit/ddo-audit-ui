@@ -14,7 +14,7 @@ import {
     LINE_CHART_DEFAULTS,
 } from "./lineChartConfig.ts"
 import { dateToLongStringWithTime } from "../../utils/dateUtils.ts"
-import "Charts.css"
+import "./Charts.css"
 
 interface GenericLineProps {
     nivoData: NivoSeries[]
