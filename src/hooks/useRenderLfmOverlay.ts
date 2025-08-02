@@ -88,6 +88,7 @@ const useRenderLfmOverlay = ({ lfmSprite, context }: Props) => {
                 : OVERLAY_CHARACTER_HEIGHT
             let totalOverlayHeight = 100
             let totalOverlayWidth = OVERLAY_WIDTH
+            const doubleClickText = "Double-click to open Wiki"
 
             if (willWrap)
                 totalOverlayWidth = OVERLAY_WIDTH + OVERLAY_CHARACTER_WIDTH + 3
@@ -217,6 +218,14 @@ const useRenderLfmOverlay = ({ lfmSprite, context }: Props) => {
                             )
                         }
                     })
+                    // Make space for the double-click text
+                    totalOverlayHeight += 22
+                    const doubleClickWidth =
+                        context.measureText(doubleClickText).width
+                    totalOverlayWidth = Math.max(
+                        totalOverlayWidth,
+                        doubleClickWidth + 25
+                    )
                 }
                 if (activeTimers.length > 0) {
                     totalOverlayHeight += activeTimers.length * 20 + 28 + 10
@@ -1074,10 +1083,11 @@ const useRenderLfmOverlay = ({ lfmSprite, context }: Props) => {
                     }
 
                     if (activeTimers.length > 0) {
-                        context.resetTransform()
                         context.translate(
-                            totalOverlayWidth / 2 - OVERLAY_SIDE_BAR_WIDTH / 2,
-                            totalOverlayHeight - activeTimers.length * 20 - 25
+                            totalOverlayWidth / 2 -
+                                OVERLAY_SIDE_BAR_WIDTH / 2 -
+                                OVERLAY_QUEST_INFO_LEFT_GAP,
+                            12
                         )
                         context.font = OVERLAY_FONTS.QUEST_INFO_HEADER
                         context.textAlign = "center"
@@ -1111,6 +1121,17 @@ const useRenderLfmOverlay = ({ lfmSprite, context }: Props) => {
                             }
                         })
                     }
+
+                    context.resetTransform()
+                    context.translate(
+                        totalOverlayWidth / 2 - OVERLAY_SIDE_BAR_WIDTH / 2,
+                        totalOverlayHeight - 15
+                    )
+                    context.font = OVERLAY_FONTS.ACTIVITY_COMMENT
+                    context.textAlign = "center"
+                    context.textBaseline = "middle"
+                    context.fillStyle = "white"
+                    context.fillText(doubleClickText, 0, 0)
                 }
             }
 
