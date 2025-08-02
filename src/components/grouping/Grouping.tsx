@@ -218,22 +218,23 @@ const GroupingContent = () => {
             return true
         })
 
+        // Always render all filtered servers, using a skeleton if data is missing
         return filteredServerNames.map((serverName) => {
-            // Use lfmData?.data if available, otherwise fallback to fauxData
-            const serverData =
-                lfmData?.data?.[serverName] ?? fauxData[serverName]
+            const hasLoaded =
+                lfmData?.data && lfmData.data[serverName] !== undefined
+            const serverData = hasLoaded ? lfmData.data[serverName] : undefined
             return (
                 <ServerNavigationCard
                     key={serverName}
                     destination={`/grouping/${serverName}`}
                     title={toSentenceCase(serverName)}
                     content={
-                        isInitialLoading() ? (
+                        hasLoaded ? (
+                            cardDescription(serverName, serverData)
+                        ) : (
                             <Skeleton
                                 width={`${120 + (serverName.length % 3) * 20}px`}
                             />
-                        ) : (
-                            cardDescription(serverName, serverData)
                         )
                     }
                     icon={
