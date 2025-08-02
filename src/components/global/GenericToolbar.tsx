@@ -15,6 +15,7 @@ import "./GenericToolbar.css"
 import { toSentenceCase } from "../../utils/stringUtils.ts"
 import Button from "./Button.tsx"
 import Stack from "./Stack.tsx"
+import ColoredText from "./ColoredText.tsx"
 
 interface Props {
     handleReload: () => void
@@ -25,6 +26,7 @@ interface Props {
     serverName: string
     isSecondaryPanel?: boolean
     handleScreenshot?: () => void
+    characterCount?: number
 }
 
 const GenericToolbar = ({
@@ -36,6 +38,7 @@ const GenericToolbar = ({
     serverName = "",
     isSecondaryPanel,
     handleScreenshot = () => {},
+    characterCount,
 }: Props) => {
     const { isFullScreen, setIsFullScreen } = useThemeContext()
     const [canManuallyReload, setCanManuallyReload] = useState(true)
@@ -65,20 +68,35 @@ const GenericToolbar = ({
                 </button>
             ) : (
                 <Link to={linkDestination} className="item">
-                    <MenuSVG className="icon" />
-                    <span>
-                        {toSentenceCase(serverName)}
-                        {VIP_SERVER_NAMES_LOWER.includes(serverName) && (
-                            <>
-                                {" "}
+                    <Stack direction="row" gap="5px" align="center">
+                        <MenuSVG className="icon" />
+                        <Stack direction="row" gap="5px" align="center">
+                            {toSentenceCase(serverName)}
+                            {VIP_SERVER_NAMES_LOWER.includes(serverName) && (
                                 <Badge
                                     text="VIP"
                                     size="small"
                                     backgroundColor="var(--orange4)"
                                 />
-                            </>
+                            )}
+                        </Stack>
+                        {characterCount != undefined && (
+                            <ColoredText
+                                color="secondary"
+                                className="hide-on-smallish-mobile"
+                            >
+                                &bull;
+                            </ColoredText>
                         )}
-                    </span>
+                        {characterCount != undefined && (
+                            <ColoredText
+                                color="secondary"
+                                className="hide-on-smallish-mobile"
+                            >
+                                {characterCount} online
+                            </ColoredText>
+                        )}
+                    </Stack>
                 </Link>
             )}
             <Button

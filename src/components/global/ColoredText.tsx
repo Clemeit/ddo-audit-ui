@@ -1,19 +1,24 @@
 import React from "react"
 
-interface Props {
-    color?: "red" | "green" | "blue" | "orange" | "secondary" | "default"
+type Color = "red" | "green" | "blue" | "orange" | "secondary" | "default"
+
+interface Props extends React.HTMLAttributes<HTMLSpanElement> {
+    color?: Color
     children: React.ReactNode
+    className?: string
 }
 
-const ColoredText = ({ color = "default", children }: Props) => {
-    const getTextClass = () => {
-        if (color === "default") {
-            return ""
-        } else {
-            return color + "-text"
-        }
-    }
-    return <span className={getTextClass()}>{children}</span>
+const ColoredText = ({
+    color = "default",
+    children,
+    className = "",
+    ...rest
+}: Props) => {
+    const colorClass = color === "default" ? "" : `${color}-text`
+    return (
+        <span className={`${colorClass} ${className}`.trim()} {...rest}>
+            {children}
+        </span>
+    )
 }
-
 export default ColoredText

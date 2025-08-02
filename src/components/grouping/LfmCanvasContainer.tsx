@@ -168,6 +168,10 @@ const GroupingContainer = ({
         [serverInfoData, serverInfoState, refreshInterval, isServerOffline]
     )
 
+    const characterCount = useMemo<number>(() => {
+        return serverInfoData?.[serverName]?.character_count || 0
+    }, [serverInfoData, serverName])
+
     // filter and sort the lfms
     const filteredLfms = useMemo(() => {
         if (!lfmData?.data)
@@ -426,6 +430,7 @@ const GroupingContainer = ({
                         isSecondaryPanel={isSecondaryPanel}
                         handleClosePanel={handleClosePanel}
                         handleScreenshot={handleScreenshot}
+                        characterCount={characterCount}
                     />
                     <LfmCanvas
                         serverName={serverName}

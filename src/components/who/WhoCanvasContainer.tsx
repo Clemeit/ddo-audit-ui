@@ -12,9 +12,9 @@ import { LoadingState } from "../../models/Api.ts"
 import {
     LiveDataHaultedPageMessage,
     ServerOfflineMessage,
+    StaleDataPageMessage,
 } from "../global/CommonMessages.tsx"
 import WhoToolbar from "./WhoToolbar.tsx"
-import { MAXIMUM_CHARACTER_COUNT } from "../../constants/whoPanel.ts"
 import { useAreaContext } from "../../contexts/AreaContext.tsx"
 import useGetRegisteredCharacters from "../../hooks/useGetRegisteredCharacters.ts"
 import useGetFriends from "../../hooks/useGetFriends.ts"
@@ -83,6 +83,18 @@ const WhoContainer = ({
             serverInfoState === LoadingState.Loaded &&
             !serverInfoData?.[serverName]?.is_online,
         [serverInfoData, serverName]
+    )
+
+    const isDataStale = useMemo<boolean>(
+        () =>
+            !!serverInfoData?.[serverName] &&
+            !isServerOffline &&
+            serverInfoState === LoadingState.Loaded &&
+            serverInfoData?.[serverName]?.last_data_fetch &&
+            Date.now() -
+                new Date(serverInfoData[serverName].last_data_fetch).getTime() >
+                5 * 60 * 1000,
+        [serverInfoData, serverInfoState, isServerOffline]
     )
 
     var handleScreenshot = function () {
@@ -331,6 +343,7 @@ const WhoContainer = ({
             {characterState === LoadingState.Haulted && (
                 <LiveDataHaultedPageMessage />
             )}
+            {isDataStale && <StaleDataPageMessage />}
             {!isServerOffline || ignoreServerDown ? (
                 <>
                     <WhoToolbar
