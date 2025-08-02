@@ -252,7 +252,7 @@ const GroupingContent = () => {
 
     const getCurrentRaidsContent = useCallback(() => {
         if (isInitialLoading()) {
-            return <ColoredText color="secondary">Loading raids!</ColoredText>
+            return <ColoredText color="secondary">Loading raids...</ColoredText>
         }
 
         if (Object.entries(getCurrentRaids() || {}).length === 0) {
