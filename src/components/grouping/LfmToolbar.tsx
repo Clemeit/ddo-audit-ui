@@ -31,6 +31,7 @@ interface Props {
     isSecondaryPanel?: boolean
     handleClosePanel?: () => void
     handleScreenshot?: () => void
+    characterCount?: number
 }
 
 const LfmToolbar = ({
@@ -39,6 +40,7 @@ const LfmToolbar = ({
     isSecondaryPanel,
     handleClosePanel = () => {},
     handleScreenshot = () => {},
+    characterCount,
 }: Props) => {
     const {
         minLevel,
@@ -549,6 +551,7 @@ const LfmToolbar = ({
                 linkDestination="/grouping"
                 isSecondaryPanel={isSecondaryPanel}
                 handleScreenshot={handleScreenshot}
+                characterCount={characterCount}
             />
         </>
     )
