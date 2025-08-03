@@ -1,4 +1,5 @@
 import React, { useState } from "react"
+import { useNavigate } from "react-router-dom"
 import Link from "./Link.tsx"
 import { ReactComponent as MenuSVG } from "../../assets/svg/menu.svg"
 import { ReactComponent as ScreenshotSVG } from "../../assets/svg/capture.svg"
@@ -40,6 +41,7 @@ const GenericToolbar = ({
     handleScreenshot = () => {},
     characterCount,
 }: Props) => {
+    const navigate = useNavigate()
     const { secondaryPanel } = useMultiPanelContext()
     const { isFullScreen, setIsFullScreen } = useThemeContext()
     const [canManuallyReload, setCanManuallyReload] = useState(true)
@@ -61,7 +63,9 @@ const GenericToolbar = ({
             )}
             {!isSecondaryPanel && (
                 <GenericToolbarButton
-                    onClick={() => {}}
+                    onClick={() => {
+                        navigate(linkDestination)
+                    }}
                     icon={<MenuSVG className="icon" />}
                     label={toSentenceCase(serverName)}
                 />

@@ -35,7 +35,9 @@ interface Props {
 
 const MultiPanelContainer = ({ serverName, primaryType }: Props) => {
     const { secondaryPanel, setSecondaryPanel } = useMultiPanelContext()
-    const [secondaryType, setSecondaryType] = useState<PanelType>(undefined)
+    const [secondaryType, setSecondaryType] = useState<PanelType | undefined>(
+        undefined
+    )
     const [isModalOpen, setIsModalOpen] = useState(false)
 
     const closeSecondaryPanel = () => {
