@@ -1,0 +1,39 @@
+.generic-toolbar-container {
+    .generic-toolbar-button {
+        background-color: var(--background-light);
+        font-size: 1rem;
+        border: none;
+        height: 100%;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        padding: 0px 10px;
+        transition: background-color 0.3s;
+        cursor: pointer;
+        gap: 10px;
+        box-shadow: none;
+        border-radius: 0px;
+
+        &:hover {
+            background-color: var(--highlight);
+        }
+
+        &.disabled {
+            background-color: var(--background-light) !important;
+            transition: none;
+            cursor: default;
+        }
+    }
+}
+
+@media (max-width: 768px) {
+    .generic-toolbar-container {
+        height: 40px;
+
+        .generic-toolbar-button.hide-label-on-mobile {
+            span {
+                display: none;
+            }
+        }
+    }
+}

@@ -20,6 +20,7 @@ import useGetRegisteredCharacters from "../../hooks/useGetRegisteredCharacters.t
 import useGetFriends from "../../hooks/useGetFriends.ts"
 import useGetIgnores from "../../hooks/useGetIgnores.ts"
 import logMessage from "../../utils/logUtils.ts"
+import Stack from "../global/Stack.tsx"
 
 // TODO: group_id should be null and never "0"
 
@@ -345,7 +346,7 @@ const WhoContainer = ({
             )}
             {isDataStale && <StaleDataPageMessage />}
             {!isServerOffline || ignoreServerDown ? (
-                <>
+                <Stack direction="column">
                     <WhoToolbar
                         serverName={serverName}
                         reloadCharacters={reloadCharacters}
@@ -365,7 +366,7 @@ const WhoContainer = ({
                             !hadFirstLoad
                         }
                     />
-                </>
+                </Stack>
             ) : (
                 <ServerOfflineMessage
                     handleDismiss={() => {

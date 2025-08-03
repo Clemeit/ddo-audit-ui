@@ -12,6 +12,7 @@
     justify-content: center;
     gap: 10px;
     border: 1px solid white;
+    color: black;
 }
 
 .button.small {
@@ -23,7 +24,7 @@
     box-shadow: 0px 0px 5px 0px white;
 }
 
-.button > span {
+.button {
     color: black;
 }
 
@@ -44,10 +45,6 @@
             box-shadow: 0px 0px 10px 0px red !important;
         }
     }
-}
-
-.button.secondary > span {
-    color: white;
 }
 
 .button.secondary.donate {
@@ -75,7 +72,7 @@
     border: 1px solid red !important;
 }
 
-.button.tertiary > span {
+.button.tertiary {
     color: white;
 }
 
@@ -84,7 +81,7 @@
     box-shadow: none;
 }
 
-.button.disabled span {
+.button.disabled {
     color: var(--gray3);
 }
 
@@ -95,12 +92,16 @@
 .button.disabled {
     border: 1px solid var(--gray3);
     cursor: auto;
+
+    svg {
+        opacity: 0.5;
+    }
 }
 
 .button.fullWidth {
     width: 100%;
 }
 
-.button.tertiary.critical span {
+.button.tertiary.critical {
     color: red !important;
 }

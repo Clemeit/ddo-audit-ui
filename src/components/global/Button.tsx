@@ -51,7 +51,7 @@ const Button = ({
             style={style}
         >
             {icon && <span className="icon">{icon}</span>}
-            <span>{children}</span>
+            {children}
         </button>
     )
 }

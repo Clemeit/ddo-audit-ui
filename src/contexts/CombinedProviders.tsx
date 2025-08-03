@@ -3,6 +3,7 @@ import { LfmProvider } from "./LfmContext.tsx"
 import { WhoProvider } from "./WhoContext.tsx"
 import { AreaProvider } from "./AreaContext.tsx"
 import { QuestProvider } from "./QuestContext.tsx"
+import { MultiPanelProvider } from "./MultiPanelContext.tsx"
 
 interface Props {
     children: React.ReactNode
@@ -19,24 +20,28 @@ export const SocialDataProvider = ({ children }: Props) => (
 
 // Full grouping stack: LfmProvider > WhoProvider > AreaProvider > QuestProvider
 export const GroupingDataProvider = ({ children }: Props) => (
-    <LfmProvider>
-        <WhoProvider>
-            <AreaProvider>
-                <QuestProvider>{children}</QuestProvider>
-            </AreaProvider>
-        </WhoProvider>
-    </LfmProvider>
+    <MultiPanelProvider>
+        <LfmProvider>
+            <WhoProvider>
+                <AreaProvider>
+                    <QuestProvider>{children}</QuestProvider>
+                </AreaProvider>
+            </WhoProvider>
+        </LfmProvider>
+    </MultiPanelProvider>
 )
 
 // Who-focused stack: WhoProvider > LfmProvider > AreaProvider
 export const WhoDataProvider = ({ children }: Props) => (
-    <WhoProvider>
-        <LfmProvider>
-            <AreaProvider>
-                <QuestProvider>{children}</QuestProvider>
-            </AreaProvider>
-        </LfmProvider>
-    </WhoProvider>
+    <MultiPanelProvider>
+        <WhoProvider>
+            <LfmProvider>
+                <AreaProvider>
+                    <QuestProvider>{children}</QuestProvider>
+                </AreaProvider>
+            </LfmProvider>
+        </WhoProvider>
+    </MultiPanelProvider>
 )
 
 // Light registration stack: LfmProvider > WhoProvider > AreaProvider
