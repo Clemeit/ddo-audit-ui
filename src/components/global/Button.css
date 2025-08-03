@@ -12,6 +12,7 @@
     justify-content: center;
     gap: 10px;
     border: 1px solid white;
+    color: black;
 }
 
 .button.small {
@@ -44,10 +45,6 @@
             box-shadow: 0px 0px 10px 0px red !important;
         }
     }
-}
-
-.button.secondary > span {
-    color: white;
 }
 
 .button.secondary.donate {
@@ -95,6 +92,10 @@
 .button.disabled {
     border: 1px solid var(--gray3);
     cursor: auto;
+
+    svg {
+        opacity: 0.5;
+    }
 }
 
 .button.fullWidth {

@@ -22,6 +22,7 @@ import useGetFriends from "../../hooks/useGetFriends.ts"
 import useGetIgnores from "../../hooks/useGetIgnores.ts"
 import logMessage from "../../utils/logUtils.ts"
 import { useQuestContext } from "../../contexts/QuestContext.tsx"
+import Stack from "../global/Stack.tsx"
 
 interface Props {
     serverName: string
@@ -420,7 +421,7 @@ const GroupingContainer = ({
                     }}
                 />
             ) : (
-                <>
+                <Stack direction="column">
                     <LfmToolbar
                         serverName={serverName}
                         reloadLfms={() => {
@@ -441,7 +442,7 @@ const GroupingContainer = ({
                             lfmState !== LoadingState.Loaded && !hadFirstLoad
                         }
                     />
-                </>
+                </Stack>
             )}
         </>
     )
