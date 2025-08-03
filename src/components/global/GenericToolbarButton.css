@@ -30,12 +30,7 @@
     .generic-toolbar-container {
         height: 40px;
 
-        .generic-toolbar-button {
-            .icon {
-                width: 30px;
-                height: 30px;
-            }
-
+        .generic-toolbar-button.hide-label-on-mobile {
             span {
                 display: none;
             }

@@ -9,6 +9,7 @@ interface Props {
     label?: string
     badge?: React.ReactNode
     disabled?: boolean
+    hideLabelOnMobile?: boolean
     hideOnMobile?: boolean
     iconOnly?: boolean
 }
@@ -19,12 +20,13 @@ const GenericToolbarButton = ({
     label,
     badge,
     disabled = false,
+    hideLabelOnMobile = false,
     hideOnMobile = false,
     iconOnly = false,
 }: Props) => {
     return (
         <Button
-            className={`generic-toolbar-button ${hideOnMobile ? "hide-on-mobile" : ""}`}
+            className={`generic-toolbar-button ${hideOnMobile ? "hide-on-mobile" : ""} ${hideLabelOnMobile ? "hide-label-on-mobile" : ""}`}
             onClick={onClick}
             disabled={disabled}
             data-attribute={`toolbar-button-${(label ?? "no-label").toLowerCase()}`}

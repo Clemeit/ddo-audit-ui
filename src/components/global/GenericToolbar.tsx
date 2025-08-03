@@ -105,6 +105,7 @@ const GenericToolbar = ({
                     ) : null
                 }
                 iconOnly={!!secondaryPanel}
+                hideLabelOnMobile
             />
 
             <GenericToolbarButton
