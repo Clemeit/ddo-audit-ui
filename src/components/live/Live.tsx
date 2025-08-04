@@ -58,7 +58,7 @@ const Live = () => {
     const hasCriticalError =
         serverInfoState === LoadingState.Error ||
         (!!serverInfoError &&
-            !serverInfoError.message.includes("CanceledError"))
+            !serverInfoError.message?.includes("CanceledError"))
 
     // Handle error notifications
     React.useEffect(() => {

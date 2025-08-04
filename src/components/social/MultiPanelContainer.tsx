@@ -232,7 +232,6 @@ const MultiPanelContainer = ({ serverName, primaryType }: Props) => {
                     }}
                 >
                     <AddSVG className="icon" />
-                    {/* Add panel */}
                 </Button>
             )}
             <Stack direction="row" gap="10px" fullWidth justify="center">
