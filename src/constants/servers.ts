@@ -7,7 +7,6 @@ const SERVER_NAMES = Object.freeze([
     "Sarlona",
     "Thelanis",
     "Wayfinder",
-    "Hardcore",
     "Cormyr",
     "Shadowdale",
     "Thrane",

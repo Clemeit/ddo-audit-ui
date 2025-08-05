@@ -38,16 +38,7 @@ interface CharacterApiServerModel {
 }
 
 interface CharacterApiDataModel {
-    argonnessen?: CharacterApiServerModel
-    cannith?: CharacterApiServerModel
-    ghallanda?: CharacterApiServerModel
-    khyber?: CharacterApiServerModel
-    orien?: CharacterApiServerModel
-    sarlona?: CharacterApiServerModel
-    thelanis?: CharacterApiServerModel
-    wayfinder?: CharacterApiServerModel
-    hardcore?: CharacterApiServerModel
-    cormyr?: CharacterApiServerModel
+    [serverName: string]: CharacterApiServerModel | undefined
 }
 
 interface CharacterSpecificApiDataModel {
@@ -59,16 +50,7 @@ interface CharacterSummaryModel {
 }
 
 interface CharacterSummaryApiDataModel {
-    argonnessen?: CharacterSummaryModel
-    cannith?: CharacterSummaryModel
-    ghallanda?: CharacterSummaryModel
-    khyber?: CharacterSummaryModel
-    orien?: CharacterSummaryModel
-    sarlona?: CharacterSummaryModel
-    thelanis?: CharacterSummaryModel
-    wayfinder?: CharacterSummaryModel
-    hardcore?: CharacterSummaryModel
-    cormyr?: CharacterSummaryModel
+    [serverName: string]: CharacterSummaryModel | undefined
 }
 
 interface OnlineCharacterIdsModel {

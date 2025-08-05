@@ -15,6 +15,7 @@ import {
 } from "./lineChartConfig.ts"
 import { dateToLongStringWithTime } from "../../utils/dateUtils.ts"
 import "./Charts.css"
+import { SERVER_NAMES_LOWER } from "../../constants/servers.ts"
 
 interface GenericLineProps {
     nivoData: NivoSeries[]
@@ -60,7 +61,11 @@ const GenericLine = ({
     const getServerColor = createHighlightColorFunction(highlightedSeries)
 
     const filteredData = useMemo(() => {
-        return nivoData.filter((series) => !excludedSeries.includes(series.id))
+        return nivoData.filter(
+            (series) =>
+                !excludedSeries.includes(series.id) &&
+                SERVER_NAMES_LOWER.includes(series.id.toLowerCase())
+        )
     }, [nivoData, excludedSeries])
 
     return (
