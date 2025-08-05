@@ -27,10 +27,10 @@ import NavigationCard from "../global/NavigationCard.tsx"
 import useGetRegisteredCharacters from "../../hooks/useGetRegisteredCharacters.ts"
 import useGetFriends from "../../hooks/useGetFriends.ts"
 import Skeleton from "../global/Skeleton.tsx"
-
 import { AlphaReleasePageMessage } from "../global/CommonMessages.tsx"
 import { BOOLEAN_FLAGS } from "../../utils/localStorage.ts"
 import useBooleanFlag from "../../hooks/useBooleanFlags.ts"
+
 const Who = () => {
     const { registeredCharacters } = useGetRegisteredCharacters()
     const { friends } = useGetFriends()
@@ -109,44 +109,39 @@ const Who = () => {
         const characterCount = serverData?.length || 0
         const friendCount =
             serverData?.filter((id: number) =>
-                friends.find((character) => character.id === id)
+                friends?.find((character) => character.id === id)
             )?.length || 0
+        const areFriendsOnline = friendCount > 0
         const areRegisteredCharactersOnline = serverData?.some((id: number) =>
             registeredCharacters?.some((character) => character.id === id)
         )
 
-        const mainContent = (
-            <span className="orange-text">
-                {characterCount} {pluralize("character", characterCount)}
-            </span>
-        )
-        const registeredContent = areRegisteredCharactersOnline && (
-            <>
-                <span> | </span>
-                <span className="blue-text">You</span>
-            </>
-        )
-        const friendsContent = friendCount > 0 && (
-            <>
-                <span> | </span>
-                <span
-                    style={{
-                        whiteSpace: "nowrap",
-                        overflow: "hidden",
-                    }}
-                    className="green-text"
-                >
-                    {friendCount} {pluralize("friend", friendCount)}
-                </span>
-            </>
-        )
-
         return (
-            <>
-                {mainContent}
-                {registeredContent}
-                {friendsContent}
-            </>
+            <span>
+                <span className="orange-text">
+                    {characterCount} {pluralize("character", characterCount)}
+                </span>
+                {areRegisteredCharactersOnline && (
+                    <span>
+                        {" | "}
+                        <span className="blue-text">You</span>
+                    </span>
+                )}
+                {areFriendsOnline && (
+                    <span>
+                        {" | "}
+                        <span
+                            style={{
+                                whiteSpace: "nowrap",
+                                overflow: "hidden",
+                            }}
+                            className="green-text"
+                        >
+                            {friendCount} {pluralize("friend", friendCount)}
+                        </span>
+                    </span>
+                )}
+            </span>
         )
     }
 
@@ -172,63 +167,25 @@ const Who = () => {
     }
 
     const getServerSelectContent = (type: "32bit" | "64bit") => {
-        if (isInitialLoading()) {
-            const serverList = serverInfoData
-                ? Object.keys(serverInfoData)
-                : SERVER_NAMES_LOWER
+        const allServerNames = [...SERVER_NAMES_LOWER].sort((a, b) =>
+            a.localeCompare(b)
+        )
 
-            return serverList
-                .filter((serverName) => {
-                    if (type === "32bit") {
-                        return (
-                            SERVERS_64_BITS_LOWER.includes(serverName) === false
-                        )
-                    } else if (type === "64bit") {
-                        return (
-                            SERVERS_64_BITS_LOWER.includes(serverName) === true
-                        )
-                    }
-                    return true
-                })
-                .sort((serverNameA, serverNameB) =>
-                    serverNameA.localeCompare(serverNameB)
-                )
-                .map((serverName) => (
-                    <ServerNavigationCard
-                        key={serverName}
-                        destination={`/who/${serverName}`}
-                        title={toSentenceCase(serverName)}
-                        content={
-                            <Skeleton
-                                width={`${120 + (serverName.length % 3) * 20}px`}
-                            />
-                        }
-                        icon={
-                            serverInfoData ? (
-                                cardIcon(serverName)
-                            ) : (
-                                <Pending className="shrinkable-icon" />
-                            )
-                        }
-                        badge={cardBadge(serverName)}
-                    />
-                ))
-        }
+        const filteredServerNames = allServerNames.filter((serverName) => {
+            if (type === "32bit") {
+                return SERVERS_64_BITS_LOWER.includes(serverName) === false
+            } else if (type === "64bit") {
+                return SERVERS_64_BITS_LOWER.includes(serverName) === true
+            }
 
-        return Object.entries(characterIdsData?.data || fauxData)
-            ?.filter(([serverName]) => SERVER_NAMES_LOWER.includes(serverName))
-            ?.filter(([serverName]) => {
-                if (type === "32bit") {
-                    return SERVERS_64_BITS_LOWER.includes(serverName) === false
-                } else if (type === "64bit") {
-                    return SERVERS_64_BITS_LOWER.includes(serverName) === true
-                }
-                return true
-            })
-            ?.sort(([server_name_a], [server_name_b]) =>
-                server_name_a.localeCompare(server_name_b)
-            )
-            ?.map(([serverName, serverData]) => (
+            return true
+        })
+
+        return filteredServerNames.map((serverName) => {
+            const serverData =
+                characterIdsData?.data?.[serverName] ?? fauxData[serverName]
+
+            return (
                 <ServerNavigationCard
                     key={serverName}
                     destination={`/who/${serverName}`}
@@ -237,7 +194,8 @@ const Who = () => {
                     icon={cardIcon(serverName)}
                     badge={cardBadge(serverName)}
                 />
-            ))
+            )
+        })
     }
 
     const [hideAlphaRelease, setHideAlphaRelease] = useBooleanFlag(
