@@ -98,7 +98,7 @@ const WhoContainer = ({
         [serverInfoData, serverInfoState, isServerOffline]
     )
 
-    var handleScreenshot = function () {
+    const handleScreenshot = () => {
         const canvas = document.getElementById(
             "who-canvas"
         ) as HTMLCanvasElement
@@ -106,12 +106,20 @@ const WhoContainer = ({
             console.error("Canvas with id 'who-canvas' not found.")
             return
         }
-        const dataUrl = canvas.toDataURL("image/png")
-        const link = document.createElement("a")
-        link.href = dataUrl
-        link.download = `${serverName}-who-screenshot.png`
-        document.body.appendChild(link)
-        link.click()
+        canvas.toBlob((blob) => {
+            if (!blob) {
+                console.error("Failed to create blob from canvas.")
+                return
+            }
+            const url = URL.createObjectURL(blob)
+            const link = document.createElement("a")
+            link.href = url
+            link.download = `${serverName}-who-screenshot.png`
+            document.body.appendChild(link)
+            link.click()
+            document.body.removeChild(link)
+            URL.revokeObjectURL(url)
+        }, "image/png")
     }
 
     // TODO: move this to a utility function

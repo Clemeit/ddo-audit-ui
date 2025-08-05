@@ -134,7 +134,7 @@ const GroupingContainer = ({
         })()
     }, [trackedCharacterIds, registeredCharacters, serverName])
 
-    var handleScreenshot = function () {
+    const handleScreenshot = () => {
         const canvas = document.getElementById(
             "lfm-canvas"
         ) as HTMLCanvasElement
@@ -142,12 +142,20 @@ const GroupingContainer = ({
             console.error("Canvas with id 'lfm-canvas' not found.")
             return
         }
-        const dataUrl = canvas.toDataURL("image/png")
-        const link = document.createElement("a")
-        link.href = dataUrl
-        link.download = `${serverName}-lfm-screenshot.png`
-        document.body.appendChild(link)
-        link.click()
+        canvas.toBlob((blob) => {
+            if (!blob) {
+                console.error("Failed to create blob from canvas.")
+                return
+            }
+            const url = URL.createObjectURL(blob)
+            const link = document.createElement("a")
+            link.href = url
+            link.download = `${serverName}-lfm-screenshot.png`
+            document.body.appendChild(link)
+            link.click()
+            document.body.removeChild(link)
+            URL.revokeObjectURL(url)
+        }, "image/png")
     }
 
     const isServerOffline = useMemo<boolean>(
