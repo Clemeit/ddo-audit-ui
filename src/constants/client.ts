@@ -3,6 +3,7 @@ const CACHED_AREAS_EXPIRY_TIME = 24 * 60 * 60 * 1000 // 1 day
 const CACHED_QUESTS_EXPIRY_TIME = 24 * 60 * 60 * 1000 // 1 day
 const MAX_REGISTERED_CHARACTERS = 20
 const MAX_FRIENDS = 30
+const MAX_LEVENSHTEIN_DISTANCE = 5 // Maximum distance for Levenshtein comparison
 
 const DONATE_LINK =
     "https://www.paypal.com/donate/?hosted_button_id=YWG5SJPYLDQXY"
@@ -38,4 +39,5 @@ export {
     MAX_REGISTERED_CHARACTERS,
     MAX_FRIENDS,
     BETTER_STACK_URL,
+    MAX_LEVENSHTEIN_DISTANCE,
 }

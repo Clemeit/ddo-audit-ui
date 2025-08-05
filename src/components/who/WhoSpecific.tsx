@@ -33,6 +33,7 @@ const WhoSpecific = () => {
                 <ServerValidationMessage
                     serverName={serverName}
                     closestMatch={closestMatch}
+                    pageType="who"
                     backLink={<Link to="/who">the Who page</Link>}
                 />
             )}

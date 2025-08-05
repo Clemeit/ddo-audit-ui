@@ -6,12 +6,14 @@ interface Props {
     serverName: string
     backLink: React.ReactNode
     closestMatch?: string
+    pageType: "grouping" | "who"
 }
 
 const ServerValidationMessage = ({
     serverName,
     closestMatch,
     backLink,
+    pageType,
 }: Props) => {
     return (
         <ContentCluster title="Server Not Found">
@@ -20,7 +22,7 @@ const ServerValidationMessage = ({
                 {closestMatch ? (
                     <span>
                         Did you mean{" "}
-                        <Link to={`/grouping/${closestMatch}`}>
+                        <Link to={`/${pageType}/${closestMatch}`}>
                             {toSentenceCase(closestMatch)}
                         </Link>
                         ?

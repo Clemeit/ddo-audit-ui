@@ -33,6 +33,7 @@ const GroupingSpecific = () => {
                 <ServerValidationMessage
                     serverName={serverName}
                     closestMatch={closestMatch}
+                    pageType="grouping"
                     backLink={<Link to="/grouping">the Grouping page</Link>}
                 />
             )}

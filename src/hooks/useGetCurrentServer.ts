@@ -6,6 +6,7 @@ import {
 } from "../utils/stringUtils.ts"
 import { SERVER_NAMES_LOWER } from "../constants/servers.ts"
 import { useMemo } from "react"
+import { MAX_LEVENSHTEIN_DISTANCE } from "../constants/client.ts"
 
 const useGetCurrentServer = () => {
     const location = useLocation()
@@ -15,8 +16,8 @@ const useGetCurrentServer = () => {
 
     const closestMatch = useMemo(() => {
         if (isValidServer) return serverName.toLowerCase()
-        let closestDistance = 5
-        let closestName: string = undefined
+        let closestDistance = MAX_LEVENSHTEIN_DISTANCE
+        let closestName: string | undefined = undefined
         SERVER_NAMES_LOWER.forEach((name) => {
             const distance = levenshteinDistance(name, serverName.toLowerCase())
             if (distance < closestDistance) {
