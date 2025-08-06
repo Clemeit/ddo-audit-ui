@@ -47,6 +47,7 @@ function postLog(log: LogRequest) {
         headers: {
             "Content-Type": "application/json",
         },
+        noRetry: true,
     })
 }
 

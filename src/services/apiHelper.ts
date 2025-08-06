@@ -20,17 +20,21 @@ const genericRequest = async <T>(
     method: "get" | "post",
     endpoint: string,
     data?: any,
-    options: { signal?: AbortSignal } = {}
+    options: { signal?: AbortSignal; noRetry?: boolean } = {}
 ) => {
-    const { signal, ...restOptions } = options
+    const { signal, noRetry, ...restOptions } = options
     try {
-        const response = await axios({
+        const axiosConfig: any = {
             method,
             url: `${API_URL}/${API_VERSION}/${endpoint}`,
             data,
             ...restOptions,
             signal,
-        })
+        }
+        if (noRetry) {
+            axiosConfig["axios-retry"] = { retries: 0 }
+        }
+        const response = await axios(axiosConfig)
         return response.data as T
     } catch (error) {
         if (!signal?.aborted) {
@@ -51,6 +55,7 @@ export const getRequest = async <T>(
         data?: any
         headers?: any
         params?: any
+        noRetry?: boolean
     } = {}
 ) => {
     return genericRequest<T>("get", endpoint, undefined, options)
@@ -64,6 +69,7 @@ export const postRequest = async <T>(
         data?: any
         headers?: any
         params?: any
+        noRetry?: boolean
     } = {}
 ) => {
     return genericRequest<T>("post", endpoint, options.data, options)
