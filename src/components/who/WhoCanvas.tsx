@@ -7,10 +7,9 @@ import {
     CHARACTER_HEIGHT,
     CLASS_FILTER_GAP,
     FILTER_ZONE_CONTENT_HEIGHT,
-    GROUP_COLORS,
-    MAXIMUM_CHARACTER_COUNT,
+    GROUP_BACKGROUND_COLORS,
+    GROUP_EDGE_COLORS,
     MINIMUM_CHARACTER_COUNT,
-    WHO_COLORS,
 } from "../../constants/whoPanel.ts"
 import LfmSprite from "../../assets/png/lfm_sprite_6.webp"
 import useRenderWhoPanel from "../../hooks/useRenderWhoPanel.ts"
@@ -110,9 +109,6 @@ const WhoCanvas = ({
         setPanelHeight(height)
         return height
     }, [curatedCharacters])
-
-    // const printColor = useRef<string>(GROUP_COLORS[0])
-    // const printColorIndex = useRef<number>(0)
 
     const [image, setImage] = useState<HTMLImageElement | null>(null)
     const mainCanvasRef = useRef<HTMLCanvasElement>(null)
@@ -263,7 +259,8 @@ const WhoCanvas = ({
             lfmHeaderBoundingBox.bottom() + 2
         )
         let colorIndex = 0
-        let currentBackgroundColor = ""
+        let currentBackgroundColor: string | undefined = undefined
+        let currentEdgeColor: string | undefined = undefined
         let currentCharacterGroupIndex = 0
         curatedCharacters.forEach((character, index) => {
             if (isGroupView) {
@@ -275,7 +272,14 @@ const WhoCanvas = ({
                     currentCharacterGroupIndex = 0
                 }
                 currentBackgroundColor =
-                    GROUP_COLORS[colorIndex % GROUP_COLORS.length]
+                    GROUP_BACKGROUND_COLORS[
+                        colorIndex % GROUP_BACKGROUND_COLORS.length
+                    ]
+                currentEdgeColor =
+                    GROUP_EDGE_COLORS[
+                        colorIndex % GROUP_BACKGROUND_COLORS.length
+                    ]
+
                 currentCharacterGroupIndex++
             }
             const shouldRenderCharacter =
@@ -294,6 +298,7 @@ const WhoCanvas = ({
                 renderCharacter({
                     character,
                     backgroundColorOverride: currentBackgroundColor,
+                    edgeColorOverride: currentEdgeColor,
                     characterIndex: currentCharacterGroupIndex,
                 })
                 charactersRendered = true

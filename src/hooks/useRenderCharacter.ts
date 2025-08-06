@@ -21,6 +21,7 @@ interface Props {
 interface RenderCharacterProps {
     character: Character
     backgroundColorOverride?: string
+    edgeColorOverride?: string
     characterIndex?: number
 }
 
@@ -47,6 +48,7 @@ const useRenderCharacter = ({ sprite, context }: Props) => {
     const renderCharacter = ({
         character,
         backgroundColorOverride,
+        edgeColorOverride,
         characterIndex,
     }: RenderCharacterProps) => {
         if (!sprite || !context) return
@@ -54,8 +56,18 @@ const useRenderCharacter = ({ sprite, context }: Props) => {
         const leftBound = lfmHeaderBoundingBox.x
 
         // render the background
-        if (backgroundColorOverride) {
-            context.fillStyle = backgroundColorOverride
+        if (backgroundColorOverride && edgeColorOverride) {
+            const gradient = context.createLinearGradient(
+                0,
+                0,
+                0,
+                CHARACTER_HEIGHT
+            )
+            gradient.addColorStop(0, edgeColorOverride)
+            gradient.addColorStop(0.25, backgroundColorOverride)
+            gradient.addColorStop(0.75, backgroundColorOverride)
+            gradient.addColorStop(1, edgeColorOverride)
+            context.fillStyle = gradient
             context.fillRect(0, 0, filterZone.width, CHARACTER_HEIGHT)
         } else {
             const gradient = context.createLinearGradient(

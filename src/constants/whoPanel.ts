@@ -10,7 +10,7 @@ const DEFAULT_REFRESH_RATE = 3000
 const MINIMUM_REFRESH_RATE = 3000
 const MAXIMUM_REFRESH_RATE = 60000
 
-const GROUP_COLORS = [
+const GROUP_BACKGROUND_COLORS = [
     "#4d3636",
     "#364d3b",
     "#40364d",
@@ -29,6 +29,28 @@ const GROUP_COLORS = [
     "#36464d",
     "#4d3641",
     "#3c4d36",
+]
+
+// Slightly darker versions of the above colors for edges
+const GROUP_EDGE_COLORS = [
+    "#402d2d",
+    "#2d4031",
+    "#352d40",
+    "#40392d",
+    "#2d403d",
+    "#402d3d",
+    "#39402d",
+    "#2d3540",
+    "#402d31",
+    "#2d402d",
+    "#302d40",
+    "#40342d",
+    "#2d4038",
+    "#3d2d40",
+    "#3e402d",
+    "#2d3a40",
+    "#402d36",
+    "#32402d",
 ]
 
 const DEFAULT_BASE_FONT_SIZE = 14
@@ -83,7 +105,8 @@ const WHO_COLORS = {
 
 export {
     DEFAULT_WHO_PANEL_WIDTH,
-    GROUP_COLORS,
+    GROUP_BACKGROUND_COLORS,
+    GROUP_EDGE_COLORS,
     CHARACTER_HEIGHT,
     MINIMUM_CHARACTER_COUNT,
     DEFAULT_CHARACTER_COUNT,
