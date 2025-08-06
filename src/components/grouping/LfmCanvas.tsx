@@ -28,7 +28,6 @@ import {
     TOTAL_LFM_PANEL_BORDER_HEIGHT,
 } from "../../constants/lfmPanel.ts"
 import { SPRITE_MAP } from "../../constants/spriteMap.ts"
-import { useAreaContext } from "../../contexts/AreaContext.tsx"
 
 interface Props {
     serverName: string
@@ -45,11 +44,10 @@ interface SelectedLfmInfo {
 }
 
 const LfmCanvas: React.FC<Props> = ({
-    serverName,
     lfms,
     raidView,
     excludedLfmCount = 0,
-    isLoading = false,
+    isLoading,
 }) => {
     const {
         panelWidth,
@@ -69,8 +67,6 @@ const LfmCanvas: React.FC<Props> = ({
         showNotEligible,
         showEligibilityDividers,
     } = useLfmContext()
-
-    const areaContext = useAreaContext()
 
     // Memoized values
     const commonBoundingBoxes = useMemo(
@@ -98,8 +94,6 @@ const LfmCanvas: React.FC<Props> = ({
     }, [lfms.length, raidView, setPanelHeight])
 
     // State
-    const [selectedLfmInfo, setSelectedLfmInfo] =
-        useState<SelectedLfmInfo | null>(null)
     const [overlayDimensions, setOverlayDimensions] = useState({
         width: 0,
         height: 0,
@@ -107,19 +101,6 @@ const LfmCanvas: React.FC<Props> = ({
     const [previousLfms, setPreviousLfms] = useState<Lfm[]>([])
     const [previousLfmCount, setPreviousLfmCount] = useState(0)
     const lastRenderTimesRef = useRef<Map<string, number>>(new Map())
-    const previousDisplaySettingsRef = useRef({
-        showRaidTimerIndicator,
-        showMemberCount,
-        showQuestGuesses,
-        showQuestTips,
-        showCharacterGuildNames,
-        showLfmPostedTime,
-        fontSize,
-        highlightRaids,
-        raidView,
-        showEligibilityDividers,
-    })
-    const previousAreaContextRef = useRef(areaContext)
 
     // Canvas refs
     const [image, setImage] = useState<HTMLImageElement | null>(null)
@@ -239,7 +220,27 @@ const LfmCanvas: React.FC<Props> = ({
     const lastClickPositionRef = useRef({ x: 0, y: 0 })
     const lastClickTimestampRef = useRef(new Date().getTime())
     const lastClickIndexRef = useRef(-1)
-    const lastClickRenderTypeRef = useRef<RenderType>(null)
+    const lastClickRenderTypeRef = useRef<RenderType | null>(null)
+
+    const [overlayRenderType, setOverlayRenderType] =
+        useState<RenderType | null>(null)
+    const [overlayRenderIndex, setOverlayRenderIndex] = useState<number | null>(
+        null
+    )
+    const [overlayRenderPosition, setOverlayRenderPosition] = useState<{
+        x: number
+        y: number
+    } | null>(null)
+    const overlayData = useMemo<{ lfm: Lfm; type: RenderType } | null>(() => {
+        if (
+            overlayRenderIndex === null ||
+            overlayRenderIndex < 0 ||
+            overlayRenderIndex >= lfms.length
+        ) {
+            return null
+        }
+        return { lfm: lfms[overlayRenderIndex], type: overlayRenderType }
+    }, [lfms, overlayRenderIndex, overlayRenderType])
 
     // Mouse event handlers
     const handleCanvasClick = useCallback(
@@ -331,26 +332,20 @@ const LfmCanvas: React.FC<Props> = ({
                 }
 
                 if (
-                    renderType === RenderType.QUEST &&
-                    !lfms[lfmIndex].quest_id
+                    lfmIndex !== overlayRenderIndex ||
+                    renderType !== overlayRenderType
                 ) {
-                    setSelectedLfmInfo(null)
-                    return
-                }
-
-                if (
-                    !selectedLfmInfo ||
-                    lfmIndex !== selectedLfmInfo.index ||
-                    renderType !== selectedLfmInfo.renderType
-                ) {
-                    setSelectedLfmInfo({
-                        index: lfmIndex,
-                        renderType: renderType,
-                        position: { x, y },
+                    setOverlayRenderPosition({
+                        x,
+                        y,
                     })
                 }
+                setOverlayRenderType(renderType)
+                setOverlayRenderIndex(lfmIndex)
             } else {
-                setSelectedLfmInfo(null)
+                setOverlayRenderType(null)
+                setOverlayRenderIndex(null)
+                setOverlayRenderPosition(null)
             }
         },
         [
@@ -362,13 +357,16 @@ const LfmCanvas: React.FC<Props> = ({
             setSortBy,
             commonBoundingBoxes,
             lfms,
-            selectedLfmInfo,
+            overlayRenderIndex,
+            overlayRenderType,
         ]
     )
 
     const handleCanvasMouseLeave = useCallback(() => {
         if (raidView) return
-        setSelectedLfmInfo(null)
+        setOverlayRenderIndex(null)
+        setOverlayRenderType(null)
+        setOverlayRenderPosition(null)
         if (mouseMoveTimeout.current) {
             clearTimeout(mouseMoveTimeout.current)
         }
@@ -387,55 +385,140 @@ const LfmCanvas: React.FC<Props> = ({
         [raidView, mouseOverDelay, handleCanvasClick]
     )
 
-    // Render the panel when panel-related props change
-    useEffect(() => {
-        if (!image) return
-        renderLfmPanelToCanvas(panelHeight, lfms.length, excludedLfmCount)
-    }, [
+    // Render functions
+    const renderLoadingMessageDeps = useRef([
+        image,
+        isLoading,
+        panelWidth,
+        panelHeight,
+        fonts,
+    ])
+    const renderLoadingMessage = (): boolean => {
+        if (!image || !isLoading) return false
+
+        if (
+            JSON.stringify([
+                image,
+                isLoading,
+                panelWidth,
+                panelHeight,
+                fonts,
+            ]) === JSON.stringify(renderLoadingMessageDeps.current)
+        ) {
+            return false
+        }
+
+        const context = lfmCanvasRef.current?.getContext("2d")
+        if (!context) return false
+
+        context.clearRect(0, 0, panelWidth, panelHeight)
+        context.fillStyle = LFM_COLORS.SECONDARY_TEXT
+        context.font = fonts.MISC_INFO_MESSAGE
+        context.textAlign = "center"
+        context.fillText("Content loading...", panelWidth / 2, 150)
+
+        renderLoadingMessageDeps.current = [
+            image,
+            isLoading,
+            panelWidth,
+            panelHeight,
+            fonts,
+        ]
+        return true
+    }
+
+    const renderLfmPanelDeps = useRef([
         image,
         renderLfmPanelToCanvas,
         panelHeight,
         raidView,
         sortBy,
         isLoading,
-        lfms.length,
         excludedLfmCount,
     ])
-
-    // Memoize current display settings to detect changes
-    const currentDisplaySettings = useMemo(
-        () => ({
-            showRaidTimerIndicator,
-            showMemberCount,
-            showQuestGuesses,
-            showQuestTips,
-            showCharacterGuildNames,
-            showLfmPostedTime,
-            fontSize,
-            highlightRaids,
+    const renderLfmPanel = (): boolean => {
+        if (!image) return false
+        if (
+            JSON.stringify([
+                image,
+                renderLfmPanelToCanvas,
+                panelHeight,
+                raidView,
+                sortBy,
+                isLoading,
+                excludedLfmCount,
+            ]) === JSON.stringify(renderLfmPanelDeps.current)
+        ) {
+            return false
+        }
+        renderLfmPanelToCanvas(panelHeight, lfms.length, excludedLfmCount)
+        renderLfmPanelDeps.current = [
+            image,
+            renderLfmPanelToCanvas,
+            panelHeight,
             raidView,
-            showEligibilityDividers,
-        }),
-        [
-            showRaidTimerIndicator,
-            showMemberCount,
-            showQuestGuesses,
-            showQuestTips,
-            showCharacterGuildNames,
-            showLfmPostedTime,
-            fontSize,
-            highlightRaids,
-            raidView,
-            showEligibilityDividers,
+            sortBy,
+            isLoading,
+            excludedLfmCount,
         ]
-    )
+        return true
+    }
 
-    // Render LFMs when LFM data or display settings change
-    useEffect(() => {
-        if (!image) return
+    const renderLfmsDeps = useRef([
+        image,
+        lfms,
+        renderLfm,
+        panelWidth,
+        panelHeight,
+        previousLfmCount,
+        getLfmKey,
+        doLfmsHaveDifferentEligibleCharacters,
+    ])
+    const displaySettingsDeps = useRef([
+        showRaidTimerIndicator,
+        showMemberCount,
+        showQuestGuesses,
+        showQuestTips,
+        showCharacterGuildNames,
+        showLfmPostedTime,
+        fontSize,
+        highlightRaids,
+        raidView,
+        showEligibilityDividers,
+    ])
+    const renderLfms = (): boolean => {
+        if (!image) return false
+
+        const renderLfmsDepsChanged =
+            JSON.stringify([
+                image,
+                lfms,
+                renderLfm,
+                panelWidth,
+                panelHeight,
+                previousLfmCount,
+                getLfmKey,
+                doLfmsHaveDifferentEligibleCharacters,
+            ]) !== JSON.stringify(renderLfmsDeps.current)
+        const displaySettingsDepsChanged =
+            JSON.stringify([
+                showRaidTimerIndicator,
+                showMemberCount,
+                showQuestGuesses,
+                showQuestTips,
+                showCharacterGuildNames,
+                showLfmPostedTime,
+                fontSize,
+                highlightRaids,
+                raidView,
+                showEligibilityDividers,
+            ]) !== JSON.stringify(displaySettingsDeps.current)
+        if (!renderLfmsDepsChanged && !displaySettingsDepsChanged) {
+            return false
+        }
 
         const lfmContext = lfmCanvasRef.current?.getContext("2d")
-        if (!lfmContext) return
+        if (!lfmContext) return false
 
         // Restore lastRenderTime values from our persistent map
         lfms.forEach((lfm) => {
@@ -449,21 +532,12 @@ const LfmCanvas: React.FC<Props> = ({
             }
         })
 
-        // Check if display settings have changed (requiring full re-render)
-        const displaySettingsChanged =
-            JSON.stringify(currentDisplaySettings) !==
-            JSON.stringify(previousDisplaySettingsRef.current)
-
-        // Check if contexts have changed
-        const areaContextChanged =
-            areaContext !== previousAreaContextRef.current
-
         // Check if we need to render all LFMs
         const shouldRenderAll =
             lfms.length !== previousLfmCount ||
-            displaySettingsChanged ||
-            areaContextChanged ||
+            displaySettingsDepsChanged ||
             previousLfms.length === 0 // First render
+        let renderedCount = 0
 
         if (shouldRenderAll) {
             // Clear entire canvas and render all LFMs
@@ -493,8 +567,6 @@ const LfmCanvas: React.FC<Props> = ({
             lfmContext.restore()
             setPreviousLfms([...lfms])
             setPreviousLfmCount(lfms.length)
-            previousDisplaySettingsRef.current = { ...currentDisplaySettings }
-            previousAreaContextRef.current = areaContext
         } else {
             // Only render LFMs that have changed
             lfmContext.save()
@@ -503,7 +575,6 @@ const LfmCanvas: React.FC<Props> = ({
                 raidView ? 0 : Math.floor(LFM_TOP_PADDING)
             )
 
-            let renderedCount = 0
             lfms.forEach((lfm, index) => {
                 const needsRender =
                     !previousLfms[index] ||
@@ -545,67 +616,79 @@ const LfmCanvas: React.FC<Props> = ({
             lfmContext.restore()
             setPreviousLfms([...lfms])
         }
-    }, [
-        image,
-        lfms,
-        renderLfm,
-        panelWidth,
-        panelHeight,
-        currentDisplaySettings,
-        previousLfmCount,
-        getLfmKey,
-        doLfmsHaveDifferentEligibleCharacters,
-    ])
 
-    // Handle loading state
-    useEffect(() => {
-        if (!image || !isLoading) return
+        renderLfmsDeps.current = [
+            image,
+            lfms,
+            renderLfm,
+            panelWidth,
+            panelHeight,
+            previousLfmCount,
+            getLfmKey,
+            doLfmsHaveDifferentEligibleCharacters,
+        ]
+        displaySettingsDeps.current = [
+            showRaidTimerIndicator,
+            showMemberCount,
+            showQuestGuesses,
+            showQuestTips,
+            showCharacterGuildNames,
+            showLfmPostedTime,
+            fontSize,
+            highlightRaids,
+        ]
 
-        const context = lfmCanvasRef.current?.getContext("2d")
-        if (!context) return
+        return true
+    }
 
-        context.clearRect(0, 0, panelWidth, panelHeight)
-        context.fillStyle = LFM_COLORS.SECONDARY_TEXT
-        context.font = fonts.MISC_INFO_MESSAGE
-        context.textAlign = "center"
-        context.fillText("Content loading...", panelWidth / 2, 150)
-    }, [image, isLoading, panelWidth, panelHeight, fonts])
+    const isOverlayVisible = useRef<boolean>(false)
+    const renderOverlayDeps = useRef([lfms, overlayData])
+    const renderOverlay = (): boolean => {
+        if (!image) return false
 
-    // Handle overlay rendering
-    useEffect(() => {
-        if (!image) return
+        if (
+            JSON.stringify([lfms, overlayData]) ===
+            JSON.stringify(renderOverlayDeps.current)
+        )
+            return false
 
-        if (selectedLfmInfo && selectedLfmInfo.index < lfms.length) {
-            const { index, renderType } = selectedLfmInfo
-            const { width, height } = renderLfmOverlay(lfms[index], renderType)
-            setOverlayDimensions({ width, height })
-        } else {
-            clearOverlay()
-            setOverlayDimensions({ width: 0, height: 0 })
+        const isOverlayDataDefined = overlayData !== null
+        const isValidQuest = overlayData?.lfm?.quest_id !== 0
+        const shouldClearOverlay =
+            !isOverlayDataDefined ||
+            (overlayData.type === RenderType.QUEST && !isValidQuest)
+
+        if (shouldClearOverlay) {
+            if (isOverlayVisible.current === true) {
+                clearOverlay()
+                setOverlayDimensions({ width: 0, height: 0 })
+                isOverlayVisible.current = false
+                renderOverlayDeps.current = [lfms, overlayData]
+                return true
+            }
+            return false
         }
-    }, [image, selectedLfmInfo, lfms, renderLfmOverlay, clearOverlay])
 
-    // Track when we need to re-composite
-    const [needsComposite, setNeedsComposite] = useState(true)
+        // TODO: Figure out how to only render if the LFM changed
+        const { width, height } = renderLfmOverlay(
+            overlayData.lfm,
+            overlayData.type
+        )
+        if (
+            overlayDimensions.width !== width ||
+            overlayDimensions.height !== height
+        ) {
+            setOverlayDimensions({
+                width,
+                height,
+            })
+        }
+        isOverlayVisible.current = true
+        renderOverlayDeps.current = [lfms, overlayData]
+        return true
+    }
 
-    // Trigger composite when any rendering layer changes
-    useEffect(() => {
-        setNeedsComposite(true)
-    }, [
-        image,
-        panelWidth,
-        panelHeight,
-        selectedLfmInfo,
-        overlayDimensions,
-        lfms.length, // Only track length changes
-        isLoading,
-        excludedLfmCount,
-        currentDisplaySettings,
-    ])
-
-    // Composite all canvases to main canvas using the back buffer as an intermediary
-    useEffect(() => {
-        if (!needsComposite) return
+    const renderToScreen = () => {
         const canvasHeight = raidView
             ? LFM_HEIGHT * lfms.length
             : LFM_HEIGHT * Math.max(MINIMUM_LFM_COUNT, lfms.length) +
@@ -627,14 +710,14 @@ const LfmCanvas: React.FC<Props> = ({
         backBufferContext.drawImage(lfmCanvasRef.current, 0, 0)
 
         // Draw overlay if selected
-        if (selectedLfmInfo) {
-            const { position } = selectedLfmInfo
+        if (overlayRenderPosition) {
+            const { x, y } = overlayRenderPosition
             const positionX = Math.max(
-                Math.min(position.x, panelWidth - overlayDimensions.width),
+                Math.min(x, panelWidth - overlayDimensions.width),
                 0
             )
             const positionY = Math.max(
-                Math.min(position.y, panelHeight - overlayDimensions.height),
+                Math.min(y, panelHeight - overlayDimensions.height),
                 0
             )
             backBufferContext.drawImage(
@@ -645,17 +728,58 @@ const LfmCanvas: React.FC<Props> = ({
         }
 
         const mainContext = mainCanvasRef.current?.getContext("2d")
-        mainContext.drawImage(backBufferCanvasRef.current, 0, 0)
         physicalCanvasHeight.current = canvasHeight
+        mainContext.drawImage(backBufferCanvasRef.current, 0, 0)
+    }
 
-        setNeedsComposite(false)
+    // Render trigger
+    useEffect(() => {
+        const renderedLoadingMessage = renderLoadingMessage()
+        const renderedLfmPanel = renderedLoadingMessage
+            ? false
+            : renderLfmPanel()
+        const renderedLfms = renderLfms()
+        const overlayRendered = renderOverlay()
+        if (
+            renderedLoadingMessage ||
+            renderedLfmPanel ||
+            renderedLfms ||
+            overlayRendered
+        ) {
+            renderToScreen()
+            console.log(
+                "Rendered...",
+                `renderedLoadingMessage: ${renderedLoadingMessage}`,
+                `renderedLfmPanel: ${renderedLfmPanel}`,
+                `renderedLfms: ${renderedLfms}`,
+                `overlayRendered: ${overlayRendered}`
+            )
+        }
     }, [
-        needsComposite,
+        isLoading,
         image,
+        lfms,
         panelWidth,
         panelHeight,
-        selectedLfmInfo,
+        displaySettingsDeps,
+        previousLfmCount,
+        showRaidTimerIndicator,
+        showMemberCount,
+        showQuestGuesses,
+        showQuestTips,
+        showCharacterGuildNames,
+        showLfmPostedTime,
+        fontSize,
+        highlightRaids,
+        raidView,
+        showEligibilityDividers,
         overlayDimensions,
+        overlayData,
+        renderLfmOverlay,
+        clearOverlay,
+        renderLfm,
+        getLfmKey,
+        doLfmsHaveDifferentEligibleCharacters,
     ])
 
     return (

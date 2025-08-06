@@ -77,6 +77,7 @@ const calculateCommonBoundingBoxes = (panelWidth: number) => {
 }
 
 function shouldLfmRerender(previous: Lfm, current: Lfm): boolean {
+    if (previous == null || current == null) return true
     if (previous.comment !== current.comment) return true
     if (
         Math.round(previous.adventure_active_time / 60) !==
@@ -91,7 +92,10 @@ function shouldLfmRerender(previous: Lfm, current: Lfm): boolean {
     if (previous.leader.name !== current.leader.name) return true
     if (previous.metadata?.isEligible !== current.metadata?.isEligible)
         return true
-    if (previous.metadata?.raidActivity !== current.metadata?.raidActivity)
+    if (
+        previous.metadata?.raidActivity?.length !==
+        current.metadata?.raidActivity?.length
+    )
         return true
 
     return false
