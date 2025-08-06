@@ -432,7 +432,7 @@ const LfmCanvas: React.FC<Props> = ({
                 sortBy,
                 isLoading,
                 excludedLfmCount,
-            ]) == JSON.stringify(renderLfmPanelDeps.current)
+            ]) === JSON.stringify(renderLfmPanelDeps.current)
         ) {
             return false
         }
