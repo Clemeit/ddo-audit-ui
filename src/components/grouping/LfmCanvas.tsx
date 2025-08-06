@@ -47,7 +47,7 @@ const LfmCanvas: React.FC<Props> = ({
     lfms,
     raidView,
     excludedLfmCount = 0,
-    isLoading = true,
+    isLoading,
 }) => {
     const {
         panelWidth,
