@@ -94,8 +94,6 @@ const LfmCanvas: React.FC<Props> = ({
     }, [lfms.length, raidView, setPanelHeight])
 
     // State
-    const [selectedLfmInfo, setSelectedLfmInfo] =
-        useState<SelectedLfmInfo | null>(null)
     const [overlayDimensions, setOverlayDimensions] = useState({
         width: 0,
         height: 0,
@@ -222,7 +220,27 @@ const LfmCanvas: React.FC<Props> = ({
     const lastClickPositionRef = useRef({ x: 0, y: 0 })
     const lastClickTimestampRef = useRef(new Date().getTime())
     const lastClickIndexRef = useRef(-1)
-    const lastClickRenderTypeRef = useRef<RenderType>(null)
+    const lastClickRenderTypeRef = useRef<RenderType | null>(null)
+
+    const [overlayRenderType, setOverlayRenderType] =
+        useState<RenderType | null>(null)
+    const [overlayRenderIndex, setOverlayRenderIndex] = useState<number | null>(
+        null
+    )
+    const [overlayRenderPosition, setOverlayRenderPosition] = useState<{
+        x: number
+        y: number
+    } | null>(null)
+    const overlayData = useMemo<{ lfm: Lfm; type: RenderType } | null>(() => {
+        if (
+            overlayRenderIndex === null ||
+            overlayRenderIndex < 0 ||
+            overlayRenderIndex >= lfms.length
+        ) {
+            return null
+        }
+        return { lfm: lfms[overlayRenderIndex], type: overlayRenderType }
+    }, [lfms, overlayRenderIndex, overlayRenderType])
 
     // Mouse event handlers
     const handleCanvasClick = useCallback(
@@ -314,26 +332,20 @@ const LfmCanvas: React.FC<Props> = ({
                 }
 
                 if (
-                    renderType === RenderType.QUEST &&
-                    !lfms[lfmIndex].quest_id
+                    lfmIndex !== overlayRenderIndex ||
+                    renderType !== overlayRenderType
                 ) {
-                    setSelectedLfmInfo(null)
-                    return
-                }
-
-                if (
-                    !selectedLfmInfo ||
-                    lfmIndex !== selectedLfmInfo.index ||
-                    renderType !== selectedLfmInfo.renderType
-                ) {
-                    setSelectedLfmInfo({
-                        index: lfmIndex,
-                        renderType: renderType,
-                        position: { x, y },
+                    setOverlayRenderPosition({
+                        x,
+                        y,
                     })
                 }
+                setOverlayRenderType(renderType)
+                setOverlayRenderIndex(lfmIndex)
             } else {
-                setSelectedLfmInfo(null)
+                setOverlayRenderType(null)
+                setOverlayRenderIndex(null)
+                setOverlayRenderPosition(null)
             }
         },
         [
@@ -345,13 +357,16 @@ const LfmCanvas: React.FC<Props> = ({
             setSortBy,
             commonBoundingBoxes,
             lfms,
-            selectedLfmInfo,
+            overlayRenderIndex,
+            overlayRenderType,
         ]
     )
 
     const handleCanvasMouseLeave = useCallback(() => {
         if (raidView) return
-        setSelectedLfmInfo(null)
+        setOverlayRenderIndex(null)
+        setOverlayRenderType(null)
+        setOverlayRenderPosition(null)
         if (mouseMoveTimeout.current) {
             clearTimeout(mouseMoveTimeout.current)
         }
@@ -626,44 +641,50 @@ const LfmCanvas: React.FC<Props> = ({
         return true
     }
 
-    const renderOverlayDeps = useRef([
-        image,
-        selectedLfmInfo,
-        // lfms,
-        renderLfmOverlay,
-        clearOverlay,
-    ])
+    const isOverlayVisible = useRef<boolean>(false)
+    const renderOverlayDeps = useRef([lfms, overlayData])
     const renderOverlay = (): boolean => {
         if (!image) return false
+
         if (
-            JSON.stringify([
-                image,
-                selectedLfmInfo,
-                // lfms,
-                renderLfmOverlay,
-                clearOverlay,
-            ]) === JSON.stringify(renderOverlayDeps.current)
-        ) {
+            JSON.stringify([lfms, overlayData]) ===
+            JSON.stringify(renderOverlayDeps.current)
+        )
+            return false
+
+        const isOverlayDataDefined = overlayData !== null
+        const isValidQuest = overlayData?.lfm?.quest_id !== 0
+        const shouldClearOverlay =
+            !isOverlayDataDefined ||
+            (overlayData.type === RenderType.QUEST && !isValidQuest)
+
+        if (shouldClearOverlay) {
+            if (isOverlayVisible.current === true) {
+                clearOverlay()
+                setOverlayDimensions({ width: 0, height: 0 })
+                isOverlayVisible.current = false
+                renderOverlayDeps.current = [lfms, overlayData]
+                return true
+            }
             return false
         }
 
-        if (selectedLfmInfo && selectedLfmInfo.index < lfms.length) {
-            const { index, renderType } = selectedLfmInfo
-            const { width, height } = renderLfmOverlay(lfms[index], renderType)
-            setOverlayDimensions({ width, height })
-        } else {
-            clearOverlay()
-            setOverlayDimensions({ width: 0, height: 0 })
+        // TODO: Figure out how to only render if the LFM changed
+        const { width, height } = renderLfmOverlay(
+            overlayData.lfm,
+            overlayData.type
+        )
+        if (
+            overlayDimensions.width !== width ||
+            overlayDimensions.height !== height
+        ) {
+            setOverlayDimensions({
+                width,
+                height,
+            })
         }
-
-        renderOverlayDeps.current = [
-            image,
-            selectedLfmInfo,
-            // lfms,
-            renderLfmOverlay,
-            clearOverlay,
-        ]
-
+        isOverlayVisible.current = true
+        renderOverlayDeps.current = [lfms, overlayData]
         return true
     }
 
@@ -689,14 +710,14 @@ const LfmCanvas: React.FC<Props> = ({
         backBufferContext.drawImage(lfmCanvasRef.current, 0, 0)
 
         // Draw overlay if selected
-        if (selectedLfmInfo) {
-            const { position } = selectedLfmInfo
+        if (overlayRenderPosition) {
+            const { x, y } = overlayRenderPosition
             const positionX = Math.max(
-                Math.min(position.x, panelWidth - overlayDimensions.width),
+                Math.min(x, panelWidth - overlayDimensions.width),
                 0
             )
             const positionY = Math.max(
-                Math.min(position.y, panelHeight - overlayDimensions.height),
+                Math.min(y, panelHeight - overlayDimensions.height),
                 0
             )
             backBufferContext.drawImage(
@@ -726,19 +747,18 @@ const LfmCanvas: React.FC<Props> = ({
             overlayRendered
         ) {
             renderToScreen()
-            // console.log(
-            //     "Rendered...",
-            //     `renderedLoadingMessage: ${renderedLoadingMessage}`,
-            //     `renderedLfmPanel: ${renderedLfmPanel}`,
-            //     `renderedLfms: ${renderedLfms}`,
-            //     `overlayRendered: ${overlayRendered}`
-            // )
+            console.log(
+                "Rendered...",
+                `renderedLoadingMessage: ${renderedLoadingMessage}`,
+                `renderedLfmPanel: ${renderedLfmPanel}`,
+                `renderedLfms: ${renderedLfms}`,
+                `overlayRendered: ${overlayRendered}`
+            )
         }
     }, [
         isLoading,
         image,
         lfms,
-        selectedLfmInfo,
         panelWidth,
         panelHeight,
         displaySettingsDeps,
@@ -754,6 +774,7 @@ const LfmCanvas: React.FC<Props> = ({
         raidView,
         showEligibilityDividers,
         overlayDimensions,
+        overlayData,
         renderLfmOverlay,
         clearOverlay,
         renderLfm,
