@@ -747,13 +747,6 @@ const LfmCanvas: React.FC<Props> = ({
             overlayRendered
         ) {
             renderToScreen()
-            console.log(
-                "Rendered...",
-                `renderedLoadingMessage: ${renderedLoadingMessage}`,
-                `renderedLfmPanel: ${renderedLfmPanel}`,
-                `renderedLfms: ${renderedLfms}`,
-                `overlayRendered: ${overlayRendered}`
-            )
         }
     }, [
         isLoading,
