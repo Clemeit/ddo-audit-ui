@@ -20,7 +20,7 @@ const PageMessage = ({
     type = "info",
     title = "Title",
     message = <span>Message</span>,
-    width = "unset",
+    width = "100%",
     maxWidth = "unset",
     onDismiss,
 }: Props) => {

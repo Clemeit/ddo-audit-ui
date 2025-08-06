@@ -348,7 +348,7 @@ const WhoContainer = ({
     ])
 
     return (
-        <>
+        <Stack direction="column">
             {characterState === LoadingState.Haulted && (
                 <LiveDataHaultedPageMessage />
             )}
@@ -393,7 +393,7 @@ const WhoContainer = ({
                     }}
                 />
             )}
-        </>
+        </Stack>
     )
 }
 

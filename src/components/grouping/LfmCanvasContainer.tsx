@@ -406,7 +406,7 @@ const GroupingContainer = ({
     ])
 
     return (
-        <>
+        <Stack direction="column">
             {lfmState === LoadingState.Haulted && (
                 <LiveDataHaultedPageMessage />
             )}
@@ -452,7 +452,7 @@ const GroupingContainer = ({
                     />
                 </Stack>
             )}
-        </>
+        </Stack>
     )
 }
 
