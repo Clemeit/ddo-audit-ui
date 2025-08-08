@@ -33,6 +33,8 @@ import useBooleanFlag from "../../hooks/useBooleanFlags.ts"
 import Badge from "../global/Badge.tsx"
 
 const Live = () => {
+    const errorNotificationShownRef = React.useRef<string | null>(null)
+
     const {
         data: serverInfoData,
         state: serverInfoState,
@@ -60,28 +62,45 @@ const Live = () => {
         (!!serverInfoError &&
             !serverInfoError.message?.includes("CanceledError"))
 
+    const errorMessage = useMemo(
+        () => serverInfoError?.message,
+        [serverInfoError?.message]
+    )
+    const dataErrorMessage = useMemo(() => dataError, [dataError])
+
     // Handle error notifications
     React.useEffect(() => {
         if (hasCriticalError) {
-            try {
-                logMessage("Error fetching data", "error", {
-                    metadata: { error: dataError },
-                })
-                createNotification({
-                    title: "Error fetching data",
-                    message:
-                        "There was an error fetching the data for this page. Please try again later.",
-                    subMessage: dataError,
-                    type: "error",
-                })
-            } catch {}
-        }
-    }, [hasCriticalError, createNotification])
+            const errorKey = `${errorMessage || "unknown"}-${dataErrorMessage || "unknown"}`
 
-    const nivoData = useMemo(
-        () => convertToNivoFormat(populationData24Hours),
-        [populationData24Hours]
-    )
+            // Only show notification if we haven't shown one for this exact error
+            if (errorNotificationShownRef.current !== errorKey) {
+                try {
+                    logMessage("Error fetching data", "error", {
+                        metadata: { error: dataErrorMessage },
+                    })
+                    createNotification({
+                        title: "Error fetching data",
+                        message:
+                            "There was an error fetching the data for this page. Please try again later.",
+                        subMessage: dataErrorMessage,
+                        type: "error",
+                        ttl: 10000,
+                    })
+                    errorNotificationShownRef.current = errorKey
+                } catch {}
+            }
+        } else {
+            errorNotificationShownRef.current = null
+        }
+    }, [hasCriticalError, createNotification, errorMessage, dataErrorMessage])
+
+    const nivoData = useMemo(() => {
+        if (!populationData24Hours || populationData24Hours.length === 0) {
+            return []
+        }
+        return convertToNivoFormat(populationData24Hours)
+    }, [populationData24Hours])
 
     const isDataNormalized = useMemo(() => {
         if (!populationData24Hours || populationData24Hours.length === 0) {
