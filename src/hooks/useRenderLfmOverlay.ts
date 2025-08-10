@@ -582,10 +582,10 @@ const useRenderLfmOverlay = ({ lfmSprite, context }: Props) => {
                                 activityDataText = "Posted"
                                 break
                             case LfmActivityType.MEMBER_JOINED:
-                                activityDataText = `${event.data} joined`
+                                activityDataText = `${event.data || "Anonymous"} joined`
                                 break
                             case LfmActivityType.MEMBER_LEFT:
-                                activityDataText = `${event.data} left`
+                                activityDataText = `${event.data || "Anonymous"} left`
                                 break
                             case LfmActivityType.QUEST:
                                 const eventQuest = quests[event.data || 0]

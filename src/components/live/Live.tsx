@@ -26,7 +26,6 @@ import { findMostPopulatedServer } from "../../utils/gameUtils.ts"
 import { useNotificationContext } from "../../contexts/NotificationContext.tsx"
 import logMessage from "../../utils/logUtils.ts"
 import { ReactComponent as InfoSVG } from "../../assets/svg/info.svg"
-
 import { AlphaReleasePageMessage } from "../global/CommonMessages.tsx"
 import { BOOLEAN_FLAGS } from "../../utils/localStorage.ts"
 import useBooleanFlag from "../../hooks/useBooleanFlags.ts"
