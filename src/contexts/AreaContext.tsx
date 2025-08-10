@@ -9,6 +9,7 @@ import {
 import { getRequest } from "../services/apiHelper.ts"
 import { CACHED_AREAS_EXPIRY_TIME } from "../constants/client.ts"
 import logMessage from "../utils/logUtils.ts"
+import { LocalStorageEntry } from "../models/LocalStorage.ts"
 
 interface AreaContextProps {
     areas: { [key: number]: Area }
@@ -22,22 +23,42 @@ interface Props {
 }
 
 export const AreaProvider = ({ children }: Props) => {
+    const [cachedAreas, setCachedAreas] = useState<{ [key: number]: Area }>({})
     const [areas, setAreas] = useState<{ [key: number]: Area }>({})
 
     const populateAreas = async (fetchFromServer: boolean = false) => {
-        // Get from cache
-        const cachedAreas = getAreasFromLocalStorage()
-        const lastUpdated = new Date(cachedAreas.updatedAt || 0)
-        if (
-            fetchFromServer ||
-            !cachedAreas ||
-            !cachedAreas.data ||
-            !cachedAreas.updatedAt ||
-            new Date().getTime() - lastUpdated.getTime() >
-                CACHED_AREAS_EXPIRY_TIME
-        ) {
-            // Cache is stale
-            try {
+        let cachedAreas: LocalStorageEntry<Area[]>
+        let lastUpdated: Date
+        try {
+            cachedAreas = getAreasFromLocalStorage()
+            lastUpdated = new Date(cachedAreas.updatedAt || 0)
+            const cachedAreasObj = cachedAreas.data.reduce(
+                (acc, quest) => {
+                    acc[quest.id] = quest
+                    return acc
+                },
+                {} as { [key: number]: Area }
+            )
+            setCachedAreas(cachedAreasObj)
+        } catch (error) {
+            logMessage("Error parsing areas from local storage", "error", {
+                metadata: {
+                    error:
+                        error instanceof Error ? error.message : String(error),
+                    stack: error instanceof Error ? error.stack : undefined,
+                },
+            })
+        }
+
+        try {
+            if (
+                fetchFromServer ||
+                !cachedAreas ||
+                !cachedAreas.data ||
+                !cachedAreas.updatedAt ||
+                new Date().getTime() - lastUpdated.getTime() >
+                    CACHED_AREAS_EXPIRY_TIME
+            ) {
                 const result = await getRequest<AreaApiResponse>("areas")
                 const areaObj = result.data.reduce(
                     (acc, area) => {
@@ -48,28 +69,19 @@ export const AreaProvider = ({ children }: Props) => {
                 )
                 setAreas(areaObj)
                 setAreasInLocalStorage(result.data)
-            } catch (error) {
-                setAreas({})
-                logMessage("Error fetching areas", "error", {
-                    metadata: {
-                        error:
-                            error instanceof Error
-                                ? error.message
-                                : String(error),
-                        stack: error instanceof Error ? error.stack : undefined,
-                    },
-                })
             }
-        } else {
-            // Cache OK
-            const areaObj = cachedAreas.data.reduce(
-                (acc, area) => {
-                    acc[area.id] = area
-                    return acc
+        } catch (error) {
+            logMessage("Error fetching areas from server", "error", {
+                metadata: {
+                    error:
+                        error instanceof Error ? error.message : String(error),
+                    stack: error instanceof Error ? error.stack : undefined,
+                    cachedQuests: {
+                        length: cachedAreas?.data?.length,
+                        lastupdated: lastUpdated,
+                    },
                 },
-                {} as { [key: number]: Area }
-            )
-            setAreas(areaObj)
+            })
         }
     }
 
@@ -77,7 +89,10 @@ export const AreaProvider = ({ children }: Props) => {
         populateAreas()
     }, [])
 
-    const areasMemoized = React.useMemo(() => ({ areas }), [areas])
+    const areasMemoized = React.useMemo(() => {
+        if (Object.keys(areas).length > 0) return { areas: areas }
+        return { areas: cachedAreas }
+    }, [areas, cachedAreas])
 
     return (
         <AreaContext.Provider
