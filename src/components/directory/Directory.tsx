@@ -34,11 +34,7 @@ const Directory = () => {
                 <ContentCluster title="Population and Activity">
                     <NavCardCluster>
                         <NavigationCard type="live" />
-                        <NavigationCard
-                            type="servers"
-                            badge={<Badge text="Soon" type="soon" />}
-                            disabled
-                        />
+                        <NavigationCard type="servers" />
                         <NavigationCard
                             type="quests"
                             badge={<Badge text="Soon" type="soon" />}

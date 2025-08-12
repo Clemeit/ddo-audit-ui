@@ -39,7 +39,6 @@ const NavMenu = () => {
             <Link
                 to="/servers"
                 className={`nav-item hide-on-small-mobile ${location.pathname.startsWith("/servers") ? "active" : ""}`}
-                disabled
             >
                 <ServersSVG className="nav-icon" />
                 <span>Servers</span>

@@ -1,6 +1,9 @@
-import React from "react"
+import React, { useCallback, useMemo } from "react"
 import Page from "../global/Page.tsx"
-import { ContentCluster } from "../global/ContentCluster.tsx"
+import {
+    ContentCluster,
+    ContentClusterGroup,
+} from "../global/ContentCluster.tsx"
 import NavCardCluster from "../global/NavCardCluster.tsx"
 import ServerNavigationCard from "../global/ServerNavigationCard.tsx"
 // import useGetLiveData from "../../hooks/useGetLiveData.ts"
@@ -11,60 +14,60 @@ import { ReactComponent as Checkmark } from "../../assets/svg/checkmark.svg"
 import { ReactComponent as X } from "../../assets/svg/x.svg"
 import { ReactComponent as Pending } from "../../assets/svg/pending.svg"
 import { WIPPageMessage } from "../global/CommonMessages.tsx"
+import useServersData from "./useServersData.tsx"
+import { ServerInfoApiDataModel } from "../../models/Game.ts"
+import Skeleton from "../global/Skeleton.tsx"
+import ColoredText from "../global/ColoredText.tsx"
+import Stack from "../global/Stack.tsx"
+import NavigationCard from "../global/NavigationCard.tsx"
+import Badge from "../global/Badge.tsx"
 
 const Servers = () => {
-    // const { serverInfo } = useGetLiveData()
-    // // TODO: Needs to be a call to get unique character and guild counts
+    const { isLoading, isError, serverInfo, uniqueData } = useServersData()
 
-    // const cardIcon = (serverName: string) => {
-    //     const isOnline = serverInfo.data?.[serverName]?.is_online
-    //     if (isOnline === true) {
-    //         return <Checkmark className="shrinkable-icon" />
-    //     } else if (isOnline === false) {
-    //         return <X className="shrinkable-icon" />
-    //     } else {
-    //         return <Pending className="shrinkable-icon" />
-    //     }
-    // }
+    const getIconForCard = (
+        serverName: string,
+        serverInfo: ServerInfoApiDataModel
+    ) => {
+        if (serverInfo === undefined || serverInfo[serverName] === undefined)
+            return <Pending />
 
-    // const getServerSelectContent = () => {
-    //     if (
-    //         serverInfo.loadingState === LoadingState.Initial ||
-    //         serverInfo.loadingState === LoadingState.Loading
-    //     ) {
-    //         return SERVER_NAMES_LOWER.sort(([serverNameA], [serverNameB]) =>
-    //             serverNameA.localeCompare(serverNameB)
-    //         ).map((serverName) => (
-    //             <ServerNavigationCard
-    //                 key={serverName}
-    //                 destination={`/grouping/${serverName}`}
-    //                 title={toSentenceCase(serverName)}
-    //                 content="Loading data..."
-    //                 icon={<Pending className="shrinkable-icon" />}
-    //             />
-    //         ))
-    //     }
+        switch (serverInfo[serverName].is_online) {
+            case true:
+                return <Checkmark />
+            case false:
+                return <X />
+        }
+    }
 
-    //     return SERVER_NAMES_LOWER.sort(([serverNameA], [serverNameB]) =>
-    //         serverNameA.localeCompare(serverNameB)
-    //     ).map((serverName) => (
-    //         <ServerNavigationCard
-    //             key={serverName}
-    //             destination={`/servers/${serverName}`}
-    //             title={toSentenceCase(serverName)}
-    //             content={
-    //                 <>
-    //                     <span className="orange-text">
-    //                         48,194 unique characters
-    //                     </span>
-    //                     <br />
-    //                     <span className="blue-text">8,109 unique guilds</span>
-    //                 </>
-    //             }
-    //             icon={cardIcon(serverName)}
-    //         />
-    //     ))
-    // }
+    const getContentForCard = (serverName: string, uniqueData: any) => {
+        if (uniqueData === undefined || serverInfo[serverName] === undefined)
+            return (
+                <Skeleton width={`${120 + (serverName.length % 3) * 20}px`} />
+            )
+
+        return (
+            <Stack direction="column" gap="4px">
+                <ColoredText color="blue">1234 characaters</ColoredText>
+                <ColoredText color="orange">123 guilds</ColoredText>
+            </Stack>
+        )
+    }
+
+    const serverSelectContent = useMemo(() => {
+        const serverNamesSorted = [...SERVER_NAMES_LOWER].sort(
+            (serverNameA, serverNameB) => serverNameA.localeCompare(serverNameB)
+        )
+
+        return serverNamesSorted.map((serverName) => (
+            <ServerNavigationCard
+                title={toSentenceCase(serverName)}
+                destination={`/servers/${serverName}`}
+                icon={getIconForCard(serverName, serverInfo)}
+                content={getContentForCard(serverName, uniqueData)}
+            />
+        ))
+    }, [isLoading, isError, serverInfo])
 
     return (
         <Page
@@ -73,9 +76,24 @@ const Servers = () => {
             logo="/icons/servers-192px.png"
         >
             <WIPPageMessage />
-            <ContentCluster title="Select a Server">
-                {/* <NavCardCluster>{getServerSelectContent()}</NavCardCluster> */}
-            </ContentCluster>
+            <ContentClusterGroup>
+                <ContentCluster title="Select a Server">
+                    <NavCardCluster>{serverSelectContent}</NavCardCluster>
+                </ContentCluster>
+                <ContentCluster title="Server Population Distribution"></ContentCluster>
+                <ContentCluster title="Race Distribution"></ContentCluster>
+                <ContentCluster title="Primary Class Distribution"></ContentCluster>
+                <ContentCluster title="See Also...">
+                    <NavCardCluster>
+                        <NavigationCard type="live" />
+                        <NavigationCard
+                            type="trends"
+                            disabled
+                            badge={<Badge text="Soon" type="soon" />}
+                        />
+                    </NavCardCluster>
+                </ContentCluster>
+            </ContentClusterGroup>
         </Page>
     )
 }

@@ -253,11 +253,7 @@ const Live = () => {
                 </ContentCluster>
                 <ContentCluster title="See Also...">
                     <NavCardCluster>
-                        <NavigationCard
-                            type="servers"
-                            disabled
-                            badge={<Badge text="Soon" type="soon" />}
-                        />
+                        <NavigationCard type="servers" />
                         <NavigationCard
                             type="trends"
                             disabled
