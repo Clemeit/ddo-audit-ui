@@ -2,7 +2,7 @@ import React from "react"
 import Stack from "../global/Stack.tsx"
 import { dateToLongStringWithTime } from "../../utils/dateUtils.ts"
 import { toSentenceCase } from "../../utils/stringUtils.ts"
-import { SliceData, Point } from "@nivo/line"
+import { SliceData } from "@nivo/line"
 import { NivoSeries } from "../../utils/nivoUtils.ts"
 
 interface LineChartTooltipProps {

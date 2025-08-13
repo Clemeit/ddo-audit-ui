@@ -1,6 +1,12 @@
 
-.chart-container{ 
+.line-container{ 
     width: 100%;
     height: 400px;
+    margin: 0 auto;
+}
+
+.pie-container {
+    width: 100%;
+    height: 500px;
     margin: 0 auto;
 }

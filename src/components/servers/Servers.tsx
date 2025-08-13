@@ -1,73 +1,55 @@
-import React, { useCallback, useMemo } from "react"
 import Page from "../global/Page.tsx"
 import {
     ContentCluster,
     ContentClusterGroup,
 } from "../global/ContentCluster.tsx"
 import NavCardCluster from "../global/NavCardCluster.tsx"
-import ServerNavigationCard from "../global/ServerNavigationCard.tsx"
-// import useGetLiveData from "../../hooks/useGetLiveData.ts"
-import { SERVER_NAMES_LOWER } from "../../constants/servers.ts"
-import { LoadingState } from "../../models/Api.ts"
-import { toSentenceCase } from "../../utils/stringUtils.ts"
-import { ReactComponent as Checkmark } from "../../assets/svg/checkmark.svg"
-import { ReactComponent as X } from "../../assets/svg/x.svg"
-import { ReactComponent as Pending } from "../../assets/svg/pending.svg"
 import { WIPPageMessage } from "../global/CommonMessages.tsx"
 import useServersData from "./useServersData.tsx"
-import { ServerInfoApiDataModel } from "../../models/Game.ts"
-import Skeleton from "../global/Skeleton.tsx"
-import ColoredText from "../global/ColoredText.tsx"
-import Stack from "../global/Stack.tsx"
 import NavigationCard from "../global/NavigationCard.tsx"
 import Badge from "../global/Badge.tsx"
+import ServerSelectContent from "./ServerSelectContent.tsx"
+import ServerPopulationDistribution from "./ServerPopulationDistribution.tsx"
+import { useState } from "react"
+import { RangeEnum } from "../../models/Population.ts"
+import Button from "../global/Button.tsx"
+import ColoredText from "../global/ColoredText.tsx"
+import Spacer from "../global/Spacer.tsx"
 
 const Servers = () => {
-    const { isLoading, isError, serverInfo, uniqueData } = useServersData()
-
-    const getIconForCard = (
-        serverName: string,
-        serverInfo: ServerInfoApiDataModel
-    ) => {
-        if (serverInfo === undefined || serverInfo[serverName] === undefined)
-            return <Pending />
-
-        switch (serverInfo[serverName].is_online) {
-            case true:
-                return <Checkmark />
-            case false:
-                return <X />
-        }
-    }
-
-    const getContentForCard = (serverName: string, uniqueData: any) => {
-        if (uniqueData === undefined || serverInfo[serverName] === undefined)
-            return (
-                <Skeleton width={`${120 + (serverName.length % 3) * 20}px`} />
-            )
-
-        return (
-            <Stack direction="column" gap="4px">
-                <ColoredText color="blue">1234 characaters</ColoredText>
-                <ColoredText color="orange">123 guilds</ColoredText>
-            </Stack>
-        )
-    }
-
-    const serverSelectContent = useMemo(() => {
-        const serverNamesSorted = [...SERVER_NAMES_LOWER].sort(
-            (serverNameA, serverNameB) => serverNameA.localeCompare(serverNameB)
-        )
-
-        return serverNamesSorted.map((serverName) => (
-            <ServerNavigationCard
-                title={toSentenceCase(serverName)}
-                destination={`/servers/${serverName}`}
-                icon={getIconForCard(serverName, serverInfo)}
-                content={getContentForCard(serverName, uniqueData)}
-            />
-        ))
-    }, [isLoading, isError, serverInfo])
+    const [
+        serverPopulationDistributionRange,
+        setServerPopulationDistributionRange,
+    ] = useState<RangeEnum>(RangeEnum.QUARTER)
+    const [
+        hourlyPopulationDistributionRange,
+        setHourlyPopulationDistributionRange,
+    ] = useState<RangeEnum>(RangeEnum.QUARTER)
+    const [
+        dailyPopulationDistributionRange,
+        setDailyPopulationDistributionRange,
+    ] = useState<RangeEnum>(RangeEnum.QUARTER)
+    const [
+        levelPopulationDistributionRange,
+        setLevelPopulationDistributionRange,
+    ] = useState<RangeEnum>(RangeEnum.QUARTER)
+    const [
+        racePopulationDistributionRange,
+        setRacePopulationDistributionRange,
+    ] = useState<RangeEnum>(RangeEnum.QUARTER)
+    const [
+        primaryClassPopulationDistributionRange,
+        setPrimaryClassPopulationDistributionRange,
+    ] = useState<RangeEnum>(RangeEnum.QUARTER)
+    const { isLoading, isError, serverInfo, uniqueData, averageData } =
+        useServersData({
+            serverPopulationDistributionRange,
+            hourlyPopulationDistributionRange,
+            dailyPopulationDistributionRange,
+            levelPopulationDistributionRange,
+            racePopulationDistributionRange,
+            primaryClassPopulationDistributionRange,
+        })
 
     return (
         <Page
@@ -75,12 +57,47 @@ const Servers = () => {
             description="DDO's server populations, character demographics, content popularity, and long-term trends. Check time zone activity and choose which server is best for you!"
             logo="/icons/servers-192px.png"
         >
-            <WIPPageMessage />
+            {/* <WIPPageMessage /> */}
             <ContentClusterGroup>
                 <ContentCluster title="Select a Server">
-                    <NavCardCluster>{serverSelectContent}</NavCardCluster>
+                    <ServerSelectContent
+                        isLoading={isLoading}
+                        isError={isError}
+                        serverInfo={serverInfo}
+                        uniqueData={uniqueData}
+                    />
+                    <Spacer size="20px" />
+                    <ColoredText color="secondary">
+                        Unique character and guild numbers are based on the last
+                        quarter.
+                    </ColoredText>
                 </ContentCluster>
-                <ContentCluster title="Server Population Distribution"></ContentCluster>
+                <ContentCluster title="Server Population Distribution">
+                    <p>
+                        Average population per server. Data is for the past
+                        quarter. // TODO: change between month and quarter
+                    </p>
+                    <Button
+                        onClick={() =>
+                            setServerPopulationDistributionRange(RangeEnum.WEEK)
+                        }
+                    >
+                        Show Week Data
+                    </Button>
+                    <Button
+                        onClick={() =>
+                            setServerPopulationDistributionRange(
+                                RangeEnum.QUARTER
+                            )
+                        }
+                    >
+                        Show Quarter Data
+                    </Button>
+                    <ServerPopulationDistribution averageData={averageData} />
+                </ContentCluster>
+                <ContentCluster title="Hourly Population Distribution"></ContentCluster>
+                <ContentCluster title="Daily Population Distribution"></ContentCluster>
+                <ContentCluster title="Level Distribution"></ContentCluster>
                 <ContentCluster title="Race Distribution"></ContentCluster>
                 <ContentCluster title="Primary Class Distribution"></ContentCluster>
                 <ContentCluster title="See Also...">

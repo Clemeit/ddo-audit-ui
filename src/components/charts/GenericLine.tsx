@@ -70,7 +70,7 @@ const GenericLine = ({
 
     return (
         <Stack direction="column" gap="10px">
-            <div className="chart-container">
+            <div className="line-container">
                 <ResponsiveLine
                     data={filteredData}
                     margin={margin}

@@ -3,6 +3,7 @@ import {
     PopulationTotalsEndpointResponse,
     UniquePopulationEndpointResponse,
 } from "../models/Game.ts"
+import { AveragePopulationEndpointSchema } from "../models/Population.ts"
 
 import { getRequest } from "./apiHelper.ts"
 
@@ -98,6 +99,24 @@ function getUniquePopulation1Quarter(
     )
 }
 
+function getAveragePopulationWeek(
+    signal?: AbortSignal
+): Promise<AveragePopulationEndpointSchema> {
+    return getRequest<AveragePopulationEndpointSchema>(
+        `${POPULATION_ENDPOINT}/average/week`,
+        { signal }
+    )
+}
+
+function getAveragePopulationQuarter(
+    signal?: AbortSignal
+): Promise<AveragePopulationEndpointSchema> {
+    return getRequest<AveragePopulationEndpointSchema>(
+        `${POPULATION_ENDPOINT}/average/quarter`,
+        { signal }
+    )
+}
+
 export {
     getPopulationData1Day,
     getPopulationData1Week,
@@ -109,4 +128,6 @@ export {
     getTotalPopulation1Quarter,
     getUniquePopulation1Month,
     getUniquePopulation1Quarter,
+    getAveragePopulationWeek,
+    getAveragePopulationQuarter,
 }
