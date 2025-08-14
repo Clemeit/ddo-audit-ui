@@ -247,7 +247,7 @@ const Live = () => {
                         yFormatter={(value: number) =>
                             isDataNormalized
                                 ? `${Math.round(value * 100).toString()}% of max`
-                                : value.toString()
+                                : value.toLocaleString()
                         }
                         showTotalInTooltip
                     />

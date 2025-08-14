@@ -110,7 +110,7 @@ const LineChartTooltip: React.FC<LineChartTooltipProps> = ({
                         <hr style={{ margin: "4px 0 4px 0" }} />
                         <Stack justify="space-between" align="center">
                             <span>Total</span>
-                            <span>{total}</span>
+                            <span>{yFormatter(total)}</span>
                         </Stack>
                     </>
                 )}
