@@ -28,10 +28,28 @@ interface AveragePopulationEndpointSchema {
     data: AveragePopulationData
 }
 
+interface PopulationByHourData {
+    [serverName: string]: {
+        [hour: string]: number | null
+    }
+}
+
+interface PopulationByHourEndpointSchema {
+    data: PopulationByHourData
+}
+
 export enum RangeEnum {
+    DAY = "day",
     WEEK = "week",
     MONTH = "month",
     QUARTER = "quarter",
+    YEAR = "year",
+}
+
+export enum ServerFilterEnum {
+    ALL = "All",
+    ONLY_64_BIT = "Only 64-Bit",
+    ONLY_32_BIT = "Only 32-Bit",
 }
 
 export type {
@@ -41,4 +59,6 @@ export type {
     ServerUniqueData,
     AveragePopulationEndpointSchema,
     AveragePopulationData,
+    PopulationByHourEndpointSchema,
+    PopulationByHourData,
 }

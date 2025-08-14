@@ -3,7 +3,10 @@ import {
     PopulationTotalsEndpointResponse,
     UniquePopulationEndpointResponse,
 } from "../models/Game.ts"
-import { AveragePopulationEndpointSchema } from "../models/Population.ts"
+import {
+    AveragePopulationEndpointSchema,
+    PopulationByHourEndpointSchema,
+} from "../models/Population.ts"
 
 import { getRequest } from "./apiHelper.ts"
 
@@ -99,6 +102,15 @@ function getUniquePopulation1Quarter(
     )
 }
 
+function getAveragePopulationDay(
+    signal?: AbortSignal
+): Promise<AveragePopulationEndpointSchema> {
+    return getRequest<AveragePopulationEndpointSchema>(
+        `${POPULATION_ENDPOINT}/average/day`,
+        { signal }
+    )
+}
+
 function getAveragePopulationWeek(
     signal?: AbortSignal
 ): Promise<AveragePopulationEndpointSchema> {
@@ -108,11 +120,74 @@ function getAveragePopulationWeek(
     )
 }
 
+function getAveragePopulationMonth(
+    signal?: AbortSignal
+): Promise<AveragePopulationEndpointSchema> {
+    return getRequest<AveragePopulationEndpointSchema>(
+        `${POPULATION_ENDPOINT}/average/month`,
+        { signal }
+    )
+}
+
 function getAveragePopulationQuarter(
     signal?: AbortSignal
 ): Promise<AveragePopulationEndpointSchema> {
     return getRequest<AveragePopulationEndpointSchema>(
         `${POPULATION_ENDPOINT}/average/quarter`,
+        { signal }
+    )
+}
+
+function getAveragePopulationYear(
+    signal?: AbortSignal
+): Promise<AveragePopulationEndpointSchema> {
+    return getRequest<AveragePopulationEndpointSchema>(
+        `${POPULATION_ENDPOINT}/average/year`,
+        { signal }
+    )
+}
+
+function getPopulationByHourForDay(
+    signal?: AbortSignal
+): Promise<PopulationByHourEndpointSchema> {
+    return getRequest<PopulationByHourEndpointSchema>(
+        `${POPULATION_ENDPOINT}/by-hour/day`,
+        { signal }
+    )
+}
+
+function getPopulationByHourForWeek(
+    signal?: AbortSignal
+): Promise<PopulationByHourEndpointSchema> {
+    return getRequest<PopulationByHourEndpointSchema>(
+        `${POPULATION_ENDPOINT}/by-hour/week`,
+        { signal }
+    )
+}
+
+function getPopulationByHourForMonth(
+    signal?: AbortSignal
+): Promise<PopulationByHourEndpointSchema> {
+    return getRequest<PopulationByHourEndpointSchema>(
+        `${POPULATION_ENDPOINT}/by-hour/month`,
+        { signal }
+    )
+}
+
+function getPopulationByHourForQuarter(
+    signal?: AbortSignal
+): Promise<PopulationByHourEndpointSchema> {
+    return getRequest<PopulationByHourEndpointSchema>(
+        `${POPULATION_ENDPOINT}/by-hour/quarter`,
+        { signal }
+    )
+}
+
+function getPopulationByHourForYear(
+    signal?: AbortSignal
+): Promise<PopulationByHourEndpointSchema> {
+    return getRequest<PopulationByHourEndpointSchema>(
+        `${POPULATION_ENDPOINT}/by-hour/year`,
         { signal }
     )
 }
@@ -128,6 +203,14 @@ export {
     getTotalPopulation1Quarter,
     getUniquePopulation1Month,
     getUniquePopulation1Quarter,
+    getAveragePopulationDay,
     getAveragePopulationWeek,
+    getAveragePopulationMonth,
     getAveragePopulationQuarter,
+    getAveragePopulationYear,
+    getPopulationByHourForDay,
+    getPopulationByHourForWeek,
+    getPopulationByHourForMonth,
+    getPopulationByHourForQuarter,
+    getPopulationByHourForYear,
 }

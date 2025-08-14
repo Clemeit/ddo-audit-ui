@@ -23,7 +23,7 @@ interface GenericLineProps {
     xScale?: any
     axisBottom?: any
     margin?: any
-    dateFormatter?: (date: Date) => string
+    tooltipTitleFormatter?: (data: any) => string
     yFormatter?: (value: number) => string
     spotlightSeries?: string[]
 }
@@ -34,7 +34,7 @@ const GenericLine = ({
     xScale = LINE_CHART_X_SCALE,
     axisBottom = LINE_CHART_AXIS_BOTTOM,
     margin = LINE_CHART_MARGIN,
-    dateFormatter = (date: Date) => dateToLongStringWithTime(date),
+    tooltipTitleFormatter = (data: any) => dateToLongStringWithTime(data),
     yFormatter = (value: number) => value.toString(),
     spotlightSeries = [],
 }: GenericLineProps) => {
@@ -89,7 +89,7 @@ const GenericLine = ({
                         <LineChartTooltip
                             slice={slice}
                             getServerColor={getServerColor}
-                            dateFormatter={dateFormatter}
+                            tooltipTitleFormatter={tooltipTitleFormatter}
                             yFormatter={yFormatter}
                         />
                     )}

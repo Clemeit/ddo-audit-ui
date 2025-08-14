@@ -2,29 +2,36 @@ import { useEffect, useMemo, useRef, useState } from "react"
 import GenericPie from "../charts/GenericPie"
 import {
     convertAveragePopulationDataToNivoFormat,
+    convertByHourPopulationDataToNivoFormat,
     NivoPieSlice,
+    NivoSeries,
 } from "../../utils/nivoUtils"
 import Stack from "../global/Stack"
 import {
-    AveragePopulationData,
-    AveragePopulationEndpointSchema,
+    PopulationByHourData,
+    PopulationByHourEndpointSchema,
     RangeEnum,
     ServerFilterEnum,
 } from "../../models/Population.ts"
 import {
-    getAveragePopulationWeek,
-    getAveragePopulationQuarter,
-    getAveragePopulationDay,
-    getAveragePopulationMonth,
-    getAveragePopulationYear,
+    getPopulationByHourForDay,
+    getPopulationByHourForWeek,
+    getPopulationByHourForMonth,
+    getPopulationByHourForQuarter,
+    getPopulationByHourForYear,
 } from "../../services/populationService.ts"
 import { toSentenceCase } from "../../utils/stringUtils.ts"
 import {
     SERVERS_64_BITS_LOWER,
     SERVERS_32_BITS_LOWER,
 } from "../../constants/servers"
+import GenericLine from "../charts/GenericLine.tsx"
+import {
+    BY_HOUR_CHART_X_SCALE,
+    BY_HOUR_LINE_CHART_AXIS_BOTTOM,
+} from "../charts/lineChartConfig.ts"
 
-const ServerPopulationDistribution = () => {
+const HourlyPopulationDistribution = () => {
     const [isLoading, setIsLoading] = useState(false)
     const [isError, setIsError] = useState(false)
     const [range, setRange] = useState<RangeEnum>(RangeEnum.QUARTER)
@@ -32,7 +39,7 @@ const ServerPopulationDistribution = () => {
         ServerFilterEnum.ONLY_64_BIT
     )
     const [dataMap, setDataMap] = useState<
-        Partial<Record<RangeEnum, AveragePopulationData | undefined>>
+        Partial<Record<RangeEnum, PopulationByHourData | undefined>>
     >({})
     const lastRange = useRef<RangeEnum | undefined>(range)
 
@@ -46,15 +53,15 @@ const ServerPopulationDistribution = () => {
     const rangeToFetchMap = useMemo(
         () => ({
             [RangeEnum.DAY]: (signal: AbortSignal) =>
-                getAveragePopulationDay(signal),
+                getPopulationByHourForDay(signal),
             [RangeEnum.WEEK]: (signal: AbortSignal) =>
-                getAveragePopulationWeek(signal),
+                getPopulationByHourForWeek(signal),
             [RangeEnum.MONTH]: (signal: AbortSignal) =>
-                getAveragePopulationMonth(signal),
+                getPopulationByHourForMonth(signal),
             [RangeEnum.QUARTER]: (signal: AbortSignal) =>
-                getAveragePopulationQuarter(signal),
+                getPopulationByHourForQuarter(signal),
             [RangeEnum.YEAR]: (signal: AbortSignal) =>
-                getAveragePopulationYear(signal),
+                getPopulationByHourForYear(signal),
         }),
         []
     )
@@ -83,7 +90,7 @@ const ServerPopulationDistribution = () => {
         return () => controller.abort()
     }, [range])
 
-    const nivoData: NivoPieSlice[] = useMemo(() => {
+    const nivoData: NivoSeries[] = useMemo(() => {
         if (!range) return []
         let averageData = dataMap?.[range]
         if (averageData) {
@@ -104,18 +111,19 @@ const ServerPopulationDistribution = () => {
                 )
             )
         }
-        return convertAveragePopulationDataToNivoFormat(averageData)
+        console.log(convertByHourPopulationDataToNivoFormat(averageData))
+        return convertByHourPopulationDataToNivoFormat(averageData)
     }, [range, serverFilter, dataMap])
 
     return (
         <>
             <p>Average population distribution per server.</p>
             <Stack direction="row" gap="10px" align="center">
-                <label htmlFor="serverPopulationDistributionRange">
+                <label htmlFor="hourlyPopulationDistributionRange">
                     Range:
                 </label>
                 <select
-                    id="serverPopulationDistributionRange"
+                    id="hourlyPopulationDistributionRange"
                     value={range}
                     onChange={(e) => setRange(e.target.value as RangeEnum)}
                 >
@@ -127,11 +135,11 @@ const ServerPopulationDistribution = () => {
                 </select>
             </Stack>
             <Stack direction="row" gap="10px" align="center">
-                <label htmlFor="serverPopulationDistributionServerFilter">
+                <label htmlFor="hourlyPopulationDistributionServerFilter">
                     Server filter:
                 </label>
                 <select
-                    id="serverPopulationDistributionServerFilter"
+                    id="hourlyPopulationDistributionServerFilter"
                     value={serverFilter}
                     onChange={(e) =>
                         setServerFilter(e.target.value as ServerFilterEnum)
@@ -144,13 +152,18 @@ const ServerPopulationDistribution = () => {
                     ))}
                 </select>
             </Stack>
-            <GenericPie
+            <GenericLine
                 nivoData={nivoData}
                 showLegend
-                descriptionFormatter={descriptionFormatter}
+                xScale={BY_HOUR_CHART_X_SCALE}
+                axisBottom={BY_HOUR_LINE_CHART_AXIS_BOTTOM}
+                tooltipTitleFormatter={(hour: any) =>
+                    `Average Characters at ${hour}:00`
+                }
+                yFormatter={(value: number) => `${value.toFixed()}`}
             />
         </>
     )
 }
 
-export default ServerPopulationDistribution
+export default HourlyPopulationDistribution

@@ -8,7 +8,7 @@ import { NivoSeries } from "../../utils/nivoUtils.ts"
 interface LineChartTooltipProps {
     slice: SliceData<NivoSeries>
     getServerColor: (serverId: string) => string
-    dateFormatter?: (date: Date) => string
+    tooltipTitleFormatter?: (data: any) => string
     yFormatter?: (value: number) => string
 }
 
@@ -58,7 +58,8 @@ const calculateTooltipPosition = (mouseX: number): string => {
 const LineChartTooltip: React.FC<LineChartTooltipProps> = ({
     slice,
     getServerColor,
-    dateFormatter = dateToLongStringWithTime,
+    tooltipTitleFormatter = (data: any) =>
+        dateToLongStringWithTime(new Date(data)),
     yFormatter = (value: number) => value.toString(),
 }) => {
     const viewportWidth = window.innerWidth
@@ -92,7 +93,7 @@ const LineChartTooltip: React.FC<LineChartTooltipProps> = ({
                     fontWeight: "bold",
                 }}
             >
-                {dateFormatter(new Date(slice.points[0].data.x))}
+                {tooltipTitleFormatter(slice.points[0].data.x)}
                 <hr style={{ margin: "4px 0 10px 0" }} />
             </div>
             <div

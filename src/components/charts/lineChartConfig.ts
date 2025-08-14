@@ -22,6 +22,15 @@ export const LINE_CHART_X_SCALE = {
     precision: "minute" as const,
 }
 
+// x will just be a number representing the hour of the day (0-23)
+export const BY_HOUR_CHART_X_SCALE = {
+    type: "linear" as const,
+    min: 0,
+    max: 23,
+    stacked: false,
+    reverse: false,
+}
+
 export const LINE_CHART_THEME = {
     axis: {
         ticks: {
@@ -54,6 +63,16 @@ export const LINE_CHART_AXIS_BOTTOM = {
     legendOffset: 50,
     format: "%H:%M",
     tickValues: "every 1 hour",
+}
+
+export const BY_HOUR_LINE_CHART_AXIS_BOTTOM = {
+    tickSize: 5,
+    tickPadding: 5,
+    tickRotation: 0,
+    legend: "Hour of Day",
+    legendOffset: 50,
+    format: (value: number) => `${value}:00`,
+    tickValues: Array.from({ length: 24 }, (_, i) => i), // 0 to 23
 }
 
 export const LINE_CHART_DEFAULTS = {

@@ -11,45 +11,35 @@ import Badge from "../global/Badge.tsx"
 import ServerSelectContent from "./ServerSelectContent.tsx"
 import ServerPopulationDistribution from "./ServerPopulationDistribution.tsx"
 import { useState } from "react"
-import { RangeEnum } from "../../models/Population.ts"
+import { RangeEnum, ServerFilterEnum } from "../../models/Population.ts"
 import Button from "../global/Button.tsx"
 import ColoredText from "../global/ColoredText.tsx"
 import Spacer from "../global/Spacer.tsx"
+import Stack from "../global/Stack.tsx"
+import HourlyPopulationDistribution from "./HourlyPopulationDistribution.tsx"
 
 const Servers = () => {
-    const [
-        serverPopulationDistributionRange,
-        setServerPopulationDistributionRange,
-    ] = useState<RangeEnum>(RangeEnum.QUARTER)
-    const [
-        hourlyPopulationDistributionRange,
-        setHourlyPopulationDistributionRange,
-    ] = useState<RangeEnum>(RangeEnum.QUARTER)
-    const [
-        dailyPopulationDistributionRange,
-        setDailyPopulationDistributionRange,
-    ] = useState<RangeEnum>(RangeEnum.QUARTER)
-    const [
-        levelPopulationDistributionRange,
-        setLevelPopulationDistributionRange,
-    ] = useState<RangeEnum>(RangeEnum.QUARTER)
-    const [
-        racePopulationDistributionRange,
-        setRacePopulationDistributionRange,
-    ] = useState<RangeEnum>(RangeEnum.QUARTER)
-    const [
-        primaryClassPopulationDistributionRange,
-        setPrimaryClassPopulationDistributionRange,
-    ] = useState<RangeEnum>(RangeEnum.QUARTER)
-    const { isLoading, isError, serverInfo, uniqueData, averageData } =
-        useServersData({
-            serverPopulationDistributionRange,
-            hourlyPopulationDistributionRange,
-            dailyPopulationDistributionRange,
-            levelPopulationDistributionRange,
-            racePopulationDistributionRange,
-            primaryClassPopulationDistributionRange,
-        })
+    // const [
+    //     hourlyPopulationDistributionRange,
+    //     setHourlyPopulationDistributionRange,
+    // ] = useState<RangeEnum>(RangeEnum.QUARTER)
+    // const [
+    //     dailyPopulationDistributionRange,
+    //     setDailyPopulationDistributionRange,
+    // ] = useState<RangeEnum>(RangeEnum.QUARTER)
+    // const [
+    //     levelPopulationDistributionRange,
+    //     setLevelPopulationDistributionRange,
+    // ] = useState<RangeEnum>(RangeEnum.QUARTER)
+    // const [
+    //     racePopulationDistributionRange,
+    //     setRacePopulationDistributionRange,
+    // ] = useState<RangeEnum>(RangeEnum.QUARTER)
+    // const [
+    //     primaryClassPopulationDistributionRange,
+    //     setPrimaryClassPopulationDistributionRange,
+    // ] = useState<RangeEnum>(RangeEnum.QUARTER)
+    const { isLoading, isError, serverInfo, uniqueData } = useServersData()
 
     return (
         <Page
@@ -73,29 +63,11 @@ const Servers = () => {
                     </ColoredText>
                 </ContentCluster>
                 <ContentCluster title="Server Population Distribution">
-                    <p>
-                        Average population per server. Data is for the past
-                        quarter. // TODO: change between month and quarter
-                    </p>
-                    <Button
-                        onClick={() =>
-                            setServerPopulationDistributionRange(RangeEnum.WEEK)
-                        }
-                    >
-                        Show Week Data
-                    </Button>
-                    <Button
-                        onClick={() =>
-                            setServerPopulationDistributionRange(
-                                RangeEnum.QUARTER
-                            )
-                        }
-                    >
-                        Show Quarter Data
-                    </Button>
-                    <ServerPopulationDistribution averageData={averageData} />
+                    <ServerPopulationDistribution />
                 </ContentCluster>
-                <ContentCluster title="Hourly Population Distribution"></ContentCluster>
+                <ContentCluster title="Hourly Population Distribution">
+                    <HourlyPopulationDistribution />
+                </ContentCluster>
                 <ContentCluster title="Daily Population Distribution"></ContentCluster>
                 <ContentCluster title="Level Distribution"></ContentCluster>
                 <ContentCluster title="Race Distribution"></ContentCluster>

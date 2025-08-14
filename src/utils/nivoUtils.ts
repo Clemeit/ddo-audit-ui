@@ -1,5 +1,9 @@
 import { PopulationPointInTime } from "../models/Game"
-import { AveragePopulationData } from "../models/Population"
+import {
+    AveragePopulationData,
+    PopulationByHourData,
+    PopulationByHourEndpointSchema,
+} from "../models/Population"
 import { toSentenceCase } from "./stringUtils"
 
 export interface NivoSeries {
@@ -59,4 +63,26 @@ function convertAveragePopulationDataToNivoFormat(
     return slices
 }
 
-export { convertToNivoFormat, convertAveragePopulationDataToNivoFormat }
+function convertByHourPopulationDataToNivoFormat(
+    data: PopulationByHourData
+): NivoSeries[] {
+    if (!data || Object.keys(data).length === 0) return []
+    const series: NivoSeries[] = []
+    Object.entries(data).forEach(([serverName, hoursData]) => {
+        const dataPoints = Object.entries(hoursData).map(([hour, count]) => ({
+            x: hour,
+            y: count ?? 0,
+        }))
+        series.push({
+            id: serverName.toLowerCase(),
+            data: dataPoints,
+        })
+    })
+    return series
+}
+
+export {
+    convertToNivoFormat,
+    convertAveragePopulationDataToNivoFormat,
+    convertByHourPopulationDataToNivoFormat,
+}
