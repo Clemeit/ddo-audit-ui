@@ -249,6 +249,7 @@ const Live = () => {
                                 ? `${Math.round(value * 100).toString()}% of max`
                                 : value.toString()
                         }
+                        showTotalInTooltip
                     />
                 </ContentCluster>
                 <ContentCluster title="See Also...">

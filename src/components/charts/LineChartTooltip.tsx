@@ -2,14 +2,16 @@ import React from "react"
 import Stack from "../global/Stack.tsx"
 import { dateToLongStringWithTime } from "../../utils/dateUtils.ts"
 import { toSentenceCase } from "../../utils/stringUtils.ts"
-import { SliceData, Point } from "@nivo/line"
+import { SliceData } from "@nivo/line"
 import { NivoSeries } from "../../utils/nivoUtils.ts"
+import "./LineChartTooltip.css"
 
 interface LineChartTooltipProps {
     slice: SliceData<NivoSeries>
     getServerColor: (serverId: string) => string
     dateFormatter?: (date: Date) => string
     yFormatter?: (value: number) => string
+    showTotal?: boolean
 }
 
 const TOOLTIP_WIDTH = 300
@@ -60,71 +62,58 @@ const LineChartTooltip: React.FC<LineChartTooltipProps> = ({
     getServerColor,
     dateFormatter = dateToLongStringWithTime,
     yFormatter = (value: number) => value.toString(),
+    showTotal = false,
 }) => {
     const viewportWidth = window.innerWidth
     const mouseX = slice.points[0].x
     const transform = calculateTooltipPosition(mouseX)
 
+    const total = slice.points.reduce(
+        (sum, point) => sum + Number(point.data.y ?? 0),
+        0
+    )
+
     return (
         <div
+            className="tooltip-container"
             style={{
-                background: "var(--soft-highlight)",
-                padding: "8px 12px",
-                border: "1px solid var(--border)",
-                borderRadius: "4px",
-                boxShadow: "0 2px 8px rgba(0, 0, 0, 0.15)",
-                color: "var(--text)",
-                fontSize: "14px",
                 maxWidth: `${Math.min(TOOLTIP_WIDTH, viewportWidth - 2 * VIEWPORT_PADDING)}px`,
-                minWidth: "0",
-                width: "fit-content",
-                position: "relative",
                 transform: transform,
-                wordWrap: "break-word",
-                overflow: "hidden",
-                boxSizing: "border-box",
-                whiteSpace: "nowrap",
             }}
         >
-            <div
-                style={{
-                    marginBottom: "4px",
-                    fontWeight: "bold",
-                }}
-            >
+            <div className="tooltip-header">
                 {dateFormatter(new Date(slice.points[0].data.x))}
                 <hr style={{ margin: "4px 0 10px 0" }} />
             </div>
-            <div
-                style={{ display: "flex", flexDirection: "column", gap: "4px" }}
-            >
+            <div className="tooltip-content">
                 {[...slice.points]
                     .sort((a, b) => Number(b.data.y) - Number(a.data.y))
                     .map((point) => (
-                        <div
-                            key={point.id}
-                            style={{
-                                display: "flex",
-                                justifyContent: "space-between",
-                            }}
-                        >
+                        <Stack key={point.id} justify="space-between">
                             <Stack direction="row" gap="5px">
                                 <div
+                                    className="tooltip-series-color"
                                     style={{
                                         backgroundColor: getServerColor(
                                             point.seriesId
                                         ),
-                                        width: "15px",
-                                        height: "15px",
-                                        borderRadius: "50%",
                                     }}
                                     aria-hidden="true"
                                 />
                                 <span>{toSentenceCase(point.seriesId)}</span>
                             </Stack>
                             <span>{yFormatter(Number(point.data.y))}</span>
-                        </div>
+                        </Stack>
                     ))}
+                {showTotal && (
+                    <>
+                        <hr style={{ margin: "4px 0 4px 0" }} />
+                        <Stack justify="space-between" align="center">
+                            <span>Total</span>
+                            <span>{total}</span>
+                        </Stack>
+                    </>
+                )}
             </div>
         </div>
     )
