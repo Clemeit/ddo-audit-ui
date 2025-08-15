@@ -208,7 +208,7 @@ const GroupingContainer = ({
                         (ignoredCharacter) =>
                             lfm.leader?.id === ignoredCharacter.id
                     )
-                    return isLeaderIgnored
+                    return !isLeaderIgnored
                 }
                 if (hideGroupsContainingIgnoredCharacters) {
                     const hasIgnoredMember = lfm.members?.some((lfmMember) =>
@@ -217,7 +217,7 @@ const GroupingContainer = ({
                                 lfmMember.id === ignoredCharacter.id
                         )
                     )
-                    return hasIgnoredMember
+                    return !hasIgnoredMember
                 }
                 if (hideAllLevelGroups) {
                     const lfmMinLevel = lfm.minimum_level
@@ -347,8 +347,8 @@ const GroupingContainer = ({
                         const aHasQuest = lfmA.quest_id !== 0
                         const bHasQuest = lfmB.quest_id !== 0
                         if (!aHasQuest && !bHasQuest) return 0
-                        if (aHasQuest) return sortDirectionModifier
-                        if (bHasQuest) return -sortDirectionModifier
+                        if (!aHasQuest) return sortDirectionModifier
+                        if (!bHasQuest) return -sortDirectionModifier
                         return (
                             questAName.localeCompare(questBName) *
                             sortDirectionModifier
@@ -392,6 +392,8 @@ const GroupingContainer = ({
         quests,
         hideAllLevelGroups,
         onlyShowRaids,
+        hideGroupsPostedByIgnoredCharacters,
+        hideGroupsContainingIgnoredCharacters,
     ])
 
     return (
