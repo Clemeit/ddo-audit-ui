@@ -1,4 +1,4 @@
-import React, {
+import {
     createContext,
     useContext,
     useState,
@@ -16,7 +16,7 @@ import {
     setData as setDataToLocalStorage,
     getData as getDataFromLocalStorage,
 } from "../utils/localStorage.ts"
-import { LfmApiDataModel, LfmSortType } from "../models/Lfm.ts"
+import { LfmApiDataModel, LfmSortSetting, LfmSortType } from "../models/Lfm.ts"
 import { MAX_LEVEL, MIN_LEVEL } from "../constants/game.ts"
 import useGetRegisteredCharacters from "../hooks/useGetRegisteredCharacters.ts"
 import { Character } from "../models/Character.ts"
@@ -44,8 +44,8 @@ interface LfmContextProps {
     setPanelHeight: (size: number) => void
     showBoundingBoxes: boolean
     setShowBoundingBoxes: (show: boolean) => void
-    sortBy: LfmSortType
-    setSortBy: (sort: LfmSortType) => void
+    sortBy: LfmSortSetting
+    setSortBy: (sort: LfmSortSetting) => void
     isDynamicWidth: boolean
     setIsDynamicWidth: (isDynamic: boolean) => void
     showRaidTimerIndicator: boolean
@@ -125,8 +125,8 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
     )
     const [panelHeight, setPanelHeight] = useState<number>(-1)
     const [isDynamicWidth, setIsDynamicWidth] = useState<boolean>(false)
-    const [sortBy, setSortBy] = useState<LfmSortType>({
-        type: "level",
+    const [sortBy, setSortBy] = useState<LfmSortSetting>({
+        type: LfmSortType.LEVEL,
         ascending: true,
     })
     const [mouseOverDelay, setMouseOverDelay] = useState<number>(
@@ -182,7 +182,7 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
     }
 
     const resetDisplaySettings = useCallback(() => {
-        setSortBy({ type: "level", ascending: true })
+        setSortBy({ type: LfmSortType.LEVEL, ascending: true })
         setFontSize(DEFAULT_BASE_FONT_SIZE)
         setMouseOverDelay(DEFAULT_MOUSE_OVER_DELAY)
         setPanelWidth(DEFAULT_LFM_PANEL_WIDTH)
@@ -221,7 +221,7 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
         setShowNotEligible(true)
         setFontSize(DEFAULT_BASE_FONT_SIZE)
         setPanelWidth(DEFAULT_LFM_PANEL_WIDTH)
-        setSortBy({ type: "level", ascending: true })
+        setSortBy({ type: LfmSortType.LEVEL, ascending: true })
         setShowRaidTimerIndicator(true)
         setShowMemberCount(true)
         setShowQuestGuesses(true)
