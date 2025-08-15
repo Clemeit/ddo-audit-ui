@@ -18,7 +18,7 @@ import {
     StaleDataPageMessage,
 } from "../global/CommonMessages.tsx"
 import { getCharacterRaidActivityByIds } from "../../services/activityService.ts"
-import { RaidActivityEvent } from "../../models/Activity.ts"
+import { ActivityEvent, RaidActivityEvent } from "../../models/Activity.ts"
 import useGetFriends from "../../hooks/useGetFriends.ts"
 import useGetIgnores from "../../hooks/useGetIgnores.ts"
 import logMessage from "../../utils/logUtils.ts"
@@ -276,13 +276,25 @@ const GroupingContainer = ({
                 const includesFriend = friendCharacters?.some((friend) =>
                     lfm.members?.some((member) => friend.id === member.id)
                 )
-                const raidActivityForLfm =
-                    raidActivity?.filter(
-                        (activity) =>
-                            activity?.data?.quest_ids?.includes(
-                                lfm?.quest_id
-                            ) || false
-                    ) || []
+                const raidActivityForLfm = raidActivity?.filter(
+                    (activity) =>
+                        activity?.data?.quest_ids?.includes(lfm?.quest_id) ||
+                        false
+                )
+                const activity: ActivityEvent[] = raidActivityForLfm.map(
+                    (activity) => {
+                        const character = registeredCharacters?.find(
+                            (character) =>
+                                character.id === activity.character_id
+                        )
+                        return {
+                            character: character,
+                            character_id: activity.character_id,
+                            timestamp: activity.timestamp,
+                            data: activity.data,
+                        }
+                    }
+                )
 
                 let selectedQuest: Quest | null = null
                 if (lfm.quest_id !== 0) {
@@ -303,7 +315,7 @@ const GroupingContainer = ({
                         eligibleCharacters,
                         isPostedByFriend,
                         includesFriend,
-                        raidActivity: raidActivityForLfm,
+                        raidActivity: activity,
                     },
                 }
             })

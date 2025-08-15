@@ -54,9 +54,7 @@ const useRenderLfmOverlay = ({ lfmSprite, context }: Props) => {
         showLfmActivity,
         showCharacterGuildNames,
         showEligibleCharacters,
-        // fontSize,
-        // showRaidTimerIndicator,
-        // showMemberCount,
+        showRaidTimerIndicator,
         isMultiColumn,
     } = useLfmContext()
     const fonts = useMemo(() => FONTS(14), [])
@@ -89,25 +87,10 @@ const useRenderLfmOverlay = ({ lfmSprite, context }: Props) => {
             let totalOverlayHeight = 100
             let totalOverlayWidth = OVERLAY_WIDTH
             const doubleClickText = "Double-click to open Wiki"
+            const raidActivities = lfm.metadata?.raidActivity || []
 
             if (willWrap)
                 totalOverlayWidth = OVERLAY_WIDTH + OVERLAY_CHARACTER_WIDTH + 3
-
-            let activeTimers: ActivityEvent[] = []
-            if (
-                showEligibleCharacters &&
-                lfm.metadata?.eligibleCharacters?.length > 0
-            ) {
-                activeTimers = lfm.metadata.eligibleCharacters
-                    .map((character) =>
-                        getActiveTimer(
-                            character,
-                            lfm.quest_id,
-                            lfm.metadata?.raidActivity
-                        )
-                    )
-                    .filter(Boolean)
-            }
 
             const {
                 textLines: commentTextLines,
@@ -227,8 +210,9 @@ const useRenderLfmOverlay = ({ lfmSprite, context }: Props) => {
                         doubleClickWidth + 25
                     )
                 }
-                if (activeTimers.length > 0) {
-                    totalOverlayHeight += activeTimers.length * 20 + 28 + 10
+                // Make space for the raid timers
+                if (raidActivities.length > 0) {
+                    totalOverlayHeight += raidActivities.length * 20 + 28 + 10
                 }
             }
 
@@ -707,9 +691,9 @@ const useRenderLfmOverlay = ({ lfmSprite, context }: Props) => {
                 ) {
                     const maximumEligibleCharacters = 5
                     const willOverflow =
-                        lfm.metadata.eligibleCharacters.length >
+                        lfm.metadata?.eligibleCharacters?.length >
                         maximumEligibleCharacters
-                    const totalRaidTimerHeight = activeTimers?.length * 24
+                    const totalRaidTimerHeight = raidActivities?.length * 24
                     const eligibleCharactersHeight =
                         Math.min(
                             maximumEligibleCharacters,
@@ -766,11 +750,11 @@ const useRenderLfmOverlay = ({ lfmSprite, context }: Props) => {
                         .sort((a, b) => a.id - b.id)
                         .sort((a, b) => {
                             // sort by raid timer first, then by name
-                            const aOnTimer = activeTimers?.some(
-                                (timer) => timer.character_id === a.id
+                            const aOnTimer = raidActivities?.some(
+                                (event) => event.character.id === a.id
                             )
-                            const bOnTimer = activeTimers?.some(
-                                (timer) => timer.character_id === b.id
+                            const bOnTimer = raidActivities?.some(
+                                (event) => event.character.id === b.id
                             )
                             if (aOnTimer && !bOnTimer) return -1
                             return 1
@@ -778,8 +762,8 @@ const useRenderLfmOverlay = ({ lfmSprite, context }: Props) => {
                         .slice(0, maximumEligibleCharacters)
                         .forEach((character) => {
                             // if the character is on timer, give them a red background
-                            const hasActiveTimer = activeTimers.some(
-                                (timer) => timer.character_id === character.id
+                            const hasActiveTimer = raidActivities.some(
+                                (event) => event.character.id === character.id
                             )
                             if (hasActiveTimer) {
                                 const redGradient =
@@ -908,15 +892,15 @@ const useRenderLfmOverlay = ({ lfmSprite, context }: Props) => {
                                 // context.stroke()
                                 // context.globalAlpha = 1
 
-                                const mostRecentRelevantTimer = activeTimers
-                                    .sort(
+                                const mostRecentRelevantTimer = raidActivities
+                                    ?.sort(
                                         (a, b) =>
                                             new Date(b.timestamp).getTime() -
                                             new Date(a.timestamp).getTime()
                                     )
                                     .find(
                                         (activity) =>
-                                            activity.character_id ===
+                                            activity.character.id ===
                                             character.id
                                     )
 
@@ -1082,7 +1066,7 @@ const useRenderLfmOverlay = ({ lfmSprite, context }: Props) => {
                         }
                     }
 
-                    if (activeTimers.length > 0) {
+                    if (raidActivities.length > 0) {
                         context.translate(
                             totalOverlayWidth / 2 -
                                 OVERLAY_SIDE_BAR_WIDTH / 2 -
@@ -1096,15 +1080,11 @@ const useRenderLfmOverlay = ({ lfmSprite, context }: Props) => {
                         context.translate(0, 20)
                         context.font = OVERLAY_FONTS.QUEST_INFO
 
-                        activeTimers.forEach((timer) => {
-                            const character =
-                                lfm.metadata?.eligibleCharacters?.find(
-                                    (c) => c.id === timer.character_id
-                                )
-                            if (character) {
+                        raidActivities.forEach((activityEvent) => {
+                            if (activityEvent.character) {
                                 const elapsedTime =
                                     Date.now() -
-                                    new Date(timer.timestamp).getTime()
+                                    new Date(activityEvent.timestamp).getTime()
                                 const remainingTime =
                                     RAID_TIMER_MILLIS - elapsedTime
                                 const remainingTimeString =
@@ -1113,7 +1093,7 @@ const useRenderLfmOverlay = ({ lfmSprite, context }: Props) => {
                                         true
                                     )
                                 context.fillText(
-                                    `${character.name}: ${remainingTimeString}`,
+                                    `${activityEvent.character.name}: ${remainingTimeString}`,
                                     0,
                                     0
                                 )
@@ -1162,6 +1142,7 @@ const useRenderLfmOverlay = ({ lfmSprite, context }: Props) => {
             showEligibleCharacters,
             quests,
             areaContext,
+            showRaidTimerIndicator,
         ]
     )
 

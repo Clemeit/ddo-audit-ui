@@ -1,6 +1,9 @@
+import { Character } from "./Character"
+
 interface ActivityEvent {
     timestamp: string
-    character_id: number
+    character_id?: number
+    character?: Character
     data: any
 }
 
