@@ -118,8 +118,15 @@ interface LfmSpecificApiModel {
     data?: { number: Lfm }
 }
 
-interface LfmSortType {
-    type: string
+enum LfmSortType {
+    LEADER_NAME = "leader_name",
+    QUEST_NAME = "quest_name",
+    ACCEPTED_CLASSES = "accepted_classes",
+    LEVEL = "level",
+}
+
+interface LfmSortSetting {
+    type: LfmSortType
     ascending: boolean
 }
 
@@ -163,11 +170,11 @@ export type {
     Lfm,
     LfmApiServerModel,
     LfmApiDataModel,
-    LfmSortType,
+    LfmSortSetting,
     FlatActivityEvent,
     QuestApiResponse,
     LfmApiModel,
     LfmSpecificApiModel,
 }
 
-export { LfmActivityType, constructUnknownQuest }
+export { LfmActivityType, constructUnknownQuest, LfmSortType }

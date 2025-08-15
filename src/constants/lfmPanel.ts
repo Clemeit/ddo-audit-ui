@@ -1,4 +1,5 @@
 import { BoundingBox } from "../models/Geometry.ts"
+import { LfmSortType } from "../models/Lfm.ts"
 import { SPRITE_MAP } from "./spriteMap.ts"
 
 const DEFAULT_LFM_PANEL_WIDTH = 848
@@ -130,29 +131,29 @@ const OVERLAY_FONTS = {
 }
 
 interface SortHeaderData {
-    type: string
+    type: LfmSortType
     boundingBox: BoundingBox
     displayText: string
 }
 
 const SORT_HEADERS = (commonBoundingBoxes): SortHeaderData[] => [
     {
-        type: "leader",
+        type: LfmSortType.LEADER_NAME,
         boundingBox: commonBoundingBoxes.mainPanelBoundingBox,
         displayText: "Leader Name",
     },
     {
-        type: "quest",
+        type: LfmSortType.QUEST_NAME,
         boundingBox: commonBoundingBoxes.questPanelBoundingBox,
         displayText: "Quest",
     },
     {
-        type: "classes",
+        type: LfmSortType.ACCEPTED_CLASSES,
         boundingBox: commonBoundingBoxes.classPanelBoundingBox,
         displayText: "Classes Needed",
     },
     {
-        type: "level",
+        type: LfmSortType.LEVEL,
         boundingBox: commonBoundingBoxes.levelPanelBoundingBox,
         displayText: "Lvl",
     },
