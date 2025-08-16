@@ -279,6 +279,12 @@ table tbody tr:last-of-type {
     cursor: pointer;
 }
 
+input[type="checkbox"],
+input[type="radio"],
+input[type="range"] {
+    accent-color: var(--blue1); /* or any CSS variable/color you prefer */
+}
+
 .verify-button {
     border-color: var(--orange-text) !important;
 }
