@@ -19,23 +19,13 @@ const GuildSearchTable = ({ guilds, searchQuery, isLoading }: Props) => {
             )
         }
 
-        if ((guilds.length === 0 && !!searchQuery) || !searchQuery) {
+        if (guilds.length === 0) {
             return (
                 <tr>
                     <td className="no-data-row" colSpan={4}>
                         {searchQuery
                             ? `No guilds found for "${searchQuery}"`
                             : "No guilds to display"}
-                    </td>
-                </tr>
-            )
-        }
-
-        if (guilds.length === 0) {
-            return (
-                <tr>
-                    <td className="no-data-row" colSpan={4}>
-                        No guilds to display
                     </td>
                 </tr>
             )
