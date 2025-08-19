@@ -56,7 +56,7 @@ const Activity = () => {
     })
 
     const [areaFilter, setAreaFilter] = useState("")
-    const debouncedAreaFilter = useDebounce(areaFilter, 200)
+    const { debouncedValue: debouncedAreaFilter } = useDebounce(areaFilter, 200)
 
     const {
         data: locationActivity,

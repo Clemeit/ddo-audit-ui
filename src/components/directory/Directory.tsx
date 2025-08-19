@@ -56,6 +56,10 @@ const Directory = () => {
                         <NavigationCard type="grouping" />
                         <NavigationCard type="who" />
                         <NavigationCard
+                            type="guilds"
+                            badge={<Badge text="Beta" type="beta" />}
+                        />
+                        <NavigationCard
                             type="notifications"
                             badge={<Badge text="Soon" type="soon" />}
                             disabled
