@@ -24,6 +24,7 @@ import {
     WhoDataProvider,
     RegistrationDataProvider,
 } from "./contexts/CombinedProviders.tsx"
+import { AreaProvider } from "./contexts/AreaContext.tsx"
 
 // Lazy load uncommon pages
 const Verification = lazy(() =>
@@ -51,6 +52,9 @@ const About = lazy(() =>
 )
 const Ignores = lazy(() =>
     lazyRetry(() => import("./components/ignores/Ignores.tsx"))
+)
+const Guilds = lazy(() =>
+    lazyRetry(() => import("./components/guilds/Guilds.tsx"))
 )
 // const Trends = lazy(() => lazyRetry(() => import("./components/trends/Trends.tsx")))
 // const Quests = lazy(() => lazyRetry(() => import("./components/quests/Quests.tsx")))
@@ -117,6 +121,14 @@ export default createBrowserRouter(
                 }
             />
             {/* <Route path="/trends" element={<Trends />} /> */}
+            <Route
+                path="/guilds"
+                element={
+                    <AreaProvider>
+                        <Guilds />
+                    </AreaProvider>
+                }
+            />
             {/* <Route path="/quests" element={<Quests />} /> */}
             <Route path="/about" element={<About />} />
             <Route path="*" element={<NotFound />} />
