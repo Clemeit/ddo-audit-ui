@@ -34,7 +34,7 @@ const useRenderLfm = ({ lfmSprite, context, raidView = false }: Props) => {
         panelWidth,
         showBoundingBoxes,
         fontSize,
-        // showRaidTimerIndicator,
+        showRaidTimerIndicator,
         showMemberCount,
         showQuestGuesses,
         showQuestTips,
@@ -627,16 +627,8 @@ const useRenderLfm = ({ lfmSprite, context, raidView = false }: Props) => {
 
                 // raid timer icon
                 const showRaidTimerIcon =
-                    lfm.metadata?.eligibleCharacters?.length > 0 &&
-                    lfm.metadata.eligibleCharacters
-                        .map((character) =>
-                            getActiveTimer(
-                                character,
-                                lfm.quest_id,
-                                lfm.metadata?.raidActivity
-                            )
-                        )
-                        .filter(Boolean).length > 0
+                    lfm.metadata?.raidActivity?.length > 0 &&
+                    showRaidTimerIndicator
                 if (showRaidTimerIcon) {
                     context.drawImage(
                         lfmSprite,
@@ -810,7 +802,7 @@ const useRenderLfm = ({ lfmSprite, context, raidView = false }: Props) => {
             showBoundingBoxes,
             commonBoundingBoxes,
             fontSize,
-            // showRaidTimerIndicator,
+            showRaidTimerIndicator,
             showLfmPostedTime,
             showMemberCount,
             showQuestGuesses,

@@ -26,6 +26,7 @@ interface GenericLineProps {
     tooltipTitleFormatter?: (data: any) => string
     yFormatter?: (value: number) => string
     spotlightSeries?: string[]
+    showTotalInTooltip?: boolean
 }
 
 const GenericLine = ({
@@ -37,6 +38,7 @@ const GenericLine = ({
     tooltipTitleFormatter = (data: any) => dateToLongStringWithTime(data),
     yFormatter = (value: number) => value.toString(),
     spotlightSeries = [],
+    showTotalInTooltip = false,
 }: GenericLineProps) => {
     const [excludedSeries, setExcludedSeries] = useState<string[]>([])
     const [highlightedSeries, setHighlightedSeries] =
@@ -91,6 +93,7 @@ const GenericLine = ({
                             getServerColor={getServerColor}
                             tooltipTitleFormatter={tooltipTitleFormatter}
                             yFormatter={yFormatter}
+                            showTotal={showTotalInTooltip}
                         />
                     )}
                     axisBottom={axisBottom}

@@ -3,6 +3,7 @@ import LfmCanvas from "./LfmCanvas.tsx"
 import {
     constructUnknownQuest,
     Lfm,
+    LfmSortType,
     LfmSpecificApiModel,
     Quest,
 } from "../../models/Lfm.ts"
@@ -17,12 +18,13 @@ import {
     StaleDataPageMessage,
 } from "../global/CommonMessages.tsx"
 import { getCharacterRaidActivityByIds } from "../../services/activityService.ts"
-import { RaidActivityEvent } from "../../models/Activity.ts"
+import { ActivityEvent, RaidActivityEvent } from "../../models/Activity.ts"
 import useGetFriends from "../../hooks/useGetFriends.ts"
 import useGetIgnores from "../../hooks/useGetIgnores.ts"
 import logMessage from "../../utils/logUtils.ts"
 import { useQuestContext } from "../../contexts/QuestContext.tsx"
 import Stack from "../global/Stack.tsx"
+import { MAX_LEVEL, MIN_LEVEL } from "../../constants/game.ts"
 
 interface Props {
     serverName: string
@@ -30,6 +32,11 @@ interface Props {
     raidView?: boolean
     isSecondaryPanel?: boolean
     handleClosePanel?: () => void
+}
+
+interface ProcessedLfms {
+    lfms: Lfm[]
+    excludedLfmCount: number
 }
 
 const GroupingContainer = ({
@@ -41,8 +48,8 @@ const GroupingContainer = ({
 }: Props) => {
     const {
         sortBy,
-        minLevel,
-        maxLevel,
+        minLevel: minLevelFilter,
+        maxLevel: maxLevelFilter,
         showNotEligible,
         filterByMyCharacters,
         registeredCharacters,
@@ -53,8 +60,8 @@ const GroupingContainer = ({
         onlyShowRaids,
     } = useLfmContext()
     const [ignoreServerDown, setIgnoreServerDown] = useState<boolean>(false)
-    const { friends } = useGetFriends()
-    const { ignores } = useGetIgnores()
+    const { friends: friendCharacters } = useGetFriends()
+    const { ignores: ignoredCharacters } = useGetIgnores()
     const { quests } = useQuestContext()
 
     const getQuestById = (id: number): Quest => {
@@ -181,11 +188,11 @@ const GroupingContainer = ({
         return serverInfoData?.[serverName]?.character_count || 0
     }, [serverInfoData, serverName])
 
-    // filter and sort the lfms
-    const filteredLfms = useMemo(() => {
+    // filter, sort, and hydrate the lfms
+    const processedLfms: ProcessedLfms = useMemo(() => {
         if (!lfmData?.data)
             return {
-                hydratedLfms: [],
+                lfms: [],
                 excludedLfmCount: 0,
             }
 
@@ -193,216 +200,200 @@ const GroupingContainer = ({
             (lfm) => lfm != null
         )
 
-        // filter out ignored groups
-        const lfmsFilteredByUserSettings = lfms.filter((lfm) => {
-            if (!lfm) return false
-
-            if (hideGroupsPostedByIgnoredCharacters) {
-                const isLeaderIgnored = ignores?.some(
-                    (ignore) => ignore?.id === lfm?.leader?.id
-                )
-                if (isLeaderIgnored) return false
-            }
-            if (hideGroupsContainingIgnoredCharacters) {
-                const hasIgnoredMember = lfm?.members?.some((member) =>
-                    ignores?.some((ignore) => ignore?.id === member?.id)
-                )
-                if (hasIgnoredMember) return false
-            }
-            if (hideAllLevelGroups) {
-                const minLevel = lfm?.minimum_level ?? 0
-                const maxLevel = lfm?.maximum_level ?? 999
-                if (minLevel == 1 && maxLevel == 34) return false
-            }
-            return true
-        })
-
-        // determine eligibility
-        const determinedLfms = lfmsFilteredByUserSettings
+        const processedLfms = lfms
+            .filter((lfm) => {
+                // Filter out ignore groups
+                if (hideGroupsPostedByIgnoredCharacters) {
+                    const isLeaderIgnored = ignoredCharacters?.some(
+                        (ignoredCharacter) =>
+                            lfm.leader?.id === ignoredCharacter.id
+                    )
+                    return !isLeaderIgnored
+                }
+                if (hideGroupsContainingIgnoredCharacters) {
+                    const hasIgnoredMember = lfm.members?.some((lfmMember) =>
+                        ignoredCharacters?.some(
+                            (ignoredCharacter) =>
+                                lfmMember.id === ignoredCharacter.id
+                        )
+                    )
+                    return !hasIgnoredMember
+                }
+                if (hideAllLevelGroups) {
+                    const lfmMinLevel = lfm.minimum_level
+                    const lfmMaxLevel = lfm.maximum_level
+                    if (
+                        lfmMinLevel === MIN_LEVEL &&
+                        lfmMaxLevel === MAX_LEVEL
+                    ) {
+                        return false
+                    }
+                }
+                return true
+            })
             .map((lfm) => {
-                if (!lfm) return null
-
-                let isEligible = true
-
-                // level check
-                if (!filterByMyCharacters) {
-                    if (minLevel && minLevel > (lfm.maximum_level ?? 0)) {
-                        isEligible = false
-                    }
-                    if (maxLevel && maxLevel < (lfm.minimum_level ?? 0)) {
-                        isEligible = false
-                    }
-                } else {
-                    const eligibleCharacters =
-                        registeredCharacters?.filter((character) => {
-                            if (!character) return false
-
-                            return (
-                                character.server_name?.toLowerCase() ===
-                                    serverName?.toLowerCase() &&
-                                (character.total_level ?? 0) >=
-                                    (lfm.minimum_level ?? 0) &&
-                                (character.total_level ?? 0) <=
-                                    (lfm.maximum_level ?? 999) &&
-                                trackedCharacterIds?.includes(character.id) &&
-                                (lfm.accepted_classes?.length === 0 ||
-                                    lfm.accepted_classes?.some(
-                                        (acceptedClass) =>
-                                            character.classes?.some(
-                                                (characterClass) =>
-                                                    characterClass?.name ===
-                                                    acceptedClass
-                                            )
-                                    ))
-                            )
-                        }) || []
-                    isEligible = eligibleCharacters.length > 0
-                    if (eligibleCharacters.length > 0) {
-                        lfm.metadata = {
-                            ...lfm.metadata,
-                            eligibleCharacters: eligibleCharacters,
+                // Hydrate lfms with eligibility, eligible characters, friends, and timers
+                const eligibleCharacters = registeredCharacters?.filter(
+                    (character) => {
+                        if (!trackedCharacterIds.includes(character.id))
+                            return false
+                        if (
+                            character.server_name?.toLowerCase() !==
+                            serverName?.toLowerCase()
+                        )
+                            return false
+                        if ((character.total_level ?? 0) < lfm.minimum_level)
+                            return false
+                        if ((character.total_level ?? 0) > lfm.maximum_level)
+                            return false
+                        if (lfm.accepted_classes?.length !== 0) {
+                            if (
+                                !lfm.accepted_classes.some((acceptedClass) =>
+                                    character.classes?.some(
+                                        (characterClass) =>
+                                            acceptedClass ===
+                                            characterClass?.name
+                                    )
+                                )
+                            ) {
+                                return false
+                            }
                         }
+                        return true
                     }
-                }
-
-                const newLfm: Lfm = {
-                    ...lfm,
-                    metadata: { ...lfm.metadata, isEligible: isEligible },
-                }
-                return newLfm
-            })
-            .filter((lfm) => lfm != null)
-
-        // sort
-        const filteredAndSortedLfms = determinedLfms
-            .filter((lfm) => showNotEligible || lfm?.metadata?.isEligible)
-            .sort((a, b) => {
-                // this sort should take care of the case where the next sort
-                // operataion has ties
-                return (a?.id ?? 0) - (b?.id ?? 0)
-            })
-            .sort((a, b) => {
-                if (sortBy?.type === "leader") {
-                    return sortBy?.ascending
-                        ? (a?.leader?.name || "").localeCompare(
-                              b?.leader?.name || ""
-                          )
-                        : (b?.leader?.name || "").localeCompare(
-                              a?.leader?.name || ""
-                          )
-                } else if (sortBy?.type === "quest") {
-                    const questA = getQuestById(a.quest_id)
-                    const questB = getQuestById(b.quest_id)
-                    const questAName = questA?.name || ""
-                    const questBName = questB?.name || ""
-
-                    // Handle LFMs without quests by placing them at the end
-                    const aHasQuest = !!questA && a?.quest_id !== 0
-                    const bHasQuest = !!questB && b?.quest_id !== 0
-
-                    if (!aHasQuest && !bHasQuest) {
-                        return 0 // Both have no quest, maintain original order
-                    }
-                    if (!aHasQuest) {
-                        return sortBy?.ascending ? 1 : -1 // Place no-quest LFMs at end when ascending, start when descending
-                    }
-                    if (!bHasQuest) {
-                        return sortBy?.ascending ? -1 : 1 // Place no-quest LFMs at end when ascending, start when descending
-                    }
-
-                    // Both have quests, sort by quest name
-                    return sortBy?.ascending
-                        ? questAName.localeCompare(questBName)
-                        : questBName.localeCompare(questAName)
-                } else if (sortBy?.type === "classes") {
-                    return sortBy?.ascending
-                        ? (a?.accepted_classes?.length ?? 0) -
-                              (b?.accepted_classes?.length ?? 0)
-                        : (b?.accepted_classes?.length ?? 0) -
-                              (a?.accepted_classes?.length ?? 0)
-                } else {
-                    // sort by level. First sort by minimum level, then by maximum level
-                    const aMinLevel = a?.minimum_level ?? 0
-                    const aMaxLevel = a?.maximum_level ?? 0
-                    const bMinLevel = b?.minimum_level ?? 0
-                    const bMaxLevel = b?.maximum_level ?? 0
-                    if (aMinLevel !== bMinLevel) {
-                        return sortBy?.ascending
-                            ? aMinLevel - bMinLevel
-                            : bMinLevel - aMinLevel
-                    } else {
-                        return sortBy?.ascending
-                            ? aMaxLevel - bMaxLevel
-                            : bMaxLevel - aMaxLevel
-                    }
-                }
-            })
-
-        const hydratedLfms = filteredAndSortedLfms.map((lfm) => {
-            if (!lfm) return lfm
-
-            // Hydrate with any activity relevant to this LFM
-            const raidActivityForLfm =
-                raidActivity?.filter(
+                )
+                const levelFilterMatch =
+                    (minLevelFilter ?? MIN_LEVEL) <=
+                        (lfm.maximum_level ?? MAX_LEVEL) &&
+                    (maxLevelFilter ?? MAX_LEVEL) >=
+                        (lfm.minimum_level ?? MIN_LEVEL)
+                const isEligible =
+                    (filterByMyCharacters && eligibleCharacters.length > 0) ||
+                    (!filterByMyCharacters && levelFilterMatch)
+                const isPostedByFriend = friendCharacters?.some(
+                    (friend) => friend.id === lfm.leader?.id
+                )
+                const includesFriend = friendCharacters?.some((friend) =>
+                    lfm.members?.some((member) => friend.id === member.id)
+                )
+                const raidActivityForLfm = raidActivity?.filter(
                     (activity) =>
                         activity?.data?.quest_ids?.includes(lfm?.quest_id) ||
                         false
-                ) || []
-            const isPostedByFriend =
-                friends?.some((friend) => friend?.id === lfm?.leader?.id) ||
-                false
-            const includesFriend =
-                isPostedByFriend ||
-                lfm?.members?.some((member) =>
-                    friends?.some((friend) => friend?.id === member?.id)
-                ) ||
-                false
+                )
+                const activity: ActivityEvent[] = raidActivityForLfm.map(
+                    (activity) => {
+                        const character = registeredCharacters?.find(
+                            (character) =>
+                                character.id === activity.character_id
+                        )
+                        return {
+                            character: character,
+                            character_id: activity.character_id,
+                            timestamp: activity.timestamp,
+                            data: activity.data,
+                        }
+                    }
+                )
 
-            lfm.metadata = {
-                ...lfm.metadata,
-                raidActivity: raidActivityForLfm,
-                isPostedByFriend,
-                includesFriend,
-            }
-
-            const quest = getQuestById(lfm.quest_id)
-            if (lfm.quest_id !== 0) {
-                if (quest) {
-                    lfm.quest = quest
-                } else {
-                    lfm.quest = constructUnknownQuest(lfm.quest_id)
+                let selectedQuest: Quest | null = null
+                if (lfm.quest_id !== 0) {
+                    const quest = getQuestById(lfm.quest_id)
+                    if (quest) {
+                        selectedQuest = quest
+                    } else {
+                        selectedQuest = constructUnknownQuest(lfm.quest_id)
+                    }
                 }
-            }
 
-            return lfm
-        })
-
-        const filteredByQuestType = onlyShowRaids
-            ? hydratedLfms.filter((lfm) => lfm.quest?.group_size === "Raid")
-            : hydratedLfms
+                return {
+                    ...lfm,
+                    quest: selectedQuest,
+                    metadata: {
+                        ...lfm.metadata,
+                        isEligible,
+                        eligibleCharacters,
+                        isPostedByFriend,
+                        includesFriend,
+                        raidActivity: activity,
+                    },
+                }
+            })
+            .filter((lfm) => {
+                // Filter out ineligible LFMs
+                if (!showNotEligible && !lfm.metadata?.isEligible) return false
+                if (onlyShowRaids) {
+                    if (lfm.quest?.group_size !== "Raid") return false
+                }
+                return true
+            })
+            .sort((lfmA, lfmB) => {
+                return (lfmA?.id ?? 0) - (lfmB?.id ?? 0)
+            })
+            .sort((lfmA, lfmB) => {
+                const sortDirectionModifier = sortBy?.ascending ? 1 : -1
+                switch (sortBy?.type) {
+                    case LfmSortType.LEADER_NAME:
+                        return (
+                            (lfmA.leader.name ?? "").localeCompare(
+                                lfmB.leader.name ?? ""
+                            ) * sortDirectionModifier
+                        )
+                    case LfmSortType.QUEST_NAME:
+                        const questAName =
+                            getQuestById(lfmA.quest_id)?.name ?? ""
+                        const questBName =
+                            getQuestById(lfmB.quest_id)?.name ?? ""
+                        const aHasQuest = lfmA.quest_id !== 0
+                        const bHasQuest = lfmB.quest_id !== 0
+                        if (!aHasQuest && !bHasQuest) return 0
+                        if (!aHasQuest) return sortDirectionModifier
+                        if (!bHasQuest) return -sortDirectionModifier
+                        return (
+                            questAName.localeCompare(questBName) *
+                            sortDirectionModifier
+                        )
+                    case LfmSortType.ACCEPTED_CLASSES:
+                        return (
+                            ((lfmA.accepted_classes?.length ?? 0) -
+                                (lfmB.accepted_classes?.length ?? 0)) *
+                            sortDirectionModifier
+                        )
+                    default:
+                        if (lfmA.maximum_level === lfmB.maximum_level)
+                            return (
+                                (lfmA.minimum_level - lfmB.minimum_level) *
+                                sortDirectionModifier
+                            )
+                        return (
+                            (lfmA.maximum_level - lfmB.maximum_level) *
+                            sortDirectionModifier
+                        )
+                }
+            })
 
         return {
-            lfms: filteredByQuestType,
-            excludedLfmCount:
-                (lfmsFilteredByUserSettings?.length ?? 0) -
-                (filteredByQuestType?.length ?? 0),
+            lfms: processedLfms,
+            excludedLfmCount: lfms?.length - processedLfms?.length,
         }
     }, [
         lfmData,
         sortBy,
-        minLevel,
+        minLevelFilter,
         showNotEligible,
-        maxLevel,
+        maxLevelFilter,
         serverName,
         filterByMyCharacters,
         registeredCharacters,
         trackedCharacterIds,
         raidActivity,
-        friends,
-        ignores,
+        friendCharacters,
+        ignoredCharacters,
         quests,
         hideAllLevelGroups,
         onlyShowRaids,
+        hideGroupsPostedByIgnoredCharacters,
+        hideGroupsContainingIgnoredCharacters,
     ])
 
     return (
@@ -443,8 +434,8 @@ const GroupingContainer = ({
                     />
                     <LfmCanvas
                         serverName={serverName}
-                        lfms={filteredLfms.lfms || []}
-                        excludedLfmCount={filteredLfms.excludedLfmCount}
+                        lfms={processedLfms.lfms || []}
+                        excludedLfmCount={processedLfms.excludedLfmCount}
                         raidView={raidView}
                         isLoading={
                             lfmState !== LoadingState.Loaded && !hadFirstLoad
