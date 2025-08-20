@@ -34,6 +34,14 @@ const SERVERS_64_BITS_LOWER = Object.freeze(
     SERVERS_64_BITS.map((server) => server.toLowerCase())
 )
 
+const SERVERS_32_BITS: readonly string[] = Object.freeze(
+    SERVER_NAMES.filter((server) => !SERVERS_64_BITS.includes(server))
+)
+
+const SERVERS_32_BITS_LOWER = Object.freeze(
+    SERVERS_32_BITS.map((server) => server.toLowerCase())
+)
+
 const getServerIndex = (serverName: string): number => {
     return SERVER_NAMES_LOWER.indexOf(serverName.toLowerCase())
 }
@@ -45,5 +53,7 @@ export {
     VIP_SERVER_NAMES_LOWER,
     SERVERS_64_BITS,
     SERVERS_64_BITS_LOWER,
+    SERVERS_32_BITS,
+    SERVERS_32_BITS_LOWER,
     getServerIndex,
 }
