@@ -7,6 +7,16 @@ export const LINE_CHART_MARGIN = {
     top: 30,
 }
 
+export const OVER_WEEK_LINE_CHART_MARGIN = {
+    ...LINE_CHART_MARGIN,
+    bottom: 120, // More space for date labels
+}
+
+export const OVER_MONTH_LINE_CHART_MARGIN = {
+    ...LINE_CHART_MARGIN,
+    bottom: 100, // More space for date labels
+}
+
 export const LINE_CHART_Y_SCALE = {
     type: "linear" as const,
     min: 0,
@@ -20,6 +30,16 @@ export const LINE_CHART_X_SCALE = {
     format: "%Y-%m-%dT%H:%M:%SZ",
     useUTC: true,
     precision: "minute" as const,
+}
+
+export const OVER_WEEK_CHART_X_SCALE = {
+    ...LINE_CHART_X_SCALE,
+    precision: "hour" as const,
+}
+
+export const OVER_MONTH_CHART_X_SCALE = {
+    ...LINE_CHART_X_SCALE,
+    precision: "day" as const,
 }
 
 // x will just be a number representing the hour of the day (0-23)
@@ -63,6 +83,20 @@ export const LINE_CHART_AXIS_BOTTOM = {
     legendOffset: 50,
     format: "%H:%M",
     tickValues: "every 1 hour",
+}
+
+export const OVER_WEEK_LINE_CHART_AXIS_BOTTOM = {
+    ...LINE_CHART_AXIS_BOTTOM,
+    legendOffset: 110,
+    format: "%Y-%m-%d %H:%M",
+    tickValues: "every 8 hour",
+}
+
+export const OVER_MONTH_LINE_CHART_AXIS_BOTTOM = {
+    ...LINE_CHART_AXIS_BOTTOM,
+    legendOffset: 80,
+    format: "%Y-%m-%d",
+    tickValues: "every 1 day",
 }
 
 export const BY_HOUR_LINE_CHART_AXIS_BOTTOM = {

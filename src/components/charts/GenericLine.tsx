@@ -13,7 +13,6 @@ import {
     LINE_CHART_AXIS_BOTTOM,
     LINE_CHART_DEFAULTS,
 } from "./lineChartConfig.ts"
-import { dateToLongStringWithTime } from "../../utils/dateUtils.ts"
 import "./Charts.css"
 import { SERVER_NAMES_LOWER } from "../../constants/servers.ts"
 
@@ -27,6 +26,7 @@ interface GenericLineProps {
     yFormatter?: (value: number) => string
     spotlightSeries?: string[]
     showTotalInTooltip?: boolean
+    chartHeight?: string
 }
 
 const GenericLine = ({
@@ -35,10 +35,11 @@ const GenericLine = ({
     xScale = LINE_CHART_X_SCALE,
     axisBottom = LINE_CHART_AXIS_BOTTOM,
     margin = LINE_CHART_MARGIN,
-    tooltipTitleFormatter = (data: any) => dateToLongStringWithTime(data),
+    tooltipTitleFormatter,
     yFormatter = (value: number) => value.toString(),
     spotlightSeries = [],
     showTotalInTooltip = false,
+    chartHeight = "400px",
 }: GenericLineProps) => {
     const [excludedSeries, setExcludedSeries] = useState<string[]>([])
     const [highlightedSeries, setHighlightedSeries] =
@@ -72,7 +73,7 @@ const GenericLine = ({
 
     return (
         <Stack direction="column" gap="10px">
-            <div className="line-container">
+            <div className="line-container" style={{ height: chartHeight }}>
                 <ResponsiveLine
                     data={filteredData}
                     margin={margin}

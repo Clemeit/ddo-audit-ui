@@ -2,7 +2,6 @@ import { PopulationPointInTime } from "../models/Game"
 import {
     AveragePopulationData,
     PopulationByHourData,
-    PopulationByHourEndpointSchema,
 } from "../models/Population"
 import { toSentenceCase } from "./stringUtils"
 
