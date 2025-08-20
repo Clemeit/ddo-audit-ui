@@ -15,8 +15,6 @@ import {
     DataLoadingErrorPageMessage,
     LiveDataHaultedPageMessage,
 } from "../global/CommonMessages.tsx"
-import { convertToNivoFormat } from "../../utils/nivoUtils.ts"
-import GenericLine from "../charts/GenericLine.tsx"
 import NewsCluster from "./NewsCluster.tsx"
 import { MakeASuggestionButton } from "../buttons/Buttons.tsx"
 import FAQSection from "./FAQSection.tsx"
@@ -25,11 +23,11 @@ import { useLiveData } from "./useLiveData.tsx"
 import { findMostPopulatedServer } from "../../utils/gameUtils.ts"
 import { useNotificationContext } from "../../contexts/NotificationContext.tsx"
 import logMessage from "../../utils/logUtils.ts"
-import { ReactComponent as InfoSVG } from "../../assets/svg/info.svg"
 import { AlphaReleasePageMessage } from "../global/CommonMessages.tsx"
 import { BOOLEAN_FLAGS } from "../../utils/localStorage.ts"
 import useBooleanFlag from "../../hooks/useBooleanFlags.ts"
 import Badge from "../global/Badge.tsx"
+import LivePopulationContent from "./LivePopulationContent.tsx"
 
 const Live = () => {
     const errorNotificationShownRef = React.useRef<string | null>(null)
@@ -45,7 +43,6 @@ const Live = () => {
     })
 
     const {
-        populationData24Hours,
         populationTotalsData1Week,
         populationTotalsData1Month,
         news,
@@ -94,25 +91,6 @@ const Live = () => {
         }
     }, [hasCriticalError, createNotification, errorMessage, dataErrorMessage])
 
-    const nivoData = useMemo(() => {
-        if (!populationData24Hours || populationData24Hours.length === 0) {
-            return []
-        }
-        return convertToNivoFormat(populationData24Hours)
-    }, [populationData24Hours])
-
-    const isDataNormalized = useMemo(() => {
-        if (!populationData24Hours || populationData24Hours.length === 0) {
-            return false
-        }
-
-        return populationData24Hours.every((point) =>
-            Object.values(point.data).every(
-                (value) => value.character_count <= 1 && value.lfm_count <= 1
-            )
-        )
-    }, [populationData24Hours])
-
     const mostPopulatedServerThisWeek = useMemo(
         () => findMostPopulatedServer(populationTotalsData1Week),
         [populationTotalsData1Week]
@@ -127,36 +105,6 @@ const Live = () => {
         () => getDefaultServerName(serverInfoData),
         [serverInfoData]
     )
-
-    const livePopulationTitle = useMemo(() => {
-        if (!serverInfoData) return "Loading..."
-
-        let totalPopulation = 0
-        let totalLfmCount = 0
-
-        for (const server of Object.values(serverInfoData)) {
-            totalPopulation += server.character_count || 0
-            totalLfmCount += server.lfm_count || 0
-        }
-
-        const snarkyComment =
-            totalPopulation === 0
-                ? "Maybe they're all anonymous."
-                : "Are you one of them?"
-        return (
-            <>
-                There are currently{" "}
-                <span className="blue-text">
-                    {totalPopulation.toLocaleString()}
-                </span>{" "}
-                characters online and{" "}
-                <span className="orange-text">
-                    {totalLfmCount.toLocaleString()}
-                </span>{" "}
-                LFMs posted. {snarkyComment}
-            </>
-        )
-    }, [serverInfoData])
 
     const [hideAlphaRelease, setHideAlphaRelease] = useBooleanFlag(
         BOOLEAN_FLAGS.hideAlphaRelease
@@ -224,33 +172,7 @@ const Live = () => {
                     />
                 </ContentCluster>
                 <ContentCluster title="Live Population">
-                    <p>{livePopulationTitle}</p>
-                    {isDataNormalized && (
-                        <span>
-                            <InfoSVG
-                                className="page-message-icon"
-                                style={{ fill: `var(--info)` }}
-                            />
-                            Note: Data is normalized to show population trends.
-                            Exact population numbers are not shown.
-                        </span>
-                    )}
-                    <GenericLine
-                        nivoData={nivoData}
-                        showLegend
-                        spotlightSeries={[
-                            "cormyr",
-                            "shadowdale",
-                            "thrane",
-                            "moonsea",
-                        ]}
-                        yFormatter={(value: number) =>
-                            isDataNormalized
-                                ? `${Math.round(value * 100).toString()}% of max`
-                                : value.toLocaleString()
-                        }
-                        showTotalInTooltip
-                    />
+                    <LivePopulationContent serverInfoData={serverInfoData} />
                 </ContentCluster>
                 <ContentCluster title="See Also...">
                     <NavCardCluster>

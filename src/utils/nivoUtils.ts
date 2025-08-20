@@ -1,8 +1,19 @@
 import { PopulationPointInTime } from "../models/Game"
+import {
+    AveragePopulationData,
+    PopulationByHourData,
+} from "../models/Population"
+import { toSentenceCase } from "./stringUtils"
 
 export interface NivoSeries {
     id: string
     data: { x: string; y: number }[]
+}
+
+export interface NivoPieSlice {
+    id: string
+    label: string
+    value: number
 }
 
 function convertToNivoFormat(data: PopulationPointInTime[]): NivoSeries[] {
@@ -36,4 +47,41 @@ function convertToNivoFormat(data: PopulationPointInTime[]): NivoSeries[] {
     return series
 }
 
-export { convertToNivoFormat }
+function convertAveragePopulationDataToNivoFormat(
+    data: AveragePopulationData
+): NivoPieSlice[] {
+    if (!data || Object.keys(data).length === 0) return []
+    const slices: NivoPieSlice[] = []
+    Object.entries(data).forEach(([serverName, serverData]) => {
+        slices.push({
+            id: serverName.toLowerCase(),
+            label: toSentenceCase(serverName),
+            value: Math.round((serverData ?? 0) * 10) / 10,
+        })
+    })
+    return slices
+}
+
+function convertByHourPopulationDataToNivoFormat(
+    data: PopulationByHourData
+): NivoSeries[] {
+    if (!data || Object.keys(data).length === 0) return []
+    const series: NivoSeries[] = []
+    Object.entries(data).forEach(([serverName, hoursData]) => {
+        const dataPoints = Object.entries(hoursData).map(([hour, count]) => ({
+            x: hour,
+            y: count ?? 0,
+        }))
+        series.push({
+            id: serverName.toLowerCase(),
+            data: dataPoints,
+        })
+    })
+    return series
+}
+
+export {
+    convertToNivoFormat,
+    convertAveragePopulationDataToNivoFormat,
+    convertByHourPopulationDataToNivoFormat,
+}
