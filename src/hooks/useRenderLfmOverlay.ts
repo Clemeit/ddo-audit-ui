@@ -387,7 +387,9 @@ const useRenderLfmOverlay = ({ lfmSprite, context }: Props) => {
                         context,
                         1
                     )
-                    const isPlayerInQuest = area?.name === quest?.adventure_area
+                    const isPlayerInQuest =
+                        quest?.adventure_area &&
+                        area?.name === quest?.adventure_area
                     context.fillText(
                         (isPlayerInQuest ? "✓ " : "") +
                             locationTextLines[0] +
