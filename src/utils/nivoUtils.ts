@@ -1,8 +1,10 @@
 import { PopulationPointInTime } from "../models/Game"
 import {
     AveragePopulationData,
+    PopulationByDayOfWeekData,
     PopulationByHourData,
 } from "../models/Population"
+import { numberToDayOfWeek } from "./dateUtils"
 import { toSentenceCase } from "./stringUtils"
 
 export interface NivoSeries {
@@ -14,6 +16,11 @@ export interface NivoPieSlice {
     id: string
     label: string
     value: number
+}
+
+export interface NivoBarSlice {
+    index: string
+    [key: string]: number | string
 }
 
 function convertToNivoFormat(data: PopulationPointInTime[]): NivoSeries[] {
@@ -80,8 +87,26 @@ function convertByHourPopulationDataToNivoFormat(
     return series
 }
 
+function convertByDayOfWeekPopulationDataToNivoFormat(
+    data: PopulationByDayOfWeekData
+): NivoBarSlice[] {
+    if (!data || Object.keys(data).length === 0) return []
+    const slices: NivoBarSlice[] = []
+    const daysOfWeek = [0, 1, 2, 3, 4, 5, 6]
+    daysOfWeek.forEach((dayOfWeek) => {
+        const dayName = numberToDayOfWeek(dayOfWeek)
+        const slice: NivoBarSlice = { index: dayName }
+        Object.entries(data).forEach(([serverName, serverData]) => {
+            slice[serverName.toLowerCase()] = serverData[dayOfWeek] ?? 0
+        })
+        slices.push(slice)
+    })
+    return slices
+}
+
 export {
     convertToNivoFormat,
     convertAveragePopulationDataToNivoFormat,
     convertByHourPopulationDataToNivoFormat,
+    convertByDayOfWeekPopulationDataToNivoFormat,
 }

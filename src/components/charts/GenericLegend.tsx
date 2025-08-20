@@ -1,5 +1,9 @@
 import React, { useMemo } from "react"
-import { NivoPieSlice, NivoSeries } from "../../utils/nivoUtils.ts"
+import {
+    NivoBarSlice,
+    NivoPieSlice,
+    NivoSeries,
+} from "../../utils/nivoUtils.ts"
 import Stack from "../global/Stack.tsx"
 import { getServerColor } from "../../utils/chartUtils.ts"
 import { SERVER_NAMES_LOWER } from "../../constants/servers.ts"
@@ -7,7 +11,7 @@ import { toSentenceCase } from "../../utils/stringUtils.ts"
 import "./GenericLegend.css"
 
 interface GenericLegendProps {
-    nivoData: NivoSeries[] | NivoPieSlice[]
+    nivoData: NivoSeries[] | NivoPieSlice[] | NivoBarSlice[]
     excludedSeries?: string[]
     onItemClick?: (serverId: string) => void
     onItemHover?: (serverId: string | null) => void
@@ -20,19 +24,24 @@ const GenericLegend = ({
     onItemHover,
 }: GenericLegendProps) => {
     const legendItems = useMemo(() => {
+        if (!nivoData || nivoData.length === 0) return []
+
         return SERVER_NAMES_LOWER.map((serverName) => {
             const series = nivoData.find(
-                (s) => s.id.toLowerCase() === serverName
+                (s) => String(s.id).toLowerCase() === serverName
             )
+            console.log("Legend series:", series)
 
             if (!series) return null
 
             return {
+                id: String(series.id),
                 serverName,
                 series,
-                color: getServerColor(series.id),
-                displayName: toSentenceCase(series.id),
-                isExcluded: excludedSeries?.includes(series.id) || false,
+                color: getServerColor(String(series.id)),
+                displayName: toSentenceCase(String(series.id)),
+                isExcluded:
+                    excludedSeries?.includes(String(series.id)) || false,
             }
         }).filter(Boolean)
     }, [nivoData, excludedSeries])
@@ -61,10 +70,8 @@ const GenericLegend = ({
                             key={item.serverName}
                             role="listitem"
                             tabIndex={onItemClick ? 0 : undefined}
-                            onClick={() => handleItemClick(item.series.id)}
-                            onMouseEnter={() =>
-                                handleItemMouseEnter(item.series.id)
-                            }
+                            onClick={() => handleItemClick(item.id)}
+                            onMouseEnter={() => handleItemMouseEnter(item.id)}
                             onMouseLeave={handleItemMouseLeave}
                             onKeyDown={(e) => {
                                 if (
@@ -72,7 +79,7 @@ const GenericLegend = ({
                                     onItemClick
                                 ) {
                                     e.preventDefault()
-                                    handleItemClick(item.series.id)
+                                    handleItemClick(item.id)
                                 }
                             }}
                             aria-label={`${item.displayName} server data`}

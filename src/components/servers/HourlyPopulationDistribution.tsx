@@ -111,7 +111,6 @@ const HourlyPopulationDistribution = () => {
                 )
             )
         }
-        console.log(convertByHourPopulationDataToNivoFormat(averageData))
         return convertByHourPopulationDataToNivoFormat(averageData)
     }, [range, serverFilter, dataMap])
 

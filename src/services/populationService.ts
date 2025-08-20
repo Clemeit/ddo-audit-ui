@@ -6,6 +6,7 @@ import {
 import {
     AveragePopulationEndpointSchema,
     PopulationByHourEndpointSchema,
+    RangeEnum,
 } from "../models/Population.ts"
 
 import { getRequest } from "./apiHelper.ts"
@@ -192,6 +193,16 @@ function getPopulationByHourForYear(
     )
 }
 
+function getPopulationByDayOfWeekForRange(
+    range: RangeEnum = RangeEnum.QUARTER,
+    signal?: AbortSignal
+): Promise<PopulationByHourEndpointSchema> {
+    return getRequest<PopulationByHourEndpointSchema>(
+        `${POPULATION_ENDPOINT}/by-day-of-week/${range}`,
+        { signal }
+    )
+}
+
 export {
     getPopulationData1Day,
     getPopulationData1Week,
@@ -213,4 +224,5 @@ export {
     getPopulationByHourForMonth,
     getPopulationByHourForQuarter,
     getPopulationByHourForYear,
+    getPopulationByDayOfWeekForRange,
 }

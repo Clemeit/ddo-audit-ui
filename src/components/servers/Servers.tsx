@@ -17,6 +17,7 @@ import ColoredText from "../global/ColoredText.tsx"
 import Spacer from "../global/Spacer.tsx"
 import Stack from "../global/Stack.tsx"
 import HourlyPopulationDistribution from "./HourlyPopulationDistribution.tsx"
+import DailyPopulationDistribution from "./DailyPopulationDistribution.tsx"
 
 const Servers = () => {
     // const [
@@ -49,26 +50,38 @@ const Servers = () => {
         >
             {/* <WIPPageMessage /> */}
             <ContentClusterGroup>
-                <ContentCluster title="Select a Server">
-                    <ServerSelectContent
-                        isLoading={isLoading}
-                        isError={isError}
-                        serverInfo={serverInfo}
-                        uniqueData={uniqueData}
-                    />
-                    <Spacer size="20px" />
-                    <ColoredText color="secondary">
-                        Unique character and guild numbers are based on the last
-                        quarter.
-                    </ColoredText>
-                </ContentCluster>
+                <div
+                    style={{
+                        opacity: 0.5,
+                        pointerEvents: "none",
+                    }}
+                >
+                    <ContentCluster
+                        title="Select a Server"
+                        badge={<Badge text="Soon" type="soon" />}
+                    >
+                        <ServerSelectContent
+                            isLoading={isLoading}
+                            isError={isError}
+                            serverInfo={serverInfo}
+                            uniqueData={uniqueData}
+                        />
+                        <Spacer size="20px" />
+                        <ColoredText color="secondary">
+                            Unique character and guild numbers are based on the
+                            last quarter.
+                        </ColoredText>
+                    </ContentCluster>
+                </div>
                 <ContentCluster title="Server Population Distribution">
                     <ServerPopulationDistribution />
                 </ContentCluster>
                 <ContentCluster title="Hourly Population Distribution">
                     <HourlyPopulationDistribution />
                 </ContentCluster>
-                <ContentCluster title="Daily Population Distribution"></ContentCluster>
+                <ContentCluster title="Daily Population Distribution">
+                    <DailyPopulationDistribution />
+                </ContentCluster>
                 <ContentCluster title="Level Distribution"></ContentCluster>
                 <ContentCluster title="Race Distribution"></ContentCluster>
                 <ContentCluster title="Primary Class Distribution"></ContentCluster>

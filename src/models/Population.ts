@@ -38,6 +38,16 @@ interface PopulationByHourEndpointSchema {
     data: PopulationByHourData
 }
 
+interface PopulationByDayOfWeekData {
+    [serverName: string]: {
+        [day: string]: number | null
+    }
+}
+
+interface PopulationByDayOfWeekEndpointSchema {
+    data: PopulationByDayOfWeekData
+}
+
 export enum RangeEnum {
     DAY = "day",
     WEEK = "week",
@@ -61,4 +71,6 @@ export type {
     AveragePopulationData,
     PopulationByHourEndpointSchema,
     PopulationByHourData,
+    PopulationByDayOfWeekEndpointSchema,
+    PopulationByDayOfWeekData,
 }

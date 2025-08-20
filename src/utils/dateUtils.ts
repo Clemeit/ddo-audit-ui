@@ -25,4 +25,17 @@ const dateToLongStringWithTime = (date?: Date): string => {
     })
 }
 
-export { dateToLongString, dateToLongStringWithTime }
+const numberToDayOfWeek = (day: number): string => {
+    const daysOfWeek = [
+        "Sunday",
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+        "Saturday",
+    ]
+    return daysOfWeek[day] || "Unknown"
+}
+
+export { dateToLongString, dateToLongStringWithTime, numberToDayOfWeek }
