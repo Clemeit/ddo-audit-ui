@@ -24,6 +24,8 @@ import RadioButton from "../global/RadioButton.tsx"
 import Spacer from "../global/Spacer.tsx"
 import FeaturedItem from "../global/FeaturedItem.tsx"
 import { MAX_LEVEL } from "../../constants/game.ts"
+import { useQuestContext } from "../../contexts/QuestContext.tsx"
+import { useAreaContext } from "../../contexts/AreaContext.tsx"
 
 interface Props {
     reloadLfms: () => void
@@ -98,6 +100,8 @@ const LfmToolbar = ({
         onlyShowRaids,
         setOnlyShowRaids,
     } = useLfmContext()
+    const { reloadQuests } = useQuestContext()
+    const { reloadAreas } = useAreaContext()
     const { isFullScreen, setIsFullScreen } = useThemeContext()
     const {
         isModalOpen: showSettingsModal,
@@ -542,6 +546,8 @@ const LfmToolbar = ({
             <GenericToolbar
                 serverName={serverName}
                 handleReload={() => {
+                    reloadQuests()
+                    reloadAreas()
                     reloadRegisteredCharacters()
                     reloadLfms()
                 }}
