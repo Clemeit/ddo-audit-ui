@@ -33,16 +33,12 @@ export const LINE_CHART_X_SCALE = {
 }
 
 export const OVER_WEEK_CHART_X_SCALE = {
-    type: "time" as const,
-    format: "%Y-%m-%dT%H:%M:%SZ",
-    useUTC: true,
+    ...LINE_CHART_X_SCALE,
     precision: "hour" as const,
 }
 
 export const OVER_MONTH_CHART_X_SCALE = {
-    type: "time" as const,
-    format: "%Y-%m-%dT%H:%M:%SZ",
-    useUTC: true,
+    ...LINE_CHART_X_SCALE,
     precision: "day" as const,
 }
 

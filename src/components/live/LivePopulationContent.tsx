@@ -1,26 +1,16 @@
-import React, { useEffect, useMemo, useRef, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import {
     PopulationPointInTime,
     ServerInfoApiDataModel,
 } from "../../models/Game.ts"
-import {
-    AveragePopulationData,
-    PopulationByHourData,
-    RangeEnum,
-    ServerFilterEnum,
-} from "../../models/Population.ts"
+import { RangeEnum, ServerFilterEnum } from "../../models/Population.ts"
 import GenericLine from "../charts/GenericLine.tsx"
 import {
     getPopulationData1Day,
     getPopulationData1Month,
-    getPopulationData1Quarter,
     getPopulationData1Week,
 } from "../../services/populationService.ts"
-import {
-    convertByHourPopulationDataToNivoFormat,
-    convertToNivoFormat,
-    NivoSeries,
-} from "../../utils/nivoUtils.ts"
+import { convertToNivoFormat, NivoSeries } from "../../utils/nivoUtils.ts"
 import {
     SERVERS_32_BITS_LOWER,
     SERVERS_64_BITS_LOWER,
@@ -28,7 +18,6 @@ import {
 import Stack from "../global/Stack.tsx"
 import { toSentenceCase } from "../../utils/stringUtils.ts"
 import {
-    BY_HOUR_CHART_X_SCALE,
     LINE_CHART_AXIS_BOTTOM,
     LINE_CHART_MARGIN,
     LINE_CHART_X_SCALE,
@@ -47,6 +36,22 @@ import {
 interface Props {
     serverInfoData: ServerInfoApiDataModel
 }
+
+const StatusSpan = ({ message }: { message: string }) => (
+    <span
+        style={{
+            position: "absolute",
+            top: "35%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            fontSize: "1.2em",
+            color: "var(--text)",
+            filter: "drop-shadow(0 0 1px rgba(0, 0, 0, 1))",
+        }}
+    >
+        {message}
+    </span>
+)
 
 const LivePopulationContent = ({ serverInfoData }: Props) => {
     const [isLoading, setIsLoading] = useState(false)
@@ -168,7 +173,6 @@ const LivePopulationContent = ({ serverInfoData }: Props) => {
                 }
             })
         }
-        console.log("populationData", populationData)
         return convertToNivoFormat(populationData)
     }, [range, serverFilter, dataMap])
 
@@ -271,20 +275,9 @@ const LivePopulationContent = ({ serverInfoData }: Props) => {
                         chartHeight={chartHeight}
                     />
                 </div>
-                {isLoading && (
-                    <span
-                        style={{
-                            position: "absolute",
-                            top: "35%",
-                            left: "50%",
-                            transform: "translate(-50%, -50%)",
-                            fontSize: "1.2em",
-                            color: "var(--text)",
-                            filter: "drop-shadow(0 0 1px rgba(0, 0, 0, 1))",
-                        }}
-                    >
-                        Loading...
-                    </span>
+                {isLoading && <StatusSpan message="Loading..." />}
+                {isError && (
+                    <StatusSpan message="An error occurred. Please try again later." />
                 )}
             </div>
         </>
