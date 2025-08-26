@@ -162,7 +162,7 @@ const Friends = () => {
                         visible={isFriendsError}
                     />
                     <Spacer size="20px" />
-                    <Stack gap="10px" fullWidth justify="space-between">
+                    <Stack gap="10px" justify="space-between" width="100%">
                         <div />
                         <Button
                             type="primary"

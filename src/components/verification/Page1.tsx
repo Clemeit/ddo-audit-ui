@@ -195,7 +195,7 @@ const Page1 = ({
                     page.
                 </p>
                 <Spacer size="10px" />
-                <Stack gap="10px" fullWidth justify="space-between">
+                <Stack gap="10px" width="100%" justify="space-between">
                     <Button
                         type="secondary"
                         onClick={() => navigate("/registration")}

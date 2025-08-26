@@ -92,6 +92,7 @@ body {
 html {
     max-width: 100%;
     font-size: 18px;
+    overflow-x: hidden;
 }
 
 hr {

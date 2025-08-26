@@ -402,7 +402,7 @@ const GroupingContainer = ({
                 <LiveDataHaultedPageMessage />
             )}
             {isDataStale && <StaleDataPageMessage />}
-            {isServerOffline && !ignoreServerDown ? (
+            {true ? (
                 <ServerOfflineMessage
                     handleDismiss={() => {
                         setIgnoreServerDown(true)

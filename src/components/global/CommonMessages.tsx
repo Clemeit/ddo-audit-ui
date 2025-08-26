@@ -157,7 +157,7 @@ export const ServerOfflineMessage = ({
                 </Link>{" "}
                 for live server status. If you think this is an error,
             </p>
-            <Stack gap="10px" fullColumnOnMobile>
+            <Stack gap="10px" className="full-column-on-mobile">
                 <Button onClick={handleDismiss} fullWidthOnMobile>
                     Load data anyway
                 </Button>

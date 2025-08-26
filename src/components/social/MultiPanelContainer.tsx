@@ -234,7 +234,7 @@ const MultiPanelContainer = ({ serverName, primaryType }: Props) => {
                     <AddSVG className="icon" />
                 </Button>
             )}
-            <Stack direction="row" gap="10px" fullWidth justify="center">
+            <Stack direction="row" gap="10px" width="100%" justify="center">
                 {primaryType === PanelType.Grouping ? (
                     <LfmContainer serverName={serverName} />
                 ) : (

@@ -122,7 +122,7 @@ const Guilds = () => {
                         subtitle="Select one of your characters' guilds to view detailed information."
                         badge={<Badge type="soon" text="Soon" />}
                     >
-                        <Stack direction="column" gap="20px" fullWidth>
+                        <Stack direction="column" gap="20px" width="100%">
                             <Stack direction="column" gap="2px">
                                 <label
                                     htmlFor="guild-select"

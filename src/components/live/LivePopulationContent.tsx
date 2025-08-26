@@ -32,6 +32,11 @@ import {
     dateToLongString,
     dateToLongStringWithTime,
 } from "../../utils/dateUtils.ts"
+import ColoredText from "../global/ColoredText.tsx"
+import FauxLink from "../global/FauxLink.tsx"
+import Modal from "../modal/Modal.tsx"
+import { ContentCluster } from "../global/ContentCluster.tsx"
+import { useAppContext } from "../../contexts/AppContext.tsx"
 
 interface Props {
     serverInfoData: ServerInfoApiDataModel
@@ -64,6 +69,7 @@ const LivePopulationContent = ({ serverInfoData }: Props) => {
         Partial<Record<RangeEnum, PopulationPointInTime[] | undefined>>
     >({})
     const lastRange = useRef<RangeEnum | undefined>(range)
+    const { timezoneOverride, setTimezoneOverride } = useAppContext()
 
     const RANGE_OPTIONS = ["day", "week", "month"] as RangeEnum[]
     const SERVER_FILTER_OPTIONS = Object.values(ServerFilterEnum)
@@ -269,6 +275,7 @@ const LivePopulationContent = ({ serverInfoData }: Props) => {
                                 : dateToLongStringWithTime(new Date(data))
                         }
                         showTotalInTooltip
+                        showTimezoneDisplay
                         xScale={xScale}
                         axisBottom={axisBottom}
                         margin={margin}
