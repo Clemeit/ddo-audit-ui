@@ -1,18 +1,4 @@
-/**
- * Adds a data point to the correct series, or creates a new series if needed.
- */
-function addToSeries(
-    series: Array<{ id: string; data: any[] }>,
-    serverName: string,
-    dataPoint: any
-) {
-    const existingSeries = series.find((s) => s.id === serverName)
-    if (existingSeries) {
-        existingSeries.data.push(dataPoint)
-    } else {
-        series.push({ id: serverName, data: [dataPoint] })
-    }
-}
+import { DEFAULT_TIMEZONE } from "../constants/client"
 import { PopulationPointInTime } from "../models/Game"
 import {
     AveragePopulationData,
@@ -35,6 +21,22 @@ export interface NivoPieSlice {
     id: string
     label: string
     value: number
+}
+
+/**
+ * Adds a data point to the correct series, or creates a new series if needed.
+ */
+function addToSeries(
+    series: Array<{ id: string; data: any[] }>,
+    serverName: string,
+    dataPoint: any
+) {
+    const existingSeries = series.find((s) => s.id === serverName)
+    if (existingSeries) {
+        existingSeries.data.push(dataPoint)
+    } else {
+        series.push({ id: serverName, data: [dataPoint] })
+    }
 }
 
 /**
@@ -63,7 +65,7 @@ function convertToNivoFormat(
                     )
                     return
                 }
-                const tz = timezone || "UTC"
+                const tz = timezone || DEFAULT_TIMEZONE
                 const zonedDate = toZonedTime(date, tz)
                 addToSeries(series, serverName, {
                     x: zonedDate,

@@ -19,6 +19,7 @@ import { useAppContext } from "../../contexts/AppContext.tsx"
 import ColoredText from "../global/ColoredText.tsx"
 import FauxLink from "../global/FauxLink.tsx"
 import { ReactComponent as CloseSVG } from "../../assets/svg/close.svg"
+import { DEFAULT_TIMEZONE } from "../../constants/client.ts"
 
 interface IntlWithSupportedValuesOf extends Partial<typeof Intl> {
     supportedValuesOf?: (key: string) => string[]
@@ -159,16 +160,16 @@ const GenericLine = ({
     }, [nivoData, excludedSeries])
 
     // Helper to format x-axis labels with timezoneOverride
-    const formatXAxis = (value: any) => {
+    const formatXAxis = (value: Date | string | number) => {
         if (!value) return ""
         try {
             const date = new Date(value)
             const dateWithTimezone = date.toLocaleString("en-US", {
-                timeZone: timezoneOverride || "UTC",
+                timeZone: timezoneOverride || DEFAULT_TIMEZONE,
             })
             return dateWithTimezone
         } catch {
-            return value
+            return value.toString()
         }
     }
 
