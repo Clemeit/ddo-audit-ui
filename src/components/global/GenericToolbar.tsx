@@ -9,7 +9,7 @@ import { ReactComponent as FullscreenExitSVG } from "../../assets/svg/fullscreen
 import { ReactComponent as RefreshSVG } from "../../assets/svg/refresh.svg"
 import { ReactComponent as CloseSVG } from "../../assets/svg/close.svg"
 import Badge from "../global/Badge.tsx"
-import { useThemeContext } from "../../contexts/ThemeContext.tsx"
+import { useAppContext } from "../../contexts/AppContext.tsx"
 import useFeatureCallouts from "../../hooks/useFeatureCallouts.ts"
 import "./GenericToolbar.css"
 import { toSentenceCase } from "../../utils/stringUtils.ts"
@@ -43,7 +43,7 @@ const GenericToolbar = ({
 }: Props) => {
     const navigate = useNavigate()
     const { secondaryPanel } = useMultiPanelContext()
-    const { isFullScreen, setIsFullScreen } = useThemeContext()
+    const { isFullScreen, setIsFullScreen } = useAppContext()
     const [canManuallyReload, setCanManuallyReload] = useState(true)
     const { isCalloutActive, dismissCallout } = useFeatureCallouts()
 
@@ -52,7 +52,7 @@ const GenericToolbar = ({
             direction="row"
             align="center"
             className="generic-toolbar-container"
-            fullWidth
+            width="100%"
         >
             {isSecondaryPanel && (
                 <GenericToolbarButton

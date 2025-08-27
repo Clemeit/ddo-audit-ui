@@ -1,5 +1,5 @@
 import React, { useMemo } from "react"
-import { NivoSeries } from "../../utils/nivoUtils.ts"
+import { NivoDateSeries } from "../../utils/nivoUtils.ts"
 import Stack from "../global/Stack.tsx"
 import { getServerColor } from "../../utils/chartUtils.ts"
 import { SERVER_NAMES_LOWER } from "../../constants/servers.ts"
@@ -7,7 +7,7 @@ import { toSentenceCase } from "../../utils/stringUtils.ts"
 import "./GenericLegend.css"
 
 interface GenericLegendProps {
-    nivoData: NivoSeries[]
+    nivoData: NivoDateSeries[]
     excludedSeries?: string[]
     onItemClick?: (serverId: string) => void
     onItemHover?: (serverId: string | null) => void

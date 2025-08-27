@@ -1,51 +1,52 @@
 import React from "react"
 import "./Stack.css"
 
-interface Props {
-    direction?: React.CSSProperties["flexDirection"]
-    gap?: string
-    lineHeight?: string
+type FlexDirection = "row" | "row-reverse" | "column" | "column-reverse"
+type FlexJustify =
+    | "flex-start"
+    | "flex-end"
+    | "center"
+    | "space-between"
+    | "space-around"
+    | "space-evenly"
+type FlexAlign = "flex-start" | "flex-end" | "center" | "baseline" | "stretch"
+
+export interface StackProps extends React.HTMLAttributes<HTMLDivElement> {
+    direction?: FlexDirection
+    gap?: React.CSSProperties["gap"]
     children?: React.ReactNode
-    fullWidth?: boolean
-    justify?:
-        | "flex-start"
-        | "flex-end"
-        | "center"
-        | "space-between"
-        | "space-around"
-        | "space-evenly"
-    align?: "flex-start" | "flex-end" | "center" | "baseline" | "stretch"
+    width?: React.CSSProperties["width"]
+    justify?: FlexJustify
+    align?: FlexAlign
     className?: string
-    rest?: any
-    fullColumnOnMobile?: boolean
     wrap?: boolean
+    style?: React.CSSProperties
 }
 
-const Stack: React.FC<Props> = ({
+const Stack: React.FC<StackProps> = ({
     direction = "row",
-    gap = "0px",
-    lineHeight = "unset",
+    gap,
     children,
-    fullWidth = false,
+    width,
     justify = "flex-start",
     align = "flex-start",
     className = "",
-    fullColumnOnMobile = false,
     wrap = false,
+    style,
     ...rest
 }) => {
     return (
         <div
-            className={`${className} ${fullColumnOnMobile ? "full-column-on-mobile" : ""}`}
+            className={className}
             style={{
                 display: "flex",
                 flexDirection: direction,
-                gap: gap,
-                width: fullWidth ? "100%" : "auto",
+                gap,
+                width,
                 justifyContent: justify,
                 alignItems: align,
                 flexWrap: wrap ? "wrap" : "nowrap",
-                lineHeight: lineHeight,
+                ...style,
             }}
             {...rest}
         >

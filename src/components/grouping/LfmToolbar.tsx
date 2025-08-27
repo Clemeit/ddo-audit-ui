@@ -1,6 +1,6 @@
 import "./LfmToolbar.css"
 import Link from "../global/Link.tsx"
-import { useThemeContext } from "../../contexts/ThemeContext.tsx"
+import { useAppContext } from "../../contexts/AppContext.tsx"
 import Modal from "../modal/Modal.tsx"
 import Stack from "../global/Stack.tsx"
 import { useLfmContext } from "../../contexts/LfmContext.tsx"
@@ -102,7 +102,7 @@ const LfmToolbar = ({
     } = useLfmContext()
     const { reloadQuests } = useQuestContext()
     const { reloadAreas } = useAreaContext()
-    const { isFullScreen, setIsFullScreen } = useThemeContext()
+    const { isFullScreen, setIsFullScreen } = useAppContext()
     const {
         isModalOpen: showSettingsModal,
         openModal: handleOpenSettingsModal,
@@ -262,7 +262,7 @@ const LfmToolbar = ({
                     >
                         Show groups I'm not eligible for
                     </Checkbox>
-                    <Stack fullWidth justify="flex-end">
+                    <Stack width="100%" justify="flex-end">
                         <Button
                             onClick={handleOpenResetFiltersModal}
                             type="tertiary"
@@ -371,7 +371,7 @@ const LfmToolbar = ({
                             Only show raid groups
                         </Checkbox>
                     </FeaturedItem>
-                    <Stack fullWidth justify="flex-end">
+                    <Stack width="100%" justify="flex-end">
                         <Button
                             onClick={handleOpenResetDisplayModal}
                             type="tertiary"
@@ -512,7 +512,7 @@ const LfmToolbar = ({
                             Show LFM posted time
                         </Checkbox>
                     </FeaturedItem>
-                    <Stack fullWidth justify="flex-end">
+                    <Stack width="100%" justify="flex-end">
                         <Button
                             onClick={handleOpenResetToolsModal}
                             type="tertiary"

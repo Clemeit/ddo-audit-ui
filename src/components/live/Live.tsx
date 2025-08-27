@@ -152,6 +152,9 @@ const Live = () => {
                         }
                     />
                 </ContentCluster>
+                <ContentCluster title="Live Population">
+                    <LivePopulationContent serverInfoData={serverInfoData} />
+                </ContentCluster>
                 <ContentCluster title="DDO Audit News">
                     <NewsCluster news={news} />
                     <br />
@@ -170,9 +173,6 @@ const Live = () => {
                             uniqueDataThisQuarter?.data?.unique_character_count
                         }
                     />
-                </ContentCluster>
-                <ContentCluster title="Live Population">
-                    <LivePopulationContent serverInfoData={serverInfoData} />
                 </ContentCluster>
                 <ContentCluster title="See Also...">
                     <NavCardCluster>

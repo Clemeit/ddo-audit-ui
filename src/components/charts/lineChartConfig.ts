@@ -27,8 +27,7 @@ export const LINE_CHART_Y_SCALE = {
 
 export const LINE_CHART_X_SCALE = {
     type: "time" as const,
-    format: "%Y-%m-%dT%H:%M:%SZ",
-    useUTC: true,
+    format: "native" as const,
     precision: "minute" as const,
 }
 

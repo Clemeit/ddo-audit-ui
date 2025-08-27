@@ -11,7 +11,7 @@ import {
     DEFAULT_LFM_PANEL_WIDTH,
     DEFAULT_MOUSE_OVER_DELAY,
 } from "../constants/lfmPanel.ts"
-import { useThemeContext } from "./ThemeContext.tsx"
+import { useAppContext } from "./AppContext.tsx"
 import {
     setData as setDataToLocalStorage,
     getData as getDataFromLocalStorage,
@@ -108,7 +108,7 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
     // debug:
     const [showBoundingBoxes, setShowBoundingBoxes] = useState<boolean>(false)
 
-    const { setIsFullScreen } = useThemeContext()
+    const { setIsFullScreen } = useAppContext()
 
     // TODO: store all of the options and filters here
     // filter:

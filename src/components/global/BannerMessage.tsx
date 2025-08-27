@@ -1,4 +1,3 @@
-import React from "react"
 import "./BannerMessage.css"
 import { ReactComponent as CloseSVG } from "../../assets/svg/close.svg"
 

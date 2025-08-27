@@ -89,7 +89,7 @@ const Feedback = () => {
                     }}
                 >
                     <Stack direction="column" gap="20px">
-                        <Stack gap="10px" direction="column" fullWidth>
+                        <Stack gap="10px" direction="column" width="100%">
                             <label
                                 htmlFor="suggestion-input"
                                 className="input-label"
@@ -115,7 +115,7 @@ const Feedback = () => {
                                 visible={showNoMessageValidation}
                             />
                         </Stack>
-                        <Stack gap="10px" direction="column" fullWidth>
+                        <Stack gap="10px" direction="column" width="100%">
                             <label
                                 htmlFor="suggestion-input"
                                 className="input-label"
@@ -134,7 +134,7 @@ const Feedback = () => {
                                 onChange={(e) => setContactInfo(e.target.value)}
                             />
                         </Stack>
-                        <Stack gap="10px" fullWidth justify="space-between">
+                        <Stack gap="10px" width="100%" justify="space-between">
                             <div className="hide-on-mobile" />
                             <Button
                                 type="primary"

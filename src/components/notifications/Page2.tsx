@@ -353,7 +353,7 @@ const Page2 = ({ setPage }: Props) => {
             </ol>
             <p className="secondary-text">Rules are not case-sensitive.</p>
 
-            <Stack gap="10px" fullWidth>
+            <Stack gap="10px" width="100%">
                 <Button type="secondary" onClick={() => setPage(1)}>
                     Cancel
                 </Button>

@@ -1,0 +1,9 @@
+.faux-link {
+    color: var(--link-blue);
+    cursor: pointer;
+    text-decoration: underline;
+
+    &:hover {
+        filter: brightness(115%);
+    }
+}

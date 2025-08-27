@@ -1,5 +1,5 @@
 import Page from "../global/Page.tsx"
-import { useThemeContext } from "../../contexts/ThemeContext.tsx"
+import { useAppContext } from "../../contexts/AppContext.tsx"
 import Spacer from "../global/Spacer.tsx"
 import useGetCurrentServer from "../../hooks/useGetCurrentServer.ts"
 import MultiPanelContainer, {
@@ -17,7 +17,7 @@ const GroupingSpecific = () => {
         isValidServer,
         closestMatch,
     } = useGetCurrentServer()
-    const { isFullScreen } = useThemeContext()
+    const { isFullScreen } = useAppContext()
 
     return (
         <Page
