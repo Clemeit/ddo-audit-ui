@@ -10,7 +10,7 @@ import {
     getPopulationData1Month,
     getPopulationData1Week,
 } from "../../services/populationService.ts"
-import { convertToNivoFormat, NivoSeries } from "../../utils/nivoUtils.ts"
+import { convertToNivoFormat, NivoDateSeries } from "../../utils/nivoUtils.ts"
 import {
     SERVERS_32_BITS_LOWER,
     SERVERS_64_BITS_LOWER,
@@ -32,10 +32,6 @@ import {
     dateToLongString,
     dateToLongStringWithTime,
 } from "../../utils/dateUtils.ts"
-import ColoredText from "../global/ColoredText.tsx"
-import FauxLink from "../global/FauxLink.tsx"
-import Modal from "../modal/Modal.tsx"
-import { ContentCluster } from "../global/ContentCluster.tsx"
 import { useAppContext } from "../../contexts/AppContext.tsx"
 
 interface Props {
@@ -140,7 +136,7 @@ const LivePopulationContent = ({ serverInfoData }: Props) => {
         return () => controller.abort()
     }, [range])
 
-    const nivoData: NivoSeries[] = useMemo(() => {
+    const nivoData: NivoDateSeries[] = useMemo(() => {
         if (!range) return []
         let populationData = dataMap?.[range]
         if (populationData) {
@@ -179,8 +175,11 @@ const LivePopulationContent = ({ serverInfoData }: Props) => {
                 }
             })
         }
-        return convertToNivoFormat(populationData)
-    }, [range, serverFilter, dataMap])
+        return convertToNivoFormat(
+            populationData,
+            timezoneOverride || Intl.DateTimeFormat().resolvedOptions().timeZone
+        )
+    }, [range, serverFilter, dataMap, timezoneOverride])
 
     const xScale = useMemo(() => {
         if (lastRange.current === RangeEnum.DAY) return LINE_CHART_X_SCALE

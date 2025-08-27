@@ -1,6 +1,6 @@
 import { ResponsiveLine } from "@nivo/line"
 import { useMemo, useState } from "react"
-import { NivoSeries } from "../../utils/nivoUtils.ts"
+import { NivoDateSeries } from "../../utils/nivoUtils.ts"
 import Stack from "../global/Stack.tsx"
 import GenericLegend from "./GenericLegend.tsx"
 import LineChartTooltip from "./LineChartTooltip.tsx"
@@ -21,7 +21,7 @@ import FauxLink from "../global/FauxLink.tsx"
 import { ReactComponent as CloseSVG } from "../../assets/svg/close.svg"
 
 interface GenericLineProps {
-    nivoData: NivoSeries[]
+    nivoData: NivoDateSeries[]
     showLegend?: boolean
     xScale?: any
     axisBottom?: any
@@ -160,7 +160,6 @@ const GenericLine = ({
             const dateWithTimzone = date.toLocaleString("en-US", {
                 timeZone: timezoneOverride || "UTC",
             })
-            console.log(timezoneOverride, date, dateWithTimzone)
             return dateWithTimzone
         } catch {
             return value

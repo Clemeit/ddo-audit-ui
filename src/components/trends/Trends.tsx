@@ -16,7 +16,7 @@ import {
     DataLoadingErrorPageMessage,
     WIPPageMessage,
 } from "../global/CommonMessages.tsx"
-import PageMessage from "../global/PageMessage.tsx"
+import { useAppContext } from "../../contexts/AppContext.tsx"
 
 const weekConfig = {
     axisBottom: {
@@ -50,13 +50,20 @@ const monthConfig = {
 const Trends = () => {
     const { populationData1Week, populationData1Month, loading, error } =
         useTrendsData()
+    const { timezoneOverride } = useAppContext()
 
     const nivoData1Week = useMemo(() => {
-        return convertToNivoFormat(populationData1Week)
+        return convertToNivoFormat(
+            populationData1Week,
+            timezoneOverride || Intl.DateTimeFormat().resolvedOptions().timeZone
+        )
     }, [populationData1Week])
 
     const nivoData1Month = useMemo(() => {
-        return convertToNivoFormat(populationData1Month)
+        return convertToNivoFormat(
+            populationData1Month,
+            timezoneOverride || Intl.DateTimeFormat().resolvedOptions().timeZone
+        )
     }, [populationData1Month])
 
     return (
