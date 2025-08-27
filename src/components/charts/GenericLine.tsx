@@ -20,6 +20,10 @@ import ColoredText from "../global/ColoredText.tsx"
 import FauxLink from "../global/FauxLink.tsx"
 import { ReactComponent as CloseSVG } from "../../assets/svg/close.svg"
 
+interface IntlWithSupportedValuesOf extends Partial<typeof Intl> {
+    supportedValuesOf?: (key: string) => string[]
+}
+
 interface GenericLineProps {
     nivoData: NivoDateSeries[]
     showLegend?: boolean
@@ -76,14 +80,16 @@ const GenericLine = ({
                         }}
                     >
                         <option value="">(Use browser setting)</option>
-                        {(Intl as any).supportedValuesOf
-                            ? (Intl as any)
-                                  .supportedValuesOf("timeZone")
-                                  .map((tz: string) => (
+                        {typeof (Intl as IntlWithSupportedValuesOf)
+                            .supportedValuesOf === "function"
+                            ? (Intl as IntlWithSupportedValuesOf)
+                                  .supportedValuesOf!("timeZone").map(
+                                  (tz: string) => (
                                       <option key={tz} value={tz}>
                                           {tz}
                                       </option>
-                                  ))
+                                  )
+                              )
                             : [
                                   "UTC",
                                   "America/New_York",
@@ -157,10 +163,10 @@ const GenericLine = ({
         if (!value) return ""
         try {
             const date = new Date(value)
-            const dateWithTimzone = date.toLocaleString("en-US", {
+            const dateWithTimezone = date.toLocaleString("en-US", {
                 timeZone: timezoneOverride || "UTC",
             })
-            return dateWithTimzone
+            return dateWithTimezone
         } catch {
             return value
         }

@@ -49,11 +49,7 @@ export const ThemeProvider = ({ children }: Props) => {
     }, [])
 
     useEffect(() => {
-        if (timezoneOverride !== undefined) {
-            setData<string>("timezone", timezoneOverride)
-        } else {
-            setData<string>("timezone", "")
-        }
+        setData<string>("timezone", timezoneOverride || "")
     }, [timezoneOverride])
 
     return (
