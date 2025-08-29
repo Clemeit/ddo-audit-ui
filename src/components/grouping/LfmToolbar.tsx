@@ -1,6 +1,6 @@
 import "./LfmToolbar.css"
 import Link from "../global/Link.tsx"
-import { useThemeContext } from "../../contexts/ThemeContext.tsx"
+import { useAppContext } from "../../contexts/AppContext.tsx"
 import Modal from "../modal/Modal.tsx"
 import Stack from "../global/Stack.tsx"
 import { useLfmContext } from "../../contexts/LfmContext.tsx"
@@ -24,6 +24,8 @@ import RadioButton from "../global/RadioButton.tsx"
 import Spacer from "../global/Spacer.tsx"
 import FeaturedItem from "../global/FeaturedItem.tsx"
 import { MAX_LEVEL } from "../../constants/game.ts"
+import { useQuestContext } from "../../contexts/QuestContext.tsx"
+import { useAreaContext } from "../../contexts/AreaContext.tsx"
 
 interface Props {
     reloadLfms: () => void
@@ -98,7 +100,9 @@ const LfmToolbar = ({
         onlyShowRaids,
         setOnlyShowRaids,
     } = useLfmContext()
-    const { isFullScreen, setIsFullScreen } = useThemeContext()
+    const { reloadQuests } = useQuestContext()
+    const { reloadAreas } = useAreaContext()
+    const { isFullScreen, setIsFullScreen } = useAppContext()
     const {
         isModalOpen: showSettingsModal,
         openModal: handleOpenSettingsModal,
@@ -258,7 +262,7 @@ const LfmToolbar = ({
                     >
                         Show groups I'm not eligible for
                     </Checkbox>
-                    <Stack fullWidth justify="flex-end">
+                    <Stack width="100%" justify="flex-end">
                         <Button
                             onClick={handleOpenResetFiltersModal}
                             type="tertiary"
@@ -367,7 +371,7 @@ const LfmToolbar = ({
                             Only show raid groups
                         </Checkbox>
                     </FeaturedItem>
-                    <Stack fullWidth justify="flex-end">
+                    <Stack width="100%" justify="flex-end">
                         <Button
                             onClick={handleOpenResetDisplayModal}
                             type="tertiary"
@@ -508,7 +512,7 @@ const LfmToolbar = ({
                             Show LFM posted time
                         </Checkbox>
                     </FeaturedItem>
-                    <Stack fullWidth justify="flex-end">
+                    <Stack width="100%" justify="flex-end">
                         <Button
                             onClick={handleOpenResetToolsModal}
                             type="tertiary"
@@ -542,6 +546,8 @@ const LfmToolbar = ({
             <GenericToolbar
                 serverName={serverName}
                 handleReload={() => {
+                    reloadQuests()
+                    reloadAreas()
                     reloadRegisteredCharacters()
                     reloadLfms()
                 }}

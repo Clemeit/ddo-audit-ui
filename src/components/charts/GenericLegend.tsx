@@ -1,8 +1,8 @@
 import React, { useMemo } from "react"
 import {
     NivoBarSlice,
+    NivoDateSeries,
     NivoPieSlice,
-    NivoSeries,
 } from "../../utils/nivoUtils.ts"
 import Stack from "../global/Stack.tsx"
 import { getServerColor } from "../../utils/chartUtils.ts"
@@ -11,7 +11,7 @@ import { toSentenceCase } from "../../utils/stringUtils.ts"
 import "./GenericLegend.css"
 
 interface GenericLegendProps {
-    nivoData: NivoSeries[] | NivoPieSlice[] | NivoBarSlice[]
+    nivoData: NivoDateSeries[] | NivoPieSlice[] | NivoBarSlice[]
     excludedSeries?: string[]
     onItemClick?: (serverId: string) => void
     onItemHover?: (serverId: string | null) => void

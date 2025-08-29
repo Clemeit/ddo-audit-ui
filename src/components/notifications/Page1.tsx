@@ -135,7 +135,7 @@ const Page1 = ({
                     <Stack
                         gap="10px"
                         direction="column"
-                        fullWidth
+                        width="100%"
                         justify="flex-start"
                     >
                         {showPreferencesLink && isSubscribed && (
@@ -213,7 +213,7 @@ const Page1 = ({
                     <div>You currently have no notification rules set up.</div>
                 )}
                 <Spacer size="20px" />
-                <Stack gap="10px" fullWidth justify="space-between">
+                <Stack gap="10px" width="100%" justify="space-between">
                     <div />
                     <Button
                         type="primary"

@@ -15,6 +15,7 @@ import {
     MINIMUM_CHARACTER_COUNT,
 } from "../../constants/whoPanel.ts"
 import { ReactComponent as WarningSVG } from "../../assets/svg/warning.svg"
+import { useAreaContext } from "../../contexts/AreaContext.tsx"
 
 interface Props {
     reloadCharacters: () => void
@@ -62,6 +63,8 @@ const WhoToolbar = ({
         maximumRenderedCharacterCount,
         setMaximumRenderedCharacterCount,
     } = useWhoContext()
+
+    const { reloadAreas } = useAreaContext()
 
     const {
         isModalOpen: showSettingsModal,
@@ -275,7 +278,10 @@ const WhoToolbar = ({
             )}
             <GenericToolbar
                 serverName={serverName}
-                handleReload={reloadCharacters}
+                handleReload={() => {
+                    reloadAreas()
+                    reloadCharacters()
+                }}
                 handleOpenSettingsModal={handleOpenModal}
                 panelWidth={panelWidth}
                 linkDestination="/who"

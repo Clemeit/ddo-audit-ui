@@ -12,31 +12,31 @@ interface QuestLevel {
 }
 
 interface QuestXP {
-    heroic_normal: number
-    heroic_hard: number
-    heroic_elite: number
-    epic_normal: number
-    epic_hard: number
-    epic_elite: number
+    heroic_normal?: number
+    heroic_hard?: number
+    heroic_elite?: number
+    epic_normal?: number
+    epic_hard?: number
+    epic_elite?: number
 }
 
 interface Quest {
     id: number
-    alt_id: string
-    area_id: number
-    name: string
-    heroic_normal_cr: number
-    epic_normal_cr: number
-    xp: QuestXP
-    is_free_to_play: boolean
-    is_free_to_vip: boolean
-    required_adventure_pack: string
-    adventure_area: string
-    quest_journal_group: string
-    group_size: string
-    patron: string
-    average_time: number
-    tip: string
+    alt_id?: string
+    area_id?: number
+    name?: string
+    heroic_normal_cr?: number
+    epic_normal_cr?: number
+    xp?: QuestXP
+    is_free_to_play?: boolean
+    is_free_to_vip?: boolean
+    required_adventure_pack?: string
+    adventure_area?: string
+    quest_journal_group?: string
+    group_size?: string
+    patron?: string
+    average_time?: number
+    tip?: string
     metadata?: {
         isUnknown?: boolean
     }

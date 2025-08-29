@@ -185,7 +185,7 @@ const CharacterSelectModal = ({
                 />
             </div>
             <div className="selection-form-footer">
-                <Stack fullWidth justify="space-between">
+                <Stack width="100%" justify="space-between">
                     <div />
                     <Button
                         type="secondary"
@@ -245,7 +245,12 @@ const CharacterSelectModal = ({
                 </div>
             </div>
             <div className="selection-form-footer">
-                <Stack direction="column" gap="10px" align="center" fullWidth>
+                <Stack
+                    direction="column"
+                    gap="10px"
+                    align="center"
+                    width="100%"
+                >
                     <Button
                         type="primary"
                         onClick={() => {

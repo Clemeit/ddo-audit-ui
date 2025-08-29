@@ -194,7 +194,7 @@ const Registration = () => {
                         visible={isError}
                     />
                     <Spacer size="20px" />
-                    <Stack gap="10px" fullWidth justify="space-between">
+                    <Stack gap="10px" width="100%" justify="space-between">
                         <div />
                         <Button type="primary" onClick={handleOpenModal}>
                             Add a character

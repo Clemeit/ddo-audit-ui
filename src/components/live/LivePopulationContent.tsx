@@ -10,7 +10,7 @@ import {
     getPopulationData1Month,
     getPopulationData1Week,
 } from "../../services/populationService.ts"
-import { convertToNivoFormat, NivoSeries } from "../../utils/nivoUtils.ts"
+import { convertToNivoFormat, NivoDateSeries } from "../../utils/nivoUtils.ts"
 import {
     SERVERS_32_BITS_LOWER,
     SERVERS_64_BITS_LOWER,
@@ -32,6 +32,7 @@ import {
     dateToLongString,
     dateToLongStringWithTime,
 } from "../../utils/dateUtils.ts"
+import { useAppContext } from "../../contexts/AppContext.tsx"
 
 interface Props {
     serverInfoData: ServerInfoApiDataModel
@@ -64,6 +65,7 @@ const LivePopulationContent = ({ serverInfoData }: Props) => {
         Partial<Record<RangeEnum, PopulationPointInTime[] | undefined>>
     >({})
     const lastRange = useRef<RangeEnum | undefined>(range)
+    const { timezoneOverride, setTimezoneOverride } = useAppContext()
 
     const RANGE_OPTIONS = ["day", "week", "month"] as RangeEnum[]
     const SERVER_FILTER_OPTIONS = Object.values(ServerFilterEnum)
@@ -134,7 +136,7 @@ const LivePopulationContent = ({ serverInfoData }: Props) => {
         return () => controller.abort()
     }, [range])
 
-    const nivoData: NivoSeries[] = useMemo(() => {
+    const nivoData: NivoDateSeries[] = useMemo(() => {
         if (!range) return []
         let populationData = dataMap?.[range]
         if (populationData) {
@@ -173,8 +175,11 @@ const LivePopulationContent = ({ serverInfoData }: Props) => {
                 }
             })
         }
-        return convertToNivoFormat(populationData)
-    }, [range, serverFilter, dataMap])
+        return convertToNivoFormat(
+            populationData,
+            timezoneOverride || Intl.DateTimeFormat().resolvedOptions().timeZone
+        )
+    }, [range, serverFilter, dataMap, timezoneOverride])
 
     const xScale = useMemo(() => {
         if (lastRange.current === RangeEnum.DAY) return LINE_CHART_X_SCALE
@@ -269,6 +274,7 @@ const LivePopulationContent = ({ serverInfoData }: Props) => {
                                 : dateToLongStringWithTime(new Date(data))
                         }
                         showTotalInTooltip
+                        showTimezoneDisplay
                         xScale={xScale}
                         axisBottom={axisBottom}
                         margin={margin}

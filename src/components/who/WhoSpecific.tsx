@@ -1,6 +1,6 @@
 import Page from "../global/Page.tsx"
 import useGetCurrentServer from "../../hooks/useGetCurrentServer.ts"
-import { useThemeContext } from "../../contexts/ThemeContext.tsx"
+import { useAppContext } from "../../contexts/AppContext.tsx"
 import Spacer from "../global/Spacer.tsx"
 import MultiPanelContainer, {
     PanelType,
@@ -17,7 +17,7 @@ const WhoSpecific = () => {
         isValidServer,
         closestMatch,
     } = useGetCurrentServer()
-    const { isFullScreen } = useThemeContext()
+    const { isFullScreen } = useAppContext()
 
     return (
         <Page

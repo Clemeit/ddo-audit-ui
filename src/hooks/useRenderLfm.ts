@@ -286,7 +286,7 @@ const useRenderLfm = ({ lfmSprite, context, raidView = false }: Props) => {
                 lineHeight: questNameLineHeight,
                 boundingBox: questNameBoundingBox,
             } = confineTextToBoundingBox({
-                text: quest?.name,
+                text: quest?.name || "Unknown Quest",
                 boundingBox: questPanelBoundingBoxWithPadding,
                 font: fonts.QUEST_NAME,
                 maxLines: showQuestTips && quest?.tip ? 1 : 2,

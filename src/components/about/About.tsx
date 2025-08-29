@@ -220,7 +220,7 @@ const About = () => {
                     </ul>
                 </ContentCluster>
             </ContentClusterGroup>
-            <Stack direction="column" fullWidth>
+            <Stack direction="column" width="100%">
                 <hr style={{ width: "100px" }} />
                 <Stack direction="row" gap="5px">
                     <ColoredText color="secondary">

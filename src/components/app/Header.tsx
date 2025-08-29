@@ -3,7 +3,7 @@ import NavMenu from "./NavMenu.tsx"
 import Banner from "./Banner.tsx"
 import { useLocation } from "react-router-dom"
 import { bannerRouteMapping } from "../../config/routes.ts"
-import { useThemeContext } from "../../contexts/ThemeContext.tsx"
+import { useAppContext } from "../../contexts/AppContext.tsx"
 
 const Header = () => {
     const location = useLocation()
@@ -14,7 +14,7 @@ const Header = () => {
         showButtons: true,
         hideSuggestionButton: false,
     })
-    const { isFullScreen } = useThemeContext()
+    const { isFullScreen } = useAppContext()
 
     useEffect(() => {
         const rootPath = location.pathname.split("/")[1]

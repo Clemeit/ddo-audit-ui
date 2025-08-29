@@ -102,7 +102,7 @@ const Page1 = () => {
         >
             <h2>Add a character</h2>
             <div className="registration-form-content">
-                <Stack direction="column" gap="15px" fullWidth>
+                <Stack direction="column" gap="15px" width="100%">
                     <div
                         style={{
                             display: "flex",
@@ -209,7 +209,7 @@ const Page1 = () => {
                     visible={isError}
                 />
                 <Spacer size="20px" />
-                <Stack gap="10px" fullWidth justify="space-between">
+                <Stack gap="10px" width="100%" justify="space-between">
                     <div />
                     <Button
                         type="primary"
