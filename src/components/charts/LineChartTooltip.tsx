@@ -3,11 +3,11 @@ import Stack from "../global/Stack.tsx"
 import { dateToLongStringWithTime } from "../../utils/dateUtils.ts"
 import { toSentenceCase } from "../../utils/stringUtils.ts"
 import { SliceData } from "@nivo/line"
-import { NivoDateSeries } from "../../utils/nivoUtils.ts"
+import { NivoDateSeries, NivoNumberSeries } from "../../utils/nivoUtils.ts"
 import "./LineChartTooltip.css"
 
 interface LineChartTooltipProps {
-    slice: SliceData<NivoDateSeries>
+    slice: SliceData<NivoDateSeries | NivoNumberSeries>
     getServerColor: (serverId: string) => string
     tooltipTitleFormatter?: (data: any) => string
     yFormatter?: (value: number) => string

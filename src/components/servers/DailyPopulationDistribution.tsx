@@ -6,7 +6,6 @@ import {
     convertByHourPopulationDataToNivoFormat,
     NivoBarSlice,
     NivoPieSlice,
-    NivoSeries,
 } from "../../utils/nivoUtils"
 import Stack from "../global/Stack"
 import {

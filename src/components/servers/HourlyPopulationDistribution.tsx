@@ -3,8 +3,8 @@ import GenericPie from "../charts/GenericPie"
 import {
     convertAveragePopulationDataToNivoFormat,
     convertByHourPopulationDataToNivoFormat,
+    NivoNumberSeries,
     NivoPieSlice,
-    NivoSeries,
 } from "../../utils/nivoUtils"
 import Stack from "../global/Stack"
 import {
@@ -90,7 +90,7 @@ const HourlyPopulationDistribution = () => {
         return () => controller.abort()
     }, [range])
 
-    const nivoData: NivoSeries[] = useMemo(() => {
+    const nivoData: NivoNumberSeries[] = useMemo(() => {
         if (!range) return []
         let averageData = dataMap?.[range]
         if (averageData) {

@@ -1,6 +1,6 @@
 import { ResponsiveLine } from "@nivo/line"
 import { useMemo, useState } from "react"
-import { NivoDateSeries } from "../../utils/nivoUtils.ts"
+import { NivoDateSeries, NivoNumberSeries } from "../../utils/nivoUtils.ts"
 import Stack from "../global/Stack.tsx"
 import GenericLegend from "./GenericLegend.tsx"
 import LineChartTooltip from "./LineChartTooltip.tsx"
@@ -26,7 +26,7 @@ interface IntlWithSupportedValuesOf extends Partial<typeof Intl> {
 }
 
 interface GenericLineProps {
-    nivoData: NivoDateSeries[]
+    nivoData: NivoDateSeries[] | NivoNumberSeries[]
     showLegend?: boolean
     xScale?: any
     axisBottom?: any

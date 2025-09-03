@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react"
-import { NivoPieSlice, NivoSeries } from "../../utils/nivoUtils.ts"
+import { NivoPieSlice } from "../../utils/nivoUtils.ts"
 import { PIE_CHART_MARGIN, PIE_CHART_THEME } from "./pieChartConfig.ts"
 import { createHighlightColorFunction } from "./chartColorUtils.ts"
 import { SERVER_NAMES_LOWER } from "../../constants/servers.ts"
