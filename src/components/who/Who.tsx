@@ -30,6 +30,8 @@ import Skeleton from "../global/Skeleton.tsx"
 import { AlphaReleasePageMessage } from "../global/CommonMessages.tsx"
 import { BOOLEAN_FLAGS } from "../../utils/localStorage.ts"
 import useBooleanFlag from "../../hooks/useBooleanFlags.ts"
+import Spacer from "../global/Spacer.tsx"
+import FauxLink from "../global/FauxLink.tsx"
 
 const Who = () => {
     const { registeredCharacters } = useGetRegisteredCharacters()
@@ -49,6 +51,11 @@ const Who = () => {
         })
     const [hasAllDataLoadedOnce, setHasAllDataLoadedOnce] =
         useState<boolean>(false)
+
+    const [hide32BitServers, setHide32BitServers] = useBooleanFlag(
+        BOOLEAN_FLAGS.hide32BitServers,
+        true
+    )
 
     useEffect(() => {
         if (
@@ -226,10 +233,35 @@ const Who = () => {
                     <NavCardCluster>
                         {getServerSelectContent("64bit")}
                     </NavCardCluster>
-                    <hr />
-                    <NavCardCluster>
-                        {getServerSelectContent("32bit")}
-                    </NavCardCluster>
+                    {hide32BitServers ? (
+                        <>
+                            <Spacer size="20px" />
+                            <FauxLink
+                                onClick={() => setHide32BitServers(false)}
+                                style={{
+                                    color: "var(--secondary-text)",
+                                }}
+                            >
+                                Show 32-bit servers
+                            </FauxLink>
+                        </>
+                    ) : (
+                        <>
+                            <hr />
+                            <NavCardCluster>
+                                {getServerSelectContent("32bit")}
+                            </NavCardCluster>
+                            <Spacer size="20px" />
+                            <FauxLink
+                                onClick={() => setHide32BitServers(true)}
+                                style={{
+                                    color: "var(--secondary-text)",
+                                }}
+                            >
+                                Hide 32-bit servers
+                            </FauxLink>
+                        </>
+                    )}
                 </ContentCluster>
                 <ContentCluster title="See Also...">
                     <NavCardCluster>
