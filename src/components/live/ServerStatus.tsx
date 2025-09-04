@@ -4,20 +4,23 @@ import { ServerInfo, ServerInfoApiDataModel } from "../../models/Game.ts"
 import { ReactComponent as Checkmark } from "../../assets/svg/checkmark.svg"
 import { ReactComponent as X } from "../../assets/svg/x.svg"
 import { ReactComponent as Pending } from "../../assets/svg/pending.svg"
-import {
-    convertMillisecondsToPrettyString,
-    toSentenceCase,
-} from "../../utils/stringUtils.ts"
+import { toSentenceCase } from "../../utils/stringUtils.ts"
 import ValidationMessage from "../global/ValidationMessage.tsx"
-import { SERVER_NAMES, SERVER_NAMES_LOWER } from "../../constants/servers.ts"
+import {
+    SERVER_NAMES,
+    SERVER_NAMES_LOWER,
+    SERVERS_32_BITS_LOWER,
+} from "../../constants/servers.ts"
 import { LoadingState } from "../../models/Api.ts"
 
 const ServerStatus = ({
     serverInfoData,
     serverInfoState,
+    hide32BitServers,
 }: {
     serverInfoData: ServerInfoApiDataModel | null
     serverInfoState: LoadingState
+    hide32BitServers: boolean
 }) => {
     const mostRecentStatusCheck = useMemo(() => {
         if (serverInfoData === null) {
@@ -84,11 +87,31 @@ const ServerStatus = ({
         )
     }, [isLoading, mostRecentStatusCheck])
 
+    const filterServerNamePredicate = useCallback(
+        (serverName: string) => {
+            const validServerName = SERVER_NAMES_LOWER.includes(
+                serverName?.toLowerCase()
+            )
+            const is32BitServer = SERVERS_32_BITS_LOWER.includes(
+                serverName?.toLowerCase()
+            )
+            if (!validServerName) {
+                return false
+            }
+            if (hide32BitServers && is32BitServer) {
+                return false
+            }
+            return true
+        },
+        [hide32BitServers]
+    )
+
     const serverStatusDisplay = useCallback(() => {
         if (isLoading()) {
             return (
                 <div className="server-status-container">
                     {[...SERVER_NAMES]
+                        .filter(filterServerNamePredicate)
                         .sort((server_name_a, server_name_b) =>
                             server_name_a.localeCompare(server_name_b)
                         )
@@ -109,7 +132,7 @@ const ServerStatus = ({
             <div className="server-status-container">
                 {Object.entries(serverInfoData || {})
                     .filter(([serverName]) =>
-                        SERVER_NAMES_LOWER.includes(serverName)
+                        filterServerNamePredicate(serverName)
                     )
                     .sort(([server_name_a], [server_name_b]) =>
                         server_name_a.localeCompare(server_name_b)
@@ -142,7 +165,7 @@ const ServerStatus = ({
                     ))}
             </div>
         )
-    }, [isLoading, serverInfoData])
+    }, [isLoading, serverInfoData, filterServerNamePredicate])
 
     const validationMessage = useCallback(() => {
         if (serverInfoState !== LoadingState.Loaded) {
