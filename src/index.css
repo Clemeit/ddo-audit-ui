@@ -321,8 +321,8 @@ input[type="range"] {
         display: none !important;
     }
 
-    .full-width-mobile {
-        width: 100%;
+    .full-width-on-mobile {
+        width: 100% !important;
     }
 
     ul {
@@ -364,5 +364,9 @@ input[type="range"] {
 
     .hide-on-small-mobile {
         display: none !important;
+    }
+
+    .full-width-on-small-mobile {
+        width: 100% !important;
     }
 }

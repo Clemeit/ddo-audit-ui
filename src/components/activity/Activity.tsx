@@ -268,7 +268,7 @@ const Activity = () => {
                         </label>
                         <Stack gap="10px">
                             <select
-                                className="large full-width-mobile"
+                                className="large full-width-on-mobile"
                                 id="character-selection"
                                 value={
                                     selectedCharacterAndAccessToken

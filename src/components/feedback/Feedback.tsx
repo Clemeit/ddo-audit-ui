@@ -139,7 +139,7 @@ const Feedback = () => {
                             <Button
                                 type="primary"
                                 onClick={submitFeedback}
-                                className="full-width-mobile"
+                                className="full-width-on-mobile"
                                 disabled={isLoading}
                             >
                                 Submit

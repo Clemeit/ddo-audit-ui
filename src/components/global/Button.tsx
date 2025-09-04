@@ -47,7 +47,7 @@ const Button = ({
         <button
             onClick={handleClick}
             disabled={disabled}
-            className={`${asDiv ? "div" : "button"} ${type} ${className} ${disabled ? "disabled" : ""} ${fullWidth ? "fullWidth" : ""} ${fullWidthOnMobile ? "full-width-mobile" : ""} ${small ? "small" : ""}`}
+            className={`${asDiv ? "div" : "button"} ${type} ${className} ${disabled ? "disabled" : ""} ${fullWidth ? "fullWidth" : ""} ${fullWidthOnMobile ? "full-width-on-mobile" : ""} ${small ? "small" : ""}`}
             style={style}
         >
             {icon && <span className="icon">{icon}</span>}
