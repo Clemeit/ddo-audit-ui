@@ -87,27 +87,31 @@ const ServerStatus = ({
         )
     }, [isLoading, mostRecentStatusCheck])
 
+    const filterServerNamePredicate = useCallback(
+        (serverName: string) => {
+            const validServerName = SERVER_NAMES_LOWER.includes(
+                serverName?.toLowerCase()
+            )
+            const is32BitServer = SERVERS_32_BITS_LOWER.includes(
+                serverName?.toLowerCase()
+            )
+            if (!validServerName) {
+                return false
+            }
+            if (hide32BitServers && is32BitServer) {
+                return false
+            }
+            return true
+        },
+        [hide32BitServers]
+    )
+
     const serverStatusDisplay = useCallback(() => {
         if (isLoading()) {
             return (
                 <div className="server-status-container">
                     {[...SERVER_NAMES]
-                        .filter((serverName) => {
-                            const validServerName = SERVER_NAMES_LOWER.includes(
-                                serverName?.toLowerCase()
-                            )
-                            const is32BitServer =
-                                SERVERS_32_BITS_LOWER.includes(
-                                    serverName?.toLowerCase()
-                                )
-                            if (!validServerName) {
-                                return false
-                            }
-                            if (hide32BitServers && is32BitServer) {
-                                return false
-                            }
-                            return true
-                        })
+                        .filter(filterServerNamePredicate)
                         .sort((server_name_a, server_name_b) =>
                             server_name_a.localeCompare(server_name_b)
                         )
@@ -127,21 +131,9 @@ const ServerStatus = ({
         return (
             <div className="server-status-container">
                 {Object.entries(serverInfoData || {})
-                    .filter(([serverName]) => {
-                        const validServerName = SERVER_NAMES_LOWER.includes(
-                            serverName?.toLowerCase()
-                        )
-                        const is32BitServer = SERVERS_32_BITS_LOWER.includes(
-                            serverName?.toLowerCase()
-                        )
-                        if (!validServerName) {
-                            return false
-                        }
-                        if (hide32BitServers && is32BitServer) {
-                            return false
-                        }
-                        return true
-                    })
+                    .filter(([serverName]) =>
+                        filterServerNamePredicate(serverName)
+                    )
                     .sort(([server_name_a], [server_name_b]) =>
                         server_name_a.localeCompare(server_name_b)
                     )
