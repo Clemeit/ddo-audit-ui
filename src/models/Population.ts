@@ -52,6 +52,11 @@ export enum ServerFilterEnum {
     ONLY_32_BIT = "Only 32-Bit",
 }
 
+export enum DataTypeFilterEnum {
+    CHARACTERS = "Characters",
+    LFMS = "LFMs",
+}
+
 export type {
     UniquePopulationEndpointSchema,
     UniquePopulationData,

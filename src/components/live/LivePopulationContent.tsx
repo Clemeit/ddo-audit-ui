@@ -3,7 +3,11 @@ import {
     PopulationPointInTime,
     ServerInfoApiDataModel,
 } from "../../models/Game.ts"
-import { RangeEnum, ServerFilterEnum } from "../../models/Population.ts"
+import {
+    DataTypeFilterEnum,
+    RangeEnum,
+    ServerFilterEnum,
+} from "../../models/Population.ts"
 import GenericLine from "../charts/GenericLine.tsx"
 import {
     getPopulationData1Day,
@@ -61,14 +65,20 @@ const LivePopulationContent = ({ serverInfoData }: Props) => {
     const [serverFilter, setServerFilter] = useState<ServerFilterEnum>(
         ServerFilterEnum.ONLY_64_BIT
     )
+    const [dataTypeFilter, setDataTypeFilter] = useState<DataTypeFilterEnum>(
+        DataTypeFilterEnum.CHARACTERS
+    )
     const [dataMap, setDataMap] = useState<
         Partial<Record<RangeEnum, PopulationPointInTime[] | undefined>>
     >({})
     const lastRange = useRef<RangeEnum | undefined>(range)
-    const { timezoneOverride, setTimezoneOverride } = useAppContext()
+    const { timezoneOverride } = useAppContext()
 
-    const RANGE_OPTIONS = ["day", "week", "month"] as RangeEnum[]
-    const SERVER_FILTER_OPTIONS = Object.values(ServerFilterEnum)
+    const RANGE_OPTIONS = ["day", "week", "month"]
+    const SERVER_FILTER_OPTIONS = Object.values(ServerFilterEnum) as string[]
+    const DATA_TYPE_FILTER_OPTIONS = Object.values(
+        DataTypeFilterEnum
+    ) as string[]
 
     const rangeToFetchMap = useMemo(
         () => ({
@@ -177,9 +187,11 @@ const LivePopulationContent = ({ serverInfoData }: Props) => {
         }
         return convertToNivoFormat(
             populationData,
-            timezoneOverride || Intl.DateTimeFormat().resolvedOptions().timeZone
+            timezoneOverride ||
+                Intl.DateTimeFormat().resolvedOptions().timeZone,
+            dataTypeFilter
         )
-    }, [range, serverFilter, dataMap, timezoneOverride])
+    }, [range, serverFilter, dataMap, timezoneOverride, dataTypeFilter])
 
     const xScale = useMemo(() => {
         if (lastRange.current === RangeEnum.DAY) return LINE_CHART_X_SCALE
@@ -221,39 +233,72 @@ const LivePopulationContent = ({ serverInfoData }: Props) => {
     return (
         <>
             <p>{livePopulationTitle}</p>
-            <Stack direction="row" gap="10px" align="center">
-                <label htmlFor="hourlyPopulationDistributionRange">
-                    Range:
-                </label>
-                <select
-                    id="hourlyPopulationDistributionRange"
-                    value={range}
-                    onChange={(e) => setRange(e.target.value as RangeEnum)}
-                >
-                    {RANGE_OPTIONS.map((opt) => (
-                        <option key={opt} value={opt}>
-                            {toSentenceCase(opt)}
-                        </option>
-                    ))}
-                </select>
-            </Stack>
-            <Stack direction="row" gap="10px" align="center">
-                <label htmlFor="hourlyPopulationDistributionServerFilter">
-                    Server filter:
-                </label>
-                <select
-                    id="hourlyPopulationDistributionServerFilter"
-                    value={serverFilter}
-                    onChange={(e) =>
-                        setServerFilter(e.target.value as ServerFilterEnum)
-                    }
-                >
-                    {SERVER_FILTER_OPTIONS.map((opt) => (
-                        <option key={opt} value={opt}>
-                            {opt}
-                        </option>
-                    ))}
-                </select>
+            <Stack
+                direction="row"
+                gap="10px"
+                className="full-column-on-small-mobile"
+            >
+                {[
+                    {
+                        label: "Range",
+                        id: "hourlyPopulationDistributionRange",
+                        value: range,
+                        onChange: (e: React.ChangeEvent<HTMLSelectElement>) =>
+                            setRange(e.target.value as RangeEnum),
+                        options: RANGE_OPTIONS,
+                        optionLabel: (opt: string) => toSentenceCase(opt),
+                    },
+                    {
+                        label: "Server filter",
+                        id: "hourlyPopulationDistributionServerFilter",
+                        value: serverFilter,
+                        onChange: (e: React.ChangeEvent<HTMLSelectElement>) =>
+                            setServerFilter(e.target.value as ServerFilterEnum),
+                        options: SERVER_FILTER_OPTIONS,
+                        optionLabel: (opt: string) => opt,
+                    },
+                    {
+                        label: "Data type",
+                        id: "hourlyPopulationDistributionDataTypeFilter",
+                        value: dataTypeFilter,
+                        onChange: (e: React.ChangeEvent<HTMLSelectElement>) =>
+                            setDataTypeFilter(
+                                e.target.value as DataTypeFilterEnum
+                            ),
+                        options: DATA_TYPE_FILTER_OPTIONS,
+                        optionLabel: (opt: string) => opt,
+                    },
+                ].map((config) => (
+                    <Stack
+                        className="full-width-on-small-mobile"
+                        direction="column"
+                        gap="2px"
+                        key={config.id}
+                        style={{ width: "150px" }}
+                    >
+                        <label
+                            htmlFor={config.id}
+                            style={{
+                                color: "var(--text)",
+                                fontWeight: "bolder",
+                            }}
+                        >
+                            {config.label}
+                        </label>
+                        <select
+                            id={config.id}
+                            value={config.value}
+                            onChange={config.onChange}
+                            style={{ width: "100%" }}
+                        >
+                            {config.options.map((opt) => (
+                                <option key={opt} value={opt}>
+                                    {config.optionLabel(opt)}
+                                </option>
+                            ))}
+                        </select>
+                    </Stack>
+                ))}
             </Stack>
             <div style={{ position: "relative" }}>
                 <div style={{ opacity: isLoading ? 0.5 : 1 }}>

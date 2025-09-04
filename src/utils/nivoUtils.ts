@@ -2,6 +2,7 @@ import { DEFAULT_TIMEZONE } from "../constants/client"
 import { PopulationPointInTime } from "../models/Game"
 import {
     AveragePopulationData,
+    DataTypeFilterEnum,
     PopulationByHourData,
 } from "../models/Population"
 import { toSentenceCase } from "./stringUtils"
@@ -47,7 +48,8 @@ function addToSeries(
  */
 function convertToNivoFormat(
     data: PopulationPointInTime[],
-    timezone: string
+    timezone: string,
+    dataType: DataTypeFilterEnum = DataTypeFilterEnum.CHARACTERS
 ): NivoDateSeries[] {
     if (!data || data.length === 0) {
         return []
@@ -67,9 +69,13 @@ function convertToNivoFormat(
                 }
                 const tz = timezone || DEFAULT_TIMEZONE
                 const zonedDate = toZonedTime(date, tz)
+                const value =
+                    dataType === DataTypeFilterEnum.CHARACTERS
+                        ? dataPoint.character_count
+                        : dataPoint.lfm_count
                 addToSeries(series, serverName, {
                     x: zonedDate,
-                    y: dataPoint.character_count,
+                    y: value,
                 })
             })
         }
