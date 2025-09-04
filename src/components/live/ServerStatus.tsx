@@ -165,7 +165,7 @@ const ServerStatus = ({
                     ))}
             </div>
         )
-    }, [isLoading, serverInfoData, hide32BitServers, filterServerNamePredicate])
+    }, [isLoading, serverInfoData, filterServerNamePredicate])
 
     const validationMessage = useCallback(() => {
         if (serverInfoState !== LoadingState.Loaded) {
