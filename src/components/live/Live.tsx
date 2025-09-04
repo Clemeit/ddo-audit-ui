@@ -29,6 +29,7 @@ import useBooleanFlag from "../../hooks/useBooleanFlags.ts"
 import Badge from "../global/Badge.tsx"
 import LivePopulationContent from "./LivePopulationContent.tsx"
 import FauxLink from "../global/FauxLink.tsx"
+import Spacer from "../global/Spacer.tsx"
 
 const Live = () => {
     const errorNotificationShownRef = React.useRef<string | null>(null)
@@ -141,6 +142,7 @@ const Live = () => {
                         serverInfoState={serverInfoState}
                         hide32BitServers={hide32BitServers}
                     />
+                    <Spacer size="10px" />
                     {hide32BitServers ? (
                         <>
                             <FauxLink
