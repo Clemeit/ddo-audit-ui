@@ -1,3 +1,4 @@
+import { SERVERS_64_BITS_LOWER } from "../constants/servers.ts"
 import { ServerInfoApiDataModel } from "../models/Game.ts"
 
 function getDefaultServerName(serverData: ServerInfoApiDataModel): string {
@@ -7,7 +8,9 @@ function getDefaultServerName(serverData: ServerInfoApiDataModel): string {
             return "unknown"
 
         const entry = Object.entries(serverData).find(
-            ([_, data]) => data?.index === 0
+            ([serverName, data]) =>
+                data?.index === 0 &&
+                SERVERS_64_BITS_LOWER.includes(serverName.toLowerCase())
         )
         return entry ? entry[0] : "unknown"
     } catch (error) {
