@@ -4,3 +4,17 @@
         width: 100% !important;
     }
 }
+
+@media (max-width: 400px) {
+    .full-column-on-smallish-mobile {
+        flex-direction: column !important;
+        width: 100% !important;
+    }
+}
+
+@media (max-width: 300px) {
+    .full-column-on-small-mobile {
+        flex-direction: column !important;
+        width: 100% !important;
+    }
+}

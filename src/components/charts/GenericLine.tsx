@@ -69,7 +69,7 @@ const GenericLine = ({
                 >
                     <span>Timezone:</span>
                     <select
-                        className="full-width-mobile"
+                        className="full-width-on-mobile"
                         id="timezoneSelect"
                         value={
                             timezoneOverride ||
