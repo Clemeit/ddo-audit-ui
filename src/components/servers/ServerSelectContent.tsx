@@ -1,6 +1,9 @@
-import { useMemo } from "react"
+import { useCallback, useMemo } from "react"
 import { ServerInfoApiDataModel } from "../../models/Game.ts"
-import { SERVER_NAMES_LOWER } from "../../constants/servers.ts"
+import {
+    SERVER_NAMES_LOWER,
+    SERVERS_64_BITS_LOWER,
+} from "../../constants/servers.ts"
 import { toSentenceCase } from "../../utils/stringUtils.ts"
 import { ReactComponent as Checkmark } from "../../assets/svg/checkmark.svg"
 import { ReactComponent as X } from "../../assets/svg/x.svg"
@@ -11,6 +14,10 @@ import ColoredText from "../global/ColoredText.tsx"
 import Stack from "../global/Stack.tsx"
 import ServerNavigationCard from "../global/ServerNavigationCard.tsx"
 import NavCardCluster from "../global/NavCardCluster.tsx"
+import useBooleanFlag from "../../hooks/useBooleanFlags.ts"
+import { BOOLEAN_FLAGS } from "../../utils/localStorage.ts"
+import Spacer from "../global/Spacer.tsx"
+import FauxLink from "../global/FauxLink.tsx"
 
 interface Props {
     isLoading?: boolean
@@ -40,6 +47,11 @@ const ServerSelectContent = ({
         }
     }
 
+    const [hide32BitServers, setHide32BitServers] = useBooleanFlag(
+        BOOLEAN_FLAGS.hide32BitServers,
+        true
+    )
+
     const getContentForCard = (
         serverName: string,
         uniqueData: UniquePopulationData
@@ -68,23 +80,74 @@ const ServerSelectContent = ({
         )
     }
 
-    const serverSelectContent = useMemo(() => {
-        const serverNamesSorted = [...SERVER_NAMES_LOWER].sort(
-            (serverNameA, serverNameB) => serverNameA.localeCompare(serverNameB)
-        )
+    const serverSelectContent = useCallback(
+        (type: "32bit" | "64bit") => {
+            const serverNamesSorted = [...SERVER_NAMES_LOWER].sort(
+                (serverNameA, serverNameB) =>
+                    serverNameA.localeCompare(serverNameB)
+            )
+            const filteredServerNames = serverNamesSorted.filter(
+                (serverName) => {
+                    if (type === "32bit") {
+                        return (
+                            SERVERS_64_BITS_LOWER.includes(serverName) === false
+                        )
+                    } else if (type === "64bit") {
+                        return (
+                            SERVERS_64_BITS_LOWER.includes(serverName) === true
+                        )
+                    }
+                    return true
+                }
+            )
 
-        return serverNamesSorted.map((serverName) => (
-            <ServerNavigationCard
-                key={serverName}
-                title={toSentenceCase(serverName)}
-                destination={`/servers/${serverName}`}
-                icon={getIconForCard(serverName, serverInfo)}
-                content={getContentForCard(serverName, uniqueData)}
-            />
-        ))
-    }, [isLoading, isError, serverInfo])
+            return filteredServerNames.map((serverName) => (
+                <ServerNavigationCard
+                    key={serverName}
+                    title={toSentenceCase(serverName)}
+                    destination={`/servers/${serverName}`}
+                    icon={getIconForCard(serverName, serverInfo)}
+                    content={getContentForCard(serverName, uniqueData)}
+                />
+            ))
+        },
+        [isLoading, isError, serverInfo]
+    )
 
-    return <NavCardCluster>{serverSelectContent}</NavCardCluster>
+    return (
+        <>
+            <NavCardCluster>{serverSelectContent("64bit")}</NavCardCluster>
+            {hide32BitServers ? (
+                <>
+                    <Spacer size="20px" />
+                    <FauxLink
+                        onClick={() => setHide32BitServers(false)}
+                        style={{
+                            color: "var(--secondary-text)",
+                        }}
+                    >
+                        Show 32-bit servers
+                    </FauxLink>
+                </>
+            ) : (
+                <>
+                    <hr />
+                    <NavCardCluster>
+                        {serverSelectContent("32bit")}
+                    </NavCardCluster>
+                    <Spacer size="20px" />
+                    <FauxLink
+                        onClick={() => setHide32BitServers(true)}
+                        style={{
+                            color: "var(--secondary-text)",
+                        }}
+                    >
+                        Hide 32-bit servers
+                    </FauxLink>
+                </>
+            )}
+        </>
+    )
 }
 
 export default ServerSelectContent

@@ -37,6 +37,7 @@ import {
     dateToLongStringWithTime,
 } from "../../utils/dateUtils.ts"
 import { useAppContext } from "../../contexts/AppContext.tsx"
+import FilterSelection from "../charts/FilterSelection.tsx"
 
 interface Props {
     serverInfoData: ServerInfoApiDataModel
@@ -73,12 +74,6 @@ const LivePopulationContent = ({ serverInfoData }: Props) => {
     >({})
     const lastRange = useRef<RangeEnum | undefined>(range)
     const { timezoneOverride } = useAppContext()
-
-    const RANGE_OPTIONS = ["day", "week", "month"]
-    const SERVER_FILTER_OPTIONS = Object.values(ServerFilterEnum) as string[]
-    const DATA_TYPE_FILTER_OPTIONS = Object.values(
-        DataTypeFilterEnum
-    ) as string[]
 
     const rangeToFetchMap = useMemo(
         () => ({
@@ -125,6 +120,7 @@ const LivePopulationContent = ({ serverInfoData }: Props) => {
     useEffect(() => {
         if (!range) return
         const controller = new AbortController()
+        setIsError(false)
         const fetchPopulationData = async () => {
             setIsLoading(true)
             try {
@@ -134,7 +130,6 @@ const LivePopulationContent = ({ serverInfoData }: Props) => {
                         ...prev,
                         [range]: result?.data,
                     }))
-                    setIsError(false)
                 }
             } catch {
                 setIsError(true)
@@ -233,75 +228,16 @@ const LivePopulationContent = ({ serverInfoData }: Props) => {
     return (
         <>
             <p>{livePopulationTitle}</p>
-            <Stack
-                direction="row"
-                gap="10px"
-                className="full-column-on-small-mobile"
-            >
-                {[
-                    {
-                        label: "Range",
-                        id: "hourlyPopulationDistributionRange",
-                        value: range,
-                        onChange: (e: React.ChangeEvent<HTMLSelectElement>) =>
-                            setRange(e.target.value as RangeEnum),
-                        options: RANGE_OPTIONS,
-                        optionLabel: (opt: string) => toSentenceCase(opt),
-                    },
-                    {
-                        label: "Server filter",
-                        id: "hourlyPopulationDistributionServerFilter",
-                        value: serverFilter,
-                        onChange: (e: React.ChangeEvent<HTMLSelectElement>) =>
-                            setServerFilter(e.target.value as ServerFilterEnum),
-                        options: SERVER_FILTER_OPTIONS,
-                        optionLabel: (opt: string) => opt,
-                    },
-                    {
-                        label: "Data type",
-                        id: "hourlyPopulationDistributionDataTypeFilter",
-                        value: dataTypeFilter,
-                        onChange: (e: React.ChangeEvent<HTMLSelectElement>) =>
-                            setDataTypeFilter(
-                                e.target.value as DataTypeFilterEnum
-                            ),
-                        options: DATA_TYPE_FILTER_OPTIONS,
-                        optionLabel: (opt: string) => opt,
-                    },
-                ].map((config) => (
-                    <Stack
-                        className="full-width-on-small-mobile"
-                        direction="column"
-                        gap="2px"
-                        key={config.id}
-                        style={{ width: "150px" }}
-                    >
-                        <label
-                            htmlFor={config.id}
-                            style={{
-                                color: "var(--text)",
-                                fontWeight: "bolder",
-                            }}
-                        >
-                            {config.label}
-                        </label>
-                        <select
-                            id={config.id}
-                            value={config.value}
-                            onChange={config.onChange}
-                            style={{ width: "100%" }}
-                        >
-                            {config.options.map((opt) => (
-                                <option key={opt} value={opt}>
-                                    {config.optionLabel(opt)}
-                                </option>
-                            ))}
-                        </select>
-                    </Stack>
-                ))}
-            </Stack>
+            <FilterSelection
+                range={range}
+                setRange={setRange}
+                serverFilter={serverFilter}
+                setServerFilter={setServerFilter}
+                dataTypeFilter={dataTypeFilter}
+                setDataTypeFilter={setDataTypeFilter}
+            />
             <div style={{ position: "relative" }}>
-                <div style={{ opacity: isLoading ? 0.5 : 1 }}>
+                <div style={{ opacity: isLoading || isError ? 0.5 : 1 }}>
                     <GenericLine
                         nivoData={nivoData}
                         showLegend

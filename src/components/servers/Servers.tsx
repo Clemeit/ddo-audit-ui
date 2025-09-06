@@ -18,6 +18,8 @@ import Spacer from "../global/Spacer.tsx"
 import Stack from "../global/Stack.tsx"
 import HourlyPopulationDistribution from "./HourlyPopulationDistribution.tsx"
 import DailyPopulationDistribution from "./DailyPopulationDistribution.tsx"
+import { BOOLEAN_FLAGS } from "../../utils/localStorage.ts"
+import useBooleanFlag from "../../hooks/useBooleanFlags.ts"
 
 const Servers = () => {
     // const [
@@ -50,29 +52,29 @@ const Servers = () => {
         >
             {/* <WIPPageMessage /> */}
             <ContentClusterGroup>
-                <div
+                {/* <div
                     style={{
                         opacity: 0.5,
                         pointerEvents: "none",
                     }}
+                > */}
+                <ContentCluster
+                    title="Select a Server"
+                    badge={<Badge text="Soon" type="soon" />}
                 >
-                    <ContentCluster
-                        title="Select a Server"
-                        badge={<Badge text="Soon" type="soon" />}
-                    >
-                        <ServerSelectContent
-                            isLoading={isLoading}
-                            isError={isError}
-                            serverInfo={serverInfo}
-                            uniqueData={uniqueData}
-                        />
-                        <Spacer size="20px" />
-                        <ColoredText color="secondary">
-                            Unique character and guild numbers are based on the
-                            last quarter.
-                        </ColoredText>
-                    </ContentCluster>
-                </div>
+                    <ServerSelectContent
+                        isLoading={isLoading}
+                        isError={isError}
+                        serverInfo={serverInfo}
+                        uniqueData={uniqueData}
+                    />
+                    <Spacer size="20px" />
+                    <ColoredText color="secondary">
+                        Unique character and guild numbers are based on the last
+                        quarter.
+                    </ColoredText>
+                </ContentCluster>
+                {/* </div> */}
                 <ContentCluster title="Server Population Distribution">
                     <ServerPopulationDistribution />
                 </ContentCluster>

@@ -8,6 +8,7 @@ import Stack from "../global/Stack"
 import {
     AveragePopulationData,
     AveragePopulationEndpointSchema,
+    DataTypeFilterEnum,
     RangeEnum,
     ServerFilterEnum,
 } from "../../models/Population.ts"
@@ -23,6 +24,7 @@ import {
     SERVERS_64_BITS_LOWER,
     SERVERS_32_BITS_LOWER,
 } from "../../constants/servers"
+import FilterSelection from "../charts/FilterSelection.tsx"
 
 const ServerPopulationDistribution = () => {
     const [isLoading, setIsLoading] = useState(false)
@@ -31,13 +33,13 @@ const ServerPopulationDistribution = () => {
     const [serverFilter, setServerFilter] = useState<ServerFilterEnum>(
         ServerFilterEnum.ONLY_64_BIT
     )
+    const [dataTypeFilter, setDataTypeFilter] = useState<DataTypeFilterEnum>(
+        DataTypeFilterEnum.CHARACTERS
+    )
     const [dataMap, setDataMap] = useState<
         Partial<Record<RangeEnum, AveragePopulationData | undefined>>
     >({})
     const lastRange = useRef<RangeEnum | undefined>(range)
-
-    const RANGE_OPTIONS = Object.values(RangeEnum)
-    const SERVER_FILTER_OPTIONS = Object.values(ServerFilterEnum)
 
     const descriptionFormatter = (value: number, total: number) => {
         return `${value.toFixed(1)} average characters (${((value / total) * 100).toFixed(1)}%)`
@@ -110,40 +112,14 @@ const ServerPopulationDistribution = () => {
     return (
         <>
             <p>Average population distribution per server.</p>
-            <Stack direction="row" gap="10px" align="center">
-                <label htmlFor="serverPopulationDistributionRange">
-                    Range:
-                </label>
-                <select
-                    id="serverPopulationDistributionRange"
-                    value={range}
-                    onChange={(e) => setRange(e.target.value as RangeEnum)}
-                >
-                    {RANGE_OPTIONS.map((opt) => (
-                        <option key={opt} value={opt}>
-                            {toSentenceCase(opt)}
-                        </option>
-                    ))}
-                </select>
-            </Stack>
-            <Stack direction="row" gap="10px" align="center">
-                <label htmlFor="serverPopulationDistributionServerFilter">
-                    Server filter:
-                </label>
-                <select
-                    id="serverPopulationDistributionServerFilter"
-                    value={serverFilter}
-                    onChange={(e) =>
-                        setServerFilter(e.target.value as ServerFilterEnum)
-                    }
-                >
-                    {SERVER_FILTER_OPTIONS.map((opt) => (
-                        <option key={opt} value={opt}>
-                            {opt}
-                        </option>
-                    ))}
-                </select>
-            </Stack>
+            <FilterSelection
+                range={range}
+                setRange={setRange}
+                serverFilter={serverFilter}
+                setServerFilter={setServerFilter}
+                dataTypeFilter={dataTypeFilter}
+                setDataTypeFilter={setDataTypeFilter}
+            />
             <GenericPie
                 nivoData={nivoData}
                 showLegend

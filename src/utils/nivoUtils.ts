@@ -96,7 +96,8 @@ function convertToNivoFormat(
  * @returns Array of NivoPieSlice for Nivo pie charts
  */
 function convertAveragePopulationDataToNivoFormat(
-    data: AveragePopulationData
+    data: AveragePopulationData,
+    dataType: DataTypeFilterEnum = DataTypeFilterEnum.CHARACTERS
 ): NivoPieSlice[] {
     if (!data || Object.keys(data).length === 0) return []
     const slices: NivoPieSlice[] = []
