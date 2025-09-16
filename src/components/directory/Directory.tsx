@@ -66,6 +66,10 @@ const Directory = () => {
                         />
                         <NavigationCard type="friends" />
                         <NavigationCard type="ignores" />
+                        <NavigationCard
+                            type="owned-content"
+                            badge={<Badge text="New" type="new" />}
+                        />
                     </NavCardCluster>
                 </ContentCluster>
                 <ContentCluster title="Character Tools">
