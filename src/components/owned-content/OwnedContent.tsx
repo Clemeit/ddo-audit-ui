@@ -36,6 +36,9 @@ const OwnedContent = () => {
     }
 
     const adventurePacks: string[] = useMemo(() => {
+        if (!quests) return []
+        if (Object.keys(quests).length === 0) return []
+
         const packs: Set<string> = new Set<string>()
         Object.values(quests).forEach((quest) => {
             if (
@@ -55,7 +58,7 @@ const OwnedContent = () => {
             setOwnedContent(adventurePacks)
         } else {
             const tempContent = [
-                ...ownedContent,
+                ...(ownedContent || []),
                 ...adventurePacks.filter((adventurePack) => {
                     return adventurePack
                         .toLowerCase()
@@ -71,7 +74,7 @@ const OwnedContent = () => {
             setOwnedContent([])
         } else {
             setOwnedContent([
-                ...ownedContent.filter((adventurePack) => {
+                ...(ownedContent || []).filter((adventurePack) => {
                     return !adventurePack
                         .toLowerCase()
                         .includes(contentFilterText.toLowerCase())

@@ -333,9 +333,9 @@ const GroupingContainer = ({
 
                 let isFull: boolean = false
                 if (
-                    lfm.members?.length === MAX_PARTY_SIZE - 1 ||
-                    (lfm.members?.length === MAX_RAID_SIZE - 1 &&
-                        selectedQuest?.group_size !== "Raid")
+                    (lfm.members?.length === MAX_PARTY_SIZE - 1 &&
+                        selectedQuest?.group_size !== "Raid") ||
+                    lfm.members?.length === MAX_RAID_SIZE - 1
                 ) {
                     isFull = true
                 }

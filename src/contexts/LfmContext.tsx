@@ -92,7 +92,7 @@ interface LfmContextProps {
     setHideContentIDontOwn: (value: boolean) => void
     indicateContentIDontOwn: boolean
     setIndicateContentIDontOwn: (value: boolean) => void
-    ownedContent: string[] | null
+    ownedContent: string[]
     setOwnedContent: (value: string[]) => void
     hideFullGroups: boolean
     setHideFullGroups: (value: boolean) => void
@@ -129,7 +129,7 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
         useState<boolean>(false)
     const [indicateContentIDontOwn, setIndicateContentIDontOwn] =
         useState<boolean>(false)
-    const [ownedContent, setOwnedContent] = useState<string[] | null>(null)
+    const [ownedContent, setOwnedContent] = useState<string[]>([])
 
     // display:
     const [fontSize, setFontSize] = useState<number>(DEFAULT_BASE_FONT_SIZE)
