@@ -56,6 +56,9 @@ const Ignores = lazy(() =>
 const Guilds = lazy(() =>
     lazyRetry(() => import("./components/guilds/Guilds.tsx"))
 )
+const OwnedContent = lazy(() =>
+    lazyRetry(() => import("./components/owned-content/OwnedContent.tsx"))
+)
 // const Trends = lazy(() => lazyRetry(() => import("./components/trends/Trends.tsx")))
 // const Quests = lazy(() => lazyRetry(() => import("./components/quests/Quests.tsx")))
 
@@ -75,6 +78,14 @@ export default createBrowserRouter(
                 }
             />
             {/* <Route path="/activity" element={<Activity />} /> */}
+            <Route
+                path="/owned-content"
+                element={
+                    <GroupingDataProvider>
+                        <OwnedContent />
+                    </GroupingDataProvider>
+                }
+            />
             <Route
                 path="/grouping"
                 element={

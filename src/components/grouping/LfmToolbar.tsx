@@ -99,6 +99,12 @@ const LfmToolbar = ({
         setShowEligibilityDividers,
         onlyShowRaids,
         setOnlyShowRaids,
+        hideContentIDontOwn,
+        setHideContentIDontOwn,
+        indicateContentIDontOwn,
+        setIndicateContentIDontOwn,
+        hideFullGroups,
+        setHideFullGroups,
     } = useLfmContext()
     const { reloadQuests } = useQuestContext()
     const { reloadAreas } = useAreaContext()
@@ -262,6 +268,33 @@ const LfmToolbar = ({
                     >
                         Show groups I'm not eligible for
                     </Checkbox>
+                    <FeaturedItem calloutId="hide-content-i-dont-own">
+                        <Checkbox
+                            checked={hideContentIDontOwn}
+                            onChange={(e) =>
+                                setHideContentIDontOwn(e.target.checked)
+                            }
+                        >
+                            Hide content I don't own
+                        </Checkbox>
+                    </FeaturedItem>
+                    <FeaturedItem calloutId="indicate-content-i-dont-own">
+                        <Checkbox
+                            checked={indicateContentIDontOwn}
+                            onChange={(e) =>
+                                setIndicateContentIDontOwn(e.target.checked)
+                            }
+                        >
+                            Indicate content I don't own
+                        </Checkbox>
+                    </FeaturedItem>
+                    <div
+                        style={{
+                            marginLeft: "20px",
+                        }}
+                    >
+                        <Link to="/owned-content">Content list</Link>
+                    </div>
                     <Stack width="100%" justify="flex-end">
                         <Button
                             onClick={handleOpenResetFiltersModal}
@@ -351,6 +384,16 @@ const LfmToolbar = ({
                             }
                         >
                             Hide groups posting for levels 1-34
+                        </Checkbox>
+                    </FeaturedItem>
+                    <FeaturedItem calloutId="hide-full-groups">
+                        <Checkbox
+                            checked={hideFullGroups}
+                            onChange={(e) =>
+                                setHideFullGroups(e.target.checked)
+                            }
+                        >
+                            Hide groups that are likely full
                         </Checkbox>
                     </FeaturedItem>
                     <FeaturedItem calloutId="grouping-eligibility-dividers">

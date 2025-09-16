@@ -88,6 +88,8 @@ interface Lfm {
         raidActivity?: ActivityEvent[]
         isPostedByFriend?: boolean
         includesFriend?: boolean
+        owned?: boolean
+        isFull?: boolean
     }
 }
 
