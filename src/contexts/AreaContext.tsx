@@ -59,7 +59,9 @@ export const AreaProvider = ({ children }: Props) => {
                 new Date().getTime() - lastUpdated.getTime() >
                     CACHED_AREAS_EXPIRY_TIME
             ) {
-                const result = await getRequest<AreaApiResponse>("areas")
+                const result = await getRequest<AreaApiResponse>("areas", {
+                    params: { force: fetchFromServer },
+                })
                 const areaObj = result.data.reduce(
                     (acc, area) => {
                         acc[area.id] = area

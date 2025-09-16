@@ -62,7 +62,9 @@ export const QuestProvider = ({ children }: Props) => {
                     CACHED_QUESTS_EXPIRY_TIME
             ) {
                 // Cache is stale
-                const result = await getRequest<QuestApiResponse>("quests")
+                const result = await getRequest<QuestApiResponse>("quests", {
+                    params: { force: fetchFromServer },
+                })
                 const questObj = result.data.reduce(
                     (acc, quest) => {
                         acc[quest.id] = quest
