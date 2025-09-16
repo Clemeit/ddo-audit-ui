@@ -20,6 +20,7 @@ import HourlyPopulationDistribution from "./HourlyPopulationDistribution.tsx"
 import DailyPopulationDistribution from "./DailyPopulationDistribution.tsx"
 import { BOOLEAN_FLAGS } from "../../utils/localStorage.ts"
 import useBooleanFlag from "../../hooks/useBooleanFlags.ts"
+import PeakTimesPopulationDistribution from "./PeakTimesPopulationDistribution.tsx"
 
 const Servers = () => {
     // const [
@@ -75,14 +76,29 @@ const Servers = () => {
                     </ColoredText>
                 </ContentCluster>
                 {/* </div> */}
-                <ContentCluster title="Server Population Distribution">
+                <ContentCluster
+                    title="Server Population Distribution"
+                    subtitle="Average population distribution per server."
+                >
                     <ServerPopulationDistribution />
                 </ContentCluster>
-                <ContentCluster title="Hourly Population Distribution">
+                <ContentCluster
+                    title="Hourly Population Distribution"
+                    subtitle="Average population distribution per server by time of day."
+                >
                     <HourlyPopulationDistribution />
                 </ContentCluster>
-                <ContentCluster title="Daily Population Distribution">
+                <ContentCluster
+                    title="Daily Population Distribution"
+                    subtitle="Average population distribution per server by day of week."
+                >
                     <DailyPopulationDistribution />
+                </ContentCluster>
+                <ContentCluster
+                    title="Peak Times"
+                    subtitle="Shows peak times for character count or LFM count per server for the selected time range."
+                >
+                    <PeakTimesPopulationDistribution />
                 </ContentCluster>
                 <ContentCluster title="Level Distribution"></ContentCluster>
                 <ContentCluster title="Race Distribution"></ContentCluster>

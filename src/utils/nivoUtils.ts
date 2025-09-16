@@ -121,15 +121,19 @@ function convertAveragePopulationDataToNivoFormat(
  * @returns Array of NivoNumberSeries for Nivo charts
  */
 function convertByHourPopulationDataToNivoFormat(
-    data: PopulationByHourData
+    data: PopulationByHourData,
+    dataType: DataTypeFilterEnum = DataTypeFilterEnum.CHARACTERS
 ): NivoNumberSeries[] {
     if (!data || Object.keys(data).length === 0) return []
     const series: NivoNumberSeries[] = []
     Object.entries(data).forEach(([serverName, hoursData]) => {
-        Object.entries(hoursData).forEach(([hour, count]) => {
+        Object.entries(hoursData).forEach(([hour, hourData]) => {
             addToSeries(series, serverName.toLowerCase(), {
                 x: parseInt(hour),
-                y: count ?? 0,
+                y:
+                    dataType === DataTypeFilterEnum.CHARACTERS
+                        ? (hourData.avg_character_count ?? 0)
+                        : (hourData.avg_lfm_count ?? 0),
             })
         })
     })
@@ -137,7 +141,8 @@ function convertByHourPopulationDataToNivoFormat(
 }
 
 function convertByDayOfWeekPopulationDataToNivoFormat(
-    data: PopulationByDayOfWeekData
+    data: PopulationByDayOfWeekData,
+    dataType: DataTypeFilterEnum = DataTypeFilterEnum.CHARACTERS
 ): NivoBarSlice[] {
     if (!data || Object.keys(data).length === 0) return []
     const slices: NivoBarSlice[] = []
@@ -146,7 +151,10 @@ function convertByDayOfWeekPopulationDataToNivoFormat(
         const dayName = numberToDayOfWeek(dayOfWeek)
         const slice: NivoBarSlice = { index: dayName }
         Object.entries(data).forEach(([serverName, serverData]) => {
-            slice[serverName.toLowerCase()] = serverData[dayOfWeek] ?? 0
+            slice[serverName.toLowerCase()] =
+                dataType === DataTypeFilterEnum.CHARACTERS
+                    ? (serverData[dayOfWeek]?.avg_character_count ?? 0)
+                    : (serverData[dayOfWeek]?.avg_lfm_count ?? 0)
         })
         slices.push(slice)
     })

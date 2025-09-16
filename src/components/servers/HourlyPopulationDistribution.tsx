@@ -8,6 +8,7 @@ import {
 } from "../../utils/nivoUtils"
 import Stack from "../global/Stack"
 import {
+    DataTypeFilterEnum,
     PopulationByHourData,
     PopulationByHourEndpointSchema,
     RangeEnum,
@@ -30,6 +31,7 @@ import {
     BY_HOUR_CHART_X_SCALE,
     BY_HOUR_LINE_CHART_AXIS_BOTTOM,
 } from "../charts/lineChartConfig.ts"
+import FilterSelection from "../charts/FilterSelection.tsx"
 
 const HourlyPopulationDistribution = () => {
     const [isLoading, setIsLoading] = useState(false)
@@ -41,6 +43,9 @@ const HourlyPopulationDistribution = () => {
     const [dataMap, setDataMap] = useState<
         Partial<Record<RangeEnum, PopulationByHourData | undefined>>
     >({})
+    const [dataTypeFilter, setDataTypeFilter] = useState<DataTypeFilterEnum>(
+        DataTypeFilterEnum.CHARACTERS
+    )
     const lastRange = useRef<RangeEnum | undefined>(range)
 
     const RANGE_OPTIONS = Object.values(RangeEnum)
@@ -111,46 +116,23 @@ const HourlyPopulationDistribution = () => {
                 )
             )
         }
-        return convertByHourPopulationDataToNivoFormat(averageData)
-    }, [range, serverFilter, dataMap])
+        return convertByHourPopulationDataToNivoFormat(
+            averageData,
+            dataTypeFilter
+        )
+    }, [range, serverFilter, dataMap, dataTypeFilter])
 
     return (
         <>
-            <p>Average population distribution per server.</p>
-            <Stack direction="row" gap="10px" align="center">
-                <label htmlFor="hourlyPopulationDistributionRange">
-                    Range:
-                </label>
-                <select
-                    id="hourlyPopulationDistributionRange"
-                    value={range}
-                    onChange={(e) => setRange(e.target.value as RangeEnum)}
-                >
-                    {RANGE_OPTIONS.map((opt) => (
-                        <option key={opt} value={opt}>
-                            {toSentenceCase(opt)}
-                        </option>
-                    ))}
-                </select>
-            </Stack>
-            <Stack direction="row" gap="10px" align="center">
-                <label htmlFor="hourlyPopulationDistributionServerFilter">
-                    Server filter:
-                </label>
-                <select
-                    id="hourlyPopulationDistributionServerFilter"
-                    value={serverFilter}
-                    onChange={(e) =>
-                        setServerFilter(e.target.value as ServerFilterEnum)
-                    }
-                >
-                    {SERVER_FILTER_OPTIONS.map((opt) => (
-                        <option key={opt} value={opt}>
-                            {opt}
-                        </option>
-                    ))}
-                </select>
-            </Stack>
+            <FilterSelection
+                range={range}
+                setRange={setRange}
+                serverFilter={serverFilter}
+                setServerFilter={setServerFilter}
+                rangeOptions={RANGE_OPTIONS}
+                dataTypeFilter={dataTypeFilter}
+                setDataTypeFilter={setDataTypeFilter}
+            />
             <GenericLine
                 nivoData={nivoData}
                 showLegend

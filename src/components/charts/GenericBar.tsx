@@ -16,6 +16,7 @@ interface GenericBarProps {
     yFormatter?: (value: number) => string
     spotlightSeries?: string[]
     chartHeight?: string
+    groupMode?: "stacked" | "grouped"
 }
 
 const GenericBar = ({
@@ -29,6 +30,7 @@ const GenericBar = ({
     yFormatter = (value: number) => value.toFixed(2),
     spotlightSeries = [],
     chartHeight = "400px",
+    groupMode = "stacked",
 }: GenericBarProps) => {
     return (
         <Stack direction="column" gap="10px">
@@ -68,6 +70,7 @@ const GenericBar = ({
                     labelSkipWidth={12}
                     labelSkipHeight={12}
                     // margin={margin}
+                    groupMode={groupMode}
                     margin={{ top: 25, bottom: 30 }}
                     colors={(d) => getServerColor(d.id.toString())}
                     // yScale={LINE_CHART_Y_SCALE}

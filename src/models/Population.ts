@@ -33,7 +33,10 @@ interface AveragePopulationEndpointSchema {
 
 interface PopulationByHourData {
     [serverName: string]: {
-        [hour: string]: number | null
+        [hour: string]: {
+            avg_character_count: number | null
+            avg_lfm_count: number | null
+        }
     }
 }
 
@@ -43,12 +46,30 @@ interface PopulationByHourEndpointSchema {
 
 interface PopulationByDayOfWeekData {
     [serverName: string]: {
-        [day: string]: number | null
+        [day: string]: {
+            avg_character_count: number | null
+            avg_lfm_count: number | null
+        }
     }
 }
 
 interface PopulationByDayOfWeekEndpointSchema {
     data: PopulationByDayOfWeekData
+}
+
+interface PopulationByHourAndDayOfWeekData {
+    [serverName: string]: {
+        [day: string]: {
+            [hour: string]: {
+                avg_character_count: number | null
+                avg_lfm_count: number | null
+            }
+        }
+    }
+}
+
+interface PopulationByHourAndDayOfWeekEndpointSchema {
+    data: PopulationByHourAndDayOfWeekData
 }
 
 export enum RangeEnum {
@@ -81,4 +102,6 @@ export type {
     PopulationByHourData,
     PopulationByDayOfWeekEndpointSchema,
     PopulationByDayOfWeekData,
+    PopulationByHourAndDayOfWeekEndpointSchema,
+    PopulationByHourAndDayOfWeekData,
 }

@@ -5,6 +5,7 @@ import {
 } from "../models/Game.ts"
 import {
     AveragePopulationEndpointSchema,
+    PopulationByHourAndDayOfWeekEndpointSchema,
     PopulationByHourEndpointSchema,
     RangeEnum,
 } from "../models/Population.ts"
@@ -203,6 +204,16 @@ function getPopulationByDayOfWeekForRange(
     )
 }
 
+function getPopulationByHourAndDayOfWeekForRange(
+    range: RangeEnum = RangeEnum.QUARTER,
+    signal?: AbortSignal
+): Promise<PopulationByHourAndDayOfWeekEndpointSchema> {
+    return getRequest<PopulationByHourAndDayOfWeekEndpointSchema>(
+        `${POPULATION_ENDPOINT}/by-hour-and-day-of-week/${range}`,
+        { signal }
+    )
+}
+
 export {
     getPopulationData1Day,
     getPopulationData1Week,
@@ -225,4 +236,5 @@ export {
     getPopulationByHourForQuarter,
     getPopulationByHourForYear,
     getPopulationByDayOfWeekForRange,
+    getPopulationByHourAndDayOfWeekForRange,
 }

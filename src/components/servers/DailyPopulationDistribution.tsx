@@ -9,6 +9,7 @@ import {
 } from "../../utils/nivoUtils"
 import Stack from "../global/Stack"
 import {
+    DataTypeFilterEnum,
     PopulationByHourData,
     PopulationByHourEndpointSchema,
     RangeEnum,
@@ -33,6 +34,7 @@ import {
     BY_HOUR_LINE_CHART_AXIS_BOTTOM,
 } from "../charts/lineChartConfig.ts"
 import GenericBar from "../charts/GenericBar.tsx"
+import FilterSelection from "../charts/FilterSelection.tsx"
 
 const DailyPopulationDistribution = () => {
     const [isLoading, setIsLoading] = useState(false)
@@ -41,13 +43,21 @@ const DailyPopulationDistribution = () => {
     const [serverFilter, setServerFilter] = useState<ServerFilterEnum>(
         ServerFilterEnum.ONLY_64_BIT
     )
+    const [dataTypeFilter, setDataTypeFilter] = useState<DataTypeFilterEnum>(
+        DataTypeFilterEnum.CHARACTERS
+    )
     const [dataMap, setDataMap] = useState<
         Partial<Record<RangeEnum, PopulationByHourData | undefined>>
     >({})
+    const [displayType, setDisplayType] = useState<string>("Stacked")
     const lastRange = useRef<RangeEnum | undefined>(range)
 
-    const RANGE_OPTIONS = Object.values(RangeEnum)
-    const SERVER_FILTER_OPTIONS = Object.values(ServerFilterEnum)
+    const RANGE_OPTIONS = [
+        RangeEnum.WEEK,
+        RangeEnum.MONTH,
+        RangeEnum.QUARTER,
+        RangeEnum.YEAR,
+    ]
 
     const descriptionFormatter = (value: number, total: number) => {
         return `${value.toFixed(1)} average characters (${((value / total) * 100).toFixed(1)}%)`
@@ -114,51 +124,31 @@ const DailyPopulationDistribution = () => {
                 )
             )
         }
-        const out = convertByDayOfWeekPopulationDataToNivoFormat(data)
+        const out = convertByDayOfWeekPopulationDataToNivoFormat(
+            data,
+            dataTypeFilter
+        )
         console.log("Nivo data:", out)
         return out
-    }, [range, serverFilter, dataMap])
+    }, [range, serverFilter, dataMap, dataTypeFilter])
 
     return (
         <>
-            <p>Average population distribution per server.</p>
-            <Stack direction="row" gap="10px" align="center">
-                <label htmlFor="hourlyPopulationDistributionRange">
-                    Range:
-                </label>
-                <select
-                    id="hourlyPopulationDistributionRange"
-                    value={range}
-                    onChange={(e) => setRange(e.target.value as RangeEnum)}
-                >
-                    {RANGE_OPTIONS.map((opt) => (
-                        <option key={opt} value={opt}>
-                            {toSentenceCase(opt)}
-                        </option>
-                    ))}
-                </select>
-            </Stack>
-            <Stack direction="row" gap="10px" align="center">
-                <label htmlFor="hourlyPopulationDistributionServerFilter">
-                    Server filter:
-                </label>
-                <select
-                    id="hourlyPopulationDistributionServerFilter"
-                    value={serverFilter}
-                    onChange={(e) =>
-                        setServerFilter(e.target.value as ServerFilterEnum)
-                    }
-                >
-                    {SERVER_FILTER_OPTIONS.map((opt) => (
-                        <option key={opt} value={opt}>
-                            {opt}
-                        </option>
-                    ))}
-                </select>
-            </Stack>
+            <FilterSelection
+                range={range}
+                setRange={setRange}
+                serverFilter={serverFilter}
+                setServerFilter={setServerFilter}
+                rangeOptions={RANGE_OPTIONS}
+                dataTypeFilter={dataTypeFilter}
+                displayType={displayType}
+                setDisplayType={setDisplayType}
+                setDataTypeFilter={setDataTypeFilter}
+            />
             <GenericBar
                 nivoData={nivoData}
                 showLegend
+                groupMode={displayType === "Grouped" ? "grouped" : "stacked"}
                 // xScale={BY_HOUR_CHART_X_SCALE}
                 // axisBottom={BY_HOUR_LINE_CHART_AXIS_BOTTOM}
                 // tooltipTitleFormatter={(hour: any) =>

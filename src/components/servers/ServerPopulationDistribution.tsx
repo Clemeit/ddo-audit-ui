@@ -114,7 +114,6 @@ const ServerPopulationDistribution = () => {
 
     return (
         <>
-            <p>Average population distribution per server.</p>
             <FilterSelection
                 range={range}
                 setRange={setRange}
