@@ -250,7 +250,8 @@ const WhoCanvas = ({
         const renderAllCharacters =
             previousState.curatedCharacters.length !==
                 curatedCharacters.length ||
-            previousState.showInQuestIndicator !== showInQuestIndicator
+            previousState.showInQuestIndicator !== showInQuestIndicator ||
+            previousState.areas !== areas
         if (renderAllCharacters) {
             whoPanelContext?.clearRect(0, 0, panelWidth, panelHeight)
         }

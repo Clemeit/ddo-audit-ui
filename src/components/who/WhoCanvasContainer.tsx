@@ -199,8 +199,15 @@ const WhoContainer = ({
                     localFilter,
                     isExactMatch
                 )
+                const unknownLocationMatch =
+                    localFilter === "aether" &&
+                    areas[character.location_id || 0] === undefined
 
-                const localMatch = nameMatch || guildNameMatch || locationMatch
+                const localMatch =
+                    nameMatch ||
+                    guildNameMatch ||
+                    locationMatch ||
+                    unknownLocationMatch
                 stringFilterMatch = stringFilterMatch || localMatch
             })
 
@@ -345,6 +352,7 @@ const WhoContainer = ({
         alwaysShowFriends,
         alwaysShowRegisteredCharacters,
         maximumRenderedCharacterCount,
+        areas,
     ])
 
     return (
