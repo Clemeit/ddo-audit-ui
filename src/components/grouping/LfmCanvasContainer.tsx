@@ -24,7 +24,12 @@ import useGetIgnores from "../../hooks/useGetIgnores.ts"
 import logMessage from "../../utils/logUtils.ts"
 import { useQuestContext } from "../../contexts/QuestContext.tsx"
 import Stack from "../global/Stack.tsx"
-import { MAX_LEVEL, MIN_LEVEL } from "../../constants/game.ts"
+import {
+    MAX_LEVEL,
+    MAX_PARTY_SIZE,
+    MAX_RAID_SIZE,
+    MIN_LEVEL,
+} from "../../constants/game.ts"
 
 interface Props {
     serverName: string
@@ -328,8 +333,8 @@ const GroupingContainer = ({
 
                 let isFull: boolean = false
                 if (
-                    lfm.members?.length === 5 ||
-                    (lfm.members?.length === 11 &&
+                    lfm.members?.length === MAX_PARTY_SIZE - 1 ||
+                    (lfm.members?.length === MAX_RAID_SIZE - 1 &&
                         selectedQuest?.group_size !== "Raid")
                 ) {
                     isFull = true
@@ -416,12 +421,12 @@ const GroupingContainer = ({
             excludedLfmCount: lfms?.length - processedLfms?.length,
         }
     }, [
+        serverName,
         lfmData,
         sortBy,
         minLevelFilter,
         showNotEligible,
         maxLevelFilter,
-        serverName,
         filterByMyCharacters,
         registeredCharacters,
         trackedCharacterIds,
@@ -436,6 +441,7 @@ const GroupingContainer = ({
         hideContentIDontOwn,
         indicateContentIDontOwn,
         hideFullGroups,
+        ownedContent,
     ])
 
     return (

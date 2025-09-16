@@ -247,8 +247,8 @@ const useRenderLfm = ({ lfmSprite, context, raidView = false }: Props) => {
             } else {
                 timerNoteText = timerNoteTextOptions(false)
             }
-            let tip: string = null
-            if (!lfm.metadata.owned && indicateContentIDontOwn) {
+            let tip: string | null = null
+            if (lfm.metadata.owned == false && indicateContentIDontOwn) {
                 tip = `Requires "${lfm.quest?.required_adventure_pack}"`
             } else if (showQuestTips) {
                 tip = lfm.quest?.tip
