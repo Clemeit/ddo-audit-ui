@@ -21,7 +21,6 @@ import { convertMillisecondsToPrettyString } from "../utils/stringUtils.ts"
 import { SPRITE_MAP } from "../constants/spriteMap.ts"
 import { mapRaceAndGenderToRaceIconBoundingBox } from "../utils/socialUtils.ts"
 import { useQuestContext } from "../contexts/QuestContext.tsx"
-import { getActiveTimer } from "../utils/timerUtils.ts"
 
 interface Props {
     lfmSprite?: HTMLImageElement | null
@@ -42,6 +41,7 @@ const useRenderLfm = ({ lfmSprite, context, raidView = false }: Props) => {
         showIndicationForGroupsPostedByFriends,
         showIndicationForGroupsContainingFriends,
         highlightRaids,
+        indicateContentIDontOwn,
     } = useLfmContext()
     const { confineTextToBoundingBox } = useTextRenderer(context)
     const commonBoundingBoxes = useMemo(
@@ -247,6 +247,12 @@ const useRenderLfm = ({ lfmSprite, context, raidView = false }: Props) => {
             } else {
                 timerNoteText = timerNoteTextOptions(false)
             }
+            let tip: string | null = null
+            if (lfm.metadata?.owned === false && indicateContentIDontOwn) {
+                tip = `Requires "${lfm.quest?.required_adventure_pack}"`
+            } else if (showQuestTips) {
+                tip = lfm.quest?.tip
+            }
             const { boundingBox: timerNoteTextBoundingBox } =
                 confineTextToBoundingBox({
                     text: showTimerNote ? timerNoteText : "",
@@ -289,14 +295,14 @@ const useRenderLfm = ({ lfmSprite, context, raidView = false }: Props) => {
                 text: quest?.name || "Unknown Quest",
                 boundingBox: questPanelBoundingBoxWithPadding,
                 font: fonts.QUEST_NAME,
-                maxLines: showQuestTips && quest?.tip ? 1 : 2,
+                maxLines: tip ? 1 : 2,
                 centered: true,
             })
             const {
                 textLines: questTipTextLines,
                 boundingBox: questTipBoundingBox,
             } = confineTextToBoundingBox({
-                text: quest?.tip,
+                text: tip,
                 boundingBox: questPanelBoundingBoxWithPadding,
                 font: fonts.COMMENT,
                 maxLines: 1,
@@ -347,7 +353,7 @@ const useRenderLfm = ({ lfmSprite, context, raidView = false }: Props) => {
                 questTipBoundingBox,
                 questDifficultyBoundingBox,
                 questPanelBoundingBox,
-                hasTip: !!quest?.tip,
+                hasTip: tip != undefined,
             })
             questNameBoundingBox.y = questNameBoundingBoxY
             questTipBoundingBox.y = questTipBoundingBoxY
@@ -605,8 +611,20 @@ const useRenderLfm = ({ lfmSprite, context, raidView = false }: Props) => {
                             questNameLineHeight / 2
                     )
                 })
+
+                // quest difficulty
+                context.font = fonts.COMMENT
+                context.fillText(
+                    questDifficultyTextLines[0] || "",
+                    questDifficultyBoundingBox.centerX(),
+                    questDifficultyBoundingBox.centerY()
+                )
+
                 // quest tip
-                if (quest.tip && showQuestTip) {
+                if (tip) {
+                    if (!lfm.metadata.owned && indicateContentIDontOwn) {
+                        context.fillStyle = LFM_COLORS.NOT_OWNED
+                    }
                     context.font = fonts.TIP
                     questTipTextLines.forEach((line) => {
                         context.fillText(
@@ -616,14 +634,6 @@ const useRenderLfm = ({ lfmSprite, context, raidView = false }: Props) => {
                         )
                     })
                 }
-
-                // quest difficulty
-                context.font = fonts.COMMENT
-                context.fillText(
-                    questDifficultyTextLines[0] || "",
-                    questDifficultyBoundingBox.centerX(),
-                    questDifficultyBoundingBox.centerY()
-                )
 
                 // raid timer icon
                 const showRaidTimerIcon =
@@ -810,6 +820,7 @@ const useRenderLfm = ({ lfmSprite, context, raidView = false }: Props) => {
             calculateQuestInfoYPositions,
             highlightRaids,
             quests,
+            indicateContentIDontOwn,
         ]
     )
 

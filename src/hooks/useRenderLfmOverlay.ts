@@ -1026,7 +1026,7 @@ const useRenderLfmOverlay = ({ lfmSprite, context }: Props) => {
 
                         if (quest.required_adventure_pack) {
                             renderQuestInfo(
-                                "Pack",
+                                "Pack:",
                                 quest.required_adventure_pack
                             )
                         }

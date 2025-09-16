@@ -24,7 +24,12 @@ import useGetIgnores from "../../hooks/useGetIgnores.ts"
 import logMessage from "../../utils/logUtils.ts"
 import { useQuestContext } from "../../contexts/QuestContext.tsx"
 import Stack from "../global/Stack.tsx"
-import { MAX_LEVEL, MIN_LEVEL } from "../../constants/game.ts"
+import {
+    MAX_LEVEL,
+    MAX_PARTY_SIZE,
+    MAX_RAID_SIZE,
+    MIN_LEVEL,
+} from "../../constants/game.ts"
 
 interface Props {
     serverName: string
@@ -58,6 +63,10 @@ const GroupingContainer = ({
         hideGroupsContainingIgnoredCharacters,
         hideAllLevelGroups,
         onlyShowRaids,
+        hideContentIDontOwn,
+        indicateContentIDontOwn,
+        ownedContent,
+        hideFullGroups,
     } = useLfmContext()
     const [ignoreServerDown, setIgnoreServerDown] = useState<boolean>(false)
     const { friends: friendCharacters } = useGetFriends()
@@ -306,6 +315,31 @@ const GroupingContainer = ({
                     }
                 }
 
+                let owned: boolean = true
+                if (ownedContent != undefined) {
+                    if (
+                        selectedQuest &&
+                        selectedQuest.required_adventure_pack
+                    ) {
+                        if (
+                            !ownedContent.includes(
+                                selectedQuest.required_adventure_pack
+                            )
+                        ) {
+                            owned = false
+                        }
+                    }
+                }
+
+                let isFull: boolean = false
+                if (
+                    (lfm.members?.length === MAX_PARTY_SIZE - 1 &&
+                        selectedQuest?.group_size !== "Raid") ||
+                    lfm.members?.length === MAX_RAID_SIZE - 1
+                ) {
+                    isFull = true
+                }
+
                 return {
                     ...lfm,
                     quest: selectedQuest,
@@ -316,6 +350,8 @@ const GroupingContainer = ({
                         isPostedByFriend,
                         includesFriend,
                         raidActivity: activity,
+                        owned,
+                        isFull,
                     },
                 }
             })
@@ -325,6 +361,14 @@ const GroupingContainer = ({
                 if (onlyShowRaids) {
                     if (lfm.quest?.group_size !== "Raid") return false
                 }
+                if (
+                    hideContentIDontOwn &&
+                    lfm.quest != undefined &&
+                    lfm.quest.required_adventure_pack != undefined &&
+                    !ownedContent?.includes(lfm.quest.required_adventure_pack)
+                )
+                    return false
+                if (hideFullGroups && lfm.metadata.isFull) return false
                 return true
             })
             .sort((lfmA, lfmB) => {
@@ -377,12 +421,12 @@ const GroupingContainer = ({
             excludedLfmCount: lfms?.length - processedLfms?.length,
         }
     }, [
+        serverName,
         lfmData,
         sortBy,
         minLevelFilter,
         showNotEligible,
         maxLevelFilter,
-        serverName,
         filterByMyCharacters,
         registeredCharacters,
         trackedCharacterIds,
@@ -394,6 +438,10 @@ const GroupingContainer = ({
         onlyShowRaids,
         hideGroupsPostedByIgnoredCharacters,
         hideGroupsContainingIgnoredCharacters,
+        hideContentIDontOwn,
+        indicateContentIDontOwn,
+        hideFullGroups,
+        ownedContent,
     ])
 
     return (

@@ -5,6 +5,10 @@
     gap: 5px;
     font-size: 1rem;
     margin: 0;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 }
 
 .checkbox-input {
