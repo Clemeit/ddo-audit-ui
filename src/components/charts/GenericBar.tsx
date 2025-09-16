@@ -1,7 +1,7 @@
 import React from "react"
 import { NivoBarSlice, NivoPieSlice } from "../../utils/nivoUtils.ts"
 import Stack from "../global/Stack.tsx"
-import { ResponsiveBar } from "@nivo/bar"
+import { ResponsiveBar, BarDatum, BarCustomLayerProps } from "@nivo/bar"
 import { getServerColor } from "../../utils/chartUtils.ts"
 import GenericLegend from "./GenericLegend.tsx"
 
@@ -26,7 +26,7 @@ const GenericBar = ({
     // margin = LINE_CHART_MARGIN,
     indexBy = "index",
     tooltipTitleFormatter,
-    yFormatter = (value: number) => value.toString(),
+    yFormatter = (value: number) => value.toFixed(2),
     spotlightSeries = [],
     chartHeight = "400px",
 }: GenericBarProps) => {
@@ -35,9 +35,41 @@ const GenericBar = ({
             <div className="line-container" style={{ height: chartHeight }}>
                 <ResponsiveBar
                     data={nivoData}
-                    indexBy={indexBy}
+                    indexBy="index"
+                    keys={[
+                        ...(nivoData.length > 0
+                            ? Object.keys(nivoData[0]).filter(
+                                  (key) => key !== "index"
+                              )
+                            : []),
+                    ]}
+                    theme={{
+                        labels: {
+                            text: {
+                                fill: "#fff",
+                            },
+                        },
+                        axis: {
+                            // legend: {
+                            //     text: {
+                            //         fill: "var(--text)",
+                            //         fontSize: 14,
+                            //     },
+                            // },
+                            ticks: {
+                                text: {
+                                    fill: "var(--text)",
+                                    fontSize: 14,
+                                },
+                            },
+                        },
+                    }}
+                    enableTotals
+                    labelSkipWidth={12}
+                    labelSkipHeight={12}
                     // margin={margin}
-                    colors={(d) => getServerColor(d.data.index)}
+                    margin={{ top: 25, bottom: 30 }}
+                    colors={(d) => getServerColor(d.id.toString())}
                     // yScale={LINE_CHART_Y_SCALE}
                     // xScale={xScale}
                     // xFormat={LINE_CHART_DEFAULTS.xFormat}
@@ -57,17 +89,23 @@ const GenericBar = ({
                     //         showTotal={showTotalInTooltip}
                     //     />
                     // )}
-                    // axisBottom={axisBottom}
+                    axisBottom={{
+                        tickSize: 5,
+                        tickPadding: 5,
+                        // tickRotation: -45,
+                        legendOffset: 50,
+                    }}
+                    valueFormat={yFormatter}
                 />
             </div>
-            {showLegend && (
+            {/* {showLegend && (
                 <GenericLegend
                     nivoData={nivoData}
                     // onItemClick={handleItemClick}
                     // onItemHover={handleItemHover}
                     // excludedSeries={excludedSeries}
                 />
-            )}
+            )} */}
         </Stack>
     )
 }

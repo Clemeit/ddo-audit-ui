@@ -21,7 +21,10 @@ interface UniquePopulationEndpointSchema {
 }
 
 interface AveragePopulationData {
-    [serverName: string]: number | null
+    [serverName: string]: {
+        avg_character_count: number | null
+        avg_lfm_count: number | null
+    } | null
 }
 
 interface AveragePopulationEndpointSchema {

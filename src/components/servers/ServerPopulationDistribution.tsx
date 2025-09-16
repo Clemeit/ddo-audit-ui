@@ -42,7 +42,7 @@ const ServerPopulationDistribution = () => {
     const lastRange = useRef<RangeEnum | undefined>(range)
 
     const descriptionFormatter = (value: number, total: number) => {
-        return `${value.toFixed(1)} average characters (${((value / total) * 100).toFixed(1)}%)`
+        return `${value.toFixed(1)} average ${dataTypeFilter} (${((value / total) * 100).toFixed(1)}%)`
     }
 
     const rangeToFetchMap = useMemo(
@@ -106,8 +106,11 @@ const ServerPopulationDistribution = () => {
                 )
             )
         }
-        return convertAveragePopulationDataToNivoFormat(averageData)
-    }, [range, serverFilter, dataMap])
+        return convertAveragePopulationDataToNivoFormat(
+            averageData,
+            dataTypeFilter
+        )
+    }, [range, serverFilter, dataMap, dataTypeFilter])
 
     return (
         <>

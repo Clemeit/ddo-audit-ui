@@ -102,10 +102,14 @@ function convertAveragePopulationDataToNivoFormat(
     if (!data || Object.keys(data).length === 0) return []
     const slices: NivoPieSlice[] = []
     Object.entries(data).forEach(([serverName, serverData]) => {
+        const serverValue =
+            dataType === DataTypeFilterEnum.CHARACTERS
+                ? serverData?.avg_character_count
+                : serverData?.avg_lfm_count
         slices.push({
             id: serverName.toLowerCase(),
             label: toSentenceCase(serverName),
-            value: Math.round((serverData ?? 0) * 10) / 10,
+            value: Math.round((serverValue ?? 0) * 10) / 10,
         })
     })
     return slices

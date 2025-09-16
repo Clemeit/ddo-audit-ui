@@ -101,19 +101,19 @@ const DailyPopulationDistribution = () => {
         } else {
             data = dataMap?.[lastRange.current]
         }
-        // if (serverFilter === ServerFilterEnum.ONLY_64_BIT) {
-        //     data = Object.fromEntries(
-        //         Object.entries(data || {}).filter(([serverName]) =>
-        //             SERVERS_64_BITS_LOWER.includes(serverName.toLowerCase())
-        //         )
-        //     )
-        // } else if (serverFilter === ServerFilterEnum.ONLY_32_BIT) {
-        //     data = Object.fromEntries(
-        //         Object.entries(data || {}).filter(([serverName]) =>
-        //             SERVERS_32_BITS_LOWER.includes(serverName.toLowerCase())
-        //         )
-        //     )
-        // }
+        if (serverFilter === ServerFilterEnum.ONLY_64_BIT) {
+            data = Object.fromEntries(
+                Object.entries(data || {}).filter(([serverName]) =>
+                    SERVERS_64_BITS_LOWER.includes(serverName.toLowerCase())
+                )
+            )
+        } else if (serverFilter === ServerFilterEnum.ONLY_32_BIT) {
+            data = Object.fromEntries(
+                Object.entries(data || {}).filter(([serverName]) =>
+                    SERVERS_32_BITS_LOWER.includes(serverName.toLowerCase())
+                )
+            )
+        }
         const out = convertByDayOfWeekPopulationDataToNivoFormat(data)
         console.log("Nivo data:", out)
         return out
