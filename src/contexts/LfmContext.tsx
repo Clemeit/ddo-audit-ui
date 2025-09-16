@@ -88,6 +88,14 @@ interface LfmContextProps {
     setShowEligibilityDividers: (value: boolean) => void
     onlyShowRaids: boolean
     setOnlyShowRaids: (value: boolean) => void
+    hideContentIDontOwn: boolean
+    setHideContentIDontOwn: (value: boolean) => void
+    indicateContentIDontOwn: boolean
+    setIndicateContentIDontOwn: (value: boolean) => void
+    ownedContent: string[] | null
+    setOwnedContent: (value: string[]) => void
+    hideFullGroups: boolean
+    setHideFullGroups: (value: boolean) => void
     resetFilterSettings: () => void
     resetDisplaySettings: () => void
     resetToolSettings: () => void
@@ -117,6 +125,11 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
     const [filterByMyCharacters, setFilterByMyCharacters] =
         useState<boolean>(false)
     const [showNotEligible, setShowNotEligible] = useState<boolean>(true)
+    const [hideContentIDontOwn, setHideContentIDontOwn] =
+        useState<boolean>(false)
+    const [indicateContentIDontOwn, setIndicateContentIDontOwn] =
+        useState<boolean>(false)
+    const [ownedContent, setOwnedContent] = useState<string[] | null>(null)
 
     // display:
     const [fontSize, setFontSize] = useState<number>(DEFAULT_BASE_FONT_SIZE)
@@ -138,6 +151,7 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
     const [showEligibilityDividers, setShowEligibilityDividers] =
         useState<boolean>(true)
     const [onlyShowRaids, setOnlyShowRaids] = useState<boolean>(false)
+    const [hideFullGroups, setHideFullGroups] = useState<boolean>(false)
 
     // tools:
     const [showRaidTimerIndicator, setShowRaidTimerIndicator] =
@@ -365,6 +379,17 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
                 Boolean(settings.filterByMyCharacters ?? false)
             )
             setShowNotEligible(Boolean(settings.showNotEligible ?? true))
+            setHideContentIDontOwn(
+                Boolean(settings.hideContentIDontOwn ?? false)
+            )
+            setIndicateContentIDontOwn(
+                Boolean(settings.indicateContentIDontOwn ?? false)
+            )
+            setOwnedContent(
+                Array.isArray(settings.ownedContent)
+                    ? settings.ownedContent
+                    : []
+            )
 
             const parsedFontSize = parseInt(
                 settings.fontSize ?? String(DEFAULT_BASE_FONT_SIZE)
@@ -426,6 +451,7 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
                 Boolean(settings.showEligibilityDividers ?? true)
             )
             setOnlyShowRaids(Boolean(settings.onlyShowRaids ?? false))
+            setHideFullGroups(Boolean(settings.hideFullGroups ?? false))
         } catch (e) {
             logMessage(
                 "Error applying validated settings, falling back to defaults",
@@ -472,6 +498,9 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
                 maxLevel,
                 filterByMyCharacters,
                 showNotEligible,
+                hideContentIDontOwn,
+                indicateContentIDontOwn,
+                ownedContent,
                 fontSize,
                 panelWidth,
                 showBoundingBoxes,
@@ -496,6 +525,7 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
                 hideAllLevelGroups,
                 showEligibilityDividers,
                 onlyShowRaids,
+                hideFullGroups,
             }
 
             // Validate the settings before saving
@@ -520,6 +550,9 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
         maxLevel,
         filterByMyCharacters,
         showNotEligible,
+        hideContentIDontOwn,
+        indicateContentIDontOwn,
+        ownedContent,
         isLoaded,
         fontSize,
         panelWidth,
@@ -545,6 +578,7 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
         hideAllLevelGroups,
         showEligibilityDividers,
         onlyShowRaids,
+        hideFullGroups,
     ])
 
     return (
@@ -612,6 +646,14 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
                 setShowEligibilityDividers,
                 onlyShowRaids,
                 setOnlyShowRaids,
+                hideContentIDontOwn,
+                setHideContentIDontOwn,
+                indicateContentIDontOwn,
+                setIndicateContentIDontOwn,
+                ownedContent,
+                setOwnedContent,
+                hideFullGroups,
+                setHideFullGroups,
                 resetDisplaySettings,
                 resetFilterSettings,
                 resetToolSettings,

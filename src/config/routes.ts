@@ -96,6 +96,12 @@ const bannerRouteMapping = {
         showButtons: true,
         hideSuggestionButton: true,
     },
+    "owned-content": {
+        title: "Content",
+        subtitle: "Set Owned Content for Eligibility Filtering",
+        miniature: true,
+        showButtons: false,
+    },
 }
 
 export { bannerRouteMapping }

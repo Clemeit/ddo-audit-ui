@@ -58,6 +58,10 @@ const GroupingContainer = ({
         hideGroupsContainingIgnoredCharacters,
         hideAllLevelGroups,
         onlyShowRaids,
+        hideContentIDontOwn,
+        indicateContentIDontOwn,
+        ownedContent,
+        hideFullGroups,
     } = useLfmContext()
     const [ignoreServerDown, setIgnoreServerDown] = useState<boolean>(false)
     const { friends: friendCharacters } = useGetFriends()
@@ -306,6 +310,31 @@ const GroupingContainer = ({
                     }
                 }
 
+                let owned: boolean = true
+                if (ownedContent != undefined) {
+                    if (
+                        selectedQuest &&
+                        selectedQuest.required_adventure_pack
+                    ) {
+                        if (
+                            !ownedContent.includes(
+                                selectedQuest.required_adventure_pack
+                            )
+                        ) {
+                            owned = false
+                        }
+                    }
+                }
+
+                let isFull: boolean = false
+                if (
+                    lfm.members?.length === 5 ||
+                    (lfm.members?.length === 11 &&
+                        selectedQuest?.group_size !== "Raid")
+                ) {
+                    isFull = true
+                }
+
                 return {
                     ...lfm,
                     quest: selectedQuest,
@@ -316,6 +345,8 @@ const GroupingContainer = ({
                         isPostedByFriend,
                         includesFriend,
                         raidActivity: activity,
+                        owned,
+                        isFull,
                     },
                 }
             })
@@ -325,6 +356,14 @@ const GroupingContainer = ({
                 if (onlyShowRaids) {
                     if (lfm.quest?.group_size !== "Raid") return false
                 }
+                if (
+                    hideContentIDontOwn &&
+                    lfm.quest != undefined &&
+                    lfm.quest.required_adventure_pack != undefined &&
+                    !ownedContent?.includes(lfm.quest.required_adventure_pack)
+                )
+                    return false
+                if (hideFullGroups && lfm.metadata.isFull) return false
                 return true
             })
             .sort((lfmA, lfmB) => {
@@ -394,6 +433,9 @@ const GroupingContainer = ({
         onlyShowRaids,
         hideGroupsPostedByIgnoredCharacters,
         hideGroupsContainingIgnoredCharacters,
+        hideContentIDontOwn,
+        indicateContentIDontOwn,
+        hideFullGroups,
     ])
 
     return (
