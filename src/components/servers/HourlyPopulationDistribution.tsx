@@ -8,12 +8,14 @@ import {
 } from "../../utils/nivoUtils"
 import Stack from "../global/Stack"
 import {
-    DataTypeFilterEnum,
     PopulationByHourData,
     PopulationByHourEndpointSchema,
+} from "../../models/Population.ts"
+import {
+    DataTypeFilterEnum,
     RangeEnum,
     ServerFilterEnum,
-} from "../../models/Population.ts"
+} from "../../models/Common.ts"
 import {
     getPopulationByHourForDay,
     getPopulationByHourForWeek,

@@ -4,9 +4,13 @@ import { ServerInfoApiDataModel } from "../../models/Game.ts"
 import {
     AveragePopulationData,
     AveragePopulationEndpointSchema,
-    RangeEnum,
     UniquePopulationData,
 } from "../../models/Population.ts"
+import {
+    DataTypeFilterEnum,
+    RangeEnum,
+    ServerFilterEnum,
+} from "../../models/Common.ts"
 import {
     getAveragePopulationWeek,
     getAveragePopulationQuarter,

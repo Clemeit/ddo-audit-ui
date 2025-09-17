@@ -3,9 +3,13 @@ import { PopulationPointInTime } from "../models/Game"
 import {
     AveragePopulationData,
     PopulationByDayOfWeekData,
-    DataTypeFilterEnum,
     PopulationByHourData,
 } from "../models/Population"
+import {
+    DataTypeFilterEnum,
+    RangeEnum,
+    ServerFilterEnum,
+} from "../models/Common.ts"
 import { numberToDayOfWeek } from "./dateUtils"
 import { toSentenceCase } from "./stringUtils"
 import { toZonedTime } from "date-fns-tz"

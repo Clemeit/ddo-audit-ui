@@ -4,7 +4,7 @@ import {
     DataTypeFilterEnum,
     RangeEnum,
     ServerFilterEnum,
-} from "../../models/Population.ts"
+} from "../../models/Common.ts"
 import { toSentenceCase } from "../../utils/stringUtils.ts"
 import { DAYS_OF_WEEK } from "../../constants/dates.ts"
 

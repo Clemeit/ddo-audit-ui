@@ -8,10 +8,12 @@ import Stack from "../global/Stack"
 import {
     AveragePopulationData,
     AveragePopulationEndpointSchema,
+} from "../../models/Population.ts"
+import {
     DataTypeFilterEnum,
     RangeEnum,
     ServerFilterEnum,
-} from "../../models/Population.ts"
+} from "../../models/Common.ts"
 import {
     getAveragePopulationWeek,
     getAveragePopulationQuarter,

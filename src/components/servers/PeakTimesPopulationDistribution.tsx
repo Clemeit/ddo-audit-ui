@@ -1,10 +1,10 @@
 import React, { useEffect, useMemo, useState } from "react"
+import { PopulationByHourAndDayOfWeekData } from "../../models/Population"
 import {
     DataTypeFilterEnum,
-    PopulationByHourAndDayOfWeekData,
     RangeEnum,
     ServerFilterEnum,
-} from "../../models/Population"
+} from "../../models/Common.ts"
 import { getPopulationByHourAndDayOfWeekForRange } from "../../services/populationService"
 import FilterSelection from "../charts/FilterSelection"
 import { ResponsiveHeatMap } from "@nivo/heatmap"

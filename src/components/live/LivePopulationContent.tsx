@@ -7,7 +7,7 @@ import {
     DataTypeFilterEnum,
     RangeEnum,
     ServerFilterEnum,
-} from "../../models/Population.ts"
+} from "../../models/Common.ts"
 import GenericLine from "../charts/GenericLine.tsx"
 import {
     getPopulationData1Day,

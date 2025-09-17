@@ -7,8 +7,8 @@ import {
     AveragePopulationEndpointSchema,
     PopulationByHourAndDayOfWeekEndpointSchema,
     PopulationByHourEndpointSchema,
-    RangeEnum,
 } from "../models/Population.ts"
+import { RangeEnum } from "../models/Common.ts"
 
 import { getRequest } from "./apiHelper.ts"
 
