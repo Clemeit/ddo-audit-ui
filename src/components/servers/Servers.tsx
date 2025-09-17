@@ -21,6 +21,7 @@ import DailyPopulationDistribution from "./DailyPopulationDistribution.tsx"
 import { BOOLEAN_FLAGS } from "../../utils/localStorage.ts"
 import useBooleanFlag from "../../hooks/useBooleanFlags.ts"
 import PeakTimesPopulationDistribution from "./PeakTimesPopulationDistribution.tsx"
+import LevelPopulationDistribution from "./LevelPopulationDistribution.tsx"
 
 const Servers = () => {
     // const [
@@ -100,7 +101,9 @@ const Servers = () => {
                 >
                     <PeakTimesPopulationDistribution />
                 </ContentCluster>
-                <ContentCluster title="Level Distribution"></ContentCluster>
+                <ContentCluster title="Level Distribution">
+                    <LevelPopulationDistribution />
+                </ContentCluster>
                 <ContentCluster title="Race Distribution"></ContentCluster>
                 <ContentCluster title="Primary Class Distribution"></ContentCluster>
                 <ContentCluster title="See Also...">
