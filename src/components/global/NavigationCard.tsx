@@ -18,6 +18,7 @@ import { ReactComponent as Health } from "../../assets/svg/health.svg"
 import { ReactComponent as Ignore } from "../../assets/svg/ignore.svg"
 import { ReactComponent as Notifications } from "../../assets/svg/notifications.svg"
 import { ReactComponent as Guild } from "../../assets/svg/guild.svg"
+import { ReactComponent as Content } from "../../assets/svg/content.svg"
 
 import Link from "./Link.tsx"
 import WebLink from "./WebLink.tsx"
@@ -42,6 +43,7 @@ const typeToTitleMap = {
     ignores: "Ignore List",
     notifications: "Notifications",
     guilds: "Guilds",
+    "owned-content": "Owned Content",
 }
 
 const typeToDescriptionMap = {
@@ -66,6 +68,8 @@ const typeToDescriptionMap = {
     ignores: "Hide LFMs posted by certain players or containing certain words.",
     notifications: "Manage LFM and friend push notification preferences.",
     guilds: "Search for guilds, view stats, and see members of your guild.",
+    "owned-content":
+        "Specify which adventure packs you own to filter content appropriately.",
 }
 
 const typeToIconMap = {
@@ -87,6 +91,7 @@ const typeToIconMap = {
     ignores: <Ignore className="shrinkable-icon" />,
     notifications: <Notifications className="shrinkable-icon" />,
     guilds: <Guild className="shrinkable-icon" />,
+    "owned-content": <Content className="shrinkable-icon" />,
 }
 
 interface Props {

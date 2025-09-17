@@ -236,7 +236,7 @@ const Friends = () => {
                             A visual indication when a friend is part of a group
                         </li>
                         <li>
-                            A visual indicationin the Who List when a friend is
+                            A visual indication in the Who List when a friend is
                             online
                         </li>
                         <li>
