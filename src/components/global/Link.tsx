@@ -9,6 +9,7 @@ interface Props {
     children: React.ReactNode
     noDecoration?: boolean
     disabled?: boolean
+    silentDisabled?: boolean
 }
 
 const Link = ({
@@ -17,6 +18,7 @@ const Link = ({
     children,
     noDecoration,
     disabled,
+    silentDisabled = false,
 }: Props) => {
     const handleClick = () => {
         logMessage("Link clicked", "info", {
@@ -29,7 +31,7 @@ const Link = ({
     return (
         <ReactLink
             to={to}
-            className={`link ${className ? className : ""} ${disabled ? "disabled" : ""}`}
+            className={`link ${className ? className : ""} ${disabled ? "disabled" : ""} ${silentDisabled ? "silent-disabled" : ""}`}
             onClick={handleClick}
             style={{
                 textDecoration: noDecoration ? "none" : "",

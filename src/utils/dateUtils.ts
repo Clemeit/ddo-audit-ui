@@ -1,3 +1,5 @@
+import { DAYS_OF_WEEK } from "../constants/dates"
+
 const dateToLongString = (date?: Date): string => {
     if (!date) return "Unknown date"
 
@@ -25,4 +27,30 @@ const dateToLongStringWithTime = (date?: Date): string => {
     })
 }
 
-export { dateToLongString, dateToLongStringWithTime }
+const numberToDayOfWeek = (day: number): string => {
+    return DAYS_OF_WEEK[day] || "Unknown"
+}
+
+const dayOfWeekToNumber = (dayOfWeek: string): number => {
+    return DAYS_OF_WEEK.findIndex(
+        (day) => day.toLowerCase() === dayOfWeek?.toLowerCase()
+    )
+}
+
+const numberToHourOfDay = (hour: number): string => {
+    const date = new Date()
+    date.setHours(hour)
+
+    return date.toLocaleString("en-US", {
+        hour: "numeric",
+        hour12: true,
+    })
+}
+
+export {
+    dateToLongString,
+    dateToLongStringWithTime,
+    numberToDayOfWeek,
+    numberToHourOfDay,
+    dayOfWeekToNumber,
+}

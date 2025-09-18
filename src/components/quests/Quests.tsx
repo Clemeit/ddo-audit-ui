@@ -7,8 +7,8 @@ const Quests = () => {
         <Page
             title="Quest Activity and Trends"
             description="Explore quest activity and trends across DDO servers, including completion time distribution and popularity."
+            pageMessages={[<WIPPageMessage />]}
         >
-            <WIPPageMessage />
             <ContentClusterGroup></ContentClusterGroup>
         </Page>
     )

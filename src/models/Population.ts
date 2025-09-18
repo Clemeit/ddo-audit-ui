@@ -21,7 +21,10 @@ interface UniquePopulationEndpointSchema {
 }
 
 interface AveragePopulationData {
-    [serverName: string]: number | null
+    [serverName: string]: {
+        avg_character_count: number | null
+        avg_lfm_count: number | null
+    } | null
 }
 
 interface AveragePopulationEndpointSchema {
@@ -30,7 +33,10 @@ interface AveragePopulationEndpointSchema {
 
 interface PopulationByHourData {
     [serverName: string]: {
-        [hour: string]: number | null
+        [hour: string]: {
+            avg_character_count: number | null
+            avg_lfm_count: number | null
+        }
     }
 }
 
@@ -38,23 +44,32 @@ interface PopulationByHourEndpointSchema {
     data: PopulationByHourData
 }
 
-export enum RangeEnum {
-    DAY = "day",
-    WEEK = "week",
-    MONTH = "month",
-    QUARTER = "quarter",
-    YEAR = "year",
+interface PopulationByDayOfWeekData {
+    [serverName: string]: {
+        [day: string]: {
+            avg_character_count: number | null
+            avg_lfm_count: number | null
+        }
+    }
 }
 
-export enum ServerFilterEnum {
-    ALL = "All",
-    ONLY_64_BIT = "Only 64-Bit",
-    ONLY_32_BIT = "Only 32-Bit",
+interface PopulationByDayOfWeekEndpointSchema {
+    data: PopulationByDayOfWeekData
 }
 
-export enum DataTypeFilterEnum {
-    CHARACTERS = "Characters",
-    LFMS = "LFMs",
+interface PopulationByHourAndDayOfWeekData {
+    [serverName: string]: {
+        [day: string]: {
+            [hour: string]: {
+                avg_character_count: number | null
+                avg_lfm_count: number | null
+            }
+        }
+    }
+}
+
+interface PopulationByHourAndDayOfWeekEndpointSchema {
+    data: PopulationByHourAndDayOfWeekData
 }
 
 export type {
@@ -66,4 +81,8 @@ export type {
     AveragePopulationData,
     PopulationByHourEndpointSchema,
     PopulationByHourData,
+    PopulationByDayOfWeekEndpointSchema,
+    PopulationByDayOfWeekData,
+    PopulationByHourAndDayOfWeekEndpointSchema,
+    PopulationByHourAndDayOfWeekData,
 }

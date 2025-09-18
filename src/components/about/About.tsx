@@ -12,30 +12,14 @@ import {
 import WebLink from "../global/WebLink.tsx"
 import Stack from "../global/Stack.tsx"
 import ColoredText from "../global/ColoredText.tsx"
-import { AlphaReleasePageMessage } from "../global/CommonMessages.tsx"
-import useBooleanFlag from "../../hooks/useBooleanFlags.ts"
-import { BOOLEAN_FLAGS } from "../../utils/localStorage.ts"
 import { getBuildTime, getCommitHash } from "../../utils/logUtils.ts"
 
 const About = () => {
-    const [hideAlphaRelease, setHideAlphaRelease] = useBooleanFlag(
-        BOOLEAN_FLAGS.hideAlphaRelease
-    )
-
     return (
         <Page
             title="About DDO Audit"
             description="Learn about the DDO Audit project! Read our mission statement, methodology, and contributing parties."
         >
-            {!hideAlphaRelease && (
-                <div className="alpha-release-message">
-                    <AlphaReleasePageMessage
-                        onDismiss={() => {
-                            setHideAlphaRelease(true)
-                        }}
-                    />
-                </div>
-            )}
             <ContentClusterGroup>
                 <ContentCluster title="Mission">
                     <p>

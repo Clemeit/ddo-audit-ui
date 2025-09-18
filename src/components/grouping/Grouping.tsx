@@ -33,8 +33,6 @@ import "./Grouping.css"
 import Skeleton from "../global/Skeleton.tsx"
 import ComponentErrorBoundary from "../global/ComponentErrorBoundary.tsx"
 import GroupingErrorFallback from "./GroupingErrorFallback.tsx"
-
-import { AlphaReleasePageMessage } from "../global/CommonMessages.tsx"
 import { BOOLEAN_FLAGS } from "../../utils/localStorage.ts"
 import useBooleanFlag from "../../hooks/useBooleanFlags.ts"
 import FauxLink from "../global/FauxLink.tsx"
@@ -307,20 +305,15 @@ const GroupingContent = () => {
             title="DDO Live LFM Viewer"
             description="View a live LFM panel to find public groups - before you even log in! See which groups are currently looking for more players and what content is currently being run."
             logo="/icons/grouping-192px.png"
+            pageMessages={() => {
+                const messages = []
+                if (loadingFailed())
+                    messages.push(<DataLoadingErrorPageMessage />)
+                if (lfmState === LoadingState.Haulted)
+                    messages.push(<LiveDataHaultedPageMessage />)
+                return messages
+            }}
         >
-            {!hideAlphaRelease && (
-                <div className="alpha-release-message">
-                    <AlphaReleasePageMessage
-                        onDismiss={() => {
-                            setHideAlphaRelease(true)
-                        }}
-                    />
-                </div>
-            )}
-            {loadingFailed() && <DataLoadingErrorPageMessage />}
-            {lfmState === LoadingState.Haulted && (
-                <LiveDataHaultedPageMessage />
-            )}
             <ContentClusterGroup>
                 <ContentCluster title="Select a Server">
                     <NavCardCluster>

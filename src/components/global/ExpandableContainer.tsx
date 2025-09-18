@@ -2,9 +2,11 @@ import React, { useState } from "react"
 import { ReactComponent as Expand } from "../../assets/svg/expand.svg"
 import { ReactComponent as Contract } from "../../assets/svg/contract.svg"
 import "./ExpandableContainer.css"
+import Stack from "./Stack"
 
-interface Props {
-    title?: React.ReactElement
+interface Props extends React.HTMLAttributes<HTMLDivElement> {
+    title?: string
+    icon?: React.ReactNode
     children?: React.ReactNode
     defaultState?: boolean
     stateChangeCallback?: (isOpen: boolean) => void
@@ -12,11 +14,13 @@ interface Props {
 }
 
 const ExpandableContainer = ({
-    title = <span>Expandable Container</span>,
+    title = "Expandable Container",
+    icon,
     children,
     defaultState = false,
     stateChangeCallback = () => {},
     className = "",
+    ...rest
 }: Props) => {
     const [isOpen, setIsOpen] = useState(defaultState)
 
@@ -25,12 +29,18 @@ const ExpandableContainer = ({
     }, [isOpen])
 
     return (
-        <div className={`expandable-container ${className ? className : ""}`}>
+        <div
+            className={`expandable-container ${className ? className : ""}`}
+            {...rest}
+        >
             <div
                 className="expandable-container-header"
                 onClick={() => setIsOpen(!isOpen)}
             >
-                <span>{title}</span>
+                <Stack direction="row" align="center" gap="5px">
+                    {icon && icon}
+                    {title}
+                </Stack>
                 {isOpen ? (
                     <Contract className="expandable-container-icon" />
                 ) : (
@@ -38,8 +48,11 @@ const ExpandableContainer = ({
                 )}
             </div>
             {isOpen && (
-                <div className="expandable-container-content drop-shadow">
-                    {children}
+                <div>
+                    <hr style={{ margin: "0px" }} />
+                    <div className="expandable-container-content">
+                        {children}
+                    </div>
                 </div>
             )}
         </div>

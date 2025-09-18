@@ -4,13 +4,13 @@ import {
     UniquePopulationEndpointResponse,
 } from "../../models/Game.ts"
 import {
-    getTotalPopulation1Month,
-    getTotalPopulation1Week,
-    getUniquePopulation1Quarter,
+    getTotalPopulationForRange,
+    getUniquePopulationForRange,
 } from "../../services/populationService.ts"
 import { NewsItem } from "../../models/Service.ts"
 import { getNews } from "../../services/serviceService.ts"
 import logMessage from "../../utils/logUtils.ts"
+import { RangeEnum } from "../../models/Common.ts"
 
 export const useLiveData = () => {
     const [populationTotalsData1Week, setPopulationTotalsData1Week] =
@@ -35,10 +35,19 @@ export const useLiveData = () => {
                     news,
                     uniquePopulationQuarter,
                 ] = await Promise.all([
-                    getTotalPopulation1Week(controller.signal),
-                    getTotalPopulation1Month(controller.signal),
+                    getTotalPopulationForRange(
+                        RangeEnum.WEEK,
+                        controller.signal
+                    ),
+                    getTotalPopulationForRange(
+                        RangeEnum.MONTH,
+                        controller.signal
+                    ),
                     getNews(controller.signal),
-                    getUniquePopulation1Quarter(controller.signal),
+                    getUniquePopulationForRange(
+                        RangeEnum.QUARTER,
+                        controller.signal
+                    ),
                 ])
 
                 if (!controller.signal.aborted) {

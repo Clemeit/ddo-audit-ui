@@ -3,13 +3,13 @@ import Stack from "../global/Stack.tsx"
 import { dateToLongStringWithTime } from "../../utils/dateUtils.ts"
 import { toSentenceCase } from "../../utils/stringUtils.ts"
 import { SliceData } from "@nivo/line"
-import { NivoDateSeries } from "../../utils/nivoUtils.ts"
-import "./LineChartTooltip.css"
+import { NivoDateSeries, NivoNumberSeries } from "../../utils/nivoUtils.ts"
+import "./GenericTooltip.css"
 
 interface LineChartTooltipProps {
-    slice: SliceData<NivoDateSeries>
+    slice: SliceData<NivoDateSeries | NivoNumberSeries>
     getServerColor: (serverId: string) => string
-    dateFormatter?: (date: Date) => string
+    tooltipTitleFormatter?: (data: any) => string
     yFormatter?: (value: number) => string
     showTotal?: boolean
 }
@@ -60,7 +60,8 @@ const calculateTooltipPosition = (mouseX: number): string => {
 const LineChartTooltip: React.FC<LineChartTooltipProps> = ({
     slice,
     getServerColor,
-    dateFormatter = dateToLongStringWithTime,
+    tooltipTitleFormatter = (data: any) =>
+        dateToLongStringWithTime(new Date(data)),
     yFormatter = (value: number) => value.toString(),
     showTotal = false,
 }) => {
@@ -82,14 +83,18 @@ const LineChartTooltip: React.FC<LineChartTooltipProps> = ({
             }}
         >
             <div className="tooltip-header">
-                {dateFormatter(new Date(slice.points[0].data.x))}
+                {tooltipTitleFormatter(slice.points[0].data.x)}
                 <hr style={{ margin: "4px 0 10px 0" }} />
             </div>
             <div className="tooltip-content">
                 {[...slice.points]
                     .sort((a, b) => Number(b.data.y) - Number(a.data.y))
                     .map((point) => (
-                        <Stack key={point.id} justify="space-between">
+                        <Stack
+                            key={point.id}
+                            justify="space-between"
+                            gap="10px"
+                        >
                             <Stack direction="row" gap="5px">
                                 <div
                                     className="tooltip-series-color"
@@ -108,7 +113,11 @@ const LineChartTooltip: React.FC<LineChartTooltipProps> = ({
                 {showTotal && (
                     <>
                         <hr style={{ margin: "4px 0 4px 0" }} />
-                        <Stack justify="space-between" align="center">
+                        <Stack
+                            justify="space-between"
+                            align="center"
+                            gap="10px"
+                        >
                             <span>Total</span>
                             <span>{yFormatter(total)}</span>
                         </Stack>

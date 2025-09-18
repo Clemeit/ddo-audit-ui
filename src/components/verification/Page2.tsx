@@ -122,18 +122,8 @@ const Page2 = ({
                     <ExpandableContainer
                         defaultState={firstTime}
                         className="demo-container"
-                        title={
-                            <div
-                                style={{
-                                    display: "flex",
-                                    alignItems: "center",
-                                    gap: "5px",
-                                }}
-                            >
-                                <Info style={{ fill: "var(--info)" }} /> Show me
-                                how
-                            </div>
-                        }
+                        title="Show me how"
+                        icon={<Info style={{ fill: "var(--info)" }} />}
                     >
                         <div className="remove-comment-field-demo" />
                     </ExpandableContainer>

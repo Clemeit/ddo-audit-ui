@@ -27,7 +27,6 @@ import NavigationCard from "../global/NavigationCard.tsx"
 import useGetRegisteredCharacters from "../../hooks/useGetRegisteredCharacters.ts"
 import useGetFriends from "../../hooks/useGetFriends.ts"
 import Skeleton from "../global/Skeleton.tsx"
-import { AlphaReleasePageMessage } from "../global/CommonMessages.tsx"
 import { BOOLEAN_FLAGS } from "../../utils/localStorage.ts"
 import useBooleanFlag from "../../hooks/useBooleanFlags.ts"
 import Spacer from "../global/Spacer.tsx"
@@ -205,29 +204,26 @@ const Who = () => {
         })
     }
 
-    const [hideAlphaRelease, setHideAlphaRelease] = useBooleanFlag(
-        BOOLEAN_FLAGS.hideAlphaRelease
-    )
-
     return (
         <Page
             title="DDO Live Character Viewer"
             description="Browse players from any server with a live character viewer. Are your friends online? Is your guild forming up for a late-night raid? Now you know!"
             logo="/icons/who-192px.png"
+            pageMessages={() => {
+                const messages = []
+                if (loadingFailed()) {
+                    messages.push(
+                        <DataLoadingErrorPageMessage key="data-error" />
+                    )
+                }
+                if (serverInfoState === LoadingState.Haulted) {
+                    messages.push(
+                        <LiveDataHaultedPageMessage key="live-haulted" />
+                    )
+                }
+                return messages
+            }}
         >
-            {!hideAlphaRelease && (
-                <div className="alpha-release-message">
-                    <AlphaReleasePageMessage
-                        onDismiss={() => {
-                            setHideAlphaRelease(true)
-                        }}
-                    />
-                </div>
-            )}
-            {loadingFailed() && <DataLoadingErrorPageMessage />}
-            {serverInfoState === LoadingState.Haulted && (
-                <LiveDataHaultedPageMessage />
-            )}
             <ContentClusterGroup>
                 <ContentCluster title="Select a Server">
                     <NavCardCluster>

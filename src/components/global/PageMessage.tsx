@@ -7,7 +7,7 @@ import { ReactComponent as SuccessSVG } from "../../assets/svg/checkmark.svg"
 import { ReactComponent as CloseSVG } from "../../assets/svg/close.svg"
 import Stack from "../global/Stack.tsx"
 
-interface Props {
+interface Props extends React.HTMLAttributes<HTMLDivElement> {
     type?: "error" | "warning" | "info" | "success"
     title?: string
     message?: React.ReactNode
@@ -23,15 +23,17 @@ const PageMessage = ({
     width = "100%",
     maxWidth = "unset",
     onDismiss,
+    ...rest
 }: Props) => {
     return (
         <div
-            className={`page-message ${type}`}
             style={{
                 border: `1px solid var(--${type})`,
                 width,
                 maxWidth,
             }}
+            {...rest}
+            className={`page-message ${type} ${rest.className || ""}`.trim()}
         >
             {onDismiss && (
                 <div

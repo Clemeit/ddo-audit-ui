@@ -4,9 +4,9 @@ import { getServerIndex } from "../constants/servers"
 function getServerColor(serverName: string): string {
     const index = getServerIndex(serverName)
     if (index === -1) {
-        return "#fff"
+        return "hsl(0, 0%, 100%)"
     }
-    return SERVER_COLORS[index] || "#fff"
+    return SERVER_COLORS[index] || "hsl(0, 0%, 100%)"
 }
 
 export { getServerColor }
