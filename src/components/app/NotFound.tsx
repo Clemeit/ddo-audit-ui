@@ -5,7 +5,11 @@ import Link from "../global/Link.tsx"
 
 const NotFound = () => {
     return (
-        <Page title="Not Found" description="This page does not exist.">
+        <Page
+            title="Not Found"
+            description="This page does not exist."
+            is404Page
+        >
             <ContentCluster title="Not Found">
                 <p>
                     The page you are looking for does not exist or hasnot been

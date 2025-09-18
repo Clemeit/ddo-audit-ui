@@ -20,17 +20,11 @@ interface Props {
     noPadding?: boolean
     contentMaxWidth?: boolean
     logo?: string
-    /**
-     * Optional page-level messages. Can be:
-     *  - a single ReactNode
-     *  - an array of ReactNodes
-     *  - a function returning either of the above (evaluated inside Page each render)
-     * Falsy entries (null/undefined/false) are stripped automatically.
-     */
     pageMessages?:
         | React.ReactNode
         | React.ReactNode[]
         | (() => React.ReactNode | React.ReactNode[])
+    is404Page?: boolean
 }
 
 const Page = ({
@@ -44,6 +38,7 @@ const Page = ({
     contentMaxWidth = false,
     logo = "/icons/logo-192px.png",
     pageMessages,
+    is404Page = false,
 }: Props) => {
     const isOnline = useNetworkStatus()
 
@@ -114,6 +109,11 @@ const Page = ({
                 <meta name="twitter:title" content={title} />
                 <meta name="twitter:description" content={description} />
                 <meta name="twitter:image" content={absoluteLogoUrl} />
+
+                {is404Page && <meta name="robots" content="noindex" />}
+                {is404Page && (
+                    <meta name="prerender-status-code" content="404" />
+                )}
             </Helmet>
             <BreadcrumbSchema />
             <div
