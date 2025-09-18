@@ -21,7 +21,10 @@ interface Props {
     setDayFilter?: (value: string) => void
     displayType?: string
     setDisplayType?: (value: string) => void
+    normalized?: boolean
+    setNormalized?: (value: boolean) => void
     rangeOptions?: RangeEnum[]
+    displayTypeOptions?: string[]
 }
 
 const FilterSelection = ({
@@ -37,14 +40,16 @@ const FilterSelection = ({
     setDayFilter,
     displayType,
     setDisplayType,
+    normalized,
+    setNormalized,
     rangeOptions = Object.values(RangeEnum) as RangeEnum[],
+    displayTypeOptions = ["Stacked", "Grouped"],
 }: Props) => {
     const SERVER_FILTER_OPTIONS = Object.values(ServerFilterEnum) as string[]
     const DATA_TYPE_FILTER_OPTIONS = Object.values(
         DataTypeFilterEnum
     ) as string[]
     const DAY_FILTER_OPTIONS = ["All", ...DAYS_OF_WEEK]
-    const DISPLAY_TYPES = ["Stacked", "Grouped"]
 
     return (
         <Stack
@@ -99,7 +104,21 @@ const FilterSelection = ({
                     value: displayType,
                     onChange: (e: React.ChangeEvent<HTMLSelectElement>) =>
                         setDisplayType(e.target.value),
-                    options: DISPLAY_TYPES,
+                    options: displayTypeOptions,
+                    optionLabel: (opt: string) => opt,
+                },
+                {
+                    label: "Normalized",
+                    id: "normalizedFilter",
+                    value:
+                        normalized === undefined
+                            ? undefined
+                            : normalized
+                              ? "Yes"
+                              : "No",
+                    onChange: (e: React.ChangeEvent<HTMLSelectElement>) =>
+                        setNormalized(e.target.value === "Yes"),
+                    options: ["Yes", "No"],
                     optionLabel: (opt: string) => opt,
                 },
             ]

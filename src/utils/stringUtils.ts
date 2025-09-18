@@ -4,6 +4,14 @@ function toSentenceCase(str: string): string {
     return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase()
 }
 
+function toTitleCase(str: string): string {
+    return str
+        .toLowerCase()
+        .split(" ")
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(" ")
+}
+
 function toPossessiveCase(str: string): string {
     return str.endsWith("s") ? `${str}'` : `${str}'s`
 }
@@ -156,7 +164,14 @@ function getTextSize(
 }
 
 function pluralize(word: string, count: number | undefined): string {
-    return count === 1 ? word : `${word}s`
+    if (count === undefined || count === 1) return word
+    if (word.endsWith("y") && !word.endsWith("ay") && !word.endsWith("ey")) {
+        return word.slice(0, -1) + "ies"
+    }
+    if (word.endsWith("s") || word.endsWith("x") || word.endsWith("z")) {
+        return word + "es"
+    }
+    return word + "s"
 }
 
 function levenshteinDistance(s: string, t: string): number {
@@ -189,4 +204,5 @@ export {
     pluralize,
     truncateText,
     levenshteinDistance,
+    toTitleCase,
 }

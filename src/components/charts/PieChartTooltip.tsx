@@ -5,12 +5,14 @@ import { NivoPieSlice } from "../../utils/nivoUtils"
 interface PieChartTooltipProps {
     datum: ComputedDatum<NivoPieSlice>
     total?: number
+    titleFormatter?: (value: any) => string
     descriptionFormatter?: (value: number, total: number) => string
 }
 
 const PieChartTooltip = ({
     datum,
     total,
+    titleFormatter = (value: string) => value,
     descriptionFormatter = (value: number, total: number) => value.toString(),
 }: PieChartTooltipProps) => {
     return (
@@ -32,7 +34,7 @@ const PieChartTooltip = ({
                 whiteSpace: "nowrap",
             }}
         >
-            <strong>{datum.label}</strong>:{" "}
+            <strong>{titleFormatter(datum.label)}</strong>:{" "}
             {descriptionFormatter(datum.value, total ?? 1)}
         </div>
     )

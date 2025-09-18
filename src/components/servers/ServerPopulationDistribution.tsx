@@ -14,13 +14,7 @@ import {
     RangeEnum,
     ServerFilterEnum,
 } from "../../models/Common.ts"
-import {
-    getAveragePopulationWeek,
-    getAveragePopulationQuarter,
-    getAveragePopulationDay,
-    getAveragePopulationMonth,
-    getAveragePopulationYear,
-} from "../../services/populationService.ts"
+import { getAveragePopulationForRange } from "../../services/populationService.ts"
 import { toSentenceCase } from "../../utils/stringUtils.ts"
 import {
     SERVERS_64_BITS_LOWER,
@@ -50,15 +44,15 @@ const ServerPopulationDistribution = () => {
     const rangeToFetchMap = useMemo(
         () => ({
             [RangeEnum.DAY]: (signal: AbortSignal) =>
-                getAveragePopulationDay(signal),
+                getAveragePopulationForRange(RangeEnum.DAY, signal),
             [RangeEnum.WEEK]: (signal: AbortSignal) =>
-                getAveragePopulationWeek(signal),
+                getAveragePopulationForRange(RangeEnum.WEEK, signal),
             [RangeEnum.MONTH]: (signal: AbortSignal) =>
-                getAveragePopulationMonth(signal),
+                getAveragePopulationForRange(RangeEnum.MONTH, signal),
             [RangeEnum.QUARTER]: (signal: AbortSignal) =>
-                getAveragePopulationQuarter(signal),
+                getAveragePopulationForRange(RangeEnum.QUARTER, signal),
             [RangeEnum.YEAR]: (signal: AbortSignal) =>
-                getAveragePopulationYear(signal),
+                getAveragePopulationForRange(RangeEnum.YEAR, signal),
         }),
         []
     )

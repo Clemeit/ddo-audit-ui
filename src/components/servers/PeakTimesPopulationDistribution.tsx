@@ -7,7 +7,7 @@ import {
 } from "../../models/Common.ts"
 import { getPopulationByHourAndDayOfWeekForRange } from "../../services/populationService"
 import FilterSelection from "../charts/FilterSelection"
-import { ResponsiveHeatMap } from "@nivo/heatmap"
+import { ResponsiveHeatMap, TooltipProps } from "@nivo/heatmap"
 import {
     SERVERS_32_BITS_LOWER,
     SERVERS_64_BITS_LOWER,
@@ -16,6 +16,24 @@ import { useAppContext } from "../../contexts/AppContext"
 import TimezoneSelect from "../global/TimezoneSelect"
 import { dayOfWeekToNumber, numberToHourOfDay } from "../../utils/dateUtils"
 import { toSentenceCase } from "../../utils/stringUtils"
+import "../charts/GenericTooltip.css"
+
+const PeakTimesTooltip: React.FC<TooltipProps<any>> = ({ cell }) => {
+    return (
+        <div className="tooltip-container">
+            <div className="tooltip-header">
+                {toSentenceCase(cell.serieId)}{" "}
+                {numberToHourOfDay(cell.data.x ?? 0)}
+                <hr style={{ margin: "4px 0 10px 0" }} />
+            </div>
+            <div className="tooltip-content">
+                <div className="tooltip-row">
+                    <span>{cell.value === 1 ? "Peak Hours" : "Off-Peak"}</span>
+                </div>
+            </div>
+        </div>
+    )
+}
 
 const PeakTimesPopulationDistribution = () => {
     const { timezoneOverride } = useAppContext()
@@ -379,6 +397,7 @@ const PeakTimesPopulationDistribution = () => {
                             },
                         },
                     }}
+                    tooltip={({ cell }) => <PeakTimesTooltip cell={cell} />}
                 />
             </div>
             <TimezoneSelect />

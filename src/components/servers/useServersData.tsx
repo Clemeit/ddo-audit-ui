@@ -1,24 +1,9 @@
-import { useEffect, useMemo, useRef, useState } from "react"
+import { useEffect, useState } from "react"
 import { getServerInfo } from "../../services/gameService.ts"
 import { ServerInfoApiDataModel } from "../../models/Game.ts"
-import {
-    AveragePopulationData,
-    AveragePopulationEndpointSchema,
-    UniquePopulationData,
-} from "../../models/Population.ts"
-import {
-    DataTypeFilterEnum,
-    RangeEnum,
-    ServerFilterEnum,
-} from "../../models/Common.ts"
-import {
-    getAveragePopulationWeek,
-    getAveragePopulationQuarter,
-    getUniquePopulation1Quarter,
-    getAveragePopulationDay,
-    getAveragePopulationMonth,
-    getAveragePopulationYear,
-} from "../../services/populationService.ts"
+import { UniquePopulationData } from "../../models/Population.ts"
+import { RangeEnum } from "../../models/Common.ts"
+import { getUniquePopulationForRange } from "../../services/populationService.ts"
 
 const useServersData = () => {
     const [isLoading, setIsLoading] = useState<boolean | undefined>(undefined)
@@ -38,7 +23,10 @@ const useServersData = () => {
             setIsLoading(true)
             const [serverInfoData, uniqueData] = await Promise.all([
                 getServerInfo(controller.signal),
-                getUniquePopulation1Quarter(controller.signal),
+                getUniquePopulationForRange(
+                    RangeEnum.QUARTER,
+                    controller.signal
+                ),
             ])
             if (!controller.signal.aborted) {
                 setServerInfo(serverInfoData)

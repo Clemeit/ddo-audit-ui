@@ -4,7 +4,7 @@ import { dateToLongStringWithTime } from "../../utils/dateUtils.ts"
 import { toSentenceCase } from "../../utils/stringUtils.ts"
 import { SliceData } from "@nivo/line"
 import { NivoDateSeries, NivoNumberSeries } from "../../utils/nivoUtils.ts"
-import "./LineChartTooltip.css"
+import "./GenericTooltip.css"
 
 interface LineChartTooltipProps {
     slice: SliceData<NivoDateSeries | NivoNumberSeries>
@@ -90,7 +90,11 @@ const LineChartTooltip: React.FC<LineChartTooltipProps> = ({
                 {[...slice.points]
                     .sort((a, b) => Number(b.data.y) - Number(a.data.y))
                     .map((point) => (
-                        <Stack key={point.id} justify="space-between">
+                        <Stack
+                            key={point.id}
+                            justify="space-between"
+                            gap="10px"
+                        >
                             <Stack direction="row" gap="5px">
                                 <div
                                     className="tooltip-series-color"
@@ -109,7 +113,11 @@ const LineChartTooltip: React.FC<LineChartTooltipProps> = ({
                 {showTotal && (
                     <>
                         <hr style={{ margin: "4px 0 4px 0" }} />
-                        <Stack justify="space-between" align="center">
+                        <Stack
+                            justify="space-between"
+                            align="center"
+                            gap="10px"
+                        >
                             <span>Total</span>
                             <span>{yFormatter(total)}</span>
                         </Stack>

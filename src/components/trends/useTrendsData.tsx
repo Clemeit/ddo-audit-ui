@@ -1,10 +1,8 @@
 import { useEffect, useState } from "react"
 import { PopulationPointInTime } from "../../models/Game"
-import {
-    getPopulationData1Week,
-    getPopulationData1Month,
-} from "../../services/populationService.ts"
+import { getPopulationTimeseriesForRange } from "../../services/populationService.ts"
 import logMessage from "../../utils/logUtils"
+import { RangeEnum } from "../../models/Common.ts"
 
 const useTrendsData = () => {
     const [populationData1Week, setPopulationData1Week] = useState<
@@ -13,8 +11,8 @@ const useTrendsData = () => {
     const [populationData1Month, setPopulationData1Month] = useState<
         PopulationPointInTime[]
     >([])
-    const [loading, setLoading] = useState(true)
-    const [error, setError] = useState<string | null>(null)
+    const [isLoading, setIsLoading] = useState(true)
+    const [isError, setIsError] = useState<string | null>(null)
 
     // Fetch data logic here
     useEffect(() => {
@@ -22,11 +20,17 @@ const useTrendsData = () => {
 
         ;(async () => {
             try {
-                setLoading(true)
+                setIsLoading(true)
                 const [populationData1Week, populationData1Month] =
                     await Promise.all([
-                        getPopulationData1Week(controller.signal),
-                        getPopulationData1Month(controller.signal),
+                        getPopulationTimeseriesForRange(
+                            RangeEnum.MONTH,
+                            controller.signal
+                        ),
+                        getPopulationTimeseriesForRange(
+                            RangeEnum.YEAR,
+                            controller.signal
+                        ),
                     ])
 
                 if (!controller.signal.aborted) {
@@ -37,14 +41,14 @@ const useTrendsData = () => {
                 if (!controller.signal.aborted) {
                     const errorMessage =
                         e instanceof Error ? e.message : String(e)
-                    setError(errorMessage)
+                    setIsError(errorMessage)
                     logMessage("Error fetching trends data", "error", {
                         metadata: { error: errorMessage },
                     })
                 }
             } finally {
                 if (!controller.signal.aborted) {
-                    setLoading(false)
+                    setIsLoading(false)
                 }
             }
         })()
@@ -53,8 +57,8 @@ const useTrendsData = () => {
     return {
         populationData1Week,
         populationData1Month,
-        loading,
-        error,
+        loading: isLoading,
+        error: isError,
     }
 }
 

@@ -9,11 +9,7 @@ import {
     ServerFilterEnum,
 } from "../../models/Common.ts"
 import GenericLine from "../charts/GenericLine.tsx"
-import {
-    getPopulationData1Day,
-    getPopulationData1Month,
-    getPopulationData1Week,
-} from "../../services/populationService.ts"
+import { getPopulationTimeseriesForRange } from "../../services/populationService.ts"
 import { convertToNivoFormat, NivoDateSeries } from "../../utils/nivoUtils.ts"
 import {
     SERVERS_32_BITS_LOWER,
@@ -78,11 +74,11 @@ const LivePopulationContent = ({ serverInfoData }: Props) => {
     const rangeToFetchMap = useMemo(
         () => ({
             [RangeEnum.DAY]: (signal: AbortSignal) =>
-                getPopulationData1Day(signal),
+                getPopulationTimeseriesForRange(RangeEnum.DAY, signal),
             [RangeEnum.WEEK]: (signal: AbortSignal) =>
-                getPopulationData1Week(signal),
+                getPopulationTimeseriesForRange(RangeEnum.WEEK, signal),
             [RangeEnum.MONTH]: (signal: AbortSignal) =>
-                getPopulationData1Month(signal),
+                getPopulationTimeseriesForRange(RangeEnum.MONTH, signal),
         }),
         []
     )
