@@ -59,6 +59,9 @@ const Guilds = lazy(() =>
 const OwnedContent = lazy(() =>
     lazyRetry(() => import("./components/owned-content/OwnedContent.tsx"))
 )
+const Donated = lazy(() =>
+    lazyRetry(() => import("./components/app/donated/Donated.tsx"))
+)
 // const Trends = lazy(() => lazyRetry(() => import("./components/trends/Trends.tsx")))
 // const Quests = lazy(() => lazyRetry(() => import("./components/quests/Quests.tsx")))
 
@@ -140,6 +143,7 @@ export default createBrowserRouter(
                     </AreaProvider>
                 }
             />
+            <Route path="/donated" element={<Donated />} />
             {/* <Route path="/quests" element={<Quests />} /> */}
             <Route path="/about" element={<About />} />
             <Route path="*" element={<NotFound />} />
