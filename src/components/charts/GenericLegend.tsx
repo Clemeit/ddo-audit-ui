@@ -10,6 +10,7 @@ import { getServerColor } from "../../utils/chartUtils.ts"
 import { SERVER_NAMES_LOWER } from "../../constants/servers.ts"
 import { toSentenceCase } from "../../utils/stringUtils.ts"
 import "./GenericLegend.css"
+import logMessage from "../../utils/logUtils.ts"
 
 interface GenericLegendProps {
     nivoData:
@@ -20,6 +21,7 @@ interface GenericLegendProps {
     excludedSeries?: string[]
     onItemClick?: (serverId: string) => void
     onItemHover?: (serverId: string | null) => void
+    scaffoldName?: string
 }
 
 const GenericLegend = ({
@@ -27,6 +29,7 @@ const GenericLegend = ({
     excludedSeries,
     onItemClick,
     onItemHover,
+    scaffoldName,
 }: GenericLegendProps) => {
     const legendItems = useMemo(() => {
         if (!nivoData || nivoData.length === 0) return []
@@ -52,6 +55,11 @@ const GenericLegend = ({
 
     const handleItemClick = (serverId: string) => {
         onItemClick?.(serverId)
+        logMessage("Legend item clicked", "info", {
+            action: "click",
+            component: "GenericLegend",
+            metadata: { serverId, scaffoldName },
+        })
     }
 
     const handleItemMouseEnter = (serverId: string) => {

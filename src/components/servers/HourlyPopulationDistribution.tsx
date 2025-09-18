@@ -23,6 +23,7 @@ import {
     buildUtcToLocalHourMap,
 } from "../../utils/hourlyPopulationBuilder"
 import { getServerColor } from "../../utils/chartUtils"
+import { useLegendFilterHighlight } from "../../hooks/useLegendFilterHighlight"
 
 const HourlyPopulationDistribution: React.FC = () => {
     const { timezoneOverride } = useAppContext()
@@ -37,7 +38,6 @@ const HourlyPopulationDistribution: React.FC = () => {
         DataTypeFilterEnum.CHARACTERS
     )
     const RANGE_OPTIONS = Object.values(RangeEnum)
-
     const utcHourToLocalHour = useMemo(() => {
         const tz =
             timezoneOverride || Intl.DateTimeFormat().resolvedOptions().timeZone
@@ -55,6 +55,17 @@ const HourlyPopulationDistribution: React.FC = () => {
         [currentData, serverFilter, dataTypeFilter, utcHourToLocalHour]
     )
 
+    const { excluded, toggleExcluded, setHighlighted, colorFn } =
+        useLegendFilterHighlight({
+            dataIds: nivoData.map((series) => series.id),
+            getColor: getServerColor,
+        })
+
+    const filteredNivoData = useMemo(
+        () => nivoData.filter((series) => !excluded.includes(series.id)),
+        [nivoData, excluded]
+    )
+
     const axisBottomWithTz = useMemo(
         () => ({
             ...BY_HOUR_LINE_CHART_AXIS_BOTTOM,
@@ -65,6 +76,7 @@ const HourlyPopulationDistribution: React.FC = () => {
 
     return (
         <ChartScaffold
+            scaffoldName="HourlyPopulationDistribution"
             isLoading={isLoading}
             isError={isError}
             range={range}
@@ -78,13 +90,17 @@ const HourlyPopulationDistribution: React.FC = () => {
             showLegend
             legendData={nivoData}
             height={400}
+            excludedSeries={excluded}
+            onLegendItemClick={toggleExcluded}
+            onLegendItemHover={setHighlighted}
         >
             <ResponsiveLine
-                data={nivoData}
-                margin={{ ...LINE_CHART_MARGIN, right: 20 }}
+                data={filteredNivoData}
+                margin={{ ...LINE_CHART_MARGIN, right: 20, top: 10 }}
                 xScale={{ type: "point" }}
+                curve={"catmullRom" as const}
                 axisBottom={axisBottomWithTz}
-                colors={(d) => getServerColor(String(d.id))}
+                colors={(d) => colorFn(String(d.id ?? ""))}
                 theme={LINE_CHART_THEME}
                 enableGridX={LINE_CHART_DEFAULTS.enableGridX}
                 enablePoints={LINE_CHART_DEFAULTS.enablePoints}

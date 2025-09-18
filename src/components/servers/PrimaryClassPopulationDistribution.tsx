@@ -32,6 +32,7 @@ const PrimaryClassPopulationDistribution = () => {
 
     return (
         <ChartScaffold
+            scaffoldName="PrimaryClassPopulationDistribution"
             isLoading={isLoading}
             isError={isError}
             range={rangeFilter}

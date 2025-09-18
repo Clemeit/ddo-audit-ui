@@ -50,12 +50,8 @@ const Guilds = () => {
         <Page
             title="DDO Guilds"
             description="A page where you can search for DDO guilds, view their stats, and see members of your guild if you have a registered character."
+            pageMessages={[<WIPPageMessage />]}
         >
-            <div
-                style={{ transform: isMobile ? "unset" : "translateY(-13px)" }}
-            >
-                <WIPPageMessage />
-            </div>
             <ContentClusterGroup>
                 <ContentCluster
                     title="Guild Search"

@@ -70,9 +70,11 @@ const Trends = () => {
         <Page
             title="Population Trends"
             description="Explore the population trends of DDO servers over time, including weekly, monthly, and yearly statistics."
+            pageMessages={[
+                <WIPPageMessage />,
+                error && <DataLoadingErrorPageMessage />,
+            ]}
         >
-            <WIPPageMessage />
-            {error && <DataLoadingErrorPageMessage />}
             <ContentClusterGroup>
                 <ContentCluster title="The Last Week">
                     <GenericLine

@@ -32,6 +32,7 @@ const RacePopulationDistribution = () => {
 
     return (
         <ChartScaffold
+            scaffoldName="RacePopulationDistribution"
             isLoading={isLoading}
             isError={isError}
             range={rangeFilter}

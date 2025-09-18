@@ -61,15 +61,16 @@
         width: 100%;
         padding: 8px 10px;
         height: unset;
+        gap: 5px !important;
     }
 
     .server-navigation-card-title {
         font-size: 1.1rem;
     }
 
-    .server-navigation-card-content {
+    /* .server-navigation-card-content {
         line-height: 1rem;
-    }
+    } */
 
     .server-navigation-card .icon {
         width: 20px;

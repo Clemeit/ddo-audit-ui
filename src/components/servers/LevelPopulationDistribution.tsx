@@ -39,6 +39,7 @@ const LevelPopulationDistribution = () => {
 
     return (
         <ChartScaffold
+            scaffoldName="LevelPopulationDistribution"
             isLoading={isLoading}
             isError={isError}
             range={rangeFilter}

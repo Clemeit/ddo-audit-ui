@@ -7,6 +7,9 @@ import {
 } from "../../models/Common.ts"
 import { toSentenceCase } from "../../utils/stringUtils.ts"
 import { DAYS_OF_WEEK } from "../../constants/dates.ts"
+import ExpandableContainer from "../global/ExpandableContainer.tsx"
+import useIsMobile from "../../hooks/useIsMobile.ts"
+import Select from "../global/Select.tsx"
 
 interface Props {
     range?: RangeEnum
@@ -25,6 +28,7 @@ interface Props {
     setNormalized?: (value: boolean) => void
     rangeOptions?: RangeEnum[]
     displayTypeOptions?: string[]
+    scaffoldName?: string
 }
 
 const FilterSelection = ({
@@ -44,6 +48,7 @@ const FilterSelection = ({
     setNormalized,
     rangeOptions = Object.values(RangeEnum) as RangeEnum[],
     displayTypeOptions = ["Stacked", "Grouped"],
+    scaffoldName,
 }: Props) => {
     const SERVER_FILTER_OPTIONS = Object.values(ServerFilterEnum) as string[]
     const DATA_TYPE_FILTER_OPTIONS = Object.values(
@@ -51,7 +56,9 @@ const FilterSelection = ({
     ) as string[]
     const DAY_FILTER_OPTIONS = ["All", ...DAYS_OF_WEEK]
 
-    return (
+    const isMobile = useIsMobile()
+
+    const content = (
         <Stack
             direction="row"
             gap="10px"
@@ -64,7 +71,7 @@ const FilterSelection = ({
             {[
                 {
                     label: "Range",
-                    id: "hourlyPopulationDistributionRange",
+                    id: "rangeFilter",
                     value: range,
                     onChange: (e: React.ChangeEvent<HTMLSelectElement>) =>
                         setRange(e.target.value as RangeEnum),
@@ -73,7 +80,7 @@ const FilterSelection = ({
                 },
                 {
                     label: "Server filter",
-                    id: "hourlyPopulationDistributionServerFilter",
+                    id: "serverFilter",
                     value: serverFilter,
                     onChange: (e: React.ChangeEvent<HTMLSelectElement>) =>
                         setServerFilter(e.target.value as ServerFilterEnum),
@@ -82,7 +89,7 @@ const FilterSelection = ({
                 },
                 {
                     label: "Data type",
-                    id: "hourlyPopulationDistributionDataTypeFilter",
+                    id: "dataTypeFilter",
                     value: dataTypeFilter,
                     onChange: (e: React.ChangeEvent<HTMLSelectElement>) =>
                         setDataTypeFilter(e.target.value as DataTypeFilterEnum),
@@ -142,18 +149,19 @@ const FilterSelection = ({
                         >
                             {config.label}
                         </label>
-                        <select
+                        <Select
                             id={config.id}
                             value={config.value}
                             onChange={config.onChange}
                             style={{ width: "100%" }}
+                            loggingMetadata={{ scaffoldName }}
                         >
                             {config.options.map((opt) => (
                                 <option key={opt} value={opt}>
                                     {config.optionLabel(opt)}
                                 </option>
                             ))}
-                        </select>
+                        </Select>
                     </Stack>
                 ))}
             {!!threshold && (
@@ -186,6 +194,18 @@ const FilterSelection = ({
                 </Stack>
             )}
         </Stack>
+    )
+
+    return isMobile ? (
+        <ExpandableContainer
+            title="Filters"
+            defaultState={false}
+            style={{ width: "100%" }}
+        >
+            {content}
+        </ExpandableContainer>
+    ) : (
+        content
     )
 }
 

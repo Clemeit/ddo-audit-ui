@@ -3,7 +3,8 @@
     width: 100%;
     justify-content: center;
     font-size: 2rem;
-    letter-spacing: 0.25rem;
+    letter-spacing: 0.2rem;
+    margin: 20px 0;
 }
 
 .step-icon {

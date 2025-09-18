@@ -20,6 +20,7 @@ import PieChartTooltip from "../charts/PieChartTooltip"
 import { getServerColor } from "../../utils/chartUtils"
 import { PIE_CHART_MARGIN, PIE_CHART_THEME } from "../charts/pieChartConfig"
 import { toSentenceCase } from "../../utils/stringUtils"
+import { useLegendFilterHighlight } from "../../hooks/useLegendFilterHighlight"
 
 const ServerPopulationDistribution = () => {
     const { range, setRange, currentData, isLoading, isError } =
@@ -60,13 +61,25 @@ const ServerPopulationDistribution = () => {
         [filteredData, dataTypeFilter]
     )
 
+    const { excluded, toggleExcluded, setHighlighted, colorFn } =
+        useLegendFilterHighlight({
+            dataIds: nivoData.map((slice) => String(slice.id ?? "")),
+            getColor: getServerColor,
+        })
+
+    const filteredNivoData: NivoPieSlice[] = useMemo(
+        () => nivoData.filter((slice) => !excluded.includes(String(slice.id))),
+        [nivoData, excluded]
+    )
+
     const total = useMemo(
-        () => nivoData.reduce((sum, s) => sum + s.value, 0),
-        [nivoData]
+        () => filteredNivoData.reduce((sum, s) => sum + s.value, 0),
+        [filteredNivoData]
     )
 
     return (
         <ChartScaffold
+            scaffoldName="ServerPopulationDistribution"
             isLoading={isLoading}
             isError={isError}
             range={range}
@@ -78,12 +91,15 @@ const ServerPopulationDistribution = () => {
             showLegend
             legendData={nivoData}
             height={500}
+            excludedSeries={excluded}
+            onLegendItemClick={toggleExcluded}
+            onLegendItemHover={setHighlighted}
         >
             <ResponsivePie
-                data={nivoData}
+                data={filteredNivoData}
                 margin={PIE_CHART_MARGIN}
                 theme={PIE_CHART_THEME}
-                colors={(d) => getServerColor(String(d.id))}
+                colors={(d) => colorFn(String(d.id ?? ""))}
                 sortByValue
                 valueFormat={(value) => `${value}`}
                 cornerRadius={5}

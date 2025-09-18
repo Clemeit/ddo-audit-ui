@@ -108,6 +108,7 @@ const ServerSelectContent = ({
                     destination={`/servers/${serverName}`}
                     icon={getIconForCard(serverName, serverInfo)}
                     content={getContentForCard(serverName, uniqueData)}
+                    silentDisabled
                 />
             ))
         },

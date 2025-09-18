@@ -12,6 +12,7 @@ interface Props {
     onClick?: () => void
     miniature?: boolean
     fullWidth?: boolean
+    silentDisabled?: boolean
 }
 
 const ServerNavigationCard = ({
@@ -24,11 +25,13 @@ const ServerNavigationCard = ({
     onClick,
     miniature,
     fullWidth,
+    silentDisabled = false,
 }: Props) => {
     return !noLink ? (
         <Link
             to={destination}
             className={`server-navigation-card${miniature ? " miniature" : ""}${fullWidth ? " full-width" : ""}`}
+            silentDisabled={silentDisabled}
         >
             <span className="server-navigation-card-title">
                 {icon}

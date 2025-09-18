@@ -14,7 +14,7 @@ const ChartContainer = ({
     height = "500px",
 }: ChartContainerProps) => {
     return (
-        <div style={{ height: height, position: "relative" }}>
+        <div style={{ width: "100%", height: height, position: "relative" }}>
             <div
                 className="chart-overlay"
                 style={{

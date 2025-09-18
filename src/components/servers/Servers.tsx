@@ -23,6 +23,7 @@ import GenderPopulationDistribution from "./GenderPopulationDistribution.tsx"
 import PrimaryClassPopulationDistribution from "./PrimaryClassPopulationDistribution.tsx"
 import ClassCountPopulationDistribution from "./ClassCountPopulationDistribution.tsx"
 import GuildAffiliatedPopulationDistribution from "./GuildAffiliatedPopulationDistribution.tsx"
+import Link from "../global/Link.tsx"
 
 const Servers = () => {
     const { isLoading, isError, serverInfo, uniqueData } = useServersData()
@@ -37,40 +38,50 @@ const Servers = () => {
             title="Servers"
             description="DDO's server populations, character demographics, content popularity, and long-term trends. Check time zone activity and choose which server is best for you!"
             logo="/icons/servers-192px.png"
-        >
-            {showBankToonDisclaimer && (
-                <div className="alpha-release-message">
+            pageMessages={[
+                showBankToonDisclaimer && (
                     <PageMessage
                         title="Bank Characters / Mules"
                         message={`These reports all include characters that are solely used for item storage - commonly referred to as "Bank toons" or "Mules." They will be filtered out in a future release, but for now, please be aware that they may significantly skew the data.`}
                         onDismiss={() => setShowBankToonDisclaimer(false)}
                     />
-                </div>
-            )}
+                ),
+                <PageMessage
+                    title="Active Development"
+                    message={
+                        <span>
+                            This page is currently in active development. If you
+                            encounter any issues or have suggestions, please
+                            visit the <Link to="/feedback">Feedback page</Link>.
+                        </span>
+                    }
+                    type="info"
+                />,
+                <PageMessage
+                    title="Mobile Browsing"
+                    message="This page is not currently optimized for mobile devices. For the best experience, please view on a desktop or laptop."
+                    type="warning"
+                    className="show-on-mobile"
+                />,
+            ]}
+        >
             <ContentClusterGroup>
-                <div
-                    style={{
-                        opacity: 0.5,
-                        pointerEvents: "none",
-                    }}
+                <ContentCluster
+                    title="Select a Server"
+                    badge={<Badge text="Soon" type="soon" />}
                 >
-                    <ContentCluster
-                        title="Select a Server"
-                        badge={<Badge text="Soon" type="soon" />}
-                    >
-                        <ServerSelectContent
-                            isLoading={isLoading}
-                            isError={isError}
-                            serverInfo={serverInfo}
-                            uniqueData={uniqueData}
-                        />
-                        <Spacer size="20px" />
-                        <ColoredText color="secondary">
-                            Unique character and guild numbers are based on the
-                            last quarter.
-                        </ColoredText>
-                    </ContentCluster>
-                </div>
+                    <ServerSelectContent
+                        isLoading={isLoading}
+                        isError={isError}
+                        serverInfo={serverInfo}
+                        uniqueData={uniqueData}
+                    />
+                    <Spacer size="20px" />
+                    <ColoredText color="secondary">
+                        Unique character and guild numbers are based on the last
+                        quarter.
+                    </ColoredText>
+                </ContentCluster>
                 <ContentCluster
                     title="Server Population Distribution"
                     subtitle="Average population distribution per server."
@@ -85,7 +96,7 @@ const Servers = () => {
                 </ContentCluster>
                 <ContentCluster
                     title="Daily Population Distribution"
-                    subtitle="Average population distribution per server by day of week."
+                    subtitle="Average population and LFM count data by day of week."
                 >
                     <DailyPopulationDistribution />
                 </ContentCluster>

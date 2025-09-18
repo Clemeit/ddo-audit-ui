@@ -32,6 +32,7 @@ const ClassCountPopulationDistribution = () => {
 
     return (
         <ChartScaffold
+            scaffoldName="ClassCountPopulationDistribution"
             isLoading={isLoading}
             isError={isError}
             range={rangeFilter}

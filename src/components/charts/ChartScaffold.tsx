@@ -8,11 +8,13 @@ import {
     ServerFilterEnum,
     DataTypeFilterEnum,
 } from "../../models/Common"
+import Stack from "../global/Stack"
 
 export interface ChartScaffoldProps {
     // Data & fetch state
     isLoading: boolean
     isError: boolean
+    scaffoldName?: string
     // Filters
     range: RangeEnum
     setRange: (r: RangeEnum) => void
@@ -70,10 +72,11 @@ export const ChartScaffold: React.FC<ChartScaffoldProps> = ({
     onLegendItemHover,
     showTimezone,
     height = 500,
+    scaffoldName,
     children,
 }) => {
     return (
-        <div>
+        <Stack gap="20px" direction="column">
             <FilterSelection
                 range={range}
                 setRange={setRange}
@@ -87,6 +90,7 @@ export const ChartScaffold: React.FC<ChartScaffoldProps> = ({
                 normalized={normalized}
                 setNormalized={setNormalized}
                 rangeOptions={rangeOptions}
+                scaffoldName={scaffoldName}
             />
             <ChartContainer
                 isError={isError}
@@ -101,10 +105,16 @@ export const ChartScaffold: React.FC<ChartScaffoldProps> = ({
                     excludedSeries={excludedSeries}
                     onItemClick={onLegendItemClick}
                     onItemHover={onLegendItemHover}
+                    scaffoldName={scaffoldName}
                 />
             )}
+            {showLegend && legendData && legendData.length === 0 && (
+                <div className="legend-container">
+                    <div className="legend-item">&nbsp;</div>
+                </div>
+            )}
             {showTimezone && <TimezoneSelect />}
-        </div>
+        </Stack>
     )
 }
 

@@ -127,8 +127,8 @@ const Friends = () => {
         <Page
             title="Friends List"
             description="Add your friends so that you can see what they're up to!"
+            pageMessages={[!isActive && <StaleDataPageMessage />]}
         >
-            {!isActive && <StaleDataPageMessage />}
             {isModalOpen && (
                 <CharacterSelectModal
                     previouslyAddedCharacters={friends}

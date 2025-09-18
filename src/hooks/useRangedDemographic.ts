@@ -45,46 +45,93 @@ export function useRangedDemographic<T>(
         useState<Record<RangeEnum, T | undefined>>(createEmptyMap)
     const [isLoading, setIsLoading] = useState(false)
     const [isError, setIsError] = useState(false)
-    const forceReloadToken = useRef<number>(0)
+    // Ref mirrors dataMap so load() can read current cache without being
+    // recreated when dataMap changes (prevents abort cycle on initial mount).
+    const dataMapRef = useRef<Record<RangeEnum, T | undefined>>(dataMap)
     const abortRef = useRef<AbortController | null>(null)
+    // Track request ids per range so late resolving requests for OTHER ranges don't get discarded.
+    const rangeRequestIdsRef = useRef<Record<RangeEnum, number>>({
+        [RangeEnum.DAY]: 0,
+        [RangeEnum.WEEK]: 0,
+        [RangeEnum.MONTH]: 0,
+        [RangeEnum.QUARTER]: 0,
+        [RangeEnum.YEAR]: 0,
+    })
+    // Track which ranges currently have in-flight requests to avoid duplicate fetches for the same range.
+    const inFlightRangesRef = useRef<Set<RangeEnum>>(new Set())
+    const inFlightCountRef = useRef(0)
+    const lastRangeWithData = useRef<RangeEnum | null>(null)
 
     const load = useCallback(
         async (selectedRange: RangeEnum, bypassCache = false) => {
-            if (!bypassCache && dataMap[selectedRange] !== undefined) return // already cached
+            const currentMap = dataMapRef.current
+            if (!bypassCache && currentMap[selectedRange] !== undefined) return // already cached
 
-            abortRef.current?.abort()
+            // If we already have an in-flight request for this same range, allow it to finish and avoid duplicate start.
+            if (inFlightRangesRef.current.has(selectedRange)) return
+
+            // Create a new request (do not abort previous unless explicit refetch/unmount).
             const controller = new AbortController()
-            abortRef.current = controller
+            abortRef.current = controller // only tracks most recent (used for unmount/refetch cancels)
+            inFlightRangesRef.current.add(selectedRange)
+            const requestId = ++rangeRequestIdsRef.current[selectedRange]
 
             try {
+                // Increment in-flight counter and set loading.
+                inFlightCountRef.current += 1
                 setIsLoading(true)
                 setIsError(false)
                 const response = await fetcher(selectedRange, controller.signal)
-                if (!controller.signal.aborted && response) {
-                    setDataMap((prev) => ({
-                        ...prev,
-                        [selectedRange]: response.data,
-                    }))
+                // Ignore if this response is stale (another request started later).
+                if (
+                    !controller.signal.aborted &&
+                    response &&
+                    requestId === rangeRequestIdsRef.current[selectedRange]
+                ) {
+                    setDataMap((prev) => {
+                        const next = { ...prev, [selectedRange]: response.data }
+                        dataMapRef.current = next
+                        return next
+                    })
+                    lastRangeWithData.current = selectedRange
                 }
             } catch (e) {
-                if (!controller.signal.aborted) setIsError(true)
+                // Only flag error if this is still the latest request for this range.
+                if (
+                    !controller.signal.aborted &&
+                    requestId === rangeRequestIdsRef.current[selectedRange]
+                ) {
+                    setIsError(true)
+                }
             } finally {
-                if (!controller.signal.aborted) setIsLoading(false)
+                // Decrement in-flight and recalc loading regardless of abort status.
+                if (inFlightCountRef.current > 0) inFlightCountRef.current -= 1
+                if (inFlightCountRef.current === 0) setIsLoading(false)
+                inFlightRangesRef.current.delete(selectedRange)
             }
         },
-        [dataMap, fetcher]
+        [fetcher]
     )
 
-    // Fetch when range changes or manual refetch is requested.
+    // Keep ref in sync with state.
+    useEffect(() => {
+        dataMapRef.current = dataMap
+    }, [dataMap])
+
+    // Only abort on unmount.
+    useEffect(() => {
+        return () => abortRef.current?.abort()
+    }, [])
+
+    // Fetch when range changes (no abort on change, prior request may resolve and be ignored if stale).
     useEffect(() => {
         load(range, false)
-        return () => abortRef.current?.abort()
-    }, [range, load, forceReloadToken.current])
+    }, [range, load])
 
     const refetch = useCallback(() => {
-        // increment token to trigger effect even if range unchanged
-        forceReloadToken.current += 1
-        load(range, true)
+        // Explicit abort only on manual refetch.
+        abortRef.current?.abort()
+        load(range, true) // bypass cache for current range
     }, [range, load])
 
     return {
@@ -93,7 +140,10 @@ export function useRangedDemographic<T>(
         setRange,
         isLoading,
         isError,
-        currentData: dataMap[range],
+        currentData:
+            dataMap[range] !== undefined
+                ? dataMap[range]
+                : dataMap[lastRangeWithData.current ?? range],
         refetch,
     }
 }

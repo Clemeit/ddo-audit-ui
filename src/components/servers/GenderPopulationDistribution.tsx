@@ -32,6 +32,7 @@ const GenderPopulationDistribution = () => {
 
     return (
         <ChartScaffold
+            scaffoldName="GenderPopulationDistribution"
             isLoading={isLoading}
             isError={isError}
             range={rangeFilter}

@@ -27,6 +27,7 @@ const GuildAffiliatedPopulationDistribution = () => {
 
     return (
         <ChartScaffold
+            scaffoldName="GuildAffiliatedPopulationDistribution"
             isLoading={isLoading}
             isError={isError}
             range={range}

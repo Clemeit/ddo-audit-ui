@@ -23,7 +23,6 @@ import { useLiveData } from "./useLiveData.tsx"
 import { findMostPopulatedServer } from "../../utils/gameUtils.ts"
 import { useNotificationContext } from "../../contexts/NotificationContext.tsx"
 import logMessage from "../../utils/logUtils.ts"
-import { AlphaReleasePageMessage } from "../global/CommonMessages.tsx"
 import { BOOLEAN_FLAGS } from "../../utils/localStorage.ts"
 import useBooleanFlag from "../../hooks/useBooleanFlags.ts"
 import Badge from "../global/Badge.tsx"
@@ -121,20 +120,21 @@ const Live = () => {
         <Page
             title="DDO Server Status"
             description="DDO server status, most populated server, current default server, and recent population trends."
+            pageMessages={() => {
+                const messages = []
+                if (serverInfoState === LoadingState.Haulted) {
+                    messages.push(
+                        <LiveDataHaultedPageMessage key="live-haulted" />
+                    )
+                }
+                if (hasCriticalError) {
+                    messages.push(
+                        <DataLoadingErrorPageMessage key="data-error" />
+                    )
+                }
+                return messages
+            }}
         >
-            {!hideAlphaRelease && (
-                <div className="alpha-release-message">
-                    <AlphaReleasePageMessage
-                        onDismiss={() => {
-                            setHideAlphaRelease(true)
-                        }}
-                    />
-                </div>
-            )}
-            {serverInfoState === LoadingState.Haulted && (
-                <LiveDataHaultedPageMessage />
-            )}
-            {hasCriticalError && <DataLoadingErrorPageMessage />}
             <ContentClusterGroup>
                 <ContentCluster title="Server Status">
                     <ServerStatus

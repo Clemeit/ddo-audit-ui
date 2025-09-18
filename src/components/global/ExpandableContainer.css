@@ -1,16 +1,25 @@
+.expandable-container {
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    /* margin-bottom: 20px; */
+    background-color: var(--background-light);
+}
+
 .expandable-container-header {
     display: flex;
     align-items: center;
     gap: 3px;
-    background-color: var(--background);
-    border-bottom: 1px solid var(--border);
+    /* background-color: var(--background); */
+    /* border-bottom: 1px solid var(--border); */
     cursor: pointer;
     font-weight: 700;
+    padding: 10px;
 }
 
 .expandable-container-content {
     border-radius: 5px;
-    margin-top: 10px;
-    padding: 10px 20px;
-    background-color: var(--background-light);
+    /* margin-top: 10px; */
+    /* padding: 10px 20px; */
+    /* background-color: var(--background-light); */
+    padding: 10px;
 }

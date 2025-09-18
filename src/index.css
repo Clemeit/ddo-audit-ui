@@ -56,6 +56,8 @@
 .dark-theme {
     --background: var(--gray8);
     --background-light: var(--gray7);
+    --border: var(--gray6);
+    --border-light: var(--gray7);
     --highlight: var(--gray6);
     --soft-highlight: var(--gray7);
     --shadow: var(--gray9);
@@ -217,6 +219,12 @@ table tbody tr:last-of-type {
         opacity: 0.5;
         pointer-events: none;
     }
+
+    &.silent-disabled {
+        pointer-events: none;
+        text-decoration: none;
+        color: inherit;
+    }
 }
 
 .clickable-icon {
@@ -307,8 +315,8 @@ input[type="range"] {
     outline: none;
 }
 
-.alpha-release-message {
-    margin: -20px 0 40px 0;
+.show-on-mobile {
+    display: none !important;
 }
 
 /* mobile */
@@ -319,6 +327,10 @@ input[type="range"] {
 
     .hide-on-mobile {
         display: none !important;
+    }
+
+    .show-on-mobile {
+        display: block !important;
     }
 
     .full-width-on-mobile {
@@ -341,10 +353,6 @@ input[type="range"] {
 
     .input-label {
         font-size: 1.2rem;
-    }
-
-    .alpha-release-message {
-        margin: 0 0 20px 0;
     }
 }
 

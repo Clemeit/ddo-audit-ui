@@ -29,6 +29,7 @@ import {
 } from "../../utils/populationAggregation"
 import ChartScaffold from "../charts/ChartScaffold"
 import "../../styles/charts/Overlay.css"
+import { useLegendFilterHighlight } from "../../hooks/useLegendFilterHighlight"
 
 interface DailyTooltipProps extends BarTooltipProps<any> {
     keys: string[]
@@ -134,6 +135,26 @@ const DailyPopulationDistribution = () => {
         [filteredDayData, dataTypeFilter]
     )
 
+    const { excluded, toggleExcluded, setHighlighted, colorFn } =
+        useLegendFilterHighlight({
+            dataIds: nivoData.reduce<string[]>(
+                (acc, item) =>
+                    acc.concat(Object.keys(item).filter((k) => k !== "index")),
+                [] as string[]
+            ),
+            getColor: getServerColor,
+        })
+
+    const filteredNivoData: NivoBarSlice[] = useMemo(
+        () =>
+            nivoData.map((item) => {
+                const newItem = { ...item }
+                excluded.forEach((ex) => delete newItem[ex])
+                return newItem
+            }),
+        [nivoData, excluded]
+    )
+
     const barKeys = useMemo(
         () =>
             nivoData.length > 0
@@ -144,6 +165,7 @@ const DailyPopulationDistribution = () => {
 
     return (
         <ChartScaffold
+            scaffoldName="DailyPopulationDistribution"
             isLoading={isLoading}
             isError={isError}
             range={range}
@@ -164,9 +186,12 @@ const DailyPopulationDistribution = () => {
             showLegend
             legendData={barKeys.map((k) => ({ id: k, data: [] }))}
             height={500}
+            excludedSeries={excluded}
+            onLegendItemClick={toggleExcluded}
+            onLegendItemHover={setHighlighted}
         >
             <ResponsiveBar
-                data={nivoData}
+                data={filteredNivoData}
                 indexBy="index"
                 keys={barKeys}
                 theme={{
@@ -180,8 +205,8 @@ const DailyPopulationDistribution = () => {
                 labelSkipWidth={12}
                 labelSkipHeight={12}
                 groupMode={displayType.toLowerCase() as "stacked" | "grouped"}
-                margin={{ ...LINE_CHART_MARGIN, left: 50 }}
-                colors={(d) => getServerColor(d.id.toString())}
+                margin={{ ...LINE_CHART_MARGIN, left: 50, top: 10 }}
+                colors={(d) => colorFn(String(d.id ?? ""))}
                 axisBottom={{
                     tickSize: 5,
                     tickPadding: 5,
