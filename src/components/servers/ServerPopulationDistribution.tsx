@@ -1,129 +1,122 @@
-import { useEffect, useMemo, useRef, useState } from "react"
-import GenericPie from "../charts/GenericPie"
+import { useMemo, useState } from "react"
+import { ResponsivePie } from "@nivo/pie"
 import {
     convertAveragePopulationDataToNivoFormat,
     NivoPieSlice,
 } from "../../utils/nivoUtils"
-import Stack from "../global/Stack"
-import {
-    AveragePopulationData,
-    AveragePopulationEndpointSchema,
-} from "../../models/Population.ts"
 import {
     DataTypeFilterEnum,
     RangeEnum,
     ServerFilterEnum,
-} from "../../models/Common.ts"
-import { getAveragePopulationForRange } from "../../services/populationService.ts"
-import { toSentenceCase } from "../../utils/stringUtils.ts"
+} from "../../models/Common"
+import { getAveragePopulationForRange } from "../../services/populationService"
 import {
     SERVERS_64_BITS_LOWER,
     SERVERS_32_BITS_LOWER,
 } from "../../constants/servers"
-import FilterSelection from "../charts/FilterSelection.tsx"
+import { useRangedDemographic } from "../../hooks/useRangedDemographic"
+import ChartScaffold from "../charts/ChartScaffold"
+import PieChartTooltip from "../charts/PieChartTooltip"
+import { getServerColor } from "../../utils/chartUtils"
+import { PIE_CHART_MARGIN, PIE_CHART_THEME } from "../charts/pieChartConfig"
+import { toSentenceCase } from "../../utils/stringUtils"
 
 const ServerPopulationDistribution = () => {
-    const [isLoading, setIsLoading] = useState(false)
-    const [isError, setIsError] = useState(false)
-    const [range, setRange] = useState<RangeEnum>(RangeEnum.QUARTER)
+    const { range, setRange, currentData, isLoading, isError } =
+        useRangedDemographic((r, signal) =>
+            getAveragePopulationForRange(r, signal)
+        )
     const [serverFilter, setServerFilter] = useState<ServerFilterEnum>(
         ServerFilterEnum.ONLY_64_BIT
     )
     const [dataTypeFilter, setDataTypeFilter] = useState<DataTypeFilterEnum>(
         DataTypeFilterEnum.CHARACTERS
     )
-    const [dataMap, setDataMap] = useState<
-        Partial<Record<RangeEnum, AveragePopulationData | undefined>>
-    >({})
-    const lastRange = useRef<RangeEnum | undefined>(range)
 
-    const descriptionFormatter = (value: number, total: number) => {
-        return `${value.toFixed(1)} average ${dataTypeFilter} (${((value / total) * 100).toFixed(1)}%)`
-    }
-
-    const rangeToFetchMap = useMemo(
-        () => ({
-            [RangeEnum.DAY]: (signal: AbortSignal) =>
-                getAveragePopulationForRange(RangeEnum.DAY, signal),
-            [RangeEnum.WEEK]: (signal: AbortSignal) =>
-                getAveragePopulationForRange(RangeEnum.WEEK, signal),
-            [RangeEnum.MONTH]: (signal: AbortSignal) =>
-                getAveragePopulationForRange(RangeEnum.MONTH, signal),
-            [RangeEnum.QUARTER]: (signal: AbortSignal) =>
-                getAveragePopulationForRange(RangeEnum.QUARTER, signal),
-            [RangeEnum.YEAR]: (signal: AbortSignal) =>
-                getAveragePopulationForRange(RangeEnum.YEAR, signal),
-        }),
-        []
-    )
-
-    useEffect(() => {
-        if (!range) return
-        const controller = new AbortController()
-        const fetchAverageData = async () => {
-            setIsLoading(true)
-            try {
-                const result = await rangeToFetchMap[range](controller.signal)
-                if (!controller.signal.aborted) {
-                    setDataMap((prev) => ({
-                        ...prev,
-                        [range]: result?.data,
-                    }))
-                    setIsError(false)
-                }
-            } catch {
-                setIsError(true)
-            } finally {
-                if (!controller.signal.aborted) setIsLoading(false)
-            }
-        }
-        if (dataMap?.[range] === undefined) fetchAverageData()
-        return () => controller.abort()
-    }, [range])
-
-    const nivoData: NivoPieSlice[] = useMemo(() => {
-        if (!range) return []
-        let averageData = dataMap?.[range]
-        if (averageData) {
-            lastRange.current = range
-        } else {
-            averageData = dataMap?.[lastRange.current]
-        }
+    const filteredData = useMemo(() => {
+        if (!currentData) return undefined
         if (serverFilter === ServerFilterEnum.ONLY_64_BIT) {
-            averageData = Object.fromEntries(
-                Object.entries(averageData || {}).filter(([serverName]) =>
+            return Object.fromEntries(
+                Object.entries(currentData).filter(([serverName]) =>
                     SERVERS_64_BITS_LOWER.includes(serverName.toLowerCase())
                 )
             )
         } else if (serverFilter === ServerFilterEnum.ONLY_32_BIT) {
-            averageData = Object.fromEntries(
-                Object.entries(averageData || {}).filter(([serverName]) =>
+            return Object.fromEntries(
+                Object.entries(currentData).filter(([serverName]) =>
                     SERVERS_32_BITS_LOWER.includes(serverName.toLowerCase())
                 )
             )
         }
-        return convertAveragePopulationDataToNivoFormat(
-            averageData,
-            dataTypeFilter
-        )
-    }, [range, serverFilter, dataMap, dataTypeFilter])
+        return currentData
+    }, [currentData, serverFilter])
+
+    const nivoData: NivoPieSlice[] = useMemo(
+        () =>
+            convertAveragePopulationDataToNivoFormat(
+                filteredData as any,
+                dataTypeFilter
+            ),
+        [filteredData, dataTypeFilter]
+    )
+
+    const total = useMemo(
+        () => nivoData.reduce((sum, s) => sum + s.value, 0),
+        [nivoData]
+    )
 
     return (
-        <>
-            <FilterSelection
-                range={range}
-                setRange={setRange}
-                serverFilter={serverFilter}
-                setServerFilter={setServerFilter}
-                dataTypeFilter={dataTypeFilter}
-                setDataTypeFilter={setDataTypeFilter}
+        <ChartScaffold
+            isLoading={isLoading}
+            isError={isError}
+            range={range}
+            setRange={setRange}
+            serverFilter={serverFilter}
+            setServerFilter={setServerFilter}
+            dataTypeFilter={dataTypeFilter}
+            setDataTypeFilter={setDataTypeFilter}
+            showLegend
+            legendData={nivoData}
+            height={500}
+        >
+            <ResponsivePie
+                data={nivoData}
+                margin={PIE_CHART_MARGIN}
+                theme={PIE_CHART_THEME}
+                colors={(d) => getServerColor(String(d.id))}
+                sortByValue
+                valueFormat={(value) => `${value}`}
+                cornerRadius={5}
+                borderWidth={1}
+                arcLabelsSkipAngle={15}
+                arcLabelsTextColor={"var(--text-inverted)"}
+                arcLinkLabelsSkipAngle={10}
+                arcLinkLabelsStraightLength={10}
+                arcLinkLabelsThickness={2}
+                arcLinkLabelsTextColor="white"
+                arcLinkLabelsColor={{
+                    from: "color",
+                    modifiers: [["darker", 1]],
+                }}
+                animate={true}
+                activeOuterRadiusOffset={8}
+                arcLabel={(e) =>
+                    (((e.value ?? 0) / total) * 100).toFixed(1) + "%"
+                }
+                arcLinkLabel={(e) => toSentenceCase(e.id.toString() ?? "")}
+                tooltip={({ datum }) => (
+                    <PieChartTooltip
+                        datum={datum as any}
+                        total={total}
+                        descriptionFormatter={(value, totalVal) => {
+                            const pct =
+                                totalVal > 0 ? (value / totalVal) * 100 : 0
+                            return `${value.toFixed(1)} avg ${dataTypeFilter.toLowerCase()} (${pct.toFixed(1)}%)`
+                        }}
+                    />
+                )}
             />
-            <GenericPie
-                nivoData={nivoData}
-                showLegend
-                descriptionFormatter={descriptionFormatter}
-            />
-        </>
+        </ChartScaffold>
     )
 }
 

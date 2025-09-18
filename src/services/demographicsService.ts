@@ -1,5 +1,12 @@
 import { RangeEnum } from "../models/Common.ts"
-import { TotalLevelDemographicApi } from "../models/Demographics.ts"
+import {
+    TotalLevelDemographicApi,
+    GuildAffiliatedDemographicApi,
+    ClassCountDemographicApi,
+    RaceDemographicApi,
+    GenderDemographicApi,
+    PrimaryClassDemographicApi,
+} from "../models/Demographics.ts"
 import { getRequest } from "./apiHelper.ts"
 
 const DEMOGRAPHICS_ENDPOINT = "demographics"
@@ -17,8 +24,8 @@ export function getTotalLevelDemographic(
 export function getRaceDemographic(
     range: RangeEnum = RangeEnum.QUARTER,
     signal?: AbortSignal
-): Promise<TotalLevelDemographicApi> {
-    return getRequest<TotalLevelDemographicApi>(
+): Promise<RaceDemographicApi> {
+    return getRequest<RaceDemographicApi>(
         `${DEMOGRAPHICS_ENDPOINT}/race/${range}`,
         { signal }
     )
@@ -27,8 +34,8 @@ export function getRaceDemographic(
 export function getGenderDemographic(
     range: RangeEnum = RangeEnum.QUARTER,
     signal?: AbortSignal
-): Promise<TotalLevelDemographicApi> {
-    return getRequest<TotalLevelDemographicApi>(
+): Promise<GenderDemographicApi> {
+    return getRequest<GenderDemographicApi>(
         `${DEMOGRAPHICS_ENDPOINT}/gender/${range}`,
         { signal }
     )
@@ -37,8 +44,8 @@ export function getGenderDemographic(
 export function getGuildAffiliatedDemographic(
     range: RangeEnum = RangeEnum.QUARTER,
     signal?: AbortSignal
-): Promise<TotalLevelDemographicApi> {
-    return getRequest<TotalLevelDemographicApi>(
+): Promise<GuildAffiliatedDemographicApi> {
+    return getRequest<GuildAffiliatedDemographicApi>(
         `${DEMOGRAPHICS_ENDPOINT}/guild-affiliated/${range}`,
         { signal }
     )
@@ -47,8 +54,8 @@ export function getGuildAffiliatedDemographic(
 export function getPrimaryClassDemographic(
     range: RangeEnum = RangeEnum.QUARTER,
     signal?: AbortSignal
-): Promise<TotalLevelDemographicApi> {
-    return getRequest<TotalLevelDemographicApi>(
+): Promise<PrimaryClassDemographicApi> {
+    return getRequest<PrimaryClassDemographicApi>(
         `${DEMOGRAPHICS_ENDPOINT}/primary-class/${range}`,
         { signal }
     )
@@ -57,8 +64,8 @@ export function getPrimaryClassDemographic(
 export function getClassCountDemographic(
     range: RangeEnum = RangeEnum.QUARTER,
     signal?: AbortSignal
-): Promise<TotalLevelDemographicApi> {
-    return getRequest<TotalLevelDemographicApi>(
+): Promise<ClassCountDemographicApi> {
+    return getRequest<ClassCountDemographicApi>(
         `${DEMOGRAPHICS_ENDPOINT}/class-count/${range}`,
         { signal }
     )

@@ -320,18 +320,18 @@ const PeakTimesPopulationDistribution = () => {
                 })
             )
         } else {
+            const dayIndex = dayOfWeekToNumber(dayFilter)
             return Object.entries(peakTimesPerServerByDay).map(
-                ([serverName, data]) => ({
-                    id: serverName,
-                    data: Array.from({ length: 24 }, (_, h) => ({
-                        x: h.toString().padStart(2, "0"), // hour label
-                        y: data?.[
-                            dayOfWeekToNumber(dayFilter)
-                        ].peakHours.includes(h)
-                            ? 1
-                            : 0, // 1=in peak, 0=not
-                    })),
-                })
+                ([serverName, dataByDay]) => {
+                    const peakHours = dataByDay?.[dayIndex]?.peakHours || []
+                    return {
+                        id: serverName,
+                        data: Array.from({ length: 24 }, (_, h) => ({
+                            x: h.toString().padStart(2, "0"),
+                            y: peakHours.includes(h) ? 1 : 0,
+                        })),
+                    }
+                }
             )
         }
     }, [peakTimesPerServer, peakTimesPerServerByDay, dayFilter])
@@ -360,45 +360,57 @@ const PeakTimesPopulationDistribution = () => {
                 className="line-container"
                 style={{ height: `${(heatmapData?.length || 4) * 50 + 100}px` }}
             >
-                <ResponsiveHeatMap
-                    data={heatmapData}
-                    margin={{ top: 60, right: 60, bottom: 60, left: 100 }}
-                    valueFormat={(v) => (v ? "Peak" : "")}
-                    colors={{
-                        type: "quantize",
-                        colors: ["rgba(65, 65, 65, 1)", "#080"],
-                    }}
-                    emptyColor="#555555"
-                    axisTop={{
-                        tickRotation: -45,
-                        format: (data) => numberToHourOfDay(data ?? 0),
-                    }}
-                    axisLeft={{
-                        format: (data) => toSentenceCase(data ?? "Unknown"),
-                    }}
-                    enableLabels={false}
-                    borderRadius={4}
-                    borderWidth={1}
-                    xInnerPadding={0.02}
-                    yInnerPadding={0.15}
-                    forceSquare
-                    theme={{
-                        labels: {
-                            text: {
-                                fill: "#fff",
+                {heatmapData.length > 0 ? (
+                    <ResponsiveHeatMap
+                        data={heatmapData}
+                        margin={{ top: 60, right: 60, bottom: 60, left: 100 }}
+                        valueFormat={(v) => (v ? "Peak" : "")}
+                        colors={{
+                            type: "quantize",
+                            colors: ["rgba(65, 65, 65, 1)", "#080"],
+                        }}
+                        emptyColor="#555555"
+                        axisTop={{
+                            tickRotation: -45,
+                            format: (val) => {
+                                const num =
+                                    typeof val === "number"
+                                        ? val
+                                        : parseInt(String(val), 10)
+                                return numberToHourOfDay(isNaN(num) ? 0 : num)
                             },
-                        },
-                        axis: {
-                            ticks: {
+                        }}
+                        axisLeft={{
+                            format: (data) => toSentenceCase(data ?? "Unknown"),
+                        }}
+                        enableLabels={false}
+                        borderRadius={4}
+                        borderWidth={1}
+                        xInnerPadding={0.02}
+                        yInnerPadding={0.15}
+                        forceSquare
+                        theme={{
+                            labels: {
                                 text: {
-                                    fill: "var(--text)",
-                                    fontSize: 14,
+                                    fill: "#fff",
                                 },
                             },
-                        },
-                    }}
-                    tooltip={({ cell }) => <PeakTimesTooltip cell={cell} />}
-                />
+                            axis: {
+                                ticks: {
+                                    text: {
+                                        fill: "var(--text)",
+                                        fontSize: 14,
+                                    },
+                                },
+                            },
+                        }}
+                        tooltip={({ cell }) => <PeakTimesTooltip cell={cell} />}
+                    />
+                ) : (
+                    <div style={{ padding: "1rem", color: "var(--text)" }}>
+                        Loading peak time data...
+                    </div>
+                )}
             </div>
             <TimezoneSelect />
         </div>

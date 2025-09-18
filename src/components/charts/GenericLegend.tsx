@@ -35,7 +35,6 @@ const GenericLegend = ({
             const series = nivoData.find(
                 (s) => String(s.id).toLowerCase() === serverName
             )
-            console.log("Legend series:", series)
 
             if (!series) return null
 
