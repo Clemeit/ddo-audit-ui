@@ -71,7 +71,7 @@ const ServerSelectContent = ({
         return (
             <Stack direction="column">
                 <ColoredText color="blue">
-                    {character_count.toLocaleString()} characaters
+                    {character_count.toLocaleString()} characters
                 </ColoredText>
                 <ColoredText color="orange">
                     {guild_count.toLocaleString()} guilds

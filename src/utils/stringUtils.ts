@@ -163,8 +163,8 @@ function getTextSize(
     return { width, height }
 }
 
-function pluralize(word: string, count: number | undefined): string {
-    if (count === undefined || count === 1) return word
+function pluralize(word: string, count: number): string {
+    if (count === 1) return word
     if (word.endsWith("y") && !word.endsWith("ay") && !word.endsWith("ey")) {
         return word.slice(0, -1) + "ies"
     }

@@ -1,5 +1,5 @@
 export interface TotalLevelDemographicApiData {
-    [severName: string]: {
+    [serverName: string]: {
         [totalLevel: string]: number | null
     } | null
 }
@@ -9,7 +9,7 @@ export interface TotalLevelDemographicApi {
 }
 
 export interface RaceDemographicApiData {
-    [severName: string]: {
+    [serverName: string]: {
         [race: string]: number | null
     } | null
 }
@@ -19,7 +19,7 @@ export interface RaceDemographicApi {
 }
 
 export interface GenderDemographicApiData {
-    [severName: string]: {
+    [serverName: string]: {
         [gender: string]: number | null
     } | null
 }
@@ -29,7 +29,7 @@ export interface GenderDemographicApi {
 }
 
 export interface GuildAffiliatedDemographicApiData {
-    [severName: string]: {
+    [serverName: string]: {
         in_guild: number | null
         not_in_guild: number | null
     } | null
@@ -40,7 +40,7 @@ export interface GuildAffiliatedDemographicApi {
 }
 
 export interface PrimaryClassDemographicApiData {
-    [severName: string]: {
+    [serverName: string]: {
         [primaryClass: string]: number | null
     } | null
 }
@@ -50,7 +50,7 @@ export interface PrimaryClassDemographicApi {
 }
 
 export interface ClassCountDemographicApiData {
-    [severName: string]: {
+    [serverName: string]: {
         [classCount: string]: number | null
     } | null
 }
