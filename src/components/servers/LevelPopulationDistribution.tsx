@@ -13,6 +13,7 @@ import LineChartTooltip from "../charts/LineChartTooltip"
 import { useRangedDemographic } from "../../hooks/useRangedDemographic"
 import { buildLevelDistributionSeries } from "../../utils/levelDistributionBuilder"
 import { NivoNumberSeries } from "../../utils/nivoUtils"
+import { useLegendFilterHighlight } from "../../hooks/useLegendFilterHighlight"
 
 const LevelPopulationDistribution = () => {
     const {
@@ -37,6 +38,17 @@ const LevelPopulationDistribution = () => {
         [currentData, serverFilter, normalized]
     )
 
+    const { excluded, toggleExcluded, setHighlighted, colorFn } =
+        useLegendFilterHighlight({
+            dataIds: nivoData.map((series) => series.id),
+            getColor: getServerColor,
+        })
+
+    const filteredNivoData = useMemo(
+        () => nivoData.filter((series) => !excluded.includes(series.id)),
+        [nivoData, excluded]
+    )
+
     return (
         <ChartScaffold
             scaffoldName="LevelPopulationDistribution"
@@ -54,10 +66,13 @@ const LevelPopulationDistribution = () => {
             showLegend
             legendData={nivoData}
             height={400}
+            excludedSeries={excluded}
+            onLegendItemClick={toggleExcluded}
+            onLegendItemHover={setHighlighted}
         >
             <ResponsiveLine
-                data={nivoData}
-                colors={(d) => getServerColor(String(d.id))}
+                data={filteredNivoData}
+                colors={(d) => colorFn(String(d.id ?? ""))}
                 curve="monotoneX"
                 yScale={{
                     stacked: displayType === "Stacked",
