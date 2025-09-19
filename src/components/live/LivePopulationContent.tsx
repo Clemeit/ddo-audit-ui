@@ -231,6 +231,7 @@ const LivePopulationContent = ({ serverInfoData }: Props) => {
                 setServerFilter={setServerFilter}
                 dataTypeFilter={dataTypeFilter}
                 setDataTypeFilter={setDataTypeFilter}
+                rangeOptions={[RangeEnum.DAY, RangeEnum.WEEK, RangeEnum.MONTH]}
             />
             <div style={{ position: "relative" }}>
                 <div style={{ opacity: isLoading || isError ? 0.5 : 1 }}>
