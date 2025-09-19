@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react"
 import { RangeEnum } from "../models/Common"
+import logMessage from "../utils/logUtils"
 
 /** Generic function signature for a demographics fetcher. */
 export type RangedFetcher<T> = (
@@ -102,6 +103,18 @@ export function useRangedDemographic<T>(
                     requestId === rangeRequestIdsRef.current[selectedRange]
                 ) {
                     setIsError(true)
+                }
+                if (!controller.signal.aborted) {
+                    logMessage(
+                        "Error fetching ranged demographic data",
+                        "error",
+                        {
+                            metadata: {
+                                error: e as Error,
+                                range: selectedRange,
+                            },
+                        }
+                    )
                 }
             } finally {
                 // Decrement in-flight and recalc loading regardless of abort status.
