@@ -155,7 +155,7 @@ const GuildSpecific = () => {
             const offlineRows: CharacterTableRow[] = Object.values(
                 offlineCharacters?.data || {}
             )
-                .sort((a: any, b: any) => {
+                .sort((a: Character, b: Character) => {
                     const dateA = a.last_save
                         ? new Date(a.last_save)
                         : new Date(0)
@@ -164,7 +164,7 @@ const GuildSpecific = () => {
                         : new Date(0)
                     return dateB.getTime() - dateA.getTime()
                 })
-                .map((char: any) => ({
+                .map((char: Character) => ({
                     character: char,
                     actions: null,
                 }))

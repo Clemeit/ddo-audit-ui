@@ -335,7 +335,7 @@ const CharacterTable = ({
                         comparison = -comparison
                     }
                     return comparison === 0
-                        ? b.character?.id - a.character?.id
+                        ? a.character?.id - b.character?.id
                         : comparison
                 }
                 return characterRows.sort(sortFunction).map(characterRow)
