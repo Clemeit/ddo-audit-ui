@@ -31,9 +31,20 @@ function getCharactersByIds(ids: number[], options?: { signal?: AbortSignal }) {
     )
 }
 
+function getOnlineCharactersByGuildName(
+    guildName: string,
+    options?: { headers?: any; signal?: AbortSignal }
+) {
+    return getRequest<MultipleCharacterResponseModel>(
+        `${CHARACTER_ENDPOINT}/by-guild-name/${guildName}`,
+        options
+    )
+}
+
 export {
     getCharacterByNameAndServer,
     getCharacterById,
     getCharactersByIds,
     getCharacterByName,
+    getOnlineCharactersByGuildName,
 }

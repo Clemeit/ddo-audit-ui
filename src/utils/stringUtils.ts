@@ -20,7 +20,8 @@ function convertMillisecondsToPrettyString(
     millis: number,
     commaSeparated: boolean = false,
     useFullWords: boolean = false,
-    onlyIncludeLargest: boolean = false
+    onlyIncludeLargest: boolean = false,
+    largestCount: number = 1
 ): string {
     if (millis == 0) {
         return "0 seconds"
@@ -32,9 +33,17 @@ function convertMillisecondsToPrettyString(
     const minutes = Math.floor(seconds / 60)
     const hours = Math.floor(minutes / 60)
     const days = Math.floor(hours / 24)
+    const weeks = Math.floor(days / 7)
+    const months = Math.floor(weeks / 4)
+    const years = Math.floor(months / 12)
 
     const resultArray: string[] = []
-    if (days > 0) resultArray.push(`${days} day${days > 1 ? "s" : ""}`)
+    if (years > 0) resultArray.push(`${years} year${years > 1 ? "s" : ""}`)
+    if (months % 12 > 0)
+        resultArray.push(`${months % 12} month${months > 1 ? "s" : ""}`)
+    if (weeks % 4 > 0)
+        resultArray.push(`${weeks % 4} week${weeks > 1 ? "s" : ""}`)
+    if (days % 7 > 0) resultArray.push(`${days % 7} day${days > 1 ? "s" : ""}`)
     if (hours % 24 > 0)
         resultArray.push(`${hours % 24} hour${hours > 1 ? "s" : ""}`)
     if (minutes % 60 > 0 && hours < 12)
@@ -47,7 +56,11 @@ function convertMillisecondsToPrettyString(
         )
 
     if (onlyIncludeLargest) {
-        return resultArray[0]
+        return resultArray.length > 0
+            ? resultArray
+                  .slice(0, largestCount)
+                  .join(commaSeparated ? ", " : " ")
+            : "0 seconds"
     }
     return resultArray.join(commaSeparated ? ", " : " ").trim()
 }

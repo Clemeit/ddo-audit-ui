@@ -190,26 +190,9 @@ table .no-data-row {
     padding: 10px 0;
 }
 
-table thead tr {
-    background-color: var(--gray6);
-    text-align: left;
-}
-
 table th,
 table td {
     padding: 6px 7px;
-}
-
-table tbody tr:nth-of-type(even) {
-    background-color: var(--gray7);
-}
-
-table tbody tr:nth-of-type(odd) {
-    background-color: var(--background);
-}
-
-table tbody tr:last-of-type {
-    border-bottom: 5px solid var(--gray6);
 }
 
 .link {

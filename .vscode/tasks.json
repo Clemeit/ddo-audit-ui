@@ -1,0 +1,22 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Typecheck (tsc)",
+			"type": "shell",
+			"command": "npm run -s pretty ; npm run -s lint",
+			"isBackground": false,
+			"problemMatcher": [
+				"$eslint-stylish"
+			],
+			"group": "build"
+		},
+		{
+			"label": "Typecheck (tsc)",
+			"type": "shell",
+			"command": "npm run -s pretty ; npm run -s lint",
+			"isBackground": false,
+			"group": "build"
+		}
+	]
+}
