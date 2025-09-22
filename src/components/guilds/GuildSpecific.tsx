@@ -27,6 +27,7 @@ import PageMessage from "../global/PageMessage.tsx"
 import { SearchParamType } from "../../hooks/useSearchParamState.ts"
 import { ReactComponent as OpenInNewTabIcon } from "../../assets/svg/open-in-new.svg"
 import { ReactComponent as ChevronRight } from "../../assets/svg/chevron-right.svg"
+import logMessage from "../../utils/logUtils.ts"
 
 const GuildSpecific = () => {
     const location = useLocation()
@@ -188,6 +189,14 @@ const GuildSpecific = () => {
         } catch (err: any) {
             if (!controller.signal.aborted) {
                 console.error("Error fetching guild expanded content:", err)
+                logMessage("Error fetching guild info", "error", {
+                    metadata: {
+                        error: (error as Error).message,
+                        guildName,
+                        serverName,
+                        currentPage,
+                    },
+                })
                 if (err) setGuildLookupError(err)
             }
         } finally {

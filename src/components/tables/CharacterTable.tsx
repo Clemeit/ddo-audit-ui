@@ -15,6 +15,7 @@ import "./CharacterTable.css"
 import { ReactComponent as ExpandSVG } from "../../assets/svg/expand.svg"
 import { ReactComponent as ContractSVG } from "../../assets/svg/contract.svg"
 import Stack from "../global/Stack.tsx"
+import logMessage from "../../utils/logUtils.ts"
 
 export enum ColumnType {
     STATUS,
@@ -256,7 +257,12 @@ const CharacterTable = ({
             <tr
                 className={`character-row${onRowClick ? " clickable" : ""}`}
                 key={rowData.character.id}
-                onClick={() => onRowClick?.(character)}
+                onClick={() => {
+                    onRowClick?.(character)
+                    logMessage("User navigating to character", "info", {
+                        metadata: { characterId: character.id },
+                    })
+                }}
             >
                 {visibleColumns.includes(ColumnType.STATUS) && statusDotCell}
                 {visibleColumns.includes(ColumnType.NAME) && nameCell}
@@ -345,6 +351,45 @@ const CharacterTable = ({
         return noCharactersMessageRow
     }
 
+    // Helper to render a sortable header cell and avoid duplication
+    const renderSortableHeader = useCallback(
+        (type: ColumnType, label: string) => {
+            if (!visibleColumns.includes(type)) return null
+
+            const isActive = sortBy.key === type
+            const Icon = isActive
+                ? sortBy.ascending
+                    ? ExpandSVG
+                    : ContractSVG
+                : null
+
+            const handleClick = () => {
+                setSortBy((prevSort) => ({
+                    key: type,
+                    ascending:
+                        prevSort.key === type ? !prevSort.ascending : true,
+                }))
+                logMessage("User sorting table", "info", {
+                    metadata: {
+                        sortBy: type,
+                    },
+                })
+            }
+
+            return (
+                <th style={{ cursor: "pointer" }} onClick={handleClick}>
+                    <Stack direction="row" gap="4px" align="center">
+                        <span>{label}</span>
+                        {Icon ? (
+                            <Icon className="sort-icon" aria-hidden="true" />
+                        ) : null}
+                    </Stack>
+                </th>
+            )
+        },
+        [sortBy, visibleColumns, logMessage]
+    )
+
     return (
         <div
             className="character-table-container"
@@ -357,232 +402,15 @@ const CharacterTable = ({
                         {visibleColumns.includes(ColumnType.STATUS) && (
                             <th style={{ width: "0px" }} />
                         )}
-                        {visibleColumns.includes(ColumnType.NAME) && (
-                            <th
-                                style={{
-                                    cursor: "pointer",
-                                }}
-                                onClick={() => {
-                                    setSortBy((prevSort) => ({
-                                        key: ColumnType.NAME,
-                                        ascending:
-                                            prevSort.key === ColumnType.NAME
-                                                ? !prevSort.ascending
-                                                : true,
-                                    }))
-                                }}
-                            >
-                                <Stack direction="row" gap="4px" align="center">
-                                    <span>Name</span>
-                                    {sortBy.key === ColumnType.NAME ? (
-                                        sortBy.ascending ? (
-                                            <ExpandSVG
-                                                className="sort-icon"
-                                                aria-hidden="true"
-                                            />
-                                        ) : (
-                                            <ContractSVG
-                                                className="sort-icon"
-                                                aria-hidden="true"
-                                            />
-                                        )
-                                    ) : null}
-                                </Stack>
-                            </th>
-                        )}
-                        {visibleColumns.includes(ColumnType.SERVER_NAME) && (
-                            <th
-                                style={{
-                                    cursor: "pointer",
-                                }}
-                                onClick={() => {
-                                    setSortBy((prevSort) => ({
-                                        key: ColumnType.SERVER_NAME,
-                                        ascending:
-                                            prevSort.key ===
-                                            ColumnType.SERVER_NAME
-                                                ? !prevSort.ascending
-                                                : true,
-                                    }))
-                                }}
-                            >
-                                <Stack direction="row" gap="4px" align="center">
-                                    <span>Server</span>
-                                    {sortBy.key === ColumnType.SERVER_NAME ? (
-                                        sortBy.ascending ? (
-                                            <ExpandSVG
-                                                className="sort-icon"
-                                                aria-hidden="true"
-                                            />
-                                        ) : (
-                                            <ContractSVG
-                                                className="sort-icon"
-                                                aria-hidden="true"
-                                            />
-                                        )
-                                    ) : null}
-                                </Stack>
-                            </th>
-                        )}
-                        {visibleColumns.includes(ColumnType.GUILD) && (
-                            <th
-                                style={{
-                                    cursor: "pointer",
-                                }}
-                                onClick={() => {
-                                    setSortBy((prevSort) => ({
-                                        key: ColumnType.GUILD,
-                                        ascending:
-                                            prevSort.key === ColumnType.GUILD
-                                                ? !prevSort.ascending
-                                                : true,
-                                    }))
-                                }}
-                            >
-                                <Stack direction="row" gap="4px" align="center">
-                                    <span>Guild</span>
-                                    {sortBy.key === ColumnType.GUILD ? (
-                                        sortBy.ascending ? (
-                                            <ExpandSVG
-                                                className="sort-icon"
-                                                aria-hidden="true"
-                                            />
-                                        ) : (
-                                            <ContractSVG
-                                                className="sort-icon"
-                                                aria-hidden="true"
-                                            />
-                                        )
-                                    ) : null}
-                                </Stack>
-                            </th>
-                        )}
-                        {visibleColumns.includes(ColumnType.LEVEL) && (
-                            <th
-                                style={{
-                                    cursor: "pointer",
-                                }}
-                                onClick={() => {
-                                    setSortBy((prevSort) => ({
-                                        key: ColumnType.LEVEL,
-                                        ascending:
-                                            prevSort.key === ColumnType.LEVEL
-                                                ? !prevSort.ascending
-                                                : true,
-                                    }))
-                                }}
-                            >
-                                <Stack direction="row" gap="4px" align="center">
-                                    <span>Level</span>
-                                    {sortBy.key === ColumnType.LEVEL ? (
-                                        sortBy.ascending ? (
-                                            <ExpandSVG
-                                                className="sort-icon"
-                                                aria-hidden="true"
-                                            />
-                                        ) : (
-                                            <ContractSVG
-                                                className="sort-icon"
-                                                aria-hidden="true"
-                                            />
-                                        )
-                                    ) : null}
-                                </Stack>
-                            </th>
-                        )}
-                        {visibleColumns.includes(ColumnType.CLASSES) && (
-                            <th
-                                style={{ cursor: "pointer" }}
-                                onClick={() => {
-                                    setSortBy((prevSort) => ({
-                                        key: ColumnType.CLASSES,
-                                        ascending:
-                                            prevSort.key === ColumnType.CLASSES
-                                                ? !prevSort.ascending
-                                                : true,
-                                    }))
-                                }}
-                            >
-                                <Stack direction="row" gap="4px" align="center">
-                                    <span>Classes</span>
-                                    {sortBy.key === ColumnType.CLASSES ? (
-                                        sortBy.ascending ? (
-                                            <ExpandSVG
-                                                className="sort-icon"
-                                                aria-hidden="true"
-                                            />
-                                        ) : (
-                                            <ContractSVG
-                                                className="sort-icon"
-                                                aria-hidden="true"
-                                            />
-                                        )
-                                    ) : null}
-                                </Stack>
-                            </th>
-                        )}
-                        {visibleColumns.includes(ColumnType.LOCATION) && (
-                            <th
-                                style={{ cursor: "pointer" }}
-                                onClick={() => {
-                                    setSortBy((prevSort) => ({
-                                        key: ColumnType.LOCATION,
-                                        ascending:
-                                            prevSort.key === ColumnType.LOCATION
-                                                ? !prevSort.ascending
-                                                : true,
-                                    }))
-                                }}
-                            >
-                                <Stack direction="row" gap="4px" align="center">
-                                    <span>Location</span>
-                                    {sortBy.key === ColumnType.LOCATION ? (
-                                        sortBy.ascending ? (
-                                            <ExpandSVG
-                                                className="sort-icon"
-                                                aria-hidden="true"
-                                            />
-                                        ) : (
-                                            <ContractSVG
-                                                className="sort-icon"
-                                                aria-hidden="true"
-                                            />
-                                        )
-                                    ) : null}
-                                </Stack>
-                            </th>
-                        )}
-                        {visibleColumns.includes(ColumnType.LAST_SEEN) && (
-                            <th
-                                style={{ cursor: "pointer" }}
-                                onClick={() => {
-                                    setSortBy((prevSort) => ({
-                                        key: ColumnType.LAST_SEEN,
-                                        ascending:
-                                            prevSort.key ===
-                                            ColumnType.LAST_SEEN
-                                                ? !prevSort.ascending
-                                                : true,
-                                    }))
-                                }}
-                            >
-                                <Stack direction="row" gap="4px" align="center">
-                                    <span>Last Seen</span>
-                                    {sortBy.key === ColumnType.LAST_SEEN ? (
-                                        sortBy.ascending ? (
-                                            <ExpandSVG
-                                                className="sort-icon"
-                                                aria-hidden="true"
-                                            />
-                                        ) : (
-                                            <ContractSVG
-                                                className="sort-icon"
-                                                aria-hidden="true"
-                                            />
-                                        )
-                                    ) : null}
-                                </Stack>
-                            </th>
+                        {renderSortableHeader(ColumnType.NAME, "Name")}
+                        {renderSortableHeader(ColumnType.SERVER_NAME, "Server")}
+                        {renderSortableHeader(ColumnType.GUILD, "Guild")}
+                        {renderSortableHeader(ColumnType.LEVEL, "Level")}
+                        {renderSortableHeader(ColumnType.CLASSES, "Classes")}
+                        {renderSortableHeader(ColumnType.LOCATION, "Location")}
+                        {renderSortableHeader(
+                            ColumnType.LAST_SEEN,
+                            "Last Seen"
                         )}
                         {visibleColumns.includes(ColumnType.ACTIONS) && (
                             <th style={{ position: "sticky" }}></th>

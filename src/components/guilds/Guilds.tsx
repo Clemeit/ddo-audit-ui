@@ -1,32 +1,14 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react"
 import Page from "../global/Page.tsx"
 import { ContentCluster, ContentClusterGroup } from "../global/ContentCluster"
-import { WIPPageMessage } from "../global/CommonMessages.tsx"
 import useIsMobile from "../../hooks/useIsMobile.ts"
 import Stack from "../global/Stack.tsx"
-import {
-    getGuilds as getGuildsApiCall,
-    getGuildByName,
-} from "../../services/guildService.ts"
+import { getGuilds as getGuildsApiCall } from "../../services/guildService.ts"
 import useDebounce from "../../hooks/useDebounce.ts"
-import {
-    GetGuildByServerAndNameData,
-    GuildByNameData,
-    GuildDataApiResponse,
-} from "../../models/Guilds.ts"
+import { GuildByNameData, GuildDataApiResponse } from "../../models/Guilds.ts"
 import GuildSearchTable from "./GuildSearchTable.tsx"
-import Badge from "../global/Badge.tsx"
-import CharacterTable, {
-    CharacterTableRow,
-    ColumnType,
-} from "../tables/CharacterTable.tsx"
 import ColoredText from "../global/ColoredText.tsx"
 import { ReactComponent as InfoSVG } from "../../assets/svg/info.svg"
-import {
-    getCharactersByIds,
-    getOnlineCharactersByGuildName,
-} from "../../services/characterService.ts"
-import Link from "../global/Link.tsx"
 import PaginationSelector from "../global/PaginationSelector.tsx"
 import { SERVER_NAMES } from "../../constants/servers.ts"
 import useGetRegisteredCharacters from "../../hooks/useGetRegisteredCharacters.ts"
@@ -34,6 +16,7 @@ import GuildExpandedContent from "./GuildExpandedContent.tsx"
 import useSearchParamState, {
     SearchParamType,
 } from "../../hooks/useSearchParamState.ts"
+import logMessage from "../../utils/logUtils.ts"
 
 const Guilds = () => {
     const isMobile = useIsMobile()
@@ -108,6 +91,14 @@ const Guilds = () => {
             } catch (error) {
                 if (!signal.aborted) {
                     console.error("Error fetching guilds:", error)
+                    logMessage("Error fetching guilds", "error", {
+                        metadata: {
+                            error: (error as Error).message,
+                            guildName: debouncedGuildName,
+                            serverName: debouncedServerName,
+                            currentPage,
+                        },
+                    })
                 }
             } finally {
                 isLoading.current = false
@@ -115,6 +106,12 @@ const Guilds = () => {
         }
 
         fetchGuilds()
+        logMessage("Use changed filters", "info", {
+            metadata: {
+                guildName: debouncedGuildName,
+                serverName: debouncedServerName,
+            },
+        })
         return () => {
             controller.abort()
         }
@@ -153,7 +150,6 @@ const Guilds = () => {
         <Page
             title="DDO Guilds"
             description="A page where you can search for DDO guilds, view their stats, and see members of your guild if you have a registered character."
-            // pageMessages={[<WIPPageMessage />]}
         >
             <ContentClusterGroup>
                 <ContentCluster

@@ -5,6 +5,7 @@ import Button from "../global/Button.tsx"
 import { ReactComponent as ChevronRight } from "../../assets/svg/chevron-right.svg"
 import useIsMobile from "../../hooks/useIsMobile.ts"
 import { useNavigate } from "react-router-dom"
+import logMessage from "../../utils/logUtils.ts"
 
 interface Props {
     guilds: GuildByNameData[]
@@ -65,6 +66,15 @@ const GuildSearchTable = ({
         }
     }, [expanded, renderExpandedContent, guilds])
 
+    const handleNavigateToGuild = (guildName: string, serverName: string) => {
+        navigate(
+            `/guilds/${serverName?.toLowerCase()}/${encodeURIComponent(guildName?.toLowerCase())}`
+        )
+        logMessage("User navigating to guild", "info", {
+            metadata: { guildName, serverName },
+        })
+    }
+
     const getTableContent = () => {
         if (guilds.length === 0) {
             return (
@@ -91,8 +101,9 @@ const GuildSearchTable = ({
                         key={key}
                         className={isExpanded ? "is-expanded" : undefined}
                         onClick={() =>
-                            navigate(
-                                `/guilds/${guild?.server_name?.toLowerCase()}/${encodeURIComponent(guild?.guild_name?.toLowerCase())}`
+                            handleNavigateToGuild(
+                                guild.guild_name,
+                                guild.server_name
                             )
                         }
                     >
