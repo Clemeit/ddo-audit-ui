@@ -46,7 +46,7 @@ const Directory = () => {
                         <NavigationCard type="who" />
                         <NavigationCard
                             type="guilds"
-                            badge={<Badge text="Beta" type="beta" />}
+                            badge={<Badge text="New" type="new" />}
                         />
                         <NavigationCard
                             type="notifications"
