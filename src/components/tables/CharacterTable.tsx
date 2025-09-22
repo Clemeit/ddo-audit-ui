@@ -233,11 +233,9 @@ const CharacterTable = ({
         )
         const lastSeenCell = (
             <td
-                title={
-                    new Date(
-                        character.last_save || new Date()
-                    ).toLocaleString() || undefined
-                }
+                title={new Date(
+                    character.last_save || new Date()
+                ).toLocaleString()}
             >
                 {character.last_save
                     ? convertMillisecondsToPrettyString(

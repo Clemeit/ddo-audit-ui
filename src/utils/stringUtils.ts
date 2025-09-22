@@ -48,7 +48,7 @@ function convertMillisecondsToPrettyString(
         )
     if (months % 12 > 0)
         resultArray.push(
-            `${months % 12} ${pluralize("month", months % 24)}`.replace(
+            `${months % 12} ${pluralize("month", months % 12)}`.replace(
                 / /g,
                 nonBreakingSpace ? "\u00A0" : " "
             )

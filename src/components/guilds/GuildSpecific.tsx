@@ -148,7 +148,7 @@ const GuildSpecific = () => {
             const offlineCharacters =
                 guildInfo?.member_ids && guildInfo?.member_ids.length > 0
                     ? await getCharactersByIds(guildInfo.member_ids, {
-                          signal: controller.signal as any,
+                          signal: controller.signal as AbortSignal,
                       })
                     : (null as MultipleCharacterResponseModel)
 
