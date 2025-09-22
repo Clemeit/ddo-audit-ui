@@ -1,9 +1,10 @@
 import { useEffect, useState, type CSSProperties, type ReactNode } from "react"
 import { GuildByNameData } from "../../models/Guilds.ts"
-import { ReactComponent as ExpandSVG } from "../../assets/svg/expand.svg"
-import { ReactComponent as ContractSVG } from "../../assets/svg/contract.svg"
 import "./GuildSearchTable.css"
 import Button from "../global/Button.tsx"
+import { ReactComponent as ChevronRight } from "../../assets/svg/chevron-right.svg"
+import useIsMobile from "../../hooks/useIsMobile.ts"
+import { useNavigate } from "react-router-dom"
 
 interface Props {
     guilds: GuildByNameData[]
@@ -21,24 +22,18 @@ const GuildSearchTable = ({
     renderExpandedContent,
 }: Props) => {
     const [expanded, setExpanded] = useState<Set<string>>(new Set())
+    const isMobile = useIsMobile()
+    const navigate = useNavigate()
+
+    useEffect(() => {
+        setExpanded(new Set())
+    }, [searchQuery, guilds])
 
     const getRowKey = (g: GuildByNameData) =>
         `${g.guild_name}__${g.server_name}`
 
-    const toggleRow = (key: string) => {
-        setExpanded((prev) => {
-            const next = new Set(prev)
-            if (next.has(key)) {
-                next.delete(key)
-            } else {
-                next.add(key)
-            }
-            return next
-        })
-    }
-
     const containerStyle: CSSProperties | undefined =
-        maxBodyHeight !== undefined
+        maxBodyHeight !== undefined && expanded.size === 0
             ? {
                   maxHeight:
                       typeof maxBodyHeight === "number"
@@ -83,53 +78,38 @@ const GuildSearchTable = ({
             )
         }
 
-        return guilds.flatMap((guild) => {
-            const key = getRowKey(guild)
-            const isExpanded = expanded.has(key)
-
-            const mainRow = (
-                <tr
-                    key={key}
-                    className={isExpanded ? "is-expanded" : undefined}
-                >
-                    <td>{guild.guild_name}</td>
-                    <td>{guild.server_name}</td>
-                    <td>{guild.character_count}</td>
-                    <td className="expand-cell">
-                        <Button
-                            className="expand-button"
-                            type="tertiary"
-                            aria-expanded={isExpanded}
-                            aria-label={
-                                isExpanded ? "Collapse row" : "Expand row"
-                            }
-                            onClick={() => toggleRow(key)}
-                            icon={isExpanded ? <ContractSVG /> : <ExpandSVG />}
-                        />
-                    </td>
-                </tr>
+        return guilds
+            .filter(
+                (guild) => expanded.size === 0 || expanded.has(getRowKey(guild))
             )
+            .flatMap((guild) => {
+                const key = getRowKey(guild)
+                const isExpanded = expanded.has(key)
 
-            const expandedRow = isExpanded ? (
-                <tr key={`${key}__expanded`} className="expanded-row">
-                    <td colSpan={4}>
-                        {renderExpandedContent ? (
-                            (expandedContent[key] ?? (
-                                <div className="expanded-placeholder">
-                                    Loading details...
-                                </div>
-                            ))
-                        ) : (
-                            <div className="expanded-placeholder">
-                                No details to display.
-                            </div>
+                return (
+                    <tr
+                        key={key}
+                        className={isExpanded ? "is-expanded" : undefined}
+                        onClick={() =>
+                            navigate(
+                                `/guilds/${guild?.server_name?.toLowerCase()}/${encodeURIComponent(guild?.guild_name?.toLowerCase())}`
+                            )
+                        }
+                    >
+                        <td>{guild.guild_name}</td>
+                        <td>{guild.server_name}</td>
+                        <td>{guild.character_count}</td>
+                        {!isMobile && (
+                            <td className="expand-cell">
+                                <ChevronRight
+                                    className="expand-icon"
+                                    aria-hidden="true"
+                                />
+                            </td>
                         )}
-                    </td>
-                </tr>
-            ) : null
-
-            return expandedRow ? [mainRow, expandedRow] : [mainRow]
-        })
+                    </tr>
+                )
+            })
     }
 
     return (
@@ -141,8 +121,10 @@ const GuildSearchTable = ({
                     <tr>
                         <th>Guild Name</th>
                         <th>Server Name</th>
-                        <th>Character Count</th>
-                        <th className="expand-header" aria-label="Expand" />
+                        <th>Count</th>
+                        {!isMobile && (
+                            <th className="expand-header" aria-label="Expand" />
+                        )}
                     </tr>
                 </thead>
                 <tbody>{getTableContent()}</tbody>

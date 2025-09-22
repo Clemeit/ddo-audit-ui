@@ -31,11 +31,14 @@ import PaginationSelector from "../global/PaginationSelector.tsx"
 import { SERVER_NAMES } from "../../constants/servers.ts"
 import useGetRegisteredCharacters from "../../hooks/useGetRegisteredCharacters.ts"
 import GuildExpandedContent from "./GuildExpandedContent.tsx"
+import useSearchParamState, {
+    SearchParamType,
+} from "../../hooks/useSearchParamState.ts"
 
 const Guilds = () => {
     const isMobile = useIsMobile()
-    const [guildName, setGuildName] = React.useState("")
-    const [serverName, setServerName] = React.useState("")
+    // const [guildName, setGuildName] = React.useState("")
+    // const [serverName, setServerName] = React.useState("")
     const [guildData, setGuildData] = React.useState<GuildDataApiResponse>()
     const [currentPage, setCurrentPage] = React.useState(1)
     const isLoading = useRef<boolean>(false)
@@ -43,7 +46,23 @@ const Guilds = () => {
     const lastFetchedGuildName = useRef<string>("")
     const lastFetchedServerName = useRef<string>("")
 
-    const { verifiedCharacters, accessTokens } = useGetRegisteredCharacters()
+    const { getSearchParam, setSearchParam } = useSearchParamState()
+
+    // guildName and serverName are controlled by search params
+    const guildName = getSearchParam(SearchParamType.GUILD_NAME) || ""
+    const serverName = getSearchParam(SearchParamType.SERVER_NAME) || ""
+    const setGuildName = (name: string) => {
+        setSearchParam(SearchParamType.GUILD_NAME, name || null)
+    }
+    const setServerName = (name: string) => {
+        setSearchParam(SearchParamType.SERVER_NAME, name || null)
+    }
+
+    const {
+        verifiedCharacters,
+        accessTokens,
+        isLoaded: areRegisteredCharactersLoaded,
+    } = useGetRegisteredCharacters()
 
     const {
         debouncedValue: debouncedGuildName,
@@ -98,14 +117,21 @@ const Guilds = () => {
     }, [debouncedGuildName, debouncedServerName, currentPage])
 
     const handleRenderExpandedContent = async (guildData: GuildByNameData) => {
-        return <GuildExpandedContent guildData={guildData} />
+        return (
+            <GuildExpandedContent
+                guildData={guildData}
+                verifiedCharacters={verifiedCharacters}
+                accessTokens={accessTokens}
+                areRegisteredCharactersLoaded={areRegisteredCharactersLoaded}
+            />
+        )
     }
 
     return (
         <Page
             title="DDO Guilds"
             description="A page where you can search for DDO guilds, view their stats, and see members of your guild if you have a registered character."
-            pageMessages={[<WIPPageMessage />]}
+            // pageMessages={[<WIPPageMessage />]}
         >
             <ContentClusterGroup>
                 <ContentCluster
@@ -113,8 +139,19 @@ const Guilds = () => {
                     subtitle="Search for guilds by name to view member count and recent activity."
                 >
                     <Stack direction="column" gap="20px">
-                        <Stack direction="row" gap="10px">
-                            <Stack direction="column" gap="2px">
+                        <Stack
+                            direction="row"
+                            gap="10px"
+                            style={{ flexWrap: "wrap", width: "100%" }}
+                        >
+                            <Stack
+                                className="full-width-on-smallish-mobile"
+                                direction="column"
+                                gap="2px"
+                                style={{
+                                    boxSizing: "border-box",
+                                }}
+                            >
                                 <label
                                     htmlFor="guild-name"
                                     className="label"
@@ -128,7 +165,8 @@ const Guilds = () => {
                                 <input
                                     type="text"
                                     placeholder="Search by name..."
-                                    className="input"
+                                    className="full-width-on-smallish-mobile"
+                                    // className="input"
                                     id="guild-name"
                                     value={guildName}
                                     onChange={(e) => {
@@ -143,7 +181,11 @@ const Guilds = () => {
                                     }}
                                 />
                             </Stack>
-                            <Stack direction="column" gap="2px">
+                            <Stack
+                                direction="column"
+                                gap="2px"
+                                className="full-width-on-smallish-mobile"
+                            >
                                 <label
                                     htmlFor="server-name"
                                     className="label"
@@ -155,7 +197,8 @@ const Guilds = () => {
                                     Server Name
                                 </label>
                                 <select
-                                    className="input"
+                                    // className="input"
+                                    className="full-width-on-smallish-mobile"
                                     id="server-name"
                                     value={serverName}
                                     onChange={(e) => {
@@ -184,7 +227,8 @@ const Guilds = () => {
                             guilds={guildData?.data || []}
                             searchQuery={guildName}
                             isLoading={isLoading.current}
-                            maxBodyHeight={"70vh"}
+                            // bodyHeight={"70vh"}
+                            // maxBodyHeight={"60vh"}
                             renderExpandedContent={handleRenderExpandedContent}
                         />
                         <PaginationSelector
@@ -212,13 +256,12 @@ const Guilds = () => {
                             <ColoredText color="secondary">
                                 Numbers are estimates and may in some cases
                                 include inactive characters that were kicked
-                                from guilds. Anonymous players are always
-                                hidden.
+                                from guilds.
                             </ColoredText>
                         </div>
                     </Stack>
                 </ContentCluster>
-                <div
+                {/* <div
                     style={{
                         opacity: 0.5,
                         pointerEvents: "none",
@@ -258,7 +301,7 @@ const Guilds = () => {
                             </div>
                         </Stack>
                     </ContentCluster>
-                </div>
+                </div> */}
             </ContentClusterGroup>
         </Page>
     )

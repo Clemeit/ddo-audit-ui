@@ -545,15 +545,12 @@ const WhoCanvas = ({
                         className="transparent-input"
                         style={{
                             position: "absolute",
-                            left: searchInputBoundingBox.x / canvasScaleWidth,
-                            top:
-                                searchInputBoundingBox.y / canvasScaleHeight -
-                                (20 -
-                                    searchInputBoundingBox.height /
-                                        canvasScaleHeight) /
-                                    2,
-                            width: searchInputBoxWidth / canvasScaleWidth,
+                            left: `${((searchInputBoundingBox.x + searchInputBoundingBox.width / 2) / panelWidth) * 100}%`,
+                            top: `${((searchInputBoundingBox.y + searchInputBoundingBox.height / 2) / panelHeight) * 100}%`,
+                            width: `${(searchInputBoxWidth / panelWidth) * 100}%`,
+                            transform: "translate(-50%, calc(-50% - 1px))",
                             fontSize: `${23 - Math.round(canvasScaleWidth * 6)}px`,
+                            // backgroundColor: "red",
                         }}
                         type="text"
                         onChange={(e) => setStringFilter(e.target.value)}
@@ -564,23 +561,14 @@ const WhoCanvas = ({
                         className="transparent-input"
                         style={{
                             position: "absolute",
-                            left:
-                                levelRangeLowerInputBoundingBox.x /
-                                    canvasScaleWidth -
-                                (levelRangeInputBoxWidth -
-                                    levelRangeLowerInputBoundingBox.width /
-                                        canvasScaleWidth) /
-                                    2,
-                            top:
-                                levelRangeLowerInputBoundingBox.y /
-                                    canvasScaleHeight -
-                                (20 -
-                                    levelRangeLowerInputBoundingBox.height /
-                                        canvasScaleHeight) /
-                                    2,
-                            width: levelRangeInputBoxWidth,
+                            left: `${((levelRangeLowerInputBoundingBox.x + levelRangeLowerInputBoundingBox.width / 2) / panelWidth) * 100}%`,
+                            top: `${((levelRangeLowerInputBoundingBox.y + levelRangeLowerInputBoundingBox.height / 2) / panelHeight) * 100}%`,
+                            transform: "translate(-50%, calc(-50% - 1px))",
+                            width: `${levelRangeInputBoxWidth}px`,
+                            height: "20px",
                             fontSize: `${23 - Math.round(canvasScaleWidth * 6)}px`,
                             textAlign: "center",
+                            // backgroundColor: "red",
                         }}
                         type="text"
                         onChange={(e) => setFauxMinLevel(e.target.value)}
@@ -600,23 +588,14 @@ const WhoCanvas = ({
                         className="transparent-input"
                         style={{
                             position: "absolute",
-                            left:
-                                levelRangeUpperInputBoundingBox.x /
-                                    canvasScaleWidth -
-                                (levelRangeInputBoxWidth -
-                                    levelRangeUpperInputBoundingBox.width /
-                                        canvasScaleWidth) /
-                                    2,
-                            top:
-                                levelRangeUpperInputBoundingBox.y /
-                                    canvasScaleHeight -
-                                (20 -
-                                    levelRangeUpperInputBoundingBox.height /
-                                        canvasScaleHeight) /
-                                    2,
-                            width: levelRangeInputBoxWidth,
+                            left: `${((levelRangeUpperInputBoundingBox.x + levelRangeUpperInputBoundingBox.width / 2) / panelWidth) * 100}%`,
+                            top: `${((levelRangeUpperInputBoundingBox.y + levelRangeUpperInputBoundingBox.height / 2) / panelHeight) * 100}%`,
+                            transform: "translate(-50%, calc(-50% - 1px))",
+                            width: `${levelRangeInputBoxWidth}px`,
+                            height: "20px",
                             fontSize: `${23 - Math.round(canvasScaleWidth * 6)}px`,
                             textAlign: "center",
+                            // backgroundColor: "red",
                         }}
                         type="text"
                         onChange={(e) => setFauxMaxLevel(e.target.value)}

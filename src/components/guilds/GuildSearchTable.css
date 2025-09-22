@@ -22,6 +22,7 @@
     width: 100%;
     border-collapse: separate;
     border-spacing: 0;
+    user-select: none;
 }
 
 .guild-search-table.loading {
@@ -88,12 +89,49 @@
 
 .guild-search-table > tbody > tr:not(.expanded-row):nth-of-type(even) {
     background-color: var(--gray7);
+
+    &:hover {
+        background-color: var(--gray6);
+        cursor: pointer;
+    }
 }
 
 .guild-search-table > tbody > tr:not(.expanded-row):nth-of-type(odd) {
     background-color: var(--background);
+
+    &:hover {
+        background-color: var(--highlight);
+        cursor: pointer;
+    }
 }
 
 .guild-search-table > tbody > tr:last-of-type {
     border-bottom: 5px solid var(--gray6);
+}
+
+@media (max-width: 768px) {
+    .guild-search-table th,
+    .guild-search-table td {
+        padding: 8px 10px;
+    }
+
+    .guild-search-table .expand-header,
+    .guild-search-table .expand-cell {
+        width: 30px;
+        padding-left: 4px;
+        padding-right: 4px;
+    }
+
+    .guild-search-table .expand-button {
+        width: 24px;
+        height: 24px;
+    }
+
+    .guild-search-table > tbody > tr:not(.expanded-row) {
+        cursor: pointer;
+    }
+
+    .guild-search-table .expanded-row > td {
+        padding: 20px 5px;
+    }
 }

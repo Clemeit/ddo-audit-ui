@@ -142,6 +142,7 @@ hr {
 }
 
 input,
+select,
 textarea {
     color: var(--text-inverted);
     padding: 2px 5px;
@@ -302,6 +303,32 @@ input[type="range"] {
     display: none !important;
 }
 
+/* This component should be affixed to the bottom of the viewport
+and shown over other content */
+.sticky-bottom {
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    background-color: var(--background);
+    padding: 10px 10px;
+    width: 100%;
+    filter: drop-shadow(0 -2px 5px var(--shadow));
+    z-index: 100;
+}
+
+/* This component should be affixed to the top of the viewport
+and shown over other content */
+.sticky-top {
+    position: sticky;
+    top: 0;
+    left: 0;
+    background-color: var(--background);
+    padding: 10px 0;
+    width: 100%;
+    filter: drop-shadow(0 2px 5px var(--shadow));
+    z-index: 1000;
+}
+
 /* mobile */
 @media (max-width: 768px) {
     html {
@@ -329,9 +356,10 @@ input[type="range"] {
         height: 20px;
     }
 
-    input {
+    input, select {
         min-width: 18px;
-        min-height: 18px;
+        min-height: 28px;
+        box-sizing: border-box;
     }
 
     .input-label {
@@ -343,6 +371,10 @@ input[type="range"] {
 @media (max-width: 400px) {
     .hide-on-smallish-mobile {
         display: none !important;
+    }
+
+    .full-width-on-smallish-mobile {
+        width: 100% !important;
     }
 }
     

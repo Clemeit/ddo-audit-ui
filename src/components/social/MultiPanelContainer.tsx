@@ -39,6 +39,9 @@ const MultiPanelContainer = ({ serverName, primaryType }: Props) => {
         undefined
     )
     const [isModalOpen, setIsModalOpen] = useState(false)
+    const [initialSearchQuery, setInitialSearchQuery] = useState<
+        string | undefined
+    >(undefined)
 
     const closeSecondaryPanel = () => {
         setSecondaryPanel(undefined)
@@ -64,6 +67,14 @@ const MultiPanelContainer = ({ serverName, primaryType }: Props) => {
         const _secondaryPanelServer = (
             getSearchParam(SearchParamType.SECONDARY_PANEL_SERVER) ?? ""
         ).toLowerCase()
+        const _initialSearchQuery = getSearchParam(
+            SearchParamType.INITIAL_SEARCH_QUERY
+        )
+        setInitialSearchQuery(
+            _initialSearchQuery && _initialSearchQuery.trim() !== ""
+                ? _initialSearchQuery
+                : undefined
+        )
         if (
             !SERVER_NAMES_LOWER.includes(_secondaryPanelServer) ||
             !VALID_PANEL_TYPES.includes(_secondaryPanelType as PanelType)
@@ -238,7 +249,10 @@ const MultiPanelContainer = ({ serverName, primaryType }: Props) => {
                 {primaryType === PanelType.Grouping ? (
                     <LfmContainer serverName={serverName} />
                 ) : (
-                    <WhoContainer serverName={serverName} />
+                    <WhoContainer
+                        serverName={serverName}
+                        initialSearchQuery={initialSearchQuery}
+                    />
                 )}
                 {secondaryPanel && (
                     <div className="hide-on-mobile">{secondaryPanel}</div>

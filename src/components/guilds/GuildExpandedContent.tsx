@@ -9,18 +9,21 @@ import useGetRegisteredCharacters from "../../hooks/useGetRegisteredCharacters.t
 import { getGuildByName } from "../../services/guildService.ts"
 import { getCharactersByIds } from "../../services/characterService.ts"
 import { GuildByNameData } from "../../models/Guilds.ts"
+import useIsMobile from "../../hooks/useIsMobile.ts"
 
 type Props = {
     guildData: GuildByNameData
+    verifiedCharacters?: any[]
+    accessTokens?: any[]
+    areRegisteredCharactersLoaded?: boolean
 }
 
-const GuildExpandedContent: React.FC<Props> = ({ guildData }) => {
-    const {
-        verifiedCharacters,
-        accessTokens,
-        isLoaded: areRegisteredCharactersLoaded,
-    } = useGetRegisteredCharacters()
-
+const GuildExpandedContent: React.FC<Props> = ({
+    guildData,
+    verifiedCharacters,
+    accessTokens,
+    areRegisteredCharactersLoaded,
+}) => {
     const [onlineRows, setOnlineRows] = useState<CharacterTableRow[]>([])
     const [currentPage, setCurrentPage] = useState<number>(1)
     const [offlineRows, setOfflineRows] = useState<CharacterTableRow[]>([])
@@ -28,6 +31,7 @@ const GuildExpandedContent: React.FC<Props> = ({ guildData }) => {
     const [isLoadingMore, setIsLoadingMore] = useState<boolean>(false)
     const [hasMoreOffline, setHasMoreOffline] = useState<boolean>(true)
     const abortRef = useRef<AbortController | null>(null)
+    const isMobile = useIsMobile()
 
     // Reset pagination and rows when guild identity changes
     useEffect(() => {
@@ -175,10 +179,9 @@ const GuildExpandedContent: React.FC<Props> = ({ guildData }) => {
                     visibleColumns={[
                         ColumnType.STATUS,
                         ColumnType.NAME,
-                        ColumnType.LOCATION,
                         ColumnType.LEVEL,
                         ColumnType.CLASSES,
-                    ]}
+                    ].concat(isMobile ? [] : [ColumnType.LOCATION])}
                     maxBodyHeight={"400px"}
                 />
             </Stack>
@@ -205,11 +208,10 @@ const GuildExpandedContent: React.FC<Props> = ({ guildData }) => {
                     visibleColumns={[
                         ColumnType.STATUS,
                         ColumnType.NAME,
-                        ColumnType.LOCATION,
                         ColumnType.LEVEL,
                         ColumnType.CLASSES,
                         ColumnType.LAST_SEEN,
-                    ]}
+                    ].concat(isMobile ? [] : [ColumnType.LOCATION])}
                     maxBodyHeight={"400px"}
                     onReachBottom={() => {
                         // Only paginate if we have more to load and not already loading

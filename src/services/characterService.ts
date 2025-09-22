@@ -4,7 +4,7 @@ import {
 } from "../models/Character.ts"
 import { getRequest } from "./apiHelper.ts"
 
-const CHARACTER_ENDPOINT = "characters"
+export const CHARACTER_ENDPOINT = "characters"
 
 function getCharacterByNameAndServer(name: string, server: string) {
     return getRequest<SingleCharacterResponseModel>(

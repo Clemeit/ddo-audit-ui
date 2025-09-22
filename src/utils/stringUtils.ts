@@ -21,7 +21,8 @@ function convertMillisecondsToPrettyString(
     commaSeparated: boolean = false,
     useFullWords: boolean = false,
     onlyIncludeLargest: boolean = false,
-    largestCount: number = 1
+    largestCount: number = 1,
+    nonBreakingSpace: boolean = false
 ): string {
     if (millis == 0) {
         return "0 seconds"
@@ -38,21 +39,54 @@ function convertMillisecondsToPrettyString(
     const years = Math.floor(months / 12)
 
     const resultArray: string[] = []
-    if (years > 0) resultArray.push(`${years} year${years > 1 ? "s" : ""}`)
+    if (years > 0)
+        resultArray.push(
+            `${years} year${years > 1 ? "s" : ""}`.replace(
+                / /g,
+                nonBreakingSpace ? "\u00A0" : " "
+            )
+        )
     if (months % 12 > 0)
-        resultArray.push(`${months % 12} month${months > 1 ? "s" : ""}`)
+        resultArray.push(
+            `${months % 12} month${months > 1 ? "s" : ""}`.replace(
+                / /g,
+                nonBreakingSpace ? "\u00A0" : " "
+            )
+        )
     if (weeks % 4 > 0)
-        resultArray.push(`${weeks % 4} week${weeks > 1 ? "s" : ""}`)
-    if (days % 7 > 0) resultArray.push(`${days % 7} day${days > 1 ? "s" : ""}`)
+        resultArray.push(
+            `${weeks % 4} week${weeks > 1 ? "s" : ""}`.replace(
+                / /g,
+                nonBreakingSpace ? "\u00A0" : " "
+            )
+        )
+    if (days % 7 > 0)
+        resultArray.push(
+            `${days % 7} day${days > 1 ? "s" : ""}`.replace(
+                / /g,
+                nonBreakingSpace ? "\u00A0" : " "
+            )
+        )
     if (hours % 24 > 0)
-        resultArray.push(`${hours % 24} hour${hours > 1 ? "s" : ""}`)
+        resultArray.push(
+            `${hours % 24} hour${hours > 1 ? "s" : ""}`.replace(
+                / /g,
+                nonBreakingSpace ? "\u00A0" : " "
+            )
+        )
     if (minutes % 60 > 0 && hours < 12)
         resultArray.push(
-            `${minutes % 60} min${useFullWords ? "ute" : ""}${minutes > 1 ? "s" : ""}`
+            `${minutes % 60} min${useFullWords ? "ute" : ""}${minutes > 1 ? "s" : ""}`.replace(
+                / /g,
+                nonBreakingSpace ? "\u00A0" : " "
+            )
         )
     if (seconds % 60 > 0 && minutes < 30 && hours === 0)
         resultArray.push(
-            `${seconds % 60} sec${useFullWords ? "ond" : ""}${seconds > 1 ? "s" : ""}`
+            `${seconds % 60} sec${useFullWords ? "ond" : ""}${seconds > 1 ? "s" : ""}`.replace(
+                / /g,
+                nonBreakingSpace ? "\u00A0" : " "
+            )
         )
 
     if (onlyIncludeLargest) {
@@ -65,7 +99,10 @@ function convertMillisecondsToPrettyString(
     return resultArray.join(commaSeparated ? ", " : " ").trim()
 }
 
-function mapClassesToString(classes?: CharacterClass[]): string {
+function mapClassesToString(
+    classes?: CharacterClass[],
+    nonBreakingSpace: boolean = false
+): string {
     const excludedClasses = ["Epic", "Legendary"]
 
     if (!classes) return ""
@@ -73,8 +110,11 @@ function mapClassesToString(classes?: CharacterClass[]): string {
         .filter(
             (characterClass) => !excludedClasses.includes(characterClass.name)
         )
-        .map(
-            (characterClass) => `${characterClass.name} ${characterClass.level}`
+        .map((characterClass) =>
+            `${characterClass.name} ${characterClass.level}`.replace(
+                / /g,
+                nonBreakingSpace ? "\u00A0" : " "
+            )
         )
         .join(", ")
 }
