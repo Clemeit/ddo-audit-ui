@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react"
+import React, { useEffect, useLayoutEffect, useRef, useState } from "react"
 import Page from "../global/Page.tsx"
 import { ContentCluster, ContentClusterGroup } from "../global/ContentCluster"
 import { WIPPageMessage } from "../global/CommonMessages.tsx"
@@ -42,6 +42,10 @@ const Guilds = () => {
     const [guildData, setGuildData] = React.useState<GuildDataApiResponse>()
     const [currentPage, setCurrentPage] = React.useState(1)
     const isLoading = useRef<boolean>(false)
+    const [computedTableMaxHeight, setComputedTableMaxHeight] =
+        useState<string>("60vh")
+
+    const tableContainerRef = useRef<HTMLDivElement | null>(null)
 
     const lastFetchedGuildName = useRef<string>("")
     const lastFetchedServerName = useRef<string>("")
@@ -116,6 +120,24 @@ const Guilds = () => {
         }
     }, [debouncedGuildName, debouncedServerName, currentPage])
 
+    useLayoutEffect(() => {
+        const recompute = () => {
+            const el = tableContainerRef.current
+            if (!el) return
+            const rect = el.getBoundingClientRect()
+            const buffer = isMobile ? 195 : 150
+            const available = Math.max(
+                250,
+                Math.floor(window.innerHeight - rect.top - buffer)
+            )
+            setComputedTableMaxHeight(`${available}px`)
+        }
+
+        recompute()
+        window.addEventListener("resize", recompute)
+        return () => window.removeEventListener("resize", recompute)
+    }, [guildData, guildName, serverName, currentPage, isMobile])
+
     const handleRenderExpandedContent = async (guildData: GuildByNameData) => {
         return (
             <GuildExpandedContent
@@ -136,7 +158,10 @@ const Guilds = () => {
             <ContentClusterGroup>
                 <ContentCluster
                     title="Guild Search"
-                    subtitle="Search for guilds by name to view member count and recent activity."
+                    subtitle={
+                        !isMobile &&
+                        "Search for guilds by name to view member count and recent activity."
+                    }
                 >
                     <Stack direction="column" gap="20px">
                         <Stack
@@ -223,14 +248,17 @@ const Guilds = () => {
                                 </select>
                             </Stack>
                         </Stack>
-                        <GuildSearchTable
-                            guilds={guildData?.data || []}
-                            searchQuery={guildName}
-                            isLoading={isLoading.current}
-                            // bodyHeight={"70vh"}
-                            // maxBodyHeight={"60vh"}
-                            renderExpandedContent={handleRenderExpandedContent}
-                        />
+                        <div ref={tableContainerRef} style={{ width: "100%" }}>
+                            <GuildSearchTable
+                                guilds={guildData?.data || []}
+                                searchQuery={guildName}
+                                isLoading={isLoading.current}
+                                maxBodyHeight={computedTableMaxHeight}
+                                renderExpandedContent={
+                                    handleRenderExpandedContent
+                                }
+                            />
+                        </div>
                         <PaginationSelector
                             totalPages={
                                 guildData
