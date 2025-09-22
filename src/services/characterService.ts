@@ -4,7 +4,7 @@ import {
 } from "../models/Character.ts"
 import { getRequest } from "./apiHelper.ts"
 
-const CHARACTER_ENDPOINT = "characters"
+export const CHARACTER_ENDPOINT = "characters"
 
 function getCharacterByNameAndServer(name: string, server: string) {
     return getRequest<SingleCharacterResponseModel>(
@@ -31,9 +31,20 @@ function getCharactersByIds(ids: number[], options?: { signal?: AbortSignal }) {
     )
 }
 
+function getOnlineCharactersByGuildName(
+    guildName: string,
+    options?: { headers?: any; signal?: AbortSignal }
+) {
+    return getRequest<MultipleCharacterResponseModel>(
+        `${CHARACTER_ENDPOINT}/by-guild-name/${guildName}`,
+        options
+    )
+}
+
 export {
     getCharacterByNameAndServer,
     getCharacterById,
     getCharactersByIds,
     getCharacterByName,
+    getOnlineCharactersByGuildName,
 }

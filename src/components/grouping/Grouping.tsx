@@ -272,7 +272,11 @@ const GroupingContent = () => {
             <Stack direction="column" gap="20px">
                 {Object.entries(getCurrentRaids() || {}).map(
                     ([serverName, lfms]: [string, Lfm[]]) => (
-                        <div className="raid-card" key={serverName}>
+                        <Stack
+                            direction="column"
+                            className="raid-card"
+                            key={serverName}
+                        >
                             <Link to={`/grouping/${serverName}`} noDecoration>
                                 <h3
                                     style={{
@@ -289,7 +293,7 @@ const GroupingContent = () => {
                                     isLoading={false}
                                 />
                             </Link>
-                        </div>
+                        </Stack>
                     )
                 )}
             </Stack>

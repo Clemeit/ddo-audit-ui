@@ -96,6 +96,12 @@ const bannerRouteMapping = {
         showButtons: true,
         hideSuggestionButton: true,
     },
+    guilds: {
+        title: "Guilds",
+        subtitle: "Guild Membership and Activity",
+        miniature: true,
+        showButtons: false,
+    },
     "owned-content": {
         title: "Content",
         subtitle: "Set Owned Content for Eligibility Filtering",

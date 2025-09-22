@@ -24,7 +24,7 @@ interface Character {
     is_recruiting?: boolean
     public_comment?: string
     last_updated?: string
-    last_saved?: string
+    last_save?: string
     metadata?: {
         isFriend?: boolean
         isRegistered?: boolean

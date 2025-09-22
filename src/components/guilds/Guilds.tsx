@@ -1,113 +1,295 @@
-import React, { useEffect, useRef } from "react"
+import React, { useEffect, useLayoutEffect, useRef, useState } from "react"
 import Page from "../global/Page.tsx"
 import { ContentCluster, ContentClusterGroup } from "../global/ContentCluster"
 import { WIPPageMessage } from "../global/CommonMessages.tsx"
 import useIsMobile from "../../hooks/useIsMobile.ts"
 import Stack from "../global/Stack.tsx"
-import { getGuildsByName } from "../../services/guildService.ts"
+import {
+    getGuilds as getGuildsApiCall,
+    getGuildByName,
+} from "../../services/guildService.ts"
 import useDebounce from "../../hooks/useDebounce.ts"
-import { GuildByNameData } from "../../models/Guilds.ts"
+import {
+    GetGuildByServerAndNameData,
+    GuildByNameData,
+    GuildDataApiResponse,
+} from "../../models/Guilds.ts"
 import GuildSearchTable from "./GuildSearchTable.tsx"
 import Badge from "../global/Badge.tsx"
-import CharacterTable from "../tables/CharacterTable.tsx"
+import CharacterTable, {
+    CharacterTableRow,
+    ColumnType,
+} from "../tables/CharacterTable.tsx"
 import ColoredText from "../global/ColoredText.tsx"
 import { ReactComponent as InfoSVG } from "../../assets/svg/info.svg"
+import {
+    getCharactersByIds,
+    getOnlineCharactersByGuildName,
+} from "../../services/characterService.ts"
+import Link from "../global/Link.tsx"
+import PaginationSelector from "../global/PaginationSelector.tsx"
+import { SERVER_NAMES } from "../../constants/servers.ts"
+import useGetRegisteredCharacters from "../../hooks/useGetRegisteredCharacters.ts"
+import GuildExpandedContent from "./GuildExpandedContent.tsx"
+import useSearchParamState, {
+    SearchParamType,
+} from "../../hooks/useSearchParamState.ts"
 
 const Guilds = () => {
     const isMobile = useIsMobile()
-    const [guildName, setGuildName] = React.useState("")
-    const [foundGuilds, setFoundGuilds] = React.useState<GuildByNameData[]>([])
+    // const [guildName, setGuildName] = React.useState("")
+    // const [serverName, setServerName] = React.useState("")
+    const [guildData, setGuildData] = React.useState<GuildDataApiResponse>()
+    const [currentPage, setCurrentPage] = React.useState(1)
     const isLoading = useRef<boolean>(false)
+    const [computedTableMaxHeight, setComputedTableMaxHeight] =
+        useState<string>("60vh")
+
+    const tableContainerRef = useRef<HTMLDivElement | null>(null)
+
+    const lastFetchedGuildName = useRef<string>("")
+    const lastFetchedServerName = useRef<string>("")
+
+    const { getSearchParam, setSearchParam } = useSearchParamState()
+
+    // guildName and serverName are controlled by search params
+    const guildName = getSearchParam(SearchParamType.GUILD_NAME) || ""
+    const serverName = getSearchParam(SearchParamType.SERVER_NAME) || ""
+    const setGuildName = (name: string) => {
+        setSearchParam(SearchParamType.GUILD_NAME, name || null)
+    }
+    const setServerName = (name: string) => {
+        setSearchParam(SearchParamType.SERVER_NAME, name || null)
+    }
+
+    const {
+        verifiedCharacters,
+        accessTokens,
+        isLoaded: areRegisteredCharactersLoaded,
+    } = useGetRegisteredCharacters()
 
     const {
         debouncedValue: debouncedGuildName,
         refreshDebounce: refreshGuildName,
     } = useDebounce(guildName, 1000)
+    const {
+        debouncedValue: debouncedServerName,
+        refreshDebounce: refreshServerName,
+    } = useDebounce(serverName, 1000)
 
     useEffect(() => {
-        if (debouncedGuildName) {
-            getGuildByName(debouncedGuildName)
-        } else {
-            setFoundGuilds([])
-        }
-        isLoading.current = false
-    }, [debouncedGuildName])
+        const controller = new AbortController()
+        const { signal } = controller
 
-    const getGuildByName = async (guildName: string) => {
-        try {
-            const response = await getGuildsByName(guildName)
-            if (response && response.data) {
-                setFoundGuilds(response.data)
-            } else {
-                setFoundGuilds([])
+        // If filters changed and we're not already on page 1, reset to page 1 and skip fetching this render
+        if (
+            (debouncedGuildName !== lastFetchedGuildName.current ||
+                debouncedServerName !== lastFetchedServerName.current) &&
+            currentPage !== 1
+        ) {
+            setCurrentPage(1)
+            return () => {
+                controller.abort()
             }
-        } catch (error) {
-            setFoundGuilds([])
         }
+
+        const fetchGuilds = async () => {
+            try {
+                isLoading.current = true
+                const response = await getGuildsApiCall(
+                    debouncedGuildName,
+                    debouncedServerName,
+                    currentPage,
+                    signal
+                )
+                setGuildData(response)
+                lastFetchedGuildName.current = debouncedGuildName
+                lastFetchedServerName.current = debouncedServerName
+            } catch (error) {
+                if (!signal.aborted) {
+                    console.error("Error fetching guilds:", error)
+                }
+            } finally {
+                isLoading.current = false
+            }
+        }
+
+        fetchGuilds()
+        return () => {
+            controller.abort()
+        }
+    }, [debouncedGuildName, debouncedServerName, currentPage])
+
+    useLayoutEffect(() => {
+        const recompute = () => {
+            const el = tableContainerRef.current
+            if (!el) return
+            const rect = el.getBoundingClientRect()
+            const buffer = isMobile ? 195 : 150
+            const available = Math.max(
+                250,
+                Math.floor(window.innerHeight - rect.top - buffer)
+            )
+            setComputedTableMaxHeight(`${available}px`)
+        }
+
+        recompute()
+        window.addEventListener("resize", recompute)
+        return () => window.removeEventListener("resize", recompute)
+    }, [guildData, guildName, serverName, currentPage, isMobile])
+
+    const handleRenderExpandedContent = async (guildData: GuildByNameData) => {
+        return (
+            <GuildExpandedContent
+                guildData={guildData}
+                verifiedCharacters={verifiedCharacters}
+                accessTokens={accessTokens}
+                areRegisteredCharactersLoaded={areRegisteredCharactersLoaded}
+            />
+        )
     }
 
     return (
         <Page
             title="DDO Guilds"
             description="A page where you can search for DDO guilds, view their stats, and see members of your guild if you have a registered character."
-            pageMessages={[<WIPPageMessage />]}
+            // pageMessages={[<WIPPageMessage />]}
         >
             <ContentClusterGroup>
                 <ContentCluster
                     title="Guild Search"
-                    subtitle="Search for guilds by name to view member count and recent activity."
+                    subtitle={
+                        !isMobile &&
+                        "Search for guilds by name to view member count and recent activity."
+                    }
                 >
                     <Stack direction="column" gap="20px">
-                        <Stack direction="column" gap="2px">
-                            <label
-                                htmlFor="guild-search"
-                                className="label"
+                        <Stack
+                            direction="row"
+                            gap="10px"
+                            style={{ flexWrap: "wrap", width: "100%" }}
+                        >
+                            <Stack
+                                className="full-width-on-smallish-mobile"
+                                direction="column"
+                                gap="2px"
                                 style={{
-                                    color: "var(--secondary-text)",
-                                    fontWeight: "bold",
+                                    boxSizing: "border-box",
                                 }}
                             >
-                                Guild Name
-                            </label>
-                            <input
-                                type="text"
-                                placeholder="Search for a guild..."
-                                className="input"
-                                id="guild-search"
-                                value={guildName}
-                                onChange={(e) => {
-                                    isLoading.current = true
-                                    setGuildName(e.target.value)
-                                }}
-                                onBlur={refreshGuildName}
-                                onKeyDown={(e) => {
-                                    if (e.key === "Enter") {
-                                        refreshGuildName()
-                                    }
-                                }}
-                            />
+                                <label
+                                    htmlFor="guild-name"
+                                    className="label"
+                                    style={{
+                                        color: "var(--secondary-text)",
+                                        fontWeight: "bold",
+                                    }}
+                                >
+                                    Guild Name
+                                </label>
+                                <input
+                                    type="text"
+                                    placeholder="Search by name..."
+                                    className="full-width-on-smallish-mobile"
+                                    // className="input"
+                                    id="guild-name"
+                                    value={guildName}
+                                    onChange={(e) => {
+                                        isLoading.current = true
+                                        setGuildName(e.target.value)
+                                    }}
+                                    onBlur={refreshGuildName}
+                                    onKeyDown={(e) => {
+                                        if (e.key === "Enter") {
+                                            refreshGuildName()
+                                        }
+                                    }}
+                                />
+                            </Stack>
+                            <Stack
+                                direction="column"
+                                gap="2px"
+                                className="full-width-on-smallish-mobile"
+                            >
+                                <label
+                                    htmlFor="server-name"
+                                    className="label"
+                                    style={{
+                                        color: "var(--secondary-text)",
+                                        fontWeight: "bold",
+                                    }}
+                                >
+                                    Server Name
+                                </label>
+                                <select
+                                    // className="input"
+                                    className="full-width-on-smallish-mobile"
+                                    id="server-name"
+                                    value={serverName}
+                                    onChange={(e) => {
+                                        isLoading.current = true
+                                        setServerName(e.target.value)
+                                    }}
+                                    onBlur={refreshServerName}
+                                    onKeyDown={(e) => {
+                                        if (e.key === "Enter") {
+                                            refreshServerName()
+                                        }
+                                    }}
+                                >
+                                    <option value="">All Servers</option>
+                                    {[...SERVER_NAMES]
+                                        .sort((a, b) => a.localeCompare(b))
+                                        .map((server) => (
+                                            <option key={server} value={server}>
+                                                {server}
+                                            </option>
+                                        ))}
+                                </select>
+                            </Stack>
                         </Stack>
-                        <GuildSearchTable
-                            guilds={foundGuilds}
-                            searchQuery={guildName}
-                            isLoading={isLoading.current}
+                        <div ref={tableContainerRef} style={{ width: "100%" }}>
+                            <GuildSearchTable
+                                guilds={guildData?.data || []}
+                                searchQuery={guildName}
+                                isLoading={isLoading.current}
+                                maxBodyHeight={computedTableMaxHeight}
+                                renderExpandedContent={
+                                    handleRenderExpandedContent
+                                }
+                            />
+                        </div>
+                        <PaginationSelector
+                            totalPages={
+                                guildData
+                                    ? Math.ceil(
+                                          guildData.total /
+                                              guildData.page_length
+                                      )
+                                    : 1
+                            }
+                            currentPage={currentPage}
+                            onChange={(page) => setCurrentPage(page)}
+                            disabled={
+                                isLoading.current ||
+                                !guildData ||
+                                guildData.total <= guildData.page_length
+                            }
                         />
+                        <div>
+                            <InfoSVG
+                                className="page-message-icon"
+                                style={{ fill: `var(--info)` }}
+                            />
+                            <ColoredText color="secondary">
+                                Numbers are estimates and may in some cases
+                                include inactive characters that were kicked
+                                from guilds.
+                            </ColoredText>
+                        </div>
                     </Stack>
-                    <div
-                        style={{
-                            marginTop: "5px",
-                        }}
-                    >
-                        <InfoSVG
-                            className="page-message-icon"
-                            style={{ fill: `var(--info)` }}
-                        />
-                        <ColoredText color="secondary">
-                            Top 20 guilds are displayed. Numbers are estimates.
-                        </ColoredText>
-                    </div>
                 </ContentCluster>
-                <div
+                {/* <div
                     style={{
                         opacity: 0.5,
                         pointerEvents: "none",
@@ -147,7 +329,7 @@ const Guilds = () => {
                             </div>
                         </Stack>
                     </ContentCluster>
-                </div>
+                </div> */}
             </ContentClusterGroup>
         </Page>
     )

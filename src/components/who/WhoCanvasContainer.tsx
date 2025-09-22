@@ -28,15 +28,18 @@ interface Props {
     serverName: string
     isSecondaryPanel?: boolean
     handleClosePanel?: () => void
+    initialSearchQuery?: string
 }
 
 const WhoContainer = ({
     serverName,
     isSecondaryPanel,
     handleClosePanel,
+    initialSearchQuery,
 }: Props) => {
     const {
         stringFilter,
+        setStringFilter,
         sortBy,
         minLevel,
         maxLevel,
@@ -78,6 +81,12 @@ const WhoContainer = ({
             setHadFirstLoad(true)
         }
     }, [characterState])
+
+    useEffect(() => {
+        if (initialSearchQuery && initialSearchQuery.trim() !== "") {
+            setStringFilter(initialSearchQuery)
+        }
+    }, [initialSearchQuery])
 
     const isServerOffline = useMemo<boolean>(
         () =>

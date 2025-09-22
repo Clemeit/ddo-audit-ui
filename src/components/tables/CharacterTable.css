@@ -1,9 +1,37 @@
-.character-table th:last-child,
+.character-table-container {
+    position: relative;
+    overflow-x: auto;
+    overflow-y: auto; /* enable vertical scroll when height is constrained */
+    max-height: 100%;
+    width: 100%;
+    border: 1px solid var(--table-border, #e5e7ebb0);
+    border-radius: 10px;
+    box-shadow: 0 0 4px rgb(0, 0, 0);
+}
+
+.character-table > thead > tr > th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    border-bottom: 1px solid var(--table-border, #e5e7ebb0);
+}
+
+.character-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    user-select: none;
+}
+
+.character-table th:last-child {
+    position: sticky;
+    right: 0;
+}
+
 .character-table td:last-child {
     position: sticky;
     right: 0;
     background-color: inherit;
-    z-index: 1;
 }
 
 .has-scroll-shadow .character-table th:last-child::before,
@@ -20,14 +48,37 @@
     transition: opacity 0.2s ease;
 }
 
-.character-table-container {
-    position: relative;
-    overflow-x: auto;
-    overflow-y: hidden;
-}
-
 .character-status-dot {
     width: 12px;
     height: 12px;
     border-radius: 50%;
+}
+
+.character-table > thead > tr > * {
+    background-color: var(--gray6);
+    text-align: left;
+}
+
+.character-table > tbody > tr:nth-of-type(even) {
+    background-color: var(--gray7);
+
+    &.clickable:hover {
+        background-color: var(--gray6);
+    }
+}
+
+.character-table > tbody > tr:nth-of-type(odd) {
+    background-color: var(--background);
+
+    &.clickable:hover {
+        background-color: var(--highlight);
+    }
+}
+
+.character-table > tbody > tr:last-of-type {
+    border-bottom: 5px solid var(--gray6);
+}
+
+.character-table .character-row.clickable {
+    cursor: pointer;
 }

@@ -56,6 +56,9 @@ const Ignores = lazy(() =>
 const Guilds = lazy(() =>
     lazyRetry(() => import("./components/guilds/Guilds.tsx"))
 )
+const GuildSpecific = lazy(() =>
+    lazyRetry(() => import("./components/guilds/GuildSpecific.tsx"))
+)
 const OwnedContent = lazy(() =>
     lazyRetry(() => import("./components/owned-content/OwnedContent.tsx"))
 )
@@ -135,14 +138,24 @@ export default createBrowserRouter(
                 }
             />
             {/* <Route path="/trends" element={<Trends />} /> */}
-            <Route
-                path="/guilds"
-                element={
-                    <AreaProvider>
-                        <Guilds />
-                    </AreaProvider>
-                }
-            />
+            <Route path="/guilds" element={<Outlet />}>
+                <Route
+                    index
+                    element={
+                        <AreaProvider>
+                            <Guilds />
+                        </AreaProvider>
+                    }
+                />
+                <Route
+                    path=":server/:guild"
+                    element={
+                        <AreaProvider>
+                            <GuildSpecific />
+                        </AreaProvider>
+                    }
+                />
+            </Route>
             <Route path="/donated" element={<Donated />} />
             {/* <Route path="/quests" element={<Quests />} /> */}
             <Route path="/about" element={<About />} />

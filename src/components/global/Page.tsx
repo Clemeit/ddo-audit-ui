@@ -8,7 +8,6 @@ import PageMessageContainer from "./PageMessageContainer.tsx"
 import useBooleanFlag from "../../hooks/useBooleanFlags.ts"
 import { BOOLEAN_FLAGS } from "../../utils/localStorage.ts"
 import { AlphaReleasePageMessage } from "./CommonMessages.tsx"
-import Stack from "./Stack.tsx"
 
 interface Props {
     children: React.ReactNode

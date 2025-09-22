@@ -1,27 +1,137 @@
-.guild-search-table th:last-child,
-.guild-search-table td:last-child {
-    position: sticky;
-    right: 0;
-    background-color: inherit;
-    z-index: 1;
-}
-
-.has-scroll-shadow .guild-search-table th:last-child::before,
-.has-scroll-shadow .guild-search-table td:last-child::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 5px;
-    height: 100%;
-    box-shadow: -5px 0 5px rgba(0, 0, 0, 0.5);
-    z-index: -1;
-    pointer-events: none;
-    transition: opacity 0.2s ease;
-}
-
 .guild-search-table-container {
     position: relative;
     overflow-x: auto;
-    overflow-y: hidden;
+    overflow-y: auto; /* enable vertical scroll when height is constrained */
+    max-height: 100%;
+    width: 100%;
+    border: 1px solid var(--table-border, #e5e7ebb0);
+    border-radius: 10px;
+    box-shadow: 0 0 4px rgb(0, 0, 0);
+}
+
+/* Keep table header visible when scrolling vertically */
+.guild-search-table > thead > tr > th {
+    position: sticky;
+    top: 0;
+    z-index: 3;
+    border-bottom: 1px solid var(--table-border, #e5e7ebb0);
+}
+
+/* Optional: make table take full width of container and prevent layout shift */
+.guild-search-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    user-select: none;
+}
+
+.guild-search-table.loading {
+    pointer-events: none;
+    opacity: 0.6;
+}
+
+/* Cell spacing and row dividers */
+.guild-search-table th,
+.guild-search-table td {
+    padding: 10px 12px;
+    /* border-bottom: 1px solid var(--row-divider, #f1f5f9); */
+}
+
+/* Rounded corners at the very top if header touches container edges */
+.guild-search-table thead th:first-child {
+    border-top-left-radius: 10px;
+}
+.guild-search-table thead th:last-child {
+    border-top-right-radius: 10px;
+}
+
+/* Expand column */
+.guild-search-table .expand-header,
+.guild-search-table .expand-cell {
+    width: 40px;
+    text-align: center;
+    padding-left: 8px;
+    padding-right: 8px;
+}
+
+.guild-search-table .expand-button {
+    border-radius: 4px;
+    width: 28px;
+    height: 28px;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+/* Expanded row visual */
+.guild-search-table .expanded-row > td {
+    background: rgba(2, 132, 199, 0.06);
+    border-bottom: 1px solid var(--table-border, #e5e7ebb0);
+    box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.6);
+    padding: 20px 30px 30px 30px;
+}
+
+.guild-search-table tr.is-expanded > td {
+    border-bottom: none;
+}
+
+.guild-search-table .expanded-placeholder {
+    color: var(--secondary-text, #6b7280);
+    font-style: italic;
+}
+
+.guild-search-table > thead > tr  > * {
+    background-color: var(--gray6);
+    text-align: left;
+}
+
+.guild-search-table > tbody > tr:not(.expanded-row):nth-of-type(even) {
+    background-color: var(--gray7);
+
+    &:hover {
+        background-color: var(--gray6);
+        cursor: pointer;
+    }
+}
+
+.guild-search-table > tbody > tr:not(.expanded-row):nth-of-type(odd) {
+    background-color: var(--background);
+
+    &:hover {
+        background-color: var(--highlight);
+        cursor: pointer;
+    }
+}
+
+.guild-search-table > tbody > tr:last-of-type {
+    border-bottom: 5px solid var(--gray6);
+}
+
+@media (max-width: 768px) {
+    .guild-search-table th,
+    .guild-search-table td {
+        padding: 8px 10px;
+    }
+
+    .guild-search-table .expand-header,
+    .guild-search-table .expand-cell {
+        width: 30px;
+        padding-left: 4px;
+        padding-right: 4px;
+    }
+
+    .guild-search-table .expand-button {
+        width: 24px;
+        height: 24px;
+    }
+
+    .guild-search-table > tbody > tr:not(.expanded-row) {
+        cursor: pointer;
+    }
+
+    .guild-search-table .expanded-row > td {
+        padding: 20px 5px;
+    }
 }

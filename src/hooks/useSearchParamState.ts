@@ -4,6 +4,9 @@ import { useCallback } from "react"
 export enum SearchParamType {
     SECONDARY_PANEL_TYPE = "secondary-panel-type",
     SECONDARY_PANEL_SERVER = "secondary-panel-server",
+    INITIAL_SEARCH_QUERY = "initial-search-query",
+    GUILD_NAME = "guild-name",
+    SERVER_NAME = "server-name",
 }
 
 interface SearchParam {
