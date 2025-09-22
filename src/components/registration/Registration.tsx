@@ -264,6 +264,12 @@ const Registration = () => {
                 <ContentCluster title="See Also...">
                     <NavCardCluster>
                         <NavigationCard
+                            type="guilds"
+                            badge={<Badge text="New" type="new" />}
+                        />
+                        <NavigationCard type="friends" />
+                        <NavigationCard type="ignores" />
+                        <NavigationCard
                             type="timers"
                             badge={<Badge text="Soon" type="soon" />}
                             disabled
@@ -273,8 +279,6 @@ const Registration = () => {
                             badge={<Badge text="Soon" type="soon" />}
                             disabled
                         />
-                        <NavigationCard type="friends" />
-                        <NavigationCard type="ignores" />
                     </NavCardCluster>
                 </ContentCluster>
             </ContentClusterGroup>
