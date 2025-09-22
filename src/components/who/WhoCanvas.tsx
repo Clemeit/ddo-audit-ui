@@ -550,7 +550,6 @@ const WhoCanvas = ({
                             width: `${(searchInputBoxWidth / panelWidth) * 100}%`,
                             transform: "translate(-50%, calc(-50% - 1px))",
                             fontSize: `${23 - Math.round(canvasScaleWidth * 6)}px`,
-                            // backgroundColor: "red",
                         }}
                         type="text"
                         onChange={(e) => setStringFilter(e.target.value)}
@@ -568,7 +567,6 @@ const WhoCanvas = ({
                             height: "20px",
                             fontSize: `${23 - Math.round(canvasScaleWidth * 6)}px`,
                             textAlign: "center",
-                            // backgroundColor: "red",
                         }}
                         type="text"
                         onChange={(e) => setFauxMinLevel(e.target.value)}
@@ -595,7 +593,6 @@ const WhoCanvas = ({
                             height: "20px",
                             fontSize: `${23 - Math.round(canvasScaleWidth * 6)}px`,
                             textAlign: "center",
-                            // backgroundColor: "red",
                         }}
                         type="text"
                         onChange={(e) => setFauxMaxLevel(e.target.value)}

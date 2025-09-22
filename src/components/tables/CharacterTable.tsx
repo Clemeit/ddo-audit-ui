@@ -51,15 +51,6 @@ interface Props {
     defaultSortAscending?: boolean
 }
 
-const defaultTableSortFunction = (
-    a: CharacterTableRow,
-    b: CharacterTableRow
-): number => {
-    if (a.character.name === b.character.name)
-        return a.character.id - b.character.id
-    return (a.character.name || "").localeCompare(b.character.name || "")
-}
-
 const CharacterTable = ({
     characterRows = [],
     noCharactersMessage = "No characters to display",
@@ -74,7 +65,7 @@ const CharacterTable = ({
         ColumnType.LOCATION,
         ColumnType.ACTIONS,
     ],
-    tableSortFunction = defaultTableSortFunction,
+    tableSortFunction,
     maxBodyHeight,
     onReachBottom,
     bottomThreshold = 80,
@@ -285,7 +276,7 @@ const CharacterTable = ({
 
     const getTableBody = () => {
         if (characterRows.length > 0) {
-            if (false) {
+            if (tableSortFunction) {
                 return characterRows.sort(tableSortFunction).map(characterRow)
             } else {
                 const sortFunction = (

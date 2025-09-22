@@ -41,35 +41,35 @@ function convertMillisecondsToPrettyString(
     const resultArray: string[] = []
     if (years > 0)
         resultArray.push(
-            `${years} year${years > 1 ? "s" : ""}`.replace(
+            `${years} ${pluralize("year", years)}`.replace(
                 / /g,
                 nonBreakingSpace ? "\u00A0" : " "
             )
         )
     if (months % 12 > 0)
         resultArray.push(
-            `${months % 12} month${months > 1 ? "s" : ""}`.replace(
+            `${months % 12} ${pluralize("month", months % 24)}`.replace(
                 / /g,
                 nonBreakingSpace ? "\u00A0" : " "
             )
         )
     if (weeks % 4 > 0)
         resultArray.push(
-            `${weeks % 4} week${weeks > 1 ? "s" : ""}`.replace(
+            `${weeks % 4} ${pluralize("week", weeks % 4)}`.replace(
                 / /g,
                 nonBreakingSpace ? "\u00A0" : " "
             )
         )
     if (days % 7 > 0)
         resultArray.push(
-            `${days % 7} day${days > 1 ? "s" : ""}`.replace(
+            `${days % 7} ${pluralize("day", days % 7)}`.replace(
                 / /g,
                 nonBreakingSpace ? "\u00A0" : " "
             )
         )
     if (hours % 24 > 0)
         resultArray.push(
-            `${hours % 24} hour${hours > 1 ? "s" : ""}`.replace(
+            `${hours % 24} ${pluralize("hour", hours % 24)}`.replace(
                 / /g,
                 nonBreakingSpace ? "\u00A0" : " "
             )
