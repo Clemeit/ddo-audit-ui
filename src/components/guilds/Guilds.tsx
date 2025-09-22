@@ -54,11 +54,11 @@ const Guilds = () => {
     const {
         debouncedValue: debouncedGuildName,
         refreshDebounce: refreshGuildName,
-    } = useDebounce(guildName, 1000)
+    } = useDebounce(guildName, 500)
     const {
         debouncedValue: debouncedServerName,
         refreshDebounce: refreshServerName,
-    } = useDebounce(serverName, 1000)
+    } = useDebounce(serverName, 500)
 
     useEffect(() => {
         const controller = new AbortController()
@@ -191,7 +191,14 @@ const Guilds = () => {
                                     id="guild-name"
                                     value={guildName}
                                     onChange={(e) => {
-                                        isLoading.current = true
+                                        if (
+                                            e.target.value ===
+                                            lastFetchedGuildName.current
+                                        ) {
+                                            isLoading.current = false
+                                        } else {
+                                            isLoading.current = true
+                                        }
                                         setGuildName(e.target.value)
                                     }}
                                     onBlur={refreshGuildName}
@@ -223,7 +230,14 @@ const Guilds = () => {
                                     id="server-name"
                                     value={serverName}
                                     onChange={(e) => {
-                                        isLoading.current = true
+                                        if (
+                                            e.target.value ===
+                                            lastFetchedServerName.current
+                                        ) {
+                                            isLoading.current = false
+                                        } else {
+                                            isLoading.current = true
+                                        }
                                         setServerName(e.target.value)
                                     }}
                                     onBlur={refreshServerName}
