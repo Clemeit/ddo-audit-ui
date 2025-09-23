@@ -14,9 +14,15 @@ interface Props {
     quests: { [key: number]: Quest }
     areas: { [key: number]: Area }
     locationActivity: CharacterActivityData[]
+    onlineActivity: CharacterActivityData[]
 }
 
-const LocationActivity = ({ quests, areas, locationActivity }: Props) => {
+const LocationActivity = ({
+    quests,
+    areas,
+    locationActivity,
+    onlineActivity,
+}: Props) => {
     const questsArray = useMemo(() => Object.values(quests), [quests])
 
     const getQuestForArea = (areaId: number): Quest | undefined => {
@@ -27,7 +33,111 @@ const LocationActivity = ({ quests, areas, locationActivity }: Props) => {
     const [hidewildernessAreas, setHidewildernessAreas] =
         useState<boolean>(false)
     const [discardLoggedOutTime, setDiscardLoggedOutTime] =
-        useState<boolean>(false)
+        useState<boolean>(true)
+
+    // If the character was logged out for all or part of the time between two activities,
+    // and the user has chosen to discard logged out time, then we remove that time from the duration calculation.
+    // We do this by transforming each location window into one or more segments with a start and end,
+    // splitting at online/offline boundaries and keeping only online portions. The Time column shows start,
+    // and Duration is end - start (live when end is undefined).
+    const adjustedLocationActivity = useMemo(() => {
+        type LocationSegment = {
+            // Original location event start (for Time column)
+            displayStart: string
+            // Actual segment start for duration calculation (>= displayStart)
+            start: string
+            // Segment end; undefined means live (now)
+            end?: string
+            data: CharacterActivityData["data"]
+            character_id?: number
+        }
+
+        if (!locationActivity?.length) return [] as LocationSegment[]
+
+        const now = new Date()
+
+        // Build status segments from latest -> older
+        const statusSegments = (onlineActivity || []).map((s, i) => ({
+            start: new Date(s.timestamp),
+            end: i === 0 ? now : new Date(onlineActivity[i - 1].timestamp),
+            online: s.data?.status === true,
+            isLatest: i === 0,
+        }))
+
+        const segments: LocationSegment[] = []
+
+        for (let i = 0; i < locationActivity.length; i++) {
+            const loc = locationActivity[i]
+            const windowStart = new Date(loc.timestamp)
+            const windowEnd =
+                i === 0 ? now : new Date(locationActivity[i - 1].timestamp)
+
+            if (isNaN(windowStart.getTime()) || isNaN(windowEnd.getTime())) {
+                continue
+            }
+            if (windowEnd.getTime() <= windowStart.getTime()) {
+                continue
+            }
+
+            const displayStartIso = windowStart.toISOString()
+
+            if (!discardLoggedOutTime) {
+                // Single segment per location window
+                const isLive = i === 0
+                segments.push({
+                    displayStart: displayStartIso,
+                    start: windowStart.toISOString(),
+                    end: isLive ? undefined : windowEnd.toISOString(),
+                    data: loc.data,
+                    character_id: loc.character_id,
+                })
+                continue
+            }
+
+            // Split by online segments; include only online overlaps
+            if (!statusSegments.length) {
+                // Fallback: treat entire window as online if no status data
+                const isLive = i === 0
+                segments.push({
+                    displayStart: displayStartIso,
+                    start: windowStart.toISOString(),
+                    end: isLive ? undefined : windowEnd.toISOString(),
+                    data: loc.data,
+                    character_id: loc.character_id,
+                })
+                continue
+            }
+
+            for (let j = 0; j < statusSegments.length; j++) {
+                const ss = statusSegments[j]
+                if (!ss.online) continue
+
+                const overlapStartMs = Math.max(
+                    windowStart.getTime(),
+                    ss.start.getTime()
+                )
+                const overlapEndMs = Math.min(
+                    windowEnd.getTime(),
+                    ss.end.getTime()
+                )
+                if (overlapEndMs > overlapStartMs) {
+                    const endsAtNow =
+                        ss.isLatest && overlapEndMs === now.getTime()
+                    segments.push({
+                        displayStart: displayStartIso,
+                        start: new Date(overlapStartMs).toISOString(),
+                        end: endsAtNow
+                            ? undefined
+                            : new Date(overlapEndMs).toISOString(),
+                        data: loc.data,
+                        character_id: loc.character_id,
+                    })
+                }
+            }
+        }
+
+        return segments
+    }, [discardLoggedOutTime, locationActivity, onlineActivity])
 
     return (
         <Stack direction="column" gap="10px" style={{ width: "100%" }}>
@@ -76,15 +186,15 @@ const LocationActivity = ({ quests, areas, locationActivity }: Props) => {
                         </tr>
                     </thead>
                     <tbody>
-                        {!locationActivity ||
-                            (locationActivity.length === 0 && (
+                        {!adjustedLocationActivity ||
+                            (adjustedLocationActivity.length === 0 && (
                                 <tr>
                                     <td className="no-data-row" colSpan={99}>
                                         No data to show
                                     </td>
                                 </tr>
                             ))}
-                        {locationActivity?.map((activity, index) => {
+                        {adjustedLocationActivity?.map((activity, index) => {
                             const quest = getQuestForArea(
                                 activity.data?.location_id
                             )
@@ -117,14 +227,13 @@ const LocationActivity = ({ quests, areas, locationActivity }: Props) => {
                                     </td>
                                     <td>
                                         {dateToShortStringWithTime(
-                                            new Date(activity.timestamp)
+                                            new Date(activity.displayStart)
                                         )}
                                     </td>
                                     <td>
-                                        {index === 0 ? (
+                                        {activity.end == null ? (
                                             <LiveDuration
-                                                start={activity.timestamp}
-                                                // live (now - start)
+                                                start={activity.start}
                                                 intervalMs={1000}
                                                 onlyWhenVisible
                                                 compact
@@ -132,12 +241,10 @@ const LocationActivity = ({ quests, areas, locationActivity }: Props) => {
                                         ) : (
                                             convertMillisecondsToPrettyString(
                                                 new Date(
-                                                    locationActivity[
-                                                        Math.max(index - 1, 0)
-                                                    ].timestamp
+                                                    activity.end
                                                 ).getTime() -
                                                     new Date(
-                                                        activity.timestamp
+                                                        activity.start
                                                     ).getTime(),
                                                 true,
                                                 true

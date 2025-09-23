@@ -19,6 +19,7 @@ import Spacer from "../global/Spacer.tsx"
 import useGetCharacterActivity from "../../hooks/useGetCharacterActivity.ts"
 import { CharacterActivityType } from "../../models/Activity.ts"
 import {
+    LiveDataHaultedPageMessage,
     NoRegisteredAndVerifiedCharacters,
     NoVerifiedCharacters,
 } from "../global/CommonMessages.tsx"
@@ -30,7 +31,12 @@ import OnlineActivity from "./OnlineActivity.tsx"
 import usePollApi from "../../hooks/usePollApi.ts"
 import { MsFromHours, MsFromSeconds } from "../../utils/timeUtils.ts"
 import { CHARACTER_ENDPOINT } from "../../services/characterService.ts"
-// import StatusBarChart from "./StatusBarChart.tsx"
+import { LoadingState } from "../../models/Api.ts"
+import LevelActivity from "./LevelActivity.tsx"
+import useSearchParamState, {
+    SearchParamType,
+} from "../../hooks/useSearchParamState.ts"
+import PageMessage from "../global/PageMessage.tsx"
 
 // TODO: Location table updates:
 // - Show quest name when a location belongs to a quest.
@@ -63,6 +69,11 @@ const Activity = () => {
     const { areas } = useAreaContext()
     const { quests } = useQuestContext()
 
+    const lastCharacterState = useRef<Character | null>(null)
+    const [isCharacterOnline, setIsCharacterOnline] = useState<boolean>(false)
+    const [isCharacterSelectionInvalid, setIsCharacterSelectionInvalid] =
+        useState<boolean>(false)
+
     const {
         activityData: locationActivity,
         isLoading: locationActivityIsLoading,
@@ -83,13 +94,23 @@ const Activity = () => {
         accessToken: selectedCharacterAndAccessToken?.accessToken?.access_token,
         activityType: CharacterActivityType.status,
     })
-    const { data: characterData } = usePollApi<SingleCharacterResponseModel>({
-        endpoint: `${CHARACTER_ENDPOINT}/${selectedCharacterAndAccessToken.character?.id}`,
-        interval: MsFromSeconds(5),
-        lifespan: MsFromHours(8),
+    const {
+        activityData: levelActivity,
+        isLoading: levelActivityIsLoading,
+        isError: levelActivityIsError,
+        reload: reloadLevelActivityData,
+    } = useGetCharacterActivity({
+        characterId: selectedCharacterAndAccessToken?.character?.id,
+        accessToken: selectedCharacterAndAccessToken?.accessToken?.access_token,
+        activityType: CharacterActivityType.total_level,
     })
-
-    const lastCharacterState = useRef<Character | null>(null)
+    const { data: characterData, state: characterDataState } =
+        usePollApi<SingleCharacterResponseModel>({
+            endpoint: `${CHARACTER_ENDPOINT}/${selectedCharacterAndAccessToken.character?.id}`,
+            interval: isCharacterOnline ? MsFromSeconds(1) : MsFromSeconds(5),
+            lifespan: MsFromHours(8),
+            enabled: !!selectedCharacterAndAccessToken.character?.id,
+        })
 
     useEffect(() => {
         let didReload = false
@@ -108,10 +129,16 @@ const Activity = () => {
             reloadOnlineActivityData()
         }
 
-        if (didReload) {
-            lastCharacterState.current = characterData.data
+        if (didReload || !lastCharacterState.current) {
+            console.log("here", characterData?.data)
+            lastCharacterState.current = characterData?.data
         }
     }, [characterData])
+
+    useEffect(() => {
+        const next = characterData?.data?.is_online
+        if (next !== undefined) setIsCharacterOnline(next)
+    }, [characterData?.data?.is_online])
 
     useEffect(() => {
         // get character name param from url
@@ -138,31 +165,30 @@ const Activity = () => {
         }
     }, [location.search, verifiedCharacters, accessTokens])
 
-    function handleCharacterSelectionChange(
-        e: React.ChangeEvent<HTMLSelectElement>
-    ) {
-        if (!e.target.value) {
+    const { getSearchParam, setSearchParam } = useSearchParamState()
+    const selectedCharacterName =
+        getSearchParam(SearchParamType.CHARACTER) || ""
+    const setSelectedCharacterName = (name: string) => {
+        setSearchParam(SearchParamType.CHARACTER, name)
+    }
+
+    useEffect(() => {
+        if (!isLoaded) return
+        if (!selectedCharacterName) {
             setSelectedCharacterAndAccessToken({
                 character: null,
                 accessToken: null,
             })
-            // clear character from url
-            const searchParams = new URLSearchParams(location.search)
-            searchParams.delete("character")
-            window.history.replaceState(
-                null,
-                "",
-                `${location.pathname}?${searchParams.toString()}`
-            )
+            setIsCharacterSelectionInvalid(false)
             return
         }
-
         const character =
             verifiedCharacters.find(
                 (character: Character) =>
-                    character.id.toString() === e.target.value
+                    character.id.toString() === selectedCharacterName
             ) || null
         if (character && accessTokens) {
+            setIsCharacterSelectionInvalid(false)
             const accessToken = accessTokens.find(
                 (token: AccessToken) => token.character_id === character.id
             )
@@ -172,18 +198,14 @@ const Activity = () => {
                     accessToken,
                 })
             }
-            // set selected character in url
-            const searchParams = new URLSearchParams(location.search)
-            if (character.name?.toLowerCase()) {
-                searchParams.set("character", character.name.toLowerCase())
-                window.history.replaceState(
-                    null,
-                    "",
-                    `${location.pathname}?${searchParams.toString()}`
-                )
-            }
+        } else {
+            setIsCharacterSelectionInvalid(true)
+            setSelectedCharacterAndAccessToken({
+                character: null,
+                accessToken: null,
+            })
         }
-    }
+    }, [verifiedCharacters, selectedCharacterName])
 
     const conditionalSelectionContent = () => {
         if (!isLoaded) return <p>Loading...</p>
@@ -216,35 +238,39 @@ const Activity = () => {
                         <label htmlFor="character-selection">
                             Select a character:
                         </label>
-                        <Stack gap="10px">
+                        <Stack gap="10px" align="center">
                             <select
                                 className="full-width-on-mobile"
                                 id="character-selection"
-                                value={
-                                    selectedCharacterAndAccessToken
-                                        ? selectedCharacterAndAccessToken
-                                              .character?.id
-                                        : ""
+                                value={selectedCharacterName}
+                                onChange={(e) =>
+                                    setSelectedCharacterName(e.target.value)
                                 }
-                                onChange={handleCharacterSelectionChange}
                             >
                                 <option value="">Select a character...</option>
-                                {verifiedCharacters.map((character) => (
-                                    <option
-                                        key={character.id}
-                                        value={character.id}
-                                    >
-                                        {character.name}
-                                    </option>
-                                ))}
+                                {verifiedCharacters
+                                    .sort((a, b) =>
+                                        (a.name ?? "").localeCompare(
+                                            b.name ?? ""
+                                        )
+                                    )
+                                    .map((character) => (
+                                        <option
+                                            key={character.id}
+                                            value={character.id}
+                                        >
+                                            {character.name}
+                                        </option>
+                                    ))}
                             </select>
                             <Button
                                 type="secondary"
                                 small
                                 onClick={() => {
+                                    reloadCharacters()
                                     reloadLocationActivityData()
                                     reloadOnlineActivityData()
-                                    // reloadLevelActivityData()
+                                    reloadLevelActivityData()
                                 }}
                             >
                                 Reload
@@ -267,29 +293,47 @@ const Activity = () => {
     }
 
     const conditionalActivityContent = () => {
-        if (verifiedCharacters.length === 0)
-            return (
-                <div
-                    style={{
-                        width: "100%",
-                        height: "10vh",
-                        display: "flex",
-                        justifyContent: "center",
-                        alignItems: "center",
-                    }}
-                >
-                    <span>Waiting for some verified characters...</span>
-                </div>
-            )
-
         return (
             <Stack direction="column" gap="20px">
                 <LocationActivity
                     quests={quests}
                     areas={areas}
-                    locationActivity={locationActivity}
+                    locationActivity={
+                        selectedCharacterAndAccessToken?.character
+                            ? locationActivity
+                            : []
+                    }
+                    onlineActivity={
+                        selectedCharacterAndAccessToken?.character
+                            ? onlineActivity
+                            : []
+                    }
                 />
-                <OnlineActivity onlineActivity={onlineActivity} />
+                <LevelActivity
+                    areas={areas}
+                    levelActivity={
+                        selectedCharacterAndAccessToken?.character
+                            ? levelActivity
+                            : []
+                    }
+                    locationActivity={
+                        selectedCharacterAndAccessToken?.character
+                            ? locationActivity
+                            : []
+                    }
+                    onlineActivity={
+                        selectedCharacterAndAccessToken?.character
+                            ? onlineActivity
+                            : []
+                    }
+                />
+                <OnlineActivity
+                    onlineActivity={
+                        selectedCharacterAndAccessToken?.character
+                            ? onlineActivity
+                            : []
+                    }
+                />
             </Stack>
         )
     }
@@ -298,6 +342,20 @@ const Activity = () => {
         <Page
             title="Character Activity History"
             description="View detailed information about your characters' activity history, including questing history, level history, login history, and more."
+            pageMessages={() => {
+                const messages = []
+                if (characterDataState === LoadingState.Haulted)
+                    messages.push(<LiveDataHaultedPageMessage />)
+                if (isCharacterSelectionInvalid)
+                    messages.push(
+                        <PageMessage
+                            title="Permission Denied"
+                            type="error"
+                            message="You don't have permission to view that character. Make sure you've registered and verified the character."
+                        />
+                    )
+                return messages
+            }}
         >
             <ContentClusterGroup>
                 <ContentCluster title="Character Activity">

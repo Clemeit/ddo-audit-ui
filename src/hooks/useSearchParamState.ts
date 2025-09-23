@@ -7,6 +7,7 @@ export enum SearchParamType {
     INITIAL_SEARCH_QUERY = "initial-search-query",
     GUILD_NAME = "guild-name",
     SERVER_NAME = "server-name",
+    CHARACTER = "character",
 }
 
 interface SearchParam {
