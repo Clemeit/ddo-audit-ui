@@ -107,7 +107,7 @@ const OnlineActivity = ({ onlineActivity }: Props) => {
                                     </tr>
                                 )
                             }
-                            return <></>
+                            return null
                         })}
                     </tbody>
                 </table>

@@ -197,7 +197,7 @@ const LocationActivity = ({
                                     </td>
                                 </tr>
                             ))}
-                        {adjustedLocationActivity?.map((activity, index) => {
+                        {adjustedLocationActivity?.map((activity) => {
                             const isPublic =
                                 areas[activity.data?.location_id || 0]
                                     ?.is_public
@@ -213,7 +213,9 @@ const LocationActivity = ({
                             }
 
                             return (
-                                <tr>
+                                <tr
+                                    key={`${activity.start}-${activity.data?.location_id}`}
+                                >
                                     <td>
                                         {
                                             areas[

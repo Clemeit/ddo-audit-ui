@@ -338,9 +338,11 @@ const LevelActivity = ({
                                     </td>
                                 </tr>
                             ))}
-                        {adjustedLevelActivity?.map((activity, index) => {
+                        {adjustedLevelActivity?.map((activity) => {
                             return (
-                                <tr>
+                                <tr
+                                    key={`${activity.start}-${activity.data?.total_level}`}
+                                >
                                     <td>{activity.data?.total_level ?? "-"}</td>
                                     <td>
                                         {mapClassesToString(
