@@ -5,6 +5,7 @@ import {
 } from "../models/Activity.ts"
 import { getCharacterActivityById } from "../services/activityService.ts"
 import { format } from "date-fns"
+import logMessage from "../utils/logUtils.ts"
 
 const useGetCharacterActivity = ({
     characterId,
@@ -49,6 +50,12 @@ const useGetCharacterActivity = ({
                 setIsError(false)
             }
         } catch (error) {
+            logMessage("Error fetching character activity", "error", {
+                metadata: {
+                    characterId,
+                    error: error instanceof Error ? error.message : error,
+                },
+            })
             setIsError(true)
         } finally {
             setIsLoading(false)

@@ -300,7 +300,7 @@ const LevelActivity = ({
             >
                 Level Activity
             </h3>
-            <Stack gap="15px">
+            <Stack gap="15px" wrap style={{ rowGap: "0px" }}>
                 <Checkbox
                     onChange={(e) => setDiscardLoggedOutTime(e.target.checked)}
                     checked={discardLoggedOutTime}
@@ -369,6 +369,9 @@ const LevelActivity = ({
                                                         activity.start
                                                     ).getTime(),
                                                 true,
+                                                true,
+                                                false,
+                                                2,
                                                 true
                                             )
                                         )}

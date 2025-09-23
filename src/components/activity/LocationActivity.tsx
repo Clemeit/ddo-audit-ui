@@ -26,6 +26,9 @@ const LocationActivity = ({
     const questsArray = useMemo(() => Object.values(quests), [quests])
 
     const getQuestForArea = (areaId: number): Quest | undefined => {
+        if (areas[areaId]?.is_public || areas[areaId]?.is_wilderness) {
+            return undefined
+        }
         return questsArray.find((quest) => quest.area_id === areaId)
     }
 
@@ -150,7 +153,7 @@ const LocationActivity = ({
             >
                 Location and Quest Activity
             </h3>
-            <Stack gap="15px">
+            <Stack gap="15px" wrap style={{ rowGap: "0px" }}>
                 <Checkbox
                     onChange={(e) => setHidePublicAreas(e.target.checked)}
                     checked={hidePublicAreas}
@@ -195,9 +198,9 @@ const LocationActivity = ({
                                 </tr>
                             ))}
                         {adjustedLocationActivity?.map((activity, index) => {
-                            const quest = getQuestForArea(
-                                activity.data?.location_id
-                            )
+                            const isPublic =
+                                areas[activity.data?.location_id || 0]
+                                    ?.is_public
                             const isWilderness =
                                 areas[activity.data?.location_id || 0]
                                     ?.is_wilderness
@@ -205,7 +208,7 @@ const LocationActivity = ({
                             if (isWilderness && hidewildernessAreas) {
                                 return null
                             }
-                            if (hidePublicAreas && !quest) {
+                            if (hidePublicAreas && isPublic) {
                                 return null
                             }
 
@@ -247,6 +250,9 @@ const LocationActivity = ({
                                                         activity.start
                                                     ).getTime(),
                                                 true,
+                                                true,
+                                                false,
+                                                2,
                                                 true
                                             )
                                         )}

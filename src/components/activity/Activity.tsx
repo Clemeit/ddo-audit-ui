@@ -12,13 +12,14 @@ import {
 } from "../../models/Character.ts"
 import "./Activity.css"
 import Stack from "../global/Stack.tsx"
-import { Link, useLocation } from "react-router-dom"
+import { useLocation } from "react-router-dom"
 import useGetRegisteredCharacters from "../../hooks/useGetRegisteredCharacters.ts"
 import Button from "../global/Button.tsx"
 import Spacer from "../global/Spacer.tsx"
 import useGetCharacterActivity from "../../hooks/useGetCharacterActivity.ts"
 import { CharacterActivityType } from "../../models/Activity.ts"
 import {
+    DataLoadingErrorPageMessage,
     LiveDataHaultedPageMessage,
     NoRegisteredAndVerifiedCharacters,
     NoVerifiedCharacters,
@@ -37,6 +38,9 @@ import useSearchParamState, {
     SearchParamType,
 } from "../../hooks/useSearchParamState.ts"
 import PageMessage from "../global/PageMessage.tsx"
+import useBooleanFlag from "../../hooks/useBooleanFlags.ts"
+import { BOOLEAN_FLAGS } from "../../utils/localStorage.ts"
+import Link from "../global/Link.tsx"
 
 // TODO: Location table updates:
 // - Show quest name when a location belongs to a quest.
@@ -54,6 +58,9 @@ const Activity = () => {
         isError,
         reload: reloadCharacters,
     } = useGetRegisteredCharacters()
+    const [isReloadDisabled, setIsReloadDisabled] = useState<boolean>(false)
+    const [hideActivityDevelopmentNotice, setHideActivityDevelopmentNotice] =
+        useBooleanFlag(BOOLEAN_FLAGS.hideActivityDevelopmentNotice, false)
 
     const [
         selectedCharacterAndAccessToken,
@@ -130,7 +137,6 @@ const Activity = () => {
         }
 
         if (didReload || !lastCharacterState.current) {
-            console.log("here", characterData?.data)
             lastCharacterState.current = characterData?.data
         }
     }, [characterData])
@@ -208,8 +214,6 @@ const Activity = () => {
     }, [verifiedCharacters, selectedCharacterName])
 
     const conditionalSelectionContent = () => {
-        if (!isLoaded) return <p>Loading...</p>
-
         if (isError)
             return (
                 <div>
@@ -238,9 +242,9 @@ const Activity = () => {
                         <label htmlFor="character-selection">
                             Select a character:
                         </label>
-                        <Stack gap="10px" align="center">
+                        <Stack gap="10px" align="center" width="100%">
                             <select
-                                className="full-width-on-mobile"
+                                className="full-width-on-smallish-mobile"
                                 id="character-selection"
                                 value={selectedCharacterName}
                                 onChange={(e) =>
@@ -271,7 +275,12 @@ const Activity = () => {
                                     reloadLocationActivityData()
                                     reloadOnlineActivityData()
                                     reloadLevelActivityData()
+                                    setIsReloadDisabled(true)
+                                    setTimeout(() => {
+                                        setIsReloadDisabled(false)
+                                    }, 2000)
                                 }}
+                                disabled={!isLoaded || isReloadDisabled}
                             >
                                 Reload
                             </Button>
@@ -279,7 +288,7 @@ const Activity = () => {
                     </Stack>
                     <p className="secondary-text">
                         You can only view the data of your{" "}
-                        <Link className="link" to="/registration">
+                        <Link to="/registration">
                             registered, verified characters
                         </Link>
                         .
@@ -354,6 +363,32 @@ const Activity = () => {
                             message="You don't have permission to view that character. Make sure you've registered and verified the character."
                         />
                     )
+                if (
+                    locationActivityIsError ||
+                    onlineActivityIsError ||
+                    levelActivityIsError
+                ) {
+                    messages.push(<DataLoadingErrorPageMessage />)
+                }
+                if (!hideActivityDevelopmentNotice) {
+                    messages.push(
+                        <PageMessage
+                            title="Active Development"
+                            message={
+                                <span>
+                                    This page is currently in active
+                                    development. If you encounter any issues or
+                                    have suggestions, please visit the{" "}
+                                    <Link to="/feedback">Feedback page</Link>.
+                                </span>
+                            }
+                            type="info"
+                            onDismiss={() =>
+                                setHideActivityDevelopmentNotice(true)
+                            }
+                        />
+                    )
+                }
                 return messages
             }}
         >

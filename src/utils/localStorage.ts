@@ -19,6 +19,7 @@ export const BOOLEAN_FLAGS = {
     hideAlphaRelease: "hide-alpha-release",
     hide32BitServers: "hide-32bit-servers",
     bankToonsDisclaimer: "bank-toons-disclaimer",
+    hideActivityDevelopmentNotice: "hide-activity-development-notice",
 }
 
 function getBooleanFlags(): Record<string, boolean> {

@@ -26,7 +26,7 @@ const OnlineActivity = ({ onlineActivity }: Props) => {
             >
                 Online Activity
             </h3>
-            <Stack gap="10px">
+            <Stack gap="15px" wrap style={{ rowGap: "0px" }}>
                 <Checkbox
                     onChange={(e) => setShowOnlineOnly(e.target.checked)}
                     checked={showOnlineOnly}
@@ -97,6 +97,9 @@ const OnlineActivity = ({ onlineActivity }: Props) => {
                                                             activity.timestamp
                                                         ).getTime(),
                                                     true,
+                                                    true,
+                                                    false,
+                                                    2,
                                                     true
                                                 )
                                             )}
