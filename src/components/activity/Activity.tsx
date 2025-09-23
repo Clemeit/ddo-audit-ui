@@ -118,6 +118,15 @@ const Activity = () => {
             lifespan: MsFromHours(8),
             enabled: !!selectedCharacterAndAccessToken.character?.id,
         })
+    const [selectedTimestampRange, setSelectedTimestampRange] = useState<{
+        start: number | null
+        end: number | null
+    }>({ start: null, end: null })
+    // Track which table initiated the selection and a version counter to force effects
+    const [lastSelectionSource, setLastSelectionSource] = useState<
+        "location" | "level" | "online" | null
+    >(null)
+    const [selectionVersion, setSelectionVersion] = useState<number>(0)
 
     useEffect(() => {
         let didReload = false
@@ -317,6 +326,17 @@ const Activity = () => {
                             ? onlineActivity
                             : []
                     }
+                    handleActivityClick={(timestampRange: {
+                        start: number | null
+                        end: number | null
+                    }) => {
+                        setSelectedTimestampRange(timestampRange)
+                        setLastSelectionSource("location")
+                        setSelectionVersion((v) => v + 1)
+                    }}
+                    selectedTimestampRange={selectedTimestampRange}
+                    lastSelectionSource={lastSelectionSource}
+                    selectionVersion={selectionVersion}
                 />
                 <LevelActivity
                     areas={areas}
@@ -335,6 +355,17 @@ const Activity = () => {
                             ? onlineActivity
                             : []
                     }
+                    handleActivityClick={(timestampRange: {
+                        start: number | null
+                        end: number | null
+                    }) => {
+                        setSelectedTimestampRange(timestampRange)
+                        setLastSelectionSource("level")
+                        setSelectionVersion((v) => v + 1)
+                    }}
+                    selectedTimestampRange={selectedTimestampRange}
+                    lastSelectionSource={lastSelectionSource}
+                    selectionVersion={selectionVersion}
                 />
                 <OnlineActivity
                     onlineActivity={
@@ -342,6 +373,17 @@ const Activity = () => {
                             ? onlineActivity
                             : []
                     }
+                    handleActivityClick={(timestampRange: {
+                        start: number | null
+                        end: number | null
+                    }) => {
+                        setSelectedTimestampRange(timestampRange)
+                        setLastSelectionSource("online")
+                        setSelectionVersion((v) => v + 1)
+                    }}
+                    selectedTimestampRange={selectedTimestampRange}
+                    lastSelectionSource={lastSelectionSource}
+                    selectionVersion={selectionVersion}
                 />
             </Stack>
         )

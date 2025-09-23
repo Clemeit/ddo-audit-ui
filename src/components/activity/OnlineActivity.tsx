@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { CharacterActivityData } from "../../models/Activity"
 import { dateToShortStringWithTime } from "../../utils/dateUtils"
 import { convertMillisecondsToPrettyString } from "../../utils/stringUtils"
@@ -10,10 +10,61 @@ import LiveDuration from "../global/LiveDuration"
 
 interface Props {
     onlineActivity: CharacterActivityData[]
+    selectedTimestampRange?: {
+        start: number | null
+        end: number | null
+    } | null
+    handleActivityClick: (timestampRange: {
+        start: number | null
+        end: number | null
+    }) => void
+    lastSelectionSource?: "location" | "level" | "online" | null
+    selectionVersion?: number
 }
 
-const OnlineActivity = ({ onlineActivity }: Props) => {
+const OnlineActivity = ({
+    onlineActivity,
+    selectedTimestampRange,
+    handleActivityClick,
+    lastSelectionSource,
+    selectionVersion,
+}: Props) => {
     const [showOnlineOnly, setShowOnlineOnly] = useState<boolean>(false)
+    const selfSource = "online" as const
+    const containerRef = useRef<HTMLDivElement | null>(null)
+
+    // When a selection is set by another table, scroll to our first highlighted row
+    useEffect(() => {
+        const container = containerRef.current
+        if (!container) return
+        if (!lastSelectionSource || lastSelectionSource === selfSource) return
+        const firstSelected = container.querySelector(
+            "tr.selected-row"
+        ) as HTMLElement | null
+        if (firstSelected) {
+            const containerRect = container.getBoundingClientRect()
+            const rowRect = firstSelected.getBoundingClientRect()
+            const alreadyVisible =
+                rowRect.top >= containerRect.top &&
+                rowRect.bottom <= containerRect.bottom
+
+            if (!alreadyVisible) {
+                const currentScroll = container.scrollTop
+                const relativeTop = rowRect.top - containerRect.top
+                const desiredOffset = container.clientHeight * 0.25
+                const rawTarget = currentScroll + (relativeTop - desiredOffset)
+                const maxScroll =
+                    container.scrollHeight - container.clientHeight
+                const targetTop = Math.max(0, Math.min(rawTarget, maxScroll))
+                container.scrollTo({ top: targetTop, behavior: "smooth" })
+            }
+        }
+    }, [
+        selectionVersion,
+        lastSelectionSource,
+        onlineActivity,
+        selectedTimestampRange,
+    ])
 
     return (
         <Stack direction="column" gap="10px" style={{ width: "100%" }}>
@@ -39,6 +90,7 @@ const OnlineActivity = ({ onlineActivity }: Props) => {
                 style={{
                     maxHeight: "410px",
                 }}
+                ref={containerRef}
             >
                 <table>
                     <thead>
@@ -62,8 +114,47 @@ const OnlineActivity = ({ onlineActivity }: Props) => {
                                 !showOnlineOnly ||
                                 activity.data?.status === true
                             ) {
+                                const startMs = new Date(
+                                    activity.timestamp
+                                ).getTime()
+                                const endMs =
+                                    index === 0
+                                        ? null
+                                        : new Date(
+                                              onlineActivity[
+                                                  Math.max(index - 1, 0)
+                                              ].timestamp
+                                          ).getTime()
+
+                                // Highlight this row if the selected timestamp range intersects this activity segment
+                                const isSelected = selectedTimestampRange
+                                    ? endMs !== null
+                                        ? !(
+                                              endMs <=
+                                                  (selectedTimestampRange.start ||
+                                                      0) ||
+                                              startMs >=
+                                                  (selectedTimestampRange.end ||
+                                                      0)
+                                          )
+                                        : startMs <=
+                                              (selectedTimestampRange.end ||
+                                                  0) ||
+                                          selectedTimestampRange.end === null
+                                    : false
+
                                 return (
-                                    <tr key={`${activity.timestamp}-${index}`}>
+                                    <tr
+                                        className={`clickable${isSelected ? " selected-row" : ""}`}
+                                        key={`${activity.timestamp}-${index}`}
+                                        onClick={() =>
+                                            handleActivityClick({
+                                                start: startMs,
+                                                end: endMs,
+                                            })
+                                        }
+                                        style={{ cursor: "pointer" }}
+                                    >
                                         <td>
                                             {activity?.data?.status === true
                                                 ? "Logged In"

@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { CharacterActivityData } from "../../models/Activity"
 import { Quest } from "../../models/Lfm"
 import { dateToShortStringWithTime } from "../../utils/dateUtils"
@@ -15,6 +15,16 @@ interface Props {
     areas: { [key: number]: Area }
     locationActivity: CharacterActivityData[]
     onlineActivity: CharacterActivityData[]
+    selectedTimestampRange?: {
+        start: number | null
+        end: number | null
+    } | null
+    handleActivityClick: (timestampRange: {
+        start: number | null
+        end: number | null
+    }) => void
+    lastSelectionSource?: "location" | "level" | "online" | null
+    selectionVersion?: number
 }
 
 const LocationActivity = ({
@@ -22,7 +32,13 @@ const LocationActivity = ({
     areas,
     locationActivity,
     onlineActivity,
+    selectedTimestampRange,
+    handleActivityClick,
+    lastSelectionSource,
+    selectionVersion,
 }: Props) => {
+    const selfSource = "location" as const
+    const containerRef = useRef<HTMLDivElement | null>(null)
     const questsArray = useMemo(() => Object.values(quests), [quests])
 
     const getQuestForArea = (areaId: number): Quest | undefined => {
@@ -142,6 +158,34 @@ const LocationActivity = ({
         return segments
     }, [discardLoggedOutTime, locationActivity, onlineActivity])
 
+    // When a selection comes from another table, scroll to the first highlighted row
+    useEffect(() => {
+        const container = containerRef.current
+        if (!container) return
+        if (!lastSelectionSource || lastSelectionSource === selfSource) return
+        const firstSelected = container.querySelector(
+            "tr.selected-row"
+        ) as HTMLElement | null
+        if (firstSelected) {
+            const containerRect = container.getBoundingClientRect()
+            const rowRect = firstSelected.getBoundingClientRect()
+            const alreadyVisible =
+                rowRect.top >= containerRect.top &&
+                rowRect.bottom <= containerRect.bottom
+
+            if (!alreadyVisible) {
+                const currentScroll = container.scrollTop
+                const relativeTop = rowRect.top - containerRect.top
+                const desiredOffset = container.clientHeight * 0.25
+                const rawTarget = currentScroll + (relativeTop - desiredOffset)
+                const maxScroll =
+                    container.scrollHeight - container.clientHeight
+                const targetTop = Math.max(0, Math.min(rawTarget, maxScroll))
+                container.scrollTo({ top: targetTop, behavior: "smooth" })
+            }
+        }
+    }, [selectionVersion, lastSelectionSource, adjustedLocationActivity])
+
     return (
         <Stack direction="column" gap="10px" style={{ width: "100%" }}>
             <h3
@@ -178,6 +222,7 @@ const LocationActivity = ({
                 style={{
                     maxHeight: "410px",
                 }}
+                ref={containerRef}
             >
                 <table>
                     <thead>
@@ -198,6 +243,22 @@ const LocationActivity = ({
                                 </tr>
                             ))}
                         {adjustedLocationActivity?.map((activity) => {
+                            // Highlight this row if the selected timestamp range intersects this activity segment
+                            const isSelected =
+                                selectedTimestampRange && activity.end
+                                    ? !(
+                                          Date.parse(activity.end) <=
+                                              (selectedTimestampRange.start ||
+                                                  0) ||
+                                          Date.parse(activity.start) >=
+                                              (selectedTimestampRange.end || 0)
+                                      )
+                                    : selectedTimestampRange &&
+                                      !activity.end &&
+                                      (new Date(activity.start).getTime() <=
+                                          (selectedTimestampRange.end || 0) ||
+                                          selectedTimestampRange.end === null)
+
                             const isPublic =
                                 areas[activity.data?.location_id || 0]
                                     ?.is_public
@@ -214,7 +275,23 @@ const LocationActivity = ({
 
                             return (
                                 <tr
+                                    className={`clickable${isSelected ? " selected-row" : ""}`}
                                     key={`${activity.start}-${activity.data?.location_id}`}
+                                    onClick={() =>
+                                        handleActivityClick({
+                                            start: new Date(
+                                                activity.start
+                                            ).getTime(),
+                                            end: activity.end
+                                                ? new Date(
+                                                      activity.end
+                                                  ).getTime()
+                                                : null,
+                                        })
+                                    }
+                                    style={{
+                                        cursor: "pointer",
+                                    }}
                                 >
                                     <td>
                                         {
@@ -262,6 +339,14 @@ const LocationActivity = ({
                                 </tr>
                             )
                         })}
+                        {adjustedLocationActivity &&
+                            adjustedLocationActivity.length >= 0 && (
+                                <tr>
+                                    <td className="no-data-row" colSpan={99}>
+                                        End of history
+                                    </td>
+                                </tr>
+                            )}
                     </tbody>
                 </table>
             </div>

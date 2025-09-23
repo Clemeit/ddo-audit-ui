@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { CharacterActivityData } from "../../models/Activity"
 import { dateToShortStringWithTime } from "../../utils/dateUtils"
 import {
@@ -17,6 +17,16 @@ interface Props {
     levelActivity: CharacterActivityData[]
     locationActivity: CharacterActivityData[]
     onlineActivity: CharacterActivityData[]
+    selectedTimestampRange?: {
+        start: number | null
+        end: number | null
+    } | null
+    handleActivityClick: (timestampRange: {
+        start: number | null
+        end: number | null
+    }) => void
+    lastSelectionSource?: "location" | "level" | "online" | null
+    selectionVersion?: number
 }
 
 const LevelActivity = ({
@@ -24,7 +34,13 @@ const LevelActivity = ({
     levelActivity,
     locationActivity,
     onlineActivity,
+    selectedTimestampRange,
+    handleActivityClick,
+    lastSelectionSource,
+    selectionVersion,
 }: Props) => {
+    const selfSource = "level" as const
+    const containerRef = useRef<HTMLDivElement | null>(null)
     const isAreaPublicSpace = (areaId: number): boolean => {
         const area = areas[areaId]
         if (!area) return false
@@ -45,10 +61,11 @@ const LevelActivity = ({
         type LevelSegment = {
             // Original level event start (for Time column)
             displayStart: string
-            // Actual segment start for duration calculation (>= displayStart)
+            // Window boundaries (retain original start/end)
             start: string
-            // Segment end; undefined means live (now)
-            end?: string
+            end?: string // undefined means live (now)
+            // Adjusted duration in ms, subtracting logged-out and/or public-area time
+            duration: number
             data: CharacterActivityData["data"]
             character_id?: number
         }
@@ -206,81 +223,28 @@ const LevelActivity = ({
                 pieces = refined
             }
 
-            // Emit pieces as segments
+            // Calculate total adjusted duration for this window and determine if live time is included
+            let totalMs = 0
+            let hasLiveIncluded = false
             for (const p of pieces) {
-                segments.push({
-                    displayStart: displayStartIso,
-                    start: new Date(p.startMs).toISOString(),
-                    end: p.endsAtNow
-                        ? undefined
-                        : new Date(p.endMs).toISOString(),
-                    data: loc.data,
-                    character_id: loc.character_id,
-                })
+                totalMs += Math.max(0, p.endMs - p.startMs)
+                if (p.endsAtNow) hasLiveIncluded = true
             }
+
+            // Emit single segment per level window, retaining original start/end
+            segments.push({
+                displayStart: displayStartIso,
+                start: displayStartIso,
+                end: hasLiveIncluded
+                    ? undefined
+                    : new Date(wEndMs).toISOString(),
+                duration: totalMs,
+                data: loc.data,
+                character_id: loc.character_id,
+            })
         }
 
-        // Consolidate segments that belong to the same level window (same displayStart)
-        if (!segments.length) return [] as LevelSegment[]
-
-        const consolidated: LevelSegment[] = []
-        const seen = new Set<string>()
-
-        for (const seg of segments) {
-            if (seen.has(seg.displayStart)) continue
-            seen.add(seg.displayStart)
-
-            const group = segments.filter(
-                (s) => s.displayStart === seg.displayStart
-            )
-
-            // Sum closed durations and detect a live segment start
-            let closedMs = 0
-            let liveStart: string | undefined
-            for (const g of group) {
-                if (g.end == null) {
-                    // choose the earliest live start (there should be only one live segment per window)
-                    if (!liveStart) liveStart = g.start
-                    else if (
-                        new Date(g.start).getTime() <
-                        new Date(liveStart).getTime()
-                    )
-                        liveStart = g.start
-                } else {
-                    closedMs +=
-                        new Date(g.end).getTime() - new Date(g.start).getTime()
-                }
-            }
-
-            const base: Pick<
-                LevelSegment,
-                "displayStart" | "data" | "character_id"
-            > = {
-                displayStart: seg.displayStart,
-                data: seg.data,
-                character_id: seg.character_id,
-            }
-
-            if (liveStart) {
-                // Offset the live start backwards by the closed duration so LiveDuration shows total live + closed
-                const adjustedStartMs = new Date(liveStart).getTime() - closedMs
-                consolidated.push({
-                    ...base,
-                    start: new Date(adjustedStartMs).toISOString(),
-                    end: undefined,
-                })
-            } else {
-                const startMs = new Date(seg.displayStart).getTime()
-                const endMs = startMs + closedMs
-                consolidated.push({
-                    ...base,
-                    start: new Date(startMs).toISOString(),
-                    end: new Date(endMs).toISOString(),
-                })
-            }
-        }
-
-        return consolidated
+        return segments
     }, [
         discardLoggedOutTime,
         discardPublicAreaTime,
@@ -288,6 +252,34 @@ const LevelActivity = ({
         onlineActivity,
         areas,
     ])
+
+    // When a selection is set by another table, scroll to our first highlighted row
+    useEffect(() => {
+        const container = containerRef.current
+        if (!container) return
+        if (!lastSelectionSource || lastSelectionSource === selfSource) return
+        const firstSelected = container.querySelector(
+            "tr.selected-row"
+        ) as HTMLElement | null
+        if (firstSelected) {
+            const containerRect = container.getBoundingClientRect()
+            const rowRect = firstSelected.getBoundingClientRect()
+            const alreadyVisible =
+                rowRect.top >= containerRect.top &&
+                rowRect.bottom <= containerRect.bottom
+
+            if (!alreadyVisible) {
+                const currentScroll = container.scrollTop
+                const relativeTop = rowRect.top - containerRect.top
+                const desiredOffset = container.clientHeight * 0.25
+                const rawTarget = currentScroll + (relativeTop - desiredOffset)
+                const maxScroll =
+                    container.scrollHeight - container.clientHeight
+                const targetTop = Math.max(0, Math.min(rawTarget, maxScroll))
+                container.scrollTo({ top: targetTop, behavior: "smooth" })
+            }
+        }
+    }, [selectionVersion, lastSelectionSource, adjustedLevelActivity])
 
     return (
         <Stack direction="column" gap="10px" style={{ width: "100%" }}>
@@ -319,6 +311,7 @@ const LevelActivity = ({
                 style={{
                     maxHeight: "410px",
                 }}
+                ref={containerRef}
             >
                 <table>
                     <thead>
@@ -339,9 +332,41 @@ const LevelActivity = ({
                                 </tr>
                             ))}
                         {adjustedLevelActivity?.map((activity) => {
+                            // Highlight this row if the selected timestamp is within its time window
+                            const isSelected =
+                                selectedTimestampRange && activity.end
+                                    ? !(
+                                          Date.parse(activity.end) <=
+                                              (selectedTimestampRange.start ||
+                                                  0) ||
+                                          Date.parse(activity.start) >=
+                                              (selectedTimestampRange.end || 0)
+                                      )
+                                    : selectedTimestampRange &&
+                                      !activity.end &&
+                                      (new Date(activity.start).getTime() <=
+                                          (selectedTimestampRange.end || 0) ||
+                                          selectedTimestampRange.end === null)
+
                             return (
                                 <tr
+                                    className={`clickable${isSelected ? " selected-row" : ""}`}
                                     key={`${activity.start}-${activity.data?.total_level}`}
+                                    onClick={() =>
+                                        handleActivityClick({
+                                            start: new Date(
+                                                activity.start
+                                            ).getTime(),
+                                            end: activity.end
+                                                ? new Date(
+                                                      activity.end
+                                                  ).getTime()
+                                                : null,
+                                        })
+                                    }
+                                    style={{
+                                        cursor: "pointer",
+                                    }}
                                 >
                                     <td>{activity.data?.total_level ?? "-"}</td>
                                     <td>
@@ -356,20 +381,19 @@ const LevelActivity = ({
                                     </td>
                                     <td>
                                         {activity.end == null ? (
+                                            // For live rows, seed LiveDuration so it shows the already-accumulated adjusted time.
                                             <LiveDuration
-                                                start={activity.start}
+                                                start={new Date(
+                                                    Date.now() -
+                                                        activity.duration
+                                                ).toISOString()}
                                                 intervalMs={1000}
                                                 onlyWhenVisible
                                                 compact
                                             />
                                         ) : (
                                             convertMillisecondsToPrettyString(
-                                                new Date(
-                                                    activity.end
-                                                ).getTime() -
-                                                    new Date(
-                                                        activity.start
-                                                    ).getTime(),
+                                                activity.duration,
                                                 true,
                                                 true,
                                                 false,
