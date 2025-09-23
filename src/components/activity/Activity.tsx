@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react"
+import React, { useState, useEffect, useRef } from "react"
 import NavigationCard from "../global/NavigationCard.tsx"
 import {
     ContentCluster,
@@ -6,7 +6,10 @@ import {
 } from "../global/ContentCluster.tsx"
 import Page from "../global/Page.tsx"
 import { AccessToken } from "../../models/Verification.ts"
-import { Character } from "../../models/Character.ts"
+import {
+    Character,
+    SingleCharacterResponseModel,
+} from "../../models/Character.ts"
 import "./Activity.css"
 import Stack from "../global/Stack.tsx"
 import { Link, useLocation } from "react-router-dom"
@@ -15,16 +18,18 @@ import Button from "../global/Button.tsx"
 import Spacer from "../global/Spacer.tsx"
 import useGetCharacterActivity from "../../hooks/useGetCharacterActivity.ts"
 import { CharacterActivityType } from "../../models/Activity.ts"
-import ActivityTable from "./ActivityTable.tsx"
-import useDebounce from "../../hooks/useDebounce.ts"
-import { getLocationActivityStats } from "../../utils/locationActivityUtil.ts"
-import { RANSACK_HOURS, RANSACK_THRESHOLD } from "../../constants/game.ts"
-import { convertMillisecondsToPrettyString } from "../../utils/stringUtils.ts"
 import {
     NoRegisteredAndVerifiedCharacters,
     NoVerifiedCharacters,
 } from "../global/CommonMessages.tsx"
 import NavCardCluster from "../global/NavCardCluster.tsx"
+import { useAreaContext } from "../../contexts/AreaContext.tsx"
+import { useQuestContext } from "../../contexts/QuestContext.tsx"
+import LocationActivity from "./LocationActivity.tsx"
+import OnlineActivity from "./OnlineActivity.tsx"
+import usePollApi from "../../hooks/usePollApi.ts"
+import { MsFromHours, MsFromSeconds } from "../../utils/timeUtils.ts"
+import { CHARACTER_ENDPOINT } from "../../services/characterService.ts"
 // import StatusBarChart from "./StatusBarChart.tsx"
 
 // TODO: Location table updates:
@@ -55,12 +60,13 @@ const Activity = () => {
         accessToken: null,
     })
 
-    const [areaFilter, setAreaFilter] = useState("")
-    const { debouncedValue: debouncedAreaFilter } = useDebounce(areaFilter, 200)
+    const { areas } = useAreaContext()
+    const { quests } = useQuestContext()
 
     const {
-        data: locationActivity,
-        loadingState: locationActivityLoadingState,
+        activityData: locationActivity,
+        isLoading: locationActivityIsLoading,
+        isError: locationActivityIsError,
         reload: reloadLocationActivityData,
     } = useGetCharacterActivity({
         characterId: selectedCharacterAndAccessToken?.character?.id,
@@ -68,23 +74,44 @@ const Activity = () => {
         activityType: CharacterActivityType.location,
     })
     const {
-        data: statusActivity,
-        loadingState: statusActivityLoadingState,
-        reload: reloadStatusActivityData,
+        activityData: onlineActivity,
+        isLoading: onlineActivityIsLoading,
+        isError: onlineActivityIsError,
+        reload: reloadOnlineActivityData,
     } = useGetCharacterActivity({
         characterId: selectedCharacterAndAccessToken?.character?.id,
         accessToken: selectedCharacterAndAccessToken?.accessToken?.access_token,
         activityType: CharacterActivityType.status,
     })
-    const {
-        data: levelActivity,
-        loadingState: levelActivityLoadingState,
-        reload: reloadLevelActivityData,
-    } = useGetCharacterActivity({
-        characterId: selectedCharacterAndAccessToken?.character?.id,
-        accessToken: selectedCharacterAndAccessToken?.accessToken?.access_token,
-        activityType: CharacterActivityType.total_level,
+    const { data: characterData } = usePollApi<SingleCharacterResponseModel>({
+        endpoint: `${CHARACTER_ENDPOINT}/${selectedCharacterAndAccessToken.character?.id}`,
+        interval: MsFromSeconds(5),
+        lifespan: MsFromHours(8),
     })
+
+    const lastCharacterState = useRef<Character | null>(null)
+
+    useEffect(() => {
+        let didReload = false
+        if (
+            lastCharacterState.current?.location_id !==
+            characterData?.data?.location_id
+        ) {
+            didReload = true
+            reloadLocationActivityData()
+        }
+        if (
+            lastCharacterState.current?.is_online !==
+            characterData?.data?.is_online
+        ) {
+            didReload = true
+            reloadOnlineActivityData()
+        }
+
+        if (didReload) {
+            lastCharacterState.current = characterData.data
+        }
+    }, [characterData])
 
     useEffect(() => {
         // get character name param from url
@@ -158,83 +185,6 @@ const Activity = () => {
         }
     }
 
-    function renderFilters() {
-        const {
-            totalTime,
-            totalRuns,
-            totalRunsWithinRansackHours,
-            averageTime,
-            ransackTimerStart,
-        } = getLocationActivityStats(locationActivity, debouncedAreaFilter)
-
-        return (
-            <>
-                <div className="activity-table-filter">
-                    <label htmlFor="area-filter">Quest name:</label>
-                    <input
-                        id="area-filter"
-                        className="large"
-                        value={areaFilter}
-                        onChange={(e) => {
-                            setAreaFilter(e.target.value)
-                        }}
-                    />
-                </div>
-                <Stack
-                    direction="row"
-                    gap="20px"
-                    className="activity-table-stats"
-                >
-                    <Stack direction="column" className="stat">
-                        <span className="stat-title">Total time</span>
-                        <span>
-                            {totalTime
-                                ? convertMillisecondsToPrettyString(totalTime)
-                                : "-"}
-                        </span>
-                    </Stack>
-                    <Stack direction="column" className="stat">
-                        <span className="stat-title">Average time</span>
-                        <span>
-                            {averageTime
-                                ? convertMillisecondsToPrettyString(averageTime)
-                                : "-"}
-                        </span>
-                    </Stack>
-                    <Stack direction="column" className="stat">
-                        <span className="stat-title">Total runs</span>
-                        <span>{totalRuns ? totalRuns : "-"}</span>
-                    </Stack>
-                    <Stack direction="column" className="stat">
-                        <span className="stat-title">Ransack</span>
-                        <span>
-                            {totalRunsWithinRansackHours ? (
-                                totalRunsWithinRansackHours >=
-                                RANSACK_THRESHOLD ? (
-                                    <span className="red-text">
-                                        Until{" "}
-                                        {new Date(
-                                            ransackTimerStart?.getTime() +
-                                                RANSACK_HOURS * 1000 * 60 * 60
-                                        ).toLocaleString()}
-                                    </span>
-                                ) : (
-                                    <span>
-                                        {RANSACK_THRESHOLD -
-                                            totalRunsWithinRansackHours}{" "}
-                                        more runs
-                                    </span>
-                                )
-                            ) : (
-                                "-"
-                            )}
-                        </span>
-                    </Stack>
-                </Stack>
-            </>
-        )
-    }
-
     const conditionalSelectionContent = () => {
         if (!isLoaded) return <p>Loading...</p>
 
@@ -268,7 +218,7 @@ const Activity = () => {
                         </label>
                         <Stack gap="10px">
                             <select
-                                className="large full-width-on-mobile"
+                                className="full-width-on-mobile"
                                 id="character-selection"
                                 value={
                                     selectedCharacterAndAccessToken
@@ -293,8 +243,8 @@ const Activity = () => {
                                 small
                                 onClick={() => {
                                     reloadLocationActivityData()
-                                    reloadStatusActivityData()
-                                    reloadLevelActivityData()
+                                    reloadOnlineActivityData()
+                                    // reloadLevelActivityData()
                                 }}
                             >
                                 Reload
@@ -334,27 +284,12 @@ const Activity = () => {
 
         return (
             <Stack direction="column" gap="20px">
-                {renderFilters()}
-                <ActivityTable
-                    characterActivity={locationActivity}
-                    activityType={CharacterActivityType.location}
-                    loadingState={locationActivityLoadingState}
-                    filter={debouncedAreaFilter}
-                />
-                <ActivityTable
-                    characterActivity={statusActivity}
-                    activityType={CharacterActivityType.status}
-                    loadingState={statusActivityLoadingState}
-                />
-                {/* <StatusBarChart
-                    statusActivity={statusActivity}
+                <LocationActivity
+                    quests={quests}
+                    areas={areas}
                     locationActivity={locationActivity}
-                /> */}
-                <ActivityTable
-                    characterActivity={levelActivity}
-                    activityType={CharacterActivityType.total_level}
-                    loadingState={levelActivityLoadingState}
                 />
+                <OnlineActivity onlineActivity={onlineActivity} />
             </Stack>
         )
     }

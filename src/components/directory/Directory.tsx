@@ -65,12 +65,11 @@ const Directory = () => {
                     <NavCardCluster>
                         <NavigationCard type="registration" />
                         <NavigationCard
-                            type="timers"
-                            badge={<Badge text="Soon" type="soon" />}
-                            disabled
+                            type="activity"
+                            badge={<Badge text="New" type="new" />}
                         />
                         <NavigationCard
-                            type="activity"
+                            type="timers"
                             badge={<Badge text="Soon" type="soon" />}
                             disabled
                         />

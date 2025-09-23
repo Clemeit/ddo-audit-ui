@@ -1,11 +1,9 @@
 import { useState, useEffect } from "react"
-import { LoadingState, ApiState } from "../models/Api.ts"
-import { CharacterActivityType, ActivityEvent } from "../models/Activity.ts"
 import {
-    getCharacterLocationActivityById,
-    getCharacterStatusActivityById,
-    getCharacterLevelActivityById,
-} from "../services/activityService.ts"
+    CharacterActivityType,
+    CharacterActivityData,
+} from "../models/Activity.ts"
+import { getCharacterActivityById } from "../services/activityService.ts"
 import { format } from "date-fns"
 
 const useGetCharacterActivity = ({
@@ -19,61 +17,42 @@ const useGetCharacterActivity = ({
     activityType?: CharacterActivityType
     areaName?: string
 }) => {
-    const [activity, setActivity] = useState<ApiState<ActivityEvent[]>>({
-        data: null,
-        loadingState: LoadingState.Initial,
-        error: null,
-    })
+    const [activityData, setActivityData] = useState<CharacterActivityData[]>(
+        []
+    )
+    const [isLoading, setIsLoading] = useState<boolean>(false)
+    const [isError, setIsError] = useState<boolean>(false)
 
-    function reload() {
+    const reload = async () => {
         if (!characterId || !accessToken || !activityType) {
             return
         }
 
-        setActivity({
-            data: null,
-            loadingState: LoadingState.Loading,
-            error: null,
-        })
+        setIsLoading(true)
 
-        // start date should be 14 days ago
+        try {
+            const startDate = format(
+                new Date().setDate(new Date().getDate() - 14),
+                "yyyy-MM-dd"
+            )
 
-        const startDate = format(
-            new Date().setDate(new Date().getDate() - 14),
-            "yyyy-MM-dd"
-        )
-
-        let promise
-        if (activityType === CharacterActivityType.location) {
-            promise = getCharacterLocationActivityById(
+            const activityResponse = await getCharacterActivityById(
                 characterId,
+                activityType,
                 accessToken,
                 startDate,
                 "",
-                500,
-                areaName
+                500
             )
-        } else if (activityType === CharacterActivityType.status) {
-            promise = getCharacterStatusActivityById(characterId, accessToken)
-        } else if (activityType === CharacterActivityType.total_level) {
-            promise = getCharacterLevelActivityById(characterId, accessToken)
+            if (activityResponse && activityResponse.data) {
+                setActivityData(activityResponse.data)
+                setIsError(false)
+            }
+        } catch (error) {
+            setIsError(true)
+        } finally {
+            setIsLoading(false)
         }
-
-        promise
-            .then((response: { data: { data: ActivityEvent[] } }) => {
-                setActivity({
-                    data: response.data.data,
-                    loadingState: LoadingState.Loaded,
-                    error: null,
-                })
-            })
-            .catch((error: { message: string }) => {
-                setActivity({
-                    data: null,
-                    loadingState: LoadingState.Error,
-                    error: error.message,
-                })
-            })
     }
 
     useEffect(() => {
@@ -81,9 +60,9 @@ const useGetCharacterActivity = ({
     }, [characterId, accessToken, activityType, areaName])
 
     return {
-        data: activity.data || [],
-        loadingState: activity.loadingState,
-        error: activity.error,
+        activityData,
+        isLoading,
+        isError,
         reload,
     }
 }
