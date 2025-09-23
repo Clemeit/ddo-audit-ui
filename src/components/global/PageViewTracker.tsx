@@ -17,6 +17,7 @@ export function PageViewTracker() {
         if (lastPathRef.current === fullPath) return
         lastPathRef.current = fullPath
 
+        // delay to ensure title and other metadata are updated (Helmet)
         const timer = setTimeout(() => {
             if (gaReady()) {
                 trackPageView(fullPath)
