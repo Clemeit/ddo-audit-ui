@@ -7,7 +7,6 @@ import { ThemeProvider } from "./contexts/AppContext.tsx"
 import { HelmetProvider } from "react-helmet-async"
 import { NotificationProvider } from "./contexts/NotificationContext.tsx"
 import { ServiceWorkerUpdater } from "./components/global/ServiceWorkerUpdater.tsx"
-import init from "./firebase.ts"
 // Import banner image to get the correct webpack path for preloading
 import bannerImage from "./assets/webp/banner.webp"
 import logMessage from "./utils/logUtils.ts"
@@ -23,8 +22,6 @@ const preloadBannerImage = () => {
 
 // Execute preload immediately
 preloadBannerImage()
-
-init()
 
 const root = ReactDOM.createRoot(document.getElementById("root")!)
 root.render(
