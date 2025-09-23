@@ -226,10 +226,8 @@ const Registration = () => {
                         You can also verify ownership of a character to unlock
                         additional features such as quest ransack, questing
                         history, level-up trends, and more. See the{" "}
-                        <Link to="/activity" className="link" disabled>
-                            Activity page
-                        </Link>{" "}
-                        for more information.
+                        <Link to="/activity">Activity page</Link> for more
+                        information.
                     </p>
                 </ContentCluster>
                 <ContentCluster
