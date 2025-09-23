@@ -8,6 +8,7 @@ interface UsePollApiProps {
     interval?: number
     lifespan?: number
     stopOnError?: boolean
+    enabled?: boolean
 }
 
 interface UsePollApiReturn<T> {
@@ -22,6 +23,7 @@ const usePollApi = <T>({
     interval = 10000,
     lifespan = 0,
     stopOnError = false,
+    enabled = true,
 }: UsePollApiProps): UsePollApiReturn<T> => {
     const [birthTime] = useState<number>(Date.now())
     const [state, setState] = useState<LoadingState>(LoadingState.Initial)
@@ -30,9 +32,11 @@ const usePollApi = <T>({
     const timeoutRef = useRef<NodeJS.Timeout | null>(null)
     const controllerRef = useRef<AbortController | null>(null)
     const consecutiveErrorsRef = useRef<number>(0)
+    const didMountRef = useRef<boolean>(false)
 
     const fetchData = useCallback(
         async (signal: AbortSignal) => {
+            if (!enabled) return
             if (timeoutRef.current) clearTimeout(timeoutRef.current)
 
             if (lifespan > 0 && Date.now() - birthTime > lifespan) {
@@ -147,6 +151,28 @@ const usePollApi = <T>({
             }
         }
     }, [fetchData])
+
+    // When the interval prop changes, restart polling immediately so the change takes effect now
+    useEffect(() => {
+        if (!didMountRef.current) {
+            didMountRef.current = true
+            return
+        }
+
+        // Abort any in-flight request and clear any pending timeout
+        if (controllerRef.current) {
+            controllerRef.current.abort()
+        }
+        if (timeoutRef.current) {
+            clearTimeout(timeoutRef.current)
+        }
+
+        // Start a fresh cycle with the new interval
+        const controller = new AbortController()
+        controllerRef.current = controller
+        consecutiveErrorsRef.current = 0
+        fetchData(controller.signal)
+    }, [interval, enabled, fetchData])
 
     const reload = useCallback(() => {
         // Abort current operations

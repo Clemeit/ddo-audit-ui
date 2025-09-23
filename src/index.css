@@ -190,6 +190,19 @@ table {
     border-collapse: separate;
     border-spacing: 0;
     margin: 0;
+
+    &.table-with-sticky-final-column {
+        th:last-child {
+            position: sticky;
+            right: 0;
+        }
+
+        td:last-child {
+            position: sticky;
+            right: 0;
+            background-color: inherit;
+        }
+    }
     
     .no-data-row {
         text-align: center;

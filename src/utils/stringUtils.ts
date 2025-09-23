@@ -76,14 +76,14 @@ function convertMillisecondsToPrettyString(
         )
     if (minutes % 60 > 0 && hours < 12)
         resultArray.push(
-            `${minutes % 60} min${useFullWords ? "ute" : ""}${minutes > 1 ? "s" : ""}`.replace(
+            `${minutes % 60} min${useFullWords ? "ute" : ""}${minutes % 60 > 1 ? "s" : ""}`.replace(
                 / /g,
                 nonBreakingSpace ? "\u00A0" : " "
             )
         )
     if (seconds % 60 > 0 && minutes < 30 && hours === 0)
         resultArray.push(
-            `${seconds % 60} sec${useFullWords ? "ond" : ""}${seconds > 1 ? "s" : ""}`.replace(
+            `${seconds % 60} sec${useFullWords ? "ond" : ""}${seconds % 60 > 1 ? "s" : ""}`.replace(
                 / /g,
                 nonBreakingSpace ? "\u00A0" : " "
             )

@@ -1,64 +1,26 @@
-import axios from "axios"
 import { getRequest } from "./apiHelper"
-import { RaidActivityEndpointResponse } from "../models/Activity"
+import {
+    CharacterActivityEndpointResponse,
+    CharacterActivityType,
+    RaidActivityEndpointResponse,
+} from "../models/Activity"
 
 const ACTIVITY_ENDPOINT = "activity"
 
-function getCharacterLocationActivityById(
+function getCharacterActivityById(
     id: number,
-    accessToken: string,
-    startDate?: string,
-    endDate?: string,
-    limit?: number,
-    areaName?: string
-) {
-    const params = new URLSearchParams()
-    if (startDate) params.append("start_date", startDate)
-    if (endDate) params.append("end_date", endDate)
-    if (limit) params.append("limit", limit.toString())
-    if (areaName) params.append("area_name", areaName)
-
-    return getRequest(`${ACTIVITY_ENDPOINT}/${id}/location`, {
-        headers: {
-            Authorization: accessToken,
-        },
-        params,
-    })
-}
-
-function getCharacterStatusActivityById(
-    id: number,
+    activityType: CharacterActivityType,
     accessToken: string,
     startDate?: string,
     endDate?: string,
     limit?: number
-) {
+): Promise<CharacterActivityEndpointResponse> {
     const params = new URLSearchParams()
     if (startDate) params.append("start_date", startDate)
     if (endDate) params.append("end_date", endDate)
     if (limit) params.append("limit", limit.toString())
 
-    return getRequest(`${ACTIVITY_ENDPOINT}/${id}/status`, {
-        headers: {
-            Authorization: accessToken,
-        },
-        params,
-    })
-}
-
-function getCharacterLevelActivityById(
-    id: number,
-    accessToken: string,
-    startDate?: string,
-    endDate?: string,
-    limit?: number
-) {
-    const params = new URLSearchParams()
-    if (startDate) params.append("start_date", startDate)
-    if (endDate) params.append("end_date", endDate)
-    if (limit) params.append("limit", limit.toString())
-
-    return getRequest(`${ACTIVITY_ENDPOINT}/${id}/level`, {
+    return getRequest(`${ACTIVITY_ENDPOINT}/${id}/${activityType}`, {
         headers: {
             Authorization: accessToken,
         },
@@ -77,9 +39,4 @@ function getCharacterRaidActivityByIds(
     })
 }
 
-export {
-    getCharacterLocationActivityById,
-    getCharacterStatusActivityById,
-    getCharacterLevelActivityById,
-    getCharacterRaidActivityByIds,
-}
+export { getCharacterActivityById, getCharacterRaidActivityByIds }

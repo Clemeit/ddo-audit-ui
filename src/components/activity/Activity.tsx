@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react"
+import React, { useState, useEffect, useRef } from "react"
 import NavigationCard from "../global/NavigationCard.tsx"
 import {
     ContentCluster,
@@ -6,26 +6,41 @@ import {
 } from "../global/ContentCluster.tsx"
 import Page from "../global/Page.tsx"
 import { AccessToken } from "../../models/Verification.ts"
-import { Character } from "../../models/Character.ts"
+import {
+    Character,
+    SingleCharacterResponseModel,
+} from "../../models/Character.ts"
 import "./Activity.css"
 import Stack from "../global/Stack.tsx"
-import { Link, useLocation } from "react-router-dom"
+import { useLocation } from "react-router-dom"
 import useGetRegisteredCharacters from "../../hooks/useGetRegisteredCharacters.ts"
 import Button from "../global/Button.tsx"
 import Spacer from "../global/Spacer.tsx"
 import useGetCharacterActivity from "../../hooks/useGetCharacterActivity.ts"
 import { CharacterActivityType } from "../../models/Activity.ts"
-import ActivityTable from "./ActivityTable.tsx"
-import useDebounce from "../../hooks/useDebounce.ts"
-import { getLocationActivityStats } from "../../utils/locationActivityUtil.ts"
-import { RANSACK_HOURS, RANSACK_THRESHOLD } from "../../constants/game.ts"
-import { convertMillisecondsToPrettyString } from "../../utils/stringUtils.ts"
 import {
+    DataLoadingErrorPageMessage,
+    LiveDataHaultedPageMessage,
     NoRegisteredAndVerifiedCharacters,
     NoVerifiedCharacters,
 } from "../global/CommonMessages.tsx"
 import NavCardCluster from "../global/NavCardCluster.tsx"
-// import StatusBarChart from "./StatusBarChart.tsx"
+import { useAreaContext } from "../../contexts/AreaContext.tsx"
+import { useQuestContext } from "../../contexts/QuestContext.tsx"
+import LocationActivity from "./LocationActivity.tsx"
+import OnlineActivity from "./OnlineActivity.tsx"
+import usePollApi from "../../hooks/usePollApi.ts"
+import { MsFromHours, MsFromSeconds } from "../../utils/timeUtils.ts"
+import { CHARACTER_ENDPOINT } from "../../services/characterService.ts"
+import { LoadingState } from "../../models/Api.ts"
+import LevelActivity from "./LevelActivity.tsx"
+import useSearchParamState, {
+    SearchParamType,
+} from "../../hooks/useSearchParamState.ts"
+import PageMessage from "../global/PageMessage.tsx"
+import useBooleanFlag from "../../hooks/useBooleanFlags.ts"
+import { BOOLEAN_FLAGS } from "../../utils/localStorage.ts"
+import Link from "../global/Link.tsx"
 
 // TODO: Location table updates:
 // - Show quest name when a location belongs to a quest.
@@ -43,6 +58,9 @@ const Activity = () => {
         isError,
         reload: reloadCharacters,
     } = useGetRegisteredCharacters()
+    const [isReloadDisabled, setIsReloadDisabled] = useState<boolean>(false)
+    const [hideActivityDevelopmentNotice, setHideActivityDevelopmentNotice] =
+        useBooleanFlag(BOOLEAN_FLAGS.hideActivityDevelopmentNotice, false)
 
     const [
         selectedCharacterAndAccessToken,
@@ -55,12 +73,18 @@ const Activity = () => {
         accessToken: null,
     })
 
-    const [areaFilter, setAreaFilter] = useState("")
-    const { debouncedValue: debouncedAreaFilter } = useDebounce(areaFilter, 200)
+    const { areas } = useAreaContext()
+    const { quests } = useQuestContext()
+
+    const lastCharacterState = useRef<Character | null>(null)
+    const [isCharacterOnline, setIsCharacterOnline] = useState<boolean>(false)
+    const [isCharacterSelectionInvalid, setIsCharacterSelectionInvalid] =
+        useState<boolean>(false)
 
     const {
-        data: locationActivity,
-        loadingState: locationActivityLoadingState,
+        activityData: locationActivity,
+        isLoading: locationActivityIsLoading,
+        isError: locationActivityIsError,
         reload: reloadLocationActivityData,
     } = useGetCharacterActivity({
         characterId: selectedCharacterAndAccessToken?.character?.id,
@@ -68,23 +92,59 @@ const Activity = () => {
         activityType: CharacterActivityType.location,
     })
     const {
-        data: statusActivity,
-        loadingState: statusActivityLoadingState,
-        reload: reloadStatusActivityData,
+        activityData: onlineActivity,
+        isLoading: onlineActivityIsLoading,
+        isError: onlineActivityIsError,
+        reload: reloadOnlineActivityData,
     } = useGetCharacterActivity({
         characterId: selectedCharacterAndAccessToken?.character?.id,
         accessToken: selectedCharacterAndAccessToken?.accessToken?.access_token,
         activityType: CharacterActivityType.status,
     })
     const {
-        data: levelActivity,
-        loadingState: levelActivityLoadingState,
+        activityData: levelActivity,
+        isLoading: levelActivityIsLoading,
+        isError: levelActivityIsError,
         reload: reloadLevelActivityData,
     } = useGetCharacterActivity({
         characterId: selectedCharacterAndAccessToken?.character?.id,
         accessToken: selectedCharacterAndAccessToken?.accessToken?.access_token,
         activityType: CharacterActivityType.total_level,
     })
+    const { data: characterData, state: characterDataState } =
+        usePollApi<SingleCharacterResponseModel>({
+            endpoint: `${CHARACTER_ENDPOINT}/${selectedCharacterAndAccessToken.character?.id}`,
+            interval: isCharacterOnline ? MsFromSeconds(1) : MsFromSeconds(5),
+            lifespan: MsFromHours(8),
+            enabled: !!selectedCharacterAndAccessToken.character?.id,
+        })
+
+    useEffect(() => {
+        let didReload = false
+        if (
+            lastCharacterState.current?.location_id !==
+            characterData?.data?.location_id
+        ) {
+            didReload = true
+            reloadLocationActivityData()
+        }
+        if (
+            lastCharacterState.current?.is_online !==
+            characterData?.data?.is_online
+        ) {
+            didReload = true
+            reloadOnlineActivityData()
+        }
+
+        if (didReload || !lastCharacterState.current) {
+            lastCharacterState.current = characterData?.data
+        }
+    }, [characterData])
+
+    useEffect(() => {
+        const next = characterData?.data?.is_online
+        if (next !== undefined) setIsCharacterOnline(next)
+    }, [characterData?.data?.is_online])
 
     useEffect(() => {
         // get character name param from url
@@ -111,31 +171,30 @@ const Activity = () => {
         }
     }, [location.search, verifiedCharacters, accessTokens])
 
-    function handleCharacterSelectionChange(
-        e: React.ChangeEvent<HTMLSelectElement>
-    ) {
-        if (!e.target.value) {
+    const { getSearchParam, setSearchParam } = useSearchParamState()
+    const selectedCharacterName =
+        getSearchParam(SearchParamType.CHARACTER) || ""
+    const setSelectedCharacterName = (name: string) => {
+        setSearchParam(SearchParamType.CHARACTER, name)
+    }
+
+    useEffect(() => {
+        if (!isLoaded) return
+        if (!selectedCharacterName) {
             setSelectedCharacterAndAccessToken({
                 character: null,
                 accessToken: null,
             })
-            // clear character from url
-            const searchParams = new URLSearchParams(location.search)
-            searchParams.delete("character")
-            window.history.replaceState(
-                null,
-                "",
-                `${location.pathname}?${searchParams.toString()}`
-            )
+            setIsCharacterSelectionInvalid(false)
             return
         }
-
         const character =
             verifiedCharacters.find(
                 (character: Character) =>
-                    character.id.toString() === e.target.value
+                    character.id.toString() === selectedCharacterName
             ) || null
         if (character && accessTokens) {
+            setIsCharacterSelectionInvalid(false)
             const accessToken = accessTokens.find(
                 (token: AccessToken) => token.character_id === character.id
             )
@@ -145,99 +204,16 @@ const Activity = () => {
                     accessToken,
                 })
             }
-            // set selected character in url
-            const searchParams = new URLSearchParams(location.search)
-            if (character.name?.toLowerCase()) {
-                searchParams.set("character", character.name.toLowerCase())
-                window.history.replaceState(
-                    null,
-                    "",
-                    `${location.pathname}?${searchParams.toString()}`
-                )
-            }
+        } else {
+            setIsCharacterSelectionInvalid(true)
+            setSelectedCharacterAndAccessToken({
+                character: null,
+                accessToken: null,
+            })
         }
-    }
-
-    function renderFilters() {
-        const {
-            totalTime,
-            totalRuns,
-            totalRunsWithinRansackHours,
-            averageTime,
-            ransackTimerStart,
-        } = getLocationActivityStats(locationActivity, debouncedAreaFilter)
-
-        return (
-            <>
-                <div className="activity-table-filter">
-                    <label htmlFor="area-filter">Quest name:</label>
-                    <input
-                        id="area-filter"
-                        className="large"
-                        value={areaFilter}
-                        onChange={(e) => {
-                            setAreaFilter(e.target.value)
-                        }}
-                    />
-                </div>
-                <Stack
-                    direction="row"
-                    gap="20px"
-                    className="activity-table-stats"
-                >
-                    <Stack direction="column" className="stat">
-                        <span className="stat-title">Total time</span>
-                        <span>
-                            {totalTime
-                                ? convertMillisecondsToPrettyString(totalTime)
-                                : "-"}
-                        </span>
-                    </Stack>
-                    <Stack direction="column" className="stat">
-                        <span className="stat-title">Average time</span>
-                        <span>
-                            {averageTime
-                                ? convertMillisecondsToPrettyString(averageTime)
-                                : "-"}
-                        </span>
-                    </Stack>
-                    <Stack direction="column" className="stat">
-                        <span className="stat-title">Total runs</span>
-                        <span>{totalRuns ? totalRuns : "-"}</span>
-                    </Stack>
-                    <Stack direction="column" className="stat">
-                        <span className="stat-title">Ransack</span>
-                        <span>
-                            {totalRunsWithinRansackHours ? (
-                                totalRunsWithinRansackHours >=
-                                RANSACK_THRESHOLD ? (
-                                    <span className="red-text">
-                                        Until{" "}
-                                        {new Date(
-                                            ransackTimerStart?.getTime() +
-                                                RANSACK_HOURS * 1000 * 60 * 60
-                                        ).toLocaleString()}
-                                    </span>
-                                ) : (
-                                    <span>
-                                        {RANSACK_THRESHOLD -
-                                            totalRunsWithinRansackHours}{" "}
-                                        more runs
-                                    </span>
-                                )
-                            ) : (
-                                "-"
-                            )}
-                        </span>
-                    </Stack>
-                </Stack>
-            </>
-        )
-    }
+    }, [verifiedCharacters, selectedCharacterName])
 
     const conditionalSelectionContent = () => {
-        if (!isLoaded) return <p>Loading...</p>
-
         if (isError)
             return (
                 <div>
@@ -266,36 +242,45 @@ const Activity = () => {
                         <label htmlFor="character-selection">
                             Select a character:
                         </label>
-                        <Stack gap="10px">
+                        <Stack gap="10px" align="center" width="100%">
                             <select
-                                className="large full-width-on-mobile"
+                                className="full-width-on-smallish-mobile"
                                 id="character-selection"
-                                value={
-                                    selectedCharacterAndAccessToken
-                                        ? selectedCharacterAndAccessToken
-                                              .character?.id
-                                        : ""
+                                value={selectedCharacterName}
+                                onChange={(e) =>
+                                    setSelectedCharacterName(e.target.value)
                                 }
-                                onChange={handleCharacterSelectionChange}
                             >
                                 <option value="">Select a character...</option>
-                                {verifiedCharacters.map((character) => (
-                                    <option
-                                        key={character.id}
-                                        value={character.id}
-                                    >
-                                        {character.name}
-                                    </option>
-                                ))}
+                                {verifiedCharacters
+                                    .sort((a, b) =>
+                                        (a.name ?? "").localeCompare(
+                                            b.name ?? ""
+                                        )
+                                    )
+                                    .map((character) => (
+                                        <option
+                                            key={character.id}
+                                            value={character.id}
+                                        >
+                                            {character.name}
+                                        </option>
+                                    ))}
                             </select>
                             <Button
                                 type="secondary"
                                 small
                                 onClick={() => {
+                                    reloadCharacters()
                                     reloadLocationActivityData()
-                                    reloadStatusActivityData()
+                                    reloadOnlineActivityData()
                                     reloadLevelActivityData()
+                                    setIsReloadDisabled(true)
+                                    setTimeout(() => {
+                                        setIsReloadDisabled(false)
+                                    }, 2000)
                                 }}
+                                disabled={!isLoaded || isReloadDisabled}
                             >
                                 Reload
                             </Button>
@@ -303,7 +288,7 @@ const Activity = () => {
                     </Stack>
                     <p className="secondary-text">
                         You can only view the data of your{" "}
-                        <Link className="link" to="/registration">
+                        <Link to="/registration">
                             registered, verified characters
                         </Link>
                         .
@@ -317,43 +302,46 @@ const Activity = () => {
     }
 
     const conditionalActivityContent = () => {
-        if (verifiedCharacters.length === 0)
-            return (
-                <div
-                    style={{
-                        width: "100%",
-                        height: "10vh",
-                        display: "flex",
-                        justifyContent: "center",
-                        alignItems: "center",
-                    }}
-                >
-                    <span>Waiting for some verified characters...</span>
-                </div>
-            )
-
         return (
             <Stack direction="column" gap="20px">
-                {renderFilters()}
-                <ActivityTable
-                    characterActivity={locationActivity}
-                    activityType={CharacterActivityType.location}
-                    loadingState={locationActivityLoadingState}
-                    filter={debouncedAreaFilter}
+                <LocationActivity
+                    quests={quests}
+                    areas={areas}
+                    locationActivity={
+                        selectedCharacterAndAccessToken?.character
+                            ? locationActivity
+                            : []
+                    }
+                    onlineActivity={
+                        selectedCharacterAndAccessToken?.character
+                            ? onlineActivity
+                            : []
+                    }
                 />
-                <ActivityTable
-                    characterActivity={statusActivity}
-                    activityType={CharacterActivityType.status}
-                    loadingState={statusActivityLoadingState}
+                <LevelActivity
+                    areas={areas}
+                    levelActivity={
+                        selectedCharacterAndAccessToken?.character
+                            ? levelActivity
+                            : []
+                    }
+                    locationActivity={
+                        selectedCharacterAndAccessToken?.character
+                            ? locationActivity
+                            : []
+                    }
+                    onlineActivity={
+                        selectedCharacterAndAccessToken?.character
+                            ? onlineActivity
+                            : []
+                    }
                 />
-                {/* <StatusBarChart
-                    statusActivity={statusActivity}
-                    locationActivity={locationActivity}
-                /> */}
-                <ActivityTable
-                    characterActivity={levelActivity}
-                    activityType={CharacterActivityType.total_level}
-                    loadingState={levelActivityLoadingState}
+                <OnlineActivity
+                    onlineActivity={
+                        selectedCharacterAndAccessToken?.character
+                            ? onlineActivity
+                            : []
+                    }
                 />
             </Stack>
         )
@@ -363,6 +351,46 @@ const Activity = () => {
         <Page
             title="Character Activity History"
             description="View detailed information about your characters' activity history, including questing history, level history, login history, and more."
+            pageMessages={() => {
+                const messages = []
+                if (characterDataState === LoadingState.Haulted)
+                    messages.push(<LiveDataHaultedPageMessage />)
+                if (isCharacterSelectionInvalid)
+                    messages.push(
+                        <PageMessage
+                            title="Permission Denied"
+                            type="error"
+                            message="You don't have permission to view that character. Make sure you've registered and verified the character."
+                        />
+                    )
+                if (
+                    locationActivityIsError ||
+                    onlineActivityIsError ||
+                    levelActivityIsError
+                ) {
+                    messages.push(<DataLoadingErrorPageMessage />)
+                }
+                if (!hideActivityDevelopmentNotice) {
+                    messages.push(
+                        <PageMessage
+                            title="Active Development"
+                            message={
+                                <span>
+                                    This page is currently in active
+                                    development. If you encounter any issues or
+                                    have suggestions, please visit the{" "}
+                                    <Link to="/feedback">Feedback page</Link>.
+                                </span>
+                            }
+                            type="info"
+                            onDismiss={() =>
+                                setHideActivityDevelopmentNotice(true)
+                            }
+                        />
+                    )
+                }
+                return messages
+            }}
         >
             <ContentClusterGroup>
                 <ContentCluster title="Character Activity">

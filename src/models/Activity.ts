@@ -1,4 +1,4 @@
-import { Character } from "./Character"
+import { Character, CharacterClass } from "./Character"
 
 interface ActivityEvent {
     timestamp: string
@@ -33,10 +33,28 @@ interface RaidActivityEndpointResponse {
     data: RaidActivityEvent[]
 }
 
+interface CharacterActivityData {
+    timestamp: string
+    character_id: number
+    data: {
+        location_id?: number
+        status?: boolean
+        guild_name?: string
+        total_level?: number
+        classes?: CharacterClass[]
+    }
+}
+
+interface CharacterActivityEndpointResponse {
+    data: CharacterActivityData[]
+}
+
 export type {
     ActivityEvent,
     CharacterActivity,
     RaidActivityEvent,
     RaidActivityEndpointResponse,
+    CharacterActivityEndpointResponse,
+    CharacterActivityData,
 }
 export { CharacterActivityType }

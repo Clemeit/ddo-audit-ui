@@ -25,6 +25,7 @@ import {
     RegistrationDataProvider,
 } from "./contexts/CombinedProviders.tsx"
 import { AreaProvider } from "./contexts/AreaContext.tsx"
+import { QuestProvider } from "./contexts/QuestContext.tsx"
 
 // Lazy load uncommon pages
 const Verification = lazy(() =>
@@ -33,7 +34,9 @@ const Verification = lazy(() =>
 const Registration = lazy(() =>
     lazyRetry(() => import("./components/registration/Registration.tsx"))
 )
-// const Activity = lazy(() => lazyRetry(() => import("./components/activity/Activity.tsx")))
+const Activity = lazy(() =>
+    lazyRetry(() => import("./components/activity/Activity.tsx"))
+)
 const NotFound = lazy(() =>
     lazyRetry(() => import("./components/app/NotFound.tsx"))
 )
@@ -83,7 +86,16 @@ export default createBrowserRouter(
                     </RegistrationDataProvider>
                 }
             />
-            {/* <Route path="/activity" element={<Activity />} /> */}
+            <Route
+                path="/activity"
+                element={
+                    <AreaProvider>
+                        <QuestProvider>
+                            <Activity />
+                        </QuestProvider>
+                    </AreaProvider>
+                }
+            />
             <Route
                 path="/owned-content"
                 element={

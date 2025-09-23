@@ -27,6 +27,19 @@ const dateToLongStringWithTime = (date?: Date): string => {
     })
 }
 
+const dateToShortStringWithTime = (date?: Date): string => {
+    if (!date) return "Unknown date"
+    if (isNaN(date.getTime())) return "Invalid date"
+    return date.toLocaleString("en-US", {
+        weekday: "short",
+        month: "short",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+    })
+}
+
 const numberToDayOfWeek = (day: number): string => {
     return DAYS_OF_WEEK[day] || "Unknown"
 }
@@ -53,4 +66,5 @@ export {
     numberToDayOfWeek,
     numberToHourOfDay,
     dayOfWeekToNumber,
+    dateToShortStringWithTime,
 }
