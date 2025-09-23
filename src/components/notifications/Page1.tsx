@@ -6,7 +6,6 @@ import Button from "../global/Button.tsx"
 import PageMessage from "../global/PageMessage.tsx"
 import { useModalNavigation } from "../../hooks/useModalNavigation.ts"
 import YesNoModal from "../modal/YesNoModal.tsx"
-import firebaseMessaging from "../../services/firebaseMessaging.ts"
 import { useNotificationContext } from "../../contexts/NotificationContext.tsx"
 
 interface Props {
@@ -36,7 +35,23 @@ const Page1 = ({
 
     const sendTestSystemNotification = async () => {
         try {
-            await firebaseMessaging.sendTestNotification()
+            if (Notification.permission !== "granted") {
+                await Notification.requestPermission()
+            }
+            if (Notification.permission === "granted") {
+                new Notification("DDO Audit Test", {
+                    body: "This is a test system notification",
+                    icon: "/icons/logo-192px.png",
+                    tag: "test-notification",
+                    requireInteraction: false,
+                })
+            } else {
+                createNotification({
+                    title: "Permission Required",
+                    message: "Please allow notifications in your browser.",
+                    type: "warning",
+                })
+            }
         } catch (error) {
             createNotification({
                 title: "Error",

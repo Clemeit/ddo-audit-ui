@@ -7,7 +7,6 @@ export const firebaseConfig = {
     storageBucket: "ddoaudit.firebasestorage.app",
     messagingSenderId: "808002047047",
     appId: "1:808002047047:web:251d7d87c213ffd1233562",
-    measurementId: "G-L54PGXRRZV",
 }
 
 export const vapidKey =

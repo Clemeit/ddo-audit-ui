@@ -53,6 +53,18 @@
             name="description"
             content="A live summary of DDO's current player population and LFM status. View population trends, check server status, browse live grouping panels, check to see if your friends are online, and decide what server is best for you!"
         />
+        <!-- Google Analytics (GA4) -->
+        <script
+            async
+            src="https://www.googletagmanager.com/gtag/js?id=G-YG3R94WB3B"
+        ></script>
+        <script>
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){ dataLayer.push(arguments); }
+            gtag('js', new Date());
+            // Manual SPA routing will emit page_view events; keep automatic disabled
+            gtag('config', 'G-YG3R94WB3B', { send_page_view: false });
+        </script>
         <!-- Structured Data -->
         <script type="application/ld+json">
         {

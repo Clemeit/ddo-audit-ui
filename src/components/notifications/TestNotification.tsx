@@ -1,16 +1,19 @@
 import React from "react"
 import Button from "../global/Button"
-import firebaseMessaging from "../../services/firebaseMessaging.ts"
 
 const TestNotification = () => {
     const sendTestSystemNotification = async () => {
-        // This sends a local system notification (not through Firebase)
-        await firebaseMessaging.sendTestNotification()
-    }
-
-    const openFirebaseConsole = () => {
-        // Open Firebase Console for sending real FCM messages
-        window.open("https://console.firebase.google.com/", "_blank")
+        if (Notification.permission !== "granted") {
+            await Notification.requestPermission()
+        }
+        if (Notification.permission === "granted") {
+            new Notification("DDO Audit Test", {
+                body: "This is a test system notification",
+                icon: "/icons/logo-192px.png",
+                tag: "test-notification",
+                requireInteraction: false,
+            })
+        }
     }
 
     return (
@@ -38,25 +41,10 @@ const TestNotification = () => {
                     Test Local System Notification
                 </Button>
 
-                <Button type="secondary" onClick={openFirebaseConsole}>
-                    Open Firebase Console
-                </Button>
+                {/* Firebase console button removed (Firebase unused) */}
             </div>
 
-            <div style={{ marginTop: "15px", fontSize: "12px", color: "#888" }}>
-                <strong>To test Firebase push notifications:</strong>
-                <ol style={{ margin: "5px 0", paddingLeft: "20px" }}>
-                    <li>Copy your FCM token from above</li>
-                    <li>Open Firebase Console → Cloud Messaging</li>
-                    <li>Click "Send your first message"</li>
-                    <li>Enter title/body and paste your token</li>
-                    <li>Send the notification</li>
-                </ol>
-                <p style={{ marginTop: "10px" }}>
-                    The notification will appear as a system notification even
-                    if the browser tab is closed!
-                </p>
-            </div>
+            {/* Firebase push notification instructions removed */}
         </div>
     )
 }

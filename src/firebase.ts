@@ -1,20 +1,16 @@
-import { initializeApp } from "firebase/app"
-import { getAnalytics } from "firebase/analytics"
+import { initializeApp, FirebaseApp } from "firebase/app"
 import { firebaseConfig } from "./config/firebaseConfig"
 import logMessage from "./utils/logUtils"
 
-function init() {
-    // Initialize Firebase
-    try {
-        const app = initializeApp(firebaseConfig)
-        const analytics = getAnalytics(app)
+let appInstance: FirebaseApp | null = null
+// Analytics intentionally disabled (GA4 handled via gtag snippet directly)
 
-        // Note: Firebase messaging is now integrated into the main service worker
-        // No need to register a separate firebase-messaging-sw.js
-        // console.log("Firebase initialized successfully")
-        return app
+async function init() {
+    if (appInstance) return appInstance
+    try {
+        appInstance = initializeApp(firebaseConfig)
+        return appInstance
     } catch (err) {
-        // console.log("Firebase initialize error: ", err)
         logMessage("Firebase initialization failed", "error", {
             metadata: {
                 error: err instanceof Error ? err.message : String(err),
