@@ -32,7 +32,7 @@ const useGetCharacterActivity = ({
 
         try {
             const startDate = format(
-                new Date().setDate(new Date().getDate() - 14),
+                new Date().setDate(new Date().getDate() - 90),
                 "yyyy-MM-dd"
             )
 

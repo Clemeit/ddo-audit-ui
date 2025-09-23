@@ -23,7 +23,9 @@ const LocationActivity = ({ quests, areas, locationActivity }: Props) => {
         return questsArray.find((quest) => quest.area_id === areaId)
     }
 
-    const [showQuestsOnly, setShowQuestsOnly] = useState<boolean>(false)
+    const [hidePublicAreas, setHidePublicAreas] = useState<boolean>(false)
+    const [hidewildernessAreas, setHidewildernessAreas] =
+        useState<boolean>(false)
     const [discardLoggedOutTime, setDiscardLoggedOutTime] =
         useState<boolean>(false)
 
@@ -40,10 +42,16 @@ const LocationActivity = ({ quests, areas, locationActivity }: Props) => {
             </h3>
             <Stack gap="15px">
                 <Checkbox
-                    onChange={(e) => setShowQuestsOnly(e.target.checked)}
-                    checked={showQuestsOnly}
+                    onChange={(e) => setHidePublicAreas(e.target.checked)}
+                    checked={hidePublicAreas}
                 >
-                    Only show quests
+                    Hide public areas
+                </Checkbox>
+                <Checkbox
+                    onChange={(e) => setHidewildernessAreas(e.target.checked)}
+                    checked={hidewildernessAreas}
+                >
+                    Hide wilderness areas
                 </Checkbox>
                 <Checkbox
                     onChange={(e) => setDiscardLoggedOutTime(e.target.checked)}
@@ -77,63 +85,67 @@ const LocationActivity = ({ quests, areas, locationActivity }: Props) => {
                                 </tr>
                             ))}
                         {locationActivity?.map((activity, index) => {
-                            if (
-                                !showQuestsOnly ||
-                                !!getQuestForArea(activity.data?.location_id)
-                            ) {
-                                return (
-                                    <tr>
-                                        <td>
-                                            {
-                                                areas[
-                                                    activity.data
-                                                        ?.location_id || 0
-                                                ].name
-                                            }
-                                        </td>
-                                        <td>
-                                            {
-                                                getQuestForArea(
-                                                    activity.data?.location_id
-                                                )?.name
-                                            }
-                                        </td>
-                                        <td>
-                                            {dateToShortStringWithTime(
-                                                new Date(activity.timestamp)
-                                            )}
-                                        </td>
-                                        <td>
-                                            {index === 0 ? (
-                                                <LiveDuration
-                                                    start={activity.timestamp}
-                                                    // live (now - start)
-                                                    intervalMs={1000}
-                                                    onlyWhenVisible
-                                                    compact
-                                                />
-                                            ) : (
-                                                convertMillisecondsToPrettyString(
-                                                    new Date(
-                                                        locationActivity[
-                                                            Math.max(
-                                                                index - 1,
-                                                                0
-                                                            )
-                                                        ].timestamp
-                                                    ).getTime() -
-                                                        new Date(
-                                                            activity.timestamp
-                                                        ).getTime(),
-                                                    true,
-                                                    true
-                                                )
-                                            )}
-                                        </td>
-                                    </tr>
-                                )
+                            const quest = getQuestForArea(
+                                activity.data?.location_id
+                            )
+                            const isWilderness =
+                                areas[activity.data?.location_id || 0]
+                                    ?.is_wilderness
+
+                            if (isWilderness && hidewildernessAreas) {
+                                return null
                             }
-                            return <></>
+                            if (hidePublicAreas && !quest) {
+                                return null
+                            }
+
+                            return (
+                                <tr>
+                                    <td>
+                                        {
+                                            areas[
+                                                activity.data?.location_id || 0
+                                            ].name
+                                        }
+                                    </td>
+                                    <td>
+                                        {
+                                            getQuestForArea(
+                                                activity.data?.location_id
+                                            )?.name
+                                        }
+                                    </td>
+                                    <td>
+                                        {dateToShortStringWithTime(
+                                            new Date(activity.timestamp)
+                                        )}
+                                    </td>
+                                    <td>
+                                        {index === 0 ? (
+                                            <LiveDuration
+                                                start={activity.timestamp}
+                                                // live (now - start)
+                                                intervalMs={1000}
+                                                onlyWhenVisible
+                                                compact
+                                            />
+                                        ) : (
+                                            convertMillisecondsToPrettyString(
+                                                new Date(
+                                                    locationActivity[
+                                                        Math.max(index - 1, 0)
+                                                    ].timestamp
+                                                ).getTime() -
+                                                    new Date(
+                                                        activity.timestamp
+                                                    ).getTime(),
+                                                true,
+                                                true
+                                            )
+                                        )}
+                                    </td>
+                                </tr>
+                            )
                         })}
                     </tbody>
                 </table>
