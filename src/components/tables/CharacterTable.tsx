@@ -392,7 +392,7 @@ const CharacterTable = ({
 
     return (
         <div
-            className="character-table-container"
+            className="table-container"
             ref={containerRef}
             style={containerStyle}
         >

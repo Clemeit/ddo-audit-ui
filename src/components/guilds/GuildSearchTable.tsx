@@ -1,7 +1,6 @@
 import { useEffect, useState, type CSSProperties, type ReactNode } from "react"
 import { GuildByNameData } from "../../models/Guilds.ts"
 import "./GuildSearchTable.css"
-import Button from "../global/Button.tsx"
 import { ReactComponent as ChevronRight } from "../../assets/svg/chevron-right.svg"
 import useIsMobile from "../../hooks/useIsMobile.ts"
 import { useNavigate } from "react-router-dom"
@@ -99,7 +98,7 @@ const GuildSearchTable = ({
                 return (
                     <tr
                         key={key}
-                        className={isExpanded ? "is-expanded" : undefined}
+                        className={"clickable"}
                         onClick={() =>
                             handleNavigateToGuild(
                                 guild.guild_name,
@@ -124,7 +123,7 @@ const GuildSearchTable = ({
     }
 
     return (
-        <div className="guild-search-table-container" style={containerStyle}>
+        <div className="table-container" style={containerStyle}>
             <table
                 className={`guild-search-table  ${isLoading ? "loading" : ""}`}
             >
