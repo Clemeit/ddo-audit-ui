@@ -169,15 +169,6 @@ const GroupingContent = () => {
                 />
             )
         }
-        if (SERVERS_64_BITS_LOWER.includes(serverName)) {
-            return (
-                <Badge
-                    text="64-bit"
-                    size="small"
-                    backgroundColor="var(--magenta3)"
-                />
-            )
-        }
         return null
     }
 
