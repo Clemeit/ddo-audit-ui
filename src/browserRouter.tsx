@@ -68,6 +68,9 @@ const OwnedContent = lazy(() =>
 const Donated = lazy(() =>
     lazyRetry(() => import("./components/app/donated/Donated.tsx"))
 )
+const UserSettings = lazy(() =>
+    lazyRetry(() => import("./components/user-settings/UserSettings.tsx"))
+)
 // const Trends = lazy(() => lazyRetry(() => import("./components/trends/Trends.tsx")))
 // const Quests = lazy(() => lazyRetry(() => import("./components/quests/Quests.tsx")))
 
@@ -169,6 +172,14 @@ export default createBrowserRouter(
                 />
             </Route>
             <Route path="/donated" element={<Donated />} />
+            <Route
+                path="/user-settings"
+                element={
+                    <SocialDataProvider>
+                        <UserSettings />
+                    </SocialDataProvider>
+                }
+            />
             {/* <Route path="/quests" element={<Quests />} /> */}
             <Route path="/about" element={<About />} />
             <Route path="*" element={<NotFound />} />

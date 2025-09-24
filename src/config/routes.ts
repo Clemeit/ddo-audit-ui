@@ -108,6 +108,12 @@ const bannerRouteMapping = {
         miniature: true,
         showButtons: false,
     },
+    "user-settings": {
+        title: "User Settings",
+        subtitle: "Import and Export Your Settings",
+        miniature: true,
+        showButtons: false,
+    },
 }
 
 export { bannerRouteMapping }

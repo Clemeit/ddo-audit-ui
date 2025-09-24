@@ -99,6 +99,8 @@ interface LfmContextProps {
     resetFilterSettings: () => void
     resetDisplaySettings: () => void
     resetToolSettings: () => void
+    exportSettings: () => any
+    importSettings: (settings: any) => boolean
 }
 
 const LfmContext = createContext<LfmContextProps | undefined>(undefined)
@@ -326,6 +328,133 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
         return true
     }
 
+    // Applies already validated settings object to state with safety and fallback.
+    const applyValidatedSettings = useCallback(
+        (settings: any): boolean => {
+            try {
+                setMinLevel(settings.minLevel ?? MIN_LEVEL)
+                setMaxLevel(settings.maxLevel ?? MAX_LEVEL)
+                setFilterByMyCharacters(
+                    Boolean(settings.filterByMyCharacters ?? false)
+                )
+                setShowNotEligible(Boolean(settings.showNotEligible ?? true))
+                setHideContentIDontOwn(
+                    Boolean(settings.hideContentIDontOwn ?? false)
+                )
+                setIndicateContentIDontOwn(
+                    Boolean(settings.indicateContentIDontOwn ?? false)
+                )
+                setOwnedContent(
+                    Array.isArray(settings.ownedContent)
+                        ? settings.ownedContent
+                        : []
+                )
+
+                const parsedFontSize = parseInt(
+                    settings.fontSize ?? String(DEFAULT_BASE_FONT_SIZE)
+                )
+                setFontSize(
+                    isNaN(parsedFontSize)
+                        ? DEFAULT_BASE_FONT_SIZE
+                        : parsedFontSize
+                )
+
+                const parsedPanelWidth = parseInt(
+                    settings.panelWidth ?? String(DEFAULT_LFM_PANEL_WIDTH)
+                )
+                setPanelWidth(
+                    isNaN(parsedPanelWidth)
+                        ? DEFAULT_LFM_PANEL_WIDTH
+                        : parsedPanelWidth
+                )
+
+                setSortBy(
+                    settings.sortBy ?? {
+                        type: LfmSortType.LEVEL,
+                        ascending: true,
+                    }
+                )
+                setShowRaidTimerIndicator(
+                    Boolean(settings.showRaidTimerIndicator ?? true)
+                )
+                setShowMemberCount(Boolean(settings.showMemberCount ?? true))
+                setShowQuestGuesses(Boolean(settings.showQuestGuesses ?? true))
+                setShowQuestTips(Boolean(settings.showQuestTips ?? true))
+                setShowCharacterGuildNames(
+                    Boolean(settings.showCharacterGuildNames ?? true)
+                )
+                setTrackedCharacterIds(
+                    Array.isArray(settings.trackedCharacterIds)
+                        ? settings.trackedCharacterIds
+                        : []
+                )
+                setShowLfmPostedTime(
+                    Boolean(settings.showLfmPostedTime ?? true)
+                )
+                setMouseOverDelay(
+                    settings.mouseOverDelay ?? DEFAULT_MOUSE_OVER_DELAY
+                )
+                setShowLfmActivity(Boolean(settings.showLfmActivity ?? true))
+                setIsMultiColumn(Boolean(settings.isMultiColumn ?? true))
+                setShowEligibleCharacters(
+                    Boolean(settings.showEligibleCharacters ?? false)
+                )
+                setHideGroupsPostedByIgnoredCharacters(
+                    Boolean(
+                        settings.hideGroupsPostedByIgnoredCharacters ?? false
+                    )
+                )
+                setHideGroupsContainingIgnoredCharacters(
+                    Boolean(
+                        settings.hideGroupsContainingIgnoredCharacters ?? false
+                    )
+                )
+                setShowIndicationForGroupsPostedByFriends(
+                    Boolean(
+                        settings.showIndicationForGroupsPostedByFriends ?? true
+                    )
+                )
+                setShowIndicationForGroupsContainingFriends(
+                    Boolean(
+                        settings.showIndicationForGroupsContainingFriends ??
+                            true
+                    )
+                )
+                setHighlightRaids(Boolean(settings.highlightRaids ?? false))
+                setHideAllLevelGroups(
+                    Boolean(settings.hideAllLevelGroups ?? false)
+                )
+                setShowEligibilityDividers(
+                    Boolean(settings.showEligibilityDividers ?? true)
+                )
+                setOnlyShowRaids(Boolean(settings.onlyShowRaids ?? false))
+                setHideFullGroups(Boolean(settings.hideFullGroups ?? false))
+                return true
+            } catch (e) {
+                logMessage(
+                    "Error applying validated settings, falling back to defaults",
+                    "error",
+                    {
+                        metadata: {
+                            settings,
+                            error: e instanceof Error ? e.message : String(e),
+                        },
+                    }
+                )
+                applyDefaultSettings()
+                createNotification({
+                    title: new Date().toLocaleTimeString(),
+                    message:
+                        "An unexpected error occurred while applying your settings. They have been reset to defaults.",
+                    subMessage: "This error has been logged.",
+                    type: "error",
+                })
+                return false
+            }
+        },
+        [applyDefaultSettings, createNotification]
+    )
+
     const loadSettingsFromLocalStorage = useCallback(() => {
         let settings: any = null
         let shouldResetToDefaults = false
@@ -372,110 +501,8 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
         }
 
         // Settings are valid, apply them safely with additional fallbacks
-        try {
-            setMinLevel(settings.minLevel ?? MIN_LEVEL)
-            setMaxLevel(settings.maxLevel ?? MAX_LEVEL)
-            setFilterByMyCharacters(
-                Boolean(settings.filterByMyCharacters ?? false)
-            )
-            setShowNotEligible(Boolean(settings.showNotEligible ?? true))
-            setHideContentIDontOwn(
-                Boolean(settings.hideContentIDontOwn ?? false)
-            )
-            setIndicateContentIDontOwn(
-                Boolean(settings.indicateContentIDontOwn ?? false)
-            )
-            setOwnedContent(
-                Array.isArray(settings.ownedContent)
-                    ? settings.ownedContent
-                    : []
-            )
-
-            const parsedFontSize = parseInt(
-                settings.fontSize ?? String(DEFAULT_BASE_FONT_SIZE)
-            )
-            setFontSize(
-                isNaN(parsedFontSize) ? DEFAULT_BASE_FONT_SIZE : parsedFontSize
-            )
-
-            const parsedPanelWidth = parseInt(
-                settings.panelWidth ?? String(DEFAULT_LFM_PANEL_WIDTH)
-            )
-            setPanelWidth(
-                isNaN(parsedPanelWidth)
-                    ? DEFAULT_LFM_PANEL_WIDTH
-                    : parsedPanelWidth
-            )
-
-            setSortBy(settings.sortBy ?? { type: "level", ascending: true })
-            setShowRaidTimerIndicator(
-                Boolean(settings.showRaidTimerIndicator ?? true)
-            )
-            setShowMemberCount(Boolean(settings.showMemberCount ?? true))
-            setShowQuestGuesses(Boolean(settings.showQuestGuesses ?? true))
-            setShowQuestTips(Boolean(settings.showQuestTips ?? true))
-            setShowCharacterGuildNames(
-                Boolean(settings.showCharacterGuildNames ?? true)
-            )
-            setTrackedCharacterIds(
-                Array.isArray(settings.trackedCharacterIds)
-                    ? settings.trackedCharacterIds
-                    : []
-            )
-            setShowLfmPostedTime(Boolean(settings.showLfmPostedTime ?? true))
-            setMouseOverDelay(
-                settings.mouseOverDelay ?? DEFAULT_MOUSE_OVER_DELAY
-            )
-            setShowLfmActivity(Boolean(settings.showLfmActivity ?? true))
-            setIsMultiColumn(Boolean(settings.isMultiColumn ?? true))
-            setShowEligibleCharacters(
-                Boolean(settings.showEligibleCharacters ?? false)
-            )
-            setHideGroupsPostedByIgnoredCharacters(
-                Boolean(settings.hideGroupsPostedByIgnoredCharacters ?? false)
-            )
-            setHideGroupsContainingIgnoredCharacters(
-                Boolean(settings.hideGroupsContainingIgnoredCharacters ?? false)
-            )
-            setShowIndicationForGroupsPostedByFriends(
-                Boolean(settings.showIndicationForGroupsPostedByFriends ?? true)
-            )
-            setShowIndicationForGroupsContainingFriends(
-                Boolean(
-                    settings.showIndicationForGroupsContainingFriends ?? true
-                )
-            )
-            setHighlightRaids(Boolean(settings.highlightRaids ?? false))
-            setHideAllLevelGroups(Boolean(settings.hideAllLevelGroups ?? false))
-            setShowEligibilityDividers(
-                Boolean(settings.showEligibilityDividers ?? true)
-            )
-            setOnlyShowRaids(Boolean(settings.onlyShowRaids ?? false))
-            setHideFullGroups(Boolean(settings.hideFullGroups ?? false))
-        } catch (e) {
-            logMessage(
-                "Error applying validated settings, falling back to defaults",
-                "error",
-                {
-                    metadata: {
-                        settings,
-                        error: e instanceof Error ? e.message : String(e),
-                    },
-                }
-            )
-
-            // If there's still an error applying validated settings, use defaults
-            applyDefaultSettings()
-
-            createNotification({
-                title: new Date().toLocaleTimeString(),
-                message:
-                    "An unexpected error occurred while applying your settings. They have been reset to defaults.",
-                subMessage: "This error has been logged.",
-                type: "error",
-            })
-        }
-    }, [applyDefaultSettings, createNotification])
+        applyValidatedSettings(settings)
+    }, [applyValidatedSettings])
 
     useLimitedInterval({
         callback: reloadRegisteredCharacters,
@@ -581,6 +608,71 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
         hideFullGroups,
     ])
 
+    const exportSettings = () => {
+        return {
+            minLevel,
+            maxLevel,
+            filterByMyCharacters,
+            showNotEligible,
+            hideContentIDontOwn,
+            indicateContentIDontOwn,
+            ownedContent,
+            isLoaded,
+            fontSize,
+            panelWidth,
+            showBoundingBoxes,
+            sortBy,
+            isDynamicWidth,
+            showRaidTimerIndicator,
+            showMemberCount,
+            showQuestGuesses,
+            showQuestTips,
+            showCharacterGuildNames,
+            trackedCharacterIds,
+            showLfmPostedTime,
+            mouseOverDelay,
+            showLfmActivity,
+            isMultiColumn,
+            showEligibleCharacters,
+            hideGroupsPostedByIgnoredCharacters,
+            hideGroupsContainingIgnoredCharacters,
+            showIndicationForGroupsPostedByFriends,
+            showIndicationForGroupsContainingFriends,
+            highlightRaids,
+            hideAllLevelGroups,
+            showEligibilityDividers,
+            onlyShowRaids,
+            hideFullGroups,
+        }
+    }
+
+    const importSettings = useCallback(
+        (settings: any): boolean => {
+            // Validate first
+            if (!validateAndParseSettings(settings)) {
+                logMessage(
+                    "Imported settings invalid - aborting import",
+                    "error",
+                    {
+                        metadata: { settings },
+                    }
+                )
+                createNotification({
+                    title: new Date().toLocaleTimeString(),
+                    message:
+                        "The settings file you tried to import is invalid or corrupted.",
+                    subMessage: "Import aborted.",
+                    type: "error",
+                })
+                return false
+            }
+
+            const success = applyValidatedSettings(settings)
+            return success
+        },
+        [applyValidatedSettings, createNotification]
+    )
+
     return (
         <LfmContext.Provider
             value={{
@@ -657,6 +749,8 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
                 resetDisplaySettings,
                 resetFilterSettings,
                 resetToolSettings,
+                exportSettings,
+                importSettings,
             }}
         >
             {children}

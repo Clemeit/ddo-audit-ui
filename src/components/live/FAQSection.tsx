@@ -146,7 +146,7 @@ const FAQSection = ({
                         return <ServerLink key={index} serverName={part} />
                     } else if (isNumeric && part.trim() !== "") {
                         return (
-                            <ColoredText color="orange" key={index}>
+                            <ColoredText color="blue" key={index}>
                                 {part}
                             </ColoredText>
                         )

@@ -79,6 +79,8 @@ interface WhoContextProps {
     setMaximumRenderedCharacterCount: React.Dispatch<
         React.SetStateAction<number>
     >
+    exportSettings: () => any
+    importSettings: (settings: any) => boolean
 }
 
 const WhoContext = createContext<WhoContextProps | undefined>(undefined)
@@ -203,6 +205,117 @@ export const WhoProvider = ({ children }: { children: ReactNode }) => {
         setMaximumRenderedCharacterCount(DEFAULT_CHARACTER_COUNT)
     }, [])
 
+    // Apply a previously validated settings object. Returns true on success.
+    // Relies on applyDefaultSettings for fallback.
+    let applyValidatedSettings: (settings: any) => boolean
+    applyValidatedSettings = useCallback(
+        (settings: any): boolean => {
+            try {
+                if (settings.shouldSaveSettings) {
+                    if (settings.shouldSaveStringFilter)
+                        setStringFilter(String(settings.stringFilter))
+                    if (settings.shouldSaveClassFilter)
+                        setClassNameFilter(
+                            Array.isArray(settings.classNameFilter)
+                                ? settings.classNameFilter
+                                : CLASS_LIST_LOWER
+                        )
+                    if (settings.shouldSaveLevelFilter)
+                        setMinLevel(
+                            parseInt(settings.minLevel ?? String(MIN_LEVEL))
+                        )
+                    if (settings.shouldSaveLevelFilter)
+                        setMaxLevel(
+                            parseInt(settings.maxLevel ?? String(MAX_LEVEL))
+                        )
+                    if (settings.shouldSaveGroupView)
+                        setIsGroupView(Boolean(settings.isGroupView ?? false))
+                    setShouldIncludeRegion(
+                        Boolean(settings.shouldIncludeRegion ?? false)
+                    )
+                    if (settings.shouldSaveExactMatch)
+                        setIsExactMatch(Boolean(settings.isExactMatch ?? false))
+                    if (settings.shouldSaveSortBy) setSortBy(settings.sortBy)
+                    setPanelWidth(
+                        parseInt(
+                            settings.panelWidth ??
+                                String(DEFAULT_WHO_PANEL_WIDTH)
+                        )
+                    )
+                    setIsDynamicWidth(Boolean(settings.isDynamicWidth ?? false))
+                }
+                setShouldSaveSettings(
+                    Boolean(settings.shouldSaveSettings ?? false)
+                )
+                setShouldSaveClassFilter(
+                    Boolean(settings.shouldSaveClassFilter ?? false)
+                )
+                setShouldSaveStringFilter(
+                    Boolean(settings.shouldSaveStringFilter ?? false)
+                )
+                setShouldSaveLevelFilter(
+                    Boolean(settings.shouldSaveLevelFilter ?? false)
+                )
+                setShouldSaveSortBy(Boolean(settings.shouldSaveSortBy ?? false))
+                setShouldSaveGroupView(
+                    Boolean(settings.shouldSaveGroupView ?? false)
+                )
+                setShouldSaveExactMatch(
+                    Boolean(settings.shouldSaveExactMatch ?? false)
+                )
+                setShowInQuestIndicator(
+                    Boolean(settings.showInQuestIndicator ?? true)
+                )
+                setRefreshInterval(
+                    parseInt(
+                        settings.refreshInterval ?? String(DEFAULT_REFRESH_RATE)
+                    )
+                )
+                setHideIgnoredCharacters(
+                    Boolean(settings.hideIgnoredCharacters ?? true)
+                )
+                setPinFriends(Boolean(settings.pinFriends ?? true))
+                setPinRegisteredCharacters(
+                    Boolean(settings.pinRegisteredCharacters ?? true)
+                )
+                setAlwaysShowRegisteredCharacters(
+                    Boolean(settings.alwaysShowRegisteredCharacters ?? false)
+                )
+                setAlwaysShowFriends(
+                    Boolean(settings.alwaysShowFriends ?? false)
+                )
+                setMaximumRenderedCharacterCount(
+                    parseInt(
+                        settings.maximumRenderedCharacterCount ??
+                            String(DEFAULT_CHARACTER_COUNT)
+                    )
+                )
+                return true
+            } catch (e) {
+                logMessage(
+                    "Error applying validated Who settings, reverting to defaults",
+                    "error",
+                    {
+                        metadata: {
+                            settings,
+                            error: e instanceof Error ? e.message : String(e),
+                        },
+                    }
+                )
+                applyDefaultSettings()
+                createNotification({
+                    title: new Date().toLocaleTimeString(),
+                    message:
+                        "An unexpected error occurred while applying Who settings. Defaults restored.",
+                    subMessage: "This error has been logged.",
+                    type: "error",
+                })
+                return false
+            }
+        },
+        [applyDefaultSettings, createNotification]
+    )
+
     const loadSettingsFromLocalStorage = useCallback(() => {
         let settings: any = null
         let shouldResetToDefaults = false
@@ -248,105 +361,8 @@ export const WhoProvider = ({ children }: { children: ReactNode }) => {
             return
         }
 
-        try {
-            if (settings.shouldSaveSettings) {
-                if (settings.shouldSaveStringFilter)
-                    setStringFilter(String(settings.stringFilter))
-                if (settings.shouldSaveClassFilter)
-                    setClassNameFilter(
-                        Array.isArray(settings.classNameFilter)
-                            ? settings.classNameFilter
-                            : CLASS_LIST_LOWER
-                    )
-                if (settings.shouldSaveLevelFilter)
-                    setMinLevel(
-                        parseInt(settings.minLevel ?? String(MIN_LEVEL))
-                    )
-                if (settings.shouldSaveLevelFilter)
-                    setMaxLevel(
-                        parseInt(settings.maxLevel ?? String(MAX_LEVEL))
-                    )
-                if (settings.shouldSaveGroupView)
-                    setIsGroupView(Boolean(settings.isGroupView ?? false))
-                setShouldIncludeRegion(
-                    Boolean(settings.shouldIncludeRegion ?? false)
-                )
-                if (settings.shouldSaveExactMatch)
-                    setIsExactMatch(Boolean(settings.isExactMatch ?? false))
-                if (settings.shouldSaveSortBy) setSortBy(settings.sortBy)
-                setPanelWidth(
-                    parseInt(
-                        settings.panelWidth ?? String(DEFAULT_WHO_PANEL_WIDTH)
-                    )
-                )
-                setIsDynamicWidth(Boolean(settings.isDynamicWidth ?? false))
-            }
-            setShouldSaveSettings(Boolean(settings.shouldSaveSettings ?? false))
-            setShouldSaveClassFilter(
-                Boolean(settings.shouldSaveClassFilter ?? false)
-            )
-            setShouldSaveStringFilter(
-                Boolean(settings.shouldSaveStringFilter ?? false)
-            )
-            setShouldSaveLevelFilter(
-                Boolean(settings.shouldSaveLevelFilter ?? false)
-            )
-            setShouldSaveSortBy(Boolean(settings.shouldSaveSortBy ?? false))
-            setShouldSaveGroupView(
-                Boolean(settings.shouldSaveGroupView ?? false)
-            )
-            setShouldSaveExactMatch(
-                Boolean(settings.shouldSaveExactMatch ?? false)
-            )
-            setShowInQuestIndicator(
-                Boolean(settings.showInQuestIndicator ?? true)
-            )
-            setRefreshInterval(
-                parseInt(
-                    settings.refreshInterval ?? String(DEFAULT_REFRESH_RATE)
-                )
-            )
-            setHideIgnoredCharacters(
-                Boolean(settings.hideIgnoredCharacters ?? true)
-            )
-            setPinFriends(Boolean(settings.pinFriends ?? true))
-            setPinRegisteredCharacters(
-                Boolean(settings.pinRegisteredCharacters ?? true)
-            )
-            setAlwaysShowRegisteredCharacters(
-                Boolean(settings.alwaysShowRegisteredCharacters ?? false)
-            )
-            setAlwaysShowFriends(Boolean(settings.alwaysShowFriends ?? false))
-            setMaximumRenderedCharacterCount(
-                parseInt(
-                    settings.maximumRenderedCharacterCount ??
-                        String(DEFAULT_CHARACTER_COUNT)
-                )
-            )
-        } catch (e) {
-            logMessage(
-                "Error applying validated settings, falling back to defaults",
-                "error",
-                {
-                    metadata: {
-                        settings,
-                        error: e instanceof Error ? e.message : String(e),
-                    },
-                }
-            )
-
-            // If there's still an error applying validated settings, use defaults
-            applyDefaultSettings()
-
-            createNotification({
-                title: new Date().toLocaleTimeString(),
-                message:
-                    "An unexpected error occurred while applying your settings. They have been reset to defaults.",
-                subMessage: "This error has been logged.",
-                type: "error",
-            })
-        }
-    }, [applyDefaultSettings, createNotification])
+        applyValidatedSettings(settings)
+    }, [applyValidatedSettings])
 
     useEffect(() => {
         loadSettingsFromLocalStorage()
@@ -430,6 +446,60 @@ export const WhoProvider = ({ children }: { children: ReactNode }) => {
         maximumRenderedCharacterCount,
     ])
 
+    const exportSettings = () => {
+        // Return current settings as an object
+        return {
+            stringFilter,
+            classNameFilter,
+            minLevel,
+            maxLevel,
+            isGroupView,
+            shouldIncludeRegion,
+            isExactMatch,
+            sortBy,
+            panelWidth,
+            isDynamicWidth,
+            shouldSaveSettings,
+            shouldSaveClassFilter,
+            shouldSaveStringFilter,
+            shouldSaveLevelFilter,
+            shouldSaveSortBy,
+            shouldSaveGroupView,
+            shouldSaveExactMatch,
+            showInQuestIndicator,
+            refreshInterval,
+            hideIgnoredCharacters,
+            pinRegisteredCharacters,
+            pinFriends,
+            alwaysShowRegisteredCharacters,
+            alwaysShowFriends,
+            maximumRenderedCharacterCount,
+        }
+    }
+
+    const importSettings = useCallback(
+        (settings: any): boolean => {
+            if (!validateAndParseSettings(settings)) {
+                logMessage(
+                    "Imported Who settings invalid - aborting import",
+                    "error",
+                    { metadata: { settings } }
+                )
+                createNotification({
+                    title: new Date().toLocaleTimeString(),
+                    message:
+                        "The Who settings you tried to import are invalid or corrupted.",
+                    subMessage: "Import aborted.",
+                    type: "error",
+                })
+                return false
+            }
+            const success = applyValidatedSettings(settings)
+            return success
+        },
+        [applyValidatedSettings, createNotification]
+    )
+
     return (
         <WhoContext.Provider
             value={{
@@ -485,6 +555,8 @@ export const WhoProvider = ({ children }: { children: ReactNode }) => {
                 setAlwaysShowFriends,
                 maximumRenderedCharacterCount,
                 setMaximumRenderedCharacterCount,
+                exportSettings,
+                importSettings,
             }}
         >
             {children}

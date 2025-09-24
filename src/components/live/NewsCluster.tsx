@@ -15,7 +15,7 @@ const NewsCluster = ({ news }: Props) => {
     }
 
     return (
-        <div role="feed" aria-label="News updates">
+        <div className="news-cluster" role="feed" aria-label="News updates">
             {news
                 .sort(
                     (a, b) =>
