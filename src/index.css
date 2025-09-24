@@ -383,6 +383,22 @@ input[type="range"] {
     display: none !important;
 }
 
+.verification-code {
+    display: flex;
+    width: 100%;
+    justify-content: center;
+    font-size: 2rem;
+    letter-spacing: 0.2rem;
+    margin: 20px 0;
+}
+
+.news-cluster {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
 /* This component should be affixed to the bottom of the viewport
 and shown over other content */
 .sticky-bottom {

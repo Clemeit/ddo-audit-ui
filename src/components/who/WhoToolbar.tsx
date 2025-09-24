@@ -262,6 +262,9 @@ const WhoToolbar = ({
                     </div>
                 </Stack>
             </ContentCluster>
+            <Link to="/user-settings" className="link">
+                Import and export your settings
+            </Link>
         </ContentClusterGroup>
     )
 

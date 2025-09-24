@@ -25,6 +25,7 @@ const useFeatureCallouts = () => {
     return {
         isCalloutActive,
         dismissCallout,
+        dismissedCallouts,
     }
 }
 
