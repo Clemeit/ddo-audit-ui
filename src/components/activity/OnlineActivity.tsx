@@ -114,34 +114,26 @@ const OnlineActivity = ({
                                 !showOnlineOnly ||
                                 activity.data?.status === true
                             ) {
+                                // Highlight this row if the selected timestamp range intersects this activity segment
                                 const startMs = new Date(
                                     activity.timestamp
                                 ).getTime()
                                 const endMs =
                                     index === 0
-                                        ? null
+                                        ? Date.now()
                                         : new Date(
                                               onlineActivity[
                                                   Math.max(index - 1, 0)
                                               ].timestamp
                                           ).getTime()
-
-                                // Highlight this row if the selected timestamp range intersects this activity segment
-                                const isSelected = selectedTimestampRange
-                                    ? endMs !== null
-                                        ? !(
-                                              endMs <=
-                                                  (selectedTimestampRange.start ||
-                                                      0) ||
-                                              startMs >=
-                                                  (selectedTimestampRange.end ||
-                                                      0)
-                                          )
-                                        : startMs <=
-                                              (selectedTimestampRange.end ||
-                                                  0) ||
-                                          selectedTimestampRange.end === null
-                                    : false
+                                const isSelected =
+                                    selectedTimestampRange &&
+                                    selectedTimestampRange.start !== null &&
+                                    selectedTimestampRange.end !== null &&
+                                    !(
+                                        endMs <= selectedTimestampRange.start ||
+                                        startMs >= selectedTimestampRange.end
+                                    )
 
                                 return (
                                     <tr

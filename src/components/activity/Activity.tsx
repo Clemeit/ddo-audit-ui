@@ -27,13 +27,19 @@ import {
 import NavCardCluster from "../global/NavCardCluster.tsx"
 import { useAreaContext } from "../../contexts/AreaContext.tsx"
 import { useQuestContext } from "../../contexts/QuestContext.tsx"
-import LocationActivity from "./LocationActivity.tsx"
-import OnlineActivity from "./OnlineActivity.tsx"
+import CharacterActivityTable, {
+    ActivityRowKind,
+    BaseActivityRow,
+    renderLevelClasses,
+    renderLevelValue,
+    renderLocationName,
+    renderQuestName,
+    renderStatus,
+} from "./CharacterActivityTable.tsx"
 import usePollApi from "../../hooks/usePollApi.ts"
 import { MsFromHours, MsFromSeconds } from "../../utils/timeUtils.ts"
 import { CHARACTER_ENDPOINT } from "../../services/characterService.ts"
 import { LoadingState } from "../../models/Api.ts"
-import LevelActivity from "./LevelActivity.tsx"
 import useSearchParamState, {
     SearchParamType,
 } from "../../hooks/useSearchParamState.ts"
@@ -313,84 +319,431 @@ const Activity = () => {
             return <NoRegisteredAndVerifiedCharacters />
     }
 
-    const conditionalActivityContent = () => {
-        return (
-            <Stack direction="column" gap="20px">
-                <LocationActivity
-                    quests={quests}
-                    areas={areas}
-                    locationActivity={
-                        selectedCharacterAndAccessToken?.character
-                            ? locationActivity
-                            : []
-                    }
-                    onlineActivity={
-                        selectedCharacterAndAccessToken?.character
-                            ? onlineActivity
-                            : []
-                    }
-                    handleActivityClick={(timestampRange: {
-                        start: number | null
-                        end: number | null
-                    }) => {
-                        setSelectedTimestampRange(timestampRange)
-                        setLastSelectionSource("location")
-                        setSelectionVersion((v) => v + 1)
-                    }}
-                    selectedTimestampRange={selectedTimestampRange}
-                    lastSelectionSource={lastSelectionSource}
-                    selectionVersion={selectionVersion}
-                />
-                <LevelActivity
-                    areas={areas}
-                    levelActivity={
-                        selectedCharacterAndAccessToken?.character
-                            ? levelActivity
-                            : []
-                    }
-                    locationActivity={
-                        selectedCharacterAndAccessToken?.character
-                            ? locationActivity
-                            : []
-                    }
-                    onlineActivity={
-                        selectedCharacterAndAccessToken?.character
-                            ? onlineActivity
-                            : []
-                    }
-                    handleActivityClick={(timestampRange: {
-                        start: number | null
-                        end: number | null
-                    }) => {
-                        setSelectedTimestampRange(timestampRange)
-                        setLastSelectionSource("level")
-                        setSelectionVersion((v) => v + 1)
-                    }}
-                    selectedTimestampRange={selectedTimestampRange}
-                    lastSelectionSource={lastSelectionSource}
-                    selectionVersion={selectionVersion}
-                />
-                <OnlineActivity
-                    onlineActivity={
-                        selectedCharacterAndAccessToken?.character
-                            ? onlineActivity
-                            : []
-                    }
-                    handleActivityClick={(timestampRange: {
-                        start: number | null
-                        end: number | null
-                    }) => {
-                        setSelectedTimestampRange(timestampRange)
-                        setLastSelectionSource("online")
-                        setSelectionVersion((v) => v + 1)
-                    }}
-                    selectedTimestampRange={selectedTimestampRange}
-                    lastSelectionSource={lastSelectionSource}
-                    selectionVersion={selectionVersion}
-                />
-            </Stack>
-        )
+    // ---------------- Consolidated activity transformation & filtering state ----------------
+    const [hidePublicAreas, setHidePublicAreas] = useState<boolean>(false)
+    const [hideWildernessAreas, setHideWildernessAreas] =
+        useState<boolean>(false)
+    const [discardLocationLoggedOut, setDiscardLocationLoggedOut] =
+        useState<boolean>(true)
+    const [discardLevelLoggedOut, setDiscardLevelLoggedOut] =
+        useState<boolean>(true)
+    const [discardLevelPublicArea, setDiscardLevelPublicArea] =
+        useState<boolean>(false)
+    const [showOnlineOnly, setShowOnlineOnly] = useState<boolean>(false)
+
+    // Helpers for building status segments (latest first) used by multiple transformations.
+    const buildStatusSegments = (status: typeof onlineActivity) => {
+        const now = new Date()
+        return (status || []).map((s, i) => ({
+            start: new Date(s.timestamp),
+            end: i === 0 ? now : new Date(status[i - 1].timestamp),
+            online: s.data?.status === true,
+            isLatest: i === 0,
+        }))
     }
+
+    const buildPublicSegments = (loc: typeof locationActivity) => {
+        const now = new Date()
+        return (loc || [])
+            .map((s, i) => ({
+                start: new Date(s.timestamp),
+                end: i === 0 ? now : new Date(loc[i - 1].timestamp),
+                isPublic: !!areas[s.data?.location_id || 0]?.is_public,
+                isWilderness: !!areas[s.data?.location_id || 0]?.is_wilderness,
+                location_id: s.data?.location_id,
+            }))
+            .filter(
+                (seg) =>
+                    !isNaN(seg.start.getTime()) && !isNaN(seg.end.getTime())
+            )
+    }
+
+    // Location segments similar to prior component (splitting by online time if requested)
+    const locationRows: BaseActivityRow[] = React.useMemo(() => {
+        if (!selectedCharacterAndAccessToken?.character) return []
+        if (!locationActivity?.length) return []
+        const statusSegments = buildStatusSegments(onlineActivity)
+        const questsArray = Object.values(quests)
+        const now = new Date()
+        const rows: BaseActivityRow[] = []
+
+        for (let i = 0; i < locationActivity.length; i++) {
+            const loc = locationActivity[i]
+            const windowStart = new Date(loc.timestamp)
+            const windowEnd =
+                i === 0 ? now : new Date(locationActivity[i - 1].timestamp)
+            if (isNaN(windowStart.getTime()) || isNaN(windowEnd.getTime()))
+                continue
+            if (windowEnd <= windowStart) continue
+            const displayStartIso = windowStart.toISOString()
+
+            const area = areas[loc.data?.location_id || 0]
+            const quest =
+                area && !area.is_public && !area.is_wilderness
+                    ? questsArray.find((q) => q.area_id === area.id)
+                    : undefined
+
+            const pushSegment = (start: Date, end: Date | undefined) => {
+                // Filter decisions applied later for entire row list (public/wilderness hides).
+                rows.push({
+                    id: `${start.toISOString()}-${loc.data?.location_id}`,
+                    kind: "location",
+                    displayStart: displayStartIso,
+                    start: start.toISOString(),
+                    end: end ? end.toISOString() : undefined,
+                    data: {
+                        location_id: loc.data?.location_id,
+                        locationName: area?.name,
+                        questName: quest?.name,
+                        is_public: area?.is_public,
+                        is_wilderness: area?.is_wilderness,
+                    },
+                })
+            }
+
+            if (!discardLocationLoggedOut) {
+                pushSegment(windowStart, i === 0 ? undefined : windowEnd)
+            } else if (!statusSegments.length) {
+                pushSegment(windowStart, i === 0 ? undefined : windowEnd)
+            } else {
+                for (const ss of statusSegments) {
+                    if (!ss.online) continue
+                    const overlapStart = Math.max(
+                        windowStart.getTime(),
+                        ss.start.getTime()
+                    )
+                    const overlapEnd = Math.min(
+                        windowEnd.getTime(),
+                        ss.end.getTime()
+                    )
+                    if (overlapEnd > overlapStart) {
+                        const endsAtNow =
+                            ss.isLatest && overlapEnd === Date.now()
+                        pushSegment(
+                            new Date(overlapStart),
+                            endsAtNow ? undefined : new Date(overlapEnd)
+                        )
+                    }
+                }
+            }
+        }
+
+        // Apply filters
+        return rows.filter((r) => {
+            if (hidePublicAreas && r.data?.is_public) return false
+            if (hideWildernessAreas && r.data?.is_wilderness) return false
+            return true
+        })
+    }, [
+        selectedCharacterAndAccessToken?.character,
+        locationActivity,
+        onlineActivity,
+        quests,
+        areas,
+        hidePublicAreas,
+        hideWildernessAreas,
+        discardLocationLoggedOut,
+    ])
+
+    // Level rows replicate prior logic (single aggregated duration per level event)
+    const levelRows: BaseActivityRow[] = React.useMemo(() => {
+        if (!selectedCharacterAndAccessToken?.character) return []
+        if (!levelActivity?.length) return []
+        const statusSegments = buildStatusSegments(onlineActivity)
+        const publicSegments = buildPublicSegments(locationActivity)
+        const now = new Date()
+        const nowMs = now.getTime()
+        const overlap = (
+            aStart: number,
+            aEnd: number,
+            bStart: number,
+            bEnd: number
+        ) => {
+            const s = Math.max(aStart, bStart)
+            const e = Math.min(aEnd, bEnd)
+            return e > s ? ([s, e] as [number, number]) : null
+        }
+        const subtractInterval = (
+            fromStart: number,
+            fromEnd: number,
+            subStart: number,
+            subEnd: number
+        ): Array<[number, number]> => {
+            if (subEnd <= fromStart || subStart >= fromEnd)
+                return [[fromStart, fromEnd]]
+            if (subStart <= fromStart && subEnd >= fromEnd) return []
+            const pieces: Array<[number, number]> = []
+            if (subStart > fromStart)
+                pieces.push([fromStart, Math.min(subStart, fromEnd)])
+            if (subEnd < fromEnd)
+                pieces.push([Math.max(subEnd, fromStart), fromEnd])
+            return pieces.filter(([s, e]) => e > s)
+        }
+        const rows: BaseActivityRow[] = []
+        for (let i = 0; i < levelActivity.length; i++) {
+            const lvl = levelActivity[i]
+            const windowStart = new Date(lvl.timestamp)
+            const windowEnd =
+                i === 0 ? now : new Date(levelActivity[i - 1].timestamp)
+            if (isNaN(windowStart.getTime()) || isNaN(windowEnd.getTime()))
+                continue
+            if (windowEnd <= windowStart) continue
+            const displayStartIso = windowStart.toISOString()
+            const wStartMs = windowStart.getTime()
+            const wEndMs = windowEnd.getTime()
+            type Piece = { startMs: number; endMs: number; endsAtNow: boolean }
+            let pieces: Piece[] = []
+            if (!discardLevelLoggedOut) {
+                pieces = [
+                    {
+                        startMs: wStartMs,
+                        endMs: wEndMs,
+                        endsAtNow: i === 0 && wEndMs === nowMs,
+                    },
+                ]
+            } else if (!statusSegments.length) {
+                pieces = [
+                    {
+                        startMs: wStartMs,
+                        endMs: wEndMs,
+                        endsAtNow: i === 0 && wEndMs === nowMs,
+                    },
+                ]
+            } else {
+                for (const ss of statusSegments) {
+                    if (!ss.online) continue
+                    const ov = overlap(
+                        wStartMs,
+                        wEndMs,
+                        ss.start.getTime(),
+                        ss.end.getTime()
+                    )
+                    if (ov) {
+                        const [sMs, eMs] = ov
+                        const endsAtNow = ss.isLatest && eMs === nowMs
+                        pieces.push({ startMs: sMs, endMs: eMs, endsAtNow })
+                    }
+                }
+            }
+            if (discardLevelPublicArea && publicSegments.length) {
+                const refined: Piece[] = []
+                for (const p of pieces) {
+                    let current: Array<[number, number]> = [
+                        [p.startMs, p.endMs],
+                    ]
+                    for (const ps of publicSegments) {
+                        if (!ps.isPublic) continue
+                        const next: Array<[number, number]> = []
+                        for (const [rs, re] of current) {
+                            const parts = subtractInterval(
+                                rs,
+                                re,
+                                ps.start.getTime(),
+                                ps.end.getTime()
+                            )
+                            next.push(...parts)
+                        }
+                        current = next
+                        if (!current.length) break
+                    }
+                    for (const [rs, re] of current) {
+                        const endsAtNow = p.endsAtNow && re === nowMs
+                        refined.push({ startMs: rs, endMs: re, endsAtNow })
+                    }
+                }
+                pieces = refined
+            }
+            let totalMs = 0
+            let hasLive = false
+            for (const p of pieces) {
+                totalMs += Math.max(0, p.endMs - p.startMs)
+                if (p.endsAtNow) hasLive = true
+            }
+            rows.push({
+                id: `${windowStart.toISOString()}-${lvl.data?.total_level}`,
+                kind: "level",
+                displayStart: displayStartIso,
+                start: displayStartIso,
+                end: hasLive ? undefined : new Date(wEndMs).toISOString(),
+                durationMs: totalMs,
+                data: { ...lvl.data },
+            })
+        }
+        return rows
+    }, [
+        selectedCharacterAndAccessToken?.character,
+        levelActivity,
+        onlineActivity,
+        locationActivity,
+        areas,
+        discardLevelLoggedOut,
+        discardLevelPublicArea,
+    ])
+
+    const onlineRows: BaseActivityRow[] = React.useMemo(() => {
+        if (!selectedCharacterAndAccessToken?.character) return []
+        if (!onlineActivity?.length) return []
+        const rows: BaseActivityRow[] = []
+        for (let i = 0; i < onlineActivity.length; i++) {
+            const act = onlineActivity[i]
+            if (showOnlineOnly && act.data?.status !== true) continue
+            const start = new Date(act.timestamp)
+            const end =
+                i === 0 ? undefined : new Date(onlineActivity[i - 1].timestamp)
+            rows.push({
+                id: `${act.timestamp}-${i}`,
+                kind: "online",
+                displayStart: start.toISOString(),
+                start: start.toISOString(),
+                end: end ? end.toISOString() : undefined,
+                data: { status: act.data?.status },
+            })
+        }
+        return rows
+    }, [
+        selectedCharacterAndAccessToken?.character,
+        onlineActivity,
+        showOnlineOnly,
+    ])
+
+    const handleSelect =
+        (kind: ActivityRowKind) =>
+        (range: { start: number | null; end: number | null }) => {
+            setSelectedTimestampRange({
+                start: range.start,
+                end: range.end ?? Date.now(),
+            })
+            setLastSelectionSource(kind)
+            setSelectionVersion((v) => v + 1)
+        }
+
+    const conditionalActivityContent = () => (
+        <Stack direction="column" gap="20px">
+            <CharacterActivityTable
+                title="Location and Quest Activity"
+                kind="location"
+                selfSource="location"
+                rows={locationRows}
+                onSelect={handleSelect("location")}
+                selectedRange={selectedTimestampRange}
+                lastSelectionSource={lastSelectionSource}
+                selectionVersion={selectionVersion}
+                filters={[
+                    {
+                        label: "Hide public areas",
+                        checked: hidePublicAreas,
+                        onChange: setHidePublicAreas,
+                    },
+                    {
+                        label: "Hide wilderness areas",
+                        checked: hideWildernessAreas,
+                        onChange: setHideWildernessAreas,
+                    },
+                    {
+                        label: "Don't count time logged out",
+                        checked: discardLocationLoggedOut,
+                        onChange: setDiscardLocationLoggedOut,
+                    },
+                ]}
+                columns={[
+                    {
+                        key: "location",
+                        header: "Location",
+                        render: (r) => renderLocationName(r),
+                    },
+                    {
+                        key: "quest",
+                        header: "Quest",
+                        render: (r) => renderQuestName(r),
+                    },
+                    { key: "__time__", header: "Time", render: () => null },
+                    {
+                        key: "__duration__",
+                        header: "Duration",
+                        render: () => null,
+                    },
+                ]}
+                infoNote={
+                    <span>
+                        Not all quests are tracked. Some data may be missing or
+                        incomplete.
+                    </span>
+                }
+            />
+            <CharacterActivityTable
+                title="Level Activity"
+                kind="level"
+                selfSource="level"
+                rows={levelRows}
+                onSelect={handleSelect("level")}
+                selectedRange={selectedTimestampRange}
+                lastSelectionSource={lastSelectionSource}
+                selectionVersion={selectionVersion}
+                filters={[
+                    {
+                        label: "Don't count time logged out",
+                        checked: discardLevelLoggedOut,
+                        onChange: setDiscardLevelLoggedOut,
+                    },
+                    {
+                        label: "Don't count time in public areas",
+                        checked: discardLevelPublicArea,
+                        onChange: setDiscardLevelPublicArea,
+                    },
+                ]}
+                columns={[
+                    {
+                        key: "level",
+                        header: "Level",
+                        render: (r) => renderLevelValue(r),
+                    },
+                    {
+                        key: "classes",
+                        header: "Classes",
+                        render: (r) => renderLevelClasses(r),
+                    },
+                    { key: "__time__", header: "Time", render: () => null },
+                    {
+                        key: "__duration__",
+                        header: "Duration",
+                        render: () => null,
+                    },
+                ]}
+                infoNote={<span>Some data may be missing or incomplete.</span>}
+            />
+            <CharacterActivityTable
+                title="Online Activity"
+                kind="online"
+                selfSource="online"
+                rows={onlineRows}
+                onSelect={handleSelect("online")}
+                selectedRange={selectedTimestampRange}
+                lastSelectionSource={lastSelectionSource}
+                selectionVersion={selectionVersion}
+                filters={[
+                    {
+                        label: "Only show when I'm online",
+                        checked: showOnlineOnly,
+                        onChange: setShowOnlineOnly,
+                    },
+                ]}
+                columns={[
+                    {
+                        key: "status",
+                        header: "Status Activity",
+                        render: (r) => renderStatus(r),
+                    },
+                    { key: "__time__", header: "Time", render: () => null },
+                    {
+                        key: "__duration__",
+                        header: "Duration",
+                        render: () => null,
+                    },
+                ]}
+                infoNote={<span>Some data may be missing or incomplete.</span>}
+            />
+        </Stack>
+    )
 
     return (
         <Page

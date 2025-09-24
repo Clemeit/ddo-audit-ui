@@ -243,22 +243,6 @@ const LocationActivity = ({
                                 </tr>
                             ))}
                         {adjustedLocationActivity?.map((activity) => {
-                            // Highlight this row if the selected timestamp range intersects this activity segment
-                            const isSelected =
-                                selectedTimestampRange && activity.end
-                                    ? !(
-                                          Date.parse(activity.end) <=
-                                              (selectedTimestampRange.start ||
-                                                  0) ||
-                                          Date.parse(activity.start) >=
-                                              (selectedTimestampRange.end || 0)
-                                      )
-                                    : selectedTimestampRange &&
-                                      !activity.end &&
-                                      (new Date(activity.start).getTime() <=
-                                          (selectedTimestampRange.end || 0) ||
-                                          selectedTimestampRange.end === null)
-
                             const isPublic =
                                 areas[activity.data?.location_id || 0]
                                     ?.is_public
@@ -272,6 +256,20 @@ const LocationActivity = ({
                             if (hidePublicAreas && isPublic) {
                                 return null
                             }
+
+                            // Highlight this row if the selected timestamp range intersects this activity segment
+                            const startMs = new Date(activity.start).getTime()
+                            const endMs = activity.end
+                                ? new Date(activity.end).getTime()
+                                : Date.now()
+                            const isSelected =
+                                selectedTimestampRange &&
+                                selectedTimestampRange.start !== null &&
+                                selectedTimestampRange.end !== null &&
+                                !(
+                                    endMs <= selectedTimestampRange.start ||
+                                    startMs >= selectedTimestampRange.end
+                                )
 
                             return (
                                 <tr
