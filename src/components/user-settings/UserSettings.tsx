@@ -112,27 +112,41 @@ const UserSettings = () => {
             } catch (e) {}
 
             if (settings.whoSettings) {
-                const success = importWhoSettings(settings.whoSettings)
-                if (!success) {
-                    createNotification({
-                        title: "Who Settings",
-                        message: "Failed to import Who settings.",
-                        type: "error",
-                        ttl: 5000,
+                try {
+                    const success = importWhoSettings(settings.whoSettings)
+                    if (!success) {
+                        createNotification({
+                            title: "Who Settings",
+                            message: "Failed to import Who settings.",
+                            type: "error",
+                            ttl: 5000,
+                        })
+                        failures.push("Who Settings")
+                        logMessage("Failed to import Who settings", "error")
+                    }
+                } catch (e) {
+                    logMessage("Failed to import Who settings", "error", {
+                        metadata: { error: (e as Error).message },
                     })
-                    failures.push("Who Settings")
                 }
             }
             if (settings.lfmSettings) {
-                const success = importLfmSettings(settings.lfmSettings)
-                if (!success) {
-                    createNotification({
-                        title: "LFM Settings",
-                        message: "Failed to import LFM settings.",
-                        type: "error",
-                        ttl: 5000,
+                try {
+                    const success = importLfmSettings(settings.lfmSettings)
+                    if (!success) {
+                        createNotification({
+                            title: "LFM Settings",
+                            message: "Failed to import LFM settings.",
+                            type: "error",
+                            ttl: 5000,
+                        })
+                        failures.push("LFM Settings")
+                        logMessage("Failed to import LFM settings", "error")
+                    }
+                } catch (e) {
+                    logMessage("Failed to import LFM settings", "error", {
+                        metadata: { error: (e as Error).message },
                     })
-                    failures.push("LFM Settings")
                 }
             }
             if (settings.friendIds && Array.isArray(settings.friendIds)) {
@@ -151,6 +165,9 @@ const UserSettings = () => {
                         ttl: 5000,
                     })
                     failures.push("Friends")
+                    logMessage("Failed to import friends", "error", {
+                        metadata: { error: (e as Error).message },
+                    })
                 }
             }
             if (settings.ignoreIds && Array.isArray(settings.ignoreIds)) {
@@ -169,6 +186,9 @@ const UserSettings = () => {
                         ttl: 5000,
                     })
                     failures.push("Ignores")
+                    logMessage("Failed to import ignores", "error", {
+                        metadata: { error: (e as Error).message },
+                    })
                 }
             }
             if (settings.accessTokens && Array.isArray(settings.accessTokens)) {
@@ -192,6 +212,11 @@ const UserSettings = () => {
                         ttl: 5000,
                     })
                     failures.push("Verified Characters")
+                    logMessage(
+                        "Failed to import verified characters",
+                        "error",
+                        { metadata: { error: (e as Error).message } }
+                    )
                 }
             }
             if (
@@ -223,6 +248,11 @@ const UserSettings = () => {
                         ttl: 5000,
                     })
                     failures.push("Registered Characters")
+                    logMessage(
+                        "Failed to import registered characters",
+                        "error",
+                        { metadata: { error: (e as Error).message } }
+                    )
                 }
             }
             if (
@@ -255,6 +285,11 @@ const UserSettings = () => {
                         ttl: 5000,
                     })
                     failures.push("Verified Characters")
+                    logMessage(
+                        "Failed to import verified characters",
+                        "error",
+                        { metadata: { error: (e as Error).message } }
+                    )
                 }
             }
             if (settings.booleanFlags) {
@@ -272,6 +307,9 @@ const UserSettings = () => {
                         ttl: 5000,
                     })
                     failures.push("Generic Settings")
+                    logMessage("Failed to import generic settings", "error", {
+                        metadata: { error: (e as Error).message },
+                    })
                 }
             }
             if (
@@ -296,6 +334,11 @@ const UserSettings = () => {
                         ttl: 5000,
                     })
                     failures.push("Feature Callouts")
+                    logMessage(
+                        "Failed to import dismissed feature callouts",
+                        "error",
+                        { metadata: { error: (e as Error).message } }
+                    )
                 }
             }
 
@@ -324,6 +367,7 @@ const UserSettings = () => {
                 (error as any).response.status === 404
             ) {
                 setSettingsNotFound(true)
+                logMessage("User settings not found for provided code", "warn")
                 return
             }
 
