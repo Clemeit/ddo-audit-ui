@@ -184,6 +184,16 @@ select option {
     box-shadow: 0 0 4px rgb(0, 0, 0);
 }
 
+.page-content {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Put the messages visually first while keeping them later in the DOM */
+.page-content .page-message-container {
+  order: -1;
+}
+
 table {
     width: 100%;
     text-align: left;
