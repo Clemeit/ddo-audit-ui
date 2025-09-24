@@ -6,7 +6,16 @@ interface PageMessageContainerProps {
 }
 
 const PageMessageContainer = ({ children }: PageMessageContainerProps) => {
-    return <div className="page-message-container">{children}</div>
+    return (
+        <div
+            className="page-message-container"
+            aria-live="polite"
+            data-nosnippet
+            role="note"
+        >
+            {children}
+        </div>
+    )
 }
 
 export default PageMessageContainer

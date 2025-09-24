@@ -116,6 +116,7 @@ const Page = ({
                 <div
                     className={`page-content ${centered ? "centered" : ""} ${contentMaxWidth ? "content-max-width" : ""}`}
                 >
+                    {children}
                     {hasPageMessage && (
                         <PageMessageContainer aria-live="polite">
                             {!hideAlphaRelease && (
@@ -144,7 +145,6 @@ const Page = ({
                             })}
                         </PageMessageContainer>
                     )}
-                    {children}
                 </div>
             </div>
         </div>

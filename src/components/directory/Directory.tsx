@@ -7,14 +7,8 @@ import Page from "../global/Page.tsx"
 import NavCardCluster from "../global/NavCardCluster.tsx"
 import { BETTER_STACK_URL } from "../../constants/client.ts"
 import Badge from "../global/Badge.tsx"
-import { BOOLEAN_FLAGS } from "../../utils/localStorage.ts"
-import useBooleanFlag from "../../hooks/useBooleanFlags.ts"
 
 const Directory = () => {
-    const [hideAlphaRelease, setHideAlphaRelease] = useBooleanFlag(
-        BOOLEAN_FLAGS.hideAlphaRelease
-    )
-
     return (
         <Page
             title="DDO Audit | Character Tracking and LFM Viewer"
