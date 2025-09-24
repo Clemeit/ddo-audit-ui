@@ -121,7 +121,7 @@ const Activity = () => {
     const [selectedTimestampRange, setSelectedTimestampRange] = useState<{
         start: number | null
         end: number | null
-    }>({ start: null, end: null })
+    }>(null)
     // Track which table initiated the selection and a version counter to force effects
     const [lastSelectionSource, setLastSelectionSource] = useState<
         "location" | "level" | "online" | null
@@ -222,6 +222,18 @@ const Activity = () => {
         }
     }, [verifiedCharacters, selectedCharacterName])
 
+    const handleReload = () => {
+        reloadCharacters()
+        reloadLocationActivityData()
+        reloadOnlineActivityData()
+        reloadLevelActivityData()
+        setIsReloadDisabled(true)
+        setSelectedTimestampRange(null)
+        setTimeout(() => {
+            setIsReloadDisabled(false)
+        }, 2000)
+    }
+
     const conditionalSelectionContent = () => {
         if (isError)
             return (
@@ -279,16 +291,7 @@ const Activity = () => {
                             <Button
                                 type="secondary"
                                 small
-                                onClick={() => {
-                                    reloadCharacters()
-                                    reloadLocationActivityData()
-                                    reloadOnlineActivityData()
-                                    reloadLevelActivityData()
-                                    setIsReloadDisabled(true)
-                                    setTimeout(() => {
-                                        setIsReloadDisabled(false)
-                                    }, 2000)
-                                }}
+                                onClick={() => handleReload()}
                                 disabled={!isLoaded || isReloadDisabled}
                             >
                                 Reload
