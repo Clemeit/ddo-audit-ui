@@ -126,7 +126,6 @@ const MultiPanelContainer = ({ serverName, primaryType }: Props) => {
 
     const getServerNavigationCard = (_serverName: string) => {
         const isCurrentServer = _serverName === serverName.toLowerCase()
-        const is64BitServer = SERVERS_64_BITS_LOWER.includes(_serverName)
 
         const onClickHandler = () => {
             setSearchParams([
@@ -165,12 +164,6 @@ const MultiPanelContainer = ({ serverName, primaryType }: Props) => {
                 size="small"
                 backgroundColor="var(--orange1)"
             />
-        ) : is64BitServer ? (
-            <Badge
-                text="64-bit"
-                size="small"
-                backgroundColor="var(--magenta3)"
-            />
         ) : null
 
         return (
@@ -188,29 +181,9 @@ const MultiPanelContainer = ({ serverName, primaryType }: Props) => {
     }
 
     const secondaryPanelServerModalContent = () => {
-        const sortedServerNames = [...SERVER_NAMES_LOWER]
-            .sort((a, b) => {
-                // Servers in SERVERS_64_BITS_LOWER should be at the start
-                if (
-                    SERVERS_64_BITS_LOWER.includes(a) &&
-                    !SERVERS_64_BITS_LOWER.includes(b)
-                ) {
-                    return -1
-                }
-                if (
-                    !SERVERS_64_BITS_LOWER.includes(a) &&
-                    SERVERS_64_BITS_LOWER.includes(b)
-                ) {
-                    return 1
-                }
-                return a.localeCompare(b)
-            })
-            .sort((a, b) => {
-                // Sort by current server first
-                if (a === serverName.toLowerCase()) return -1
-                if (b === serverName.toLowerCase()) return 1
-                return 0
-            })
+        const sortedServerNames = [...SERVERS_64_BITS_LOWER].sort((a, b) => {
+            return a.localeCompare(b)
+        })
 
         return (
             <ContentCluster title="Choose a Server">
