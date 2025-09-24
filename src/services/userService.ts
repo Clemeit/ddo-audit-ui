@@ -1,4 +1,8 @@
-import { GetSettingsResponse, PostSettingsResponse } from "../models/User"
+import {
+    GetSettingsResponse,
+    PostSettingsResponse,
+    UserSettings,
+} from "../models/User"
 import { getRequest, postRequest } from "./apiHelper"
 
 const USER_ENDPOINT = "user"
@@ -9,7 +13,7 @@ function getUserSettings(user_id: string) {
     )
 }
 
-function postUserSettings(settings: any, userId: string) {
+function postUserSettings(settings: UserSettings, userId: string) {
     return postRequest<PostSettingsResponse>(`${USER_ENDPOINT}/settings`, {
         data: { settings, originatingUserId: userId },
         headers: {

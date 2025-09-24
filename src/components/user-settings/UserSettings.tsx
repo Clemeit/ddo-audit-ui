@@ -21,6 +21,7 @@ import {
 } from "../../utils/localStorage"
 import { useNotificationContext } from "../../contexts/NotificationContext"
 import useFeatureCallouts from "../../hooks/useFeatureCallouts"
+import { UserSettings as UserSettingsInterface } from "../../models/User"
 
 const UserSettings = () => {
     const [userIdImportCode, setUserIdImportCode] = React.useState<string>("")
@@ -55,7 +56,7 @@ const UserSettings = () => {
             const ignoreIds = ignores.map((i) => i.id)
             const booleanFlags = getBooleanFlags()
 
-            const settings = {
+            const settings: UserSettingsInterface = {
                 whoSettings: exportWhoSettings(),
                 lfmSettings: exportLfmSettings(),
                 registeredCharacterIds,
@@ -186,7 +187,7 @@ const UserSettings = () => {
                 } catch (e) {
                     createNotification({
                         title: "Verified Characters",
-                        message: "Failed to import verified caracters.",
+                        message: "Failed to import verified characters.",
                         type: "error",
                         ttl: 5000,
                     })

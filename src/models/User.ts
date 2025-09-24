@@ -1,18 +1,20 @@
 import { AccessToken } from "./Verification"
 
+interface UserSettings {
+    registeredCharacterIds?: number[]
+    verifiedCharacterIds?: number[]
+    accessTokens?: AccessToken[]
+    friendIds?: number[]
+    ignoreIds?: number[]
+    lfmSettings?: any
+    whoSettings?: any
+    booleanFlags?: { [key: string]: boolean }
+    dismissedCallouts?: string[]
+}
+
 interface GetSettingsResponse {
     data: {
-        settings?: {
-            registeredCharacterIds?: number[]
-            verifiedCharacterIds?: number[]
-            accessTokens?: AccessToken[]
-            friendIds?: number[]
-            ignoreIds?: number[]
-            lfmSettings?: any
-            whoSettings?: any
-            booleanFlags?: { [key: string]: boolean }
-            dismissedCallouts?: string[]
-        }
+        settings?: UserSettings
         originatingUserId?: string
     }
 }
@@ -23,4 +25,4 @@ interface PostSettingsResponse {
     }
 }
 
-export type { GetSettingsResponse, PostSettingsResponse }
+export type { GetSettingsResponse, PostSettingsResponse, UserSettings }
