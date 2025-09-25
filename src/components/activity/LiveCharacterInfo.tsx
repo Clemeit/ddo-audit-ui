@@ -12,7 +12,7 @@ import CharacterTable, {
     CharacterTableRow,
     ColumnType,
 } from "../tables/CharacterTable"
-import { useMemo, useState } from "react"
+import { useMemo } from "react"
 import Checkbox from "../global/Checkbox"
 import useBooleanFlag from "../../hooks/useBooleanFlags"
 import { BOOLEAN_FLAGS } from "../../utils/localStorage"
@@ -93,7 +93,7 @@ const LiveCharacterInfo = ({ characterData, groupMembers }: Props) => {
             .sort((a, b) => b[1] - a[1])
             .slice(0, 2)
             ?.map(([locId]) => getQuestFromAreaId(parseInt(locId))?.name)
-            ?.filter((name) => name) as string[]
+            ?.filter((name) => name)
         if (sortedQuests.length === 0) return null
         if (
             sortedQuests.length === 1 &&

@@ -29,7 +29,7 @@ const WebLink = ({
             href={href}
             rel="noreferrer"
             target="_blank"
-            className={`link ${rest?.className ? rest?.className : ""} ${disabled ? "disabled" : ""}`}
+            className={`link ${rest.className || ""} ${disabled ? "disabled" : ""}`}
             onClick={onClick}
             style={{
                 textDecoration: noDecoration ? "none" : "",
