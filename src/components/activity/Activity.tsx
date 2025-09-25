@@ -88,7 +88,7 @@ const Activity = () => {
     const { quests } = useQuestContext()
 
     const lastCharacterState = useRef<Character | null>(null)
-    const [isCharacterOnline, setIsCharacterOnline] = useState<boolean>(false)
+    // const [isCharacterOnline, setIsCharacterOnline] = useState<boolean>(false)
     const [isCharacterSelectionInvalid, setIsCharacterSelectionInvalid] =
         useState<boolean>(false)
 
@@ -125,7 +125,9 @@ const Activity = () => {
     const { data: characterData, state: characterDataState } =
         usePollApi<SingleCharacterResponseModel>({
             endpoint: `${CHARACTER_ENDPOINT}/${selectedCharacterAndAccessToken.character?.id}`,
-            interval: isCharacterOnline ? MsFromSeconds(1) : MsFromSeconds(5),
+            interval: lastCharacterState.current?.is_online
+                ? MsFromSeconds(1)
+                : MsFromSeconds(5),
             lifespan: MsFromHours(8),
             enabled: !!selectedCharacterAndAccessToken.character?.id,
         })
@@ -181,11 +183,6 @@ const Activity = () => {
             lastCharacterState.current = characterData?.data
         }
     }, [characterData])
-
-    useEffect(() => {
-        const next = characterData?.data?.is_online
-        if (next !== undefined) setIsCharacterOnline(next)
-    }, [characterData?.data?.is_online])
 
     useEffect(() => {
         // get character name param from url
