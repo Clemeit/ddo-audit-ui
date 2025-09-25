@@ -17,6 +17,7 @@ import logMessage, {
     getUserId,
 } from "../../utils/logUtils.ts"
 import { useNotificationContext } from "../../contexts/NotificationContext.tsx"
+import { ReactComponent as WarningSVG } from "../../assets/svg/warning.svg"
 
 const Feedback = () => {
     const [message, setMessage] = React.useState("")
@@ -148,18 +149,28 @@ const Feedback = () => {
                     </Stack>
                 </form>
             </ContentCluster>
-            <ContentCluster title="Disclaimer">
+            <ContentCluster
+                title="Disclaimer"
+                icon={
+                    <WarningSVG
+                        className="inline-icon warning-icon"
+                        style={{ fill: "var(--warning)" }}
+                        aria-hidden="true"
+                        focusable="false"
+                    />
+                }
+            >
                 <p>
-                    This website is in no way affiliated with or endorsed by
-                    Standing Stone Games or{" "}
+                    <ColoredText color="orange">
+                        This website is in no way affiliated with or endorsed by
+                        Standing Stone Games or
+                    </ColoredText>{" "}
                     <WebLink href="https://www.daybreakgames.com/home">
                         Daybreak Game Company
                     </WebLink>
-                    .{" "}
-                    <ColoredText color="orange">
-                        Please do not submit personal information, login
-                        details, or bug reports related to the game.
-                    </ColoredText>
+                    . This is not an official website. Please do not submit
+                    personal information, login details, or bug reports related
+                    to the game.
                 </p>
             </ContentCluster>
         </>

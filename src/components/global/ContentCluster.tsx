@@ -10,6 +10,7 @@ interface Props {
     className?: string
     hideHeaderOnMobile?: boolean
     badge?: React.ReactNode
+    icon?: React.ReactNode
 }
 
 const ContentCluster = ({
@@ -19,6 +20,7 @@ const ContentCluster = ({
     className = "",
     hideHeaderOnMobile = false,
     badge,
+    icon,
 }: Props) => {
     const headerId = title
         ? title
@@ -35,6 +37,7 @@ const ContentCluster = ({
                     id={headerId}
                     className={`content-cluster-title ${hideHeaderOnMobile ? "hide-on-mobile" : ""}`}
                 >
+                    {icon}
                     {title}
                     {badge && <span className="badge">{badge}</span>}
                     <LinkSVG
