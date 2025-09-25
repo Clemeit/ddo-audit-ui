@@ -4,6 +4,7 @@ interface LogRequest {
     timestamp?: string // ISO 8601 format
     session_id?: string
     user_id?: string
+    originating_user_id?: string
     user_agent?: string
     browser?: string
     browser_version?: string

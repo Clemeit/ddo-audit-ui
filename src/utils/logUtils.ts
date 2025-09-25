@@ -81,6 +81,10 @@ export function getUserId(): string {
     return userId
 }
 
+export function getOriginatingUserId(): string {
+    return localStorage.getItem("ddo_user_id")
+}
+
 // Utility function to get the commit hash from environment variables
 export function getCommitHash(): string | undefined {
     return process.env.REACT_APP_COMMIT_SHA || undefined
@@ -112,6 +116,7 @@ export default function logMessage(
     const session_id = getSessionId()
     const { route, page_title } = getRouteInfo()
     const user_id = getUserId()
+    const originating_user_id = getOriginatingUserId()
     const commit_hash = getCommitHash() || "local_dev"
 
     const logEntry: LogRequest = {
@@ -120,6 +125,7 @@ export default function logMessage(
         timestamp: new Date().toISOString(),
         session_id,
         user_id,
+        originating_user_id,
         user_agent: navigator.userAgent,
         browser,
         browser_version,
