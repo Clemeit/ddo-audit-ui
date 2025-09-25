@@ -82,10 +82,20 @@ const UserSettings = () => {
     }
 
     const importSettings = async () => {
-        if (userIdImportCode.length === 0 || settingsNotFound) return
+        if (
+            userIdImportCode?.trim().length !== 6 ||
+            !/^[A-Za-z]+$/.test(userIdImportCode.trim())
+        ) {
+            setSettingsNotFound(true)
+            return
+        }
+
+        if (settingsNotFound) return
 
         try {
-            const response = await getUserSettings(userIdImportCode)
+            const response = await getUserSettings(
+                userIdImportCode.trim().toUpperCase()
+            )
 
             if (!response || !response.data || !response.data.settings) {
                 setSettingsNotFound(true)
@@ -496,21 +506,21 @@ const UserSettings = () => {
                                 >
                                     <input
                                         type="text"
-                                        placeholder="Enter your code..."
+                                        placeholder="Code"
                                         className="full-width-on-mobile"
-                                        // className="input"
                                         id="guild-name"
                                         value={userIdImportCode}
                                         onChange={(e) => {
-                                            setUserIdImportCode(
-                                                e.target.value?.toUpperCase()
-                                            )
+                                            setUserIdImportCode(e.target.value)
                                             setSettingsNotFound(false)
                                         }}
                                         onKeyDown={(e) => {
                                             if (e.key === "Enter") {
                                                 importSettings()
                                             }
+                                        }}
+                                        style={{
+                                            textTransform: "uppercase",
                                         }}
                                     />
                                     <ValidationMessage
