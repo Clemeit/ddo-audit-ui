@@ -173,6 +173,212 @@ export const WhoProvider = ({ children }: { children: ReactNode }) => {
         return true
     }
 
+    // Sanitize settings object field-by-field, coercing invalid values to safe defaults
+    const sanitizeSettings = useCallback(
+        (settings: any): { sanitized: any; corrected: boolean } => {
+            const s = settings && typeof settings === "object" ? settings : {}
+            let corrected = false
+
+            const coerceNumber = (
+                value: any,
+                { min, max, def }: { min?: number; max?: number; def: number }
+            ): number => {
+                const n =
+                    typeof value === "number" ? value : parseInt(String(value))
+                if (isNaN(n)) return def
+                if (min !== undefined && n < min) return min
+                if (max !== undefined && n > max) return max
+                return n
+            }
+
+            const sanitizeBoolean = (value: any, def: boolean): boolean => {
+                if (typeof value === "boolean") return value
+                if (value === undefined || value === null) return def
+                return Boolean(value)
+            }
+
+            const sanitizeString = (value: any, def: string): string => {
+                if (typeof value === "string") return value
+                return def
+            }
+
+            const defaults = {
+                stringFilter: "",
+                classNameFilter: CLASS_LIST_LOWER as string[],
+                minLevel: MIN_LEVEL,
+                maxLevel: MAX_LEVEL,
+                isGroupView: false,
+                shouldIncludeRegion: false,
+                isExactMatch: false,
+                sortBy: {
+                    type: CharacterSortType.Level,
+                    ascending: true,
+                } as CharacterSortBy,
+                panelWidth: DEFAULT_WHO_PANEL_WIDTH,
+                isDynamicWidth: false,
+                shouldSaveSettings: false,
+                shouldSaveClassFilter: false,
+                shouldSaveStringFilter: false,
+                shouldSaveLevelFilter: false,
+                shouldSaveSortBy: false,
+                shouldSaveGroupView: false,
+                shouldSaveExactMatch: false,
+                showInQuestIndicator: true,
+                refreshInterval: DEFAULT_REFRESH_RATE,
+                hideIgnoredCharacters: true,
+                pinRegisteredCharacters: true,
+                pinFriends: true,
+                alwaysShowRegisteredCharacters: false,
+                alwaysShowFriends: false,
+                maximumRenderedCharacterCount: DEFAULT_CHARACTER_COUNT,
+            }
+
+            const sanitized: any = {}
+
+            sanitized.stringFilter = sanitizeString(
+                s.stringFilter,
+                defaults.stringFilter
+            )
+            sanitized.classNameFilter = Array.isArray(s.classNameFilter)
+                ? s.classNameFilter.filter((c: any) => typeof c === "string")
+                : defaults.classNameFilter
+
+            sanitized.minLevel = coerceNumber(s.minLevel, {
+                min: MIN_LEVEL,
+                max: MAX_LEVEL,
+                def: defaults.minLevel,
+            })
+            sanitized.maxLevel = coerceNumber(s.maxLevel, {
+                min: MIN_LEVEL,
+                max: MAX_LEVEL,
+                def: defaults.maxLevel,
+            })
+
+            sanitized.isGroupView = sanitizeBoolean(
+                s.isGroupView,
+                defaults.isGroupView
+            )
+            sanitized.shouldIncludeRegion = sanitizeBoolean(
+                s.shouldIncludeRegion,
+                defaults.shouldIncludeRegion
+            )
+            sanitized.isExactMatch = sanitizeBoolean(
+                s.isExactMatch,
+                defaults.isExactMatch
+            )
+
+            const sort = s.sortBy
+            if (
+                sort &&
+                typeof sort === "object" &&
+                sort.type !== undefined &&
+                typeof sort.ascending === "boolean"
+            ) {
+                sanitized.sortBy = sort
+            } else {
+                sanitized.sortBy = defaults.sortBy
+            }
+
+            sanitized.panelWidth = coerceNumber(s.panelWidth, {
+                min: 100,
+                max: 2000,
+                def: defaults.panelWidth,
+            })
+            sanitized.isDynamicWidth = sanitizeBoolean(
+                s.isDynamicWidth,
+                defaults.isDynamicWidth
+            )
+
+            // persistence preferences
+            sanitized.shouldSaveSettings = sanitizeBoolean(
+                s.shouldSaveSettings,
+                defaults.shouldSaveSettings
+            )
+            sanitized.shouldSaveClassFilter = sanitizeBoolean(
+                s.shouldSaveClassFilter,
+                defaults.shouldSaveClassFilter
+            )
+            sanitized.shouldSaveStringFilter = sanitizeBoolean(
+                s.shouldSaveStringFilter,
+                defaults.shouldSaveStringFilter
+            )
+            sanitized.shouldSaveLevelFilter = sanitizeBoolean(
+                s.shouldSaveLevelFilter,
+                defaults.shouldSaveLevelFilter
+            )
+            sanitized.shouldSaveSortBy = sanitizeBoolean(
+                s.shouldSaveSortBy,
+                defaults.shouldSaveSortBy
+            )
+            sanitized.shouldSaveGroupView = sanitizeBoolean(
+                s.shouldSaveGroupView,
+                defaults.shouldSaveGroupView
+            )
+            sanitized.shouldSaveExactMatch = sanitizeBoolean(
+                s.shouldSaveExactMatch,
+                defaults.shouldSaveExactMatch
+            )
+
+            sanitized.showInQuestIndicator = sanitizeBoolean(
+                s.showInQuestIndicator,
+                defaults.showInQuestIndicator
+            )
+            sanitized.refreshInterval = coerceNumber(s.refreshInterval, {
+                min: 5,
+                max: 3600,
+                def: defaults.refreshInterval,
+            })
+            sanitized.hideIgnoredCharacters = sanitizeBoolean(
+                s.hideIgnoredCharacters,
+                defaults.hideIgnoredCharacters
+            )
+            sanitized.pinRegisteredCharacters = sanitizeBoolean(
+                s.pinRegisteredCharacters,
+                defaults.pinRegisteredCharacters
+            )
+            sanitized.pinFriends = sanitizeBoolean(
+                s.pinFriends,
+                defaults.pinFriends
+            )
+            sanitized.alwaysShowRegisteredCharacters = sanitizeBoolean(
+                s.alwaysShowRegisteredCharacters,
+                defaults.alwaysShowRegisteredCharacters
+            )
+            sanitized.alwaysShowFriends = sanitizeBoolean(
+                s.alwaysShowFriends,
+                defaults.alwaysShowFriends
+            )
+            sanitized.maximumRenderedCharacterCount = coerceNumber(
+                s.maximumRenderedCharacterCount,
+                {
+                    min: MINIMUM_CHARACTER_COUNT,
+                    max: MAXIMUM_CHARACTER_COUNT,
+                    def: defaults.maximumRenderedCharacterCount,
+                }
+            )
+
+            // correction detection by comparing values
+            const keys = Object.keys(defaults)
+            for (const k of keys) {
+                const original = (s as any)[k]
+                const value = (sanitized as any)[k]
+                if (k === "classNameFilter") {
+                    const a = Array.isArray(original) ? original : []
+                    if (a.length !== value.length) {
+                        corrected = true
+                        break
+                    }
+                } else if (JSON.stringify(original) !== JSON.stringify(value)) {
+                    corrected = true
+                    break
+                }
+            }
+
+            return { sanitized, corrected }
+        },
+        []
+    )
+
     const applyDefaultSettings = useCallback(() => {
         setStringFilter("")
         setClassNameFilter(CLASS_LIST_LOWER)
@@ -318,51 +524,42 @@ export const WhoProvider = ({ children }: { children: ReactNode }) => {
 
     const loadSettingsFromLocalStorage = useCallback(() => {
         let settings: any = null
-        let shouldResetToDefaults = false
-        let errorMessage = ""
-
         try {
             settings = getDataFromLocalStorage<any>(settingsStorageKey)
-
-            // If settings exist but are invalid, we need to reset
-            if (settings && !validateAndParseSettings(settings)) {
-                shouldResetToDefaults = true
-                errorMessage =
-                    "Settings validation failed - corrupted or invalid data detected"
-            }
         } catch (e) {
-            shouldResetToDefaults = true
-            errorMessage = `Error loading settings from localStorage: ${e instanceof Error ? e.message : String(e)}`
-        }
-
-        if (shouldResetToDefaults || !settings) {
-            if (shouldResetToDefaults) {
-                logMessage(
-                    "Settings corrupted or invalid, resetting to defaults",
-                    "error",
-                    {
-                        metadata: {
-                            error: errorMessage,
-                            corruptedSettings: settings,
-                        },
-                    }
-                )
-                createNotification({
-                    title: new Date().toLocaleTimeString(),
-                    message:
-                        "Your settings were corrupted or invalid and have been reset to defaults. Sorry about that!",
-                    subMessage: "This error has been logged.",
-                    type: "error",
-                })
-            }
-
-            // Apply defaults and save them to localStorage to overwrite bad data
+            logMessage(
+                "Error loading Who settings from localStorage, using defaults",
+                "error",
+                {
+                    metadata: {
+                        error: e instanceof Error ? e.message : String(e),
+                    },
+                }
+            )
             applyDefaultSettings()
             return
         }
 
-        applyValidatedSettings(settings)
-    }, [applyValidatedSettings])
+        if (!settings) {
+            applyDefaultSettings()
+            return
+        }
+
+        const { sanitized, corrected } = sanitizeSettings(settings)
+        if (corrected) {
+            logMessage(
+                "Who settings contained invalid fields; sanitized to safe defaults",
+                "warn",
+                {
+                    metadata: { original: settings, sanitized },
+                }
+            )
+            try {
+                setDataToLocalStorage<any>(settingsStorageKey, sanitized)
+            } catch {}
+        }
+        applyValidatedSettings(sanitized)
+    }, [applyDefaultSettings, applyValidatedSettings, sanitizeSettings])
 
     useEffect(() => {
         loadSettingsFromLocalStorage()
@@ -479,25 +676,20 @@ export const WhoProvider = ({ children }: { children: ReactNode }) => {
 
     const importSettings = useCallback(
         (settings: any): boolean => {
-            if (!validateAndParseSettings(settings)) {
-                logMessage(
-                    "Imported Who settings invalid - aborting import",
-                    "error",
-                    { metadata: { settings } }
-                )
+            const { sanitized, corrected } = sanitizeSettings(settings)
+            if (corrected) {
                 createNotification({
                     title: new Date().toLocaleTimeString(),
                     message:
-                        "The Who settings you tried to import are invalid or corrupted.",
-                    subMessage: "Import aborted.",
-                    type: "error",
+                        "Some imported Who settings were invalid and have been corrected to safe defaults.",
+                    subMessage: "Import completed with adjustments.",
+                    type: "info",
                 })
-                return false
             }
-            const success = applyValidatedSettings(settings)
+            const success = applyValidatedSettings(sanitized)
             return success
         },
-        [applyValidatedSettings, createNotification]
+        [applyValidatedSettings, createNotification, sanitizeSettings]
     )
 
     return (
