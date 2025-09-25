@@ -47,17 +47,6 @@ const Servers = () => {
                     />
                 ),
                 <PageMessage
-                    title="Active Development"
-                    message={
-                        <span>
-                            This page is currently in active development. If you
-                            encounter any issues or have suggestions, please
-                            visit the <Link to="/feedback">Feedback page</Link>.
-                        </span>
-                    }
-                    type="info"
-                />,
-                <PageMessage
                     title="Mobile Browsing"
                     message="This page is not currently optimized for mobile devices. For the best experience, please view on a desktop or laptop."
                     type="warning"

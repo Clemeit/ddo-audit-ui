@@ -81,21 +81,11 @@ const QuickInfo = ({
     }
 
     return (
-        <>
-            <span>
-                <InfoSVG
-                    className="page-message-icon"
-                    style={{ fill: `var(--info)` }}
-                />
-                Data collection has not been running for an entire quarter, so
-                the following data may not be accurate.
-            </span>
-            <ul>
-                <li>{getDefaultServerStatement()}</li>
-                <li>{getMostPopulatedStatement()}</li>
-                <li>{getUniqueCharactersAndGuildsStatement()}</li>
-            </ul>
-        </>
+        <ul>
+            <li>{getDefaultServerStatement()}</li>
+            <li>{getMostPopulatedStatement()}</li>
+            <li>{getUniqueCharactersAndGuildsStatement()}</li>
+        </ul>
     )
 }
 
