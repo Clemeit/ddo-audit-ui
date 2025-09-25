@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react"
+import React, { useState, useEffect, useRef, useCallback, useMemo } from "react"
 import NavigationCard from "../global/NavigationCard.tsx"
 import {
     ContentCluster,
@@ -8,6 +8,7 @@ import Page from "../global/Page.tsx"
 import { AccessToken } from "../../models/Verification.ts"
 import {
     Character,
+    MultipleCharacterResponseModel,
     SingleCharacterResponseModel,
 } from "../../models/Character.ts"
 import "./Activity.css"
@@ -38,7 +39,10 @@ import CharacterActivityTable, {
 } from "./CharacterActivityTable.tsx"
 import usePollApi from "../../hooks/usePollApi.ts"
 import { MsFromHours, MsFromSeconds } from "../../utils/timeUtils.ts"
-import { CHARACTER_ENDPOINT } from "../../services/characterService.ts"
+import {
+    CHARACTER_ENDPOINT,
+    getCharactersByGroupId,
+} from "../../services/characterService.ts"
 import { LoadingState } from "../../models/Api.ts"
 import useSearchParamState, {
     SearchParamType,
@@ -47,6 +51,7 @@ import PageMessage from "../global/PageMessage.tsx"
 import useBooleanFlag from "../../hooks/useBooleanFlags.ts"
 import { BOOLEAN_FLAGS } from "../../utils/localStorage.ts"
 import Link from "../global/Link.tsx"
+import LiveCharacterInfo from "./LiveCharacterInfo.tsx"
 
 // TODO: Location table updates:
 // - Show quest name when a location belongs to a quest.
@@ -124,6 +129,13 @@ const Activity = () => {
             lifespan: MsFromHours(8),
             enabled: !!selectedCharacterAndAccessToken.character?.id,
         })
+    const { data: groupData, reload: reloadGroupData } =
+        usePollApi<MultipleCharacterResponseModel>({
+            endpoint: `${CHARACTER_ENDPOINT}/by-group-id/${characterData?.data?.group_id}`,
+            interval: MsFromSeconds(3),
+            lifespan: MsFromHours(8),
+            enabled: !!characterData?.data?.group_id,
+        })
     const [selectedTimestampRange, setSelectedTimestampRange] = useState<{
         start: number | null
         end: number | null
@@ -133,6 +145,13 @@ const Activity = () => {
         "location" | "level" | "online" | null
     >(null)
     const [selectionVersion, setSelectionVersion] = useState<number>(0)
+
+    const groupMembers: Character[] = useMemo(() => {
+        if (!groupData?.data || !characterData?.data?.group_id) return []
+        return Object.values(groupData.data || {}).filter(
+            (c) => c.server_name === characterData?.data?.server_name
+        )
+    }, [groupData, characterData])
 
     useEffect(() => {
         let didReload = false
@@ -149,6 +168,13 @@ const Activity = () => {
         ) {
             didReload = true
             reloadOnlineActivityData()
+        }
+        if (
+            lastCharacterState.current?.group_id !==
+            characterData?.data?.group_id
+        ) {
+            didReload = true
+            reloadGroupData()
         }
 
         if (didReload || !lastCharacterState.current) {
@@ -793,6 +819,15 @@ const Activity = () => {
             <ContentClusterGroup>
                 <ContentCluster title="Character Activity">
                     {conditionalSelectionContent()}
+                    {characterData?.data?.is_online && (
+                        <>
+                            <LiveCharacterInfo
+                                characterData={characterData?.data}
+                                groupMembers={groupMembers}
+                            />
+                            <Spacer size="20px" />
+                        </>
+                    )}
                     {conditionalActivityContent()}
                 </ContentCluster>
                 <ContentCluster title="See Also...">

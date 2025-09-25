@@ -4,7 +4,8 @@ import logMessage from "../../utils/logUtils.ts"
 import "./Checkbox.css"
 import { getElementInnerText } from "../../utils/elementUtils.ts"
 
-interface Props {
+interface Props
+    extends React.HTMLAttributes<HTMLInputElement | HTMLLabelElement> {
     children?: React.ReactNode
     checked?: boolean
     onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void
@@ -16,6 +17,7 @@ const Checkbox = ({
     checked = false,
     onChange = () => {},
     disabled = false,
+    ...rest
 }: Props) => {
     const [id] = useState(uuid())
 
@@ -33,7 +35,7 @@ const Checkbox = ({
     }
 
     return (
-        <label className="checkbox-label" htmlFor={id}>
+        <label className="checkbox-label" htmlFor={id} {...rest}>
             <input
                 type="checkbox"
                 className="checkbox-input"
