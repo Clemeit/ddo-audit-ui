@@ -41,10 +41,17 @@ function getOnlineCharactersByGuildName(
     )
 }
 
+function getCharactersByGroupId(groupId: number) {
+    return getRequest<MultipleCharacterResponseModel>(
+        `${CHARACTER_ENDPOINT}/by-group-id/${groupId}`
+    )
+}
+
 export {
     getCharacterByNameAndServer,
     getCharacterById,
     getCharactersByIds,
     getCharacterByName,
     getOnlineCharactersByGuildName,
+    getCharactersByGroupId,
 }

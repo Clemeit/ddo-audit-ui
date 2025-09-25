@@ -16,6 +16,8 @@ import { ReactComponent as ExpandSVG } from "../../assets/svg/expand.svg"
 import { ReactComponent as ContractSVG } from "../../assets/svg/contract.svg"
 import Stack from "../global/Stack.tsx"
 import logMessage from "../../utils/logUtils.ts"
+import WebLink from "../global/WebLink.tsx"
+import { ReactComponent as OpenInNew } from "../../assets/svg/open-in-new.svg"
 
 export enum ColumnType {
     STATUS,
@@ -50,6 +52,7 @@ interface Props {
     onRowClick?: (character: Character) => void
     defaultSortType?: ColumnType
     defaultSortAscending?: boolean
+    enableWikiLinks?: boolean
 }
 
 const CharacterTable = ({
@@ -74,6 +77,7 @@ const CharacterTable = ({
     onRowClick,
     defaultSortType = ColumnType.NAME,
     defaultSortAscending = true,
+    enableWikiLinks = false,
 }: Props) => {
     const areaContext = useAreaContext()
     const { areas } = areaContext
@@ -227,9 +231,29 @@ const CharacterTable = ({
         )
         const locationCell = (
             <td>
-                {character.is_anonymous && !showAnonymous
-                    ? "-"
-                    : areas[character.location_id || 0]?.name}
+                {character.is_anonymous && !showAnonymous ? (
+                    "-"
+                ) : enableWikiLinks ? (
+                    <WebLink
+                        href={`https://ddowiki.com/page/${encodeURIComponent(areas[character.location_id || 0]?.name || "")}`}
+                        style={{
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: "4px",
+                        }}
+                    >
+                        {areas[character.location_id || 0]?.name}{" "}
+                        <OpenInNew
+                            style={{
+                                width: "1rem",
+                                height: "1rem",
+                                flexShrink: 0,
+                            }}
+                        />
+                    </WebLink>
+                ) : (
+                    areas[character.location_id || 0]?.name
+                )}
             </td>
         )
         const lastSeenCell = (
