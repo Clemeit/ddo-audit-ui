@@ -82,7 +82,7 @@ export function getUserId(): string {
 }
 
 export function getOriginatingUserId(): string {
-    return localStorage.getItem("ddo_user_id")
+    return localStorage.getItem("originating_user_id")
 }
 
 // Utility function to get the commit hash from environment variables
