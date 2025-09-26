@@ -214,6 +214,7 @@ const Activity = () => {
     const selectedCharacterName =
         getSearchParam(SearchParamType.CHARACTER) || ""
     const setSelectedCharacterName = (name: string) => {
+        clearSelect()
         setSearchParam(SearchParamType.CHARACTER, name)
         logMessage("Character selection changed", "info", {
             metadata: { characterId: name },
@@ -261,7 +262,7 @@ const Activity = () => {
         reloadOnlineActivityData()
         reloadLevelActivityData()
         setIsReloadDisabled(true)
-        setSelectedTimestampRange(null)
+        clearSelect()
         setTimeout(() => {
             setIsReloadDisabled(false)
         }, 2000)
@@ -643,6 +644,12 @@ const Activity = () => {
             setLastSelectionSource(kind)
             setSelectionVersion((v) => v + 1)
         }
+
+    const clearSelect = useCallback(() => {
+        setSelectedTimestampRange(null)
+        setLastSelectionSource(null)
+        setSelectionVersion((v) => v + 1)
+    }, [])
 
     const conditionalActivityContent = () => (
         <Stack direction="column" gap="20px">

@@ -9,6 +9,7 @@ import {
     convertMillisecondsToPrettyString,
     mapClassesToString,
 } from "../../utils/stringUtils"
+import logMessage from "../../utils/logUtils"
 
 // Row kinds unify different activity concepts.
 export type ActivityRowKind = "location" | "level" | "online"
@@ -194,12 +195,21 @@ const CharacterActivityTable: React.FC<CharacterActivityTableProps> = ({
                                     key={row.id}
                                     className={`clickable${isSelected ? " selected-row" : ""}`}
                                     style={{ cursor: "pointer" }}
-                                    onClick={() =>
+                                    onClick={() => {
+                                        logMessage(
+                                            `User selected ${kind} activity row`,
+                                            "info",
+                                            {
+                                                metadata: {
+                                                    rowId: row.id,
+                                                },
+                                            }
+                                        )
                                         onSelect({
                                             start: startMs,
                                             end: row.end ? endMs : null,
                                         })
-                                    }
+                                    }}
                                 >
                                     {columns.map((col) => (
                                         <td key={col.key}>
