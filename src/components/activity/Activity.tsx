@@ -52,6 +52,7 @@ import useBooleanFlag from "../../hooks/useBooleanFlags.ts"
 import { BOOLEAN_FLAGS } from "../../utils/localStorage.ts"
 import Link from "../global/Link.tsx"
 import LiveCharacterInfo from "./LiveCharacterInfo.tsx"
+import logMessage from "../../utils/logUtils.ts"
 
 // TODO: Location table updates:
 // - Show quest name when a location belongs to a quest.
@@ -214,6 +215,9 @@ const Activity = () => {
         getSearchParam(SearchParamType.CHARACTER) || ""
     const setSelectedCharacterName = (name: string) => {
         setSearchParam(SearchParamType.CHARACTER, name)
+        logMessage("Character selection changed", "info", {
+            metadata: { characterId: name },
+        })
     }
 
     useEffect(() => {

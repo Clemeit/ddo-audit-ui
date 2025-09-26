@@ -369,6 +369,7 @@ const UserSettings = () => {
                     type: "success",
                     ttl: 5000,
                 })
+                logMessage("User settings imported successfully", "info")
             }
         } catch (error) {
             if (
@@ -384,7 +385,6 @@ const UserSettings = () => {
             logMessage("User settings import failed", "error", {
                 metadata: { error: (error as Error).message },
             })
-            console.error("Error importing user settings:", error)
         }
     }
 
