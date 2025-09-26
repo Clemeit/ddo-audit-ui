@@ -186,6 +186,15 @@ const GuildSpecific = () => {
             if (offlineRows.length < 20) {
                 setHasMoreOffline(false)
             }
+            if (offlineRows.length > 0) {
+                logMessage("User saw offline guilds members", "info", {
+                    metadata: {
+                        guildName,
+                        serverName,
+                        currentPage,
+                    },
+                })
+            }
         } catch (err: any) {
             if (!controller.signal.aborted) {
                 console.error("Error fetching guild expanded content:", err)
