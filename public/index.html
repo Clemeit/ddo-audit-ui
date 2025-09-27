@@ -31,6 +31,13 @@
         <!-- Performance optimizations -->
         <link rel="dns-prefetch" href="//api.ddoaudit.com" />
         <link rel="preconnect" href="https://api.ddoaudit.com" crossorigin />
+        <!-- Preload LCP background image (served from /public) -->
+        <link
+            rel="preload"
+            as="image"
+            href="/assets/webp/banner_2.webp"
+            type="image/webp"
+        />
         <!-- Security -->
         <meta http-equiv="X-Content-Type-Options" content="nosniff" />
         <meta http-equiv="X-Frame-Options" content="DENY" />
