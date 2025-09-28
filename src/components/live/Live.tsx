@@ -107,10 +107,6 @@ const Live = () => {
         [serverInfoData]
     )
 
-    const [hideAlphaRelease, setHideAlphaRelease] = useBooleanFlag(
-        BOOLEAN_FLAGS.hideAlphaRelease
-    )
-
     const [hide32BitServers, setHide32BitServers] = useBooleanFlag(
         BOOLEAN_FLAGS.hide32BitServers,
         true

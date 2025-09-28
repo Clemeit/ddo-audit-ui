@@ -105,25 +105,6 @@ export const WIPPageMessage = () => (
     />
 )
 
-export const AlphaReleasePageMessage = ({ onDismiss = null }) => (
-    <PageMessage
-        title="DDO Audit 64-bit Alpha Release"
-        message={
-            <span>
-                This is an alpha release of DDO Audit. The decision to release
-                early was made to accommodate the recent addition of the 64-bit
-                servers.
-                <br />
-                <br />
-                Many features are still in development. Some features may not be
-                available yet, and some may not work as expected. Please report
-                any issues you encounter.
-            </span>
-        }
-        onDismiss={onDismiss}
-    />
-)
-
 export const ServerOfflineMessage = ({
     handleDismiss,
     handleReportBug,

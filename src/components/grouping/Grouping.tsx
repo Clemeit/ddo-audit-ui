@@ -291,10 +291,6 @@ const GroupingContent = () => {
         )
     }, [serverInfoState, lfmData, getCurrentRaids, hasAllDataLoadedOnce])
 
-    const [hideAlphaRelease, setHideAlphaRelease] = useBooleanFlag(
-        BOOLEAN_FLAGS.hideAlphaRelease
-    )
-
     return (
         <Page
             title="DDO Live LFM Viewer"

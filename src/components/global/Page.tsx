@@ -5,9 +5,6 @@ import useNetworkStatus from "../../hooks/useNetworkStatus.ts"
 import BreadcrumbSchema from "./BreadcrumbSchema.tsx"
 import BannerMessage from "./BannerMessage.tsx"
 import PageMessageContainer from "./PageMessageContainer.tsx"
-import useBooleanFlag from "../../hooks/useBooleanFlags.ts"
-import { BOOLEAN_FLAGS } from "../../utils/localStorage.ts"
-import { AlphaReleasePageMessage } from "./CommonMessages.tsx"
 
 interface Props {
     children: React.ReactNode
@@ -41,10 +38,6 @@ const Page = ({
 }: Props) => {
     const isOnline = useNetworkStatus()
 
-    const [hideAlphaRelease, setHideAlphaRelease] = useBooleanFlag(
-        BOOLEAN_FLAGS.hideAlphaRelease
-    )
-
     // Convert relative logo path to absolute URL for social media meta tags
     const absoluteLogoUrl = logo.startsWith("http")
         ? logo
@@ -74,7 +67,7 @@ const Page = ({
         return React.Children.toArray(rawPageMessages).filter(Boolean)
     }, [rawPageMessages])
 
-    const hasPageMessage = composedMessages.length > 0 || !hideAlphaRelease
+    const hasPageMessage = composedMessages.length > 0
 
     return (
         <div className={className}>
@@ -119,14 +112,6 @@ const Page = ({
                     {children}
                     {hasPageMessage && (
                         <PageMessageContainer aria-live="polite">
-                            {!hideAlphaRelease && (
-                                <AlphaReleasePageMessage
-                                    key="alpha-release"
-                                    onDismiss={() => {
-                                        setHideAlphaRelease(true)
-                                    }}
-                                />
-                            )}
                             {composedMessages.map((msg, idx) => {
                                 // If consumer supplied their own key we preserve React’s own key
                                 // Fallback to index only if nothing else (better: require keys downstream)
