@@ -29,6 +29,7 @@ import {
     MAX_PARTY_SIZE,
     MAX_RAID_SIZE,
     MIN_LEVEL,
+    RAID_TIMER_MILLIS,
 } from "../../constants/game.ts"
 
 interface Props {
@@ -290,8 +291,8 @@ const GroupingContainer = ({
                         activity?.data?.quest_ids?.includes(lfm?.quest_id) ||
                         false
                 )
-                const activity: ActivityEvent[] = raidActivityForLfm.map(
-                    (activity) => {
+                const activity: ActivityEvent[] = raidActivityForLfm
+                    .map((activity) => {
                         const character = registeredCharacters?.find(
                             (character) =>
                                 character.id === activity.character_id
@@ -302,8 +303,13 @@ const GroupingContainer = ({
                             timestamp: activity.timestamp,
                             data: activity.data,
                         }
-                    }
-                )
+                    })
+                    .filter(
+                        (activity) =>
+                            Date.now() -
+                                new Date(activity.timestamp).getTime() <
+                            RAID_TIMER_MILLIS
+                    ) // only include activity from the last 2 hours
 
                 let selectedQuest: Quest | null = null
                 if (lfm.quest_id !== 0) {

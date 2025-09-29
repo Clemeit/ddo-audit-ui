@@ -402,8 +402,9 @@ const UserSettings = () => {
             return (
                 <>
                     <p>
-                        Navigate to this page on the device you want to import
-                        your settings on, and enter the following one-time code.{" "}
+                        Navigate to the User Settings page on the device you
+                        want to import your settings on, and enter the following
+                        one-time code.{" "}
                         <ColoredText color="orange">
                             This code can only be used once and will expire in 5
                             minutes.
