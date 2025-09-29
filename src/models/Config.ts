@@ -1,7 +1,10 @@
 interface ConfigEntry {
     key: string
-    value: any
+    value?: string
     description?: string
+    is_enabled?: boolean
+    created_date?: string
+    modified_date?: string
 }
 
 interface ConfigEndpointResponse {
@@ -10,4 +13,12 @@ interface ConfigEndpointResponse {
     }
 }
 
-export type { ConfigEntry, ConfigEndpointResponse }
+interface SingleConfigEndpointResponse {
+    data: ConfigEntry
+}
+
+export type {
+    ConfigEntry,
+    ConfigEndpointResponse,
+    SingleConfigEndpointResponse,
+}

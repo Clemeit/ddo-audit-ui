@@ -4,6 +4,7 @@ import { ServerInfo, ServerInfoApiDataModel } from "../../models/Game.ts"
 import { ReactComponent as Checkmark } from "../../assets/svg/checkmark.svg"
 import { ReactComponent as X } from "../../assets/svg/x.svg"
 import { ReactComponent as Pending } from "../../assets/svg/pending.svg"
+import { ReactComponent as Pumpkin } from "../../assets/svg/pumpkin.svg"
 import { toSentenceCase } from "../../utils/stringUtils.ts"
 import ValidationMessage from "../global/ValidationMessage.tsx"
 import {
@@ -12,6 +13,7 @@ import {
     SERVERS_32_BITS_LOWER,
 } from "../../constants/servers.ts"
 import { LoadingState } from "../../models/Api.ts"
+import { useAppContext } from "../../contexts/AppContext.tsx"
 
 const ServerStatus = ({
     serverInfoData,
@@ -22,6 +24,8 @@ const ServerStatus = ({
     serverInfoState: LoadingState
     hide32BitServers: boolean
 }) => {
+    const { config } = useAppContext()
+
     const mostRecentStatusCheck = useMemo(() => {
         if (serverInfoData === null) {
             return new Date(0)
@@ -106,6 +110,55 @@ const ServerStatus = ({
         [hide32BitServers]
     )
 
+    const getIcon = useCallback(
+        (iconType: "loading" | "online" | "offline") => {
+            if (config?.["seasonal_theme"]?.value === "night-revels") {
+                switch (iconType) {
+                    case "loading":
+                        return (
+                            <Pumpkin
+                                className="status-icon"
+                                title="Loading"
+                                style={{ fill: "#00c" }}
+                            />
+                        )
+                    case "online":
+                        return (
+                            <Pumpkin
+                                className="status-icon"
+                                title="Online"
+                                style={{
+                                    fill: "#0c0",
+                                }}
+                            />
+                        )
+                    case "offline":
+                        return (
+                            <Pumpkin
+                                className="status-icon"
+                                title="Offline"
+                                style={{ fill: "#c00" }}
+                            />
+                        )
+                    default:
+                        return null
+                }
+            }
+
+            switch (iconType) {
+                case "loading":
+                    return <Pending className="status-icon" title="Loading" />
+                case "online":
+                    return <Checkmark className="status-icon" title="Online" />
+                case "offline":
+                    return <X className="status-icon" title="Offline" />
+                default:
+                    return null
+            }
+        },
+        [config]
+    )
+
     const serverStatusDisplay = useCallback(() => {
         if (isLoading()) {
             return (
@@ -117,10 +170,7 @@ const ServerStatus = ({
                         )
                         .map((serverName) => (
                             <div key={serverName} className="server-status">
-                                <Pending
-                                    className="status-icon"
-                                    title="Loading"
-                                />
+                                <span>{getIcon("loading")}</span>
                                 <span>{serverName}</span>
                             </div>
                         ))}
@@ -148,24 +198,16 @@ const ServerStatus = ({
                     .map(([server_name, server_data]) => (
                         <div key={server_name} className="server-status">
                             <span>
-                                {server_data.is_online ? (
-                                    <Checkmark
-                                        className="status-icon"
-                                        title="Online"
-                                    />
-                                ) : (
-                                    <X
-                                        className="status-icon"
-                                        title="Offline"
-                                    />
-                                )}
+                                {server_data.is_online
+                                    ? getIcon("online")
+                                    : getIcon("offline")}
                             </span>
                             <span>{toSentenceCase(server_name)}</span>
                         </div>
                     ))}
             </div>
         )
-    }, [isLoading, serverInfoData, filterServerNamePredicate])
+    }, [isLoading, serverInfoData, filterServerNamePredicate, getIcon])
 
     const validationMessage = useCallback(() => {
         if (serverInfoState !== LoadingState.Loaded) {

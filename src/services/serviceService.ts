@@ -1,5 +1,8 @@
 import { NewsResponse } from "../models/Service.ts"
-import { ConfigEndpointResponse } from "../models/Config.ts"
+import {
+    ConfigEndpointResponse,
+    SingleConfigEndpointResponse,
+} from "../models/Config.ts"
 import { getRequest, postRequest } from "./apiHelper.ts"
 import {
     FeedbackEndpointResponse,
@@ -24,10 +27,13 @@ function getConfig(signal?: AbortSignal): Promise<ConfigEndpointResponse> {
 function getConfigByKey(
     key: string,
     signal?: AbortSignal
-): Promise<ConfigEndpointResponse> {
-    return getRequest<ConfigEndpointResponse>(`${CONFIG_ENDPOINT}/${key}`, {
-        signal,
-    })
+): Promise<SingleConfigEndpointResponse> {
+    return getRequest<SingleConfigEndpointResponse>(
+        `${CONFIG_ENDPOINT}/${key}`,
+        {
+            signal,
+        }
+    )
 }
 
 function postFeedback(

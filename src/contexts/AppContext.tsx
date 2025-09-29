@@ -1,5 +1,8 @@
 import React, { createContext, useState, useEffect, useContext } from "react"
 import { getData, setData } from "../utils/localStorage"
+import { getConfig } from "../services/serviceService"
+import logMessage from "../utils/logUtils"
+import { ConfigEntry } from "../models/Config"
 
 interface AppContextProps {
     theme: string
@@ -8,6 +11,7 @@ interface AppContextProps {
     setIsFullScreen: (fullScreen: boolean) => void
     timezoneOverride: string
     setTimezoneOverride: (timezone: string) => void
+    config: { [key: string]: ConfigEntry }
 }
 
 const AppContext = createContext<AppContextProps | undefined>(undefined)
@@ -24,6 +28,32 @@ export const ThemeProvider = ({ children }: Props) => {
     })
     const [isFullScreen, setIsFullScreen] = useState(false)
     const [timezoneOverride, setTimezoneOverride] = useState<string>()
+    const [config, setConfig] = useState<{ [key: string]: ConfigEntry }>({})
+
+    useEffect(() => {
+        const controller = new AbortController()
+        const signal = controller.signal
+
+        async function fetchConfig() {
+            try {
+                const response = await getConfig(signal)
+                if (response && response.data) {
+                    setConfig(response.data)
+                }
+            } catch (error) {
+                logMessage("Error fetching config", "error", {
+                    metadata: {
+                        error: (error as Error).message,
+                    },
+                })
+            }
+        }
+        fetchConfig()
+
+        return () => {
+            controller.abort()
+        }
+    }, [])
 
     useEffect(() => {
         document.body.className = theme
@@ -61,6 +91,7 @@ export const ThemeProvider = ({ children }: Props) => {
                 setIsFullScreen,
                 timezoneOverride,
                 setTimezoneOverride,
+                config,
             }}
         >
             {children}
