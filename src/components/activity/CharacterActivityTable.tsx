@@ -73,6 +73,18 @@ const CharacterActivityTable: React.FC<CharacterActivityTableProps> = ({
 }) => {
     const containerRef = useRef<HTMLDivElement | null>(null)
 
+    const scrollToTop = () => {
+        const container = containerRef.current
+        if (container) {
+            container.scrollTo({ top: 0, behavior: "smooth" })
+        }
+    }
+
+    // Scroll to top when rows change (new data loaded)
+    useEffect(() => {
+        scrollToTop()
+    }, [rows])
+
     // Scroll to first selected row when selection sourced externally
     useEffect(() => {
         const container = containerRef.current
