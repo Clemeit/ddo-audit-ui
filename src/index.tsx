@@ -8,7 +8,7 @@ import { HelmetProvider } from "react-helmet-async"
 import { NotificationProvider } from "./contexts/NotificationContext.tsx"
 import { ServiceWorkerUpdater } from "./components/global/ServiceWorkerUpdater.tsx"
 // Import banner image to get the correct webpack path for preloading
-import bannerImage from "./assets/webp/banner_night_revels.webp"
+import bannerImage from "./assets/webp/banner.webp"
 import logMessage from "./utils/logUtils.ts"
 
 // Preload the banner image for improved LCP
