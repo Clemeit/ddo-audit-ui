@@ -43,7 +43,9 @@ const NotFound = lazy(() =>
 // const Notifications = lazy(
 //     () => lazyRetry(() => import("./components/notifications/Notifications.tsx"))
 // )
-// const Timers = lazy(() => lazyRetry(() => import("./components/timers/Timers.tsx")))
+const Timers = lazy(() =>
+    lazyRetry(() => import("./components/timers/Timers.tsx"))
+)
 const Feedback = lazy(() =>
     lazyRetry(() => import("./components/feedback/Feedback.tsx"))
 )
@@ -130,7 +132,7 @@ export default createBrowserRouter(
                 <Route path=":id" element={<WhoSpecific />} />
             </Route>
             {/* <Route path="/notifications" element={<Notifications />} /> */}
-            {/* <Route path="/timers" element={<Timers />} /> */}
+            <Route path="/timers" element={<Timers />} />
             <Route path="/servers" element={<Outlet />}>
                 <Route index element={<Servers />} />
                 <Route path=":id" element={<Servers />} />
