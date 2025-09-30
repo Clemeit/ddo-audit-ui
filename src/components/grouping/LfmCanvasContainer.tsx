@@ -138,7 +138,7 @@ const GroupingContainer = ({
                         setRaidActivity(raidActivity.data)
                     }
                 } catch (error) {
-                    logMessage("Error fetching raid activity:", "error", {
+                    logMessage("Error fetching raid activity", "error", {
                         metadata: {
                             error:
                                 error instanceof Error ? error.message : error,

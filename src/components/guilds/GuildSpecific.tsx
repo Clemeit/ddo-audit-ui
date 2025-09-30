@@ -310,6 +310,10 @@ const GuildSpecific = () => {
         setCanRefresh(false)
     }
 
+    const contentTitle = guildInfo
+        ? `${guildInfo.guild_name} - Members`
+        : "Guild Members"
+
     return (
         <Page
             title="Guild Lookup"
@@ -329,7 +333,7 @@ const GuildSpecific = () => {
             }}
         >
             <ContentClusterGroup>
-                <ContentCluster title="Members">
+                <ContentCluster title={contentTitle}>
                     <Stack direction="column" gap="20px">
                         <Stack
                             direction="column"
