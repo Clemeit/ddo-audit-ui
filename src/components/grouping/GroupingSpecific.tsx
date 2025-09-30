@@ -21,12 +21,17 @@ const GroupingSpecific = () => {
 
     return (
         <Page
-            title={`DDO Live LFM Viewer for ${serverNameSentenceCase}`}
+            title={
+                isValidServer
+                    ? `DDO Live LFM Viewer for ${serverNameSentenceCase}`
+                    : "Server Not Found"
+            }
             description={`Browse ${serverNamePossessiveCase} LFMs! Check the LFM panel before you login, or set up notifications and never miss raid night again!`}
             centered
             noPadding={isValidServer}
             contentMaxWidth={isValidServer}
             logo="/icons/grouping-192px.png"
+            is404Page={!isValidServer}
         >
             {!isFullScreen && <Spacer className="hide-on-mobile" size="20px" />}
             {!isValidServer && (

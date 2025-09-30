@@ -22,12 +22,17 @@ const WhoSpecific = () => {
 
     return (
         <Page
-            title={`DDO Live Character Viewer for ${serverNameSentenceCase}`}
+            title={
+                isValidServer
+                    ? `DDO Live Character Viewer for ${serverNameSentenceCase}`
+                    : "Server Not Found"
+            }
             description={`Browse ${serverNamePossessiveCase} Who List! Are your friends online? Is your guild forming up for raid night? Now you know!`}
             centered
             noPadding={isValidServer}
             contentMaxWidth={isValidServer}
             logo="/icons/who-192px.png"
+            is404Page={!isValidServer}
         >
             {!isFullScreen && <Spacer className="hide-on-mobile" size="20px" />}
             {!isValidServer && (
