@@ -33,10 +33,6 @@ import "./Grouping.css"
 import Skeleton from "../global/Skeleton.tsx"
 import ComponentErrorBoundary from "../global/ComponentErrorBoundary.tsx"
 import GroupingErrorFallback from "./GroupingErrorFallback.tsx"
-import { BOOLEAN_FLAGS } from "../../utils/localStorage.ts"
-import useBooleanFlag from "../../hooks/useBooleanFlags.ts"
-import FauxLink from "../global/FauxLink.tsx"
-import Spacer from "../global/Spacer.tsx"
 
 const Grouping = () => {
     return (
@@ -63,11 +59,6 @@ const GroupingContent = () => {
         })
     const [hasAllDataLoadedOnce, setHasAllDataLoadedOnce] =
         useState<boolean>(false)
-
-    const [hide32BitServers, setHide32BitServers] = useBooleanFlag(
-        BOOLEAN_FLAGS.hide32BitServers,
-        true
-    )
 
     useEffect(() => {
         if (
@@ -310,35 +301,6 @@ const GroupingContent = () => {
                     <NavCardCluster>
                         {getServerSelectContent("64bit")}
                     </NavCardCluster>
-                    {hide32BitServers ? (
-                        <>
-                            <Spacer size="20px" />
-                            <FauxLink
-                                onClick={() => setHide32BitServers(false)}
-                                style={{
-                                    color: "var(--secondary-text)",
-                                }}
-                            >
-                                Show 32-bit servers
-                            </FauxLink>
-                        </>
-                    ) : (
-                        <>
-                            <hr />
-                            <NavCardCluster>
-                                {getServerSelectContent("32bit")}
-                            </NavCardCluster>
-                            <Spacer size="20px" />
-                            <FauxLink
-                                onClick={() => setHide32BitServers(true)}
-                                style={{
-                                    color: "var(--secondary-text)",
-                                }}
-                            >
-                                Hide 32-bit servers
-                            </FauxLink>
-                        </>
-                    )}
                 </ContentCluster>
                 <ContentCluster title="Current Raids">
                     {getCurrentRaidsContent()}
