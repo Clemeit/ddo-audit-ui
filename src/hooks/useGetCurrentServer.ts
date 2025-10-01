@@ -4,7 +4,10 @@ import {
     toPossessiveCase,
     levenshteinDistance,
 } from "../utils/stringUtils.ts"
-import { SERVER_NAMES_LOWER } from "../constants/servers.ts"
+import {
+    SERVER_NAMES_LOWER,
+    SERVERS_32_BITS_LOWER,
+} from "../constants/servers.ts"
 import { useMemo } from "react"
 import { MAX_LEVENSHTEIN_DISTANCE } from "../constants/client.ts"
 
@@ -35,6 +38,7 @@ const useGetCurrentServer = () => {
         serverNamePossessiveCase: toPossessiveCase(toSentenceCase(serverName)),
         isValidServer,
         closestMatch,
+        is32BitServer: SERVERS_32_BITS_LOWER.includes(serverName.toLowerCase()),
     }
 }
 
