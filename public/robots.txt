@@ -1,5 +1,20 @@
 # https://www.robotstxt.org/robotstxt.html
 User-agent: *
+
+# Allow specific valid paths first (more specific rules should come before general ones)
+Allow: /servers/*
+Allow: /grouping/*
+Allow: /who/*
+Allow: /guilds/*/*
+
+# Disallow deep nesting (3+ levels, but not the allowed patterns above)
+Disallow: /*/*/*/*/*
+Disallow: /*/*/*/*
+
+# Disallow URLs with query parameters (can cause infinite crawling)
+Disallow: /*?
+
+# Allow everything else at root and one level deep
 Allow: /
 
 Sitemap: https://www.ddoaudit.com/sitemap.xml

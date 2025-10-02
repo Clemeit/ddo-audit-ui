@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
    <url>
-      <loc>https://www.ddoaudit.com/</loc>
+      <loc>https://www.ddoaudit.com</loc>
       <lastmod>2025-07-19T00:00:00+00:00</lastmod>
       <changefreq>monthly</changefreq>
       <priority>0.5</priority>
@@ -18,7 +18,7 @@
       <changefreq>daily</changefreq>
       <priority>0.5</priority>
    </url>
-   <url>
+   <!-- <url>
       <loc>https://www.ddoaudit.com/servers/argonnessen</loc>
       <lastmod>2025-07-19T00:00:00+00:00</lastmod>
       <changefreq>daily</changefreq>
@@ -71,6 +71,30 @@
       <lastmod>2025-07-19T00:00:00+00:00</lastmod>
       <changefreq>daily</changefreq>
       <priority>0.5</priority>
+   </url> -->
+   <url>
+      <loc>https://www.ddoaudit.com/servers/cormyr</loc>
+      <lastmod>2025-10-02T00:00:00+00:00</lastmod>
+      <changefreq>daily</changefreq>
+      <priority>1</priority>
+   </url>
+   <url>
+      <loc>https://www.ddoaudit.com/servers/moonsea</loc>
+      <lastmod>2025-10-02T00:00:00+00:00</lastmod>
+      <changefreq>daily</changefreq>
+      <priority>1</priority>
+   </url>
+   <url>
+      <loc>https://www.ddoaudit.com/servers/shadowdale</loc>
+      <lastmod>2025-10-02T00:00:00+00:00</lastmod>
+      <changefreq>daily</changefreq>
+      <priority>1</priority>
+   </url>
+   <url>
+      <loc>https://www.ddoaudit.com/servers/thrane</loc>
+      <lastmod>2025-10-02T00:00:00+00:00</lastmod>
+      <changefreq>daily</changefreq>
+      <priority>1</priority>
    </url>
    <url>
       <loc>https://www.ddoaudit.com/grouping</loc>
@@ -78,7 +102,7 @@
       <changefreq>always</changefreq>
       <priority>1</priority>
    </url>
-   <url>
+   <!-- <url>
       <loc>https://www.ddoaudit.com/grouping/argonnessen</loc>
       <lastmod>2025-07-19T00:00:00+00:00</lastmod>
       <changefreq>daily</changefreq>
@@ -131,6 +155,30 @@
       <lastmod>2025-07-19T00:00:00+00:00</lastmod>
       <changefreq>daily</changefreq>
       <priority>1</priority>
+   </url> -->
+   <url>
+      <loc>https://www.ddoaudit.com/grouping/cormyr</loc>
+      <lastmod>2025-10-02T00:00:00+00:00</lastmod>
+      <changefreq>daily</changefreq>
+      <priority>1</priority>
+   </url>
+   <url>
+      <loc>https://www.ddoaudit.com/grouping/moonsea</loc>
+      <lastmod>2025-10-02T00:00:00+00:00</lastmod>
+      <changefreq>daily</changefreq>
+      <priority>1</priority>
+   </url>
+   <url>
+      <loc>https://www.ddoaudit.com/grouping/shadowdale</loc>
+      <lastmod>2025-10-02T00:00:00+00:00</lastmod>
+      <changefreq>daily</changefreq>
+      <priority>1</priority>
+   </url>
+   <url>
+      <loc>https://www.ddoaudit.com/grouping/thrane</loc>
+      <lastmod>2025-10-02T00:00:00+00:00</lastmod>
+      <changefreq>daily</changefreq>
+      <priority>1</priority>
    </url>
    <url>
       <loc>https://www.ddoaudit.com/who</loc>
@@ -138,7 +186,7 @@
       <changefreq>always</changefreq>
       <priority>1</priority>
    </url>
-   <url>
+   <!-- <url>
       <loc>https://www.ddoaudit.com/who/argonnessen</loc>
       <lastmod>2025-07-19T00:00:00+00:00</lastmod>
       <changefreq>daily</changefreq>
@@ -191,13 +239,37 @@
       <lastmod>2025-07-19T00:00:00+00:00</lastmod>
       <changefreq>daily</changefreq>
       <priority>1</priority>
+   </url> -->
+   <url>
+      <loc>https://www.ddoaudit.com/who/cormyr</loc>
+      <lastmod>2025-10-02T00:00:00+00:00</lastmod>
+      <changefreq>daily</changefreq>
+      <priority>1</priority>
    </url>
    <url>
+      <loc>https://www.ddoaudit.com/who/moonsea</loc>
+      <lastmod>2025-10-02T00:00:00+00:00</lastmod>
+      <changefreq>daily</changefreq>
+      <priority>1</priority>
+   </url>
+   <url>
+      <loc>https://www.ddoaudit.com/who/shadowdale</loc>
+      <lastmod>2025-10-02T00:00:00+00:00</lastmod>
+      <changefreq>daily</changefreq>
+      <priority>1</priority>
+   </url>
+   <url>
+      <loc>https://www.ddoaudit.com/who/thrane</loc>
+      <lastmod>2025-10-02T00:00:00+00:00</lastmod>
+      <changefreq>daily</changefreq>
+      <priority>1</priority>
+   </url>
+   <!-- <url>
       <loc>https://www.ddoaudit.com/trends</loc>
       <lastmod>2025-07-19T00:00:00+00:00</lastmod>
       <changefreq>weekly</changefreq>
       <priority>0.6</priority>
-   </url>
+   </url> -->
    <!-- <url>
       <loc>https://www.ddoaudit.com/quests</loc>
       <lastmod>2025-07-19T00:00:00+00:00</lastmod>
