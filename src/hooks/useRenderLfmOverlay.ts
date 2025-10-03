@@ -32,9 +32,7 @@ import {
 } from "../utils/socialUtils.ts"
 import { useAreaContext } from "../contexts/AreaContext.tsx"
 import { useQuestContext } from "../contexts/QuestContext.tsx"
-import { getActiveTimer } from "../utils/timerUtils.ts"
 import useGetFriends from "./useGetFriends.ts"
-import { ActivityEvent } from "../models/Activity.ts"
 
 interface Props {
     lfmSprite?: HTMLImageElement | null
@@ -586,7 +584,7 @@ const useRenderLfmOverlay = ({ lfmSprite, context }: Props) => {
                         }
                         const activityDataLines = wrapText(
                             activityDataText,
-                            totalOverlayWidth - OVERLAY_SIDE_BAR_WIDTH - 8,
+                            totalOverlayWidth - OVERLAY_SIDE_BAR_WIDTH - 55,
                             context.font,
                             context,
                             1
