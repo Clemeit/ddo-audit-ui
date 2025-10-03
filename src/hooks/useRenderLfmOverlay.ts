@@ -584,7 +584,7 @@ const useRenderLfmOverlay = ({ lfmSprite, context }: Props) => {
                         }
                         const activityDataLines = wrapText(
                             activityDataText,
-                            totalOverlayWidth - OVERLAY_SIDE_BAR_WIDTH - 55,
+                            totalOverlayWidth - OVERLAY_SIDE_BAR_WIDTH - 60,
                             context.font,
                             context,
                             1
