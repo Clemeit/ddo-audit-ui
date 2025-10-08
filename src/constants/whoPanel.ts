@@ -101,6 +101,7 @@ const WHO_COLORS = {
     CHARACTER_BORDER: "#898E6F",
     CHARACTER_TEXT: "#EEEDD1",
     SECONDARY_TEXT: "#B6B193",
+    QUEST_TEXT: "#e9d1b6ff",
 }
 
 export {

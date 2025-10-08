@@ -23,16 +23,12 @@ interface Props {
 }
 
 const LiveCharacterInfo = ({ characterData, groupMembers }: Props) => {
-    const { quests } = useQuestContext()
+    const { getQuestFromAreaId } = useQuestContext()
     const { areas } = useAreaContext()
     const [hideSelfFromPartyList, setHideSelfFromPartyList] = useBooleanFlag(
         BOOLEAN_FLAGS.hideSelfFromPartyList,
         false
     )
-
-    const getQuestFromAreaId = (areaId: number): Quest | undefined => {
-        return Object.values(quests).find((quest) => quest.area_id === areaId)
-    }
 
     const wikiLinkFromText = (text: string) => {
         return (

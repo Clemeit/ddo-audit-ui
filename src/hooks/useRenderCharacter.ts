@@ -12,6 +12,8 @@ import { CHARACTER_IDS } from "../constants/characterIds.ts"
 import { truncateText } from "../utils/stringUtils.ts"
 import { CLASS_LIST_LOWER } from "../constants/game.ts"
 import { useAreaContext } from "../contexts/AreaContext.tsx"
+import { useQuestContext } from "../contexts/QuestContext.tsx"
+import { Quest } from "../models/Lfm.ts"
 
 interface Props {
     sprite?: HTMLImageElement | null
@@ -40,6 +42,7 @@ const useRenderCharacter = ({ sprite, context }: Props) => {
     )
     const fonts = useMemo(() => FONTS(), [])
     const areaContext = useAreaContext()
+    const { getQuestFromAreaId } = useQuestContext()
     const { areas } = useMemo(
         () => ({ areas: areaContext.areas }),
         [areaContext.areas]
@@ -199,6 +202,8 @@ const useRenderCharacter = ({ sprite, context }: Props) => {
 
         // render location
         let locationName = "Somewhere in the Aether"
+        let locationNameWidth = 0
+        let questName = ""
         context.font = fonts.CHARACTER_LOCATION
         if (character.location_id) {
             const location = areas[character.location_id]
@@ -210,12 +215,31 @@ const useRenderCharacter = ({ sprite, context }: Props) => {
                     context
                 )
             }
+            const quest = getQuestFromAreaId(character.location_id)
+            if (quest && !location.is_wilderness) {
+                locationNameWidth = context.measureText(locationName).width
+                questName = truncateText(
+                    quest.name || "",
+                    nameHeaderBoundingBox.width - 30 - locationNameWidth,
+                    context.font,
+                    context
+                )
+            }
         }
         context.fillText(
             locationName,
             nameHeaderBoundingBox.x - leftBound + 7,
             leaderRaceIcon.height + 14
         )
+        if (questName) {
+            context.fillStyle = WHO_COLORS.QUEST_TEXT
+            context.fillText(
+                `(${questName})`,
+                nameHeaderBoundingBox.x - leftBound + 7 + locationNameWidth + 5,
+                leaderRaceIcon.height + 14
+            )
+            context.fillStyle = WHO_COLORS.CHARACTER_TEXT
+        }
 
         // render classes
         character.classes
