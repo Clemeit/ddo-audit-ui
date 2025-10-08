@@ -61,6 +61,8 @@ interface WhoContextProps {
     setShouldSaveExactMatch: React.Dispatch<React.SetStateAction<boolean>>
     showInQuestIndicator: boolean
     setShowInQuestIndicator: React.Dispatch<React.SetStateAction<boolean>>
+    showQuestName: boolean
+    setShowQuestName: React.Dispatch<React.SetStateAction<boolean>>
     refreshInterval: number
     setRefreshInterval: React.Dispatch<React.SetStateAction<number>>
     hideIgnoredCharacters: boolean
@@ -108,6 +110,7 @@ export const WhoProvider = ({ children }: { children: ReactNode }) => {
     const [isDynamicWidth, setIsDynamicWidth] = useState<boolean>(false)
     const [showInQuestIndicator, setShowInQuestIndicator] =
         useState<boolean>(true)
+    const [showQuestName, setShowQuestName] = useState<boolean>(false)
     const [refreshInterval, setRefreshInterval] =
         useState<number>(DEFAULT_REFRESH_RATE)
 
@@ -224,6 +227,7 @@ export const WhoProvider = ({ children }: { children: ReactNode }) => {
                 shouldSaveGroupView: false,
                 shouldSaveExactMatch: false,
                 showInQuestIndicator: true,
+                showQuestName: true,
                 refreshInterval: DEFAULT_REFRESH_RATE,
                 hideIgnoredCharacters: true,
                 pinRegisteredCharacters: true,
@@ -323,6 +327,10 @@ export const WhoProvider = ({ children }: { children: ReactNode }) => {
                 s.showInQuestIndicator,
                 defaults.showInQuestIndicator
             )
+            sanitized.showQuestName = sanitizeBoolean(
+                s.showQuestName,
+                defaults.showQuestName
+            )
             sanitized.refreshInterval = coerceNumber(s.refreshInterval, {
                 min: 5,
                 max: 3600,
@@ -395,6 +403,7 @@ export const WhoProvider = ({ children }: { children: ReactNode }) => {
         setPanelHeight(0)
         setIsDynamicWidth(false)
         setShowInQuestIndicator(true)
+        setShowQuestName(true)
         setRefreshInterval(DEFAULT_REFRESH_RATE)
         setShouldSaveSettings(false)
         setShouldSaveClassFilter(false)
@@ -472,6 +481,7 @@ export const WhoProvider = ({ children }: { children: ReactNode }) => {
                 setShowInQuestIndicator(
                     Boolean(settings.showInQuestIndicator ?? true)
                 )
+                setShowQuestName(Boolean(settings.showQuestName ?? true))
                 setRefreshInterval(
                     parseInt(
                         settings.refreshInterval ?? String(DEFAULT_REFRESH_RATE)
@@ -589,6 +599,7 @@ export const WhoProvider = ({ children }: { children: ReactNode }) => {
                 shouldSaveGroupView,
                 shouldSaveExactMatch,
                 showInQuestIndicator,
+                showQuestName,
                 refreshInterval,
                 hideIgnoredCharacters,
                 pinRegisteredCharacters,
@@ -634,6 +645,7 @@ export const WhoProvider = ({ children }: { children: ReactNode }) => {
         shouldSaveGroupView,
         shouldSaveExactMatch,
         showInQuestIndicator,
+        showQuestName,
         refreshInterval,
         hideIgnoredCharacters,
         pinRegisteredCharacters,
@@ -664,6 +676,7 @@ export const WhoProvider = ({ children }: { children: ReactNode }) => {
             shouldSaveGroupView,
             shouldSaveExactMatch,
             showInQuestIndicator,
+            showQuestName,
             refreshInterval,
             hideIgnoredCharacters,
             pinRegisteredCharacters,
@@ -733,6 +746,8 @@ export const WhoProvider = ({ children }: { children: ReactNode }) => {
                 setShouldSaveExactMatch,
                 showInQuestIndicator,
                 setShowInQuestIndicator,
+                showQuestName,
+                setShowQuestName,
                 refreshInterval,
                 setRefreshInterval,
                 hideIgnoredCharacters,
