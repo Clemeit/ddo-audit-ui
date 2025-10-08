@@ -1,7 +1,6 @@
 import { useAreaContext } from "../../contexts/AreaContext"
 import { useQuestContext } from "../../contexts/QuestContext"
 import { Character } from "../../models/Character"
-import { Quest } from "../../models/Lfm"
 import { mapClassesToString } from "../../utils/stringUtils"
 import ColoredText from "../global/ColoredText"
 import ExpandableContainer from "../global/ExpandableContainer"

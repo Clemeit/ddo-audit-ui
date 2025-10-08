@@ -1,5 +1,3 @@
-// Check cache. If cache is not stale (24 hours), return cached data.
-// Otherwise, fetch data and populate cache.
 import React, {
     createContext,
     useState,

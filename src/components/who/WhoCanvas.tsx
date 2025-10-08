@@ -57,6 +57,7 @@ const WhoCanvas = ({
         sortBy,
         setSortBy,
         showInQuestIndicator,
+        showQuestName,
         maximumRenderedCharacterCount,
         shouldSaveLevelFilter,
         shouldSaveSettings,
@@ -145,6 +146,7 @@ const WhoCanvas = ({
         maxLevel,
         truncatedMessage: "",
         showInQuestIndicator,
+        showQuestName,
         areas,
     })
 
@@ -251,6 +253,7 @@ const WhoCanvas = ({
             previousState.curatedCharacters.length !==
                 curatedCharacters.length ||
             previousState.showInQuestIndicator !== showInQuestIndicator ||
+            previousState.showQuestName !== showQuestName ||
             previousState.areas !== areas
         if (renderAllCharacters) {
             whoPanelContext?.clearRect(0, 0, panelWidth, panelHeight)
@@ -362,6 +365,7 @@ const WhoCanvas = ({
             maxLevel,
             truncatedMessage,
             showInQuestIndicator,
+            showQuestName,
             areas,
         })
     }, [
@@ -376,6 +380,7 @@ const WhoCanvas = ({
         isExactMatch,
         sortBy,
         showInQuestIndicator,
+        showQuestName,
         areas,
     ])
 

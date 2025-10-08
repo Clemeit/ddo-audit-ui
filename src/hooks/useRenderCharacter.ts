@@ -13,7 +13,6 @@ import { truncateText } from "../utils/stringUtils.ts"
 import { CLASS_LIST_LOWER } from "../constants/game.ts"
 import { useAreaContext } from "../contexts/AreaContext.tsx"
 import { useQuestContext } from "../contexts/QuestContext.tsx"
-import { Quest } from "../models/Lfm.ts"
 
 interface Props {
     sprite?: HTMLImageElement | null
@@ -28,7 +27,7 @@ interface RenderCharacterProps {
 }
 
 const useRenderCharacter = ({ sprite, context }: Props) => {
-    const { panelWidth, showInQuestIndicator } = useWhoContext()
+    const { panelWidth, showInQuestIndicator, showQuestName } = useWhoContext()
     const {
         filterZone,
         lfmHeaderBoundingBox,
@@ -215,15 +214,17 @@ const useRenderCharacter = ({ sprite, context }: Props) => {
                     context
                 )
             }
-            const quest = getQuestFromAreaId(character.location_id)
-            if (quest && !location.is_wilderness) {
-                locationNameWidth = context.measureText(locationName).width
-                questName = truncateText(
-                    quest.name || "",
-                    nameHeaderBoundingBox.width - 30 - locationNameWidth,
-                    context.font,
-                    context
-                )
+            if (showQuestName) {
+                const quest = getQuestFromAreaId(character.location_id)
+                if (quest && !location.is_wilderness) {
+                    locationNameWidth = context.measureText(locationName).width
+                    questName = truncateText(
+                        quest.name || "",
+                        nameHeaderBoundingBox.width - 30 - locationNameWidth,
+                        context.font,
+                        context
+                    )
+                }
             }
         }
         context.fillText(
