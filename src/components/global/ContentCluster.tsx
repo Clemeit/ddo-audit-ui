@@ -11,6 +11,7 @@ interface Props {
     hideHeaderOnMobile?: boolean
     badge?: React.ReactNode
     icon?: React.ReactNode
+    showHeaderLink?: boolean
 }
 
 const ContentCluster = ({
@@ -21,6 +22,7 @@ const ContentCluster = ({
     hideHeaderOnMobile = false,
     badge,
     icon,
+    showHeaderLink = true,
 }: Props) => {
     const headerId = title
         ? title
@@ -40,39 +42,41 @@ const ContentCluster = ({
                     {icon}
                     {title}
                     {badge && <span className="badge">{badge}</span>}
-                    <LinkSVG
-                        className="clickable-icon hide-on-mobile"
-                        onClick={() => {
-                            // Create a URL-safe ID from the title
-                            const newUrl = `${window.location.pathname}#${headerId}`
+                    {showHeaderLink && (
+                        <LinkSVG
+                            className="clickable-icon hide-on-mobile"
+                            onClick={() => {
+                                // Create a URL-safe ID from the title
+                                const newUrl = `${window.location.pathname}#${headerId}`
 
-                            // Update the URL without causing a page reload
-                            window.history.pushState({}, "", newUrl)
+                                // Update the URL without causing a page reload
+                                window.history.pushState({}, "", newUrl)
 
-                            // Copy the link to clipboard for easy sharing
-                            navigator.clipboard
-                                .writeText(window.location.href)
-                                .then(() => {
-                                    createNotification({
-                                        title: "Link Copied!",
-                                        message:
-                                            "Section link has been copied to clipboard",
-                                        type: "success",
-                                        ttl: 3000,
+                                // Copy the link to clipboard for easy sharing
+                                navigator.clipboard
+                                    .writeText(window.location.href)
+                                    .then(() => {
+                                        createNotification({
+                                            title: "Link Copied!",
+                                            message:
+                                                "Section link has been copied to clipboard",
+                                            type: "success",
+                                            ttl: 3000,
+                                        })
                                     })
-                                })
-                                .catch(() => {
-                                    // Fallback for browsers that don't support clipboard API
-                                    createNotification({
-                                        title: "Link Updated",
-                                        message:
-                                            "URL updated - you can copy it from the address bar",
-                                        type: "info",
-                                        ttl: 3000,
+                                    .catch(() => {
+                                        // Fallback for browsers that don't support clipboard API
+                                        createNotification({
+                                            title: "Link Updated",
+                                            message:
+                                                "URL updated - you can copy it from the address bar",
+                                            type: "info",
+                                            ttl: 3000,
+                                        })
                                     })
-                                })
-                        }}
-                    />
+                            }}
+                        />
+                    )}
                 </h2>
             )}
             {subtitle && <p className="content-cluster-subtitle">{subtitle}</p>}

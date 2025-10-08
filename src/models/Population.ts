@@ -1,6 +1,8 @@
 interface ServerUniqueData {
     unique_character_count: number
     unique_guild_count: number
+    active_unique_character_count: number
+    active_unique_guild_count: number
 }
 
 interface ServerBreakdown {
@@ -10,6 +12,8 @@ interface ServerBreakdown {
 interface UniquePopulationData {
     unique_character_count: number
     unique_guild_count: number
+    active_unique_character_count: number
+    active_unique_guild_count: number
     days_analyzed: number
     start_date: string
     end_date: string

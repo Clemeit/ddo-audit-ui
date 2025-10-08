@@ -7,6 +7,7 @@ import {
     RangeEnum,
     ServerFilterEnum,
     DataTypeFilterEnum,
+    ActivityLevelFilterEnum,
 } from "../../models/Common"
 import Stack from "../global/Stack"
 
@@ -27,6 +28,8 @@ export interface ChartScaffoldProps {
     displayTypeOptions?: string[]
     normalized?: boolean
     setNormalized?: (b: boolean) => void
+    activityLevelFilter?: ActivityLevelFilterEnum
+    setActivityLevelFilter?: (f: ActivityLevelFilterEnum) => void
     rangeOptions?: RangeEnum[]
     // Legend
     showLegend?: boolean
@@ -64,6 +67,8 @@ export const ChartScaffold: React.FC<ChartScaffoldProps> = ({
     displayTypeOptions,
     normalized,
     setNormalized,
+    activityLevelFilter,
+    setActivityLevelFilter,
     rangeOptions,
     showLegend,
     legendData,
@@ -89,6 +94,8 @@ export const ChartScaffold: React.FC<ChartScaffoldProps> = ({
                 displayTypeOptions={displayTypeOptions}
                 normalized={normalized}
                 setNormalized={setNormalized}
+                activityLevel={activityLevelFilter}
+                setActivityLevel={setActivityLevelFilter}
                 rangeOptions={rangeOptions}
                 scaffoldName={scaffoldName}
             />

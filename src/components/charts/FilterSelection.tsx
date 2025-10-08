@@ -1,6 +1,7 @@
 import React from "react"
 import Stack from "../global/Stack.tsx"
 import {
+    ActivityLevelFilterEnum,
     DataTypeFilterEnum,
     RangeEnum,
     ServerFilterEnum,
@@ -26,6 +27,10 @@ interface Props {
     setDisplayType?: (value: string) => void
     normalized?: boolean
     setNormalized?: (value: boolean) => void
+    consolidated?: boolean
+    setConsolidated?: (value: boolean) => void
+    activityLevel?: ActivityLevelFilterEnum
+    setActivityLevel?: (value: ActivityLevelFilterEnum) => void
     rangeOptions?: RangeEnum[]
     displayTypeOptions?: string[]
     scaffoldName?: string
@@ -46,6 +51,10 @@ const FilterSelection = ({
     setDisplayType,
     normalized,
     setNormalized,
+    consolidated,
+    setConsolidated,
+    activityLevel,
+    setActivityLevel,
     rangeOptions = Object.values(RangeEnum) as RangeEnum[],
     displayTypeOptions = ["Stacked", "Grouped"],
     scaffoldName,
@@ -126,6 +135,31 @@ const FilterSelection = ({
                     onChange: (e: React.ChangeEvent<HTMLSelectElement>) =>
                         setNormalized(e.target.value === "Yes"),
                     options: ["Yes", "No"],
+                    optionLabel: (opt: string) => opt,
+                },
+                {
+                    label: "Consolidated",
+                    id: "consolidatedFilter",
+                    value:
+                        consolidated === undefined
+                            ? undefined
+                            : consolidated
+                              ? "Yes"
+                              : "No",
+                    onChange: (e: React.ChangeEvent<HTMLSelectElement>) =>
+                        setConsolidated(e.target.value === "Yes"),
+                    options: ["Yes", "No"],
+                    optionLabel: (opt: string) => opt,
+                },
+                {
+                    label: "Activity level",
+                    id: "activityLevelFilter",
+                    value: activityLevel,
+                    onChange: (e: React.ChangeEvent<HTMLSelectElement>) =>
+                        setActivityLevel(
+                            e.target.value as ActivityLevelFilterEnum
+                        ),
+                    options: Object.values(ActivityLevelFilterEnum),
                     optionLabel: (opt: string) => opt,
                 },
             ]

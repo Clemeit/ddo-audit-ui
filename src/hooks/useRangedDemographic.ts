@@ -5,6 +5,7 @@ import logMessage from "../utils/logUtils"
 /** Generic function signature for a demographics fetcher. */
 export type RangedFetcher<T> = (
     range: RangeEnum,
+    params?: any,
     signal?: AbortSignal
 ) => Promise<{ data: T } | undefined>
 
@@ -12,6 +13,10 @@ export interface UseRangedDemographicState<T> {
     dataMap: Record<RangeEnum, T | undefined>
     range: RangeEnum
     setRange: (r: RangeEnum) => void
+    /** Current params passed to the fetcher. */
+    params: any
+    /** Update params and invalidate cached data for all ranges. */
+    setParams: (p: any) => void
     isLoading: boolean
     isError: boolean
     /** Returns data for the active range (may be undefined before first load). */
@@ -39,9 +44,11 @@ function createEmptyMap<T>(): Record<RangeEnum, T | undefined> {
  */
 export function useRangedDemographic<T>(
     fetcher: RangedFetcher<T>,
-    initialRange: RangeEnum = RangeEnum.QUARTER
+    initialRange: RangeEnum = RangeEnum.QUARTER,
+    initialParams?: any
 ): UseRangedDemographicState<T> {
     const [range, setRange] = useState<RangeEnum>(initialRange)
+    const [params, setParams] = useState<any>(initialParams)
     const [dataMap, setDataMap] =
         useState<Record<RangeEnum, T | undefined>>(createEmptyMap)
     const [isLoading, setIsLoading] = useState(false)
@@ -49,7 +56,16 @@ export function useRangedDemographic<T>(
     // Ref mirrors dataMap so load() can read current cache without being
     // recreated when dataMap changes (prevents abort cycle on initial mount).
     const dataMapRef = useRef<Record<RangeEnum, T | undefined>>(dataMap)
-    const abortRef = useRef<AbortController | null>(null)
+    // Track an AbortController per range so we can abort all on params change/unmount and per-range on refetch.
+    const abortControllersRef = useRef<
+        Record<RangeEnum, AbortController | null>
+    >({
+        [RangeEnum.DAY]: null,
+        [RangeEnum.WEEK]: null,
+        [RangeEnum.MONTH]: null,
+        [RangeEnum.QUARTER]: null,
+        [RangeEnum.YEAR]: null,
+    })
     // Track request ids per range so late resolving requests for OTHER ranges don't get discarded.
     const rangeRequestIdsRef = useRef<Record<RangeEnum, number>>({
         [RangeEnum.DAY]: 0,
@@ -62,18 +78,21 @@ export function useRangedDemographic<T>(
     const inFlightRangesRef = useRef<Set<RangeEnum>>(new Set())
     const inFlightCountRef = useRef(0)
     const lastRangeWithData = useRef<RangeEnum | null>(null)
+    // Guard to avoid treating initial params as a "change" that would reset cache on mount
+    const didRunParamsEffectOnceRef = useRef(false)
 
     const load = useCallback(
-        async (selectedRange: RangeEnum, bypassCache = false) => {
+        async (selectedRange: RangeEnum, params: any, bypassCache = false) => {
             const currentMap = dataMapRef.current
             if (!bypassCache && currentMap[selectedRange] !== undefined) return // already cached
 
             // If we already have an in-flight request for this same range, allow it to finish and avoid duplicate start.
             if (inFlightRangesRef.current.has(selectedRange)) return
 
-            // Create a new request (do not abort previous unless explicit refetch/unmount).
+            // Create a new request controller (do not abort previous unless explicit refetch/unmount/params change).
             const controller = new AbortController()
-            abortRef.current = controller // only tracks most recent (used for unmount/refetch cancels)
+            // Store controller for this specific range so we can abort it later if needed.
+            abortControllersRef.current[selectedRange] = controller
             inFlightRangesRef.current.add(selectedRange)
             const requestId = ++rangeRequestIdsRef.current[selectedRange]
 
@@ -82,7 +101,11 @@ export function useRangedDemographic<T>(
                 inFlightCountRef.current += 1
                 setIsLoading(true)
                 setIsError(false)
-                const response = await fetcher(selectedRange, controller.signal)
+                const response = await fetcher(
+                    selectedRange,
+                    params,
+                    controller.signal
+                )
                 // Ignore if this response is stale (another request started later).
                 if (
                     !controller.signal.aborted &&
@@ -121,6 +144,11 @@ export function useRangedDemographic<T>(
                 if (inFlightCountRef.current > 0) inFlightCountRef.current -= 1
                 if (inFlightCountRef.current === 0) setIsLoading(false)
                 inFlightRangesRef.current.delete(selectedRange)
+                // Clear the controller for this range if it matches
+                const current = abortControllersRef.current[selectedRange]
+                if (current === controller) {
+                    abortControllersRef.current[selectedRange] = null
+                }
             }
         },
         [fetcher]
@@ -133,24 +161,78 @@ export function useRangedDemographic<T>(
 
     // Only abort on unmount.
     useEffect(() => {
-        return () => abortRef.current?.abort()
+        return () => {
+            // Abort any in-flight requests for all ranges
+            ;(
+                [
+                    RangeEnum.DAY,
+                    RangeEnum.WEEK,
+                    RangeEnum.MONTH,
+                    RangeEnum.QUARTER,
+                    RangeEnum.YEAR,
+                ] as RangeEnum[]
+            ).forEach((r) => {
+                const ctrl = abortControllersRef.current[r]
+                if (ctrl) ctrl.abort()
+                abortControllersRef.current[r] = null
+            })
+        }
     }, [])
 
     // Fetch when range changes (no abort on change, prior request may resolve and be ignored if stale).
     useEffect(() => {
-        load(range, false)
-    }, [range, load])
+        load(range, params, false)
+    }, [range, params, load])
+
+    // Invalidate cache and abort all in-flight requests when params change (skip on initial mount).
+    useEffect(() => {
+        if (!didRunParamsEffectOnceRef.current) {
+            didRunParamsEffectOnceRef.current = true
+            return
+        }
+        // Reset cache
+        setDataMap(() => {
+            const empty = createEmptyMap<T>()
+            dataMapRef.current = empty
+            return empty
+        })
+        lastRangeWithData.current = null
+        // Abort any in-flight requests for all ranges and reset loading counters
+        ;(
+            [
+                RangeEnum.DAY,
+                RangeEnum.WEEK,
+                RangeEnum.MONTH,
+                RangeEnum.QUARTER,
+                RangeEnum.YEAR,
+            ] as RangeEnum[]
+        ).forEach((r) => {
+            const ctrl = abortControllersRef.current[r]
+            if (ctrl) ctrl.abort()
+            abortControllersRef.current[r] = null
+            inFlightRangesRef.current.delete(r)
+            // Reset request id for this range so new requests are considered latest
+            rangeRequestIdsRef.current[r] = 0
+        })
+        inFlightCountRef.current = 0
+        setIsLoading(false)
+        setIsError(false)
+    }, [params])
 
     const refetch = useCallback(() => {
-        // Explicit abort only on manual refetch.
-        abortRef.current?.abort()
-        load(range, true) // bypass cache for current range
-    }, [range, load])
+        // Explicit abort only on manual refetch for the current range.
+        const ctrl = abortControllersRef.current[range]
+        if (ctrl) ctrl.abort()
+        abortControllersRef.current[range] = null
+        load(range, params, true) // bypass cache for current range
+    }, [range, params, load])
 
     return {
         dataMap,
         range,
         setRange,
+        params,
+        setParams,
         isLoading,
         isError,
         currentData:

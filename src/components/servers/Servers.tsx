@@ -23,7 +23,12 @@ import GenderPopulationDistribution from "./GenderPopulationDistribution.tsx"
 import PrimaryClassPopulationDistribution from "./PrimaryClassPopulationDistribution.tsx"
 import ClassCountPopulationDistribution from "./ClassCountPopulationDistribution.tsx"
 import GuildAffiliatedPopulationDistribution from "./GuildAffiliatedPopulationDistribution.tsx"
+import FauxLink from "../global/FauxLink.tsx"
+import Stack from "../global/Stack.tsx"
+import { useModalNavigation } from "../../hooks/useModalNavigation.ts"
+import Modal from "../modal/Modal.tsx"
 import Link from "../global/Link.tsx"
+import WebLink from "../global/WebLink.tsx"
 
 const Servers = () => {
     const { isLoading, isError, serverInfo, uniqueData } = useServersData()
@@ -31,6 +36,99 @@ const Servers = () => {
     const [showBankToonDisclaimer, setShowBankToonDisclaimer] = useBooleanFlag(
         BOOLEAN_FLAGS.bankToonsDisclaimer,
         true
+    )
+
+    const {
+        isModalOpen,
+        openModal: handleOpenModal,
+        closeModal: handleCloseModal,
+    } = useModalNavigation()
+
+    const activeCalculationModal = (
+        <Modal onClose={handleCloseModal} fullScreenOnMobile>
+            <ContentCluster
+                title='How is "Active" Calculated?'
+                showHeaderLink={false}
+            >
+                <p>
+                    Determining if a character is "active" is entirely
+                    subjective and should not be viewed as a perfect measure of
+                    activity. This is my own interpretation of what an active
+                    character is, based on my experience playing DDO and
+                    observing player behavior over the years.
+                </p>
+                <p>
+                    A few factors are considered when determining if a character
+                    is active or inactive. Some factors are weighted differently
+                    than others.
+                </p>
+                <ul>
+                    <li>A character's level</li>
+                    <li>A character's location</li>
+                    <li>A character's online activity</li>
+                </ul>
+                <h3>Level</h3>
+                <p>
+                    Inactive characters tend to follow a common trend: little to
+                    no level-up activity, and what activity they do have was
+                    performed within a relatively short period of time. For
+                    example, an inactive character might remain at level 1
+                    indefinitely, or they might increase to level 4, 7, or 15
+                    over the course of a few minutes, then never level up again.
+                </p>
+                <p>
+                    Active characters tend to level up on a semi-regular basis.
+                    They tend to have more level activity, and that activity is
+                    spread out over a longer period of time. For example, an
+                    active character might level up to 10 over the course of a
+                    week, then reach level 15 the following week, then level 20
+                    a few days later, and so on.
+                </p>
+                <h3>Location</h3>
+                <p>
+                    Inactive characters tend to remain in a single location for
+                    long periods of time. They tend to spend most or all of
+                    their time in areas where banks are easily accessible, such
+                    as The Harbor, The Lordsmarch Bank, the Crafting Hall, etc.
+                    For example, an inactive character might have some location
+                    activity when they are first created, but then they spend
+                    most or all of their time in The Harbor.
+                </p>
+                <p>
+                    Active characters tend to move around more frequently. They
+                    spend time in a variety of locations, including inside
+                    quests and wilderness areas. For example, an active
+                    character might spend some time in The Harbor, but they also
+                    spend time in quests, wilderness areas, and other public
+                    locations.
+                </p>
+                <h3>Online Activity</h3>
+                <p>
+                    Inactive characters tend to spend significantly less time
+                    online. They may log in frequently, but they typically spend
+                    a short amount of time online. For example, an inactive
+                    character might log in many times per week, but those
+                    sessions are short.
+                </p>
+                <p>
+                    Active characters tend to spend more time online. They don't
+                    necessarily log in more frequently, but they spend a
+                    considerably longer amount of time online when they do log
+                    in. For example, an active character might log in once or
+                    twice per day and stay logged in at least long enough to run
+                    a few quests.
+                </p>
+                <hr />
+                <p>
+                    For more information, check out{" "}
+                    <WebLink href="https://github.com/Clemeit/ddo-audit-service/blob/master/sanic/utils/activity.py">
+                        the source code
+                    </WebLink>
+                    . If you have ideas on how this algorithm could be improved,
+                    please <Link to="/feedback">leave a suggestion.</Link>
+                </p>
+            </ContentCluster>
+        </Modal>
     )
 
     return (
@@ -54,6 +152,7 @@ const Servers = () => {
                 />,
             ]}
         >
+            {isModalOpen && activeCalculationModal}
             <ContentClusterGroup>
                 <ContentCluster
                     title="Select a Server"
@@ -66,10 +165,15 @@ const Servers = () => {
                         uniqueData={uniqueData}
                     />
                     <Spacer size="20px" />
-                    <ColoredText color="secondary">
-                        Unique character and guild numbers are based on the last
-                        quarter.
-                    </ColoredText>
+                    <Stack direction="column" gap="8px">
+                        <ColoredText color="secondary">
+                            Unique character and guild numbers are based on the
+                            last quarter.
+                        </ColoredText>
+                        <FauxLink onClick={handleOpenModal}>
+                            How is "active" calculated?
+                        </FauxLink>
+                    </Stack>
                 </ContentCluster>
                 <ContentCluster
                     title="Server Population Distribution"

@@ -1,5 +1,9 @@
-import React, { useMemo, useState } from "react"
-import { RangeEnum, ServerFilterEnum } from "../../models/Common"
+import React, { useEffect, useMemo, useState } from "react"
+import {
+    ActivityLevelFilterEnum,
+    RangeEnum,
+    ServerFilterEnum,
+} from "../../models/Common"
 import { getTotalLevelDemographic } from "../../services/demographicsService"
 import ChartScaffold from "../charts/ChartScaffold"
 import { ResponsiveLine } from "@nivo/line"
@@ -16,18 +20,31 @@ import { NivoNumberSeries } from "../../utils/nivoUtils"
 import { useLegendFilterHighlight } from "../../hooks/useLegendFilterHighlight"
 
 const LevelPopulationDistribution = () => {
-    const {
-        range: rangeFilter,
-        setRange: setRangeFilter,
-        currentData,
-        isLoading,
-        isError,
-    } = useRangedDemographic((r, signal) => getTotalLevelDemographic(r, signal))
+    // const {
+    //     range: rangeFilter,
+    //     setRange: setRangeFilter,
+    //     params,
+    //     setParams,
+    //     currentData,
+    //     isLoading,
+    //     isError,
+    // } = useRangedDemographic((r, activityLevel, signal) =>
+    //     getTotalLevelDemographic(r, activityLevel, signal)
+    // )
+
+    const [isLoading, setIsLoading] = useState<boolean>(false)
+    const [isError, setIsError] = useState<boolean>(false)
+    const [currentData, setCurrentData] = useState<any>(null)
+    const [rangeFilter, setRangeFilter] = useState<RangeEnum>(RangeEnum.QUARTER)
+
     const [serverFilter, setServerFilter] = useState<ServerFilterEnum>(
         ServerFilterEnum.ONLY_64_BIT
     )
     const [displayType, setDisplayType] = useState<string>("Separated")
     const [normalized, setNormalized] = useState<boolean>(false)
+    const [activityLevel, setActivityLevel] = useState<ActivityLevelFilterEnum>(
+        ActivityLevelFilterEnum.ACTIVE
+    )
     const nivoData: NivoNumberSeries[] = useMemo(
         () =>
             buildLevelDistributionSeries(
@@ -49,6 +66,33 @@ const LevelPopulationDistribution = () => {
         [nivoData, excluded]
     )
 
+    useEffect(() => {
+        const signal = new AbortController().signal
+        const fetchData = async () => {
+            setIsError(false)
+            setIsLoading(true)
+            try {
+                const data = await getTotalLevelDemographic(
+                    rangeFilter,
+                    {
+                        activity_level: activityLevel.toLocaleLowerCase(),
+                    },
+                    signal
+                )
+                setCurrentData(data.data)
+            } catch (e) {
+                if (!signal.aborted) {
+                    setIsError(true)
+                }
+            } finally {
+                if (!signal.aborted) {
+                    setIsLoading(false)
+                }
+            }
+        }
+        fetchData()
+    }, [rangeFilter, activityLevel])
+
     return (
         <ChartScaffold
             scaffoldName="LevelPopulationDistribution"
@@ -63,6 +107,8 @@ const LevelPopulationDistribution = () => {
             displayTypeOptions={["Separated", "Stacked"]}
             normalized={normalized}
             setNormalized={setNormalized}
+            activityLevelFilter={activityLevel}
+            setActivityLevelFilter={setActivityLevel}
             showLegend
             legendData={nivoData}
             height={400}

@@ -1,4 +1,4 @@
-import { RangeEnum } from "../models/Common.ts"
+import { ActivityLevelFilterEnum, RangeEnum } from "../models/Common.ts"
 import {
     TotalLevelDemographicApi,
     GuildAffiliatedDemographicApi,
@@ -13,11 +13,15 @@ const DEMOGRAPHICS_ENDPOINT = "demographics"
 
 export function getTotalLevelDemographic(
     range: RangeEnum = RangeEnum.QUARTER,
+    params?: any,
     signal?: AbortSignal
 ): Promise<TotalLevelDemographicApi> {
     return getRequest<TotalLevelDemographicApi>(
         `${DEMOGRAPHICS_ENDPOINT}/total-level/${range}`,
-        { signal }
+        {
+            signal,
+            params,
+        }
     )
 }
 

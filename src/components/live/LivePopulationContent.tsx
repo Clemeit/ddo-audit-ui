@@ -65,6 +65,7 @@ const LivePopulationContent = ({ serverInfoData }: Props) => {
     const [dataTypeFilter, setDataTypeFilter] = useState<DataTypeFilterEnum>(
         DataTypeFilterEnum.CHARACTERS
     )
+    const [consolidated, setConsolidated] = useState<boolean>(false)
     const [dataMap, setDataMap] = useState<
         Partial<Record<RangeEnum, PopulationPointInTime[] | undefined>>
     >({})
@@ -176,13 +177,42 @@ const LivePopulationContent = ({ serverInfoData }: Props) => {
                 }
             })
         }
+
+        populationData = populationData?.map((point) => {
+            return {
+                timestamp: point.timestamp,
+                data: consolidated
+                    ? {
+                          all: {
+                              character_count: Object.values(point.data).reduce(
+                                  (sum, val) =>
+                                      sum + (val.character_count || 0),
+                                  0
+                              ),
+                              lfm_count: Object.values(point.data).reduce(
+                                  (sum, val) => sum + (val.lfm_count || 0),
+                                  0
+                              ),
+                          },
+                      }
+                    : point.data,
+            }
+        })
+
         return convertToNivoFormat(
             populationData,
             timezoneOverride ||
                 Intl.DateTimeFormat().resolvedOptions().timeZone,
             dataTypeFilter
         )
-    }, [range, serverFilter, dataMap, timezoneOverride, dataTypeFilter])
+    }, [
+        range,
+        serverFilter,
+        dataMap,
+        timezoneOverride,
+        dataTypeFilter,
+        consolidated,
+    ])
 
     const xScale = useMemo(() => {
         if (lastRange.current === RangeEnum.DAY) return LINE_CHART_X_SCALE
@@ -231,6 +261,8 @@ const LivePopulationContent = ({ serverInfoData }: Props) => {
                 setServerFilter={setServerFilter}
                 dataTypeFilter={dataTypeFilter}
                 setDataTypeFilter={setDataTypeFilter}
+                consolidated={consolidated}
+                setConsolidated={setConsolidated}
                 rangeOptions={[RangeEnum.DAY, RangeEnum.WEEK, RangeEnum.MONTH]}
             />
             <div style={{ position: "relative" }}>

@@ -34,23 +34,25 @@ const GenericLegend = ({
     const legendItems = useMemo(() => {
         if (!nivoData || nivoData.length === 0) return []
 
-        return SERVER_NAMES_LOWER.map((serverName) => {
-            const series = nivoData.find(
-                (s) => String(s.id).toLowerCase() === serverName
-            )
+        return [...SERVER_NAMES_LOWER, "all"]
+            .map((serverName) => {
+                const series = nivoData.find(
+                    (s) => String(s.id).toLowerCase() === serverName
+                )
 
-            if (!series) return null
+                if (!series) return null
 
-            return {
-                id: String(series.id),
-                serverName,
-                series,
-                color: getServerColor(String(series.id)),
-                displayName: toSentenceCase(String(series.id)),
-                isExcluded:
-                    excludedSeries?.includes(String(series.id)) || false,
-            }
-        }).filter(Boolean)
+                return {
+                    id: String(series.id),
+                    serverName,
+                    series,
+                    color: getServerColor(String(series.id)),
+                    displayName: toSentenceCase(String(series.id)),
+                    isExcluded:
+                        excludedSeries?.includes(String(series.id)) || false,
+                }
+            })
+            .filter(Boolean)
     }, [nivoData, excludedSeries])
 
     const handleItemClick = (serverId: string) => {

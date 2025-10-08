@@ -67,14 +67,24 @@ const ServerSelectContent = ({
 
         const character_count = serverData.unique_character_count
         const guild_count = serverData.unique_guild_count
+        const active_character_count = serverData.active_unique_character_count
+        const active_guild_count = serverData.active_unique_guild_count
 
         return (
             <Stack direction="column">
                 <ColoredText color="blue">
-                    {character_count.toLocaleString()} characters
+                    {character_count.toLocaleString()} characters (
+                    {Math.round(
+                        (active_character_count / character_count) * 100
+                    ).toLocaleString()}
+                    % active)
                 </ColoredText>
                 <ColoredText color="orange">
-                    {guild_count.toLocaleString()} guilds
+                    {guild_count.toLocaleString()} guilds (
+                    {Math.round(
+                        (active_guild_count / guild_count) * 100
+                    ).toLocaleString()}
+                    % active )
                 </ColoredText>
             </Stack>
         )

@@ -16,3 +16,9 @@ export enum DataTypeFilterEnum {
     CHARACTERS = "Characters",
     LFMS = "LFMs",
 }
+
+export enum ActivityLevelFilterEnum {
+    ALL = "All",
+    ACTIVE = "Active",
+    INACTIVE = "Inactive",
+}
