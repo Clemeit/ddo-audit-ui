@@ -212,29 +212,23 @@ const GroupingContainer = ({
 
         const processedLfms = lfms
             .filter((lfm) => {
-                // Filter out ignore groups
+                // Filter out ignored groups
                 if (hideGroupsPostedByIgnoredCharacters) {
                     const isLeaderIgnored = ignoredCharacters?.some(
-                        (ignoredCharacter) =>
-                            lfm.leader?.id === ignoredCharacter.id
+                        (char) => char.id === lfm.leader?.id
                     )
-                    return !isLeaderIgnored
+                    if (isLeaderIgnored) return false
                 }
                 if (hideGroupsContainingIgnoredCharacters) {
-                    const hasIgnoredMember = lfm.members?.some((lfmMember) =>
-                        ignoredCharacters?.some(
-                            (ignoredCharacter) =>
-                                lfmMember.id === ignoredCharacter.id
-                        )
+                    const hasIgnoredMember = lfm.members?.some((member) =>
+                        ignoredCharacters?.some((char) => char.id === member.id)
                     )
-                    return !hasIgnoredMember
+                    if (hasIgnoredMember) return false
                 }
                 if (hideAllLevelGroups) {
-                    const lfmMinLevel = lfm.minimum_level
-                    const lfmMaxLevel = lfm.maximum_level
                     if (
-                        lfmMinLevel === MIN_LEVEL &&
-                        lfmMaxLevel === MAX_LEVEL
+                        lfm.minimum_level === MIN_LEVEL &&
+                        lfm.maximum_level === MAX_LEVEL
                     ) {
                         return false
                     }
