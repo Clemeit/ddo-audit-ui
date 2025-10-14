@@ -30,7 +30,7 @@ function convertMillisecondsToPrettyString(
         commaSeparated = false,
         useFullWords = false,
         onlyIncludeLargest = false,
-        largestCount = 2,
+        largestCount = 1,
         nonBreakingSpace = false,
     }: { millis: number } & ConvertMillisecondsOptions = {
         millis: 0,

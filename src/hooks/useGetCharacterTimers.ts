@@ -18,7 +18,7 @@ interface CharacterTimerMap {
 
 const useGetCharacterTimers = ({ registeredCharacters }: Props) => {
     const [characterTimers, setCharacterTimers] = useState<CharacterTimerMap>(
-        []
+        {}
     )
     const [isLoading, setIsLoading] = useState<boolean>(false)
 
@@ -39,20 +39,20 @@ const useGetCharacterTimers = ({ registeredCharacters }: Props) => {
                 setCharacterTimers([])
                 return
             }
-            const characterTimers: {
+            const localCharacterTimers: {
                 [characterId: number]: QuestInstances[]
             } = {}
             raidActivity.data.forEach((activity) => {
-                if (!characterTimers[activity.character_id]) {
-                    characterTimers[activity.character_id] = []
+                if (!localCharacterTimers[activity.character_id]) {
+                    localCharacterTimers[activity.character_id] = []
                 }
-                characterTimers[activity.character_id].push({
+                localCharacterTimers[activity.character_id].push({
                     timestamp: activity.timestamp,
                     quest_ids: activity.data?.quest_ids || [],
                 })
             })
 
-            setCharacterTimers(characterTimers)
+            setCharacterTimers(localCharacterTimers)
         } catch (error) {
             logMessage("Error fetching character timers", "error", {
                 metadata: {
