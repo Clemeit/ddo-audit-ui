@@ -6,10 +6,11 @@ import { ContentCluster } from "../global/ContentCluster.tsx"
 
 interface Props {
     title: string
-    text: string
+    text?: string
     onYes: () => void
     onNo: () => void
     fullScreenOnMobile?: boolean
+    children?: React.ReactNode
 }
 
 const YesNoModal = ({
@@ -18,10 +19,12 @@ const YesNoModal = ({
     onYes,
     onNo,
     fullScreenOnMobile = false,
+    children,
 }: Props) => {
     const content = (
         <ContentCluster title={title}>
-            <p>{text}</p>
+            {text && <p>{text}</p>}
+            {children}
             <Stack direction="row" gap="10px">
                 <Button onClick={onYes}>Yes</Button>
                 <Button onClick={onNo}>No</Button>

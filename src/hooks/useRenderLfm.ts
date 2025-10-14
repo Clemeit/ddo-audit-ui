@@ -221,7 +221,13 @@ const useRenderLfm = ({ lfmSprite, context, raidView = false }: Props) => {
             const postedTimeDifferenceString =
                 postedTimeDifference < 60000
                     ? "Just now"
-                    : `${convertMillisecondsToPrettyString(Math.round(postedTimeDifference), false, true, true)} ago`
+                    : `${convertMillisecondsToPrettyString({
+                          millis: postedTimeDifference,
+                          commaSeparated: false,
+                          useFullWords: true,
+                          onlyIncludeLargest: true,
+                      })} ago`
+
             const isAdventureActive = lfm.adventure_active_time > 0
             const adventureActiveMinutes = Math.round(
                 lfm.adventure_active_time / 60

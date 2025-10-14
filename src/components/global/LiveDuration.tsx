@@ -40,7 +40,18 @@ const LiveDuration: React.FC<Props> = ({
         return Math.max(0, endMs - startMs)
     }, [start, end, now])
 
-    return <>{convertMillisecondsToPrettyString(durationMs, true, compact)}</>
+    return (
+        <>
+            {convertMillisecondsToPrettyString({
+                millis: durationMs,
+                commaSeparated: true,
+                useFullWords: !compact,
+                onlyIncludeLargest: compact,
+                largestCount: compact ? 2 : undefined,
+                nonBreakingSpace: true,
+            })}
+        </>
+    )
 }
 
 export default LiveDuration

@@ -16,13 +16,25 @@ function toPossessiveCase(str: string): string {
     return str.endsWith("s") ? `${str}'` : `${str}'s`
 }
 
+interface ConvertMillisecondsOptions {
+    commaSeparated?: boolean
+    useFullWords?: boolean
+    onlyIncludeLargest?: boolean
+    largestCount?: number
+    nonBreakingSpace?: boolean
+}
+
 function convertMillisecondsToPrettyString(
-    millis: number,
-    commaSeparated: boolean = false,
-    useFullWords: boolean = false,
-    onlyIncludeLargest: boolean = false,
-    largestCount: number = 1,
-    nonBreakingSpace: boolean = false
+    {
+        millis,
+        commaSeparated = false,
+        useFullWords = false,
+        onlyIncludeLargest = false,
+        largestCount = 2,
+        nonBreakingSpace = false,
+    }: { millis: number } & ConvertMillisecondsOptions = {
+        millis: 0,
+    }
 ): string {
     if (millis == 0) {
         return "0 seconds"
