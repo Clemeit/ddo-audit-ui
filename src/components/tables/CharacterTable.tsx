@@ -263,15 +263,16 @@ const CharacterTable = ({
                 ).toLocaleString()}
             >
                 {character.last_save
-                    ? convertMillisecondsToPrettyString(
-                          new Date().getTime() -
+                    ? convertMillisecondsToPrettyString({
+                          millis:
+                              new Date().getTime() -
                               new Date(character.last_save).getTime(),
-                          true,
-                          false,
-                          true,
-                          2,
-                          true
-                      )
+                          commaSeparated: true,
+                          useFullWords: false,
+                          onlyIncludeLargest: true,
+                          largestCount: 2,
+                          nonBreakingSpace: true,
+                      })
                     : "N/A"}
             </td>
         )

@@ -132,7 +132,14 @@ const CharacterActivityTable: React.FC<CharacterActivityTableProps> = ({
             row.durationMs != null
                 ? row.durationMs
                 : new Date(row.end).getTime() - new Date(row.start).getTime()
-        return convertMillisecondsToPrettyString(ms, true, true, false, 2, true)
+        return convertMillisecondsToPrettyString({
+            millis: ms,
+            commaSeparated: true,
+            useFullWords: true,
+            onlyIncludeLargest: false,
+            largestCount: 2,
+            nonBreakingSpace: true,
+        })
     }
 
     return (

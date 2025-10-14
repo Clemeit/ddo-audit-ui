@@ -913,10 +913,10 @@ const useRenderLfmOverlay = ({ lfmSprite, context }: Props) => {
                                 const remainingTime =
                                     RAID_TIMER_MILLIS - elapsedTime
                                 const remainingTimeString =
-                                    convertMillisecondsToPrettyString(
-                                        remainingTime,
-                                        true
-                                    )
+                                    convertMillisecondsToPrettyString({
+                                        millis: remainingTime,
+                                        commaSeparated: true,
+                                    })
                                 context.translate(0, 20)
                                 context.fillStyle =
                                     OVERLAY_COLORS.ACTIVITY_COMMENT
@@ -1036,10 +1036,10 @@ const useRenderLfmOverlay = ({ lfmSprite, context }: Props) => {
                         if (quest.average_time) {
                             renderQuestInfo(
                                 "Average time:",
-                                convertMillisecondsToPrettyString(
-                                    quest.average_time * 1000,
-                                    true
-                                )
+                                convertMillisecondsToPrettyString({
+                                    millis: quest.average_time * 1000,
+                                    commaSeparated: true,
+                                })
                             )
                         }
 
@@ -1088,10 +1088,10 @@ const useRenderLfmOverlay = ({ lfmSprite, context }: Props) => {
                                 const remainingTime =
                                     RAID_TIMER_MILLIS - elapsedTime
                                 const remainingTimeString =
-                                    convertMillisecondsToPrettyString(
-                                        remainingTime,
-                                        true
-                                    )
+                                    convertMillisecondsToPrettyString({
+                                        millis: remainingTime,
+                                        commaSeparated: true,
+                                    })
                                 context.fillText(
                                     `${activityEvent.character.name}: ${remainingTimeString}`,
                                     0,

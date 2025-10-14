@@ -110,12 +110,12 @@ const Friends = () => {
         if (friends.length === 0) {
             return ""
         }
-        const prettyString = convertMillisecondsToPrettyString(
-            millisSinceLastReload,
-            true,
-            true,
-            true
-        )
+        const prettyString = convertMillisecondsToPrettyString({
+            millis: millisSinceLastReload,
+            commaSeparated: true,
+            useFullWords: true,
+            onlyIncludeLargest: true,
+        })
         if (!prettyString) {
             return "Last refreshed just now"
         } else {

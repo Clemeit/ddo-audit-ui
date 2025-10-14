@@ -1,7 +1,7 @@
 import React from "react"
 import "./FauxLink.css"
 
-interface Props {
+interface Props extends React.HTMLAttributes<HTMLSpanElement> {
     children: React.ReactNode
 }
 

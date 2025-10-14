@@ -3,7 +3,7 @@ import { Link as ReactLink } from "react-router-dom"
 import logMessage from "../../utils/logUtils.ts"
 import { getElementInnerText } from "../../utils/elementUtils.ts"
 
-interface Props {
+interface Props extends React.HTMLAttributes<HTMLAnchorElement> {
     to: string
     className?: string
     children: React.ReactNode
@@ -21,6 +21,7 @@ const Link = ({
     disabled,
     silentDisabled = false,
     newTab = false,
+    ...rest
 }: Props) => {
     const handleClick = () => {
         logMessage("Link clicked", "info", {
@@ -42,6 +43,7 @@ const Link = ({
             rel={newTab ? "noopener noreferrer" : undefined}
             aria-disabled={disabled ? "true" : "false"}
             tabIndex={disabled ? -1 : 0}
+            {...rest}
         >
             {children}
         </ReactLink>

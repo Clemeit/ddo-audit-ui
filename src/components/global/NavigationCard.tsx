@@ -35,7 +35,7 @@ const typeToTitleMap = {
     transfers: "Server Transfers",
     friends: "Friends List",
     registration: "Register Characters",
-    timers: "Raid and Quest Timers",
+    timers: "Raid Timers",
     about: "About This Project",
     api: "API",
     feedback: "Provide Feedback",

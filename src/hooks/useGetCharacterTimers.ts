@@ -1,69 +1,76 @@
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { Character } from "../models/Character"
 import { getCharacterRaidActivityByIds } from "../services/activityService"
 import logMessage from "../utils/logUtils"
 
 interface Props {
-    verifiedCharacters: Character[]
+    registeredCharacters: Character[]
 }
 
-interface QuestInstances {
+export interface QuestInstances {
     timestamp: string
     quest_ids: number[]
 }
 
-interface CharacterTimers {
-    character: Character
-    raidActivity: QuestInstances[]
+interface CharacterTimerMap {
+    [characterId: number]: QuestInstances[]
 }
 
-const useGetCharacterTimers = ({ verifiedCharacters }: Props) => {
-    const [characterTimers, setCharacterTimers] = useState<CharacterTimers[]>(
-        []
+const useGetCharacterTimers = ({ registeredCharacters }: Props) => {
+    const [characterTimers, setCharacterTimers] = useState<CharacterTimerMap>(
+        {}
     )
+    const [isLoading, setIsLoading] = useState<boolean>(false)
+
+    const loadTimers = useCallback(async () => {
+        try {
+            if (!registeredCharacters) return
+            if (registeredCharacters.length === 0) {
+                setCharacterTimers([])
+                return
+            }
+            setIsLoading(true)
+            const characterIds = registeredCharacters.map(
+                (character) => character.id
+            )
+            const raidActivity =
+                await getCharacterRaidActivityByIds(characterIds)
+            if (!raidActivity?.data?.length) {
+                setCharacterTimers([])
+                return
+            }
+            const localCharacterTimers: {
+                [characterId: number]: QuestInstances[]
+            } = {}
+            raidActivity.data.forEach((activity) => {
+                if (!localCharacterTimers[activity.character_id]) {
+                    localCharacterTimers[activity.character_id] = []
+                }
+                localCharacterTimers[activity.character_id].push({
+                    timestamp: activity.timestamp,
+                    quest_ids: activity.data?.quest_ids || [],
+                })
+            })
+
+            setCharacterTimers(localCharacterTimers)
+        } catch (error) {
+            logMessage("Error fetching character timers", "error", {
+                metadata: {
+                    error:
+                        error instanceof Error ? error.message : String(error),
+                    stack: error instanceof Error ? error.stack : undefined,
+                },
+            })
+        } finally {
+            setIsLoading(false)
+        }
+    }, [registeredCharacters])
 
     useEffect(() => {
-        ;(async () => {
-            try {
-                if (!verifiedCharacters || verifiedCharacters.length === 0)
-                    return
-                // get timers for each character
-                const characterIds = verifiedCharacters.map(
-                    (character) => character.id
-                )
-                const raidActivity =
-                    await getCharacterRaidActivityByIds(characterIds)
-                if (!raidActivity?.data?.length) return
-                const characterTimers: CharacterTimers[] =
-                    verifiedCharacters.map((character) => {
-                        const activityForCharacter = raidActivity.data.filter(
-                            (activity) => activity.character_id === character.id
-                        )
-                        return {
-                            character,
-                            raidActivity: activityForCharacter.map((event) => ({
-                                timestamp: event.timestamp,
-                                quest_ids: event.data.quest_ids,
-                            })),
-                        }
-                    })
+        loadTimers()
+    }, [registeredCharacters])
 
-                setCharacterTimers(characterTimers)
-            } catch (error) {
-                logMessage("Error fetching character timers", "error", {
-                    metadata: {
-                        error:
-                            error instanceof Error
-                                ? error.message
-                                : String(error),
-                        stack: error instanceof Error ? error.stack : undefined,
-                    },
-                })
-            }
-        })()
-    }, [verifiedCharacters])
-
-    return { characterTimers }
+    return { characterTimers, isLoading, reload: loadTimers }
 }
 
 export default useGetCharacterTimers

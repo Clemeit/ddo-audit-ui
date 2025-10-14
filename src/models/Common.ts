@@ -16,3 +16,9 @@ export enum DataTypeFilterEnum {
     CHARACTERS = "Characters",
     LFMS = "LFMs",
 }
+
+export enum RaidTimerCharacterSortEnum {
+    NAME = "Name",
+    LEVEL = "Level",
+    RECENT_RAID = "Most Recent Raid",
+}

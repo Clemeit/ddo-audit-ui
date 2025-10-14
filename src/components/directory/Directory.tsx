@@ -64,8 +64,7 @@ const Directory = () => {
                         />
                         <NavigationCard
                             type="timers"
-                            badge={<Badge text="Soon" type="soon" />}
-                            disabled
+                            badge={<Badge text="New" type="new" />}
                         />
                     </NavCardCluster>
                 </ContentCluster>
