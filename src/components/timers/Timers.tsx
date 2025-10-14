@@ -277,6 +277,32 @@ const Timers = () => {
                         )}
                     </Stack>
                 </ContentCluster>
+                <ContentCluster title="About this Feature">
+                    <p>
+                        DDO Audit tracks your character's questing activity to
+                        determine when you've entered or completed a raid quest.
+                        This approach comes with the following caveats:
+                    </p>
+                    <ul>
+                        <li>
+                            The raid timers displayed here start the moment your
+                            character leaves a raid, regardless of whether you
+                            have turned in the quest.
+                        </li>
+                        <li>
+                            DDO Audit has no way of knowing when you use a Raid
+                            Timer Bypass Hourglass to reset a raid timer. You
+                            can manually clear a raid timer by clicking the
+                            "Delete" button next to the timer.
+                        </li>
+                        <li>
+                            It's difficult to differentiate between the Heroic
+                            and Epic versions of certain raids. In such cases,
+                            both versions of the raid will be displayed with the
+                            same timer.
+                        </li>
+                    </ul>
+                </ContentCluster>
                 <ContentCluster title="See Also...">
                     <NavCardCluster>
                         <NavigationCard type="registration" />
