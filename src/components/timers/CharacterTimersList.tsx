@@ -205,9 +205,9 @@ const CharacterTimersList = ({
                                 <tr>
                                     <th>Quest</th>
                                     <th className="hide-on-small-mobile">
-                                        Completed At
+                                        Completed
                                     </th>
-                                    <th>Off Timer At</th>
+                                    <th>Off Timer</th>
                                     <th style={{ width: "30px" }} />
                                 </tr>
                             </thead>
@@ -237,26 +237,23 @@ const CharacterTimersList = ({
                                                     .join(" / ")}
                                             </td>
                                             <td className="hide-on-small-mobile">
-                                                {completedAt.toLocaleString()}{" "}
+                                                <LiveDuration
+                                                    start={timer.timestamp}
+                                                />{" "}
+                                                ago
                                                 <br />
                                                 <ColoredText color="secondary">
-                                                    (
-                                                    <LiveDuration
-                                                        start={timer.timestamp}
-                                                    />{" "}
-                                                    ago)
+                                                    {completedAt.toLocaleString()}{" "}
                                                 </ColoredText>
                                             </td>
                                             <td>
-                                                {offTimerDate.toLocaleString()}
+                                                <LiveDuration
+                                                    start={Date.now()}
+                                                    end={offTimerMillis}
+                                                />
                                                 <br />
                                                 <ColoredText color="secondary">
-                                                    (
-                                                    <LiveDuration
-                                                        start={Date.now()}
-                                                        end={offTimerMillis}
-                                                    />
-                                                    )
+                                                    {offTimerDate.toLocaleString()}
                                                 </ColoredText>
                                             </td>
                                             <td>
