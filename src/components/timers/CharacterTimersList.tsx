@@ -8,6 +8,8 @@ import { ReactComponent as Delete } from "../../assets/svg/delete.svg"
 import { Character } from "../../models/Character.ts"
 import { QuestInstances } from "../../hooks/useGetCharacterTimers.ts"
 import { RaidTimerCharacterSortEnum } from "../../models/Common.ts"
+import Link from "../global/Link.tsx"
+import TimerSortControls from "./TimerSortControls.tsx"
 
 export interface HiddenTimer {
     characterId: number
@@ -22,6 +24,11 @@ interface Props {
     quests: { [id: number]: { name?: string } | undefined }
     image: HTMLImageElement | null
     onDeleteClick: (characterId: number, timer: QuestInstances) => void
+    sortValue: { type: RaidTimerCharacterSortEnum; order: string }
+    sortOnChange: (value: {
+        type: RaidTimerCharacterSortEnum
+        order: string
+    }) => void
 }
 
 const CharacterTimersList = ({
@@ -32,6 +39,8 @@ const CharacterTimersList = ({
     quests,
     image,
     onDeleteClick,
+    sortValue,
+    sortOnChange,
 }: Props) => {
     // Styles hoisted to avoid recreating objects per render
     const waitingStyle: React.CSSProperties = useMemo(
@@ -46,7 +55,12 @@ const CharacterTimersList = ({
     )
 
     const headingStyle: React.CSSProperties = useMemo(
-        () => ({ display: "flex", alignItems: "center", gap: "10px" }),
+        () => ({
+            display: "flex",
+            alignItems: "center",
+            gap: "10px",
+            marginBottom: "10px",
+        }),
         []
     )
 
@@ -168,7 +182,10 @@ const CharacterTimersList = ({
     if (!registeredCharacters.length) {
         return (
             <div style={waitingStyle}>
-                <span>Waiting for some registered characters...</span>
+                <span>
+                    <Link to="/registration">Register a character</Link> to see
+                    their raid timers here
+                </span>
             </div>
         )
     }
@@ -177,113 +194,124 @@ const CharacterTimersList = ({
     if (!preparedRows || preparedRows.length === 0) {
         return (
             <div style={waitingStyle}>
-                <span>No timers found</span>
+                <span>No raid timers found</span>
             </div>
         )
     }
 
     return (
         <>
-            {preparedRows.map(({ characterId, character, filteredTimers }) => (
-                <div key={characterId}>
-                    <Stack gap="10px" align="center">
-                        <h3 style={headingStyle}>
-                            {character.name}
-                            {characterClassIconContainer(character, image)}
-                            <ColoredText color="secondary">
-                                Level {character.total_level} |{" "}
-                                {character.server_name}
-                            </ColoredText>
-                        </h3>
-                    </Stack>
-                    <div
-                        className="table-container"
-                        style={tableContainerStyle}
-                    >
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Quest</th>
-                                    <th className="hide-on-small-mobile">
-                                        Completed
-                                    </th>
-                                    <th>Off Timer</th>
-                                    <th style={{ width: "30px" }} />
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {filteredTimers.map((timer) => {
-                                    const completedAt = new Date(
-                                        timer.timestamp
-                                    )
-                                    const offTimerMillis =
-                                        completedAt.getTime() +
-                                        RAID_TIMER_MILLIS
-                                    const offTimerDate = new Date(
-                                        offTimerMillis
-                                    )
-
-                                    return (
-                                        <tr
-                                            key={`${characterId}-${timer.timestamp}`}
-                                        >
-                                            <td>
-                                                {timer.quest_ids
-                                                    .map(
-                                                        (qid) =>
-                                                            quests[qid]?.name ||
-                                                            "Unknown Quest"
-                                                    )
-                                                    .join(" / ")}
-                                            </td>
-                                            <td className="hide-on-small-mobile">
-                                                <LiveDuration
-                                                    start={timer.timestamp}
-                                                />{" "}
-                                                ago
-                                                <br />
-                                                <ColoredText color="secondary">
-                                                    {completedAt.toLocaleString()}{" "}
-                                                </ColoredText>
-                                            </td>
-                                            <td>
-                                                <LiveDuration
-                                                    start={Date.now()}
-                                                    end={offTimerMillis}
-                                                />
-                                                <br />
-                                                <ColoredText color="secondary">
-                                                    {offTimerDate.toLocaleString()}
-                                                </ColoredText>
-                                            </td>
-                                            <td>
-                                                <button
-                                                    type="button"
-                                                    aria-label={`Delete timer for ${character.name}`}
-                                                    title={`Delete timer for ${character.name}`}
-                                                    onClick={handleDelete(
-                                                        characterId,
-                                                        timer
-                                                    )}
-                                                    style={{
-                                                        background:
-                                                            "transparent",
-                                                        border: 0,
-                                                        padding: 0,
-                                                        cursor: "pointer",
-                                                    }}
-                                                >
-                                                    <Delete className="clickable-icon" />
-                                                </button>
-                                            </td>
+            <TimerSortControls value={sortValue} onChange={sortOnChange} />
+            <Stack direction="column" gap="10px" style={{ width: "100%" }}>
+                {preparedRows.map(
+                    ({ characterId, character, filteredTimers }) => (
+                        <div key={characterId} style={{ width: "100%" }}>
+                            <Stack gap="10px" align="center">
+                                <h3 style={headingStyle}>
+                                    {character.name}
+                                    {characterClassIconContainer(
+                                        character,
+                                        image
+                                    )}
+                                    <ColoredText color="secondary">
+                                        Level {character.total_level} |{" "}
+                                        {character.server_name}
+                                    </ColoredText>
+                                </h3>
+                            </Stack>
+                            <div
+                                className="table-container"
+                                style={tableContainerStyle}
+                            >
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Quest</th>
+                                            <th className="hide-on-small-mobile">
+                                                Completed
+                                            </th>
+                                            <th>Off Timer</th>
+                                            <th style={{ width: "30px" }} />
                                         </tr>
-                                    )
-                                })}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            ))}
+                                    </thead>
+                                    <tbody>
+                                        {filteredTimers.map((timer) => {
+                                            const completedAt = new Date(
+                                                timer.timestamp
+                                            )
+                                            const offTimerMillis =
+                                                completedAt.getTime() +
+                                                RAID_TIMER_MILLIS
+                                            const offTimerDate = new Date(
+                                                offTimerMillis
+                                            )
+
+                                            return (
+                                                <tr
+                                                    key={`${characterId}-${timer.timestamp}`}
+                                                >
+                                                    <td>
+                                                        {timer.quest_ids
+                                                            .map(
+                                                                (qid) =>
+                                                                    quests[qid]
+                                                                        ?.name ||
+                                                                    "Unknown Quest"
+                                                            )
+                                                            .join(" / ")}
+                                                    </td>
+                                                    <td className="hide-on-small-mobile">
+                                                        <LiveDuration
+                                                            start={
+                                                                timer.timestamp
+                                                            }
+                                                        />{" "}
+                                                        ago
+                                                        <br />
+                                                        <ColoredText color="secondary">
+                                                            {completedAt.toLocaleString()}{" "}
+                                                        </ColoredText>
+                                                    </td>
+                                                    <td>
+                                                        <LiveDuration
+                                                            start={Date.now()}
+                                                            end={offTimerMillis}
+                                                        />
+                                                        <br />
+                                                        <ColoredText color="secondary">
+                                                            {offTimerDate.toLocaleString()}
+                                                        </ColoredText>
+                                                    </td>
+                                                    <td>
+                                                        <button
+                                                            type="button"
+                                                            aria-label={`Delete timer for ${character.name}`}
+                                                            title={`Delete timer for ${character.name}`}
+                                                            onClick={handleDelete(
+                                                                characterId,
+                                                                timer
+                                                            )}
+                                                            style={{
+                                                                background:
+                                                                    "transparent",
+                                                                border: 0,
+                                                                padding: 0,
+                                                                cursor: "pointer",
+                                                            }}
+                                                        >
+                                                            <Delete className="clickable-icon" />
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            )
+                                        })}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    )
+                )}
+            </Stack>
         </>
     )
 }

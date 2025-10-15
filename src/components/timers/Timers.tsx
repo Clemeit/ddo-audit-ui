@@ -152,13 +152,6 @@ const Timers = () => {
         }
     }, [])
 
-    const sortAndFilterContent = () => (
-        <TimerSortControls
-            value={sortCharacterBy}
-            onChange={setSortCharacterBy}
-        />
-    )
-
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false)
     const [selectedTimer, setSelectedTimer] = useState<QuestInstances | null>(
         null
@@ -206,7 +199,6 @@ const Timers = () => {
                         registeredCharactersCount={registeredCharacters.length}
                     />
                     <>
-                        {sortAndFilterContent()}
                         {isLoading && !initialTimerLoadDone ? (
                             <div
                                 style={{
@@ -240,6 +232,8 @@ const Timers = () => {
                                         action: "click",
                                     })
                                 }}
+                                sortValue={sortCharacterBy}
+                                sortOnChange={setSortCharacterBy}
                             />
                         )}
                     </>
