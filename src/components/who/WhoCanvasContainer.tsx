@@ -21,6 +21,7 @@ import useGetFriends from "../../hooks/useGetFriends.ts"
 import useGetIgnores from "../../hooks/useGetIgnores.ts"
 import logMessage from "../../utils/logUtils.ts"
 import Stack from "../global/Stack.tsx"
+import { CLASS_LIST_LOWER, MAX_LEVEL, MIN_LEVEL } from "../../constants/game.ts"
 
 // TODO: group_id should be null and never "0"
 
@@ -39,7 +40,6 @@ const WhoContainer = ({
 }: Props) => {
     const {
         stringFilter,
-        setStringFilter,
         sortBy,
         minLevel,
         maxLevel,
@@ -81,12 +81,6 @@ const WhoContainer = ({
             setHadFirstLoad(true)
         }
     }, [characterState])
-
-    useEffect(() => {
-        if (initialSearchQuery && initialSearchQuery.trim() !== "") {
-            setStringFilter(initialSearchQuery)
-        }
-    }, [initialSearchQuery])
 
     const isServerOffline = useMemo<boolean>(
         () =>
@@ -364,6 +358,21 @@ const WhoContainer = ({
         areas,
     ])
 
+    // If initialSearchQuery is set, set up initialState filters
+    const initialState = useMemo(() => {
+        if (initialSearchQuery && initialSearchQuery.trim() !== "") {
+            return {
+                stringFilter: initialSearchQuery,
+                minLevel: MIN_LEVEL,
+                maxLevel: MAX_LEVEL,
+                classNameFilter: CLASS_LIST_LOWER,
+                isGroupView: false,
+            }
+        } else {
+            return {}
+        }
+    }, [initialSearchQuery])
+
     return (
         <Stack direction="column">
             {characterState === LoadingState.Haulted && (
@@ -390,6 +399,7 @@ const WhoContainer = ({
                             characterState !== LoadingState.Loaded &&
                             !hadFirstLoad
                         }
+                        initialState={initialState}
                     />
                 </Stack>
             ) : (

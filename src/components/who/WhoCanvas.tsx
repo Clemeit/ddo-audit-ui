@@ -29,6 +29,13 @@ interface Props {
     serverName: string
     areResultsTruncated: boolean
     isLoading: boolean
+    initialState?: Partial<{
+        stringFilter: string
+        classNameFilter: string[]
+        minLevel: number
+        maxLevel: number
+        isGroupView: boolean
+    }>
 }
 
 const WhoCanvas = ({
@@ -37,6 +44,7 @@ const WhoCanvas = ({
     serverName = "",
     areResultsTruncated = false,
     isLoading,
+    initialState = {},
 }: Props) => {
     const {
         panelWidth,
@@ -81,8 +89,47 @@ const WhoCanvas = ({
         () => calculateCommonFilterBoundingBoxes(panelWidth),
         [panelWidth]
     )
-    const [fauxMinLevel, setFauxMinLevel] = useState<string>(String(MIN_LEVEL))
-    const [fauxMaxLevel, setFauxMaxLevel] = useState<string>(String(MAX_LEVEL))
+    const [fauxMinLevel, setFauxMinLevel] = useState<string>(
+        String(initialState.minLevel ?? MIN_LEVEL)
+    )
+    const [fauxMaxLevel, setFauxMaxLevel] = useState<string>(
+        String(initialState.maxLevel ?? MAX_LEVEL)
+    )
+
+    // Apply initial state from props deterministically (no timeouts, explicit fallbacks)
+    useEffect(() => {
+        // Only set stringFilter if explicitly provided to avoid clobbering user's saved value
+        if (initialState.stringFilter !== undefined) {
+            setStringFilter(initialState.stringFilter)
+        }
+
+        // Default class filter to all classes if not specified
+        setClassNameFilter(initialState.classNameFilter ?? CLASS_LIST_LOWER)
+
+        // Level inputs default to global min/max if not specified (visual only)
+        setFauxMinLevel(String(initialState.minLevel ?? MIN_LEVEL))
+        setFauxMaxLevel(String(initialState.maxLevel ?? MAX_LEVEL))
+
+        // Preserve saved settings unless explicit initial values are provided
+        if (initialState.minLevel !== undefined) {
+            setMinLevel(initialState.minLevel)
+        }
+        if (initialState.maxLevel !== undefined) {
+            setMaxLevel(initialState.maxLevel)
+        }
+
+        // Only set group view if explicitly provided
+        if (initialState.isGroupView !== undefined) {
+            setIsGroupView(initialState.isGroupView)
+        }
+    }, [
+        initialState,
+        setStringFilter,
+        setClassNameFilter,
+        setIsGroupView,
+        setMinLevel,
+        setMaxLevel,
+    ])
 
     const loadedLevels = useRef<boolean>(false)
 
@@ -161,9 +208,15 @@ const WhoCanvas = ({
 
     useEffect(() => {
         const setLevelTimeout = setTimeout(() => {
+            // Respect explicitly provided initial levels; only restore from saved settings when
+            // initialState did not specify a value
             if (shouldSaveSettings && shouldSaveLevelFilter) {
-                setFauxMinLevel(String(minLevel))
-                setFauxMaxLevel(String(maxLevel))
+                if (initialState.minLevel === undefined) {
+                    setFauxMinLevel(String(minLevel))
+                }
+                if (initialState.maxLevel === undefined) {
+                    setFauxMaxLevel(String(maxLevel))
+                }
             }
             loadedLevels.current = true
         }, 100)
@@ -171,8 +224,10 @@ const WhoCanvas = ({
     }, [
         shouldSaveSettings,
         shouldSaveLevelFilter,
-        setFauxMinLevel,
-        setFauxMaxLevel,
+        minLevel,
+        maxLevel,
+        initialState.minLevel,
+        initialState.maxLevel,
     ])
 
     // Set the canvases to the correct size

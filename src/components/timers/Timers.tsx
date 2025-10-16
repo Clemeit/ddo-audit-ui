@@ -300,6 +300,7 @@ const Timers = () => {
                 <ContentCluster title="See Also...">
                     <NavCardCluster>
                         <NavigationCard type="registration" />
+                        <NavigationCard type="activity" />
                     </NavCardCluster>
                 </ContentCluster>
             </ContentClusterGroup>
