@@ -827,16 +827,29 @@ const Activity = () => {
             <ContentClusterGroup>
                 <ContentCluster title="Character Activity">
                     {conditionalSelectionContent()}
-                    {characterData?.data?.is_online && (
-                        <>
-                            <LiveCharacterInfo
-                                characterData={characterData?.data}
-                                groupMembers={groupMembers}
-                            />
-                            <Spacer size="20px" />
-                        </>
-                    )}
-                    {conditionalActivityContent()}
+                    <div
+                        style={{
+                            opacity: selectedCharacterAndAccessToken.character
+                                ? 1
+                                : 0.5,
+                            pointerEvents:
+                                selectedCharacterAndAccessToken.character
+                                    ? "auto"
+                                    : "none",
+                        }}
+                    >
+                        {!!selectedCharacterAndAccessToken.character &&
+                            characterData?.data?.is_online && (
+                                <>
+                                    <LiveCharacterInfo
+                                        characterData={characterData?.data}
+                                        groupMembers={groupMembers}
+                                    />
+                                    <Spacer size="20px" />
+                                </>
+                            )}
+                        {conditionalActivityContent()}
+                    </div>
                 </ContentCluster>
                 <ContentCluster title="See Also...">
                     <NavCardCluster>
