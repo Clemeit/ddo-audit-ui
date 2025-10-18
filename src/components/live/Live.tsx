@@ -136,9 +136,10 @@ const Live = () => {
                     <ServerStatus
                         serverInfoData={serverInfoData}
                         serverInfoState={serverInfoState}
-                        hide32BitServers={hide32BitServers}
+                        // hide32BitServers={hide32BitServers}
+                        hide32BitServers={false}
                     />
-                    <Spacer size="10px" />
+                    {/* <Spacer size="10px" />
                     {hide32BitServers ? (
                         <>
                             <FauxLink
@@ -161,7 +162,7 @@ const Live = () => {
                                 Hide 32-bit servers
                             </FauxLink>
                         </>
-                    )}
+                    )} */}
                 </ContentCluster>
                 <ContentCluster title="Quick Info">
                     <QuickInfo
