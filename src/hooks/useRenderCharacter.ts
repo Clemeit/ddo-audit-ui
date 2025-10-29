@@ -192,7 +192,7 @@ const useRenderCharacter = ({ sprite, context }: Props) => {
                     leftBound +
                     SPRITE_MAP.RACES.HUMAN.width +
                     characterNameWidth +
-                    7,
+                    11,
                 2,
                 SPRITE_MAP.CROWN.width,
                 SPRITE_MAP.CROWN.height

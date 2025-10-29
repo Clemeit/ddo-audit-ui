@@ -1,3 +1,5 @@
-const CHARACTER_IDS: number[] = []
+const CHARACTER_IDS: number[] = [
+    111669489558, 111672554267, 1116727455,
+] as const
 
 export { CHARACTER_IDS }
