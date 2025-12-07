@@ -22,3 +22,9 @@ export enum ActivityLevelFilterEnum {
     ACTIVE = "Active",
     INACTIVE = "Inactive",
 }
+
+export enum RaidTimerCharacterSortEnum {
+    NAME = "Name",
+    LEVEL = "Level",
+    RECENT_RAID = "Most Recent Raid",
+}

@@ -195,9 +195,9 @@ const ActivityTable = ({
                             >
                                 {isNaN(timeDifferenceMilliseconds)
                                     ? "-"
-                                    : convertMillisecondsToPrettyString(
-                                          timeDifferenceMilliseconds
-                                      )}
+                                    : convertMillisecondsToPrettyString({
+                                          millis: timeDifferenceMilliseconds,
+                                      })}
                             </td>
                         </tr>
                     )
@@ -225,9 +225,9 @@ const ActivityTable = ({
                             >
                                 {isNaN(timeDifferenceMilliseconds)
                                     ? "-"
-                                    : convertMillisecondsToPrettyString(
-                                          timeDifferenceMilliseconds
-                                      )}
+                                    : convertMillisecondsToPrettyString({
+                                          millis: timeDifferenceMilliseconds,
+                                      })}
                             </td>
                         </tr>
                     )
@@ -242,9 +242,9 @@ const ActivityTable = ({
                             <td>
                                 {isNaN(timeDifferenceMilliseconds)
                                     ? "-"
-                                    : convertMillisecondsToPrettyString(
-                                          timeDifferenceMilliseconds
-                                      )}
+                                    : convertMillisecondsToPrettyString({
+                                          millis: timeDifferenceMilliseconds,
+                                      })}
                             </td>
                         </tr>
                     )

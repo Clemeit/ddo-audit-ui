@@ -132,12 +132,12 @@ const Registration = () => {
         if (registeredCharacters.length === 0) {
             return ""
         }
-        const prettyString = convertMillisecondsToPrettyString(
-            millisSinceLastReload,
-            true,
-            true,
-            true
-        )
+        const prettyString = convertMillisecondsToPrettyString({
+            millis: millisSinceLastReload,
+            commaSeparated: true,
+            useFullWords: true,
+            onlyIncludeLargest: true,
+        })
         if (!prettyString) {
             return "Last refreshed just now"
         } else {
@@ -217,7 +217,7 @@ const Registration = () => {
                         and level. The LFM Viewer will also show an indicator on
                         a post if you're currently on timer for that raid. You
                         can view raid timers on the{" "}
-                        <Link to="/timers" className="link" disabled>
+                        <Link to="/timers" className="link">
                             Timers page
                         </Link>
                         .
@@ -266,16 +266,15 @@ const Registration = () => {
                             badge={<Badge text="New" type="new" />}
                         />
                         <NavigationCard
+                            type="timers"
+                            badge={<Badge text="New" type="new" />}
+                        />
+                        <NavigationCard
                             type="guilds"
                             badge={<Badge text="New" type="new" />}
                         />
                         <NavigationCard type="friends" />
                         <NavigationCard type="ignores" />
-                        <NavigationCard
-                            type="timers"
-                            badge={<Badge text="Soon" type="soon" />}
-                            disabled
-                        />
                     </NavCardCluster>
                 </ContentCluster>
             </ContentClusterGroup>

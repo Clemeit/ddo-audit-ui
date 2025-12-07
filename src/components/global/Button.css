@@ -62,7 +62,7 @@
     fill: var(--orange4);
 }
 
-.button.tertiary {
+.button.tertiary, .button.text {
     background-color: transparent;
     border: none;
     border: 1px solid transparent;
@@ -72,8 +72,13 @@
     border: 1px solid red !important;
 }
 
-.button.tertiary {
+.button.tertiary, .button.text {
     color: white;
+}
+
+.button.text:hover {
+    box-shadow: none;
+    text-decoration: underline;
 }
 
 .button.tertiary:hover {

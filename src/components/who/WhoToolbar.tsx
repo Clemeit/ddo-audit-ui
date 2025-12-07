@@ -16,6 +16,7 @@ import {
 } from "../../constants/whoPanel.ts"
 import { ReactComponent as WarningSVG } from "../../assets/svg/warning.svg"
 import { useAreaContext } from "../../contexts/AreaContext.tsx"
+import FeaturedItem from "../global/FeaturedItem.tsx"
 
 interface Props {
     reloadCharacters: () => void
@@ -50,6 +51,8 @@ const WhoToolbar = ({
         setShouldSaveExactMatch,
         showInQuestIndicator,
         setShowInQuestIndicator,
+        showQuestName,
+        setShowQuestName,
         hideIgnoredCharacters,
         setHideIgnoredCharacters,
         pinRegisteredCharacters,
@@ -84,6 +87,16 @@ const WhoToolbar = ({
                     >
                         Show in-quest indicator
                     </Checkbox>
+                    <FeaturedItem calloutId="who-quest-name">
+                        <Checkbox
+                            checked={showQuestName}
+                            onChange={(e) => {
+                                setShowQuestName(e.target.checked)
+                            }}
+                        >
+                            Show quest name next to location
+                        </Checkbox>
+                    </FeaturedItem>
                     <label htmlFor="maxChracterRenderSlider">
                         Display the first{" "}
                         {maximumRenderedCharacterCount.toString()} characters

@@ -9,6 +9,7 @@ import {
 import { getCharactersByIds } from "../services/characterService.ts"
 import { Character } from "../models/Character.ts"
 import { AccessToken } from "../models/Verification.ts"
+import logMessage from "../utils/logUtils.ts"
 
 interface Props {
     enabled?: boolean
@@ -136,9 +137,12 @@ const useGetRegisteredCharacters = ({ enabled = true }: Props = {}) => {
                 try {
                     setRegisteredCharactersInLocalStorage(characters)
                 } catch (localStorageError) {
-                    console.warn(
-                        "Failed to save characters to localStorage:",
-                        localStorageError
+                    logMessage(
+                        "Failed to save registered characters to localStorage",
+                        "error",
+                        {
+                            metadata: { error: localStorageError },
+                        }
                     )
                     // Don't fail the entire operation for localStorage issues
                 }
@@ -151,7 +155,9 @@ const useGetRegisteredCharacters = ({ enabled = true }: Props = {}) => {
                     return
                 }
 
-                console.error("Failed to fetch characters:", error)
+                logMessage("Failed to fetch registered characters", "error", {
+                    metadata: { error: error },
+                })
                 setIsError(true)
                 setErrorMessage(
                     error?.message || "Failed to fetch character data"
@@ -159,7 +165,13 @@ const useGetRegisteredCharacters = ({ enabled = true }: Props = {}) => {
                 setIsLoaded(true)
             }
         } catch (localStorageError) {
-            console.error("Failed to access localStorage:", localStorageError)
+            logMessage(
+                "Failed to access registered characters from localStorage",
+                "error",
+                {
+                    metadata: { error: localStorageError },
+                }
+            )
             setIsError(true)
             setErrorMessage("Failed to access stored character data")
             setIsLoaded(true)
@@ -168,7 +180,13 @@ const useGetRegisteredCharacters = ({ enabled = true }: Props = {}) => {
 
     function unregisterCharacter(character: Character) {
         if (!character?.id) {
-            console.warn("Cannot unregister character: invalid character data")
+            logMessage(
+                "Cannot unregister character: invalid character data",
+                "warn",
+                {
+                    metadata: { character: character },
+                }
+            )
             return
         }
 
@@ -190,7 +208,9 @@ const useGetRegisteredCharacters = ({ enabled = true }: Props = {}) => {
 
             reload()
         } catch (error) {
-            console.error("Failed to unregister character:", error)
+            logMessage("Failed to unregister character", "error", {
+                metadata: { error: error },
+            })
             setIsError(true)
             setErrorMessage("Failed to unregister character")
         }

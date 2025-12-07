@@ -9,7 +9,13 @@ interface Props {
     onClick: () => void
     disabled?: boolean
     className?: string
-    type?: "primary" | "secondary" | "tertiary" | "donate" | "secondary donate"
+    type?:
+        | "primary"
+        | "secondary"
+        | "tertiary"
+        | "donate"
+        | "secondary donate"
+        | "text"
     style?: React.CSSProperties
     fullWidth?: boolean
     fullWidthOnMobile?: boolean

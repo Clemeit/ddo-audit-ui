@@ -195,7 +195,7 @@ const Servers = () => {
                 </ContentCluster>
                 <ContentCluster
                     title="Peak Times"
-                    subtitle="Peak times for each server, defined as when the population of LFM count is above some threshold of the server's observed maximum population or LFM count."
+                    subtitle="Peak times for each server, defined as when the population or LFM count is above some threshold of the server's observed maximum population or LFM count."
                 >
                     <PeakTimesPopulationDistribution />
                 </ContentCluster>

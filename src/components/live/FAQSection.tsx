@@ -80,6 +80,11 @@ const FAQSection = ({
             answer: 'Server status can be checked on our "Live" page. Server status is checked every few seconds and is updated in real-time.',
         },
         {
+            question:
+                "How can I check my character's raid timers and activity?",
+            answer: "DDO Audit keeps track of your character's raid timers, questing activity, and more! You can view raid timers on the Timers page and character activity on the Activity page.",
+        },
+        {
             question: `Is DDO still active in ${new Date().getFullYear()}?`,
             answer: "Yes, DDO is still quite active and receives periodic updates and content releases.",
         },
