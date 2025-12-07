@@ -4,6 +4,7 @@ import Banner from "./Banner.tsx"
 import { useLocation } from "react-router-dom"
 import { bannerRouteMapping } from "../../config/routes.ts"
 import { useAppContext } from "../../contexts/AppContext.tsx"
+import LogInButtonContainer from "./LogInButtonContainer.tsx"
 
 const Header = () => {
     const location = useLocation()
@@ -33,6 +34,7 @@ const Header = () => {
                     showButtons={bannerData.showButtons}
                     hideSuggestionButton={bannerData.hideSuggestionButton}
                 />
+                <LogInButtonContainer />
             </>
         )
     )
