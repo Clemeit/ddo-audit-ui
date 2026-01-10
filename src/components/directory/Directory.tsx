@@ -18,10 +18,7 @@ const Directory = () => {
                 <ContentCluster title="Population and Activity">
                     <NavCardCluster>
                         <NavigationCard type="live" />
-                        <NavigationCard
-                            type="servers"
-                            badge={<Badge text="New" type="new" />}
-                        />
+                        <NavigationCard type="servers" />
                         <NavigationCard
                             type="quests"
                             badge={<Badge text="Soon" type="soon" />}
@@ -38,10 +35,7 @@ const Directory = () => {
                     <NavCardCluster>
                         <NavigationCard type="grouping" />
                         <NavigationCard type="who" />
-                        <NavigationCard
-                            type="guilds"
-                            badge={<Badge text="New" type="new" />}
-                        />
+                        <NavigationCard type="guilds" />
                         <NavigationCard
                             type="notifications"
                             badge={<Badge text="Soon" type="soon" />}
@@ -49,10 +43,7 @@ const Directory = () => {
                         />
                         <NavigationCard type="friends" />
                         <NavigationCard type="ignores" />
-                        <NavigationCard
-                            type="owned-content"
-                            badge={<Badge text="New" type="new" />}
-                        />
+                        <NavigationCard type="owned-content" />
                     </NavCardCluster>
                 </ContentCluster>
                 <ContentCluster title="Character Tools">
@@ -70,10 +61,7 @@ const Directory = () => {
                 </ContentCluster>
                 <ContentCluster title="Additional Resources">
                     <NavCardCluster>
-                        <NavigationCard
-                            type="user-settings"
-                            badge={<Badge text="New" type="new" />}
-                        />
+                        <NavigationCard type="user-settings" />
                         <NavigationCard type="about" />
                         <NavigationCard
                             type="api"
