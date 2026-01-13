@@ -173,6 +173,14 @@ const useRenderLfmOverlay = ({ lfmSprite, context }: Props) => {
                     if (quest.metadata?.isUnknown) {
                         infoFields = [quest.name, lfm.quest_id]
                     } else {
+                        const lengthString = quest.length
+                            ? convertMillisecondsToPrettyString({
+                                  millis: quest.length * 1000,
+                                  commaSeparated: true,
+                                  useFullWords: true,
+                                  onlyIncludeLargest: true,
+                              })
+                            : null
                         infoFields = [
                             quest.name,
                             quest.adventure_area,
@@ -183,6 +191,7 @@ const useRenderLfmOverlay = ({ lfmSprite, context }: Props) => {
                             quest.group_size,
                             quest.heroic_normal_cr,
                             quest.epic_normal_cr,
+                            lengthString,
                             lfm.difficulty,
                         ]
                     }
@@ -1059,6 +1068,17 @@ const useRenderLfmOverlay = ({ lfmSprite, context }: Props) => {
                                 "Epic level:",
                                 quest.epic_normal_cr.toString()
                             )
+                        }
+
+                        if (quest.length) {
+                            const durationString =
+                                convertMillisecondsToPrettyString({
+                                    millis: quest.length * 1000,
+                                    commaSeparated: true,
+                                    useFullWords: true,
+                                    onlyIncludeLargest: true,
+                                })
+                            renderQuestInfo("Length:", durationString)
                         }
 
                         if (lfm.difficulty) {
