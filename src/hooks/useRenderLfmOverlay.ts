@@ -61,6 +61,16 @@ const useRenderLfmOverlay = ({ lfmSprite, context }: Props) => {
     const { quests } = useQuestContext()
     const { friends } = useGetFriends()
 
+    const lengthToLengthString = useCallback((lengthInSeconds: number) => {
+        if (lengthInSeconds <= 0) return "Unknown"
+        return convertMillisecondsToPrettyString({
+            millis: lengthInSeconds * 1000,
+            commaSeparated: true,
+            useFullWords: true,
+            onlyIncludeLargest: true,
+        })
+    }, [])
+
     const renderLfmOverlay = useCallback<
         (lfm: Lfm, renderType: RenderType) => { width: number; height: number }
     >(
@@ -174,12 +184,7 @@ const useRenderLfmOverlay = ({ lfmSprite, context }: Props) => {
                         infoFields = [quest.name, lfm.quest_id]
                     } else {
                         const lengthString = quest.length
-                            ? convertMillisecondsToPrettyString({
-                                  millis: quest.length * 1000,
-                                  commaSeparated: true,
-                                  useFullWords: true,
-                                  onlyIncludeLargest: true,
-                              })
+                            ? lengthToLengthString(quest.length)
                             : null
                         infoFields = [
                             quest.name,
@@ -1071,14 +1076,10 @@ const useRenderLfmOverlay = ({ lfmSprite, context }: Props) => {
                         }
 
                         if (quest.length) {
-                            const durationString =
-                                convertMillisecondsToPrettyString({
-                                    millis: quest.length * 1000,
-                                    commaSeparated: true,
-                                    useFullWords: true,
-                                    onlyIncludeLargest: true,
-                                })
-                            renderQuestInfo("Length:", durationString)
+                            const lengthStrnig = lengthToLengthString(
+                                quest.length
+                            )
+                            renderQuestInfo("Length:", lengthStrnig)
                         }
 
                         if (lfm.difficulty) {
@@ -1163,6 +1164,8 @@ const useRenderLfmOverlay = ({ lfmSprite, context }: Props) => {
             quests,
             areaContext,
             showRaidTimerIndicator,
+            lengthToLengthString,
+            friends,
         ]
     )
 
