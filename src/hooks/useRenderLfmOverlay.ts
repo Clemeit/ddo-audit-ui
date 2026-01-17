@@ -1076,10 +1076,10 @@ const useRenderLfmOverlay = ({ lfmSprite, context }: Props) => {
                         }
 
                         if (quest.length) {
-                            const lengthStrnig = lengthToLengthString(
+                            const lengthString = lengthToLengthString(
                                 quest.length
                             )
-                            renderQuestInfo("Length:", lengthStrnig)
+                            renderQuestInfo("Length:", lengthString)
                         }
 
                         if (lfm.difficulty) {
