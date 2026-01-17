@@ -36,6 +36,7 @@ interface Quest {
     group_size?: string
     patron?: string
     average_time?: number
+    length?: number
     tip?: string
     metadata?: {
         isUnknown?: boolean
