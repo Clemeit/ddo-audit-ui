@@ -105,6 +105,11 @@ const OVERLAY_COLORS = {
     SECONDARY_TEXT: "#999999",
     QUEST_INFO: "#e0e0e0",
     SKY_BLUE: "#D3F6F6",
+    METRIC_VERY_LOW: "#ff8181",
+    METRIC_LOW: "#fff389",
+    METRIC_MEDIUM: "#e0e0e0",
+    METRIC_HIGH: "#8aff8a",
+    METRIC_VERY_HIGH: "#96ffff",
 }
 
 const OVERLAY_WIDTH = 287

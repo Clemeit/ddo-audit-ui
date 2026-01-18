@@ -71,6 +71,8 @@ const LfmToolbar = ({
         setTrackedCharacterIds,
         showLfmPostedTime,
         setShowLfmPostedTime,
+        showQuestMetrics,
+        setShowQuestMetrics,
         reloadRegisteredCharacters,
         resetDisplaySettings,
         resetFilterSettings,
@@ -553,6 +555,16 @@ const LfmToolbar = ({
                             }
                         >
                             Show LFM posted time
+                        </Checkbox>
+                    </FeaturedItem>
+                    <FeaturedItem calloutId="show-quest-metrics">
+                        <Checkbox
+                            checked={showQuestMetrics}
+                            onChange={(e) =>
+                                setShowQuestMetrics(e.target.checked)
+                            }
+                        >
+                            Show quest metrics
                         </Checkbox>
                     </FeaturedItem>
                     <Stack width="100%" justify="flex-end">

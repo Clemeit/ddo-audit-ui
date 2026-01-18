@@ -1,4 +1,4 @@
-import { API_URL, API_VERSION } from "../constants/client.ts"
+import { API_URL } from "../constants/client.ts"
 import axios from "axios"
 import axiosRetry from "axios-retry"
 
@@ -20,13 +20,14 @@ const genericRequest = async <T>(
     method: "get" | "post",
     endpoint: string,
     data?: any,
-    options: { signal?: AbortSignal; noRetry?: boolean } = {}
+    options: { signal?: AbortSignal; noRetry?: boolean } = {},
+    version: string = "v1"
 ) => {
     const { signal, noRetry, ...restOptions } = options
     try {
         const axiosConfig: any = {
             method,
-            url: `${API_URL}/${API_VERSION}/${endpoint}`,
+            url: `${API_URL}/${version}/${endpoint}`,
             data,
             ...restOptions,
             signal,
@@ -56,9 +57,10 @@ export const getRequest = async <T>(
         headers?: any
         params?: any
         noRetry?: boolean
-    } = {}
+    } = {},
+    version: string = "v1"
 ) => {
-    return genericRequest<T>("get", endpoint, undefined, options)
+    return genericRequest<T>("get", endpoint, undefined, options, version)
 }
 
 // Function to make POST requests
@@ -70,7 +72,8 @@ export const postRequest = async <T>(
         headers?: any
         params?: any
         noRetry?: boolean
-    } = {}
+    } = {},
+    version: string = "v1"
 ) => {
-    return genericRequest<T>("post", endpoint, options.data, options)
+    return genericRequest<T>("post", endpoint, options.data, options, version)
 }

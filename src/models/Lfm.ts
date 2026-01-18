@@ -41,6 +41,10 @@ interface Quest {
     metadata?: {
         isUnknown?: boolean
     }
+    heroic_xp_per_minute_relative?: number
+    epic_xp_per_minute_relative?: number
+    heroic_popularity_relative?: number
+    epic_popularity_relative?: number
 }
 
 interface QuestApiResponse {

@@ -33,6 +33,7 @@ import {
 import { useAreaContext } from "../contexts/AreaContext.tsx"
 import { useQuestContext } from "../contexts/QuestContext.tsx"
 import useGetFriends from "./useGetFriends.ts"
+import { getMetricOverlayDisplayData } from "../utils/questUtils.ts"
 
 interface Props {
     lfmSprite?: HTMLImageElement | null
@@ -54,6 +55,7 @@ const useRenderLfmOverlay = ({ lfmSprite, context }: Props) => {
         showEligibleCharacters,
         showRaidTimerIndicator,
         isMultiColumn,
+        showQuestMetrics,
     } = useLfmContext()
     const fonts = useMemo(() => FONTS(14), [])
     const { confineTextToBoundingBox } = useTextRenderer(context)
@@ -180,12 +182,21 @@ const useRenderLfmOverlay = ({ lfmSprite, context }: Props) => {
                 totalOverlayHeight = OVERLAY_QUEST_INFO_SPACING
                 if (quest) {
                     let infoFields: any[] = []
+                    let metricSpacing = 0
                     if (quest.metadata?.isUnknown) {
                         infoFields = [quest.name, lfm.quest_id]
                     } else {
-                        const lengthString = quest.length
-                            ? lengthToLengthString(quest.length)
-                            : null
+                        const lengthString =
+                            quest.length &&
+                            !areaContext.areas[quest.area_id].is_wilderness
+                                ? lengthToLengthString(quest.length)
+                                : null
+
+                        const {
+                            xpPerMinuteRelativeString,
+                            popularityRelativeString,
+                        } = getMetricOverlayDisplayData(lfm, quest)
+
                         infoFields = [
                             quest.name,
                             quest.adventure_area,
@@ -196,9 +207,21 @@ const useRenderLfmOverlay = ({ lfmSprite, context }: Props) => {
                             quest.group_size,
                             quest.heroic_normal_cr,
                             quest.epic_normal_cr,
-                            lengthString,
                             lfm.difficulty,
+                            lengthString && showQuestMetrics,
+                            xpPerMinuteRelativeString != null &&
+                                showQuestMetrics,
+                            popularityRelativeString != null &&
+                                showQuestMetrics,
                         ]
+                        if (
+                            showQuestMetrics &&
+                            (lengthString ||
+                                xpPerMinuteRelativeString != null ||
+                                popularityRelativeString != null)
+                        ) {
+                            metricSpacing = 10
+                        }
                     }
                     context.font = OVERLAY_FONTS.QUEST_INFO
                     infoFields.forEach((field) => {
@@ -214,7 +237,7 @@ const useRenderLfmOverlay = ({ lfmSprite, context }: Props) => {
                         }
                     })
                     // Make space for the double-click text
-                    totalOverlayHeight += 22
+                    totalOverlayHeight += 22 + metricSpacing
                     const doubleClickWidth =
                         context.measureText(doubleClickText).width
                     totalOverlayWidth = Math.max(
@@ -994,18 +1017,25 @@ const useRenderLfmOverlay = ({ lfmSprite, context }: Props) => {
                 // Render Quest
                 let maxWidth = 0
 
-                const renderQuestInfo = (title: string, text: string) => {
+                const renderQuestInfo = (
+                    title: string,
+                    text: string,
+                    valueColor: string = OVERLAY_COLORS.QUEST_INFO
+                ) => {
+                    const startingStyle = context.fillStyle
                     context.font = OVERLAY_FONTS.QUEST_INFO_HEADER
                     context.textAlign = "right"
                     context.fillText(title, 0, 0)
                     context.font = OVERLAY_FONTS.QUEST_INFO
                     context.textAlign = "left"
+                    context.fillStyle = valueColor
                     context.fillText(text, 5, 0)
                     context.translate(0, OVERLAY_QUEST_INFO_SPACING)
                     maxWidth = Math.max(
                         maxWidth,
                         context.measureText(title).width
                     )
+                    context.fillStyle = startingStyle
                 }
 
                 if (quest) {
@@ -1075,15 +1105,45 @@ const useRenderLfmOverlay = ({ lfmSprite, context }: Props) => {
                             )
                         }
 
-                        if (quest.length) {
-                            const lengthString = lengthToLengthString(
-                                quest.length
-                            )
-                            renderQuestInfo("Length:", lengthString)
-                        }
-
                         if (lfm.difficulty) {
                             renderQuestInfo("Difficulty:", lfm.difficulty)
+                        }
+
+                        if (
+                            showQuestMetrics &&
+                            !areaContext.areas[quest.area_id].is_wilderness
+                        ) {
+                            context.translate(0, 8)
+
+                            if (quest.length) {
+                                const lengthString = lengthToLengthString(
+                                    quest.length
+                                )
+                                renderQuestInfo("Length:", lengthString)
+                            }
+
+                            const {
+                                xpPerMinuteRelativeString,
+                                xpPerMinuteColor,
+                                popularityRelativeString,
+                                popularityColor,
+                            } = getMetricOverlayDisplayData(lfm, quest)
+
+                            if (xpPerMinuteRelativeString != null) {
+                                renderQuestInfo(
+                                    "XP/Min:",
+                                    xpPerMinuteRelativeString,
+                                    xpPerMinuteColor
+                                )
+                            }
+
+                            if (popularityRelativeString != null) {
+                                renderQuestInfo(
+                                    "Popularity:",
+                                    popularityRelativeString,
+                                    popularityColor
+                                )
+                            }
                         }
                     }
 
@@ -1166,6 +1226,7 @@ const useRenderLfmOverlay = ({ lfmSprite, context }: Props) => {
             showRaidTimerIndicator,
             lengthToLengthString,
             friends,
+            showQuestMetrics,
         ]
     )
 
