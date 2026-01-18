@@ -36,10 +36,15 @@ interface Quest {
     group_size?: string
     patron?: string
     average_time?: number
+    length?: number
     tip?: string
     metadata?: {
         isUnknown?: boolean
     }
+    heroic_xp_per_minute_relative?: number
+    epic_xp_per_minute_relative?: number
+    heroic_popularity_relative?: number
+    epic_popularity_relative?: number
 }
 
 interface QuestApiResponse {

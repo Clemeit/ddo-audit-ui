@@ -6,12 +6,12 @@ import React, {
     useMemo,
     useCallback,
 } from "react"
-import { Quest, QuestApiResponse } from "../models/Lfm.ts"
+import { Quest } from "../models/Lfm.ts"
 import {
     getQuests as getQuestsFromLocalStorage,
     setQuests as setQuestsInLocalStorage,
 } from "../utils/localStorage.ts"
-import { getRequest } from "../services/apiHelper.ts"
+import { getQuests } from "../services/questService.ts"
 import { CACHED_QUESTS_EXPIRY_TIME } from "../constants/client.ts"
 import logMessage from "../utils/logUtils.ts"
 import { LocalStorageEntry } from "../models/LocalStorage.ts"
@@ -71,12 +71,9 @@ export const QuestProvider = ({ children }: Props) => {
                         CACHED_QUESTS_EXPIRY_TIME
                 ) {
                     // Cache is stale
-                    const result = await getRequest<QuestApiResponse>(
-                        "quests",
-                        {
-                            params: { force: fetchFromServer },
-                        }
-                    )
+                    const result = await getQuests({
+                        force: fetchFromServer,
+                    })
                     const questObj = result.data.reduce(
                         (acc, quest) => {
                             acc[quest.id] = quest
