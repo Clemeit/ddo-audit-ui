@@ -1,18 +1,7 @@
 import { OVERLAY_COLORS } from "../constants/lfmPanel"
 import { Lfm, Quest } from "../models/Lfm.ts"
 
-export const questXpPerMinuteRelativeString = (
-    relativeValue: number | undefined
-): string => {
-    if (relativeValue == null) return "N/A"
-    if (relativeValue < 0.2) return "Very Low"
-    if (relativeValue < 0.4) return "Low"
-    if (relativeValue < 0.6) return "Average"
-    if (relativeValue < 0.8) return "High"
-    return "Very High"
-}
-
-export const questPopularityRelativeString = (
+export const getRelativeString = (
     relativeValue: number | undefined
 ): string => {
     if (relativeValue == null) return "N/A"
@@ -35,14 +24,22 @@ export const getRelativeMetricColor = (
 }
 
 export const getMetricOverlayDisplayData = (
-    lfm: Lfm,
-    quest: Quest
+    lfm: Lfm | null,
+    quest: Quest | null
 ): {
-    xpPerMinuteRelativeString: string
-    xpPerMinuteColor: string
-    popularityRelativeString: string
-    popularityColor: string
+    xpPerMinuteRelativeString: string | null
+    xpPerMinuteColor: string | null
+    popularityRelativeString: string | null
+    popularityColor: string | null
 } => {
+    const defaultResult = {
+        xpPerMinuteRelativeString: null,
+        xpPerMinuteColor: null,
+        popularityRelativeString: null,
+        popularityColor: null,
+    }
+    if (lfm == null || quest == null) return defaultResult
+
     const averageAcceptedLevel = (lfm.minimum_level + lfm.maximum_level) / 2
     const diffToHeroicLevel = Math.abs(
         (quest.heroic_normal_cr || 0) - averageAcceptedLevel
@@ -67,16 +64,14 @@ export const getMetricOverlayDisplayData = (
     return {
         xpPerMinuteRelativeString:
             xpPerMinuteValue != null
-                ? questXpPerMinuteRelativeString(xpPerMinuteValue)
+                ? getRelativeString(xpPerMinuteValue)
                 : null,
         xpPerMinuteColor:
             xpPerMinuteValue != null
                 ? getRelativeMetricColor(xpPerMinuteValue)
                 : null,
         popularityRelativeString:
-            popularityValue != null
-                ? questPopularityRelativeString(popularityValue)
-                : null,
+            popularityValue != null ? getRelativeString(popularityValue) : null,
         popularityColor:
             popularityValue != null
                 ? getRelativeMetricColor(popularityValue)

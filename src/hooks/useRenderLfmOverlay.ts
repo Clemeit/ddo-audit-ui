@@ -118,6 +118,13 @@ const useRenderLfmOverlay = ({ lfmSprite, context }: Props) => {
                 maxLines: 4,
             })
 
+            const {
+                xpPerMinuteRelativeString,
+                xpPerMinuteColor,
+                popularityRelativeString,
+                popularityColor,
+            } = getMetricOverlayDisplayData(lfm, quest)
+
             // figure out the quest activity history
             const rawActivityEvents = getLfmActivityEventsFlatMap(lfm).filter(
                 (event) => event.tag !== LfmActivityType.COMMENT
@@ -192,11 +199,6 @@ const useRenderLfmOverlay = ({ lfmSprite, context }: Props) => {
                                 ? lengthToLengthString(quest.length)
                                 : null
 
-                        const {
-                            xpPerMinuteRelativeString,
-                            popularityRelativeString,
-                        } = getMetricOverlayDisplayData(lfm, quest)
-
                         infoFields = [
                             quest.name,
                             quest.adventure_area,
@@ -208,11 +210,9 @@ const useRenderLfmOverlay = ({ lfmSprite, context }: Props) => {
                             quest.heroic_normal_cr,
                             quest.epic_normal_cr,
                             lfm.difficulty,
-                            lengthString && showQuestMetrics,
-                            xpPerMinuteRelativeString != null &&
-                                showQuestMetrics,
-                            popularityRelativeString != null &&
-                                showQuestMetrics,
+                            showQuestMetrics ? lengthString : null,
+                            showQuestMetrics ? xpPerMinuteRelativeString : null,
+                            showQuestMetrics ? popularityRelativeString : null,
                         ]
                         if (
                             showQuestMetrics &&
@@ -1121,13 +1121,6 @@ const useRenderLfmOverlay = ({ lfmSprite, context }: Props) => {
                                 )
                                 renderQuestInfo("Length:", lengthString)
                             }
-
-                            const {
-                                xpPerMinuteRelativeString,
-                                xpPerMinuteColor,
-                                popularityRelativeString,
-                                popularityColor,
-                            } = getMetricOverlayDisplayData(lfm, quest)
 
                             if (xpPerMinuteRelativeString != null) {
                                 renderQuestInfo(
