@@ -36,7 +36,7 @@ const bannerRouteMapping = {
         showButtons: false,
     },
     quests: {
-        title: "Quest Activity",
+        title: "Quest Analytics",
         subtitle: "Completion Times and Popularity",
         miniature: true,
         showButtons: false,

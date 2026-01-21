@@ -21,8 +21,7 @@ const Directory = () => {
                         <NavigationCard type="servers" />
                         <NavigationCard
                             type="quests"
-                            badge={<Badge text="Soon" type="soon" />}
-                            disabled
+                            badge={<Badge text="New" type="new" />}
                         />
                         <NavigationCard
                             type="trends"

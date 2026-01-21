@@ -1,4 +1,3 @@
-import React from "react"
 import "../../index.css"
 import "./Banner.css"
 import useIsMobile from "../../hooks/useIsMobile.ts"

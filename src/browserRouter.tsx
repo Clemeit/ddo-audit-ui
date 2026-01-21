@@ -74,7 +74,12 @@ const UserSettings = lazy(() =>
     lazyRetry(() => import("./components/user-settings/UserSettings.tsx"))
 )
 // const Trends = lazy(() => lazyRetry(() => import("./components/trends/Trends.tsx")))
-// const Quests = lazy(() => lazyRetry(() => import("./components/quests/Quests.tsx")))
+const Quests = lazy(() =>
+    lazyRetry(() => import("./components/quests/Quests.tsx"))
+)
+const QuestSpecific = lazy(() =>
+    lazyRetry(() => import("./components/quests/QuestSpecific.tsx"))
+)
 
 // Set up the router
 export default createBrowserRouter(
@@ -189,7 +194,19 @@ export default createBrowserRouter(
                     </SocialDataProvider>
                 }
             />
-            {/* <Route path="/quests" element={<Quests />} /> */}
+            <Route
+                path="/quests"
+                element={
+                    <QuestProvider>
+                        <AreaProvider>
+                            <Outlet />
+                        </AreaProvider>
+                    </QuestProvider>
+                }
+            >
+                <Route index element={<Quests />} />
+                <Route path=":id" element={<QuestSpecific />} />
+            </Route>
             <Route path="/about" element={<About />} />
             <Route path="*" element={<NotFound />} />
         </Route>
