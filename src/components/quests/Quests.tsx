@@ -133,6 +133,8 @@ const Quests = () => {
         minimumLevel,
         maximumLevel,
         isLevelRange,
+        sortDirection,
+        sortField,
         showOnlyQuestsWithMetrics,
     ])
 

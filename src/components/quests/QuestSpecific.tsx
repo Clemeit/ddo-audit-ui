@@ -106,6 +106,14 @@ const QuestSpecific = () => {
     }, [currentQuest, rawNumbers, questMetrics])
 
     const pageContent = () => {
+        if (isLoading) {
+            return (
+                <ContentCluster title={currentQuest?.name}>
+                    <p>Loading quest analytics...</p>
+                </ContentCluster>
+            )
+        }
+
         if (currentQuest == undefined) {
             return (
                 <ContentCluster title="Quest Not Found">
