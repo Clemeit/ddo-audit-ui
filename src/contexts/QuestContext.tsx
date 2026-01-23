@@ -15,11 +15,13 @@ import { getQuests } from "../services/questService.ts"
 import { CACHED_QUESTS_EXPIRY_TIME } from "../constants/client.ts"
 import logMessage from "../utils/logUtils.ts"
 import { LocalStorageEntry } from "../models/LocalStorage.ts"
+import { MIN_LEVEL } from "../constants/game.ts"
 
 interface QuestContextProps {
     quests: { [key: number]: Quest }
     reloadQuests: () => void
     getQuestFromAreaId: (areaId: number) => Quest | undefined
+    maxQuestLevel: number
 }
 
 const QuestContext = createContext<QuestContextProps | undefined>(undefined)
@@ -112,6 +114,19 @@ export const QuestProvider = ({ children }: Props) => {
         return { quests: cachedQuests }
     }, [quests, cachedQuests])
 
+    const maxQuestLevel = useMemo(() => {
+        let maxLevel = MIN_LEVEL
+        Object.values(questsMemoized.quests).forEach((quest) => {
+            if (quest.heroic_normal_cr && quest.heroic_normal_cr > maxLevel) {
+                maxLevel = quest.heroic_normal_cr
+            }
+            if (quest.epic_normal_cr && quest.epic_normal_cr > maxLevel) {
+                maxLevel = quest.epic_normal_cr
+            }
+        })
+        return maxLevel
+    }, [questsMemoized])
+
     const areaIdToQuestMap: { [areaId: number]: Quest } = useMemo(() => {
         const map: { [areaId: number]: Quest } = {}
         for (const quest of Object.values(questsMemoized.quests ?? {})) {
@@ -137,8 +152,9 @@ export const QuestProvider = ({ children }: Props) => {
             quests: questsMemoized.quests,
             reloadQuests,
             getQuestFromAreaId,
+            maxQuestLevel,
         }),
-        [questsMemoized.quests, reloadQuests, getQuestFromAreaId]
+        [questsMemoized.quests, reloadQuests, getQuestFromAreaId, maxQuestLevel]
     )
 
     return (

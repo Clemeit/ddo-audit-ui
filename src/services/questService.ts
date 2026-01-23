@@ -1,4 +1,4 @@
-import { QuestApiResponse } from "../models/Lfm.ts"
+import { QuestAnalyticsApiResponse, QuestApiResponse } from "../models/Lfm.ts"
 import { getRequest } from "./apiHelper.ts"
 
 export const QUEST_ENDPOINT = "quests"
@@ -15,4 +15,15 @@ function getQuests(options?: { force?: boolean; signal?: AbortSignal }) {
     )
 }
 
-export { getQuests }
+function getQuestAnalytics(
+    questId: number,
+    options?: { signal?: AbortSignal }
+) {
+    return getRequest<QuestAnalyticsApiResponse>(
+        `quests/${questId}/analytics`,
+        { signal: options?.signal },
+        QUEST_API_VERSION
+    )
+}
+
+export { getQuests, getQuestAnalytics }
