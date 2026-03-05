@@ -1,7 +1,15 @@
 import { FlatActivityEvent, Lfm, LfmActivityType } from "../models/Lfm"
-import { LFM_HEIGHT, LFM_AREA_PADDING } from "../constants/lfmPanel.ts"
+import {
+    LFM_HEIGHT,
+    LFM_AREA_PADDING,
+    SKULL_EXPRESSION,
+    REAPER_EXPRESSION,
+    ELITE_EXPRESSION,
+    HARD_EXPRESSION,
+} from "../constants/lfmPanel.ts"
 import { BoundingBox } from "../models/Geometry.ts"
 import { SPRITE_MAP } from "../constants/spriteMap.ts"
+import { MAX_SKULL_COUNT } from "../constants/game.ts"
 
 const calculateCommonBoundingBoxes = (panelWidth: number) => {
     const lfmBoundingBox = new BoundingBox(
@@ -203,6 +211,50 @@ function areLfmArraysEqual(
     return true
 }
 
+function buildDifficultyString(lfm: Lfm): string {
+    if (!lfm) return "Normal"
+
+    const comment = lfm.comment ?? ""
+
+    const reaperString = (() => {
+        const skullCountMatch = comment.match(SKULL_EXPRESSION)
+        if (!skullCountMatch) return "Reaper"
+
+        const rawSkullCount = parseInt(skullCountMatch[2])
+        const hasPlusSymbol = !!skullCountMatch[3]
+
+        const clampedSkullCount =
+            rawSkullCount <= 0
+                ? 0
+                : rawSkullCount > MAX_SKULL_COUNT
+                  ? 9001
+                  : rawSkullCount
+
+        const skullString =
+            clampedSkullCount > 0
+                ? `${clampedSkullCount}${hasPlusSymbol ? "+" : ""}`
+                : null
+
+        return skullString ? `Reaper ${skullString}` : "Reaper"
+    })()
+
+    if (!lfm.is_quest_guess) {
+        return lfm.difficulty === "Reaper"
+            ? reaperString
+            : (lfm.difficulty ?? "Normal")
+    }
+
+    if (REAPER_EXPRESSION.test(lfm.comment)) {
+        return reaperString
+    } else if (ELITE_EXPRESSION.test(lfm.comment)) {
+        return "Elite"
+    } else if (HARD_EXPRESSION.test(lfm.comment)) {
+        return "Hard"
+    }
+
+    return "Normal"
+}
+
 export {
     shouldLfmRerender,
     calculateCommonBoundingBoxes,
@@ -211,4 +263,5 @@ export {
     areLfmArraysEqual,
     areLfmsEquivalent,
     areLfmOverlaysEquivalent,
+    buildDifficultyString,
 }
