@@ -5,15 +5,12 @@ import {
     LFM_COLORS,
     FONTS,
     QUEST_INFO_GAP,
-    REAPER_EXPRESSION,
-    ELITE_EXPRESSION,
-    HARD_EXPRESSION,
-    SKULL_EXPRESSION,
 } from "../constants/lfmPanel.ts"
 import { useLfmContext } from "../contexts/LfmContext.tsx"
 import { BoundingBox } from "../models/Geometry.ts"
 import useTextRenderer from "./useTextRenderer.ts"
 import {
+    buildDifficultyString,
     calculateCommonBoundingBoxes,
     getLfmPostedTimestamp,
 } from "../utils/lfmUtils.ts"
@@ -314,30 +311,9 @@ const useRenderLfm = ({ lfmSprite, context, raidView = false }: Props) => {
                 maxLines: 1,
                 centered: true,
             })
-            const skullCountMatches = lfm.comment.match(SKULL_EXPRESSION)
-            let skullCount = 0
-            let skullPlus = false
-            if (skullCountMatches) {
-                skullCount = parseInt(skullCountMatches[2])
-                skullPlus = !!skullCountMatches[3]
-            }
-            let lfmDifficultyString = ""
-            if (!lfm.is_quest_guess) {
-                lfmDifficultyString = lfm.difficulty
-            } else {
-                if (REAPER_EXPRESSION.test(lfm.comment) || skullCountMatches) {
-                    lfmDifficultyString = "Reaper"
-                } else if (ELITE_EXPRESSION.test(lfm.comment)) {
-                    lfmDifficultyString = "Elite"
-                } else if (HARD_EXPRESSION.test(lfm.comment)) {
-                    lfmDifficultyString = "Hard"
-                } else {
-                    lfmDifficultyString = "Normal"
-                }
-            }
-            if (skullCount > 0) {
-                lfmDifficultyString += ` ${skullCount}${skullPlus ? "+" : ""}`
-            }
+
+            const lfmDifficultyString = buildDifficultyString(lfm)
+
             const {
                 textLines: questDifficultyTextLines,
                 boundingBox: questDifficultyBoundingBox,

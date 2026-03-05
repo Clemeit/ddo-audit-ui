@@ -5,6 +5,7 @@ const MIN_LEVEL = 1
 const MAX_LEVEL = 34
 const MAX_PARTY_SIZE = 6
 const MAX_RAID_SIZE = 12
+const MAX_SKULL_COUNT = 10
 
 const CLASS_LIST = [
     "Barbarian",
@@ -36,4 +37,5 @@ export {
     RAID_TIMER_MILLIS,
     MAX_PARTY_SIZE,
     MAX_RAID_SIZE,
+    MAX_SKULL_COUNT,
 }

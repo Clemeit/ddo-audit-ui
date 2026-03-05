@@ -167,7 +167,7 @@ const SORT_HEADERS = (commonBoundingBoxes): SortHeaderData[] => [
 
 const HARD_EXPRESSION = /\b(hard|h|eh)\b/i
 const ELITE_EXPRESSION = /\b(elite|e|ee)\b/i
-const REAPER_EXPRESSION = /\b(reaper|r|re)/i
+const REAPER_EXPRESSION = /\b(reaper|r)\d?\b/i
 const SKULL_EXPRESSION = /\b(r|r |reaper|reaper )(\d+)\b(\+)?/i
 
 export {
