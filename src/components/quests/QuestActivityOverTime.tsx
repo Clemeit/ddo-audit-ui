@@ -4,6 +4,7 @@ import { QuestAnalyticsApiData } from "../../models/Lfm"
 import Skeleton from "../global/Skeleton"
 import Stack from "../global/Stack"
 import { SERVER_COLORS } from "../../constants/charts"
+import LineChartTooltip from "../charts/LineChartTooltip"
 import {
     LINE_CHART_MARGIN,
     LINE_CHART_THEME,
@@ -60,7 +61,7 @@ const QuestActivityOverTime = ({ questMetrics, isLoading }: Props) => {
                     yScale={LINE_CHART_Y_SCALE}
                     xScale={OVER_MONTH_CHART_X_SCALE}
                     theme={LINE_CHART_THEME}
-                    curve={LINE_CHART_DEFAULTS.curve}
+                    curve={"linear"}
                     enableGridX={LINE_CHART_DEFAULTS.enableGridX}
                     enablePoints={LINE_CHART_DEFAULTS.enablePoints}
                     lineWidth={LINE_CHART_DEFAULTS.lineWidth}
@@ -79,6 +80,25 @@ const QuestActivityOverTime = ({ questMetrics, isLoading }: Props) => {
                         legendOffset: -45,
                         legendPosition: "middle",
                     }}
+                    sliceTooltip={({ slice }) => (
+                        <LineChartTooltip
+                            slice={slice}
+                            getServerColor={() => SERVER_COLORS[0]}
+                            tooltipTitleFormatter={(value: any) => {
+                                const date =
+                                    value instanceof Date
+                                        ? value
+                                        : new Date(String(value))
+
+                                return Number.isNaN(date.getTime())
+                                    ? `Date: ${String(value)}`
+                                    : `Date: ${date.toLocaleDateString()}`
+                            }}
+                            yFormatter={(value: number) =>
+                                value.toLocaleString()
+                            }
+                        />
+                    )}
                 />
             </div>
         )

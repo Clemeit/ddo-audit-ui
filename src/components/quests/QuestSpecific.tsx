@@ -127,10 +127,10 @@ const QuestSpecific = () => {
 
         if (!questMetrics) {
             return (
-                <ContentCluster title="Quest Not Found">
+                <ContentCluster title={currentQuest.name}>
                     <p>
-                        Sorry, there's no data currently available for "
-                        {currentQuest.name}". Please check back later.
+                        Sorry, there's no data currently available. Please check
+                        back later.
                     </p>
                 </ContentCluster>
             )
@@ -139,68 +139,88 @@ const QuestSpecific = () => {
         return (
             <ContentClusterGroup>
                 <ContentCluster title={currentQuest?.name}>
-                    <div className="table-container">
-                        <table
-                            style={{
-                                width: "100%",
-                                borderCollapse: "collapse",
-                            }}
-                        >
-                            <thead>
-                                <tr>
-                                    <th
-                                        style={{
-                                            textAlign: "left",
-                                            padding: "6px 8px",
-                                        }}
-                                    >
-                                        Difficulty
-                                    </th>
-                                    <th
-                                        style={{
-                                            textAlign: "left",
-                                            padding: "6px 8px",
-                                        }}
-                                    >
-                                        XP
-                                    </th>
-                                    <th
-                                        style={{
-                                            textAlign: "left",
-                                            padding: "6px 8px",
-                                        }}
-                                    >
-                                        XP/Min
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {xpRows.map(({ label, xp, xpPerMin }) => (
-                                    <tr key={label}>
-                                        <td style={{ padding: "6px 8px" }}>
-                                            {label}
-                                        </td>
-                                        <td style={{ padding: "6px 8px" }}>
-                                            {xp ?? "N/A"}
-                                        </td>
-                                        <td style={{ padding: "6px 8px" }}>
-                                            {xpPerMin ?? "N/A"}
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                    <Checkbox
-                        onChange={(e) => setRawNumbers(e.target.checked)}
-                        checked={rawNumbers}
-                        style={{
-                            marginTop: "5px",
-                        }}
-                    >
-                        Raw numbers
-                    </Checkbox>
-                    <br />
+                    {xpRows && xpRows.length > 0 && (
+                        <>
+                            <div className="table-container">
+                                <table
+                                    style={{
+                                        width: "100%",
+                                        borderCollapse: "collapse",
+                                    }}
+                                >
+                                    <thead>
+                                        <tr>
+                                            <th
+                                                style={{
+                                                    textAlign: "left",
+                                                    padding: "6px 8px",
+                                                }}
+                                            >
+                                                Difficulty
+                                            </th>
+                                            <th
+                                                style={{
+                                                    textAlign: "left",
+                                                    padding: "6px 8px",
+                                                }}
+                                            >
+                                                XP
+                                            </th>
+                                            <th
+                                                style={{
+                                                    textAlign: "left",
+                                                    padding: "6px 8px",
+                                                }}
+                                            >
+                                                XP/Min
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {xpRows.map(
+                                            ({ label, xp, xpPerMin }) => (
+                                                <tr key={label}>
+                                                    <td
+                                                        style={{
+                                                            padding: "6px 8px",
+                                                        }}
+                                                    >
+                                                        {label}
+                                                    </td>
+                                                    <td
+                                                        style={{
+                                                            padding: "6px 8px",
+                                                        }}
+                                                    >
+                                                        {xp ?? "N/A"}
+                                                    </td>
+                                                    <td
+                                                        style={{
+                                                            padding: "6px 8px",
+                                                        }}
+                                                    >
+                                                        {xpPerMin ?? "N/A"}
+                                                    </td>
+                                                </tr>
+                                            )
+                                        )}
+                                    </tbody>
+                                </table>
+                            </div>
+                            <Checkbox
+                                onChange={(e) =>
+                                    setRawNumbers(e.target.checked)
+                                }
+                                checked={rawNumbers}
+                                style={{
+                                    marginTop: "5px",
+                                }}
+                            >
+                                Raw numbers
+                            </Checkbox>
+                            <br />
+                        </>
+                    )}
                     <div className="table-container">
                         <table>
                             <tbody>

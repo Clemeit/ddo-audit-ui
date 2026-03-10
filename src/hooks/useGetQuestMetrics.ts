@@ -11,7 +11,7 @@ const useGetQuestMetrics = (questId: number) => {
 
     const fetchData = useCallback(
         async (signal: AbortSignal) => {
-            if (questId === -1) return
+            if (questId == undefined || questId === -1) return
             setIsLoading(true)
 
             try {

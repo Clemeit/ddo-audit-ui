@@ -5,6 +5,7 @@ import Skeleton from "../global/Skeleton"
 import Stack from "../global/Stack"
 import { SERVER_COLORS } from "../../constants/charts"
 import { LINE_CHART_MARGIN } from "../charts/lineChartConfig"
+import QuestBarTooltip from "./QuestBarTooltip"
 import "../charts/Charts.css"
 
 interface Props {
@@ -88,6 +89,12 @@ const QuestActivityByHour = ({ questMetrics, isLoading }: Props) => {
                         legendOffset: -50,
                         legendPosition: "middle",
                     }}
+                    tooltip={(barProps) => (
+                        <QuestBarTooltip
+                            {...(barProps as any)}
+                            titleFormatter={(index) => `Hour: ${index}:00`}
+                        />
+                    )}
                     valueFormat={(value) => Number(value).toLocaleString()}
                 />
             </div>
