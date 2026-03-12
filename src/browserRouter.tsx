@@ -205,7 +205,7 @@ export default createBrowserRouter(
                 }
             >
                 <Route index element={<Quests />} />
-                <Route path=":id" element={<QuestSpecific />} />
+                <Route path=":questName" element={<QuestSpecific />} />
             </Route>
             <Route path="/about" element={<About />} />
             <Route path="*" element={<NotFound />} />

@@ -33,8 +33,6 @@ const QuestSearch = ({
 }: Props) => {
     const { maxQuestLevel } = useQuestContext()
 
-    console.log("maxQuestLevel", maxQuestLevel)
-
     const setToDefaults = () => {
         setQuestFilter("")
         setMinimumLevel(MIN_LEVEL)

@@ -78,3 +78,82 @@ export const getMetricOverlayDisplayData = (
                 : null,
     }
 }
+
+const hasQuestLevel = (value: number | undefined): value is number => {
+    return value != null
+}
+
+export const isQuestWithinLevelTolerance = (
+    targetQuest: Quest | null | undefined,
+    candidateQuest: Quest | null | undefined,
+    tolerance: number = 1
+): boolean => {
+    if (!targetQuest || !candidateQuest) return false
+
+    const heroicMatch =
+        hasQuestLevel(targetQuest.heroic_normal_cr) &&
+        hasQuestLevel(candidateQuest.heroic_normal_cr) &&
+        Math.abs(
+            targetQuest.heroic_normal_cr - candidateQuest.heroic_normal_cr
+        ) <= tolerance
+
+    const epicMatch =
+        hasQuestLevel(targetQuest.epic_normal_cr) &&
+        hasQuestLevel(candidateQuest.epic_normal_cr) &&
+        Math.abs(targetQuest.epic_normal_cr - candidateQuest.epic_normal_cr) <=
+            tolerance
+
+    return heroicMatch || epicMatch
+}
+
+export const getQuestLevelDeltaFromTarget = (
+    targetQuest: Quest | null | undefined,
+    candidateQuest: Quest | null | undefined
+): number | null => {
+    if (!targetQuest || !candidateQuest) return null
+
+    const deltas: number[] = []
+
+    if (
+        hasQuestLevel(targetQuest.heroic_normal_cr) &&
+        hasQuestLevel(candidateQuest.heroic_normal_cr)
+    ) {
+        deltas.push(
+            Math.abs(
+                targetQuest.heroic_normal_cr - candidateQuest.heroic_normal_cr
+            )
+        )
+    }
+
+    if (
+        hasQuestLevel(targetQuest.epic_normal_cr) &&
+        hasQuestLevel(candidateQuest.epic_normal_cr)
+    ) {
+        deltas.push(
+            Math.abs(targetQuest.epic_normal_cr - candidateQuest.epic_normal_cr)
+        )
+    }
+
+    if (deltas.length === 0) return null
+    return Math.min(...deltas)
+}
+
+export const sortQuestsByPeerProximity = (
+    quests: Quest[],
+    targetQuest: Quest | null | undefined
+): Quest[] => {
+    return [...quests].sort((a, b) => {
+        const aDelta = getQuestLevelDeltaFromTarget(targetQuest, a)
+        const bDelta = getQuestLevelDeltaFromTarget(targetQuest, b)
+
+        if (aDelta == null && bDelta == null) {
+            return (a.name || "").localeCompare(b.name || "")
+        }
+        if (aDelta == null) return 1
+        if (bDelta == null) return -1
+
+        if (aDelta !== bDelta) return aDelta - bDelta
+
+        return (a.name || "").localeCompare(b.name || "")
+    })
+}

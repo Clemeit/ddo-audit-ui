@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { getQuestAnalytics } from "../services/questService"
 import { QuestAnalyticsApiResponse } from "../models/Lfm"
 import logMessage from "../utils/logUtils"

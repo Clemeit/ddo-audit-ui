@@ -200,9 +200,7 @@ const Quests = () => {
                     meetsMaxLevel
                 )
             })
-            .filter(
-                (quest) => areas && areas[quest.area_id].is_wilderness == false
-            )
+            .filter((quest) => areas?.[quest.area_id]?.is_wilderness === false)
             .filter((quest) => {
                 if (showOnlyQuestsWithMetrics) {
                     return (
@@ -330,12 +328,13 @@ const Quests = () => {
                                 setSortField={setSortField}
                                 sortDirection={sortDirection}
                                 setSortDirection={setSortDirection}
-                                onTableScroll={(scrollPos) =>
+                                onTableScroll={(scrollPos) => {
+                                    setScrollPosition(scrollPos)
                                     saveToSessionStorage(
                                         "tableScrollPosition",
                                         scrollPos
                                     )
-                                }
+                                }}
                                 initialScrollPosition={scrollPosition}
                                 scrollResetKey={scrollResetKey}
                             />

@@ -15,6 +15,8 @@ const getBestXpValue = (
     xp: Quest["xp"],
     type: "heroic" | "epic"
 ): number | null => {
+    if (!xp) return null
+
     const prefix = type === "heroic" ? "heroic" : "epic"
 
     const elite = xp[`${prefix}_elite` as keyof typeof xp]
@@ -37,7 +39,7 @@ const calculateXpPerMinute = (
     quest: Quest,
     type: "heroic" | "epic"
 ): number | null => {
-    if (!quest.length) return null
+    if (!quest.length || quest.xp == undefined) return null
     const xpValue = getBestXpValue(quest.xp, type)
     if (!xpValue) return null
     return Math.round(xpValue / (quest.length / 60))
@@ -47,6 +49,11 @@ interface Props {
     quests: Quest[]
     maxBodyHeight?: number | string
     isLoading?: boolean
+    highlightQuestId?: number
+    hideHeroicLevelColumn?: boolean
+    hideEpicLevelColumn?: boolean
+    hideHeroicXpColumn?: boolean
+    hideEpicXpColumn?: boolean
     sortField?: string
     setSortField?: React.Dispatch<React.SetStateAction<string>>
     sortDirection?: "asc" | "desc"
@@ -60,6 +67,11 @@ const QuestTable = ({
     quests = [],
     maxBodyHeight,
     isLoading,
+    highlightQuestId,
+    hideHeroicLevelColumn = false,
+    hideEpicLevelColumn = false,
+    hideHeroicXpColumn = false,
+    hideEpicXpColumn = false,
     sortField,
     setSortField,
     sortDirection,
@@ -102,6 +114,20 @@ const QuestTable = ({
               }
             : undefined
 
+    const visibleColumnCount = useMemo(() => {
+        let count = 8
+        if (hideHeroicLevelColumn) count -= 1
+        if (hideEpicLevelColumn) count -= 1
+        if (hideHeroicXpColumn) count -= 1
+        if (hideEpicXpColumn) count -= 1
+        return count
+    }, [
+        hideEpicLevelColumn,
+        hideEpicXpColumn,
+        hideHeroicLevelColumn,
+        hideHeroicXpColumn,
+    ])
+
     const handleHeaderClick = (
         fieldName: string,
         defaultOrder: "asc" | "desc" = "asc"
@@ -136,7 +162,7 @@ const QuestTable = ({
         if (quests.length === 0) {
             return (
                 <tr>
-                    <td className="no-data-row" colSpan={4}>
+                    <td className="no-data-row" colSpan={visibleColumnCount}>
                         No quests to display
                     </td>
                 </tr>
@@ -147,18 +173,24 @@ const QuestTable = ({
             .filter((quest) => quest.id && quest.name)
             .flatMap((quest) => {
                 const key = `quest_${quest.id}`
+                const isHighlightedRow =
+                    highlightQuestId != null && quest.id === highlightQuestId
 
                 return (
                     <tr
                         key={key}
-                        className={"clickable"}
+                        className={`clickable ${isHighlightedRow ? "selected-row" : ""}`.trim()}
                         onClick={() => {
                             if (quest) handleRowClick(quest)
                         }}
                     >
                         <td>{quest.name || "Unknown Quest"}</td>
-                        <td>{quest.heroic_normal_cr || ""}</td>
-                        <td>{quest.epic_normal_cr || ""}</td>
+                        {!hideHeroicLevelColumn && (
+                            <td>{quest.heroic_normal_cr || ""}</td>
+                        )}
+                        {!hideEpicLevelColumn && (
+                            <td>{quest.epic_normal_cr || ""}</td>
+                        )}
                         <td>{quest.required_adventure_pack || ""}</td>
                         <td>
                             {quest.length != undefined
@@ -170,63 +202,84 @@ const QuestTable = ({
                                   })
                                 : ""}
                         </td>
-                        <td
-                            style={{
-                                color: getRelativeMetricColor(
-                                    quest.heroic_xp_per_minute_relative
-                                ),
-                            }}
-                            title={`${
-                                Math.round(
-                                    quest.heroic_xp_per_minute_relative * 100
-                                ) / 100
-                            }/1`}
-                        >
-                            {(() => {
-                                const xpPerMin = calculateXpPerMinute(
-                                    quest,
-                                    "heroic"
-                                )
-                                if (!xpPerMin) return ""
-                                return `${xpPerMin}${
-                                    quest.heroic_xp_per_minute_relative != null
-                                        ? ` (${getRelativeString(
-                                              quest.heroic_xp_per_minute_relative
-                                          ).replace(/\s/g, "\u00A0")})`
-                                        : ""
-                                }`
-                            })()}
-                        </td>
-                        <td
-                            style={{
-                                color: getRelativeMetricColor(
-                                    quest.epic_xp_per_minute_relative
-                                ),
-                            }}
-                            title={`${Math.round(quest.epic_xp_per_minute_relative * 100) / 100}/1`}
-                        >
-                            {(() => {
-                                const xpPerMin = calculateXpPerMinute(
-                                    quest,
-                                    "epic"
-                                )
-                                if (!xpPerMin) return ""
-                                return `${xpPerMin}${
-                                    quest.epic_xp_per_minute_relative != null
-                                        ? ` (${getRelativeString(
-                                              quest.epic_xp_per_minute_relative
-                                          ).replace(/\s/g, "\u00A0")})`
-                                        : ""
-                                }`
-                            })()}
-                        </td>
+                        {!hideHeroicXpColumn && (
+                            <td
+                                style={{
+                                    color: getRelativeMetricColor(
+                                        quest.heroic_xp_per_minute_relative
+                                    ),
+                                }}
+                                title={
+                                    quest.heroic_xp_per_minute_relative !=
+                                    undefined
+                                        ? `${
+                                              Math.round(
+                                                  quest.heroic_xp_per_minute_relative *
+                                                      100
+                                              ) / 100
+                                          }/1`
+                                        : "No data"
+                                }
+                            >
+                                {(() => {
+                                    const xpPerMin = calculateXpPerMinute(
+                                        quest,
+                                        "heroic"
+                                    )
+                                    if (!xpPerMin) return ""
+                                    return `${xpPerMin}${
+                                        quest.heroic_xp_per_minute_relative !=
+                                        null
+                                            ? ` (${getRelativeString(
+                                                  quest.heroic_xp_per_minute_relative
+                                              ).replace(/\s/g, "\u00A0")})`
+                                            : ""
+                                    }`
+                                })()}
+                            </td>
+                        )}
+                        {!hideEpicXpColumn && (
+                            <td
+                                style={{
+                                    color: getRelativeMetricColor(
+                                        quest.epic_xp_per_minute_relative
+                                    ),
+                                }}
+                                title={
+                                    quest.epic_xp_per_minute_relative !=
+                                    undefined
+                                        ? `${Math.round(quest.epic_xp_per_minute_relative * 100) / 100}/1`
+                                        : "No data"
+                                }
+                            >
+                                {(() => {
+                                    const xpPerMin = calculateXpPerMinute(
+                                        quest,
+                                        "epic"
+                                    )
+                                    if (!xpPerMin) return ""
+                                    return `${xpPerMin}${
+                                        quest.epic_xp_per_minute_relative !=
+                                        null
+                                            ? ` (${getRelativeString(
+                                                  quest.epic_xp_per_minute_relative
+                                              ).replace(/\s/g, "\u00A0")})`
+                                            : ""
+                                    }`
+                                })()}
+                            </td>
+                        )}
                         <td
                             style={{
                                 color: getRelativeMetricColor(
                                     quest.heroic_popularity_relative
                                 ),
                             }}
-                            title={`${Math.round(quest.heroic_popularity_relative * 100) / 100}/1`}
+                            title={
+                                quest.heroic_popularity_relative != undefined
+                                    ? `${Math.round(quest.heroic_popularity_relative * 100) / 100}/1`
+                                    : "No data"
+                            }
                         >
                             {quest.heroic_popularity_relative != undefined
                                 ? getRelativeString(
@@ -275,42 +328,50 @@ const QuestTable = ({
                                 {getSortIcon("name")}
                             </div>
                         </th>
-                        <th
-                            style={{
-                                cursor: "pointer",
-                            }}
-                            onClick={() =>
-                                handleHeaderClick("heroic_normal_cr")
-                            }
-                        >
-                            <div
+                        {!hideHeroicLevelColumn && (
+                            <th
                                 style={{
-                                    display: "flex",
-                                    alignItems: "center",
-                                    gap: "4px",
+                                    cursor: "pointer",
                                 }}
+                                onClick={() =>
+                                    handleHeaderClick("heroic_normal_cr")
+                                }
                             >
-                                Level&nbsp;(Heroic)
-                                {getSortIcon("heroic_normal_cr")}
-                            </div>
-                        </th>
-                        <th
-                            style={{
-                                cursor: "pointer",
-                            }}
-                            onClick={() => handleHeaderClick("epic_normal_cr")}
-                        >
-                            <div
+                                <div
+                                    style={{
+                                        display: "flex",
+                                        alignItems: "center",
+                                        gap: "4px",
+                                    }}
+                                >
+                                    Level
+                                    {!hideEpicLevelColumn && "\u00A0(Heroic)"}
+                                    {getSortIcon("heroic_normal_cr")}
+                                </div>
+                            </th>
+                        )}
+                        {!hideEpicLevelColumn && (
+                            <th
                                 style={{
-                                    display: "flex",
-                                    alignItems: "center",
-                                    gap: "4px",
+                                    cursor: "pointer",
                                 }}
+                                onClick={() =>
+                                    handleHeaderClick("epic_normal_cr")
+                                }
                             >
-                                Level&nbsp;(Epic)
-                                {getSortIcon("epic_normal_cr")}
-                            </div>
-                        </th>
+                                <div
+                                    style={{
+                                        display: "flex",
+                                        alignItems: "center",
+                                        gap: "4px",
+                                    }}
+                                >
+                                    Level
+                                    {!hideHeroicLevelColumn && "\u00A0(Epic)"}
+                                    {getSortIcon("epic_normal_cr")}
+                                </div>
+                            </th>
+                        )}
                         <th
                             style={{
                                 cursor: "pointer",
@@ -347,47 +408,56 @@ const QuestTable = ({
                                 {getSortIcon("length")}
                             </div>
                         </th>
-                        <th
-                            style={{
-                                cursor: "pointer",
-                            }}
-                            onClick={() =>
-                                handleHeaderClick(
-                                    "heroic_xp_per_minute",
-                                    "desc"
-                                )
-                            }
-                        >
-                            <div
+                        {!hideHeroicXpColumn && (
+                            <th
                                 style={{
-                                    display: "flex",
-                                    alignItems: "center",
-                                    gap: "4px",
+                                    cursor: "pointer",
                                 }}
+                                onClick={() =>
+                                    handleHeaderClick(
+                                        "heroic_xp_per_minute",
+                                        "desc"
+                                    )
+                                }
                             >
-                                XP/Minute&nbsp;(HE)
-                                {getSortIcon("heroic_xp_per_minute")}
-                            </div>
-                        </th>
-                        <th
-                            style={{
-                                cursor: "pointer",
-                            }}
-                            onClick={() =>
-                                handleHeaderClick("epic_xp_per_minute", "desc")
-                            }
-                        >
-                            <div
+                                <div
+                                    style={{
+                                        display: "flex",
+                                        alignItems: "center",
+                                        gap: "4px",
+                                    }}
+                                >
+                                    XP/Minute
+                                    {!hideEpicXpColumn && "\u00A0(HE)"}
+                                    {getSortIcon("heroic_xp_per_minute")}
+                                </div>
+                            </th>
+                        )}
+                        {!hideEpicXpColumn && (
+                            <th
                                 style={{
-                                    display: "flex",
-                                    alignItems: "center",
-                                    gap: "4px",
+                                    cursor: "pointer",
                                 }}
+                                onClick={() =>
+                                    handleHeaderClick(
+                                        "epic_xp_per_minute",
+                                        "desc"
+                                    )
+                                }
                             >
-                                XP/Minute&nbsp;(EE)
-                                {getSortIcon("epic_xp_per_minute")}
-                            </div>
-                        </th>
+                                <div
+                                    style={{
+                                        display: "flex",
+                                        alignItems: "center",
+                                        gap: "4px",
+                                    }}
+                                >
+                                    XP/Minute
+                                    {!hideHeroicXpColumn && "\u00A0(EE)"}
+                                    {getSortIcon("epic_xp_per_minute")}
+                                </div>
+                            </th>
+                        )}
                         <th
                             style={{
                                 cursor: "pointer",
