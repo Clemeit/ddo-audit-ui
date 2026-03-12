@@ -15,7 +15,7 @@ import { getQuests } from "../services/questService.ts"
 import { CACHED_QUESTS_EXPIRY_TIME } from "../constants/client.ts"
 import logMessage from "../utils/logUtils.ts"
 import { LocalStorageEntry } from "../models/LocalStorage.ts"
-import { MIN_LEVEL } from "../constants/game.ts"
+import { MIN_LEVEL, MAX_LEVEL } from "../constants/game.ts"
 
 interface QuestContextProps {
     quests: { [key: number]: Quest }
@@ -38,8 +38,8 @@ export const QuestProvider = ({ children }: Props) => {
 
     const populateQuests = useCallback(
         async (fetchFromServer: boolean = false) => {
-            let cachedQuests: LocalStorageEntry<Quest[]>
-            let lastUpdated: Date
+            let cachedQuests: LocalStorageEntry<Quest[]> | null = null
+            let lastUpdated: Date | null = null
             try {
                 cachedQuests = getQuestsFromLocalStorage()
                 lastUpdated = new Date(cachedQuests.updatedAt || 0)
@@ -69,6 +69,7 @@ export const QuestProvider = ({ children }: Props) => {
                     !cachedQuests ||
                     !cachedQuests.data ||
                     !cachedQuests.updatedAt ||
+                    lastUpdated == null ||
                     new Date().getTime() - lastUpdated.getTime() >
                         CACHED_QUESTS_EXPIRY_TIME
                 ) {
@@ -115,7 +116,7 @@ export const QuestProvider = ({ children }: Props) => {
     }, [quests, cachedQuests])
 
     const maxQuestLevel = useMemo(() => {
-        let maxLevel = MIN_LEVEL
+        let maxLevel = MAX_LEVEL
         Object.values(questsMemoized.quests).forEach((quest) => {
             if (
                 quest.heroic_normal_cr != null &&

@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { useParams } from "react-router-dom"
 import Page from "../global/Page"
 import { ContentCluster, ContentClusterGroup } from "../global/ContentCluster"
@@ -21,85 +21,14 @@ import QuestTable from "./QuestTable"
 import {
     getRelativeMetricColor,
     getRelativeString,
-    getBestXpValue,
+    sortQuestsByField,
+    calculateQuestXpPerMinute,
 } from "../../utils/questUtils"
-
-const sortQuests = (
-    quests: Quest[],
-    sortField: string,
-    sortDirection: "asc" | "desc"
-): Quest[] => {
-    return [...quests].sort((a, b) => {
-        let aValue: string | number | null | undefined
-        let bValue: string | number | null | undefined
-        switch (sortField) {
-            case "name":
-                aValue = a.name
-                bValue = b.name
-                break
-            case "heroic_normal_cr":
-                aValue = a.heroic_normal_cr
-                bValue = b.heroic_normal_cr
-                break
-            case "epic_normal_cr":
-                aValue = a.epic_normal_cr
-                bValue = b.epic_normal_cr
-                break
-            case "required_adventure_pack":
-                aValue = a.required_adventure_pack
-                bValue = b.required_adventure_pack
-                break
-            case "length":
-                aValue = a.length
-                bValue = b.length
-                break
-            case "heroic_xp_per_minute":
-                aValue = a.heroic_xp_per_minute_relative
-                bValue = b.heroic_xp_per_minute_relative
-                break
-            case "epic_xp_per_minute":
-                aValue = a.epic_xp_per_minute_relative
-                bValue = b.epic_xp_per_minute_relative
-                break
-            case "popularity":
-                aValue = a.heroic_popularity_relative
-                bValue = b.heroic_popularity_relative
-                break
-            default:
-                aValue = a.name
-                bValue = b.name
-                break
-        }
-
-        const aIsEmpty = aValue == null || aValue === ""
-        const bIsEmpty = bValue == null || bValue === ""
-
-        if (aIsEmpty && bIsEmpty) {
-            return (a.id - b.id) * (sortDirection === "asc" ? 1 : -1)
-        }
-        if (aIsEmpty) return 1
-        if (bIsEmpty) return -1
-
-        if (aValue < bValue) return sortDirection === "asc" ? -1 : 1
-        if (aValue > bValue) return sortDirection === "asc" ? 1 : -1
-
-        return (a.id - b.id) * (sortDirection === "asc" ? 1 : -1)
-    })
-}
+import logMessage from "../../utils/logUtils"
 
 const formatBooleanValue = (value?: boolean): string => {
     if (value == null) return "Unknown"
     return value ? "Yes" : "No"
-}
-
-const calculateQuestXpPerMinute = (
-    quest: Quest | null,
-    type: "heroic" | "epic"
-): number | null => {
-    if (!quest?.length || !quest.xp) return null
-    const xpValue = getBestXpValue(quest.xp, type)
-    if (!xpValue) return null
-    return Math.round(xpValue / (quest.length / 60))
 }
 
 const formatRelativeRawValue = (value?: number | null): string => {
@@ -143,7 +72,12 @@ const QuestSpecific = () => {
         [quests, rawQuestName]
     )
 
-    const { questMetrics, isLoading } = useGetQuestMetrics(currentQuest?.id)
+    const { questMetrics, isLoading, error } = useGetQuestMetrics(
+        currentQuest?.id
+    )
+
+    const questNotFoundLogKeyRef = useRef<string | null>(null)
+    const missingAnalyticsQuestIdRef = useRef<number | null>(null)
 
     const [rawNumbers, setRawNumbers] = useState<boolean>(false)
     const [heroicSortField, setHeroicSortField] = useState<string>("name")
@@ -154,6 +88,44 @@ const QuestSpecific = () => {
     const [epicSortDirection, setEpicSortDirection] = useState<"asc" | "desc">(
         "asc"
     )
+
+    useEffect(() => {
+        const questCount = Object.keys(quests || {}).length
+        if (!rawQuestName || currentQuest || questCount === 0) {
+            return
+        }
+
+        if (questNotFoundLogKeyRef.current === rawQuestName) {
+            return
+        }
+
+        questNotFoundLogKeyRef.current = rawQuestName
+        logMessage("Quest-specific page could not resolve quest name", "warn", {
+            metadata: {
+                questNameParam: questName,
+                rawQuestName,
+                questCount,
+            },
+        })
+    }, [currentQuest, questName, quests, rawQuestName])
+
+    useEffect(() => {
+        if (!currentQuest?.id || isLoading || questMetrics || error) {
+            return
+        }
+
+        if (missingAnalyticsQuestIdRef.current === currentQuest.id) {
+            return
+        }
+
+        missingAnalyticsQuestIdRef.current = currentQuest.id
+        logMessage("Quest-specific analytics data not available", "warn", {
+            metadata: {
+                questId: currentQuest.id,
+                questName: currentQuest.name,
+            },
+        })
+    }, [currentQuest, error, isLoading, questMetrics])
 
     const hasHeroicLevel = currentQuest?.heroic_normal_cr != null
     const hasEpicLevel = currentQuest?.epic_normal_cr != null
@@ -175,7 +147,11 @@ const QuestSpecific = () => {
             return Math.abs(quest.heroic_normal_cr - targetLevel) <= 1
         })
 
-        return sortQuests(candidates, heroicSortField, heroicSortDirection)
+        return sortQuestsByField(
+            candidates,
+            heroicSortField,
+            heroicSortDirection
+        )
     }, [areas, currentQuest, quests, heroicSortDirection, heroicSortField])
 
     const epicPeerQuests = useMemo(() => {
@@ -195,7 +171,7 @@ const QuestSpecific = () => {
             return Math.abs(quest.epic_normal_cr - targetLevel) <= 1
         })
 
-        return sortQuests(candidates, epicSortField, epicSortDirection)
+        return sortQuestsByField(candidates, epicSortField, epicSortDirection)
     }, [areas, currentQuest, quests, epicSortDirection, epicSortField])
 
     const questWikiLink = useMemo(() => {
@@ -214,8 +190,10 @@ const QuestSpecific = () => {
     }, [currentQuest?.required_adventure_pack])
 
     const xpRows = useMemo(() => {
-        const averageTimeSeconds =
-            questMetrics?.data?.analytics_data?.average_duration_seconds ?? 1
+        const averageTimeSeconds = Math.max(
+            1,
+            questMetrics?.data?.analytics_data?.average_duration_seconds ?? 0
+        )
         const formatNumber = (value?: number | null) => {
             if (rawNumbers) return value
             return value != null

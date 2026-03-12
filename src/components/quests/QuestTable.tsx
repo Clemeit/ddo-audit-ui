@@ -1,27 +1,15 @@
-import { CSSProperties, useCallback, useEffect, useMemo, useRef } from "react"
+import { CSSProperties, useEffect, useMemo, useRef } from "react"
 import { Quest } from "../../models/Lfm"
 import { convertMillisecondsToPrettyString } from "../../utils/stringUtils"
 import {
     getRelativeMetricColor,
     getRelativeString,
-    getBestXpValue,
+    calculateQuestXpPerMinute,
 } from "../../utils/questUtils"
 import { useNavigate } from "react-router-dom"
 import logMessage from "../../utils/logUtils"
 import { ReactComponent as UpSVG } from "../../assets/svg/contract.svg"
 import { ReactComponent as DownSVG } from "../../assets/svg/expand.svg"
-
-// Calculate XP per minute using best available XP value
-const calculateXpPerMinute = (
-    quest: Quest,
-    type: "heroic" | "epic"
-): number | null => {
-    if (!quest.length || quest.xp == undefined) return null
-    const xpValue = getBestXpValue(quest.xp, type)
-    if (!xpValue) return null
-    return Math.round(xpValue / (quest.length / 60))
-}
-
 interface Props {
     quests: Quest[]
     maxBodyHeight?: number | string
@@ -148,10 +136,23 @@ const QuestTable = ({
 
         return quests
             .filter((quest) => quest.id && quest.name)
-            .flatMap((quest) => {
+            .map((quest) => {
                 const key = `quest_${quest.id}`
                 const isHighlightedRow =
                     highlightQuestId != null && quest.id === highlightQuestId
+
+                const heroicXpPerMin = calculateQuestXpPerMinute(
+                    quest,
+                    "heroic"
+                )
+                const heroicXpLabel = heroicXpPerMin
+                    ? `${heroicXpPerMin}${quest.heroic_xp_per_minute_relative != null ? ` (${getRelativeString(quest.heroic_xp_per_minute_relative).replace(/\s/g, "\u00A0")})` : ""}`
+                    : ""
+
+                const epicXpPerMin = calculateQuestXpPerMinute(quest, "epic")
+                const epicXpLabel = epicXpPerMin
+                    ? `${epicXpPerMin}${quest.epic_xp_per_minute_relative != null ? ` (${getRelativeString(quest.epic_xp_per_minute_relative).replace(/\s/g, "\u00A0")})` : ""}`
+                    : ""
 
                 return (
                     <tr
@@ -198,21 +199,7 @@ const QuestTable = ({
                                         : "No data"
                                 }
                             >
-                                {(() => {
-                                    const xpPerMin = calculateXpPerMinute(
-                                        quest,
-                                        "heroic"
-                                    )
-                                    if (!xpPerMin) return ""
-                                    return `${xpPerMin}${
-                                        quest.heroic_xp_per_minute_relative !=
-                                        null
-                                            ? ` (${getRelativeString(
-                                                  quest.heroic_xp_per_minute_relative
-                                              ).replace(/\s/g, "\u00A0")})`
-                                            : ""
-                                    }`
-                                })()}
+                                {heroicXpLabel}
                             </td>
                         )}
                         {!hideEpicXpColumn && (
@@ -229,21 +216,7 @@ const QuestTable = ({
                                         : "No data"
                                 }
                             >
-                                {(() => {
-                                    const xpPerMin = calculateXpPerMinute(
-                                        quest,
-                                        "epic"
-                                    )
-                                    if (!xpPerMin) return ""
-                                    return `${xpPerMin}${
-                                        quest.epic_xp_per_minute_relative !=
-                                        null
-                                            ? ` (${getRelativeString(
-                                                  quest.epic_xp_per_minute_relative
-                                              ).replace(/\s/g, "\u00A0")})`
-                                            : ""
-                                    }`
-                                })()}
+                                {epicXpLabel}
                             </td>
                         )}
                         <td
@@ -269,15 +242,12 @@ const QuestTable = ({
             })
     }
 
-    const getSortIcon = useCallback(
-        (fieldName: string) => {
-            const icon = sortDirection === "asc" ? <UpSVG /> : <DownSVG />
-            if (sortField === fieldName) {
-                return icon
-            }
-        },
-        [sortField, sortDirection]
-    )
+    const getSortIcon = (fieldName: string) => {
+        const icon = sortDirection === "asc" ? <UpSVG /> : <DownSVG />
+        if (sortField === fieldName) {
+            return icon
+        }
+    }
 
     return (
         <div
@@ -285,7 +255,9 @@ const QuestTable = ({
             style={containerStyle}
             ref={tableBodyRef}
         >
-            <table className={`quest-table  ${isLoading ? "loading" : ""}`}>
+            <table
+                className={`quest-table ${isLoading ? "loading" : ""}`.trim()}
+            >
                 <thead>
                     <tr>
                         <th

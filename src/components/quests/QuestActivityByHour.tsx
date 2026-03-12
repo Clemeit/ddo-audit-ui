@@ -3,7 +3,7 @@ import { ResponsiveBar } from "@nivo/bar"
 import { QuestAnalyticsApiData } from "../../models/Lfm"
 import Skeleton from "../global/Skeleton"
 import Stack from "../global/Stack"
-import { SERVER_COLORS } from "../../constants/charts"
+import { SERVER_COLORS, QUEST_BAR_CHART_THEME } from "../../constants/charts"
 import { LINE_CHART_MARGIN } from "../charts/lineChartConfig"
 import QuestBarTooltip from "./QuestBarTooltip"
 import "../charts/Charts.css"
@@ -11,28 +11,6 @@ import "../charts/Charts.css"
 interface Props {
     questMetrics?: QuestAnalyticsApiData
     isLoading?: boolean
-}
-
-const BAR_THEME = {
-    labels: {
-        text: {
-            fill: "#fff",
-        },
-    },
-    axis: {
-        legend: {
-            text: {
-                fill: "var(--text)",
-                fontSize: 14,
-            },
-        },
-        ticks: {
-            text: {
-                fill: "var(--text)",
-                fontSize: 14,
-            },
-        },
-    },
 }
 
 const CHART_HEIGHT = "360px"
@@ -74,7 +52,7 @@ const QuestActivityByHour = ({ questMetrics, isLoading }: Props) => {
                     margin={{ ...LINE_CHART_MARGIN, left: 65, bottom: 70 }}
                     padding={0.25}
                     colors={[SERVER_COLORS[0]]}
-                    theme={BAR_THEME}
+                    theme={QUEST_BAR_CHART_THEME}
                     labelSkipWidth={12}
                     labelSkipHeight={12}
                     axisBottom={{

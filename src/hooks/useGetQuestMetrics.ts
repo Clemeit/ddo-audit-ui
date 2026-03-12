@@ -3,7 +3,7 @@ import { getQuestAnalytics } from "../services/questService"
 import { QuestAnalyticsApiResponse } from "../models/Lfm"
 import logMessage from "../utils/logUtils"
 
-const useGetQuestMetrics = (questId: number) => {
+const useGetQuestMetrics = (questId?: number) => {
     const [questMetrics, setQuestMetrics] =
         useState<QuestAnalyticsApiResponse | null>(null)
     const [isLoading, setIsLoading] = useState<boolean>(false)
@@ -13,6 +13,7 @@ const useGetQuestMetrics = (questId: number) => {
         async (signal: AbortSignal) => {
             if (questId == undefined || questId === -1) {
                 setQuestMetrics(null)
+                setError(null)
                 return
             }
 
@@ -22,9 +23,17 @@ const useGetQuestMetrics = (questId: number) => {
                     setQuestMetrics(data)
                 }
             } catch (error) {
+                const isAbortError =
+                    signal.aborted ||
+                    (error instanceof Error && error.name === "AbortError")
+
+                if (isAbortError) {
+                    return
+                }
+
                 logMessage("Error fetching quest metrics", "error", {
                     metadata: {
-                        questId: questId,
+                        questId,
                         error: error instanceof Error ? error.message : error,
                     },
                 })
@@ -38,6 +47,13 @@ const useGetQuestMetrics = (questId: number) => {
     )
 
     useEffect(() => {
+        if (questId == undefined || questId === -1) {
+            setQuestMetrics(null)
+            setError(null)
+            setIsLoading(false)
+            return
+        }
+
         const controller = new AbortController()
         setIsLoading(true)
         setError(null)
@@ -50,7 +66,7 @@ const useGetQuestMetrics = (questId: number) => {
         return () => {
             controller.abort()
         }
-    }, [fetchData])
+    }, [fetchData, questId])
 
     return {
         questMetrics,

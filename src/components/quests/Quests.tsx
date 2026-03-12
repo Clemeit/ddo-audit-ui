@@ -8,19 +8,48 @@ import Stack from "../global/Stack.tsx"
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react"
 import QuestSearch from "./QuestSearch.tsx"
 import { MIN_LEVEL } from "../../constants/game.ts"
+import { sortQuestsByField } from "../../utils/questUtils.ts"
 import QuestTable from "./QuestTable.tsx"
 import { useAreaContext } from "../../contexts/AreaContext.tsx"
 import { ReactComponent as InfoSVG } from "../../assets/svg/info.svg"
 import ColoredText from "../global/ColoredText.tsx"
 import useIsMobile from "../../hooks/useIsMobile.ts"
 import ExpandableContainer from "../global/ExpandableContainer.tsx"
+import logMessage from "../../utils/logUtils.ts"
+
+const VALID_SORT_FIELDS = [
+    "name",
+    "heroic_normal_cr",
+    "epic_normal_cr",
+    "required_adventure_pack",
+    "length",
+    "heroic_xp_per_minute",
+    "epic_xp_per_minute",
+    "popularity",
+]
+
+const sessionStorageReadFailureKeys = new Set<string>()
+const sessionStorageWriteFailureKeys = new Set<string>()
+
+const isValidSortField = (value: string): boolean => {
+    return VALID_SORT_FIELDS.includes(value)
+}
 
 const getFromSessionStorage = (key: string, defaultValue: any) => {
     try {
         const value = sessionStorage.getItem(key)
         if (value === null) return defaultValue
         return JSON.parse(value)
-    } catch {
+    } catch (error) {
+        if (!sessionStorageReadFailureKeys.has(key)) {
+            sessionStorageReadFailureKeys.add(key)
+            logMessage("Failed to read quests session storage value", "warn", {
+                metadata: {
+                    key,
+                    error: error instanceof Error ? error.message : error,
+                },
+            })
+        }
         return defaultValue
     }
 }
@@ -28,8 +57,16 @@ const getFromSessionStorage = (key: string, defaultValue: any) => {
 const saveToSessionStorage = (key: string, value: any) => {
     try {
         sessionStorage.setItem(key, JSON.stringify(value))
-    } catch {
-        // Silently fail if session storage is not available
+    } catch (error) {
+        if (!sessionStorageWriteFailureKeys.has(key)) {
+            sessionStorageWriteFailureKeys.add(key)
+            logMessage("Failed to write quests session storage value", "warn", {
+                metadata: {
+                    key,
+                    error: error instanceof Error ? error.message : error,
+                },
+            })
+        }
     }
 }
 
@@ -38,14 +75,15 @@ const Quests = () => {
     const { quests, maxQuestLevel } = useQuestContext()
     const { areas } = useAreaContext()
 
-    const storedMaximumLevelRaw = getFromSessionStorage(
-        "maximumLevel",
-        null
-    ) as number | null
-    const storedMaximumLevel =
-        typeof storedMaximumLevelRaw === "number" && storedMaximumLevelRaw > 1
-            ? storedMaximumLevelRaw
-            : null
+    // Read the initial stored max level once at mount; avoid re-reading sessionStorage on every render
+    const initialStoredMaxLevelRef = useRef<number | null>(
+        (() => {
+            const raw = getFromSessionStorage("maximumLevel", null) as
+                | number
+                | null
+            return typeof raw === "number" && raw > 1 ? raw : null
+        })()
+    )
 
     const [computedTableMaxHeight, setComputedTableMaxHeight] =
         useState<string>("60vh")
@@ -63,7 +101,8 @@ const Quests = () => {
         getFromSessionStorage("minimumLevel", MIN_LEVEL)
     )
     const [maximumLevel, setMaximumLevel] = useState<number>(() => {
-        if (storedMaximumLevel != null) return storedMaximumLevel
+        if (initialStoredMaxLevelRef.current != null)
+            return initialStoredMaxLevelRef.current
         if (maxQuestLevel != null && maxQuestLevel > 1) return maxQuestLevel
         return 100
     })
@@ -75,12 +114,50 @@ const Quests = () => {
             getFromSessionStorage("showOnlyQuestsWithMetrics", false)
         )
 
-    const [sortField, setSortField] = useState<string>(
-        getFromSessionStorage("sortField", "name")
-    )
-    const [sortDirection, setSortDirection] = useState<"asc" | "desc">(
-        getFromSessionStorage("sortDirection", "asc")
-    )
+    const [sortField, setSortField] = useState<string>(() => {
+        const storedSortField = getFromSessionStorage("sortField", "name")
+
+        if (
+            typeof storedSortField === "string" &&
+            isValidSortField(storedSortField)
+        ) {
+            return storedSortField
+        }
+
+        if (storedSortField != null) {
+            logMessage("Invalid quest sort field in session storage", "warn", {
+                metadata: {
+                    sortField: storedSortField,
+                },
+            })
+        }
+
+        return "name"
+    })
+    const [sortDirection, setSortDirection] = useState<"asc" | "desc">(() => {
+        const storedSortDirection = getFromSessionStorage(
+            "sortDirection",
+            "asc"
+        )
+
+        if (storedSortDirection === "asc" || storedSortDirection === "desc") {
+            return storedSortDirection
+        }
+
+        if (storedSortDirection != null) {
+            logMessage(
+                "Invalid quest sort direction in session storage",
+                "warn",
+                {
+                    metadata: {
+                        sortDirection: storedSortDirection,
+                    },
+                }
+            )
+        }
+
+        return "asc"
+    })
 
     const [searchContainerIsOpen, setSearchContainerIsOpen] =
         useState<boolean>(false)
@@ -138,11 +215,11 @@ const Quests = () => {
     ])
 
     useEffect(() => {
-        if (storedMaximumLevel !== null) return
+        if (initialStoredMaxLevelRef.current !== null) return
         if (maxQuestLevel == undefined || maxQuestLevel <= 1) return
         setMaximumLevel(maxQuestLevel)
         saveToSessionStorage("maximumLevel", maxQuestLevel)
-    }, [maxQuestLevel, storedMaximumLevel])
+    }, [maxQuestLevel])
 
     useLayoutEffect(() => {
         const recompute = () => {
@@ -163,7 +240,7 @@ const Quests = () => {
     }, [isMobile, quests, searchContainerIsOpen])
 
     const filteredQuests = useMemo(() => {
-        return Object.values(quests)
+        const filtered = Object.values(quests)
             .filter((quest) => {
                 const nameMatchesFilter = quest.name
                     ? quest.name
@@ -186,18 +263,8 @@ const Quests = () => {
                           quest.heroic_normal_cr == minimumLevel) ||
                       (quest.epic_normal_cr !== undefined &&
                           quest.epic_normal_cr == minimumLevel)
-                const meetsMaxLevel = isLevelRange
-                    ? true
-                    : (quest.heroic_normal_cr !== undefined &&
-                          quest.heroic_normal_cr <= maximumLevel) ||
-                      (quest.epic_normal_cr !== undefined &&
-                          quest.epic_normal_cr <= maximumLevel)
 
-                return (
-                    (nameMatchesFilter || packMatchesFilter) &&
-                    meetsMinLevel &&
-                    meetsMaxLevel
-                )
+                return (nameMatchesFilter || packMatchesFilter) && meetsMinLevel
             })
             .filter((quest) => areas?.[quest.area_id]?.is_wilderness === false)
             .filter((quest) => {
@@ -212,62 +279,7 @@ const Quests = () => {
                     return true
                 }
             })
-            .sort((a, b) => {
-                let aValue: string | number | null | undefined
-                let bValue: string | number | null | undefined
-                switch (sortField) {
-                    case "name":
-                        aValue = a.name
-                        bValue = b.name
-                        break
-                    case "heroic_normal_cr":
-                        aValue = a.heroic_normal_cr
-                        bValue = b.heroic_normal_cr
-                        break
-                    case "epic_normal_cr":
-                        aValue = a.epic_normal_cr
-                        bValue = b.epic_normal_cr
-                        break
-                    case "required_adventure_pack":
-                        aValue = a.required_adventure_pack
-                        bValue = b.required_adventure_pack
-                        break
-                    case "length":
-                        aValue = a.length
-                        bValue = b.length
-                        break
-                    case "heroic_xp_per_minute":
-                        aValue = a.heroic_xp_per_minute_relative
-                        bValue = b.heroic_xp_per_minute_relative
-                        break
-                    case "epic_xp_per_minute":
-                        aValue = a.epic_xp_per_minute_relative
-                        bValue = b.epic_xp_per_minute_relative
-                        break
-                    case "popularity":
-                        aValue = a.heroic_popularity_relative
-                        bValue = b.heroic_popularity_relative
-                        break
-                }
-
-                // Handle null/undefined values - always push them to the end
-                const aIsEmpty = aValue == null || aValue === ""
-                const bIsEmpty = bValue == null || bValue === ""
-
-                if (aIsEmpty && bIsEmpty) {
-                    // Both empty - sort by quest id for deterministic ordering
-                    return (a.id - b.id) * (sortDirection === "asc" ? 1 : -1)
-                }
-                if (aIsEmpty) return 1 // a goes to end
-                if (bIsEmpty) return -1 // b goes to end
-
-                // Normal comparison for non-empty values
-                if (aValue < bValue) return sortDirection === "asc" ? -1 : 1
-                if (aValue > bValue) return sortDirection === "asc" ? 1 : -1
-
-                // Values are equal - sort by quest id for deterministic ordering
-                return (a.id - b.id) * (sortDirection === "asc" ? 1 : -1)
-            })
+        return sortQuestsByField(filtered, sortField, sortDirection)
     }, [
         quests,
         questFilter,

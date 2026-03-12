@@ -37,6 +37,8 @@ const QuestSearch = ({
         setQuestFilter("")
         setMinimumLevel(MIN_LEVEL)
         setMaximumLevel(maxQuestLevel)
+        setIsLevelRange(true)
+        setShowOnlyQuestsWithMetrics(false)
     }
 
     return (

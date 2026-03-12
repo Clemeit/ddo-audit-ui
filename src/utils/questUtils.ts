@@ -158,6 +158,79 @@ export const sortQuestsByPeerProximity = (
     })
 }
 
+export const sortQuestsByField = (
+    quests: Quest[],
+    sortField: string,
+    sortDirection: "asc" | "desc"
+): Quest[] => {
+    return [...quests].sort((a, b) => {
+        let aValue: string | number | null | undefined
+        let bValue: string | number | null | undefined
+        switch (sortField) {
+            case "name":
+                aValue = a.name
+                bValue = b.name
+                break
+            case "heroic_normal_cr":
+                aValue = a.heroic_normal_cr
+                bValue = b.heroic_normal_cr
+                break
+            case "epic_normal_cr":
+                aValue = a.epic_normal_cr
+                bValue = b.epic_normal_cr
+                break
+            case "required_adventure_pack":
+                aValue = a.required_adventure_pack
+                bValue = b.required_adventure_pack
+                break
+            case "length":
+                aValue = a.length
+                bValue = b.length
+                break
+            case "heroic_xp_per_minute":
+                aValue = a.heroic_xp_per_minute_relative
+                bValue = b.heroic_xp_per_minute_relative
+                break
+            case "epic_xp_per_minute":
+                aValue = a.epic_xp_per_minute_relative
+                bValue = b.epic_xp_per_minute_relative
+                break
+            case "popularity":
+                aValue = a.heroic_popularity_relative
+                bValue = b.heroic_popularity_relative
+                break
+            default:
+                aValue = a.name
+                bValue = b.name
+                break
+        }
+
+        const aIsEmpty = aValue == null || aValue === ""
+        const bIsEmpty = bValue == null || bValue === ""
+
+        if (aIsEmpty && bIsEmpty) {
+            return (a.id - b.id) * (sortDirection === "asc" ? 1 : -1)
+        }
+        if (aIsEmpty) return 1
+        if (bIsEmpty) return -1
+
+        if (aValue < bValue) return sortDirection === "asc" ? -1 : 1
+        if (aValue > bValue) return sortDirection === "asc" ? 1 : -1
+
+        return (a.id - b.id) * (sortDirection === "asc" ? 1 : -1)
+    })
+}
+
+export const calculateQuestXpPerMinute = (
+    quest: Quest | null,
+    type: "heroic" | "epic"
+): number | null => {
+    if (!quest?.length || !quest.xp) return null
+    const xpValue = getBestXpValue(quest.xp, type)
+    if (!xpValue) return null
+    return Math.round(xpValue / (quest.length / 60))
+}
+
 export const getBestXpValue = (
     xp: Quest["xp"],
     type: "heroic" | "epic"
