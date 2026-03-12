@@ -15,7 +15,7 @@ import { getQuests } from "../services/questService.ts"
 import { CACHED_QUESTS_EXPIRY_TIME } from "../constants/client.ts"
 import logMessage from "../utils/logUtils.ts"
 import { LocalStorageEntry } from "../models/LocalStorage.ts"
-import { MIN_LEVEL, MAX_LEVEL } from "../constants/game.ts"
+import { MAX_LEVEL } from "../constants/game.ts"
 
 interface QuestContextProps {
     quests: { [key: number]: Quest }

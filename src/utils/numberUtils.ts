@@ -6,7 +6,8 @@ function areArraysEqual(arr1: number[], arr2: number[]) {
 }
 
 function clamp(value: number, min: number, max: number): number {
-    return Math.min(max, Math.max(min, value))
+    const safeValue = Number.isFinite(value) ? value : min
+    return Math.min(max, Math.max(min, safeValue))
 }
 
 export { areArraysEqual, clamp }

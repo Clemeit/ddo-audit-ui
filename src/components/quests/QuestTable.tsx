@@ -61,11 +61,16 @@ const QuestTable = ({
 
     // Restore prior scroll position after data changes
     useEffect(() => {
-        const el = tableBodyRef.current
-        if (!el) return
-        setTimeout(() => {
-            if (el) el.scrollTop = initialScrollPosition
+        if (!tableBodyRef.current) return
+        const timeoutId = window.setTimeout(() => {
+            const currentEl = tableBodyRef.current
+            if (currentEl) {
+                currentEl.scrollTop = initialScrollPosition
+            }
         }, 0)
+        return () => {
+            window.clearTimeout(timeoutId)
+        }
     }, [quests, initialScrollPosition, scrollResetKey])
 
     const containerStyle: CSSProperties | undefined =
