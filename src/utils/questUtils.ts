@@ -78,3 +78,178 @@ export const getMetricOverlayDisplayData = (
                 : null,
     }
 }
+
+const hasQuestLevel = (value: number | undefined): value is number => {
+    return value != null
+}
+
+export const isQuestWithinLevelTolerance = (
+    targetQuest: Quest | null | undefined,
+    candidateQuest: Quest | null | undefined,
+    tolerance: number = 1
+): boolean => {
+    if (!targetQuest || !candidateQuest) return false
+
+    const heroicMatch =
+        hasQuestLevel(targetQuest.heroic_normal_cr) &&
+        hasQuestLevel(candidateQuest.heroic_normal_cr) &&
+        Math.abs(
+            targetQuest.heroic_normal_cr - candidateQuest.heroic_normal_cr
+        ) <= tolerance
+
+    const epicMatch =
+        hasQuestLevel(targetQuest.epic_normal_cr) &&
+        hasQuestLevel(candidateQuest.epic_normal_cr) &&
+        Math.abs(targetQuest.epic_normal_cr - candidateQuest.epic_normal_cr) <=
+            tolerance
+
+    return heroicMatch || epicMatch
+}
+
+export const getQuestLevelDeltaFromTarget = (
+    targetQuest: Quest | null | undefined,
+    candidateQuest: Quest | null | undefined
+): number | null => {
+    if (!targetQuest || !candidateQuest) return null
+
+    const deltas: number[] = []
+
+    if (
+        hasQuestLevel(targetQuest.heroic_normal_cr) &&
+        hasQuestLevel(candidateQuest.heroic_normal_cr)
+    ) {
+        deltas.push(
+            Math.abs(
+                targetQuest.heroic_normal_cr - candidateQuest.heroic_normal_cr
+            )
+        )
+    }
+
+    if (
+        hasQuestLevel(targetQuest.epic_normal_cr) &&
+        hasQuestLevel(candidateQuest.epic_normal_cr)
+    ) {
+        deltas.push(
+            Math.abs(targetQuest.epic_normal_cr - candidateQuest.epic_normal_cr)
+        )
+    }
+
+    if (deltas.length === 0) return null
+    return Math.min(...deltas)
+}
+
+export const sortQuestsByPeerProximity = (
+    quests: Quest[],
+    targetQuest: Quest | null | undefined
+): Quest[] => {
+    return [...quests].sort((a, b) => {
+        const aDelta = getQuestLevelDeltaFromTarget(targetQuest, a)
+        const bDelta = getQuestLevelDeltaFromTarget(targetQuest, b)
+
+        if (aDelta == null && bDelta == null) {
+            return (a.name || "").localeCompare(b.name || "")
+        }
+        if (aDelta == null) return 1
+        if (bDelta == null) return -1
+
+        if (aDelta !== bDelta) return aDelta - bDelta
+
+        return (a.name || "").localeCompare(b.name || "")
+    })
+}
+
+export const sortQuestsByField = (
+    quests: Quest[],
+    sortField: string,
+    sortDirection: "asc" | "desc"
+): Quest[] => {
+    return [...quests].sort((a, b) => {
+        let aValue: string | number | null | undefined
+        let bValue: string | number | null | undefined
+        switch (sortField) {
+            case "name":
+                aValue = a.name
+                bValue = b.name
+                break
+            case "heroic_normal_cr":
+                aValue = a.heroic_normal_cr
+                bValue = b.heroic_normal_cr
+                break
+            case "epic_normal_cr":
+                aValue = a.epic_normal_cr
+                bValue = b.epic_normal_cr
+                break
+            case "required_adventure_pack":
+                aValue = a.required_adventure_pack
+                bValue = b.required_adventure_pack
+                break
+            case "length":
+                aValue = a.length
+                bValue = b.length
+                break
+            case "heroic_xp_per_minute":
+                aValue = a.heroic_xp_per_minute_relative
+                bValue = b.heroic_xp_per_minute_relative
+                break
+            case "epic_xp_per_minute":
+                aValue = a.epic_xp_per_minute_relative
+                bValue = b.epic_xp_per_minute_relative
+                break
+            case "popularity":
+                aValue = a.heroic_popularity_relative
+                bValue = b.heroic_popularity_relative
+                break
+            default:
+                aValue = a.name
+                bValue = b.name
+                break
+        }
+
+        const aIsEmpty = aValue == null || aValue === ""
+        const bIsEmpty = bValue == null || bValue === ""
+
+        if (aIsEmpty && bIsEmpty) {
+            return (a.id - b.id) * (sortDirection === "asc" ? 1 : -1)
+        }
+        if (aIsEmpty) return 1
+        if (bIsEmpty) return -1
+
+        if (aValue < bValue) return sortDirection === "asc" ? -1 : 1
+        if (aValue > bValue) return sortDirection === "asc" ? 1 : -1
+
+        return (a.id - b.id) * (sortDirection === "asc" ? 1 : -1)
+    })
+}
+
+export const calculateQuestXpPerMinute = (
+    quest: Quest | null,
+    type: "heroic" | "epic"
+): number | null => {
+    if (!quest?.length || !quest.xp) return null
+    const xpValue = getBestXpValue(quest.xp, type)
+    if (!xpValue) return null
+    return Math.round(xpValue / (quest.length / 60))
+}
+
+export const getBestXpValue = (
+    xp: Quest["xp"],
+    type: "heroic" | "epic"
+): number | null => {
+    if (!xp) return null
+
+    const prefix = type === "heroic" ? "heroic" : "epic"
+
+    const elite = xp[`${prefix}_elite` as keyof typeof xp]
+    if (elite && elite > 0) return elite
+
+    const hard = xp[`${prefix}_hard` as keyof typeof xp]
+    if (hard && hard > 0) return hard
+
+    const normal = xp[`${prefix}_normal` as keyof typeof xp]
+    if (normal && normal > 0) return normal
+
+    const casual = xp[`${prefix}_casual` as keyof typeof xp]
+    if (casual && casual > 0) return casual
+
+    return null
+}

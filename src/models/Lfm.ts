@@ -12,9 +12,11 @@ interface QuestLevel {
 }
 
 interface QuestXP {
+    heroic_casual?: number
     heroic_normal?: number
     heroic_hard?: number
     heroic_elite?: number
+    epic_casual?: number
     epic_normal?: number
     epic_hard?: number
     epic_elite?: number
@@ -51,6 +53,58 @@ interface QuestApiResponse {
     data: Quest[]
     source: string
     timestamp: number
+}
+
+interface QuestSessionHistogramBin {
+    count: number | null
+    bin_start: number | null
+    bin_end: number | null
+}
+
+interface QuestSessionHourData {
+    hour: number | null
+    count: number | null
+}
+
+interface QuestSessionDateData {
+    date: string | null
+    count: number | null
+}
+
+interface QuestSessionDayOfWeekData {
+    day: number | null
+    day_name: string | null
+    count: number | null
+}
+
+interface QuestAnalyticsData {
+    histogram?: QuestSessionHistogramBin[]
+    total_sessions?: number | null
+    active_sessions?: number | null
+    activity_by_hour?: QuestSessionHourData[]
+    activity_over_time?: QuestSessionDateData[]
+    activity_by_day_of_week?: QuestSessionDayOfWeekData[]
+    completed_sessions?: number | null
+    average_duration_seconds?: number | null
+    standard_deviation_seconds?: number | null
+}
+
+interface QuestMetrics {
+    heroic_xp_per_minute_relative?: number | null
+    epic_xp_per_minute_relative?: number | null
+    heroic_popularity_relative?: number | null
+    epic_popularity_relative?: number | null
+}
+
+interface QuestAnalyticsApiData {
+    analytics_data?: QuestAnalyticsData
+    metrics?: QuestMetrics
+}
+
+interface QuestAnalyticsApiResponse {
+    data: QuestAnalyticsApiData
+    cached: boolean
+    updated_at: string
 }
 
 interface LfmActivityEvent {
@@ -182,6 +236,8 @@ export type {
     QuestApiResponse,
     LfmApiModel,
     LfmSpecificApiModel,
+    QuestAnalyticsApiResponse,
+    QuestAnalyticsApiData,
 }
 
 export { LfmActivityType, constructUnknownQuest, LfmSortType }
