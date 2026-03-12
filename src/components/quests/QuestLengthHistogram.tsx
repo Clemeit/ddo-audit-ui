@@ -113,7 +113,7 @@ const QuestLengthHistogram = ({ questMetrics, isLoading }: Props) => {
                         tickSize: 5,
                         tickPadding: 5,
                         tickRotation: -30,
-                        legend: "Run Duration (minutes)",
+                        legend: "Run Duration",
                         legendOffset: 70,
                     }}
                     axisLeft={{

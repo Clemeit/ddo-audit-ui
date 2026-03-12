@@ -157,3 +157,26 @@ export const sortQuestsByPeerProximity = (
         return (a.name || "").localeCompare(b.name || "")
     })
 }
+
+export const getBestXpValue = (
+    xp: Quest["xp"],
+    type: "heroic" | "epic"
+): number | null => {
+    if (!xp) return null
+
+    const prefix = type === "heroic" ? "heroic" : "epic"
+
+    const elite = xp[`${prefix}_elite` as keyof typeof xp]
+    if (elite && elite > 0) return elite
+
+    const hard = xp[`${prefix}_hard` as keyof typeof xp]
+    if (hard && hard > 0) return hard
+
+    const normal = xp[`${prefix}_normal` as keyof typeof xp]
+    if (normal && normal > 0) return normal
+
+    const casual = xp[`${prefix}_casual` as keyof typeof xp]
+    if (casual && casual > 0) return casual
+
+    return null
+}

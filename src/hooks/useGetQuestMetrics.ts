@@ -11,8 +11,10 @@ const useGetQuestMetrics = (questId: number) => {
 
     const fetchData = useCallback(
         async (signal: AbortSignal) => {
-            if (questId == undefined || questId === -1) return
-            setIsLoading(true)
+            if (questId == undefined || questId === -1) {
+                setQuestMetrics(null)
+                return
+            }
 
             try {
                 const data = await getQuestAnalytics(questId, { signal })
@@ -28,10 +30,7 @@ const useGetQuestMetrics = (questId: number) => {
                 })
                 if (!signal.aborted) {
                     setError(error as Error)
-                }
-            } finally {
-                if (!signal.aborted) {
-                    setIsLoading(false)
+                    setQuestMetrics(null)
                 }
             }
         },

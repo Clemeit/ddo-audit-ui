@@ -21,6 +21,7 @@ import QuestTable from "./QuestTable"
 import {
     getRelativeMetricColor,
     getRelativeString,
+    getBestXpValue,
 } from "../../utils/questUtils"
 
 const sortQuests = (
@@ -89,29 +90,6 @@ const sortQuests = (
 const formatBooleanValue = (value?: boolean): string => {
     if (value == null) return "Unknown"
     return value ? "Yes" : "No"
-}
-
-const getBestXpValue = (
-    xp: Quest["xp"],
-    type: "heroic" | "epic"
-): number | null => {
-    if (!xp) return null
-
-    const prefix = type === "heroic" ? "heroic" : "epic"
-
-    const elite = xp[`${prefix}_elite` as keyof typeof xp]
-    if (elite && elite > 0) return elite
-
-    const hard = xp[`${prefix}_hard` as keyof typeof xp]
-    if (hard && hard > 0) return hard
-
-    const normal = xp[`${prefix}_normal` as keyof typeof xp]
-    if (normal && normal > 0) return normal
-
-    const casual = xp[`${prefix}_casual` as keyof typeof xp]
-    if (casual && casual > 0) return casual
-
-    return null
 }
 
 const calculateQuestXpPerMinute = (
@@ -188,7 +166,7 @@ const QuestSpecific = () => {
             if (!quest?.id) return false
             if (quest.id === currentQuest.id) return true
 
-            if (areas?.[quest.area_id || 0]?.is_wilderness !== false) {
+            if (areas?.[quest.area_id || 0]?.is_wilderness === true) {
                 return false
             }
 
@@ -208,7 +186,7 @@ const QuestSpecific = () => {
             if (!quest?.id) return false
             if (quest.id === currentQuest.id) return true
 
-            if (areas?.[quest.area_id || 0]?.is_wilderness !== false) {
+            if (areas?.[quest.area_id || 0]?.is_wilderness === true) {
                 return false
             }
 
@@ -375,149 +353,129 @@ const QuestSpecific = () => {
             <ContentClusterGroup>
                 <ContentCluster title={currentQuest?.name}>
                     {currentQuest ? (
-                        <>
-                            <div className="table-container">
-                                <table>
-                                    <tbody>
-                                        <tr>
-                                            <td>Heroic level:</td>
-                                            <td>
-                                                {currentQuest.heroic_normal_cr ??
-                                                    "N/A"}
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>Epic level:</td>
-                                            <td>
-                                                {currentQuest.epic_normal_cr ??
-                                                    "N/A"}
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>Adventure area:</td>
-                                            <td>
-                                                {currentQuest.adventure_area ||
-                                                    areas?.[
-                                                        currentQuest.area_id ||
-                                                            0
-                                                    ]?.name ||
-                                                    "N/A"}
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>Quest journal group:</td>
-                                            <td>
-                                                {currentQuest.quest_journal_group ||
-                                                    "N/A"}
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>Group size:</td>
-                                            <td>
-                                                {currentQuest.group_size ||
-                                                    "N/A"}
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>Patron:</td>
-                                            <td>
-                                                {currentQuest.patron || "N/A"}
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>Required adventure pack:</td>
-                                            <td>
-                                                {requiredAdventurePackWikiLink ? (
-                                                    <WebLink
-                                                        href={
-                                                            requiredAdventurePackWikiLink
-                                                        }
+                        <div className="table-container">
+                            <table>
+                                <tbody>
+                                    <tr>
+                                        <td>Heroic level:</td>
+                                        <td>
+                                            {currentQuest.heroic_normal_cr ??
+                                                "N/A"}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Epic level:</td>
+                                        <td>
+                                            {currentQuest.epic_normal_cr ??
+                                                "N/A"}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Adventure area:</td>
+                                        <td>
+                                            {currentQuest.adventure_area ||
+                                                areas?.[
+                                                    currentQuest.area_id || 0
+                                                ]?.name ||
+                                                "N/A"}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Quest journal group:</td>
+                                        <td>
+                                            {currentQuest.quest_journal_group ||
+                                                "N/A"}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Group size:</td>
+                                        <td>
+                                            {currentQuest.group_size || "N/A"}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Patron:</td>
+                                        <td>{currentQuest.patron || "N/A"}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Required adventure pack:</td>
+                                        <td>
+                                            {requiredAdventurePackWikiLink ? (
+                                                <WebLink
+                                                    href={
+                                                        requiredAdventurePackWikiLink
+                                                    }
+                                                    style={{
+                                                        display: "inline-flex",
+                                                        alignItems: "center",
+                                                        gap: "4px",
+                                                    }}
+                                                >
+                                                    {
+                                                        currentQuest.required_adventure_pack
+                                                    }
+                                                    <OpenInNew
                                                         style={{
-                                                            display:
-                                                                "inline-flex",
-                                                            alignItems:
-                                                                "center",
-                                                            gap: "4px",
+                                                            width: "1rem",
+                                                            height: "1rem",
+                                                            flexShrink: 0,
                                                         }}
-                                                    >
-                                                        {
-                                                            currentQuest.required_adventure_pack
-                                                        }
-                                                        <OpenInNew
-                                                            style={{
-                                                                width: "1rem",
-                                                                height: "1rem",
-                                                                flexShrink: 0,
-                                                            }}
-                                                        />
-                                                    </WebLink>
-                                                ) : (
-                                                    "N/A"
-                                                )}
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>Free to play:</td>
-                                            <td>
-                                                {formatBooleanValue(
-                                                    currentQuest.is_free_to_play
-                                                )}
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>Free to VIP:</td>
-                                            <td>
-                                                {formatBooleanValue(
-                                                    currentQuest.is_free_to_vip
-                                                )}
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>Tip:</td>
-                                            <td>{currentQuest.tip || "N/A"}</td>
-                                        </tr>
-                                        <tr>
-                                            <td>DDO Wiki:</td>
-                                            <td>
-                                                {questWikiLink ? (
-                                                    <WebLink
-                                                        href={questWikiLink}
+                                                    />
+                                                </WebLink>
+                                            ) : (
+                                                "N/A"
+                                            )}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Free to play:</td>
+                                        <td>
+                                            {formatBooleanValue(
+                                                currentQuest.is_free_to_play
+                                            )}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Free to VIP:</td>
+                                        <td>
+                                            {formatBooleanValue(
+                                                currentQuest.is_free_to_vip
+                                            )}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Tip:</td>
+                                        <td>{currentQuest.tip || "N/A"}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>DDO Wiki:</td>
+                                        <td>
+                                            {questWikiLink ? (
+                                                <WebLink
+                                                    href={questWikiLink}
+                                                    style={{
+                                                        display: "inline-flex",
+                                                        alignItems: "center",
+                                                        gap: "4px",
+                                                    }}
+                                                >
+                                                    {currentQuest.name}
+                                                    <OpenInNew
                                                         style={{
-                                                            display:
-                                                                "inline-flex",
-                                                            alignItems:
-                                                                "center",
-                                                            gap: "4px",
+                                                            width: "1rem",
+                                                            height: "1rem",
+                                                            flexShrink: 0,
                                                         }}
-                                                    >
-                                                        {currentQuest.name}
-                                                        <OpenInNew
-                                                            style={{
-                                                                width: "1rem",
-                                                                height: "1rem",
-                                                                flexShrink: 0,
-                                                            }}
-                                                        />
-                                                    </WebLink>
-                                                ) : (
-                                                    "N/A"
-                                                )}
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                            <div style={{ marginTop: "10px" }}>
-                                <InfoSVG
-                                    className="page-message-icon"
-                                    style={{ fill: `var(--info)` }}
-                                />
-                                <ColoredText color="secondary">
-                                    Report incorrect data{" "}
-                                    <Link to="/feedback">here</Link>.
-                                </ColoredText>
-                            </div>
-                        </>
+                                                    />
+                                                </WebLink>
+                                            ) : (
+                                                "N/A"
+                                            )}
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
                     ) : (
                         <p>Quest information is not available.</p>
                     )}

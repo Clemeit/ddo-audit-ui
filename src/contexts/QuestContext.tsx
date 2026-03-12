@@ -117,10 +117,16 @@ export const QuestProvider = ({ children }: Props) => {
     const maxQuestLevel = useMemo(() => {
         let maxLevel = MIN_LEVEL
         Object.values(questsMemoized.quests).forEach((quest) => {
-            if (quest.heroic_normal_cr && quest.heroic_normal_cr > maxLevel) {
+            if (
+                quest.heroic_normal_cr != null &&
+                quest.heroic_normal_cr > maxLevel
+            ) {
                 maxLevel = quest.heroic_normal_cr
             }
-            if (quest.epic_normal_cr && quest.epic_normal_cr > maxLevel) {
+            if (
+                quest.epic_normal_cr != null &&
+                quest.epic_normal_cr > maxLevel
+            ) {
                 maxLevel = quest.epic_normal_cr
             }
         })

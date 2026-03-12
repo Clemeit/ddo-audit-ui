@@ -4,35 +4,12 @@ import { convertMillisecondsToPrettyString } from "../../utils/stringUtils"
 import {
     getRelativeMetricColor,
     getRelativeString,
+    getBestXpValue,
 } from "../../utils/questUtils"
 import { useNavigate } from "react-router-dom"
 import logMessage from "../../utils/logUtils"
 import { ReactComponent as UpSVG } from "../../assets/svg/contract.svg"
 import { ReactComponent as DownSVG } from "../../assets/svg/expand.svg"
-
-// Helper to get the best available XP value with fallback logic
-const getBestXpValue = (
-    xp: Quest["xp"],
-    type: "heroic" | "epic"
-): number | null => {
-    if (!xp) return null
-
-    const prefix = type === "heroic" ? "heroic" : "epic"
-
-    const elite = xp[`${prefix}_elite` as keyof typeof xp]
-    if (elite && elite > 0) return elite
-
-    const hard = xp[`${prefix}_hard` as keyof typeof xp]
-    if (hard && hard > 0) return hard
-
-    const normal = xp[`${prefix}_normal` as keyof typeof xp]
-    if (normal && normal > 0) return normal
-
-    const casual = xp[`${prefix}_casual` as keyof typeof xp]
-    if (casual && casual > 0) return casual
-
-    return null
-}
 
 // Calculate XP per minute using best available XP value
 const calculateXpPerMinute = (
