@@ -1,10 +1,11 @@
-import React, { useMemo } from "react"
+import React, { useEffect, useMemo } from "react"
 import { Helmet } from "react-helmet-async"
 import "./Page.css"
 import useNetworkStatus from "../../hooks/useNetworkStatus.ts"
 import BreadcrumbSchema from "./BreadcrumbSchema.tsx"
 import BannerMessage from "./BannerMessage.tsx"
 import PageMessageContainer from "./PageMessageContainer.tsx"
+import logMessage from "../../utils/logUtils.ts"
 
 interface Props {
     children: React.ReactNode
@@ -37,6 +38,10 @@ const Page = ({
     is404Page = false,
 }: Props) => {
     const isOnline = useNetworkStatus()
+
+    useEffect(() => {
+        logMessage("Page viewed", "info")
+    }, [])
 
     // Convert relative logo path to absolute URL for social media meta tags
     const absoluteLogoUrl = logo.startsWith("http")
