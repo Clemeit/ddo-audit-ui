@@ -27,14 +27,12 @@ const getApiUrl = () => {
 const API_URL = getApiUrl()
 // const API_URL = "http://api.localtest.me"
 const BETTER_STACK_URL = "https://ddoaudit.betteruptime.com/"
-const API_VERSION = "v1"
 
 export {
     CACHED_CHARACTER_EXPIRY_TIME,
     DONATE_LINK,
     GITHUB_LINK,
     API_URL,
-    API_VERSION,
     CACHED_AREAS_EXPIRY_TIME,
     CACHED_QUESTS_EXPIRY_TIME,
     MAX_REGISTERED_CHARACTERS,

@@ -134,10 +134,7 @@ const Servers = () => {
                 <ContentCluster title="See Also...">
                     <NavCardCluster>
                         <NavigationCard type="live" />
-                        <NavigationCard
-                            type="guilds"
-                            badge={<Badge text="New" type="new" />}
-                        />
+                        <NavigationCard type="guilds" />
                         <NavigationCard
                             type="trends"
                             disabled

@@ -64,6 +64,8 @@ interface LfmContextProps {
     setTrackedCharacterIds: (ids: number[]) => void
     showLfmPostedTime: boolean
     setShowLfmPostedTime: (show: boolean) => void
+    showQuestMetrics: boolean
+    setShowQuestMetrics: (show: boolean) => void
     mouseOverDelay: number
     setMouseOverDelay: (delay: number) => void
     showLfmActivity: boolean
@@ -164,6 +166,7 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
     const [showCharacterGuildNames, setShowCharacterGuildNames] =
         useState<boolean>(true)
     const [showLfmPostedTime, setShowLfmPostedTime] = useState<boolean>(true)
+    const [showQuestMetrics, setShowQuestMetrics] = useState<boolean>(true)
     const [showLfmActivity, setShowLfmActivity] = useState<boolean>(true)
     const [showEligibleCharacters, setShowEligibleCharacters] =
         useState<boolean>(false)
@@ -220,6 +223,7 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
         setShowQuestTips(true)
         setShowCharacterGuildNames(true)
         setShowLfmPostedTime(true)
+        setShowQuestMetrics(true)
         setShowLfmActivity(true)
         setShowEligibleCharacters(false)
         setHideGroupsPostedByIgnoredCharacters(false)
@@ -245,6 +249,7 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
         setShowCharacterGuildNames(true)
         setTrackedCharacterIds([])
         setShowLfmPostedTime(true)
+        setShowQuestMetrics(true)
         setMouseOverDelay(DEFAULT_MOUSE_OVER_DELAY)
         setShowLfmActivity(true)
         setIsMultiColumn(true)
@@ -376,6 +381,7 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
                 showCharacterGuildNames: true,
                 trackedCharacterIds: [] as number[],
                 showLfmPostedTime: true,
+                showQuestMetrics: true,
                 mouseOverDelay: DEFAULT_MOUSE_OVER_DELAY,
                 showLfmActivity: true,
                 isMultiColumn: true,
@@ -468,6 +474,10 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
             sanitized.showLfmPostedTime = sanitizeBoolean(
                 s.showLfmPostedTime,
                 defaults.showLfmPostedTime
+            )
+            sanitized.showQuestMetrics = sanitizeBoolean(
+                s.showQuestMetrics,
+                defaults.showQuestMetrics
             )
             sanitized.showLfmActivity = sanitizeBoolean(
                 s.showLfmActivity,
@@ -633,6 +643,7 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
                 setShowLfmPostedTime(
                     Boolean(settings.showLfmPostedTime ?? true)
                 )
+                setShowQuestMetrics(Boolean(settings.showQuestMetrics ?? true))
                 setMouseOverDelay(
                     settings.mouseOverDelay ?? DEFAULT_MOUSE_OVER_DELAY
                 )
@@ -772,6 +783,7 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
                 showCharacterGuildNames,
                 trackedCharacterIds,
                 showLfmPostedTime,
+                showQuestMetrics,
                 mouseOverDelay,
                 showLfmActivity,
                 isMultiColumn,
@@ -825,6 +837,7 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
         showCharacterGuildNames,
         trackedCharacterIds,
         showLfmPostedTime,
+        showQuestMetrics,
         mouseOverDelay,
         showLfmActivity,
         isMultiColumn,
@@ -862,6 +875,7 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
             showCharacterGuildNames,
             trackedCharacterIds,
             showLfmPostedTime,
+            showQuestMetrics,
             mouseOverDelay,
             showLfmActivity,
             isMultiColumn,
@@ -937,6 +951,8 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
                 setTrackedCharacterIds,
                 showLfmPostedTime,
                 setShowLfmPostedTime,
+                showQuestMetrics,
+                setShowQuestMetrics,
                 mouseOverDelay,
                 setMouseOverDelay,
                 showLfmActivity,

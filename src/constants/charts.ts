@@ -1,3 +1,25 @@
+export const QUEST_BAR_CHART_THEME = {
+    labels: {
+        text: {
+            fill: "#fff",
+        },
+    },
+    axis: {
+        legend: {
+            text: {
+                fill: "var(--text)",
+                fontSize: 14,
+            },
+        },
+        ticks: {
+            text: {
+                fill: "var(--text)",
+                fontSize: 14,
+            },
+        },
+    },
+}
+
 const SERVER_COLORS = [
     "hsl(205, 70%, 41%)",
     "hsl(167, 72%, 49%)",

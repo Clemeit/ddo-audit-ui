@@ -6,20 +6,22 @@ import React, {
     useMemo,
     useCallback,
 } from "react"
-import { Quest, QuestApiResponse } from "../models/Lfm.ts"
+import { Quest } from "../models/Lfm.ts"
 import {
     getQuests as getQuestsFromLocalStorage,
     setQuests as setQuestsInLocalStorage,
 } from "../utils/localStorage.ts"
-import { getRequest } from "../services/apiHelper.ts"
+import { getQuests } from "../services/questService.ts"
 import { CACHED_QUESTS_EXPIRY_TIME } from "../constants/client.ts"
 import logMessage from "../utils/logUtils.ts"
 import { LocalStorageEntry } from "../models/LocalStorage.ts"
+import { MAX_LEVEL } from "../constants/game.ts"
 
 interface QuestContextProps {
     quests: { [key: number]: Quest }
     reloadQuests: () => void
     getQuestFromAreaId: (areaId: number) => Quest | undefined
+    maxQuestLevel: number
 }
 
 const QuestContext = createContext<QuestContextProps | undefined>(undefined)
@@ -36,8 +38,8 @@ export const QuestProvider = ({ children }: Props) => {
 
     const populateQuests = useCallback(
         async (fetchFromServer: boolean = false) => {
-            let cachedQuests: LocalStorageEntry<Quest[]>
-            let lastUpdated: Date
+            let cachedQuests: LocalStorageEntry<Quest[]> | null = null
+            let lastUpdated: Date | null = null
             try {
                 cachedQuests = getQuestsFromLocalStorage()
                 lastUpdated = new Date(cachedQuests.updatedAt || 0)
@@ -67,16 +69,14 @@ export const QuestProvider = ({ children }: Props) => {
                     !cachedQuests ||
                     !cachedQuests.data ||
                     !cachedQuests.updatedAt ||
+                    lastUpdated == null ||
                     new Date().getTime() - lastUpdated.getTime() >
                         CACHED_QUESTS_EXPIRY_TIME
                 ) {
                     // Cache is stale
-                    const result = await getRequest<QuestApiResponse>(
-                        "quests",
-                        {
-                            params: { force: fetchFromServer },
-                        }
-                    )
+                    const result = await getQuests({
+                        force: fetchFromServer,
+                    })
                     const questObj = result.data.reduce(
                         (acc, quest) => {
                             acc[quest.id] = quest
@@ -115,6 +115,25 @@ export const QuestProvider = ({ children }: Props) => {
         return { quests: cachedQuests }
     }, [quests, cachedQuests])
 
+    const maxQuestLevel = useMemo(() => {
+        let maxLevel = MAX_LEVEL
+        Object.values(questsMemoized.quests).forEach((quest) => {
+            if (
+                quest.heroic_normal_cr != null &&
+                quest.heroic_normal_cr > maxLevel
+            ) {
+                maxLevel = quest.heroic_normal_cr
+            }
+            if (
+                quest.epic_normal_cr != null &&
+                quest.epic_normal_cr > maxLevel
+            ) {
+                maxLevel = quest.epic_normal_cr
+            }
+        })
+        return maxLevel
+    }, [questsMemoized])
+
     const areaIdToQuestMap: { [areaId: number]: Quest } = useMemo(() => {
         const map: { [areaId: number]: Quest } = {}
         for (const quest of Object.values(questsMemoized.quests ?? {})) {
@@ -140,8 +159,9 @@ export const QuestProvider = ({ children }: Props) => {
             quests: questsMemoized.quests,
             reloadQuests,
             getQuestFromAreaId,
+            maxQuestLevel,
         }),
-        [questsMemoized.quests, reloadQuests, getQuestFromAreaId]
+        [questsMemoized.quests, reloadQuests, getQuestFromAreaId, maxQuestLevel]
     )
 
     return (

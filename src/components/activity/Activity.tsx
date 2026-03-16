@@ -318,7 +318,8 @@ const Activity = () => {
                                             key={character.id}
                                             value={character.id}
                                         >
-                                            {character.name}
+                                            {character.name} (
+                                            {character.server_name})
                                         </option>
                                     ))}
                             </select>

@@ -191,34 +191,37 @@ const WhoContainer = ({
             }
 
             let stringFilterMatch = false
-            const stringFilters = stringFilter.split(",")
-            stringFilters.forEach((localFilter) => {
-                const nameMatch = compareString(
-                    character.name,
-                    localFilter,
-                    isExactMatch
-                )
-                const guildNameMatch = compareString(
-                    character.guild_name,
-                    localFilter,
-                    isExactMatch
-                )
-                const locationMatch = compareString(
-                    areas[character.location_id || 0]?.name,
-                    localFilter,
-                    isExactMatch
-                )
-                const unknownLocationMatch =
-                    localFilter === "aether" &&
-                    areas[character.location_id || 0] === undefined
+            // only match on characters that are not anonymous
+            if (!character.is_anonymous) {
+                const stringFilters = stringFilter.split(",")
+                stringFilters.forEach((localFilter) => {
+                    const nameMatch = compareString(
+                        character.name,
+                        localFilter,
+                        isExactMatch
+                    )
+                    const guildNameMatch = compareString(
+                        character.guild_name,
+                        localFilter,
+                        isExactMatch
+                    )
+                    const locationMatch = compareString(
+                        areas[character.location_id || 0]?.name,
+                        localFilter,
+                        isExactMatch
+                    )
+                    const unknownLocationMatch =
+                        localFilter === "aether" &&
+                        areas[character.location_id || 0] === undefined
 
-                const localMatch =
-                    nameMatch ||
-                    guildNameMatch ||
-                    locationMatch ||
-                    unknownLocationMatch
-                stringFilterMatch = stringFilterMatch || localMatch
-            })
+                    const localMatch =
+                        nameMatch ||
+                        guildNameMatch ||
+                        locationMatch ||
+                        unknownLocationMatch
+                    stringFilterMatch = stringFilterMatch || localMatch
+                })
+            }
 
             const levelRangeMatch =
                 character.total_level! >= minLevel &&
@@ -257,10 +260,14 @@ const WhoContainer = ({
                 ...Object.values(characterData?.data ?? {})
                     .filter((c) => groupIds.has(c.group_id ?? 0))
                     .filter((c) => {
-                        // only characters where there are two or more characters with the same group_id
+                        // only characters where there are two or more characters with the same group_id and at least one is not anonymous
                         const groupCount = Object.values(
                             characterData?.data ?? {}
-                        ).filter((c2) => c2.group_id === c.group_id).length
+                        ).filter(
+                            (c2) =>
+                                c2.group_id === c.group_id && !c2.is_anonymous
+                        ).length
+                        // only characters where at least one character in the group is not anonymous
                         return groupCount > 1
                     }),
             ]

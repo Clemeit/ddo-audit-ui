@@ -269,10 +269,7 @@ const Registration = () => {
                             type="timers"
                             badge={<Badge text="New" type="new" />}
                         />
-                        <NavigationCard
-                            type="guilds"
-                            badge={<Badge text="New" type="new" />}
-                        />
+                        <NavigationCard type="guilds" />
                         <NavigationCard type="friends" />
                         <NavigationCard type="ignores" />
                     </NavCardCluster>
