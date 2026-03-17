@@ -20,6 +20,8 @@ import { ReactComponent as Notifications } from "../../assets/svg/notifications.
 import { ReactComponent as Guild } from "../../assets/svg/guild.svg"
 import { ReactComponent as Content } from "../../assets/svg/content.svg"
 import { ReactComponent as UserSettingsSVG } from "../../assets/svg/user-settings.svg"
+import { ReactComponent as LogoutSVG } from "../../assets/svg/logout.svg"
+import { ReactComponent as LoginSVG } from "../../assets/svg/login.svg"
 
 import Link from "./Link.tsx"
 import WebLink from "./WebLink.tsx"
@@ -46,6 +48,8 @@ const typeToTitleMap = {
     guilds: "Guilds",
     "owned-content": "Owned Content",
     "user-settings": "User Settings",
+    login: "Log In",
+    logout: "Log Out",
 }
 
 const typeToDescriptionMap = {
@@ -73,6 +77,8 @@ const typeToDescriptionMap = {
     "owned-content":
         "Specify which adventure packs you own to filter content appropriately.",
     "user-settings": "Import and export your settings to sync across devices.",
+    login: "Log in to save your settings and sync them across all of your devices.",
+    logout: "Log out of your account. Your settings will still be saved for next time.",
 }
 
 const typeToIconMap = {
@@ -96,6 +102,8 @@ const typeToIconMap = {
     guilds: <Guild className="shrinkable-icon" />,
     "owned-content": <Content className="shrinkable-icon" />,
     "user-settings": <UserSettingsSVG className="shrinkable-icon" />,
+    login: <LoginSVG className="shrinkable-icon" />,
+    logout: <LogoutSVG className="shrinkable-icon" />,
 }
 
 interface Props {

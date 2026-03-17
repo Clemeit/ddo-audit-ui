@@ -1,31 +1,34 @@
-import React from "react"
 import Button from "../global/Button"
 import Stack from "../global/Stack"
+import { useUserContext } from "../../contexts/UserContext"
 
-const IS_LOGGED_IN = false
+const LoginButtonContainer = () => {
+    const { accessToken, logout, openLoginModal, openRegisterModal } =
+        useUserContext()
 
-const LogInButtonContainer = () => {
     return (
         <Stack
             style={{
-                position: "absolute",
-                top: 10,
-                right: 10,
-                padding: "8px 16px",
-                zIndex: 90,
+                marginLeft: "auto",
+                alignItems: "center",
+                padding: "0px 15px 0px 0px",
             }}
         >
-            {IS_LOGGED_IN ? (
-                <Button type="text" small onClick={() => {}}>
+            {!!accessToken ? (
+                <Button type="text" small onClick={() => logout()}>
                     Log Out
                 </Button>
             ) : (
                 <>
-                    <Button type="text" small onClick={() => {}}>
-                        Log In
+                    <Button type="text" small onClick={() => openLoginModal()}>
+                        Log&nbsp;In
                     </Button>
                     |
-                    <Button type="text" small onClick={() => {}}>
+                    <Button
+                        type="text"
+                        small
+                        onClick={() => openRegisterModal()}
+                    >
                         Register
                     </Button>
                 </>
@@ -34,4 +37,4 @@ const LogInButtonContainer = () => {
     )
 }
 
-export default LogInButtonContainer
+export default LoginButtonContainer

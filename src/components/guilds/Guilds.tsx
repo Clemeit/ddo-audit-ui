@@ -1,7 +1,7 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react"
 import Page from "../global/Page.tsx"
 import { ContentCluster, ContentClusterGroup } from "../global/ContentCluster"
-import useIsMobile from "../../hooks/useIsMobile.ts"
+import useWindowSize from "../../hooks/useWindowSize.ts"
 import Stack from "../global/Stack.tsx"
 import { getGuilds as getGuildsApiCall } from "../../services/guildService.ts"
 import useDebounce from "../../hooks/useDebounce.ts"
@@ -19,7 +19,7 @@ import useSearchParamState, {
 import logMessage from "../../utils/logUtils.ts"
 
 const Guilds = () => {
-    const isMobile = useIsMobile()
+    const { isMobile } = useWindowSize()
     // const [guildName, setGuildName] = React.useState("")
     // const [serverName, setServerName] = React.useState("")
     const [guildData, setGuildData] = React.useState<GuildDataApiResponse>()

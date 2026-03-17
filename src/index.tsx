@@ -10,6 +10,7 @@ import { ServiceWorkerUpdater } from "./components/global/ServiceWorkerUpdater.t
 // Import banner image to get the correct webpack path for preloading
 import bannerImage from "./assets/webp/banner_night_revels.webp"
 import logMessage from "./utils/logUtils.ts"
+import { UserProvider } from "./contexts/UserContext.tsx"
 
 // Preload the banner image for improved LCP
 const preloadBannerImage = () => {
@@ -27,10 +28,12 @@ const root = ReactDOM.createRoot(document.getElementById("root")!)
 root.render(
     <HelmetProvider>
         <ThemeProvider>
-            <NotificationProvider>
-                <ServiceWorkerUpdater />
-                <RouterProvider router={browserRouter} />
-            </NotificationProvider>
+            <UserProvider>
+                <NotificationProvider>
+                    <ServiceWorkerUpdater />
+                    <RouterProvider router={browserRouter} />
+                </NotificationProvider>
+            </UserProvider>
         </ThemeProvider>
     </HelmetProvider>
 )

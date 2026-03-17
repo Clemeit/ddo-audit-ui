@@ -5,13 +5,23 @@ import ContentPush from "./ContentPush.tsx"
 import { ErrorBoundary } from "./ErrorBoundary.tsx"
 import Notifications from "../global/Notifications.tsx"
 import PageViewTracker from "../global/PageViewTracker.tsx"
+import { useUserContext } from "../../contexts/UserContext.tsx"
+import Modal from "../modal/Modal.tsx"
+import AccountForm from "../account/AccountForm.tsx"
 
 function App() {
+    const { isLoginModalOpen, closeAccountModal } = useUserContext()
+
     return (
         <ErrorBoundary>
             <Header />
             <PageViewTracker />
             <Outlet />
+            {isLoginModalOpen && (
+                <Modal onClose={closeAccountModal}>
+                    <AccountForm />
+                </Modal>
+            )}
             <ScrollRestoration />
             <Footer />
             <Notifications />

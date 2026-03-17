@@ -5,11 +5,10 @@ import CharacterTable, {
     ColumnType,
 } from "../tables/CharacterTable.tsx"
 import Link from "../global/Link.tsx"
-import useGetRegisteredCharacters from "../../hooks/useGetRegisteredCharacters.ts"
 import { getGuildByName } from "../../services/guildService.ts"
 import { getCharactersByIds } from "../../services/characterService.ts"
 import { GuildByNameData } from "../../models/Guilds.ts"
-import useIsMobile from "../../hooks/useIsMobile.ts"
+import useWindowSize from "../../hooks/useWindowSize.ts"
 
 type Props = {
     guildData: GuildByNameData
@@ -31,7 +30,7 @@ const GuildExpandedContent: React.FC<Props> = ({
     const [isLoadingMore, setIsLoadingMore] = useState<boolean>(false)
     const [hasMoreOffline, setHasMoreOffline] = useState<boolean>(true)
     const abortRef = useRef<AbortController | null>(null)
-    const isMobile = useIsMobile()
+    const { isMobile } = useWindowSize()
 
     // Reset pagination and rows when guild identity changes
     useEffect(() => {

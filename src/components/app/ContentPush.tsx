@@ -1,8 +1,8 @@
 import React from "react"
-import useIsMobile from "../../hooks/useIsMobile.ts"
+import useWindowSize from "../../hooks/useWindowSize.ts"
 
 const ContentPush = () => {
-    const isMobile = useIsMobile()
+    const { isMobile } = useWindowSize()
 
     return isMobile ? <div style={{ height: "50px" }} /> : null
 }

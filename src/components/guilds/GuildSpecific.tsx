@@ -13,7 +13,7 @@ import {
 import Page from "../global/Page"
 import { ContentCluster, ContentClusterGroup } from "../global/ContentCluster"
 import Stack from "../global/Stack"
-import useIsMobile from "../../hooks/useIsMobile"
+import useWindowSize from "../../hooks/useWindowSize"
 import usePollApi from "../../hooks/usePollApi"
 import {
     Character,
@@ -46,7 +46,7 @@ const GuildSpecific = () => {
     const [isLoadingMore, setIsLoadingMore] = useState<boolean>(false)
     const [hasMoreOffline, setHasMoreOffline] = useState<boolean>(true)
     const abortRef = useRef<AbortController | null>(null)
-    const isMobile = useIsMobile()
+    const { isMobile } = useWindowSize()
     const [canRefresh, setCanRefresh] = useState<boolean>(false)
     // Used to force a refetch of offline data without changing page
     const [offlineRefreshKey, setOfflineRefreshKey] = useState<number>(0)

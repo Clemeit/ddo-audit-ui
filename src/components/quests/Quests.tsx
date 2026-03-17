@@ -13,7 +13,7 @@ import QuestTable from "./QuestTable.tsx"
 import { useAreaContext } from "../../contexts/AreaContext.tsx"
 import { ReactComponent as InfoSVG } from "../../assets/svg/info.svg"
 import ColoredText from "../global/ColoredText.tsx"
-import useIsMobile from "../../hooks/useIsMobile.ts"
+import useWindowSize from "../../hooks/useWindowSize.ts"
 import ExpandableContainer from "../global/ExpandableContainer.tsx"
 import logMessage from "../../utils/logUtils.ts"
 
@@ -71,7 +71,7 @@ const saveToSessionStorage = (key: string, value: any) => {
 }
 
 const Quests = () => {
-    const isMobile = useIsMobile()
+    const { isMobile } = useWindowSize()
     const { quests, maxQuestLevel } = useQuestContext()
     const { areas } = useAreaContext()
 

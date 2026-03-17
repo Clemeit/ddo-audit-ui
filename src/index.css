@@ -109,6 +109,13 @@ hr {
     color: var(--text);
 }
 
+button.navigation-card {
+    box-sizing: content-box;
+    appearance: none;
+    -webkit-appearance: none;
+    font: inherit;
+}
+
 .nav-card-cluster {
     display: flex;
     flex-direction: row;

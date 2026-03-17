@@ -2,7 +2,7 @@ import { useEffect, useState, type CSSProperties, type ReactNode } from "react"
 import { GuildByNameData } from "../../models/Guilds.ts"
 import "./GuildSearchTable.css"
 import { ReactComponent as ChevronRight } from "../../assets/svg/chevron-right.svg"
-import useIsMobile from "../../hooks/useIsMobile.ts"
+import useWindowSize from "../../hooks/useWindowSize.ts"
 import { useNavigate } from "react-router-dom"
 import logMessage from "../../utils/logUtils.ts"
 
@@ -22,7 +22,7 @@ const GuildSearchTable = ({
     renderExpandedContent,
 }: Props) => {
     const [expanded, setExpanded] = useState<Set<string>>(new Set())
-    const isMobile = useIsMobile()
+    const { isMobile } = useWindowSize()
     const navigate = useNavigate()
 
     useEffect(() => {

@@ -7,8 +7,11 @@ import Page from "../global/Page.tsx"
 import NavCardCluster from "../global/NavCardCluster.tsx"
 import { BETTER_STACK_URL } from "../../constants/client.ts"
 import Badge from "../global/Badge.tsx"
+import { useUserContext } from "../../contexts/UserContext.tsx"
 
 const Directory = () => {
+    const { openLoginModal, logout, isLoggedIn } = useUserContext()
+
     return (
         <Page
             title="DDO Audit | Character Tracking and LFM Viewer"
@@ -60,7 +63,22 @@ const Directory = () => {
                 </ContentCluster>
                 <ContentCluster title="Additional Resources">
                     <NavCardCluster>
-                        <NavigationCard type="user-settings" />
+                        {!isLoggedIn && (
+                            <NavigationCard
+                                type="login"
+                                badge={<Badge text="New" type="new" />}
+                                noLink
+                                onClick={() => openLoginModal()}
+                            />
+                        )}
+                        {isLoggedIn && (
+                            <NavigationCard
+                                type="logout"
+                                badge={<Badge text="New" type="new" />}
+                                noLink
+                                onClick={() => logout()}
+                            />
+                        )}
                         <NavigationCard type="about" />
                         <NavigationCard
                             type="api"

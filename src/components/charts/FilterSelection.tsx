@@ -8,7 +8,7 @@ import {
 import { toSentenceCase } from "../../utils/stringUtils.ts"
 import { DAYS_OF_WEEK } from "../../constants/dates.ts"
 import ExpandableContainer from "../global/ExpandableContainer.tsx"
-import useIsMobile from "../../hooks/useIsMobile.ts"
+import useWindowSize from "../../hooks/useWindowSize.ts"
 import Select from "../global/Select.tsx"
 
 interface Props {
@@ -56,7 +56,7 @@ const FilterSelection = ({
     ) as string[]
     const DAY_FILTER_OPTIONS = ["All", ...DAYS_OF_WEEK]
 
-    const isMobile = useIsMobile()
+    const { isMobile } = useWindowSize()
 
     const content = (
         <Stack

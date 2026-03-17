@@ -1,3 +1,4 @@
+import { UserObject } from "./Auth"
 import { AccessToken } from "./Verification"
 
 interface UserSettings {
@@ -25,4 +26,37 @@ interface PostSettingsResponse {
     }
 }
 
-export type { GetSettingsResponse, PostSettingsResponse, UserSettings }
+interface UserProfile {
+    data?: UserObject
+    error?: string
+}
+
+interface UpdatePasswordPayload {
+    old_password: string
+    new_password: string
+}
+
+interface PersistentSettingsPayload {
+    settings: {
+        [key: string]: any
+    }
+}
+
+interface PersistentSettingsResponse {
+    data?: {
+        settings: {
+            [key: string]: any
+        }
+    }
+    error?: string
+}
+
+export type {
+    GetSettingsResponse,
+    PostSettingsResponse,
+    UserSettings,
+    UserProfile,
+    UpdatePasswordPayload,
+    PersistentSettingsPayload,
+    PersistentSettingsResponse,
+}

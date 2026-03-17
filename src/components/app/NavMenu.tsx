@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react"
+import { useState, useEffect } from "react"
 import { useLocation } from "react-router-dom"
 import Link from "../global/Link.tsx"
 import "./NavMenu.css"
@@ -9,10 +9,16 @@ import { ReactComponent as ServersSVG } from "../../assets/svg/servers.svg"
 import { ReactComponent as TrendsSVG } from "../../assets/svg/trends.svg"
 import { ReactComponent as WhoSVG } from "../../assets/svg/who.svg"
 import { ReactComponent as GroupingSVG } from "../../assets/svg/grouping.svg"
+import { ReactComponent as LoginSVG } from "../../assets/svg/login.svg"
+import LoginButtonContainer from "./LoginButtonContainer.tsx"
+import { useUserContext } from "../../contexts/UserContext.tsx"
+import useWindowSize from "../../hooks/useWindowSize.ts"
 
 const NavMenu = () => {
     const location = useLocation()
+    const { isMobile, isSmallWeb } = useWindowSize()
     const [scrollPosition, setScrollPosition] = useState(0)
+    const { isLoggedIn, openLoginModal } = useUserContext()
 
     useEffect(() => {
         const handleScroll = () => setScrollPosition(window.scrollY)
@@ -36,13 +42,15 @@ const NavMenu = () => {
                 <LiveSVG className="nav-icon" />
                 <span>Live</span>
             </Link>
-            <Link
-                to="/servers"
-                className={`nav-item hide-on-small-mobile ${location.pathname.startsWith("/servers") ? "active" : ""}`}
-            >
-                <ServersSVG className="nav-icon" />
-                <span>Servers</span>
-            </Link>
+            {!isSmallWeb && (
+                <Link
+                    to="/servers"
+                    className={`nav-item hide-on-small-mobile ${location.pathname.startsWith("/servers") ? "active" : ""}`}
+                >
+                    <ServersSVG className="nav-icon" />
+                    <span>Servers</span>
+                </Link>
+            )}
             <Link
                 to="/grouping"
                 className={`nav-item ${location.pathname.startsWith("/grouping") ? "active" : ""}`}
@@ -72,6 +80,17 @@ const NavMenu = () => {
                 <AboutSVG className="nav-icon" />
                 <span>About</span>
             </Link>
+            {!isLoggedIn && isMobile && (
+                <Link
+                    to="#"
+                    className="nav-item"
+                    onClick={() => openLoginModal()}
+                >
+                    <LoginSVG className="nav-icon" />
+                    <span>Log In</span>
+                </Link>
+            )}
+            {!isMobile && <LoginButtonContainer />}
         </nav>
     )
 }

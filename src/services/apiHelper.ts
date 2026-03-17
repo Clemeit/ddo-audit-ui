@@ -17,7 +17,7 @@ axiosRetry(axios, {
 })
 
 const genericRequest = async <T>(
-    method: "get" | "post",
+    method: "get" | "post" | "put",
     endpoint: string,
     data?: any,
     options: { signal?: AbortSignal; noRetry?: boolean } = {},
@@ -76,4 +76,18 @@ export const postRequest = async <T>(
     version: string = "v1"
 ) => {
     return genericRequest<T>("post", endpoint, options.data, options, version)
+}
+
+export const putRequest = async <T>(
+    endpoint: string,
+    options: {
+        signal?: AbortSignal
+        data?: any
+        headers?: any
+        params?: any
+        noRetry?: boolean
+    } = {},
+    version: string = "v1"
+) => {
+    return genericRequest<T>("put", endpoint, options.data, options, version)
 }

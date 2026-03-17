@@ -1,12 +1,12 @@
 import React, { useMemo } from "react"
 import "./Footer.css"
-import useIsMobile from "../../hooks/useIsMobile.ts"
+import useWindowSize from "../../hooks/useWindowSize.ts"
 import { useLocation } from "react-router-dom"
 
 const showFooterOnPages = ["/", "/about"]
 
 const Footer = () => {
-    const isMobile = useIsMobile()
+    const { isMobile } = useWindowSize()
     const location = useLocation()
 
     const showFooter = useMemo(() => {
