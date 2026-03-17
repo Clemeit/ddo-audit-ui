@@ -6,11 +6,14 @@ import Button from "../global/Button"
 import ColoredText from "../global/ColoredText"
 import { ContentCluster } from "../global/ContentCluster"
 import FauxLink from "../global/FauxLink"
+import { ReactComponent as LogoSVG } from "../../assets/svg/logo.svg"
+import useWindowSize from "../../hooks/useWindowSize"
 
 const AccountForm = () => {
     const [username, setUsername] = useState<string>("")
     const [password, setPassword] = useState<string>("")
     const [errorMessage, setErrorMessage] = useState<string>(null)
+    const { isMobile, isSmallishMobile } = useWindowSize()
 
     useEffect(() => {
         setErrorMessage("")
@@ -82,167 +85,186 @@ const AccountForm = () => {
         }
     }, [username, password, register])
 
-    const loginForm = (
+    return (
         <form
             onSubmit={(e) => {
                 e.preventDefault()
-                tryLogin()
+                if (accountModalType === "login") {
+                    tryLogin()
+                } else {
+                    tryRegister()
+                }
             }}
-            style={{ width: "300px" }}
+            style={{ maxWidth: isMobile ? "unset" : "650px" }}
         >
-            <ContentCluster title="Welcome back" hideLink>
-                <Stack direction="column" gap={10} width="100%">
-                    <Stack direction="column" gap={2} style={{ width: "100%" }}>
-                        <label htmlFor="username-field">Username</label>
-                        <input
-                            id="username-field"
-                            type="text"
-                            name="username"
-                            autoComplete="username"
-                            value={username}
-                            onChange={(e) => setUsername(e.target.value)}
-                            style={{ width: "100%", boxSizing: "border-box" }}
-                            disabled={isLoading}
-                        />
-                    </Stack>
-                    <Stack direction="column" gap={2} style={{ width: "100%" }}>
-                        <label htmlFor="password-field">Username</label>
-                        <input
-                            id="password-field"
-                            type="password"
-                            name="password"
-                            autoComplete="current-password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            style={{ width: "100%", boxSizing: "border-box" }}
-                            disabled={isLoading}
-                        />
-                    </Stack>
-                    {errorMessage && (
-                        <ColoredText color="red">{errorMessage}</ColoredText>
-                    )}
-                    <Button
-                        type="primary"
-                        onClick={() => tryLogin()}
-                        disabled={isLoading}
-                    >
-                        Log in
-                    </Button>
-                    <div
+            <ContentCluster
+                title={
+                    accountModalType === "login"
+                        ? "Welcome back!"
+                        : "Create an account"
+                }
+                hideLink
+            >
+                <Stack
+                    direction={isSmallishMobile ? "column" : "row"}
+                    style={{ width: "100%" }}
+                    gap={20}
+                    wrap
+                >
+                    <Stack
+                        direction="column"
+                        gap={10}
                         style={{
+                            flex: 1,
+                            minWidth: isSmallishMobile ? 0 : "200px",
                             width: "100%",
-                            display: "flex",
-                            justifyContent: "center",
-                            margin: "20px 0px 10px 0px",
                         }}
                     >
-                        <hr style={{ margin: "4px 0 4px 0", width: "50%" }} />
-                    </div>
-                    <div
+                        <LogoSVG style={{ width: "40px", height: "40px" }} />
+                        {accountModalType === "login" ? (
+                            <span>
+                                Log in with your DDO Audit account. This is NOT
+                                the same as your DDO account.
+                            </span>
+                        ) : (
+                            <>
+                                <span>
+                                    A DDO Audit account lets you save your
+                                    settings and characters to be used across
+                                    devices.
+                                </span>
+                                <span>
+                                    Do NOT use the same login credentials that
+                                    you use for DDO.
+                                </span>
+                            </>
+                        )}
+                    </Stack>
+                    <Stack
+                        direction="column"
+                        gap={10}
                         style={{
+                            flex: 1,
+                            minWidth: isSmallishMobile ? 0 : "200px",
                             width: "100%",
-                            display: "flex",
-                            justifyContent: "center",
                         }}
                     >
-                        <span>
-                            Need to create an account?{" "}
-                            <FauxLink
-                                onClick={() => {
-                                    setErrorMessage("")
-                                    openRegisterModal()
+                        <Stack
+                            direction="column"
+                            gap={2}
+                            style={{ width: "100%" }}
+                        >
+                            <label htmlFor="username-field">Username</label>
+                            <input
+                                id="username-field"
+                                type="text"
+                                name="username"
+                                autoComplete="username"
+                                value={username}
+                                onChange={(e) => setUsername(e.target.value)}
+                                style={{
+                                    width: "100%",
+                                    boxSizing: "border-box",
                                 }}
-                            >
-                                Register now
-                            </FauxLink>
-                        </span>
-                    </div>
-                </Stack>
-            </ContentCluster>
-        </form>
-    )
-
-    const registerForm = (
-        <form
-            onSubmit={(e) => {
-                e.preventDefault()
-                tryRegister()
-            }}
-            style={{ width: "300px" }}
-        >
-            <ContentCluster title="Create an account" hideLink>
-                <Stack direction="column" gap={10} width="100%">
-                    <Stack direction="column" gap={2} style={{ width: "100%" }}>
-                        <label htmlFor="username-field">Username</label>
-                        <input
-                            id="username-field"
-                            type="text"
-                            name="username"
-                            autoComplete="username"
-                            value={username}
-                            onChange={(e) => setUsername(e.target.value)}
-                            style={{ width: "100%", boxSizing: "border-box" }}
-                            disabled={isLoading}
-                        />
-                    </Stack>
-                    <Stack direction="column" gap={2} style={{ width: "100%" }}>
-                        <label htmlFor="password-field">Username</label>
-                        <input
-                            id="password-field"
-                            type="password"
-                            name="password"
-                            autoComplete="new-password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            style={{ width: "100%", boxSizing: "border-box" }}
-                            disabled={isLoading}
-                        />
-                    </Stack>
-                    {errorMessage && (
-                        <ColoredText color="red">{errorMessage}</ColoredText>
-                    )}
-                    <Button
-                        type="primary"
-                        onClick={() => tryRegister()}
-                        disabled={isLoading}
-                    >
-                        Register
-                    </Button>
-                    <div
-                        style={{
-                            width: "100%",
-                            display: "flex",
-                            justifyContent: "center",
-                            margin: "20px 0px 10px 0px",
-                        }}
-                    >
-                        <hr style={{ margin: "4px 0 4px 0", width: "50%" }} />
-                    </div>
-                    <div
-                        style={{
-                            width: "100%",
-                            display: "flex",
-                            justifyContent: "center",
-                        }}
-                    >
-                        <span>
-                            Already have an account?{" "}
-                            <FauxLink
-                                onClick={() => {
-                                    setErrorMessage("")
-                                    openLoginModal()
+                                disabled={isLoading}
+                            />
+                        </Stack>
+                        <Stack
+                            direction="column"
+                            gap={2}
+                            style={{ width: "100%" }}
+                        >
+                            <label htmlFor="password-field">Password</label>
+                            <input
+                                id="password-field"
+                                type="password"
+                                name="password"
+                                autoComplete={
+                                    accountModalType === "login"
+                                        ? "current-password"
+                                        : "new-password"
+                                }
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                style={{
+                                    width: "100%",
+                                    boxSizing: "border-box",
                                 }}
+                                disabled={isLoading}
+                            />
+                        </Stack>
+                        {errorMessage && (
+                            <ColoredText color="red">
+                                {errorMessage}
+                            </ColoredText>
+                        )}
+                        {accountModalType === "login" ? (
+                            <Button
+                                type="primary"
+                                onClick={() => tryLogin()}
+                                disabled={isLoading}
                             >
                                 Log in
-                            </FauxLink>
-                        </span>
-                    </div>
+                            </Button>
+                        ) : (
+                            <Button
+                                type="primary"
+                                onClick={() => tryRegister()}
+                                disabled={isLoading}
+                            >
+                                Register
+                            </Button>
+                        )}
+                        <div
+                            style={{
+                                width: "100%",
+                                display: "flex",
+                                justifyContent: "center",
+                                margin: "20px 0px 10px 0px",
+                            }}
+                        >
+                            <hr
+                                style={{ margin: "4px 0 4px 0", width: "50%" }}
+                            />
+                        </div>
+                        <div
+                            style={{
+                                width: "100%",
+                                display: "flex",
+                                justifyContent: "center",
+                            }}
+                        >
+                            {accountModalType === "login" ? (
+                                <span style={{ textAlign: "center" }}>
+                                    Need an account?{" "}
+                                    <FauxLink
+                                        onClick={() => {
+                                            setErrorMessage("")
+                                            openRegisterModal()
+                                        }}
+                                    >
+                                        Register&nbsp;now
+                                    </FauxLink>
+                                </span>
+                            ) : (
+                                <span style={{ textAlign: "center" }}>
+                                    Already have an account?{" "}
+                                    <FauxLink
+                                        onClick={() => {
+                                            setErrorMessage("")
+                                            openLoginModal()
+                                        }}
+                                    >
+                                        Log&nbsp;in
+                                    </FauxLink>
+                                </span>
+                            )}
+                        </div>
+                    </Stack>
                 </Stack>
             </ContentCluster>
         </form>
     )
-
-    return accountModalType === "login" ? loginForm : registerForm
 }
 
 export default AccountForm

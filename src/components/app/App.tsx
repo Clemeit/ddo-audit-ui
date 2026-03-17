@@ -18,7 +18,7 @@ function App() {
             <PageViewTracker />
             <Outlet />
             {isLoginModalOpen && (
-                <Modal onClose={closeAccountModal}>
+                <Modal onClose={closeAccountModal} fullScreenOnMobile={true}>
                     <AccountForm />
                 </Modal>
             )}
