@@ -12,10 +12,7 @@ import {
     DEFAULT_MOUSE_OVER_DELAY,
 } from "../constants/lfmPanel.ts"
 import { useAppContext } from "./AppContext.tsx"
-import {
-    setData as setDataToLocalStorage,
-    getData as getDataFromLocalStorage,
-} from "../utils/localStorage.ts"
+import { getLfmSettings, setLfmSettings } from "../utils/localStorage.ts"
 import { LfmApiDataModel, LfmSortSetting, LfmSortType } from "../models/Lfm.ts"
 import { MAX_LEVEL, MIN_LEVEL } from "../constants/game.ts"
 import useGetRegisteredCharacters from "../hooks/useGetRegisteredCharacters.ts"
@@ -108,7 +105,6 @@ interface LfmContextProps {
 const LfmContext = createContext<LfmContextProps | undefined>(undefined)
 
 export const LfmProvider = ({ children }: { children: ReactNode }) => {
-    const settingsStorageKey = "lfm-settings"
     const [isLoaded, setIsLoaded] = useState<boolean>(false)
     const { registeredCharacters, reload: reloadRegisteredCharacters } =
         useGetRegisteredCharacters()
@@ -711,7 +707,7 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
     const loadSettingsFromLocalStorage = useCallback(() => {
         let settings: any = null
         try {
-            settings = getDataFromLocalStorage<any>(settingsStorageKey)
+            settings = getLfmSettings()
         } catch (e) {
             logMessage(
                 "Error loading settings from localStorage, using defaults",
@@ -741,7 +737,7 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
                 }
             )
             try {
-                setDataToLocalStorage<any>(settingsStorageKey, sanitized)
+                setLfmSettings(sanitized)
             } catch {}
         }
         applyValidatedSettings(sanitized)
@@ -801,7 +797,7 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
 
             // Validate the settings before saving
             if (validateAndParseSettings(settingsToSave)) {
-                setDataToLocalStorage<any>(settingsStorageKey, settingsToSave)
+                setLfmSettings(settingsToSave)
             } else {
                 logMessage(
                     "Attempted to save invalid settings to localStorage - skipping save",

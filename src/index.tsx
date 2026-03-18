@@ -3,7 +3,7 @@ import { RouterProvider } from "react-router-dom"
 import "./index.css"
 import reportWebVitals from "./reportWebVitals"
 import browserRouter from "./browserRouter.tsx"
-import { ThemeProvider } from "./contexts/AppContext.tsx"
+import { AppProvider } from "./contexts/AppContext.tsx"
 import { HelmetProvider } from "react-helmet-async"
 import { NotificationProvider } from "./contexts/NotificationContext.tsx"
 import { ServiceWorkerUpdater } from "./components/global/ServiceWorkerUpdater.tsx"
@@ -27,14 +27,14 @@ preloadBannerImage()
 const root = ReactDOM.createRoot(document.getElementById("root")!)
 root.render(
     <HelmetProvider>
-        <ThemeProvider>
+        <AppProvider>
             <UserProvider>
                 <NotificationProvider>
                     <ServiceWorkerUpdater />
                     <RouterProvider router={browserRouter} />
                 </NotificationProvider>
             </UserProvider>
-        </ThemeProvider>
+        </AppProvider>
     </HelmetProvider>
 )
 

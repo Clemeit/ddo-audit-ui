@@ -8,10 +8,7 @@ import React, {
 } from "react"
 import { CLASS_LIST_LOWER, MAX_LEVEL, MIN_LEVEL } from "../constants/game.ts"
 import { CharacterSortBy, CharacterSortType } from "../models/Character.ts"
-import {
-    getData as getDataFromLocalStorage,
-    setData as setDataToLocalStorage,
-} from "../utils/localStorage.ts"
+import { getWhoSettings, setWhoSettings } from "../utils/localStorage.ts"
 import {
     DEFAULT_CHARACTER_COUNT,
     DEFAULT_REFRESH_RATE,
@@ -535,7 +532,7 @@ export const WhoProvider = ({ children }: { children: ReactNode }) => {
     const loadSettingsFromLocalStorage = useCallback(() => {
         let settings: any = null
         try {
-            settings = getDataFromLocalStorage<any>(settingsStorageKey)
+            settings = getWhoSettings()
         } catch (e) {
             logMessage(
                 "Error loading Who settings from localStorage, using defaults",
@@ -565,7 +562,7 @@ export const WhoProvider = ({ children }: { children: ReactNode }) => {
                 }
             )
             try {
-                setDataToLocalStorage<any>(settingsStorageKey, sanitized)
+                setWhoSettings(sanitized)
             } catch {}
         }
         applyValidatedSettings(sanitized)
@@ -611,7 +608,7 @@ export const WhoProvider = ({ children }: { children: ReactNode }) => {
 
             // Validate the settings before saving
             if (validateAndParseSettings(settingsToSave)) {
-                setDataToLocalStorage<any>(settingsStorageKey, settingsToSave)
+                setWhoSettings(settingsToSave)
             } else {
                 logMessage(
                     "Attempted to save invalid settings to localStorage - skipping save",

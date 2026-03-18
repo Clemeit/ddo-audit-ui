@@ -4,16 +4,38 @@ import { LocalStorageEntry } from "../models/LocalStorage.ts"
 import { Area } from "../models/Area.ts"
 import { Quest } from "../models/Lfm.ts"
 import logMessage from "./logUtils.ts"
+import { RaidTimerStorage } from "../models/RaidTimers.ts"
+import { NotificationPreferences } from "../models/Notification.ts"
 
 const VERSION_PREFIX = "v1-"
 
 const ACCESS_TOKENS_KEY = "access-tokens"
 const REGISTERED_CHARACTERS_KEY = "registered-characters"
+const DISMISSED_CALLOUTS_KEY = "dismissed-feature-callouts"
 const FRIENDS_KEY = "friends"
 const IGNORES_KEY = "ignores"
 const CACHED_AREAS_KEY = "cached-areas"
 const CACHED_QUEST_KEY = "cached-quests"
 const BOOLEAN_FLAGS_KEY = "boolean-flags"
+const LFM_SETTINGS_KEY = "lfm-settings"
+const WHO_SETTINGS_KEY = "who-settings"
+const RAID_TIMER_SETTINGS_KEY = "timer-settings"
+const TIMEZONE_KEY = "timezone"
+const UPDATE_DISMISSED_KEY = "update-dismissed"
+const UPDATE_SHOWN_KEY = "update-shown"
+const NOTIFICATION_PREFERENCES_KEY = "notification-preferences"
+
+export const persistentKeys = [
+    ACCESS_TOKENS_KEY,
+    REGISTERED_CHARACTERS_KEY,
+    DISMISSED_CALLOUTS_KEY,
+    FRIENDS_KEY,
+    IGNORES_KEY,
+    BOOLEAN_FLAGS_KEY,
+    LFM_SETTINGS_KEY,
+    WHO_SETTINGS_KEY,
+    REGISTERED_CHARACTERS_KEY,
+]
 
 export const BOOLEAN_FLAGS = {
     hideAlphaRelease: "hide-alpha-release",
@@ -21,6 +43,43 @@ export const BOOLEAN_FLAGS = {
     bankToonsDisclaimer: "bank-toons-disclaimer",
     hideActivityDevelopmentNotice: "hide-activity-development-notice",
     hideSelfFromPartyList: "hide-self-from-party-list",
+}
+
+type LocalStorageWriteEvent = {
+    key: string
+    storageKey: string
+    value: unknown
+    updatedAt: string
+}
+
+type LocalStorageWriteListener = (event: LocalStorageWriteEvent) => void
+
+const writeListeners = new Set<LocalStorageWriteListener>()
+
+export function subscribeToLocalStorageWrites(
+    listener: LocalStorageWriteListener
+): () => void {
+    writeListeners.add(listener)
+
+    // unsubscriber
+    return () => {
+        writeListeners.delete(listener)
+    }
+}
+
+function notifyLocalStorageWrite(event: LocalStorageWriteEvent): void {
+    for (const listener of Array.from(writeListeners)) {
+        try {
+            listener(event)
+        } catch (e) {
+            logMessage("localStorage write listener failed", "warn", {
+                metadata: {
+                    key: event.key,
+                    error: e instanceof Error ? e.message : String(e),
+                },
+            })
+        }
+    }
 }
 
 function getBooleanFlags(): Record<string, boolean> {
@@ -47,6 +106,24 @@ function getBooleanFlag(key: string): boolean | null {
 
 function clearBooleanFlags(): void {
     setValue(BOOLEAN_FLAGS_KEY, {})
+}
+
+// Lfm settings functions
+function getLfmSettings(): any {
+    return getData<any>(LFM_SETTINGS_KEY, {})
+}
+
+function setLfmSettings(settings: any): void {
+    setData<any>(LFM_SETTINGS_KEY, settings)
+}
+
+// Who settings functions
+function getWhoSettings(): any {
+    return getData<any>(WHO_SETTINGS_KEY, {})
+}
+
+function setWhoSettings(settings: any): void {
+    setData<any>(WHO_SETTINGS_KEY, settings)
 }
 
 // Access Token functions
@@ -107,6 +184,42 @@ function removeRegisteredCharacter(character: Character): void {
     )
 }
 
+// Raid timer settings functions
+function getRaidTimerSettings(): RaidTimerStorage {
+    return getData<RaidTimerStorage>(RAID_TIMER_SETTINGS_KEY, {})
+}
+
+function setRaidTimerSettings(settings: RaidTimerStorage): void {
+    setData<RaidTimerStorage>(RAID_TIMER_SETTINGS_KEY, settings)
+}
+
+// Feature callouts functions
+function getDismissedFeatureCallouts(): string[] {
+    return getData<string[]>(DISMISSED_CALLOUTS_KEY, [])
+}
+
+function addDismissedFeatureCallout(callout: string): void {
+    addItem<string>(DISMISSED_CALLOUTS_KEY, callout, (a, b) => a === b)
+}
+
+// Update dismissed functions
+function setUpdateDismissed(timestamp: string): void {
+    setData<string>(UPDATE_DISMISSED_KEY, timestamp)
+}
+
+function getUpdateDismissed(): string | null {
+    return getData<string>(UPDATE_DISMISSED_KEY, null)
+}
+
+// Update shown functions
+function setUpdateShown(timestamp: string): void {
+    setData<string>(UPDATE_SHOWN_KEY, timestamp)
+}
+
+function getUpdateShown(): string | null {
+    return getData<string>(UPDATE_SHOWN_KEY, null)
+}
+
 // Friends functions
 function getFriends(): Character[] {
     return getData<Character[]>(FRIENDS_KEY, [])
@@ -165,6 +278,38 @@ function getQuests(): LocalStorageEntry<Quest[]> {
 
 function setQuests(quests: Quest[]): void {
     setData<Quest[]>(CACHED_QUEST_KEY, quests)
+}
+
+// Timezone functions
+function getTimezone(): string | null {
+    return getData<string>(TIMEZONE_KEY, null)
+}
+
+function setTimezone(timezone: string): void {
+    setData<string>(TIMEZONE_KEY, timezone)
+}
+
+// Tracked character IDs functions
+function getTrackedCharacterIds(): number[] {
+    const settings = getData<any>(LFM_SETTINGS_KEY, {})
+    return settings?.trackedCharacterIds || []
+}
+
+function setTrackedCharacterIds(ids: number[]): void {
+    const settings = getData<any>(LFM_SETTINGS_KEY, {})
+    settings.trackedCharacterIds = ids
+    setData<any>(LFM_SETTINGS_KEY, settings)
+}
+
+// Notification preferences functions
+function getNotificationPreferences(): NotificationPreferences {
+    return getData<NotificationPreferences>(NOTIFICATION_PREFERENCES_KEY, {})
+}
+
+function setNotificationPreferences(
+    preferences: NotificationPreferences
+): void {
+    setData<NotificationPreferences>(NOTIFICATION_PREFERENCES_KEY, preferences)
 }
 
 // Generic functions
@@ -265,21 +410,28 @@ function getValue<T>(key: string): T | null {
 }
 
 function setValue<T>(key: string, value: T): void {
+    const storageKey = VERSION_PREFIX + key
     try {
-        localStorage.setItem(VERSION_PREFIX + key, JSON.stringify(value))
+        localStorage.setItem(storageKey, JSON.stringify(value))
+        notifyLocalStorageWrite({
+            key,
+            storageKey,
+            value,
+            updatedAt: new Date().toISOString(),
+        })
     } catch (e) {
         logMessage(
-            `Failed to set localStorage value for key "${VERSION_PREFIX + key}"`,
+            `Failed to set localStorage value for key "${storageKey}"`,
             "error",
             {
                 metadata: {
-                    key: VERSION_PREFIX + key,
+                    key: storageKey,
                     error: e instanceof Error ? e.message : String(e),
                 },
             }
         )
         console.error(
-            `Error setting localStorage value for key "${VERSION_PREFIX + key}":`,
+            `Error setting localStorage value for key "${storageKey}":`,
             e
         )
     }
@@ -296,6 +448,8 @@ export {
     setRegisteredCharacters,
     addRegisteredCharacter,
     removeRegisteredCharacter,
+    getDismissedFeatureCallouts,
+    addDismissedFeatureCallout,
     getFriends,
     getFriendsMetadata,
     addFriend,
@@ -315,8 +469,22 @@ export {
     removeBooleanFlag,
     getBooleanFlag,
     clearBooleanFlags,
-    getData,
-    setData,
     addItem,
     removeItem,
+    getLfmSettings,
+    setLfmSettings,
+    getWhoSettings,
+    setWhoSettings,
+    getRaidTimerSettings,
+    setRaidTimerSettings,
+    getTimezone,
+    setTimezone,
+    getTrackedCharacterIds,
+    setTrackedCharacterIds,
+    getUpdateDismissed,
+    setUpdateDismissed,
+    getUpdateShown,
+    setUpdateShown,
+    getNotificationPreferences,
+    setNotificationPreferences,
 }
