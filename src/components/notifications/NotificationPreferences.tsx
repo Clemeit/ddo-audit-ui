@@ -1,28 +1,19 @@
-import React, { useState, useEffect } from "react"
+import { useState, useEffect } from "react"
 import { ContentCluster, ContentClusterGroup } from "../global/ContentCluster"
 import Stack from "../global/Stack"
 import Button from "../global/Button"
 import PageMessage from "../global/PageMessage"
 import Spacer from "../global/Spacer"
 import Link from "../global/Link"
-import { getData, setData } from "../../utils/localStorage"
-
-interface NotificationPreferences {
-    lfmUpdates: boolean
-    raidAlerts: boolean
-    guildEvents: boolean
-    serverStatus: boolean
-    questOfTheDay: boolean
-    favoriteQuestAlerts: boolean
-    instantNotifications: boolean
-    digestNotifications: boolean
-    scheduleStartHour: number
-    scheduleEndHour: number
-}
+import {
+    getNotificationPreferences,
+    setNotificationPreferences,
+} from "../../utils/localStorage"
+import { NotificationPreferences as NotificationPreferencesModel } from "../../models/Notification"
 
 interface Props {
     isSubscribed: boolean
-    onPreferencesChange: (preferences: NotificationPreferences) => void
+    onPreferencesChange: (preferences: NotificationPreferencesModel) => void
     setPage: (page: number) => void
 }
 
@@ -31,25 +22,23 @@ const NotificationPreferences = ({
     onPreferencesChange,
     setPage,
 }: Props) => {
-    const [preferences, setPreferences] = useState<NotificationPreferences>({
-        lfmUpdates: true,
-        raidAlerts: true,
-        guildEvents: false,
-        serverStatus: true,
-        questOfTheDay: false,
-        favoriteQuestAlerts: true,
-        instantNotifications: true,
-        digestNotifications: false,
-        scheduleStartHour: 9,
-        scheduleEndHour: 22,
-    })
-    const notificationStorageKey = "notification_preferences"
+    const [preferences, setPreferences] =
+        useState<NotificationPreferencesModel>({
+            lfmUpdates: true,
+            raidAlerts: true,
+            guildEvents: false,
+            serverStatus: true,
+            questOfTheDay: false,
+            favoriteQuestAlerts: true,
+            instantNotifications: true,
+            digestNotifications: false,
+            scheduleStartHour: 9,
+            scheduleEndHour: 22,
+        })
 
     useEffect(() => {
         // Load preferences from localStorage
-        const savedPrefs = getData<NotificationPreferences>(
-            notificationStorageKey
-        )
+        const savedPrefs = getNotificationPreferences()
         if (savedPrefs) {
             try {
                 setPreferences(savedPrefs)
@@ -61,11 +50,11 @@ const NotificationPreferences = ({
 
     useEffect(() => {
         // Save preferences to localStorage and notify parent
-        setData<NotificationPreferences>(notificationStorageKey, preferences)
+        setNotificationPreferences(preferences)
         onPreferencesChange(preferences)
     }, [preferences, onPreferencesChange])
 
-    const handleToggle = (key: keyof NotificationPreferences) => {
+    const handleToggle = (key: keyof NotificationPreferencesModel) => {
         if (typeof preferences[key] === "boolean") {
             setPreferences((prev) => ({
                 ...prev,

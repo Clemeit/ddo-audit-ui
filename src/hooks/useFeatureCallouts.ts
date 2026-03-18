@@ -1,22 +1,23 @@
-import { useEffect, useMemo, useState } from "react"
-import { addItem, getData } from "../utils/localStorage"
+import { useEffect, useState } from "react"
+import {
+    getDismissedFeatureCallouts,
+    addDismissedFeatureCallout,
+} from "../utils/localStorage"
 
 const useFeatureCallouts = () => {
-    const calloutsKey = "dismissed-feature-callouts"
-
-    const [dismissedCallouts, setDismissedCallouts] = useState<string[]>([])
-    const [isLoaded, setIsLoaded] = useState(false)
+    const [dismissedCallouts, setDismissedCallouts] = useState<string[]>(
+        getDismissedFeatureCallouts() || []
+    )
 
     useEffect(() => {
-        const dismissedCallouts = getData<string[]>(calloutsKey) || []
+        const dismissedCallouts = getDismissedFeatureCallouts() || []
         setDismissedCallouts(dismissedCallouts)
-        setIsLoaded(true)
     }, [])
 
     const dismissCallout = (callout: string) => {
         if (dismissedCallouts.includes(callout)) return
         setDismissedCallouts([...dismissedCallouts, callout])
-        addItem<string>(calloutsKey, callout, (a, b) => a === b)
+        addDismissedFeatureCallout(callout)
     }
 
     const isCalloutActive = (callout: string) =>

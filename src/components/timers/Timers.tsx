@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import Page from "../global/Page.tsx"
 import {
     ContentCluster,
@@ -14,9 +14,11 @@ import { useQuestContext } from "../../contexts/QuestContext.tsx"
 import LfmSprite from "../../assets/png/lfm_sprite_6.webp"
 import { RaidTimerCharacterSortEnum } from "../../models/Common.ts"
 import { MsFromMinutes, MsFromSeconds } from "../../utils/timeUtils.ts"
-import { getData, setData } from "../../utils/localStorage.ts"
+import {
+    getRaidTimerSettings,
+    setRaidTimerSettings,
+} from "../../utils/localStorage.ts"
 import TimersHeader from "./TimersHeader.tsx"
-import TimerSortControls from "./TimerSortControls.tsx"
 import CharacterTimersList from "./CharacterTimersList.tsx"
 import DeleteTimerModal from "./DeleteTimerModal.tsx"
 import Spacer from "../global/Spacer.tsx"
@@ -25,17 +27,7 @@ import logMessage from "../../utils/logUtils.ts"
 import Link from "../global/Link.tsx"
 import Stack from "../global/Stack.tsx"
 
-interface TimerStorage {
-    sortType: RaidTimerCharacterSortEnum
-    sortOrder: string
-    hiddenTimers?: {
-        characterId: number
-        timestamp: string
-    }[]
-}
-
 const Timers = () => {
-    const timerStorageKey = "timer-settings"
     const {
         registeredCharacters,
         isLoaded,
@@ -56,7 +48,7 @@ const Timers = () => {
         order: string
     }>(() => {
         try {
-            const saved = getData<TimerStorage>(timerStorageKey)
+            const saved = getRaidTimerSettings()
             return saved
                 ? {
                       type: saved.sortType as RaidTimerCharacterSortEnum,
@@ -84,7 +76,7 @@ const Timers = () => {
         { characterId: number; timestamp: string }[]
     >(() => {
         try {
-            return getData<TimerStorage>(timerStorageKey)?.hiddenTimers || []
+            return getRaidTimerSettings()?.hiddenTimers || []
         } catch (e) {
             logMessage(
                 "Failed to load timer settings (hiddenTimers)",
@@ -107,7 +99,7 @@ const Timers = () => {
             hasMountedRef.current = true
             return
         }
-        setData<TimerStorage>(timerStorageKey, {
+        setRaidTimerSettings({
             sortType: sortCharacterBy.type,
             sortOrder: sortCharacterBy.order,
             hiddenTimers,
