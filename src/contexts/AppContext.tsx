@@ -16,14 +16,10 @@ interface Props {
 
 export const AppProvider = ({ children }: Props) => {
     const [isFullScreen, setIsFullScreen] = useState(false)
-    const [timezoneOverride, setTimezoneOverride] = useState<string>()
-
-    useEffect(() => {
+    const [timezoneOverride, setTimezoneOverride] = useState<string>(() => {
         const savedTimezone = getTimezone()
-        if (savedTimezone !== undefined) {
-            setTimezoneOverride(savedTimezone)
-        }
-    }, [])
+        return savedTimezone !== undefined ? savedTimezone : ""
+    })
 
     useEffect(() => {
         setTimezone(timezoneOverride || "")

@@ -38,7 +38,7 @@ const TimersHeader = ({
             </span>
             .{" "}
             <Link to="/registration" className="link">
-                Register more
+                Register&nbsp;more
             </Link>
             .
         </p>

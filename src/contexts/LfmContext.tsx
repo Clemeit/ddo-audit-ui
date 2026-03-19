@@ -21,6 +21,7 @@ import logMessage from "../utils/logUtils.ts"
 import { useNotificationContext } from "./NotificationContext.tsx"
 import useLimitedInterval from "../hooks/useLimitedInterval.ts"
 import { MsFromHours, MsFromMinutes } from "../utils/timeUtils.ts"
+import { useUserContext } from "./UserContext.tsx"
 
 interface LfmContextProps {
     lfmDataCache: LfmApiDataModel
@@ -105,6 +106,8 @@ interface LfmContextProps {
 const LfmContext = createContext<LfmContextProps | undefined>(undefined)
 
 export const LfmProvider = ({ children }: { children: ReactNode }) => {
+    const { persistentSettingsRevision } = useUserContext()
+
     const [isLoaded, setIsLoaded] = useState<boolean>(false)
     const { registeredCharacters, reload: reloadRegisteredCharacters } =
         useGetRegisteredCharacters()
@@ -752,7 +755,7 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
     useEffect(() => {
         loadSettingsFromLocalStorage()
         setIsLoaded(true)
-    }, [loadSettingsFromLocalStorage])
+    }, [loadSettingsFromLocalStorage, persistentSettingsRevision])
 
     useEffect(() => {
         // Only save to localStorage after initial load to avoid overwriting with undefined values

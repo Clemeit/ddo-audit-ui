@@ -13,11 +13,24 @@ import {
     postRegister,
 } from "../services/authService"
 import { UserAccountObject, UserAuthedResponse } from "../models/Auth"
-import { subscribeToLocalStorageWrites } from "../utils/localStorage"
+import {
+    getPersistentDataByKeys,
+    isPersistentKey,
+    setPersistentData,
+    subscribeToLocalStorageWrites,
+    PERSISTENT_KEYS,
+} from "../utils/localStorage"
+import {
+    getPersistentSettings,
+    patchPersistentSettings,
+    putPersistentSettings,
+} from "../services/userService"
+import logMessage from "../utils/logUtils"
 
 interface UserContextProps {
     isLoggedIn: boolean
     accessToken: string
+    persistentSettingsRevision: number
     register: (
         payload: UserAccountObject,
         signal?: AbortSignal
@@ -42,6 +55,9 @@ interface Props {
 }
 
 export const UserProvider = ({ children }: Props) => {
+    const [persistentSettingsRevision, setPersistentSettingsRevision] =
+        useState<number>(0)
+
     const [accessToken, setAccessToken] = useState<string>(null)
     const [refreshToken, setRefreshToken] = useState<string>(() =>
         localStorage.getItem("refresh_token")
@@ -66,6 +82,10 @@ export const UserProvider = ({ children }: Props) => {
         []
     )
 
+    const dirtyKeysRef = useRef<Set<string>>(new Set())
+    const syncTimeoutRef = useRef<number | null>(null)
+    const isApplyingServerRef = useRef<boolean>(false)
+
     const setSession = useCallback((data: UserAuthedResponse["data"]) => {
         setAccessToken(data.access_token)
         setRefreshToken(data.refresh_token)
@@ -73,39 +93,66 @@ export const UserProvider = ({ children }: Props) => {
     }, [])
 
     const clearSession = useCallback(() => {
+        if (syncTimeoutRef.current !== null) {
+            window.clearTimeout(syncTimeoutRef.current)
+            syncTimeoutRef.current = null
+        }
         setAccessToken(null)
         setRefreshToken(null)
         setExpiresIn(null)
     }, [])
 
-    const dirtyKeysRef = useRef<Set<string>>(new Set())
-    const syncTimeoutRef = useRef<number | null>(null)
-    const isApplyingServerRef = useRef<boolean>(false)
-
-    const flushDirtyKeysToServer = useCallback(async () => {
-        if (!accessToken) return
-        if (dirtyKeysRef.current.size === 0) return
-        // TODO
-        console.log(
-            "Flushing dirty keys to server:",
-            Array.from(dirtyKeysRef.current)
-        )
-
-        // After successful sync:
-        dirtyKeysRef.current.clear()
-    }, [accessToken])
-
-    const applyServerSettingsToLocal = useCallback(
-        (serverSettings: Record<string, any>) => {
-            isApplyingServerRef.current = true
+    const flushAllLocalSettingsToServer = useCallback(
+        async (token: string, signal?: AbortSignal) => {
+            if (!token) return
+            const allData = getPersistentDataByKeys(PERSISTENT_KEYS)
+            console.log("Flushing all local settings to server:", allData)
             try {
-                // TODO
-                console.log(
-                    "Applying server settings to localStorage:",
-                    serverSettings
+                await putPersistentSettings(
+                    token,
+                    { settings: allData },
+                    signal
                 )
-            } finally {
-                isApplyingServerRef.current = false
+                // After successful sync:
+                dirtyKeysRef.current.clear()
+            } catch (error) {
+                console.error("Failed to sync settings to server:", error)
+                logMessage("Failed to sync settings to server", "error", {
+                    metadata: {
+                        error:
+                            error instanceof Error
+                                ? error.stack
+                                : String(error),
+                    },
+                })
+            }
+        },
+        []
+    )
+
+    const flushDirtyKeysToServer = useCallback(
+        async (token: string, signal?: AbortSignal) => {
+            if (!token) return
+            const keysToFlush = Array.from(dirtyKeysRef.current)
+            if (keysToFlush.length === 0) return
+            const data = getPersistentDataByKeys(keysToFlush)
+            console.log("Flushing dirty keys to server:", keysToFlush, data)
+            try {
+                await patchPersistentSettings(token, { settings: data }, signal)
+                // Only clear keys included in this successful flush.
+                for (const key of keysToFlush) {
+                    dirtyKeysRef.current.delete(key)
+                }
+            } catch (error) {
+                console.error("Failed to sync settings to server:", error)
+                logMessage("Failed to sync settings to server", "error", {
+                    metadata: {
+                        error:
+                            error instanceof Error
+                                ? error.stack
+                                : String(error),
+                    },
+                })
             }
         },
         []
@@ -122,15 +169,17 @@ export const UserProvider = ({ children }: Props) => {
 
         syncTimeoutRef.current = window.setTimeout(() => {
             syncTimeoutRef.current = null
-            void flushDirtyKeysToServer()
+            void flushDirtyKeysToServer(accessToken)
         }, 1000)
     }, [accessToken, flushDirtyKeysToServer])
 
     useEffect(() => {
         const unsubscribe = subscribeToLocalStorageWrites(({ key }) => {
             // filter for syncable keys, auth state, server-apply suppression, etc.
-            dirtyKeysRef.current.add(key)
-            scheduleDebouncedSync()
+            if (isPersistentKey(key) && !isApplyingServerRef.current) {
+                dirtyKeysRef.current.add(key)
+                scheduleDebouncedSync()
+            }
         })
 
         return unsubscribe
@@ -145,6 +194,52 @@ export const UserProvider = ({ children }: Props) => {
         }
     }, [refreshToken])
 
+    const applyServerSettingsToLocal = useCallback(
+        (serverSettings: Record<string, any>) => {
+            isApplyingServerRef.current = true
+            try {
+                console.log(
+                    "Applying server settings to localStorage:",
+                    serverSettings
+                )
+                setPersistentData(serverSettings)
+                setPersistentSettingsRevision((prev) => prev + 1)
+            } finally {
+                isApplyingServerRef.current = false
+            }
+        },
+        []
+    )
+
+    const fetchAndApplyServerSettings = useCallback(
+        async (token: string, signal?: AbortSignal) => {
+            try {
+                const response = await getPersistentSettings(token, signal)
+                const serverSettings = response?.data?.settings
+                if (
+                    !serverSettings ||
+                    typeof serverSettings !== "object" ||
+                    Object.keys(serverSettings).length === 0
+                ) {
+                    await flushAllLocalSettingsToServer(token, signal)
+                    return
+                }
+                applyServerSettingsToLocal(serverSettings)
+            } catch (error: unknown) {
+                if ((error as { name?: string })?.name === "AbortError") return
+                logMessage("Failed to fetch settings from server", "warn", {
+                    metadata: {
+                        error:
+                            error instanceof Error
+                                ? error.stack
+                                : String(error),
+                    },
+                })
+            }
+        },
+        [applyServerSettingsToLocal, flushAllLocalSettingsToServer]
+    )
+
     const refreshSession = useCallback(
         async (signal?: AbortSignal) => {
             if (!refreshToken) return
@@ -153,13 +248,19 @@ export const UserProvider = ({ children }: Props) => {
                     { refresh_token: refreshToken },
                     signal
                 )
-                if (response?.data) setSession(response.data)
+                if (response?.data) {
+                    setSession(response.data)
+                    await fetchAndApplyServerSettings(
+                        response.data.access_token,
+                        signal
+                    )
+                }
             } catch (error) {
                 // Refresh token expired or invalid — session is over
                 clearSession()
             }
         },
-        [refreshToken]
+        [refreshToken, setSession, fetchAndApplyServerSettings, clearSession]
     )
 
     // Rehydrate session on mount
@@ -195,13 +296,17 @@ export const UserProvider = ({ children }: Props) => {
                 if (response?.data) {
                     setSession(response.data)
                     closeAccountModal()
+                    await fetchAndApplyServerSettings(
+                        response.data.access_token,
+                        signal
+                    )
                 }
                 return response
             } finally {
                 setIsLoading(false)
             }
         },
-        [setSession]
+        [setSession, closeAccountModal, fetchAndApplyServerSettings]
     )
 
     const login = useCallback(
@@ -212,19 +317,27 @@ export const UserProvider = ({ children }: Props) => {
                 if (response?.data) {
                     setSession(response.data)
                     closeAccountModal()
+                    await fetchAndApplyServerSettings(
+                        response.data.access_token,
+                        signal
+                    )
                 }
                 return response
             } finally {
                 setIsLoading(false)
             }
         },
-        [setSession]
+        [setSession, closeAccountModal, fetchAndApplyServerSettings]
     )
 
     const logout = useCallback(
         async (signal?: AbortSignal) => {
             setIsLoading(true)
             try {
+                if (syncTimeoutRef.current !== null) {
+                    window.clearTimeout(syncTimeoutRef.current)
+                    syncTimeoutRef.current = null
+                }
                 if (accessToken) {
                     await postLogout(accessToken, signal).catch(() => {})
                 }
@@ -241,6 +354,7 @@ export const UserProvider = ({ children }: Props) => {
             value={{
                 isLoggedIn: !!accessToken,
                 accessToken,
+                persistentSettingsRevision,
                 register,
                 login,
                 logout,

@@ -3,16 +3,18 @@ import {
     getDismissedFeatureCallouts,
     addDismissedFeatureCallout,
 } from "../utils/localStorage"
+import { useUserContext } from "../contexts/UserContext"
 
 const useFeatureCallouts = () => {
     const [dismissedCallouts, setDismissedCallouts] = useState<string[]>(
         getDismissedFeatureCallouts() || []
     )
+    const { persistentSettingsRevision } = useUserContext()
 
     useEffect(() => {
         const dismissedCallouts = getDismissedFeatureCallouts() || []
         setDismissedCallouts(dismissedCallouts)
-    }, [])
+    }, [persistentSettingsRevision])
 
     const dismissCallout = (callout: string) => {
         if (dismissedCallouts.includes(callout)) return

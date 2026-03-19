@@ -25,7 +25,7 @@ const UPDATE_DISMISSED_KEY = "update-dismissed"
 const UPDATE_SHOWN_KEY = "update-shown"
 const NOTIFICATION_PREFERENCES_KEY = "notification-preferences"
 
-export const persistentKeys = [
+export const PERSISTENT_KEYS = [
     ACCESS_TOKENS_KEY,
     REGISTERED_CHARACTERS_KEY,
     DISMISSED_CALLOUTS_KEY,
@@ -34,8 +34,51 @@ export const persistentKeys = [
     BOOLEAN_FLAGS_KEY,
     LFM_SETTINGS_KEY,
     WHO_SETTINGS_KEY,
-    REGISTERED_CHARACTERS_KEY,
-]
+] as const
+
+export type PersistentKey = (typeof PERSISTENT_KEYS)[number]
+
+const PERSISTENT_KEY_SET: ReadonlySet<string> = new Set(PERSISTENT_KEYS)
+
+export function isPersistentKey(key: string): key is PersistentKey {
+    return PERSISTENT_KEY_SET.has(key)
+}
+
+function getPersistentDefaultValue(key: PersistentKey): unknown {
+    switch (key) {
+        case ACCESS_TOKENS_KEY:
+        case REGISTERED_CHARACTERS_KEY:
+        case DISMISSED_CALLOUTS_KEY:
+        case FRIENDS_KEY:
+        case IGNORES_KEY:
+            return []
+        case BOOLEAN_FLAGS_KEY:
+        case LFM_SETTINGS_KEY:
+        case WHO_SETTINGS_KEY:
+            return {}
+        default:
+            return {}
+    }
+}
+
+function normalizePersistentValue(key: PersistentKey, value: unknown): unknown {
+    switch (key) {
+        case ACCESS_TOKENS_KEY:
+        case REGISTERED_CHARACTERS_KEY:
+        case DISMISSED_CALLOUTS_KEY:
+        case FRIENDS_KEY:
+        case IGNORES_KEY:
+            return Array.isArray(value) ? value : []
+        case BOOLEAN_FLAGS_KEY:
+        case LFM_SETTINGS_KEY:
+        case WHO_SETTINGS_KEY:
+            return value && typeof value === "object" && !Array.isArray(value)
+                ? value
+                : {}
+        default:
+            return getPersistentDefaultValue(key)
+    }
+}
 
 export const BOOLEAN_FLAGS = {
     hideAlphaRelease: "hide-alpha-release",
@@ -312,7 +355,54 @@ function setNotificationPreferences(
     setData<NotificationPreferences>(NOTIFICATION_PREFERENCES_KEY, preferences)
 }
 
+// Persistent settings functions
+function getPersistentDataByKeys(keys: readonly string[]): Record<string, any> {
+    const result: Record<string, any> = {}
+    for (const key of keys) {
+        if (isPersistentKey(key)) {
+            const fallback = getPersistentDefaultValue(key)
+            const value = getData<any>(key, fallback)
+            result[key] = normalizePersistentValue(key, value)
+        }
+    }
+    return result
+}
+
+function setPersistentData(data: Record<string, any>): void {
+    for (const key in data) {
+        if (isPersistentKey(key)) {
+            const normalizedValue = normalizePersistentValue(key, data[key])
+            if (normalizedValue !== data[key]) {
+                console.warn(
+                    `Coercing invalid persistent value for key "${key}" to a safe default.`,
+                    data[key]
+                )
+            }
+            console.log(
+                "Setting persistent data for key:",
+                key,
+                "with value:",
+                normalizedValue
+            )
+            setData<any>(key, normalizedValue)
+        } else {
+            console.warn(
+                `Attempted to set non-persistent key "${key}" with value:`,
+                data[key]
+            )
+        }
+    }
+}
+
 // Generic functions
+function isJsonEqual(a: unknown, b: unknown): boolean {
+    try {
+        return JSON.stringify(a) === JSON.stringify(b)
+    } catch {
+        return false
+    }
+}
+
 function getMetadata<T>(key: string, fallback?: any): LocalStorageEntry<T> {
     const metadata = getValue<LocalStorageEntry<T>>(key)
     if (!metadata) {
@@ -331,6 +421,7 @@ function getData<T>(key: string, fallback?: any): T {
 
 function setData<T>(key: string, data: T): void {
     const metadata = getMetadata<T>(key)
+    if (isJsonEqual(metadata.data, data)) return
     const newEntry: LocalStorageEntry<T> = {
         createdAt: metadata.createdAt || new Date().toISOString(),
         updatedAt: new Date().toISOString(),
@@ -412,6 +503,9 @@ function getValue<T>(key: string): T | null {
 function setValue<T>(key: string, value: T): void {
     const storageKey = VERSION_PREFIX + key
     try {
+        const next = JSON.stringify(value)
+        const prev = localStorage.getItem(storageKey)
+        if (prev === next) return
         localStorage.setItem(storageKey, JSON.stringify(value))
         notifyLocalStorageWrite({
             key,
@@ -487,4 +581,6 @@ export {
     setUpdateShown,
     getNotificationPreferences,
     setNotificationPreferences,
+    getPersistentDataByKeys,
+    setPersistentData,
 }

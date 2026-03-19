@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react"
 import { Character } from "../models/Character"
 import { getCharactersByIds } from "../services/characterService.ts"
 import logMessage from "../utils/logUtils"
+import { useUserContext } from "../contexts/UserContext"
 
 interface Props {
     getCharactersFromLocalStorage: () => Character[]
@@ -36,13 +37,30 @@ const useGetCharacterList = ({
     const [hasFetchedFromServer, setHasFetchedFromServer] =
         useState<boolean>(false)
     const [lastFetch, setLastFetch] = useState<Date>(new Date(0))
+    const { persistentSettingsRevision } = useUserContext()
 
     const reload = useCallback(() => {
         const setIsLoadingTimeout = setTimeout(() => setIsLoading(true), 500)
         setIsError(false)
 
-        const _cachedCharacters = getCharactersFromLocalStorage()
-        if (!_cachedCharacters || _cachedCharacters.length === 0) {
+        const cachedCharactersFromLocal = getCharactersFromLocalStorage()
+        const _cachedCharacters = Array.isArray(cachedCharactersFromLocal)
+            ? cachedCharactersFromLocal
+            : []
+
+        if (!Array.isArray(cachedCharactersFromLocal)) {
+            logMessage(
+                "Invalid cached characters format in localStorage",
+                "warn",
+                {
+                    metadata: {
+                        value: cachedCharactersFromLocal,
+                    },
+                }
+            )
+        }
+
+        if (_cachedCharacters.length === 0) {
             clearTimeout(setIsLoadingTimeout)
             setCachedCharacters([])
             setLiveCharacters([])
@@ -102,7 +120,7 @@ const useGetCharacterList = ({
 
     useEffect(() => {
         reload()
-    }, [reload])
+    }, [reload, persistentSettingsRevision])
 
     return {
         characters:

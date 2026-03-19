@@ -18,6 +18,7 @@ import {
 } from "../constants/whoPanel.ts"
 import logMessage from "../utils/logUtils.ts"
 import { useNotificationContext } from "./NotificationContext.tsx"
+import { useUserContext } from "./UserContext.tsx"
 
 interface WhoContextProps {
     stringFilter: string
@@ -135,6 +136,7 @@ export const WhoProvider = ({ children }: { children: ReactNode }) => {
         useState<number>(DEFAULT_CHARACTER_COUNT)
 
     const { createNotification } = useNotificationContext()
+    const { persistentSettingsRevision } = useUserContext()
 
     const validateAndParseSettings = (settings: any): boolean => {
         // Basic type validation
@@ -571,7 +573,7 @@ export const WhoProvider = ({ children }: { children: ReactNode }) => {
     useEffect(() => {
         loadSettingsFromLocalStorage()
         setIsLoaded(true)
-    }, [loadSettingsFromLocalStorage])
+    }, [loadSettingsFromLocalStorage, persistentSettingsRevision])
 
     useEffect(() => {
         if (!isLoaded) return

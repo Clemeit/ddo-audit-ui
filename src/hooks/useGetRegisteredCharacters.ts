@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react"
+import { useUserContext } from "../contexts/UserContext.tsx"
 import {
     getAccessTokens as getAccessTokensFromLocalStorage,
     getRegisteredCharactersMetadata as getRegisteredCharactersMetadataFromLocalStorage,
@@ -34,6 +35,7 @@ const useGetRegisteredCharacters = ({ enabled = true }: Props = {}) => {
     const [errorMessage, setErrorMessage] = useState<string>("")
     const [lastReload, setLastReload] = useState<Date>(new Date())
     const abortControllerRef = useRef<AbortController | null>(null)
+    const { persistentSettingsRevision } = useUserContext()
 
     const reload = useCallback(async () => {
         // Cancel any existing request
@@ -225,7 +227,7 @@ const useGetRegisteredCharacters = ({ enabled = true }: Props = {}) => {
                 abortControllerRef.current.abort()
             }
         }
-    }, [reload, enabled])
+    }, [reload, enabled, persistentSettingsRevision])
 
     const publishedRegisteredCharacters = (): Character[] => {
         if (
