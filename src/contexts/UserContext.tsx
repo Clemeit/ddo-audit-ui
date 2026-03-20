@@ -6,6 +6,7 @@ import React, {
     useCallback,
     useRef,
 } from "react"
+import axios from "axios"
 import {
     postLogin,
     postLogout,
@@ -20,6 +21,13 @@ import {
     subscribeToLocalStorageWrites,
     PERSISTENT_KEYS,
 } from "../utils/localStorage"
+import {
+    setFriends,
+    setIgnores,
+    setRegisteredCharacters,
+} from "../utils/localStorage"
+import { normalizeAllPersistentSettings } from "../utils/settingsNormalizers"
+import { hydrateCharacterIds } from "../utils/settingsHydration"
 import {
     getPersistentSettings,
     patchPersistentSettings,
@@ -83,6 +91,7 @@ export const UserProvider = ({ children }: Props) => {
     )
 
     const dirtyKeysRef = useRef<Set<string>>(new Set())
+    const syncedValueSnapshotRef = useRef<Map<string, string>>(new Map())
     const syncTimeoutRef = useRef<number | null>(null)
     const isApplyingServerRef = useRef<boolean>(false)
 
@@ -97,24 +106,91 @@ export const UserProvider = ({ children }: Props) => {
             window.clearTimeout(syncTimeoutRef.current)
             syncTimeoutRef.current = null
         }
+        syncedValueSnapshotRef.current.clear()
         setAccessToken(null)
         setRefreshToken(null)
         setExpiresIn(null)
     }, [])
 
+    const isIdOnlyKey = useCallback(
+        (key: string) =>
+            key === "friends" ||
+            key === "ignores" ||
+            key === "registered-characters",
+        []
+    )
+
+    const toComparableValue = useCallback(
+        (key: string, value: unknown): unknown => {
+            if (isIdOnlyKey(key) && Array.isArray(value)) {
+                const ids = value.filter(
+                    (id): id is number => typeof id === "number"
+                )
+                return Array.from(new Set(ids)).sort((a, b) => a - b)
+            }
+
+            if (Array.isArray(value)) {
+                return value.map((item) => toComparableValue(key, item))
+            }
+
+            if (value && typeof value === "object") {
+                const input = value as Record<string, unknown>
+                const out: Record<string, unknown> = {}
+                for (const k of Object.keys(input).sort()) {
+                    out[k] = toComparableValue(k, input[k])
+                }
+                return out
+            }
+
+            return value
+        },
+        [isIdOnlyKey]
+    )
+
+    const serializeComparable = useCallback(
+        (key: string, value: unknown): string => {
+            try {
+                return JSON.stringify(toComparableValue(key, value ?? null))
+            } catch {
+                return String(value)
+            }
+        },
+        [toComparableValue]
+    )
+
+    const serializePersistentValue = useCallback(
+        (key: string): string | null => {
+            if (!isPersistentKey(key)) return null
+            const value = getPersistentDataByKeys([key])[key]
+            return serializeComparable(key, value)
+        },
+        [serializeComparable]
+    )
+
     const flushAllLocalSettingsToServer = useCallback(
         async (token: string, signal?: AbortSignal) => {
             if (!token) return
             const allData = getPersistentDataByKeys(PERSISTENT_KEYS)
-            console.log("Flushing all local settings to server:", allData)
+            const normalizedAllData = normalizeAllPersistentSettings(allData)
+            console.log(
+                "Flushing all local settings to server:",
+                normalizedAllData
+            )
             try {
                 await putPersistentSettings(
                     token,
-                    { settings: allData },
+                    { settings: normalizedAllData },
                     signal
                 )
                 // After successful sync:
                 dirtyKeysRef.current.clear()
+                for (const key of Object.keys(normalizedAllData)) {
+                    if (!isPersistentKey(key)) continue
+                    syncedValueSnapshotRef.current.set(
+                        key,
+                        serializeComparable(key, normalizedAllData[key])
+                    )
+                }
             } catch (error) {
                 console.error("Failed to sync settings to server:", error)
                 logMessage("Failed to sync settings to server", "error", {
@@ -135,13 +211,39 @@ export const UserProvider = ({ children }: Props) => {
             if (!token) return
             const keysToFlush = Array.from(dirtyKeysRef.current)
             if (keysToFlush.length === 0) return
-            const data = getPersistentDataByKeys(keysToFlush)
-            console.log("Flushing dirty keys to server:", keysToFlush, data)
+
+            const changedKeys = keysToFlush.filter((key) => {
+                const currentSerialized = serializePersistentValue(key)
+                const previousSerialized =
+                    syncedValueSnapshotRef.current.get(key) ?? null
+                return (
+                    currentSerialized !== null &&
+                    currentSerialized !== previousSerialized
+                )
+            })
+
+            // Clear keys that were marked dirty but are already in-sync.
+            for (const key of keysToFlush) {
+                if (!changedKeys.includes(key)) {
+                    dirtyKeysRef.current.delete(key)
+                }
+            }
+
+            if (changedKeys.length === 0) return
+
+            const data = getPersistentDataByKeys(changedKeys)
+            console.log("Flushing dirty keys to server:", changedKeys, data)
             try {
                 await patchPersistentSettings(token, { settings: data }, signal)
                 // Only clear keys included in this successful flush.
-                for (const key of keysToFlush) {
+                for (const key of changedKeys) {
                     dirtyKeysRef.current.delete(key)
+                    if (isPersistentKey(key)) {
+                        syncedValueSnapshotRef.current.set(
+                            key,
+                            serializeComparable(key, data[key])
+                        )
+                    }
                 }
             } catch (error) {
                 console.error("Failed to sync settings to server:", error)
@@ -155,7 +257,7 @@ export const UserProvider = ({ children }: Props) => {
                 })
             }
         },
-        []
+        [serializeComparable, serializePersistentValue]
     )
 
     const scheduleDebouncedSync = useCallback(() => {
@@ -172,6 +274,22 @@ export const UserProvider = ({ children }: Props) => {
             void flushDirtyKeysToServer(accessToken)
         }, 1000)
     }, [accessToken, flushDirtyKeysToServer])
+
+    useEffect(() => {
+        if (!accessToken) {
+            syncedValueSnapshotRef.current.clear()
+            return
+        }
+
+        const current = getPersistentDataByKeys(PERSISTENT_KEYS)
+        for (const key of Object.keys(current)) {
+            if (!isPersistentKey(key)) continue
+            syncedValueSnapshotRef.current.set(
+                key,
+                serializeComparable(key, current[key])
+            )
+        }
+    }, [accessToken, serializeComparable])
 
     useEffect(() => {
         const unsubscribe = subscribeToLocalStorageWrites(({ key }) => {
@@ -195,20 +313,68 @@ export const UserProvider = ({ children }: Props) => {
     }, [refreshToken])
 
     const applyServerSettingsToLocal = useCallback(
-        (serverSettings: Record<string, any>) => {
+        async (serverSettings: unknown, signal?: AbortSignal) => {
             isApplyingServerRef.current = true
             try {
-                console.log(
-                    "Applying server settings to localStorage:",
-                    serverSettings
-                )
-                setPersistentData(serverSettings)
+                const normalized =
+                    normalizeAllPersistentSettings(serverSettings)
+                const {
+                    friends: friendIds,
+                    ignores: ignoreIds,
+                    "registered-characters": registeredIds,
+                    ...nonCharSettings
+                } = normalized
+                setPersistentData(nonCharSettings as Record<string, any>)
+                const [friendsResult, ignoresResult, registeredResult] =
+                    await Promise.all([
+                        hydrateCharacterIds(friendIds, signal),
+                        hydrateCharacterIds(ignoreIds, signal),
+                        hydrateCharacterIds(registeredIds, signal),
+                    ])
+                if (friendsResult !== null) {
+                    setFriends(friendsResult)
+                } else {
+                    logMessage(
+                        "Character hydration failed for friends; existing local data preserved",
+                        "warn",
+                        {}
+                    )
+                }
+                if (ignoresResult !== null) {
+                    setIgnores(ignoresResult)
+                } else {
+                    logMessage(
+                        "Character hydration failed for ignores; existing local data preserved",
+                        "warn",
+                        {}
+                    )
+                }
+                if (registeredResult !== null) {
+                    setRegisteredCharacters(registeredResult)
+                } else {
+                    logMessage(
+                        "Character hydration failed for registered characters; existing local data preserved",
+                        "warn",
+                        {}
+                    )
+                }
+                const normalizedByKey = normalized as unknown as Record<
+                    string,
+                    unknown
+                >
+                for (const key of Object.keys(normalized)) {
+                    if (!isPersistentKey(key)) continue
+                    syncedValueSnapshotRef.current.set(
+                        key,
+                        serializeComparable(key, normalizedByKey[key])
+                    )
+                }
                 setPersistentSettingsRevision((prev) => prev + 1)
             } finally {
                 isApplyingServerRef.current = false
             }
         },
-        []
+        [serializeComparable]
     )
 
     const fetchAndApplyServerSettings = useCallback(
@@ -224,9 +390,16 @@ export const UserProvider = ({ children }: Props) => {
                     await flushAllLocalSettingsToServer(token, signal)
                     return
                 }
-                applyServerSettingsToLocal(serverSettings)
+                await applyServerSettingsToLocal(serverSettings, signal)
             } catch (error: unknown) {
                 if ((error as { name?: string })?.name === "AbortError") return
+                if (
+                    axios.isAxiosError(error) &&
+                    error.response?.status === 404
+                ) {
+                    await flushAllLocalSettingsToServer(token, signal)
+                    return
+                }
                 logMessage("Failed to fetch settings from server", "warn", {
                     metadata: {
                         error:

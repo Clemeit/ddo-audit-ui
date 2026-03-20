@@ -284,6 +284,15 @@ function removeFriend(character: Character): void {
     removeItem<Character>(FRIENDS_KEY, character, (a, b) => a.id === b.id)
 }
 
+function getFriendIds(): number[] {
+    const characters = getData<Character[]>(FRIENDS_KEY, [])
+    return Array.isArray(characters)
+        ? characters
+              .map((c) => c.id)
+              .filter((id): id is number => typeof id === "number")
+        : []
+}
+
 // Ignores functions
 function getIgnores(): Character[] {
     return getData<Character[]>(IGNORES_KEY, [])
@@ -303,6 +312,24 @@ function addIgnore(character: Character): void {
 
 function removeIgnore(character: Character): void {
     removeItem<Character>(IGNORES_KEY, character, (a, b) => a.id === b.id)
+}
+
+function getIgnoreIds(): number[] {
+    const characters = getData<Character[]>(IGNORES_KEY, [])
+    return Array.isArray(characters)
+        ? characters
+              .map((c) => c.id)
+              .filter((id): id is number => typeof id === "number")
+        : []
+}
+
+function getRegisteredCharacterIds(): number[] {
+    const characters = getData<Character[]>(REGISTERED_CHARACTERS_KEY, [])
+    return Array.isArray(characters)
+        ? characters
+              .map((c) => c.id)
+              .filter((id): id is number => typeof id === "number")
+        : []
 }
 
 // Areas functions
@@ -360,9 +387,20 @@ function getPersistentDataByKeys(keys: readonly string[]): Record<string, any> {
     const result: Record<string, any> = {}
     for (const key of keys) {
         if (isPersistentKey(key)) {
-            const fallback = getPersistentDefaultValue(key)
-            const value = getData<any>(key, fallback)
-            result[key] = normalizePersistentValue(key, value)
+            // For character list keys, upload IDs only — not full Character objects
+            if (
+                key === FRIENDS_KEY ||
+                key === IGNORES_KEY ||
+                key === REGISTERED_CHARACTERS_KEY
+            ) {
+                if (key === FRIENDS_KEY) result[key] = getFriendIds()
+                else if (key === IGNORES_KEY) result[key] = getIgnoreIds()
+                else result[key] = getRegisteredCharacterIds()
+            } else {
+                const fallback = getPersistentDefaultValue(key)
+                const value = getData<any>(key, fallback)
+                result[key] = normalizePersistentValue(key, value)
+            }
         }
     }
     return result
@@ -554,6 +592,9 @@ export {
     addIgnore,
     removeIgnore,
     setIgnores,
+    getFriendIds,
+    getIgnoreIds,
+    getRegisteredCharacterIds,
     getAreas,
     setAreas,
     getQuests,

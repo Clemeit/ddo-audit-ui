@@ -1,5 +1,6 @@
 import { UserObject } from "./Auth"
 import { AccessToken } from "./Verification"
+import type { NormalizedPersistentSettings } from "../utils/settingsNormalizers"
 
 interface UserSettings {
     registeredCharacterIds?: number[]
@@ -37,16 +38,12 @@ interface UpdatePasswordPayload {
 }
 
 interface PersistentSettingsPayload {
-    settings: {
-        [key: string]: any
-    }
+    settings: Partial<NormalizedPersistentSettings>
 }
 
 interface PersistentSettingsResponse {
     data?: {
-        settings: {
-            [key: string]: any
-        }
+        settings: NormalizedPersistentSettings
     }
     error?: string
 }

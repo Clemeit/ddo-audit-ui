@@ -9,23 +9,20 @@ import {
  * without the expensive API calls from the full LfmContext
  */
 const useTrackedCharacters = () => {
-    const [trackedCharacterIds, setTrackedCharacterIds] = useState<number[]>([])
-    const settingsStorageKey = "lfm-settings"
-
-    // Load tracked character IDs from localStorage on mount
-    useEffect(() => {
-        try {
-            const ids = getTrackedCharacterIds()
-            if (ids) {
-                setTrackedCharacterIds(ids)
+    const [trackedCharacterIds, setTrackedCharacterIds] = useState<number[]>(
+        () => {
+            try {
+                const ids = getTrackedCharacterIds()
+                return Array.isArray(ids) ? ids : []
+            } catch (error) {
+                console.error(
+                    "Error loading tracked character IDs from localStorage:",
+                    error
+                )
+                return []
             }
-        } catch (error) {
-            console.error(
-                "Error loading tracked character IDs from localStorage:",
-                error
-            )
         }
-    }, [])
+    )
 
     // Save tracked character IDs to localStorage when they change
     useEffect(() => {

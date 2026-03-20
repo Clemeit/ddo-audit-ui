@@ -14,6 +14,11 @@ import {
 import { useAppContext } from "./AppContext.tsx"
 import { getLfmSettings, setLfmSettings } from "../utils/localStorage.ts"
 import { LfmApiDataModel, LfmSortSetting, LfmSortType } from "../models/Lfm.ts"
+import {
+    isRecord,
+    normalizeLfmSettings,
+    type NormalizedLfmSettings,
+} from "../utils/settingsNormalizers.ts"
 import { MAX_LEVEL, MIN_LEVEL } from "../constants/game.ts"
 import useGetRegisteredCharacters from "../hooks/useGetRegisteredCharacters.ts"
 import { Character } from "../models/Character.ts"
@@ -335,239 +340,21 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
     // Sanitize settings object field-by-field, coercing invalid values to safe defaults
     // Returns a sanitized settings object plus a flag indicating if any correction occurred
     const sanitizeSettings = useCallback(
-        (settings: any): { sanitized: any; corrected: boolean } => {
-            const s = settings && typeof settings === "object" ? settings : {}
+        (
+            settings: unknown
+        ): { sanitized: NormalizedLfmSettings; corrected: boolean } => {
+            const s = isRecord(settings) ? settings : {}
+            const sanitized = normalizeLfmSettings(settings)
             let corrected = false
 
-            const coerceNumber = (
-                value: any,
-                { min, max, def }: { min?: number; max?: number; def: number }
-            ): number => {
-                const n =
-                    typeof value === "number" ? value : parseInt(String(value))
-                if (isNaN(n)) return def
-                if (min !== undefined && n < min) return min
-                if (max !== undefined && n > max) return max
-                return n
-            }
-
-            const sanitizeBoolean = (value: any, def: boolean): boolean => {
-                if (typeof value === "boolean") return value
-                if (value === undefined || value === null) return def
-                return Boolean(value)
-            }
-
-            const defaults = {
-                minLevel: MIN_LEVEL,
-                maxLevel: MAX_LEVEL,
-                filterByMyCharacters: false,
-                showNotEligible: true,
-                hideContentIDontOwn: false,
-                indicateContentIDontOwn: false,
-                ownedContent: [] as string[],
-                fontSize: DEFAULT_BASE_FONT_SIZE,
-                panelWidth: DEFAULT_LFM_PANEL_WIDTH,
-                showBoundingBoxes: false,
-                sortBy: {
-                    type: LfmSortType.LEVEL,
-                    ascending: true,
-                } as LfmSortSetting,
-                isDynamicWidth: false,
-                showRaidTimerIndicator: true,
-                showMemberCount: true,
-                showQuestGuesses: true,
-                showQuestTips: true,
-                showCharacterGuildNames: true,
-                trackedCharacterIds: [] as number[],
-                showLfmPostedTime: true,
-                showQuestMetrics: true,
-                mouseOverDelay: DEFAULT_MOUSE_OVER_DELAY,
-                showLfmActivity: true,
-                isMultiColumn: true,
-                showEligibleCharacters: false,
-                hideGroupsPostedByIgnoredCharacters: false,
-                hideGroupsContainingIgnoredCharacters: false,
-                showIndicationForGroupsPostedByFriends: true,
-                showIndicationForGroupsContainingFriends: true,
-                highlightRaids: false,
-                hideAllLevelGroups: false,
-                showEligibilityDividers: true,
-                onlyShowRaids: false,
-                hideFullGroups: false,
-            }
-
-            const sanitized: any = {}
-
-            // Numeric ranges
-            sanitized.minLevel = coerceNumber(s.minLevel, {
-                min: MIN_LEVEL,
-                max: MAX_LEVEL,
-                def: defaults.minLevel,
-            })
-            sanitized.maxLevel = coerceNumber(s.maxLevel, {
-                min: MIN_LEVEL,
-                max: MAX_LEVEL,
-                def: defaults.maxLevel,
-            })
-            sanitized.fontSize = coerceNumber(s.fontSize, {
-                min: 8,
-                max: 72,
-                def: defaults.fontSize,
-            })
-            sanitized.panelWidth = coerceNumber(s.panelWidth, {
-                min: 100,
-                max: 2000,
-                def: defaults.panelWidth,
-            })
-            sanitized.mouseOverDelay = coerceNumber(s.mouseOverDelay, {
-                min: 0,
-                max: 10000,
-                def: defaults.mouseOverDelay,
-            })
-
-            // Booleans
-            sanitized.filterByMyCharacters = sanitizeBoolean(
-                s.filterByMyCharacters,
-                defaults.filterByMyCharacters
-            )
-            sanitized.showNotEligible = sanitizeBoolean(
-                s.showNotEligible,
-                defaults.showNotEligible
-            )
-            sanitized.hideContentIDontOwn = sanitizeBoolean(
-                s.hideContentIDontOwn,
-                defaults.hideContentIDontOwn
-            )
-            sanitized.indicateContentIDontOwn = sanitizeBoolean(
-                s.indicateContentIDontOwn,
-                defaults.indicateContentIDontOwn
-            )
-            sanitized.showBoundingBoxes = sanitizeBoolean(
-                s.showBoundingBoxes,
-                defaults.showBoundingBoxes
-            )
-            sanitized.isDynamicWidth = sanitizeBoolean(
-                s.isDynamicWidth,
-                defaults.isDynamicWidth
-            )
-            sanitized.showRaidTimerIndicator = sanitizeBoolean(
-                s.showRaidTimerIndicator,
-                defaults.showRaidTimerIndicator
-            )
-            sanitized.showMemberCount = sanitizeBoolean(
-                s.showMemberCount,
-                defaults.showMemberCount
-            )
-            sanitized.showQuestGuesses = sanitizeBoolean(
-                s.showQuestGuesses,
-                defaults.showQuestGuesses
-            )
-            sanitized.showQuestTips = sanitizeBoolean(
-                s.showQuestTips,
-                defaults.showQuestTips
-            )
-            sanitized.showCharacterGuildNames = sanitizeBoolean(
-                s.showCharacterGuildNames,
-                defaults.showCharacterGuildNames
-            )
-            sanitized.showLfmPostedTime = sanitizeBoolean(
-                s.showLfmPostedTime,
-                defaults.showLfmPostedTime
-            )
-            sanitized.showQuestMetrics = sanitizeBoolean(
-                s.showQuestMetrics,
-                defaults.showQuestMetrics
-            )
-            sanitized.showLfmActivity = sanitizeBoolean(
-                s.showLfmActivity,
-                defaults.showLfmActivity
-            )
-            sanitized.isMultiColumn = sanitizeBoolean(
-                s.isMultiColumn,
-                defaults.isMultiColumn
-            )
-            sanitized.showEligibleCharacters = sanitizeBoolean(
-                s.showEligibleCharacters,
-                defaults.showEligibleCharacters
-            )
-            sanitized.hideGroupsPostedByIgnoredCharacters = sanitizeBoolean(
-                s.hideGroupsPostedByIgnoredCharacters,
-                defaults.hideGroupsPostedByIgnoredCharacters
-            )
-            sanitized.hideGroupsContainingIgnoredCharacters = sanitizeBoolean(
-                s.hideGroupsContainingIgnoredCharacters,
-                defaults.hideGroupsContainingIgnoredCharacters
-            )
-            sanitized.showIndicationForGroupsPostedByFriends = sanitizeBoolean(
-                s.showIndicationForGroupsPostedByFriends,
-                defaults.showIndicationForGroupsPostedByFriends
-            )
-            sanitized.showIndicationForGroupsContainingFriends =
-                sanitizeBoolean(
-                    s.showIndicationForGroupsContainingFriends,
-                    defaults.showIndicationForGroupsContainingFriends
-                )
-            sanitized.highlightRaids = sanitizeBoolean(
-                s.highlightRaids,
-                defaults.highlightRaids
-            )
-            sanitized.hideAllLevelGroups = sanitizeBoolean(
-                s.hideAllLevelGroups,
-                defaults.hideAllLevelGroups
-            )
-            sanitized.showEligibilityDividers = sanitizeBoolean(
-                s.showEligibilityDividers,
-                defaults.showEligibilityDividers
-            )
-            sanitized.onlyShowRaids = sanitizeBoolean(
-                s.onlyShowRaids,
-                defaults.onlyShowRaids
-            )
-            sanitized.hideFullGroups = sanitizeBoolean(
-                s.hideFullGroups,
-                defaults.hideFullGroups
-            )
-
-            // Arrays
-            sanitized.ownedContent = Array.isArray(s.ownedContent)
-                ? s.ownedContent
-                : defaults.ownedContent
-            sanitized.trackedCharacterIds = Array.isArray(s.trackedCharacterIds)
-                ? s.trackedCharacterIds.filter(
-                      (n: any) => typeof n === "number"
-                  )
-                : defaults.trackedCharacterIds
-
-            // sortBy object
-            const sort = s.sortBy
-            if (
-                sort &&
-                typeof sort === "object" &&
-                sort.type !== undefined &&
-                typeof sort.ascending === "boolean"
-            ) {
-                sanitized.sortBy = sort
-            } else {
-                sanitized.sortBy = defaults.sortBy
-            }
-
-            // Determine if any correction occurred by comparing used fields
-            const keys = Object.keys(defaults)
-            for (const k of keys) {
-                if ((s as any)[k] === undefined) {
-                    if (sanitized[k] !== (defaults as any)[k]) {
-                        corrected = true
-                        break
-                    }
-                } else if (k === "trackedCharacterIds") {
-                    const a = Array.isArray((s as any)[k]) ? (s as any)[k] : []
-                    if (a.length !== sanitized[k].length) {
-                        corrected = true
-                        break
-                    }
-                } else if (
-                    JSON.stringify((s as any)[k]) !==
-                    JSON.stringify(sanitized[k])
+            for (const k of Object.keys(
+                sanitized
+            ) as (keyof NormalizedLfmSettings)[]) {
+                const original = (s as any)[k]
+                if (original === undefined) continue
+                if (
+                    JSON.stringify(original) !==
+                    JSON.stringify((sanitized as any)[k])
                 ) {
                     corrected = true
                     break
