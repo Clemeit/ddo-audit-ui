@@ -156,6 +156,75 @@ export const UserProvider = ({ children }: Props) => {
         setSessionRehydrateHint(false)
     }, [setSessionRehydrateHint])
 
+    const notifySessionInvalidated = useCallback(() => {
+        createNotification({
+            title: "You were logged out",
+            message: "Please log back in to continue syncing your settings.",
+            type: "info",
+            ttl: 6000,
+        })
+    }, [createNotification])
+
+    const refreshAccessSession = useCallback(
+        async (signal?: AbortSignal): Promise<string | null> => {
+            const response = await postRefresh(signal)
+            if (!response?.data) return null
+            setSession(response.data)
+            return response.data.access_token
+        },
+        [setSession]
+    )
+
+    const executeWithAuthRetry = useCallback(
+        async <T,>(
+            request: (authToken: string) => Promise<T>,
+            token: string,
+            signal?: AbortSignal
+        ): Promise<T> => {
+            try {
+                return await request(token)
+            } catch (error) {
+                if ((error as { name?: string })?.name === "AbortError") {
+                    throw error
+                }
+
+                const status = axios.isAxiosError(error)
+                    ? error.response?.status
+                    : undefined
+                if (status !== 401 && status !== 403) {
+                    throw error
+                }
+
+                try {
+                    const refreshedToken = await refreshAccessSession(signal)
+                    if (!refreshedToken) {
+                        clearSession()
+                        notifySessionInvalidated()
+                        throw error
+                    }
+                    return await request(refreshedToken)
+                } catch (refreshError) {
+                    if (
+                        (refreshError as { name?: string })?.name ===
+                        "AbortError"
+                    ) {
+                        throw refreshError
+                    }
+
+                    const refreshStatus = axios.isAxiosError(refreshError)
+                        ? refreshError.response?.status
+                        : undefined
+                    if (refreshStatus === 401 || refreshStatus === 403) {
+                        clearSession()
+                        notifySessionInvalidated()
+                    }
+                    throw refreshError
+                }
+            }
+        },
+        [refreshAccessSession, clearSession, notifySessionInvalidated]
+    )
+
     const isIdOnlyKey = useCallback(
         (key: string) =>
             key === "friends" ||
@@ -217,9 +286,14 @@ export const UserProvider = ({ children }: Props) => {
             const allData = getPersistentDataByKeys(PERSISTENT_KEYS)
             const normalizedAllData = normalizeAllPersistentSettings(allData)
             try {
-                await putPersistentSettings(
+                await executeWithAuthRetry(
+                    (authToken) =>
+                        putPersistentSettings(
+                            authToken,
+                            { settings: normalizedAllData },
+                            signal
+                        ),
                     token,
-                    { settings: normalizedAllData },
                     signal
                 )
                 // After successful sync:
@@ -232,6 +306,13 @@ export const UserProvider = ({ children }: Props) => {
                     )
                 }
             } catch (error) {
+                if (
+                    axios.isAxiosError(error) &&
+                    (error.response?.status === 401 ||
+                        error.response?.status === 403)
+                ) {
+                    return
+                }
                 logMessage("Failed to sync settings to server", "error", {
                     metadata: {
                         error:
@@ -242,7 +323,7 @@ export const UserProvider = ({ children }: Props) => {
                 })
             }
         },
-        []
+        [executeWithAuthRetry, serializeComparable]
     )
 
     const flushDirtyKeysToServer = useCallback(
@@ -276,9 +357,14 @@ export const UserProvider = ({ children }: Props) => {
                 changedKeys
             )
             try {
-                await patchPersistentSettings(
+                await executeWithAuthRetry(
+                    (authToken) =>
+                        patchPersistentSettings(
+                            authToken,
+                            { settings: normalized },
+                            signal
+                        ),
                     token,
-                    { settings: normalized },
                     signal
                 )
                 // Only clear keys included in this successful flush.
@@ -292,6 +378,13 @@ export const UserProvider = ({ children }: Props) => {
                     }
                 }
             } catch (error) {
+                if (
+                    axios.isAxiosError(error) &&
+                    (error.response?.status === 401 ||
+                        error.response?.status === 403)
+                ) {
+                    return
+                }
                 logMessage("Failed to sync settings to server", "error", {
                     metadata: {
                         error:
@@ -302,7 +395,7 @@ export const UserProvider = ({ children }: Props) => {
                 })
             }
         },
-        [serializeComparable, serializePersistentValue]
+        [executeWithAuthRetry, serializeComparable, serializePersistentValue]
     )
 
     const scheduleDebouncedSync = useCallback(() => {
@@ -416,7 +509,11 @@ export const UserProvider = ({ children }: Props) => {
     const fetchAndApplyServerSettings = useCallback(
         async (token: string, signal?: AbortSignal) => {
             try {
-                const response = await getPersistentSettings(token, signal)
+                const response = await executeWithAuthRetry(
+                    (authToken) => getPersistentSettings(authToken, signal),
+                    token,
+                    signal
+                )
                 const serverSettings = response?.data?.settings
                 if (
                     !serverSettings ||
@@ -436,6 +533,13 @@ export const UserProvider = ({ children }: Props) => {
                     await flushAllLocalSettingsToServer(token, signal)
                     return
                 }
+                if (
+                    axios.isAxiosError(error) &&
+                    (error.response?.status === 401 ||
+                        error.response?.status === 403)
+                ) {
+                    return
+                }
                 logMessage("Failed to fetch settings from server", "warn", {
                     metadata: {
                         error:
@@ -446,7 +550,11 @@ export const UserProvider = ({ children }: Props) => {
                 })
             }
         },
-        [applyServerSettingsToLocal, flushAllLocalSettingsToServer]
+        [
+            applyServerSettingsToLocal,
+            executeWithAuthRetry,
+            flushAllLocalSettingsToServer,
+        ]
     )
 
     const refreshSession = useCallback(
