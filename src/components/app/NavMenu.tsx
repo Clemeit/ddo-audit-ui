@@ -10,7 +10,7 @@ import { ReactComponent as TrendsSVG } from "../../assets/svg/trends.svg"
 import { ReactComponent as WhoSVG } from "../../assets/svg/who.svg"
 import { ReactComponent as GroupingSVG } from "../../assets/svg/grouping.svg"
 import { ReactComponent as LoginSVG } from "../../assets/svg/login.svg"
-import LoginButtonContainer from "./LoginButtonContainer.tsx"
+import LoginButtonContainer from "./RE_LoginButtonContainer.tsx"
 import { useUserContext } from "../../contexts/UserContext.tsx"
 import useWindowSize from "../../hooks/useWindowSize.ts"
 
