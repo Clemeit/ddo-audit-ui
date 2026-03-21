@@ -326,3 +326,15 @@ export function normalizeAllPersistentSettings(
         "registered-characters": coerceNumberArray(s["registered-characters"]),
     }
 }
+
+export function normalizePartialPersistentSettings(
+    input: unknown,
+    keys: string[]
+): Partial<NormalizedPersistentSettings> {
+    const full = normalizeAllPersistentSettings(input)
+    return Object.fromEntries(
+        keys
+            .filter((k): k is keyof NormalizedPersistentSettings => k in full)
+            .map((k) => [k, full[k]])
+    ) as Partial<NormalizedPersistentSettings>
+}

@@ -27,7 +27,10 @@ import {
     setIgnores,
     setRegisteredCharacters,
 } from "../utils/localStorage"
-import { normalizeAllPersistentSettings } from "../utils/settingsNormalizers"
+import {
+    normalizeAllPersistentSettings,
+    normalizePartialPersistentSettings,
+} from "../utils/settingsNormalizers"
 import { hydrateCharacterIds } from "../utils/settingsHydration"
 import {
     getPersistentSettings,
@@ -268,7 +271,10 @@ export const UserProvider = ({ children }: Props) => {
             if (changedKeys.length === 0) return
 
             const data = getPersistentDataByKeys(changedKeys)
-            const normalized = normalizeAllPersistentSettings(data)
+            const normalized = normalizePartialPersistentSettings(
+                data,
+                changedKeys
+            )
             try {
                 await patchPersistentSettings(
                     token,
