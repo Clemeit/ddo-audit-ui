@@ -11,6 +11,7 @@ import FauxLink from "../global/FauxLink"
 import YesNoModal from "../modal/YesNoModal"
 import { useNotificationContext } from "../../contexts/NotificationContext"
 import { notifyAuthError } from "../../utils/authNotifications"
+import logMessage from "../../utils/logUtils"
 
 const Account = () => {
     const {
@@ -45,7 +46,18 @@ const Account = () => {
                 const profileData = await getProfile(accessToken, signal)
                 setUserProfileData(profileData?.data)
                 setIsUserProfileError(false)
-            } catch {
+            } catch (error) {
+                if ((error as { name?: string })?.name === "AbortError") {
+                    return
+                }
+                logMessage("Failed to fetch user profile", "error", {
+                    metadata: {
+                        error:
+                            error instanceof Error
+                                ? error.message
+                                : String(error),
+                    },
+                })
                 setIsUserProfileError(true)
             } finally {
                 setIsUserProfileLoading(false)
@@ -65,7 +77,13 @@ const Account = () => {
     const handleLogout = useCallback(async () => {
         try {
             await logout()
-        } catch {
+        } catch (error) {
+            logMessage("Logout from Account component failed", "error", {
+                metadata: {
+                    error:
+                        error instanceof Error ? error.message : String(error),
+                },
+            })
             notifyAuthError(createNotification, "logout")
         }
     }, [logout, createNotification])
@@ -74,7 +92,19 @@ const Account = () => {
         try {
             await deleteAccount()
             setShowDeleteAccountModal(false)
-        } catch {
+        } catch (error) {
+            logMessage(
+                "Account deletion from Account component failed",
+                "error",
+                {
+                    metadata: {
+                        error:
+                            error instanceof Error
+                                ? error.message
+                                : String(error),
+                    },
+                }
+            )
             notifyAuthError(createNotification, "delete-account")
         }
     }, [deleteAccount, createNotification])
@@ -83,7 +113,19 @@ const Account = () => {
         try {
             await deleteSettings()
             setShowDeleteSettingsModal(false)
-        } catch {
+        } catch (error) {
+            logMessage(
+                "Settings deletion from Account component failed",
+                "error",
+                {
+                    metadata: {
+                        error:
+                            error instanceof Error
+                                ? error.message
+                                : String(error),
+                    },
+                }
+            )
             notifyAuthError(createNotification, "delete-settings")
         }
     }, [deleteSettings, createNotification])

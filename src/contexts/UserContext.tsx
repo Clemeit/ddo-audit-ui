@@ -205,7 +205,6 @@ export const UserProvider = ({ children }: Props) => {
                     )
                 }
             } catch (error) {
-                console.error("Failed to sync settings to server:", error)
                 logMessage("Failed to sync settings to server", "error", {
                     metadata: {
                         error:
@@ -258,7 +257,6 @@ export const UserProvider = ({ children }: Props) => {
                     }
                 }
             } catch (error) {
-                console.error("Failed to sync settings to server:", error)
                 logMessage("Failed to sync settings to server", "error", {
                     metadata: {
                         error:
@@ -317,10 +315,25 @@ export const UserProvider = ({ children }: Props) => {
 
     // Persist refresh token on change
     useEffect(() => {
-        if (refreshToken) {
-            localStorage.setItem("refresh_token", refreshToken)
-        } else {
-            localStorage.removeItem("refresh_token")
+        try {
+            if (refreshToken) {
+                localStorage.setItem("refresh_token", refreshToken)
+            } else {
+                localStorage.removeItem("refresh_token")
+            }
+        } catch (error) {
+            logMessage(
+                "Failed to persist refresh token to localStorage",
+                "warn",
+                {
+                    metadata: {
+                        error:
+                            error instanceof Error
+                                ? error.message
+                                : String(error),
+                    },
+                }
+            )
         }
     }, [refreshToken])
 
@@ -443,6 +456,15 @@ export const UserProvider = ({ children }: Props) => {
                 }
             } catch (error) {
                 // Refresh token expired or invalid — session is over
+                if ((error as { name?: string })?.name === "AbortError") return
+                logMessage("Failed to refresh session", "warn", {
+                    metadata: {
+                        error:
+                            error instanceof Error
+                                ? error.message
+                                : String(error),
+                    },
+                })
                 clearSession()
             } finally {
                 setIsLoading(false)
@@ -453,11 +475,26 @@ export const UserProvider = ({ children }: Props) => {
 
     // Rehydrate session on mount
     useEffect(() => {
-        const storedToken = localStorage.getItem("refresh_token")
-        if (!storedToken) return
-        const controller = new AbortController()
-        refreshSession(controller.signal)
-        return () => controller.abort()
+        try {
+            const storedToken = localStorage.getItem("refresh_token")
+            if (!storedToken) return
+            const controller = new AbortController()
+            refreshSession(controller.signal)
+            return () => controller.abort()
+        } catch (error) {
+            logMessage(
+                "Failed to rehydrate session from localStorage",
+                "warn",
+                {
+                    metadata: {
+                        error:
+                            error instanceof Error
+                                ? error.message
+                                : String(error),
+                    },
+                }
+            )
+        }
     }, [])
 
     // Keep session alive
@@ -497,11 +534,29 @@ export const UserProvider = ({ children }: Props) => {
                     ttl: 10000,
                 })
                 return response
+            } catch (error) {
+                if ((error as { name?: string })?.name === "AbortError") {
+                    return
+                }
+                logMessage("User registration failed", "error", {
+                    metadata: {
+                        error:
+                            error instanceof Error
+                                ? error.message
+                                : String(error),
+                    },
+                })
+                throw error
             } finally {
                 setIsLoading(false)
             }
         },
-        [setSession, closeAccountModal, fetchAndApplyServerSettings]
+        [
+            setSession,
+            closeAccountModal,
+            fetchAndApplyServerSettings,
+            createNotification,
+        ]
     )
 
     const login = useCallback(
@@ -518,6 +573,19 @@ export const UserProvider = ({ children }: Props) => {
                     )
                 }
                 return response
+            } catch (error) {
+                if ((error as { name?: string })?.name === "AbortError") {
+                    return
+                }
+                logMessage("User login failed", "error", {
+                    metadata: {
+                        error:
+                            error instanceof Error
+                                ? error.message
+                                : String(error),
+                    },
+                })
+                throw error
             } finally {
                 setIsLoading(false)
             }
@@ -543,11 +611,25 @@ export const UserProvider = ({ children }: Props) => {
                     type: "success",
                     ttl: 5000,
                 })
+            } catch (error) {
+                if ((error as { name?: string })?.name === "AbortError") {
+                    return
+                }
+                logMessage("User logout failed", "error", {
+                    metadata: {
+                        error:
+                            error instanceof Error
+                                ? error.message
+                                : String(error),
+                    },
+                })
+                // Still clear session even if logout request fails
+                clearSession()
             } finally {
                 setIsLoading(false)
             }
         },
-        [accessToken, clearSession]
+        [accessToken, clearSession, createNotification]
     )
 
     const deleteAccount = useCallback(
@@ -582,11 +664,24 @@ export const UserProvider = ({ children }: Props) => {
                         )
                     }
                 }
+            } catch (error) {
+                if ((error as { name?: string })?.name === "AbortError") {
+                    return
+                }
+                logMessage("Account deletion failed", "error", {
+                    metadata: {
+                        error:
+                            error instanceof Error
+                                ? error.message
+                                : String(error),
+                    },
+                })
+                throw error
             } finally {
                 setIsLoading(false)
             }
         },
-        [accessToken, clearSession]
+        [accessToken, clearSession, createNotification]
     )
 
     const deleteSettings = useCallback(
@@ -620,11 +715,30 @@ export const UserProvider = ({ children }: Props) => {
                         })
                     }
                 }
+            } catch (error) {
+                if ((error as { name?: string })?.name === "AbortError") {
+                    return
+                }
+                logMessage("Settings deletion failed", "error", {
+                    metadata: {
+                        error:
+                            error instanceof Error
+                                ? error.message
+                                : String(error),
+                    },
+                })
+                createNotification({
+                    title: "Setting Deletion Failed",
+                    message:
+                        "An error occurred while trying to delete your settings. Please try again later.",
+                    type: "error",
+                    ttl: 10000,
+                })
             } finally {
                 setIsLoading(false)
             }
         },
-        [accessToken, clearSession]
+        [accessToken, createNotification]
     )
 
     const changePassword = useCallback(
@@ -652,16 +766,24 @@ export const UserProvider = ({ children }: Props) => {
                     })
                 }
                 return response
+            } catch (error) {
+                if ((error as { name?: string })?.name === "AbortError") {
+                    return
+                }
+                logMessage("Password change failed", "error", {
+                    metadata: {
+                        error:
+                            error instanceof Error
+                                ? error.message
+                                : String(error),
+                    },
+                })
+                throw error
             } finally {
                 setIsLoading(false)
             }
         },
-        [
-            accessToken,
-            setSession,
-            closeAccountModal,
-            fetchAndApplyServerSettings,
-        ]
+        [accessToken, setSession, closeAccountModal, createNotification]
     )
 
     return (

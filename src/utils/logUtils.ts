@@ -63,26 +63,41 @@ function getScreenInfo(): {
 
 // Utility function to generate a session ID (persisted in sessionStorage)
 export function getSessionId(): string {
-    let sessionId = sessionStorage.getItem("ddo_session_id")
-    if (!sessionId) {
-        sessionId = `session_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`
-        sessionStorage.setItem("ddo_session_id", sessionId)
+    try {
+        let sessionId = sessionStorage.getItem("ddo_session_id")
+        if (!sessionId) {
+            sessionId = `session_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`
+            sessionStorage.setItem("ddo_session_id", sessionId)
+        }
+        return sessionId
+    } catch (error) {
+        // sessionStorage unavailable, generate temporary ID
+        return `session_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`
     }
-    return sessionId
 }
 
-// Utility function to generate a session ID (persisted in sessionStorage)
+// Utility function to generate a user ID (persisted in localStorage)
 export function getUserId(): string {
-    let userId = localStorage.getItem("ddo_user_id")
-    if (!userId) {
-        userId = `user_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`
-        localStorage.setItem("ddo_user_id", userId)
+    try {
+        let userId = localStorage.getItem("ddo_user_id")
+        if (!userId) {
+            userId = `user_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`
+            localStorage.setItem("ddo_user_id", userId)
+        }
+        return userId
+    } catch (error) {
+        // localStorage unavailable, generate temporary ID
+        return `user_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`
     }
-    return userId
 }
 
-export function getOriginatingUserId(): string {
-    return localStorage.getItem("originating_user_id")
+export function getOriginatingUserId(): string | null {
+    try {
+        return localStorage.getItem("originating_user_id")
+    } catch (error) {
+        // localStorage unavailable
+        return null
+    }
 }
 
 // Utility function to get the commit hash from environment variables
@@ -141,6 +156,10 @@ export default function logMessage(
     }
 
     postLog(logEntry).catch((error) => {
-        console.error("Failed to log message:", error)
+        // Fail silently to avoid infinite loops or cascading errors
+        // Only log to console if not in production to aid debugging
+        if (process.env.NODE_ENV !== "production") {
+            console.error("Failed to log message:", error)
+        }
     })
 }

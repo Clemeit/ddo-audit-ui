@@ -10,6 +10,7 @@ import { ReactComponent as LogoSVG } from "../../assets/svg/logo.svg"
 import useWindowSize from "../../hooks/useWindowSize"
 import { useNotificationContext } from "../../contexts/NotificationContext"
 import { notifyAuthError } from "../../utils/authNotifications"
+import logMessage from "../../utils/logUtils"
 
 const AccountForm = () => {
     const [username, setUsername] = useState<string>("")
@@ -62,11 +63,24 @@ const AccountForm = () => {
         } catch (error) {
             if (axios.isAxiosError(error) && error.response?.status === 429) {
                 setErrorMessage("Too many attempts. Please try again later.")
+                logMessage("User login rate limited", "warn", {
+                    metadata: {
+                        status: 429,
+                    },
+                })
             } else {
+                logMessage("User login failed", "error", {
+                    metadata: {
+                        error:
+                            error instanceof Error
+                                ? error.message
+                                : String(error),
+                    },
+                })
                 setErrorMessage("Invalid username or password.")
             }
         }
-    }, [username, password, login, createNotification])
+    }, [username, password, login])
 
     const tryRegister = useCallback(async () => {
         if (!username || !password) {
@@ -92,11 +106,24 @@ const AccountForm = () => {
         } catch (error) {
             if (axios.isAxiosError(error) && error.response?.status === 429) {
                 setErrorMessage("Too many attempts. Please try again later.")
+                logMessage("User registration rate limited", "warn", {
+                    metadata: {
+                        status: 429,
+                    },
+                })
             } else {
+                logMessage("User registration failed", "error", {
+                    metadata: {
+                        error:
+                            error instanceof Error
+                                ? error.message
+                                : String(error),
+                    },
+                })
                 setErrorMessage("Unable to register. Please try again.")
             }
         }
-    }, [username, password, register, createNotification])
+    }, [username, password, register])
 
     const tryChangePassword = useCallback(async () => {
         if (!oldPassword || !newPassword) {
@@ -128,6 +155,11 @@ const AccountForm = () => {
         } catch (error) {
             if (axios.isAxiosError(error) && error.response?.status === 429) {
                 setErrorMessage("Too many attempts. Please try again later.")
+                logMessage("Password change rate limited", "warn", {
+                    metadata: {
+                        status: 429,
+                    },
+                })
                 notifyAuthError(
                     createNotification,
                     "change-password",
@@ -138,12 +170,29 @@ const AccountForm = () => {
                 error.response?.status === 400
             ) {
                 setErrorMessage("Current password is incorrect.")
+                logMessage(
+                    "Password change failed: incorrect current password",
+                    "warn",
+                    {
+                        metadata: {
+                            status: 400,
+                        },
+                    }
+                )
                 notifyAuthError(
                     createNotification,
                     "change-password",
                     "Current password is incorrect."
                 )
             } else {
+                logMessage("Password change failed", "error", {
+                    metadata: {
+                        error:
+                            error instanceof Error
+                                ? error.message
+                                : String(error),
+                    },
+                })
                 setErrorMessage("Unable to update password. Please try again.")
                 notifyAuthError(
                     createNotification,
