@@ -113,6 +113,7 @@ export const UserProvider = ({ children }: Props) => {
     const syncedValueSnapshotRef = useRef<Map<string, string>>(new Map())
     const syncTimeoutRef = useRef<number | null>(null)
     const isApplyingServerRef = useRef<boolean>(false)
+    const keepAliveControllerRef = useRef<AbortController | null>(null)
 
     const setSessionRehydrateHint = useCallback((enabled: boolean) => {
         try {
@@ -619,14 +620,17 @@ export const UserProvider = ({ children }: Props) => {
     // Keep session alive
     useEffect(() => {
         if (!accessToken || !expiresIn) return
-        const controller = new AbortController()
         const timeout = setTimeout(
-            () => refreshSession(controller.signal),
-            (expiresIn - 30) * 1000 // refresh 30s before expiry
-        )
+            () => {
+                keepAliveControllerRef.current = new AbortController()
+                void refreshSession(keepAliveControllerRef.current.signal)
+            },
+            (expiresIn - 30) * 1000
+        ) // refresh 30s before expiry
         return () => {
             clearTimeout(timeout)
-            controller.abort()
+            keepAliveControllerRef.current?.abort()
+            keepAliveControllerRef.current = null
         }
     }, [accessToken, expiresIn, refreshSession])
 
