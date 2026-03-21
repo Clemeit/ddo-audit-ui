@@ -34,6 +34,8 @@ export const PERSISTENT_KEYS = [
     BOOLEAN_FLAGS_KEY,
     LFM_SETTINGS_KEY,
     WHO_SETTINGS_KEY,
+    TIMEZONE_KEY,
+    RAID_TIMER_SETTINGS_KEY,
 ] as const
 
 export type PersistentKey = (typeof PERSISTENT_KEYS)[number]
@@ -55,7 +57,10 @@ function getPersistentDefaultValue(key: PersistentKey): unknown {
         case BOOLEAN_FLAGS_KEY:
         case LFM_SETTINGS_KEY:
         case WHO_SETTINGS_KEY:
+        case RAID_TIMER_SETTINGS_KEY:
             return {}
+        case TIMEZONE_KEY:
+            return ""
         default:
             return {}
     }
@@ -72,9 +77,12 @@ function normalizePersistentValue(key: PersistentKey, value: unknown): unknown {
         case BOOLEAN_FLAGS_KEY:
         case LFM_SETTINGS_KEY:
         case WHO_SETTINGS_KEY:
+        case RAID_TIMER_SETTINGS_KEY:
             return value && typeof value === "object" && !Array.isArray(value)
                 ? value
                 : {}
+        case TIMEZONE_KEY:
+            return typeof value === "string" ? value : ""
         default:
             return getPersistentDefaultValue(key)
     }

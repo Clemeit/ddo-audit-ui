@@ -3,6 +3,8 @@ import type { LfmSortSetting } from "../models/Lfm.ts"
 import { CharacterSortType } from "../models/Character.ts"
 import type { CharacterSortBy } from "../models/Character.ts"
 import type { AccessToken } from "../models/Verification.ts"
+import { RaidTimerCharacterSortEnum } from "../models/Common.ts"
+import type { RaidTimerStorage } from "../models/RaidTimers.ts"
 import {
     DEFAULT_BASE_FONT_SIZE,
     DEFAULT_LFM_PANEL_WIDTH,
@@ -297,6 +299,8 @@ export interface NormalizedPersistentSettings {
     friends: number[]
     ignores: number[]
     "registered-characters": number[]
+    timezone: string
+    "timer-settings": RaidTimerStorage
 }
 
 function normalizeAccessTokens(input: unknown): AccessToken[] {
@@ -307,6 +311,25 @@ function normalizeAccessTokens(input: unknown): AccessToken[] {
             typeof t.character_id === "number" &&
             typeof t.access_token === "string"
     )
+}
+
+function normalizeRaidTimerSettings(input: unknown): RaidTimerStorage {
+    const s = isRecord(input) ? input : {}
+    const validSortTypes = Object.values(RaidTimerCharacterSortEnum) as string[]
+    return {
+        sortType: validSortTypes.includes(s.sortType as string)
+            ? (s.sortType as RaidTimerCharacterSortEnum)
+            : RaidTimerCharacterSortEnum.NAME,
+        sortOrder: typeof s.sortOrder === "string" ? s.sortOrder : "asc",
+        hiddenTimers: Array.isArray(s.hiddenTimers)
+            ? s.hiddenTimers.filter(
+                  (t): t is { characterId: number; timestamp: string } =>
+                      isRecord(t) &&
+                      typeof t.characterId === "number" &&
+                      typeof t.timestamp === "string"
+              )
+            : [],
+    }
 }
 
 export function normalizeAllPersistentSettings(
@@ -324,6 +347,8 @@ export function normalizeAllPersistentSettings(
         friends: coerceNumberArray(s.friends),
         ignores: coerceNumberArray(s.ignores),
         "registered-characters": coerceNumberArray(s["registered-characters"]),
+        timezone: typeof s.timezone === "string" ? s.timezone : "",
+        "timer-settings": normalizeRaidTimerSettings(s["timer-settings"]),
     }
 }
 
