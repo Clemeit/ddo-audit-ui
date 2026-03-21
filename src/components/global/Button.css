@@ -26,15 +26,15 @@
 
 .button {
     color: black;
+}
 
-    &.critical {
-        border: 1px solid red !important;
-        color: red !important;
+.button.critical {
+    border: 1px solid red !important;
+    color: red !important;
+}
 
-        &:hover {
-            box-shadow: 0px 0px 10px 0px red !important;
-        }
-    }
+.button.critical:hover {
+    box-shadow: 0px 0px 10px 0px red !important;
 }
 
 .button:hover {
@@ -45,15 +45,15 @@
     background-color: var(--background);
     color: white;
     border: 1px solid white;
+}
 
-    &.critical {
-        border: 1px solid red !important;
+.button.secondary.critical {
+    border: 1px solid red !important;
+}
 
-        &:hover {
-            border: 1px solid red !important;
-            box-shadow: 0px 0px 10px 0px red !important;
-        }
-    }
+.button.secondary.critical:hover {
+    border: 1px solid red !important;
+    box-shadow: 0px 0px 10px 0px red !important;
 }
 
 .button.secondary.donate {

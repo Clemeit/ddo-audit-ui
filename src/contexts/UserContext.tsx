@@ -80,9 +80,13 @@ export const UserProvider = ({ children }: Props) => {
     const { createNotification } = useNotificationContext()
 
     const [accessToken, setAccessToken] = useState<string>(null)
-    const [refreshToken, setRefreshToken] = useState<string>(() =>
-        localStorage.getItem("refresh_token")
-    )
+    const [refreshToken, setRefreshToken] = useState<string>(() => {
+        try {
+            return localStorage.getItem("refresh_token")
+        } catch {
+            return null
+        }
+    })
     const [expiresIn, setExpiresIn] = useState<number>(null)
     const [isAccountModalOpen, setIsAccountModalOpen] = useState(false)
     const [accountModalType, setAccountModalType] = useState<
@@ -706,13 +710,10 @@ export const UserProvider = ({ children }: Props) => {
                             ttl: 10000,
                         })
                     } else {
-                        createNotification({
-                            title: "Setting Deletion Failed",
-                            message:
-                                "An error occurred while trying to delete your settings. Please try again later.",
-                            type: "error",
-                            ttl: 10000,
-                        })
+                        throw new Error(
+                            "Unexpected response from server: " +
+                                JSON.stringify(response)
+                        )
                     }
                 }
             } catch (error) {
@@ -727,18 +728,12 @@ export const UserProvider = ({ children }: Props) => {
                                 : String(error),
                     },
                 })
-                createNotification({
-                    title: "Setting Deletion Failed",
-                    message:
-                        "An error occurred while trying to delete your settings. Please try again later.",
-                    type: "error",
-                    ttl: 10000,
-                })
+                throw error
             } finally {
                 setIsLoading(false)
             }
         },
-        [accessToken, createNotification]
+        [accessToken]
     )
 
     const changePassword = useCallback(

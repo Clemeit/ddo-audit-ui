@@ -7,23 +7,8 @@ import Page from "../global/Page.tsx"
 import NavCardCluster from "../global/NavCardCluster.tsx"
 import { BETTER_STACK_URL } from "../../constants/client.ts"
 import Badge from "../global/Badge.tsx"
-import { useUserContext } from "../../contexts/UserContext.tsx"
-import { useCallback } from "react"
-import { useNotificationContext } from "../../contexts/NotificationContext"
-import { notifyAuthError } from "../../utils/authNotifications"
 
 const Directory = () => {
-    const { openLoginModal, logout, isLoggedIn } = useUserContext()
-    const { createNotification } = useNotificationContext()
-
-    const handleLogout = useCallback(async () => {
-        try {
-            await logout()
-        } catch {
-            notifyAuthError(createNotification, "logout")
-        }
-    }, [logout, createNotification])
-
     return (
         <Page
             title="DDO Audit | Character Tracking and LFM Viewer"

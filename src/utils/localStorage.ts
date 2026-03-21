@@ -228,8 +228,8 @@ function removeRegisteredCharacter(character: Character): void {
 }
 
 // Raid timer settings functions
-function getRaidTimerSettings(): RaidTimerStorage {
-    return getData<RaidTimerStorage>(RAID_TIMER_SETTINGS_KEY, {})
+function getRaidTimerSettings(): RaidTimerStorage | null {
+    return getData<RaidTimerStorage | null>(RAID_TIMER_SETTINGS_KEY, null)
 }
 
 function setRaidTimerSettings(settings: RaidTimerStorage): void {
@@ -372,8 +372,11 @@ function setTrackedCharacterIds(ids: number[]): void {
 }
 
 // Notification preferences functions
-function getNotificationPreferences(): NotificationPreferences {
-    return getData<NotificationPreferences>(NOTIFICATION_PREFERENCES_KEY, {})
+function getNotificationPreferences(): NotificationPreferences | null {
+    return getData<NotificationPreferences | null>(
+        NOTIFICATION_PREFERENCES_KEY,
+        null
+    )
 }
 
 function setNotificationPreferences(

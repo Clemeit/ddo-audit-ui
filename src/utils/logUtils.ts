@@ -4,13 +4,20 @@ import { LogRequest } from "../models/Log.ts"
 function getSecureRandomString(length: number): string {
     const chars =
         "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
-    const bytes = new Uint8Array(length)
-    // Use Web Crypto API for cryptographically secure randomness
-    crypto.getRandomValues(bytes)
     let result = ""
-    for (let i = 0; i < length; i++) {
-        // Map each byte to an index in the chars string
-        result += chars[bytes[i] % chars.length]
+
+    // Use Web Crypto API if available, fall back to Math.random()
+    if (globalThis.crypto?.getRandomValues) {
+        const bytes = new Uint8Array(length)
+        crypto.getRandomValues(bytes)
+        for (let i = 0; i < length; i++) {
+            result += chars[bytes[i] % chars.length]
+        }
+    } else {
+        // Fallback for non-secure contexts
+        for (let i = 0; i < length; i++) {
+            result += chars[Math.floor(Math.random() * chars.length)]
+        }
     }
     return result
 }

@@ -43,7 +43,7 @@ export async function hydrateCharacterIds(
         })
 
         try {
-            return await attemptHydration(ids)
+            return await attemptHydration(ids, signal)
         } catch (secondError) {
             logMessage(
                 "Character hydration failed after retry, keeping existing local data",

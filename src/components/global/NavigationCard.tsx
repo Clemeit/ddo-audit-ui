@@ -20,7 +20,6 @@ import { ReactComponent as Notifications } from "../../assets/svg/notifications.
 import { ReactComponent as Guild } from "../../assets/svg/guild.svg"
 import { ReactComponent as Content } from "../../assets/svg/content.svg"
 import { ReactComponent as UserSettingsSVG } from "../../assets/svg/user-settings.svg"
-import { ReactComponent as LogoutSVG } from "../../assets/svg/logout.svg"
 import { ReactComponent as LoginSVG } from "../../assets/svg/login.svg"
 
 import Link from "./Link.tsx"

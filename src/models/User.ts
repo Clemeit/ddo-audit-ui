@@ -113,7 +113,7 @@ interface LfmSetting extends SimpleSetting {
     showIndicatorForGroupsContainingFriends: boolean
     highlightRaids: boolean
     hideAllLevelGroups: boolean
-    showElgibilityDividers: boolean
+    showEligibilityDividers: boolean
     onlyShowRaids: boolean
     hideFullGroups: boolean
 }

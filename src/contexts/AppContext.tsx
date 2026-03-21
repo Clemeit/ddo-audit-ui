@@ -18,7 +18,7 @@ export const AppProvider = ({ children }: Props) => {
     const [isFullScreen, setIsFullScreen] = useState(false)
     const [timezoneOverride, setTimezoneOverride] = useState<string>(() => {
         const savedTimezone = getTimezone()
-        return savedTimezone !== undefined ? savedTimezone : ""
+        return savedTimezone ?? ""
     })
 
     useEffect(() => {
