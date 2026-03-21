@@ -98,6 +98,16 @@ const AccountForm = () => {
             return
         }
 
+        if (username.includes(" ") || password.includes(" ")) {
+            setErrorMessage("Username and password cannot contain spaces.")
+            return
+        }
+
+        if (username === password) {
+            setErrorMessage("Username and password cannot be the same.")
+            return
+        }
+
         try {
             await register({
                 username,

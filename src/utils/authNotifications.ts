@@ -39,7 +39,7 @@ const AUTH_ERROR_COPY: Record<
             "An error occurred while trying to delete your account. Please try again later.",
     },
     "delete-settings": {
-        title: "Setting Deletion Failed",
+        title: "Settings Deletion Failed",
         defaultMessage:
             "An error occurred while trying to delete your settings. Please try again later.",
     },

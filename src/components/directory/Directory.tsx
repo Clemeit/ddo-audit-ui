@@ -62,7 +62,7 @@ const Directory = () => {
                     <NavCardCluster>
                         <NavigationCard
                             type="account"
-                            badge={<Badge text="New" type="new" />}
+                            badge={<Badge text="Beta" type="beta" />}
                         />
                         <NavigationCard type="about" />
                         <NavigationCard

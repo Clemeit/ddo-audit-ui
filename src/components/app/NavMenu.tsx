@@ -81,14 +81,14 @@ const NavMenu = () => {
                 <span>About</span>
             </Link>
             {!isLoggedIn && isMobile && (
-                <Link
-                    to="#"
+                <button
+                    type="button"
                     className="nav-item"
                     onClick={() => openLoginModal()}
                 >
                     <LoginSVG className="nav-icon" />
                     <span>Log In</span>
-                </Link>
+                </button>
             )}
             {!isMobile && <LoginButtonContainer />}
         </nav>

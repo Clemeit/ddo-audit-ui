@@ -248,15 +248,20 @@ export const UserProvider = ({ children }: Props) => {
             if (changedKeys.length === 0) return
 
             const data = getPersistentDataByKeys(changedKeys)
+            const normalized = normalizeAllPersistentSettings(data)
             try {
-                await patchPersistentSettings(token, { settings: data }, signal)
+                await patchPersistentSettings(
+                    token,
+                    { settings: normalized },
+                    signal
+                )
                 // Only clear keys included in this successful flush.
                 for (const key of changedKeys) {
                     dirtyKeysRef.current.delete(key)
                     if (isPersistentKey(key)) {
                         syncedValueSnapshotRef.current.set(
                             key,
-                            serializeComparable(key, data[key])
+                            serializeComparable(key, normalized[key])
                         )
                     }
                 }
@@ -530,17 +535,19 @@ export const UserProvider = ({ children }: Props) => {
                         signal
                     )
                 }
-                createNotification({
-                    title: "Registration Successful",
-                    message:
-                        "Welcome to DDO Audit! Your account has been created and your settings have been saved.",
-                    type: "success",
-                    ttl: 10000,
-                })
+                if (response?.data) {
+                    createNotification({
+                        title: "Registration Successful",
+                        message:
+                            "Welcome to DDO Audit! Your account has been created and your settings have been saved.",
+                        type: "success",
+                        ttl: 10000,
+                    })
+                }
                 return response
             } catch (error) {
                 if ((error as { name?: string })?.name === "AbortError") {
-                    return
+                    return null
                 }
                 logMessage("User registration failed", "error", {
                     metadata: {
@@ -579,7 +586,7 @@ export const UserProvider = ({ children }: Props) => {
                 return response
             } catch (error) {
                 if ((error as { name?: string })?.name === "AbortError") {
-                    return
+                    return null
                 }
                 logMessage("User login failed", "error", {
                     metadata: {

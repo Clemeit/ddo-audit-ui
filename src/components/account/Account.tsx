@@ -12,6 +12,8 @@ import YesNoModal from "../modal/YesNoModal"
 import { useNotificationContext } from "../../contexts/NotificationContext"
 import { notifyAuthError } from "../../utils/authNotifications"
 import logMessage from "../../utils/logUtils"
+import Badge from "../global/Badge"
+import useWindowSize from "../../hooks/useWindowSize"
 
 const Account = () => {
     const {
@@ -26,6 +28,7 @@ const Account = () => {
         deleteSettings,
     } = useUserContext()
     const { createNotification } = useNotificationContext()
+    const { isSmallishMobile } = useWindowSize()
 
     const [skeletonWidths] = useState<number[]>(() =>
         Array.from({ length: 3 }, () => Math.floor(Math.random() * 81) + 20)
@@ -72,7 +75,7 @@ const Account = () => {
         fetchUserProfile(accessToken, controller.signal)
 
         return () => controller.abort()
-    }, [accessToken])
+    }, [accessToken, isLoggedIn, fetchUserProfile])
 
     const handleLogout = useCallback(async () => {
         try {
@@ -133,15 +136,26 @@ const Account = () => {
     const notLoggedInScreen = (
         <div>
             <p>
-                A DDO Audit account allows you to save your preferences,
-                registered characters, and other settings, making them available
-                across all of your devices.
+                Create an account to sync your settings and character lists
+                across all your devices.
             </p>
-            <Stack gap="10px">
-                <Button type="secondary" onClick={() => openLoginModal()}>
+            <Stack gap="8px" style={{ marginBottom: "20px" }}>
+                <Badge type="beta" text="Beta" />
+                <span>This is a new feature and may contain bugs.</span>
+            </Stack>
+            <Stack gap="10px" wrap={isSmallishMobile}>
+                <Button
+                    type="primary"
+                    onClick={() => openLoginModal()}
+                    fullWidthOnMobile
+                >
                     Log in
                 </Button>
-                <Button type="primary" onClick={() => openRegisterModal()}>
+                <Button
+                    type="secondary"
+                    onClick={() => openRegisterModal()}
+                    fullWidthOnMobile
+                >
                     Register
                 </Button>
             </Stack>
@@ -152,10 +166,8 @@ const Account = () => {
         <div>
             <h3>Welcome back, {userProfileData?.username}!</h3>
             <p>
-                A DDO Audit account allows you to save your preferences,
-                registered characters, and other settings, making them available
-                across all of your devices. You can manage your account and data
-                here.
+                Your account keeps your settings and character lists synced
+                across devices. Manage your account and data below.
             </p>
             <label htmlFor="management-list">Account management:</label>
             <ul id="management-list">
@@ -164,7 +176,7 @@ const Account = () => {
                         style={{ color: "var(--text)" }}
                         onClick={() => openChangePasswordModal()}
                     >
-                        Change my password
+                        Change password
                     </FauxLink>
                 </li>
                 <li>
@@ -184,7 +196,7 @@ const Account = () => {
                         style={{ color: "var(--text)" }}
                         onClick={() => setShowDeleteSettingsModal(true)}
                     >
-                        Delete my saved settings and preferences
+                        Delete saved settings
                     </FauxLink>
                 </li>
                 <li>
@@ -192,7 +204,7 @@ const Account = () => {
                         style={{ color: "var(--text)" }}
                         onClick={() => setShowDeleteAccountModal(true)}
                     >
-                        Delete my account
+                        Delete account
                     </FauxLink>
                 </li>
             </ul>
@@ -212,8 +224,12 @@ const Account = () => {
         if (isAuthLoading || isUserProfileLoading) {
             return (
                 <Stack direction="column" gap="10px">
-                    {skeletonWidths.map((width) => (
-                        <Skeleton variant="rectangular" width={`${width}%`} />
+                    {skeletonWidths.map((width, index) => (
+                        <Skeleton
+                            variant="rectangular"
+                            width={`${width}%`}
+                            key={`skel_${index}`}
+                        />
                     ))}
                 </Stack>
             )
