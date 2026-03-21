@@ -472,12 +472,30 @@ export const UserProvider = ({ children }: Props) => {
                                 : String(error),
                     },
                 })
-                clearSession()
+                if (
+                    axios.isAxiosError(error) &&
+                    (error.response?.status === 401 ||
+                        error.response?.status === 403)
+                ) {
+                    clearSession()
+                    createNotification({
+                        title: "You were logged out",
+                        message:
+                            "Please log back in to continue syncing your settings.",
+                        type: "info",
+                        ttl: 6000,
+                    })
+                }
             } finally {
                 setIsLoading(false)
             }
         },
-        [setSession, fetchAndApplyServerSettings, clearSession]
+        [
+            setSession,
+            fetchAndApplyServerSettings,
+            clearSession,
+            createNotification,
+        ]
     )
 
     // Rehydrate session on mount
