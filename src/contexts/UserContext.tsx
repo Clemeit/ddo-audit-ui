@@ -74,6 +74,8 @@ interface Props {
     children: React.ReactNode
 }
 
+const SESSION_REHYDRATE_HINT_KEY = "v1-auth-session-hint"
+
 export const UserProvider = ({ children }: Props) => {
     const [persistentSettingsRevision, setPersistentSettingsRevision] =
         useState<number>(0)
@@ -109,10 +111,36 @@ export const UserProvider = ({ children }: Props) => {
     const syncTimeoutRef = useRef<number | null>(null)
     const isApplyingServerRef = useRef<boolean>(false)
 
-    const setSession = useCallback((data: UserAuthedResponse["data"]) => {
-        setAccessToken(data.access_token)
-        setExpiresIn(data.expires_in)
+    const setSessionRehydrateHint = useCallback((enabled: boolean) => {
+        try {
+            if (enabled) {
+                window.localStorage.setItem(SESSION_REHYDRATE_HINT_KEY, "1")
+            } else {
+                window.localStorage.removeItem(SESSION_REHYDRATE_HINT_KEY)
+            }
+        } catch {
+            // Ignore storage failures and fall back to current in-memory session only.
+        }
     }, [])
+
+    const shouldAttemptSessionRehydrate = useCallback((): boolean => {
+        try {
+            return (
+                window.localStorage.getItem(SESSION_REHYDRATE_HINT_KEY) === "1"
+            )
+        } catch {
+            return false
+        }
+    }, [])
+
+    const setSession = useCallback(
+        (data: UserAuthedResponse["data"]) => {
+            setAccessToken(data.access_token)
+            setExpiresIn(data.expires_in)
+            setSessionRehydrateHint(true)
+        },
+        [setSessionRehydrateHint]
+    )
 
     const clearSession = useCallback(() => {
         if (syncTimeoutRef.current !== null) {
@@ -122,7 +150,8 @@ export const UserProvider = ({ children }: Props) => {
         syncedValueSnapshotRef.current.clear()
         setAccessToken(null)
         setExpiresIn(null)
-    }, [])
+        setSessionRehydrateHint(false)
+    }, [setSessionRehydrateHint])
 
     const isIdOnlyKey = useCallback(
         (key: string) =>
@@ -447,10 +476,13 @@ export const UserProvider = ({ children }: Props) => {
 
     // Rehydrate session on mount
     useEffect(() => {
+        if (!shouldAttemptSessionRehydrate()) {
+            return
+        }
         const controller = new AbortController()
         void refreshSession(controller.signal)
         return () => controller.abort()
-    }, [refreshSession])
+    }, [refreshSession, shouldAttemptSessionRehydrate])
 
     // Keep session alive
     useEffect(() => {
