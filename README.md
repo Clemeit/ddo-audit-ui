@@ -14,6 +14,30 @@ You can submit feedback, suggestions, and bug reports on DDO Audit's [feedback p
 
 - **React**: A JavaScript library for building user interfaces, used for the frontend of the application.
 
+## Running Tests
+
+This project uses [Jest](https://jestjs.io/) (via Create React App) with [React Testing Library](https://testing-library.com/docs/react-testing-library/intro/).
+
+Run the full test suite:
+
+```bash
+npx react-scripts test
+```
+
+This launches Jest in interactive watch mode by default. To run all tests once and exit (useful for CI):
+
+```bash
+npx react-scripts test --watchAll=false
+```
+
+Run tests matching a specific pattern:
+
+```bash
+npx react-scripts test --testPathPattern="utils/stringUtils"
+```
+
+Test files live in `__tests__` subdirectories alongside their source modules (e.g., `src/utils/__tests__/stringUtils.test.ts` tests `src/utils/stringUtils.ts`).
+
 ## Links:
 
 - **Main website**: [https://www.ddoaudit.com](https://www.ddoaudit.com)
