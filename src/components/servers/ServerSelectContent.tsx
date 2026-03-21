@@ -14,8 +14,6 @@ import ColoredText from "../global/ColoredText.tsx"
 import Stack from "../global/Stack.tsx"
 import ServerNavigationCard from "../global/ServerNavigationCard.tsx"
 import NavCardCluster from "../global/NavCardCluster.tsx"
-import useBooleanFlag from "../../hooks/useBooleanFlags.ts"
-import { BOOLEAN_FLAGS } from "../../utils/localStorage.ts"
 import Spacer from "../global/Spacer.tsx"
 import FauxLink from "../global/FauxLink.tsx"
 
@@ -46,11 +44,6 @@ const ServerSelectContent = ({
                 return <X />
         }
     }
-
-    const [hide32BitServers, setHide32BitServers] = useBooleanFlag(
-        BOOLEAN_FLAGS.hide32BitServers,
-        true
-    )
 
     const getContentForCard = (
         serverName: string,
@@ -115,40 +108,7 @@ const ServerSelectContent = ({
         [isLoading, isError, serverInfo]
     )
 
-    return (
-        <>
-            <NavCardCluster>{serverSelectContent("64bit")}</NavCardCluster>
-            {hide32BitServers ? (
-                <>
-                    <Spacer size="20px" />
-                    <FauxLink
-                        onClick={() => setHide32BitServers(false)}
-                        style={{
-                            color: "var(--secondary-text)",
-                        }}
-                    >
-                        Show 32-bit servers
-                    </FauxLink>
-                </>
-            ) : (
-                <>
-                    <hr />
-                    <NavCardCluster>
-                        {serverSelectContent("32bit")}
-                    </NavCardCluster>
-                    <Spacer size="20px" />
-                    <FauxLink
-                        onClick={() => setHide32BitServers(true)}
-                        style={{
-                            color: "var(--secondary-text)",
-                        }}
-                    >
-                        Hide 32-bit servers
-                    </FauxLink>
-                </>
-            )}
-        </>
-    )
+    return <NavCardCluster>{serverSelectContent("64bit")}</NavCardCluster>
 }
 
 export default ServerSelectContent

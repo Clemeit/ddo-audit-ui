@@ -7,7 +7,9 @@ import { useLfmContext } from "../../contexts/LfmContext.tsx"
 import {
     DEFAULT_BASE_FONT_SIZE,
     DEFAULT_MOUSE_OVER_DELAY,
+    MAX_FONT_SIZE,
     MAXIMUM_MOUSE_OVER_DELAY,
+    MIN_FONT_SIZE,
     MINIMUM_MOUSE_OVER_DELAY,
 } from "../../constants/lfmPanel.ts"
 import Button from "../global/Button.tsx"
@@ -259,7 +261,7 @@ const LfmToolbar = ({
                                             </Checkbox>
                                         ))}
                                 <Link to="/registration" className="link">
-                                    Register more
+                                    Register&nbsp;more
                                 </Link>
                             </Stack>
                         </div>
@@ -319,8 +321,8 @@ const LfmToolbar = ({
                     <input
                         id="fontSizeSlider"
                         type="range"
-                        min={10}
-                        max={20}
+                        min={MIN_FONT_SIZE}
+                        max={MAX_FONT_SIZE}
                         value={fontSize}
                         onChange={(e) => setFontSize(parseInt(e.target.value))}
                     />

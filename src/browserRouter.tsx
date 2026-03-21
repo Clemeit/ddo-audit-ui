@@ -80,6 +80,9 @@ const Quests = lazy(() =>
 const QuestSpecific = lazy(() =>
     lazyRetry(() => import("./components/quests/QuestSpecific.tsx"))
 )
+const Account = lazy(() =>
+    lazyRetry(() => import("./components/account/Account.tsx"))
+)
 
 // Set up the router
 export default createBrowserRouter(
@@ -207,6 +210,7 @@ export default createBrowserRouter(
                 <Route index element={<Quests />} />
                 <Route path=":questName" element={<QuestSpecific />} />
             </Route>
+            <Route path="/account" element={<Account />} />
             <Route path="/about" element={<About />} />
             <Route path="*" element={<NotFound />} />
         </Route>

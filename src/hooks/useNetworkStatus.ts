@@ -10,6 +10,10 @@ const useNetworkStatus = () => {
         window.addEventListener("online", handleOnline)
         window.addEventListener("offline", handleOffline)
 
+        // Re-sync in case the status changed between the initial render and
+        // when the listeners were attached (closes the race window on page load)
+        setIsOnline(navigator.onLine)
+
         return () => {
             window.removeEventListener("online", handleOnline)
             window.removeEventListener("offline", handleOffline)

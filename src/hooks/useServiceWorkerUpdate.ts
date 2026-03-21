@@ -3,17 +3,19 @@ import { useNotificationContext } from "../contexts/NotificationContext"
 import { UpdateNotificationActions } from "../components/global/UpdateNotificationActions"
 import logMessage from "../utils/logUtils"
 import { MsFromDays, MsFromSeconds } from "../utils/timeUtils"
-import { getData, setData } from "../utils/localStorage"
+import {
+    getUpdateDismissed,
+    setUpdateDismissed,
+    getUpdateShown,
+    setUpdateShown,
+} from "../utils/localStorage"
 
 export const useServiceWorkerUpdate = () => {
     const { createNotification, dismissNotification } = useNotificationContext()
-    const UPDATE_DISMISSED_KEY = "update-dismissed"
-    const UPDATE_SHOWN_KEY = "update-shown"
 
     const onDismissNotification = useCallback((notificationId: string) => {
-        const now = new Date().toISOString()
         try {
-            setData<string>(UPDATE_DISMISSED_KEY, now)
+            setUpdateDismissed(new Date().toISOString())
         } catch (error) {
             logMessage(
                 "Failed to set update dismissal time in localStorage",
@@ -88,7 +90,7 @@ export const useServiceWorkerUpdate = () => {
                 }
             }
 
-            const lastDismissal = getData<string>(UPDATE_DISMISSED_KEY)
+            const lastDismissal = getUpdateDismissed()
             if (lastDismissal) {
                 const lastDismissalDate = new Date(lastDismissal)
                 const now = new Date()
@@ -100,7 +102,7 @@ export const useServiceWorkerUpdate = () => {
                 }
             }
 
-            const lastDisplay = getData<string>(UPDATE_SHOWN_KEY)
+            const lastDisplay = getUpdateShown()
             if (lastDisplay) {
                 const lastDisplayDate = new Date(lastDisplay)
                 const now = new Date()
@@ -113,7 +115,7 @@ export const useServiceWorkerUpdate = () => {
             }
 
             try {
-                setData<string>(UPDATE_SHOWN_KEY, new Date().toISOString())
+                setUpdateShown(new Date().toISOString())
             } catch (error) {
                 logMessage(
                     "Failed to set update display time in localStorage",

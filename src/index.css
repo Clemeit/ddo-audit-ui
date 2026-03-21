@@ -46,14 +46,15 @@
     --short-push-height: 175px;
 }
 
-/* .light-theme {
-    --background: var(--white);
-    --text: var(--black);
-    --secondary-text: var(--gray6);
-    --nav-menu-item-highlight: var(--highlight-blue-1);
-} */
-
-.dark-theme {
+body {
+    margin: 0;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    background-color: var(--background);
+    max-width: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+    
     --background: var(--gray8);
     --background-light: var(--gray7);
     --border: var(--gray6);
@@ -81,16 +82,6 @@
     --warning: orange;
 }
 
-body {
-    margin: 0;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    background-color: var(--background);
-    max-width: 100%;
-    overflow-y: auto;
-    overflow-x: hidden;
-}
-
 html {
     max-width: 100%;
     font-size: 18px;
@@ -107,6 +98,13 @@ hr {
 * {
     font-family: "Times New Roman", Times, serif;
     color: var(--text);
+}
+
+button.navigation-card {
+    box-sizing: content-box;
+    appearance: none;
+    -webkit-appearance: none;
+    font: inherit;
 }
 
 .nav-card-cluster {

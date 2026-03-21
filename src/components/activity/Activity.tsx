@@ -48,8 +48,6 @@ import useSearchParamState, {
     SearchParamType,
 } from "../../hooks/useSearchParamState.ts"
 import PageMessage from "../global/PageMessage.tsx"
-import useBooleanFlag from "../../hooks/useBooleanFlags.ts"
-import { BOOLEAN_FLAGS } from "../../utils/localStorage.ts"
 import Link from "../global/Link.tsx"
 import LiveCharacterInfo from "./LiveCharacterInfo.tsx"
 import logMessage from "../../utils/logUtils.ts"
@@ -71,8 +69,6 @@ const Activity = () => {
         reload: reloadCharacters,
     } = useGetRegisteredCharacters()
     const [isReloadDisabled, setIsReloadDisabled] = useState<boolean>(false)
-    const [hideActivityDevelopmentNotice, setHideActivityDevelopmentNotice] =
-        useBooleanFlag(BOOLEAN_FLAGS.hideActivityDevelopmentNotice, false)
 
     const [
         selectedCharacterAndAccessToken,
@@ -802,25 +798,6 @@ const Activity = () => {
                     levelActivityIsError
                 ) {
                     messages.push(<DataLoadingErrorPageMessage />)
-                }
-                if (!hideActivityDevelopmentNotice) {
-                    messages.push(
-                        <PageMessage
-                            title="Active Development"
-                            message={
-                                <span>
-                                    This page is currently in active
-                                    development. If you encounter any issues or
-                                    have suggestions, please visit the{" "}
-                                    <Link to="/feedback">Feedback page</Link>.
-                                </span>
-                            }
-                            type="info"
-                            onDismiss={() =>
-                                setHideActivityDevelopmentNotice(true)
-                            }
-                        />
-                    )
                 }
                 return messages
             }}

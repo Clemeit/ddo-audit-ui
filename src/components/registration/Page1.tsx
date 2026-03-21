@@ -13,7 +13,7 @@ import { getCharacterByNameAndServer } from "../../services/characterService.ts"
 import { HttpStatusCode } from "axios"
 import { SERVER_NAMES } from "../../constants/servers.ts"
 import Modal from "../modal/Modal.tsx"
-import useIsMobile from "../../hooks/useIsMobile.ts"
+import useWindowSize from "../../hooks/useWindowSize.ts"
 
 const Page1 = () => {
     const {
@@ -26,7 +26,7 @@ const Page1 = () => {
     } = useGetRegisteredCharacters()
 
     // Registering a new character:
-    const isMobile = useIsMobile()
+    const { isMobile } = useWindowSize()
     const [showRegistrationModal, setShowRegistrationModal] = useState(false)
     const [characterName, setCharacterName] = useState("")
     const [characterServer, setCharacterServer] = useState("Argonnessen")

@@ -1,7 +1,6 @@
 import React, { useEffect, useRef } from "react"
 import { ReactComponent as CloseSVG } from "../../assets/svg/close.svg"
 import "./Modal.css"
-import useIsMobile from "../../hooks/useIsMobile.ts"
 
 interface Props {
     children: React.ReactNode

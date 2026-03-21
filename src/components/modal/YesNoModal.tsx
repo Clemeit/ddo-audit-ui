@@ -11,6 +11,7 @@ interface Props {
     onNo: () => void
     fullScreenOnMobile?: boolean
     children?: React.ReactNode
+    critical?: boolean
 }
 
 const YesNoModal = ({
@@ -20,13 +21,20 @@ const YesNoModal = ({
     onNo,
     fullScreenOnMobile = false,
     children,
+    critical = false,
 }: Props) => {
     const content = (
         <ContentCluster title={title}>
             {text && <p>{text}</p>}
             {children}
             <Stack direction="row" gap="10px">
-                <Button onClick={onYes}>Yes</Button>
+                <Button
+                    onClick={onYes}
+                    type={critical ? "secondary" : "primary"}
+                    className={critical ? "critical" : ""}
+                >
+                    Yes
+                </Button>
                 <Button onClick={onNo}>No</Button>
             </Stack>
         </ContentCluster>

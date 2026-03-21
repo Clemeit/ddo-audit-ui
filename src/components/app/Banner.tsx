@@ -1,6 +1,6 @@
 import "../../index.css"
 import "./Banner.css"
-import useIsMobile from "../../hooks/useIsMobile.ts"
+import useWindowSize from "../../hooks/useWindowSize.ts"
 import {
     DonateButton,
     GitHubButton,
@@ -24,7 +24,7 @@ const Banner = ({
     hideOnMobile = true,
     hideSuggestionButton = false,
 }: Props) => {
-    const isMobile = useIsMobile()
+    const { isMobile } = useWindowSize()
 
     return isMobile && hideOnMobile ? null : (
         <div className={`banner ${miniature ? "miniature" : ""}`}>

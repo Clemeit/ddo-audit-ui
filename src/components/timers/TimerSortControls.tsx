@@ -1,8 +1,6 @@
-import React from "react"
 import Stack from "../global/Stack.tsx"
 import Select from "../global/Select.tsx"
 import { RaidTimerCharacterSortEnum } from "../../models/Common.ts"
-import useIsMobile from "../../hooks/useIsMobile.ts"
 
 export interface SortState {
     type: RaidTimerCharacterSortEnum
@@ -16,7 +14,7 @@ interface Props {
 
 const TimerSortControls = ({ value, onChange }: Props) => {
     const disableOrder = value.type === RaidTimerCharacterSortEnum.RECENT_RAID
-    const isMobile = useIsMobile()
+
     return (
         <Stack gap="10px">
             <Stack
