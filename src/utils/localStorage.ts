@@ -81,10 +81,7 @@ function normalizePersistentValue(key: PersistentKey, value: unknown): unknown {
 }
 
 export const BOOLEAN_FLAGS = {
-    hideAlphaRelease: "hide-alpha-release",
-    hide32BitServers: "hide-32bit-servers",
     bankToonsDisclaimer: "bank-toons-disclaimer",
-    hideActivityDevelopmentNotice: "hide-activity-development-notice",
     hideSelfFromPartyList: "hide-self-from-party-list",
 }
 
@@ -126,20 +123,24 @@ function notifyLocalStorageWrite(event: LocalStorageWriteEvent): void {
 }
 
 function getBooleanFlags(): Record<string, boolean> {
-    const flags = getValue<Record<string, boolean>>(BOOLEAN_FLAGS_KEY)
-    return flags || {}
+    return getData<Record<string, boolean>>(BOOLEAN_FLAGS_KEY, {})
 }
 
 function setBooleanFlag(key: string, value: boolean): void {
     const flags = getBooleanFlags()
-    flags[key] = value
-    setValue(BOOLEAN_FLAGS_KEY, flags)
+    setData<Record<string, boolean>>(BOOLEAN_FLAGS_KEY, {
+        ...flags,
+        [key]: value,
+    })
 }
 
 function removeBooleanFlag(key: string): void {
     const flags = getBooleanFlags()
-    delete flags[key]
-    setValue(BOOLEAN_FLAGS_KEY, flags)
+    if (!(key in flags)) {
+        return
+    }
+    const { [key]: _, ...remainingFlags } = flags
+    setData<Record<string, boolean>>(BOOLEAN_FLAGS_KEY, remainingFlags)
 }
 
 function getBooleanFlag(key: string): boolean | null {
@@ -148,7 +149,7 @@ function getBooleanFlag(key: string): boolean | null {
 }
 
 function clearBooleanFlags(): void {
-    setValue(BOOLEAN_FLAGS_KEY, {})
+    setData<Record<string, boolean>>(BOOLEAN_FLAGS_KEY, {})
 }
 
 // Lfm settings functions
@@ -541,7 +542,7 @@ function setValue<T>(key: string, value: T): void {
         const next = JSON.stringify(value)
         const prev = localStorage.getItem(storageKey)
         if (prev === next) return
-        localStorage.setItem(storageKey, JSON.stringify(value))
+        localStorage.setItem(storageKey, next)
         notifyLocalStorageWrite({
             key,
             storageKey,

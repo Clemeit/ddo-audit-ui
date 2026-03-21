@@ -23,12 +23,8 @@ import { useLiveData } from "./useLiveData.tsx"
 import { findMostPopulatedServer } from "../../utils/gameUtils.ts"
 import { useNotificationContext } from "../../contexts/NotificationContext.tsx"
 import logMessage from "../../utils/logUtils.ts"
-import { BOOLEAN_FLAGS } from "../../utils/localStorage.ts"
-import useBooleanFlag from "../../hooks/useBooleanFlags.ts"
 import Badge from "../global/Badge.tsx"
 import LivePopulationContent from "./LivePopulationContent.tsx"
-import FauxLink from "../global/FauxLink.tsx"
-import Spacer from "../global/Spacer.tsx"
 
 const Live = () => {
     const errorNotificationShownRef = React.useRef<string | null>(null)
@@ -107,11 +103,6 @@ const Live = () => {
         [serverInfoData]
     )
 
-    const [hide32BitServers, setHide32BitServers] = useBooleanFlag(
-        BOOLEAN_FLAGS.hide32BitServers,
-        true
-    )
-
     return (
         <Page
             title="DDO Server Status"
@@ -136,33 +127,8 @@ const Live = () => {
                     <ServerStatus
                         serverInfoData={serverInfoData}
                         serverInfoState={serverInfoState}
-                        // hide32BitServers={hide32BitServers}
                         hide32BitServers={false}
                     />
-                    {/* <Spacer size="10px" />
-                    {hide32BitServers ? (
-                        <>
-                            <FauxLink
-                                onClick={() => setHide32BitServers(false)}
-                                style={{
-                                    color: "var(--secondary-text)",
-                                }}
-                            >
-                                Show 32-bit servers
-                            </FauxLink>
-                        </>
-                    ) : (
-                        <>
-                            <FauxLink
-                                onClick={() => setHide32BitServers(true)}
-                                style={{
-                                    color: "var(--secondary-text)",
-                                }}
-                            >
-                                Hide 32-bit servers
-                            </FauxLink>
-                        </>
-                    )} */}
                 </ContentCluster>
                 <ContentCluster title="Quick Info">
                     <QuickInfo

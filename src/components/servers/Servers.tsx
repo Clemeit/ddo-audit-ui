@@ -23,7 +23,6 @@ import GenderPopulationDistribution from "./GenderPopulationDistribution.tsx"
 import PrimaryClassPopulationDistribution from "./PrimaryClassPopulationDistribution.tsx"
 import ClassCountPopulationDistribution from "./ClassCountPopulationDistribution.tsx"
 import GuildAffiliatedPopulationDistribution from "./GuildAffiliatedPopulationDistribution.tsx"
-import Link from "../global/Link.tsx"
 
 const Servers = () => {
     const { isLoading, isError, serverInfo, uniqueData } = useServersData()

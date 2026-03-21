@@ -189,8 +189,8 @@ const Account = () => {
                 </li>
             </ul>
             <br />
-            <label htmlFor="management-list">Manage your data:</label>
-            <ul>
+            <label htmlFor="data-list">Manage your data:</label>
+            <ul id="dat-list">
                 <li>
                     <FauxLink
                         style={{ color: "var(--text)" }}
