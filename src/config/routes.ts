@@ -108,12 +108,6 @@ const bannerRouteMapping = {
         miniature: true,
         showButtons: false,
     },
-    "user-settings": {
-        title: "User Settings",
-        subtitle: "Import and Export Your Settings",
-        miniature: true,
-        showButtons: false,
-    },
     account: {
         title: "Account",
         subtitle: "Manage Your DDO Audit Account",

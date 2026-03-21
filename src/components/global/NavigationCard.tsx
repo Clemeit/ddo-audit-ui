@@ -19,7 +19,6 @@ import { ReactComponent as Ignore } from "../../assets/svg/ignore.svg"
 import { ReactComponent as Notifications } from "../../assets/svg/notifications.svg"
 import { ReactComponent as Guild } from "../../assets/svg/guild.svg"
 import { ReactComponent as Content } from "../../assets/svg/content.svg"
-import { ReactComponent as UserSettingsSVG } from "../../assets/svg/user-settings.svg"
 import { ReactComponent as LoginSVG } from "../../assets/svg/login.svg"
 
 import Link from "./Link.tsx"
@@ -46,7 +45,6 @@ const typeToTitleMap = {
     notifications: "Notifications",
     guilds: "Guilds",
     "owned-content": "Owned Content",
-    "user-settings": "User Settings",
     account: "Account",
 }
 
@@ -74,7 +72,6 @@ const typeToDescriptionMap = {
     guilds: "Search for guilds, view stats, and see members of your guild.",
     "owned-content":
         "Specify which adventure packs you own to filter content appropriately.",
-    "user-settings": "Import and export your settings to sync across devices.",
     account:
         "Create an account or log in to access saved settings and preferences.",
 }
@@ -99,7 +96,6 @@ const typeToIconMap = {
     notifications: <Notifications className="shrinkable-icon" />,
     guilds: <Guild className="shrinkable-icon" />,
     "owned-content": <Content className="shrinkable-icon" />,
-    "user-settings": <UserSettingsSVG className="shrinkable-icon" />,
     account: <LoginSVG className="shrinkable-icon" />,
 }
 
