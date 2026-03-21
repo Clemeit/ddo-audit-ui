@@ -1,7 +1,6 @@
 import ReactDOM from "react-dom/client"
 import { RouterProvider } from "react-router-dom"
 import "./index.css"
-import reportWebVitals from "./reportWebVitals"
 import browserRouter from "./browserRouter.tsx"
 import { AppProvider } from "./contexts/AppContext.tsx"
 import { HelmetProvider } from "react-helmet-async"
@@ -36,8 +35,4 @@ root.render(
             </NotificationProvider>
         </AppProvider>
     </HelmetProvider>
-)
-
-reportWebVitals((onPerfEntry: any) =>
-    logMessage("Web vitals", "info", { metadata: onPerfEntry })
 )
