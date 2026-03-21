@@ -1,6 +1,20 @@
 import { postLog } from "../services/serviceService.ts"
 import { LogRequest } from "../models/Log.ts"
 
+function getSecureRandomString(length: number): string {
+    const chars =
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
+    const bytes = new Uint8Array(length)
+    // Use Web Crypto API for cryptographically secure randomness
+    crypto.getRandomValues(bytes)
+    let result = ""
+    for (let i = 0; i < length; i++) {
+        // Map each byte to an index in the chars string
+        result += chars[bytes[i] % chars.length]
+    }
+    return result
+}
+
 // Utility function to detect browser name and version
 function getBrowserInfo(): { browser?: string; browser_version?: string } {
     const userAgent = navigator.userAgent
@@ -66,13 +80,13 @@ export function getSessionId(): string {
     try {
         let sessionId = sessionStorage.getItem("ddo_session_id")
         if (!sessionId) {
-            sessionId = `session_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`
+            sessionId = `session_${Date.now()}_${getSecureRandomString(7)}`
             sessionStorage.setItem("ddo_session_id", sessionId)
         }
         return sessionId
     } catch (error) {
         // sessionStorage unavailable, generate temporary ID
-        return `session_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`
+        return `session_${Date.now()}_${getSecureRandomString(7)}`
     }
 }
 
@@ -81,13 +95,13 @@ export function getUserId(): string {
     try {
         let userId = localStorage.getItem("ddo_user_id")
         if (!userId) {
-            userId = `user_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`
+            userId = `user_${Date.now()}_${getSecureRandomString(7)}`
             localStorage.setItem("ddo_user_id", userId)
         }
         return userId
     } catch (error) {
         // localStorage unavailable, generate temporary ID
-        return `user_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`
+        return `user_${Date.now()}_${getSecureRandomString(7)}`
     }
 }
 
