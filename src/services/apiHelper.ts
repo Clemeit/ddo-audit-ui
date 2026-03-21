@@ -20,7 +20,11 @@ const genericRequest = async <T>(
     method: "get" | "post" | "put" | "patch" | "delete",
     endpoint: string,
     data?: any,
-    options: { signal?: AbortSignal; noRetry?: boolean } = {},
+    options: {
+        signal?: AbortSignal
+        noRetry?: boolean
+        withCredentials?: boolean
+    } = {},
     version: string = "v1"
 ) => {
     const { signal, noRetry, ...restOptions } = options
@@ -57,6 +61,7 @@ export const getRequest = async <T>(
         headers?: any
         params?: any
         noRetry?: boolean
+        withCredentials?: boolean
     } = {},
     version: string = "v1"
 ) => {
@@ -72,6 +77,7 @@ export const postRequest = async <T>(
         headers?: any
         params?: any
         noRetry?: boolean
+        withCredentials?: boolean
     } = {},
     version: string = "v1"
 ) => {
@@ -86,6 +92,7 @@ export const putRequest = async <T>(
         headers?: any
         params?: any
         noRetry?: boolean
+        withCredentials?: boolean
     } = {},
     version: string = "v1"
 ) => {
@@ -100,6 +107,7 @@ export const patchRequest = async <T>(
         headers?: any
         params?: any
         noRetry?: boolean
+        withCredentials?: boolean
     } = {},
     version: string = "v1"
 ) => {
@@ -114,6 +122,7 @@ export const deleteRequest = async <T>(
         headers?: any
         params?: any
         noRetry?: boolean
+        withCredentials?: boolean
     } = {},
     version: string = "v1"
 ) => {

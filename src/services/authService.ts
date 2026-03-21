@@ -1,6 +1,5 @@
 import {
     AccountDeleteResponse,
-    RefreshPayload,
     UserAccountObject,
     UserAuthedResponse,
     UserLogoutResponse,
@@ -13,21 +12,29 @@ function postRegister(
     payload: UserAccountObject,
     signal?: AbortSignal
 ): Promise<UserAuthedResponse> {
-    return postRequest(`${AUTH_ENDPOINT}/register`, { data: payload, signal })
+    return postRequest(`${AUTH_ENDPOINT}/register`, {
+        data: payload,
+        signal,
+        withCredentials: true,
+    })
 }
 
 function postLogin(
     payload: UserAccountObject,
     signal?: AbortSignal
 ): Promise<UserAuthedResponse> {
-    return postRequest(`${AUTH_ENDPOINT}/login`, { data: payload, signal })
+    return postRequest(`${AUTH_ENDPOINT}/login`, {
+        data: payload,
+        signal,
+        withCredentials: true,
+    })
 }
 
-function postRefresh(
-    payload: RefreshPayload,
-    signal?: AbortSignal
-): Promise<UserAuthedResponse> {
-    return postRequest(`${AUTH_ENDPOINT}/refresh`, { data: payload, signal })
+function postRefresh(signal?: AbortSignal): Promise<UserAuthedResponse> {
+    return postRequest(`${AUTH_ENDPOINT}/refresh`, {
+        signal,
+        withCredentials: true,
+    })
 }
 
 function postLogout(
@@ -37,6 +44,7 @@ function postLogout(
     return postRequest(`${AUTH_ENDPOINT}/logout`, {
         headers: { Authorization: `Bearer ${accessToken}` },
         signal,
+        withCredentials: true,
     })
 }
 

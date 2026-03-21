@@ -47,11 +47,11 @@ interface UserContextProps {
     register: (
         payload: UserAccountObject,
         signal?: AbortSignal
-    ) => Promise<UserAuthedResponse>
+    ) => Promise<UserAuthedResponse | null>
     login: (
         payload: UserAccountObject,
         signal?: AbortSignal
-    ) => Promise<UserAuthedResponse>
+    ) => Promise<UserAuthedResponse | null>
     changePassword: (
         payload: UpdatePasswordPayload,
         signal?: AbortSignal
@@ -80,13 +80,6 @@ export const UserProvider = ({ children }: Props) => {
     const { createNotification } = useNotificationContext()
 
     const [accessToken, setAccessToken] = useState<string>(null)
-    const [refreshToken, setRefreshToken] = useState<string>(() => {
-        try {
-            return localStorage.getItem("refresh_token")
-        } catch {
-            return null
-        }
-    })
     const [expiresIn, setExpiresIn] = useState<number>(null)
     const [isAccountModalOpen, setIsAccountModalOpen] = useState(false)
     const [accountModalType, setAccountModalType] = useState<
@@ -118,7 +111,6 @@ export const UserProvider = ({ children }: Props) => {
 
     const setSession = useCallback((data: UserAuthedResponse["data"]) => {
         setAccessToken(data.access_token)
-        setRefreshToken(data.refresh_token)
         setExpiresIn(data.expires_in)
     }, [])
 
@@ -129,7 +121,6 @@ export const UserProvider = ({ children }: Props) => {
         }
         syncedValueSnapshotRef.current.clear()
         setAccessToken(null)
-        setRefreshToken(null)
         setExpiresIn(null)
     }, [])
 
@@ -322,30 +313,6 @@ export const UserProvider = ({ children }: Props) => {
         return unsubscribe
     }, [scheduleDebouncedSync])
 
-    // Persist refresh token on change
-    useEffect(() => {
-        try {
-            if (refreshToken) {
-                localStorage.setItem("refresh_token", refreshToken)
-            } else {
-                localStorage.removeItem("refresh_token")
-            }
-        } catch (error) {
-            logMessage(
-                "Failed to persist refresh token to localStorage",
-                "warn",
-                {
-                    metadata: {
-                        error:
-                            error instanceof Error
-                                ? error.message
-                                : String(error),
-                    },
-                }
-            )
-        }
-    }, [refreshToken])
-
     const applyServerSettingsToLocal = useCallback(
         async (serverSettings: unknown, signal?: AbortSignal) => {
             isApplyingServerRef.current = true
@@ -449,13 +416,9 @@ export const UserProvider = ({ children }: Props) => {
 
     const refreshSession = useCallback(
         async (signal?: AbortSignal) => {
-            if (!refreshToken) return
             setIsLoading(true)
             try {
-                const response = await postRefresh(
-                    { refresh_token: refreshToken },
-                    signal
-                )
+                const response = await postRefresh(signal)
                 if (response?.data) {
                     setSession(response.data)
                     await fetchAndApplyServerSettings(
@@ -479,36 +442,19 @@ export const UserProvider = ({ children }: Props) => {
                 setIsLoading(false)
             }
         },
-        [refreshToken, setSession, fetchAndApplyServerSettings, clearSession]
+        [setSession, fetchAndApplyServerSettings, clearSession]
     )
 
     // Rehydrate session on mount
     useEffect(() => {
-        try {
-            const storedToken = localStorage.getItem("refresh_token")
-            if (!storedToken) return
-            const controller = new AbortController()
-            refreshSession(controller.signal)
-            return () => controller.abort()
-        } catch (error) {
-            logMessage(
-                "Failed to rehydrate session from localStorage",
-                "warn",
-                {
-                    metadata: {
-                        error:
-                            error instanceof Error
-                                ? error.message
-                                : String(error),
-                    },
-                }
-            )
-        }
-    }, [])
+        const controller = new AbortController()
+        void refreshSession(controller.signal)
+        return () => controller.abort()
+    }, [refreshSession])
 
     // Keep session alive
     useEffect(() => {
-        if (!refreshToken || !expiresIn) return
+        if (!accessToken || !expiresIn) return
         const controller = new AbortController()
         const timeout = setTimeout(
             () => refreshSession(controller.signal),
@@ -518,7 +464,7 @@ export const UserProvider = ({ children }: Props) => {
             clearTimeout(timeout)
             controller.abort()
         }
-    }, [refreshToken, expiresIn, refreshSession])
+    }, [accessToken, expiresIn, refreshSession])
 
     // Account lifecycle functions
 
