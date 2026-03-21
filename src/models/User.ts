@@ -48,6 +48,13 @@ interface PersistentSettingsResponse {
     error?: string
 }
 
+interface DeletePersistentSettingsResponse {
+    data?: {
+        deleted: boolean
+    }
+    error?: string
+}
+
 interface SimpleSetting {
     created_at?: string
     updated_at: string
@@ -178,4 +185,5 @@ export type {
     RaidTimerSetting,
     TimezoneSetting,
     WhoSetting,
+    DeletePersistentSettingsResponse,
 }

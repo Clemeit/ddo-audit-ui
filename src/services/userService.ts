@@ -7,8 +7,15 @@ import {
     UpdatePasswordPayload,
     UserProfile,
     UserSettings,
+    DeletePersistentSettingsResponse,
 } from "../models/User"
-import { getRequest, patchRequest, postRequest, putRequest } from "./apiHelper"
+import {
+    deleteRequest,
+    getRequest,
+    patchRequest,
+    postRequest,
+    putRequest,
+} from "./apiHelper"
 
 const USER_ENDPOINT = "user"
 
@@ -106,6 +113,16 @@ function getPersistentSettings(
     })
 }
 
+function deletePersistentSettings(
+    accessToken: string,
+    signal?: AbortSignal
+): Promise<DeletePersistentSettingsResponse> {
+    return deleteRequest(`${USER_ENDPOINT}/settings/persistent`, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+        signal,
+    })
+}
+
 export {
     getUserSettings,
     postUserSettings,
@@ -114,4 +131,5 @@ export {
     putPersistentSettings,
     patchPersistentSettings,
     getPersistentSettings,
+    deletePersistentSettings,
 }

@@ -28,12 +28,12 @@ const root = ReactDOM.createRoot(document.getElementById("root")!)
 root.render(
     <HelmetProvider>
         <AppProvider>
-            <UserProvider>
-                <NotificationProvider>
+            <NotificationProvider>
+                <UserProvider>
                     <ServiceWorkerUpdater />
                     <RouterProvider router={browserRouter} />
-                </NotificationProvider>
-            </UserProvider>
+                </UserProvider>
+            </NotificationProvider>
         </AppProvider>
     </HelmetProvider>
 )

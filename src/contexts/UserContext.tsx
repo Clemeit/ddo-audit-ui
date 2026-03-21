@@ -12,6 +12,7 @@ import {
     postLogout,
     postRefresh,
     postRegister,
+    deleteAccount as deleteAccountRequest,
 } from "../services/authService"
 import { UserAccountObject, UserAuthedResponse } from "../models/Auth"
 import {
@@ -31,9 +32,13 @@ import { hydrateCharacterIds } from "../utils/settingsHydration"
 import {
     getPersistentSettings,
     patchPersistentSettings,
+    putUpdatePassword,
     putPersistentSettings,
+    deletePersistentSettings,
 } from "../services/userService"
 import logMessage from "../utils/logUtils"
+import { UpdatePasswordPayload } from "../models/User"
+import { useNotificationContext } from "./NotificationContext"
 
 interface UserContextProps {
     isLoggedIn: boolean
@@ -47,12 +52,19 @@ interface UserContextProps {
         payload: UserAccountObject,
         signal?: AbortSignal
     ) => Promise<UserAuthedResponse>
+    changePassword: (
+        payload: UpdatePasswordPayload,
+        signal?: AbortSignal
+    ) => Promise<UserAuthedResponse>
     logout: (signal?: AbortSignal) => Promise<void>
-    isLoginModalOpen: boolean
+    deleteAccount: (signal?: AbortSignal) => Promise<void>
+    deleteSettings: (signal?: AbortSignal) => Promise<void>
+    isAccountModalOpen: boolean
     openLoginModal: () => void
     openRegisterModal: () => void
+    openChangePasswordModal: () => void
     closeAccountModal: () => void
-    accountModalType: "login" | "register"
+    accountModalType: "login" | "register" | "change-password"
     isLoading: boolean
 }
 
@@ -65,6 +77,7 @@ interface Props {
 export const UserProvider = ({ children }: Props) => {
     const [persistentSettingsRevision, setPersistentSettingsRevision] =
         useState<number>(0)
+    const { createNotification } = useNotificationContext()
 
     const [accessToken, setAccessToken] = useState<string>(null)
     const [refreshToken, setRefreshToken] = useState<string>(() =>
@@ -73,7 +86,7 @@ export const UserProvider = ({ children }: Props) => {
     const [expiresIn, setExpiresIn] = useState<number>(null)
     const [isAccountModalOpen, setIsAccountModalOpen] = useState(false)
     const [accountModalType, setAccountModalType] = useState<
-        "login" | "register"
+        "login" | "register" | "change-password"
     >("login")
     const [isLoading, setIsLoading] = useState<boolean>(false)
 
@@ -83,6 +96,10 @@ export const UserProvider = ({ children }: Props) => {
     }, [])
     const openRegisterModal = useCallback(() => {
         setAccountModalType("register")
+        setIsAccountModalOpen(true)
+    }, [])
+    const openChangePasswordModal = useCallback(() => {
+        setAccountModalType("change-password")
         setIsAccountModalOpen(true)
     }, [])
     const closeAccountModal = useCallback(
@@ -416,6 +433,7 @@ export const UserProvider = ({ children }: Props) => {
     const refreshSession = useCallback(
         async (signal?: AbortSignal) => {
             if (!refreshToken) return
+            setIsLoading(true)
             try {
                 const response = await postRefresh(
                     { refresh_token: refreshToken },
@@ -431,6 +449,8 @@ export const UserProvider = ({ children }: Props) => {
             } catch (error) {
                 // Refresh token expired or invalid — session is over
                 clearSession()
+            } finally {
+                setIsLoading(false)
             }
         },
         [refreshToken, setSession, fetchAndApplyServerSettings, clearSession]
@@ -474,6 +494,13 @@ export const UserProvider = ({ children }: Props) => {
                         signal
                     )
                 }
+                createNotification({
+                    title: "Registration Successful",
+                    message:
+                        "Welcome to DDO Audit! Your account has been created and your settings have been saved.",
+                    type: "success",
+                    ttl: 10000,
+                })
                 return response
             } finally {
                 setIsLoading(false)
@@ -512,14 +539,134 @@ export const UserProvider = ({ children }: Props) => {
                     syncTimeoutRef.current = null
                 }
                 if (accessToken) {
-                    await postLogout(accessToken, signal).catch(() => {})
+                    await postLogout(accessToken, signal)
                 }
                 clearSession()
+                createNotification({
+                    title: "Logged Out",
+                    message: "You have been logged out successfully.",
+                    type: "success",
+                    ttl: 5000,
+                })
             } finally {
                 setIsLoading(false)
             }
         },
         [accessToken, clearSession]
+    )
+
+    const deleteAccount = useCallback(
+        async (signal?: AbortSignal) => {
+            setIsLoading(true)
+            try {
+                if (syncTimeoutRef.current !== null) {
+                    window.clearTimeout(syncTimeoutRef.current)
+                    syncTimeoutRef.current = null
+                }
+                if (accessToken) {
+                    const response = await deleteAccountRequest(
+                        accessToken,
+                        signal
+                    )
+                    if (
+                        response?.data?.message ===
+                        "Account deleted successfully"
+                    ) {
+                        createNotification({
+                            title: "Account Deleted",
+                            message:
+                                "Your account has been deleted successfully.",
+                            type: "success",
+                            ttl: 10000,
+                        })
+                        clearSession()
+                    } else {
+                        throw new Error(
+                            "Unexpected response from server: " +
+                                JSON.stringify(response)
+                        )
+                    }
+                }
+            } finally {
+                setIsLoading(false)
+            }
+        },
+        [accessToken, clearSession]
+    )
+
+    const deleteSettings = useCallback(
+        async (signal?: AbortSignal) => {
+            setIsLoading(true)
+            try {
+                if (syncTimeoutRef.current !== null) {
+                    window.clearTimeout(syncTimeoutRef.current)
+                    syncTimeoutRef.current = null
+                }
+                if (accessToken) {
+                    const response = await deletePersistentSettings(
+                        accessToken,
+                        signal
+                    )
+                    if (response?.data?.deleted) {
+                        createNotification({
+                            title: "Settings Deleted",
+                            message:
+                                "Your settings have been deleted successfully.",
+                            type: "success",
+                            ttl: 10000,
+                        })
+                    } else {
+                        createNotification({
+                            title: "Setting Deletion Failed",
+                            message:
+                                "An error occurred while trying to delete your settings. Please try again later.",
+                            type: "error",
+                            ttl: 10000,
+                        })
+                    }
+                }
+            } finally {
+                setIsLoading(false)
+            }
+        },
+        [accessToken, clearSession]
+    )
+
+    const changePassword = useCallback(
+        async (payload: UpdatePasswordPayload, signal?: AbortSignal) => {
+            if (!accessToken) {
+                throw new Error("No access token available")
+            }
+
+            setIsLoading(true)
+            try {
+                const response = await putUpdatePassword(
+                    accessToken,
+                    payload,
+                    signal
+                )
+                if (response?.data) {
+                    setSession(response.data)
+                    closeAccountModal()
+                    createNotification({
+                        title: "Password updated!",
+                        message:
+                            "You have been logged out on all other devices.",
+                        type: "success",
+                        ttl: 10000,
+                    })
+                }
+                return response
+            } finally {
+                setIsLoading(false)
+            }
+        },
+        [
+            accessToken,
+            setSession,
+            closeAccountModal,
+            fetchAndApplyServerSettings,
+        ]
     )
 
     return (
@@ -530,10 +677,14 @@ export const UserProvider = ({ children }: Props) => {
                 persistentSettingsRevision,
                 register,
                 login,
+                changePassword,
                 logout,
-                isLoginModalOpen: isAccountModalOpen,
+                deleteAccount,
+                deleteSettings,
+                isAccountModalOpen,
                 openLoginModal,
                 openRegisterModal,
+                openChangePasswordModal,
                 closeAccountModal,
                 accountModalType,
                 isLoading,

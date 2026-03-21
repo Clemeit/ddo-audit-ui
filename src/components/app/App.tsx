@@ -10,14 +10,14 @@ import Modal from "../modal/Modal.tsx"
 import AccountForm from "../account/AccountForm.tsx"
 
 function App() {
-    const { isLoginModalOpen, closeAccountModal } = useUserContext()
+    const { isAccountModalOpen, closeAccountModal } = useUserContext()
 
     return (
         <ErrorBoundary>
             <Header />
             <PageViewTracker />
             <Outlet />
-            {isLoginModalOpen && (
+            {isAccountModalOpen && (
                 <Modal onClose={closeAccountModal} fullScreenOnMobile={true}>
                     <AccountForm />
                 </Modal>

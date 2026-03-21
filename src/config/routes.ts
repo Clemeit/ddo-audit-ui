@@ -114,6 +114,12 @@ const bannerRouteMapping = {
         miniature: true,
         showButtons: false,
     },
+    account: {
+        title: "Account",
+        subtitle: "Manage Your DDO Audit Account",
+        miniature: true,
+        showButtons: false,
+    },
 }
 
 export { bannerRouteMapping }
