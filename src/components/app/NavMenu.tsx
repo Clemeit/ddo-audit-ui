@@ -80,7 +80,7 @@ const NavMenu = () => {
                 <AboutSVG className="nav-icon" />
                 <span>About</span>
             </Link>
-            {!isLoggedIn && isMobile && (
+            {/* {!isLoggedIn && isMobile && (
                 <button
                     type="button"
                     className="nav-item"
@@ -90,7 +90,7 @@ const NavMenu = () => {
                     <span>Log In</span>
                 </button>
             )}
-            {!isMobile && <LoginButtonContainer />}
+            {!isMobile && <LoginButtonContainer />} */}
         </nav>
     )
 }
