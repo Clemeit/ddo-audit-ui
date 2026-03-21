@@ -55,6 +55,7 @@ function deleteAccount(
     return deleteRequest(`${AUTH_ENDPOINT}/account`, {
         headers: { Authorization: `Bearer ${accessToken}` },
         signal,
+        withCredentials: true,
     })
 }
 

@@ -45,6 +45,7 @@ function getProfile(
     return getRequest(`${USER_ENDPOINT}/profile`, {
         headers: { Authorization: `Bearer ${accessToken}` },
         signal,
+        withCredentials: true,
     })
 }
 
@@ -57,6 +58,7 @@ function putUpdatePassword(
         headers: { Authorization: `Bearer ${accessToken}` },
         data: payload,
         signal,
+        withCredentials: true,
     })
 }
 
@@ -79,6 +81,7 @@ function putPersistentSettings(
         headers: { Authorization: `Bearer ${accessToken}` },
         data: payload,
         signal,
+        withCredentials: true,
     })
 }
 
@@ -100,6 +103,7 @@ function patchPersistentSettings(
         headers: { Authorization: `Bearer ${accessToken}` },
         data: payload,
         signal,
+        withCredentials: true,
     })
 }
 
@@ -110,6 +114,7 @@ function getPersistentSettings(
     return getRequest(`${USER_ENDPOINT}/settings/persistent`, {
         headers: { Authorization: `Bearer ${accessToken}` },
         signal,
+        withCredentials: true,
     })
 }
 
@@ -120,6 +125,7 @@ function deletePersistentSettings(
     return deleteRequest(`${USER_ENDPOINT}/settings/persistent`, {
         headers: { Authorization: `Bearer ${accessToken}` },
         signal,
+        withCredentials: true,
     })
 }
 
