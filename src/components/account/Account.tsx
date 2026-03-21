@@ -14,6 +14,7 @@ import { notifyAuthError } from "../../utils/authNotifications"
 import logMessage from "../../utils/logUtils"
 import Badge from "../global/Badge"
 import useWindowSize from "../../hooks/useWindowSize"
+import PageMessage from "../global/PageMessage"
 
 const Account = () => {
     const {
@@ -270,7 +271,17 @@ const Account = () => {
     )
 
     return (
-        <Page title="Account" description="Manage Your DDO Audit Account">
+        <Page
+            title="Account"
+            description="Manage Your DDO Audit Account"
+            pageMessages={
+                <PageMessage
+                    title="Not Ready for Release"
+                    message="This page is undergoing testing and is not yet ready for public consumption."
+                    type="error"
+                />
+            }
+        >
             {showDeleteAccountModal && deleteAccountModal}
             {showDeleteSettingsModal && deleteSettingsModal}
             <ContentClusterGroup>
