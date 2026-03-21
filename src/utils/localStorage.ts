@@ -416,12 +416,6 @@ function setPersistentData(data: Record<string, any>): void {
                     data[key]
                 )
             }
-            console.log(
-                "Setting persistent data for key:",
-                key,
-                "with value:",
-                normalizedValue
-            )
             setData<any>(key, normalizedValue)
         } else {
             console.warn(

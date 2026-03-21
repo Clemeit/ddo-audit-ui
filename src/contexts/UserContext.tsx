@@ -189,10 +189,6 @@ export const UserProvider = ({ children }: Props) => {
             if (!token) return
             const allData = getPersistentDataByKeys(PERSISTENT_KEYS)
             const normalizedAllData = normalizeAllPersistentSettings(allData)
-            console.log(
-                "Flushing all local settings to server:",
-                normalizedAllData
-            )
             try {
                 await putPersistentSettings(
                     token,
@@ -249,7 +245,6 @@ export const UserProvider = ({ children }: Props) => {
             if (changedKeys.length === 0) return
 
             const data = getPersistentDataByKeys(changedKeys)
-            console.log("Flushing dirty keys to server:", changedKeys, data)
             try {
                 await patchPersistentSettings(token, { settings: data }, signal)
                 // Only clear keys included in this successful flush.
