@@ -8,7 +8,7 @@ export interface ServiceRequestProps {
 
 // Configure axios to use retries
 axiosRetry(axios, {
-    retries: 5,
+    retries: 2,
     retryDelay: (...arg) => axiosRetry.exponentialDelay(...arg, 1000),
     retryCondition(error) {
         // Retry on server errors (5xx) OR network errors (no response)
@@ -17,7 +17,7 @@ axiosRetry(axios, {
 })
 
 const genericRequest = async <T>(
-    method: "get" | "post" | "put",
+    method: "get" | "post" | "put" | "patch" | "delete",
     endpoint: string,
     data?: any,
     options: { signal?: AbortSignal; noRetry?: boolean } = {},
@@ -90,4 +90,32 @@ export const putRequest = async <T>(
     version: string = "v1"
 ) => {
     return genericRequest<T>("put", endpoint, options.data, options, version)
+}
+
+export const patchRequest = async <T>(
+    endpoint: string,
+    options: {
+        signal?: AbortSignal
+        data?: any
+        headers?: any
+        params?: any
+        noRetry?: boolean
+    } = {},
+    version: string = "v1"
+) => {
+    return genericRequest<T>("patch", endpoint, options.data, options, version)
+}
+
+export const deleteRequest = async <T>(
+    endpoint: string,
+    options: {
+        signal?: AbortSignal
+        data?: any
+        headers?: any
+        params?: any
+        noRetry?: boolean
+    } = {},
+    version: string = "v1"
+) => {
+    return genericRequest<T>("delete", endpoint, options.data, options, version)
 }

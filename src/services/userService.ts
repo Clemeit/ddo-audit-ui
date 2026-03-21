@@ -7,8 +7,15 @@ import {
     UpdatePasswordPayload,
     UserProfile,
     UserSettings,
+    DeletePersistentSettingsResponse,
 } from "../models/User"
-import { getRequest, postRequest, putRequest } from "./apiHelper"
+import {
+    deleteRequest,
+    getRequest,
+    patchRequest,
+    postRequest,
+    putRequest,
+} from "./apiHelper"
 
 const USER_ENDPOINT = "user"
 
@@ -53,12 +60,43 @@ function putUpdatePassword(
     })
 }
 
+/**
+ * Update persistent user settings that are stored in localStorage and synced with the server.
+ * These are settings that should persist across sessions and devices, such as UI preferences.
+ * This function will overwrite the entire persistent settings object on the server, so it should
+ * be used with the full set of settings. For partial updates, use patchPersistentSettings instead.
+ * @param accessToken
+ * @param payload
+ * @param signal
+ * @returns
+ */
 function putPersistentSettings(
     accessToken: string,
     payload: PersistentSettingsPayload,
     signal?: AbortSignal
 ): Promise<PersistentSettingsResponse> {
     return putRequest(`${USER_ENDPOINT}/settings/persistent`, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+        data: payload,
+        signal,
+    })
+}
+
+/**
+ * Patch update for persistent user settings. This will merge the provided settings with the existing
+ * ones on the server instead of overwriting them. Use this for updating a subset of settings without
+ * affecting others. For full updates, use putPersistentSettings.
+ * @param accessToken
+ * @param payload
+ * @param signal
+ * @returns
+ */
+function patchPersistentSettings(
+    accessToken: string,
+    payload: PersistentSettingsPayload,
+    signal?: AbortSignal
+): Promise<PersistentSettingsResponse> {
+    return patchRequest(`${USER_ENDPOINT}/settings/persistent`, {
         headers: { Authorization: `Bearer ${accessToken}` },
         data: payload,
         signal,
@@ -75,11 +113,23 @@ function getPersistentSettings(
     })
 }
 
+function deletePersistentSettings(
+    accessToken: string,
+    signal?: AbortSignal
+): Promise<DeletePersistentSettingsResponse> {
+    return deleteRequest(`${USER_ENDPOINT}/settings/persistent`, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+        signal,
+    })
+}
+
 export {
     getUserSettings,
     postUserSettings,
     getProfile,
     putUpdatePassword,
     putPersistentSettings,
+    patchPersistentSettings,
     getPersistentSettings,
+    deletePersistentSettings,
 }

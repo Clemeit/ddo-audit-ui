@@ -33,10 +33,18 @@ interface UserLogoutResponse {
     error?: string
 }
 
+interface AccountDeleteResponse {
+    data?: {
+        message: string
+    }
+    error?: string
+}
+
 export type {
     UserObject,
     UserAccountObject,
     UserAuthedResponse,
     RefreshPayload,
     UserLogoutResponse,
+    AccountDeleteResponse,
 }

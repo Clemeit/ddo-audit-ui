@@ -1,10 +1,11 @@
 import {
+    AccountDeleteResponse,
     RefreshPayload,
     UserAccountObject,
     UserAuthedResponse,
     UserLogoutResponse,
 } from "../models/Auth.ts"
-import { postRequest } from "./apiHelper.ts"
+import { deleteRequest, postRequest } from "./apiHelper.ts"
 
 const AUTH_ENDPOINT = "auth"
 
@@ -39,4 +40,14 @@ function postLogout(
     })
 }
 
-export { postRegister, postLogin, postRefresh, postLogout }
+function deleteAccount(
+    accessToken: string,
+    signal?: AbortSignal
+): Promise<AccountDeleteResponse> {
+    return deleteRequest(`${AUTH_ENDPOINT}/account`, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+        signal,
+    })
+}
+
+export { postRegister, postLogin, postRefresh, postLogout, deleteAccount }

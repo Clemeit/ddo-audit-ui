@@ -8,9 +8,21 @@ import NavCardCluster from "../global/NavCardCluster.tsx"
 import { BETTER_STACK_URL } from "../../constants/client.ts"
 import Badge from "../global/Badge.tsx"
 import { useUserContext } from "../../contexts/UserContext.tsx"
+import { useCallback } from "react"
+import { useNotificationContext } from "../../contexts/NotificationContext"
+import { notifyAuthError } from "../../utils/authNotifications"
 
 const Directory = () => {
     const { openLoginModal, logout, isLoggedIn } = useUserContext()
+    const { createNotification } = useNotificationContext()
+
+    const handleLogout = useCallback(async () => {
+        try {
+            await logout()
+        } catch {
+            notifyAuthError(createNotification, "logout")
+        }
+    }, [logout, createNotification])
 
     return (
         <Page
@@ -63,22 +75,10 @@ const Directory = () => {
                 </ContentCluster>
                 <ContentCluster title="Additional Resources">
                     <NavCardCluster>
-                        {!isLoggedIn && (
-                            <NavigationCard
-                                type="login"
-                                badge={<Badge text="New" type="new" />}
-                                noLink
-                                onClick={() => openLoginModal()}
-                            />
-                        )}
-                        {isLoggedIn && (
-                            <NavigationCard
-                                type="logout"
-                                badge={<Badge text="New" type="new" />}
-                                noLink
-                                onClick={() => logout()}
-                            />
-                        )}
+                        <NavigationCard
+                            type="account"
+                            badge={<Badge text="New" type="new" />}
+                        />
                         <NavigationCard type="about" />
                         <NavigationCard
                             type="api"
