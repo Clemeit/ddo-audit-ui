@@ -97,21 +97,25 @@ const CharacterSelectModal = ({
     function registerCharacter() {
         if (isFetching) return
         focusCharacterNameField()
-        if (!characterName) {
+
+        const trimmedName = characterName.trim()
+        setCharacterName(trimmedName)
+
+        if (!trimmedName) {
             setValidationErrorMessage(["Character name is required"])
             return
         }
 
         // Ensure the name is alphanumeric including hyphens, and less than 30 characters
         const nameRegex = /^[a-zA-Z0-9-]{1,30}$/
-        if (!nameRegex.test(characterName)) {
+        if (!nameRegex.test(trimmedName)) {
             setValidationErrorMessage(["Invalid character name"])
             return
         }
 
         setIsFetching(true)
 
-        getCharacterByName(characterName)
+        getCharacterByName(trimmedName)
             .then((response) => {
                 if (response && response.data) {
                     // If there's exactly 1 character, we're done. Otherwise,
