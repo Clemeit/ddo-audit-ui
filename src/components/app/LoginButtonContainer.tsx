@@ -6,8 +6,13 @@ import { useNotificationContext } from "../../contexts/NotificationContext"
 import { notifyAuthError } from "../../utils/authNotifications"
 
 const LoginButtonContainer = () => {
-    const { accessToken, logout, openLoginModal, openRegisterModal } =
-        useUserContext()
+    const {
+        accessToken,
+        logout,
+        openLoginModal,
+        openRegisterModal,
+        firstLoadComplete,
+    } = useUserContext()
     const { createNotification } = useNotificationContext()
 
     const handleLogout = useCallback(async () => {
@@ -19,33 +24,43 @@ const LoginButtonContainer = () => {
     }, [logout, createNotification])
 
     return (
-        <Stack
-            style={{
-                marginLeft: "auto",
-                alignItems: "center",
-                padding: "0px 15px 0px 0px",
-            }}
-        >
-            {!!accessToken ? (
-                <Button type="text" small onClick={() => void handleLogout()}>
-                    Log Out
-                </Button>
-            ) : (
-                <>
-                    <Button type="text" small onClick={() => openLoginModal()}>
-                        Log&nbsp;In
-                    </Button>
-                    |
+        firstLoadComplete && (
+            <Stack
+                style={{
+                    marginLeft: "auto",
+                    alignItems: "center",
+                    padding: "0px 15px 0px 0px",
+                }}
+            >
+                {!!accessToken ? (
                     <Button
                         type="text"
                         small
-                        onClick={() => openRegisterModal()}
+                        onClick={() => void handleLogout()}
                     >
-                        Register
+                        Log Out
                     </Button>
-                </>
-            )}
-        </Stack>
+                ) : (
+                    <>
+                        <Button
+                            type="text"
+                            small
+                            onClick={() => openLoginModal()}
+                        >
+                            Log&nbsp;In
+                        </Button>
+                        |
+                        <Button
+                            type="text"
+                            small
+                            onClick={() => openRegisterModal()}
+                        >
+                            Register
+                        </Button>
+                    </>
+                )}
+            </Stack>
+        )
     )
 }
 

@@ -69,6 +69,7 @@ interface UserContextProps {
     closeAccountModal: () => void
     accountModalType: "login" | "register" | "change-password"
     isLoading: boolean
+    firstLoadComplete: boolean
 }
 
 const UserContext = createContext<UserContextProps | undefined>(undefined)
@@ -91,6 +92,7 @@ export const UserProvider = ({ children }: Props) => {
         "login" | "register" | "change-password"
     >("login")
     const [isLoading, setIsLoading] = useState<boolean>(false)
+    const [firstLoadComplete, setFirstLoadComplete] = useState<boolean>(false)
 
     const openLoginModal = useCallback(() => {
         setAccountModalType("login")
@@ -597,6 +599,7 @@ export const UserProvider = ({ children }: Props) => {
                 }
             } finally {
                 setIsLoading(false)
+                setFirstLoadComplete(true)
             }
         },
         [
@@ -610,11 +613,23 @@ export const UserProvider = ({ children }: Props) => {
     // Rehydrate session on mount
     useEffect(() => {
         if (!shouldAttemptSessionRehydrate()) {
+            setFirstLoadComplete(true)
             return
         }
+
         const controller = new AbortController()
-        void refreshSession(controller.signal)
-        return () => controller.abort()
+        const timeoutId = setTimeout(() => {
+            setFirstLoadComplete(true)
+        }, 3000) // Fallback in case rehydration hangs for some reason
+
+        void refreshSession(controller.signal).finally(() => {
+            clearTimeout(timeoutId)
+        })
+
+        return () => {
+            controller.abort()
+            clearTimeout(timeoutId)
+        }
     }, [refreshSession, shouldAttemptSessionRehydrate])
 
     // Keep session alive
@@ -921,6 +936,7 @@ export const UserProvider = ({ children }: Props) => {
                 closeAccountModal,
                 accountModalType,
                 isLoading,
+                firstLoadComplete,
             }}
         >
             {children}
