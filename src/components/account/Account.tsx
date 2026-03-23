@@ -249,6 +249,7 @@ const Account = () => {
             onNo={() => setShowDeleteAccountModal(false)}
             title="Delete Account"
             critical
+            fullScreenOnMobile
         >
             <p>Are you sure you want to delete your account?</p>
             <p>This action cannot be undone.</p>
@@ -261,6 +262,7 @@ const Account = () => {
             onNo={() => setShowDeleteSettingsModal(false)}
             title="Delete Saved Settings and Preferences"
             critical
+            fullScreenOnMobile
         >
             <p>
                 Are you sure you want to delete your saved settings and
