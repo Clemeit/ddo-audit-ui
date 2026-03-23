@@ -6,11 +6,47 @@ async function attemptHydration(
     ids: number[],
     signal?: AbortSignal
 ): Promise<Character[]> {
-    const response = await getCharactersByIds(ids, { signal })
-    return Object.values(response.data || {}).filter(
+    const expectedIds = Array.from(
+        new Set(
+            ids.filter((id): id is number => typeof id === "number" && id > 0)
+        )
+    )
+    const expectedIdSet = new Set(expectedIds)
+
+    const response = await getCharactersByIds(expectedIds, { signal })
+    const hydratedCharacters = Object.values(response.data || {}).filter(
         (c): c is Character =>
             c != null && typeof c === "object" && typeof c.id === "number"
     )
+
+    const returnedById = new Map<number, Character>()
+    for (const character of hydratedCharacters) {
+        if (!returnedById.has(character.id)) {
+            returnedById.set(character.id, character)
+        }
+    }
+
+    const returnedIdSet = new Set(returnedById.keys())
+    const missingIds = expectedIds.filter((id) => !returnedIdSet.has(id))
+    const unexpectedIds = Array.from(returnedIdSet).filter(
+        (id) => !expectedIdSet.has(id)
+    )
+
+    if (missingIds.length > 0 || unexpectedIds.length > 0) {
+        logMessage("Character hydration returned mismatched IDs", "warn", {
+            metadata: {
+                expectedIds,
+                returnedIds: Array.from(returnedIdSet),
+                missingIds,
+                unexpectedIds,
+            },
+        })
+        throw new Error("Character hydration response ID mismatch")
+    }
+
+    return expectedIds
+        .map((id) => returnedById.get(id))
+        .filter((character): character is Character => Boolean(character))
 }
 
 /**
@@ -22,10 +58,16 @@ export async function hydrateCharacterIds(
     ids: number[],
     signal?: AbortSignal
 ): Promise<Character[] | null> {
-    if (ids.length === 0) return []
+    const dedupedIds = Array.from(
+        new Set(
+            ids.filter((id): id is number => typeof id === "number" && id > 0)
+        )
+    )
+
+    if (dedupedIds.length === 0) return []
 
     try {
-        return await attemptHydration(ids, signal)
+        return await attemptHydration(dedupedIds, signal)
     } catch (firstError) {
         if ((firstError as { name?: string })?.name === "AbortError") {
             return null
@@ -34,7 +76,7 @@ export async function hydrateCharacterIds(
 
         logMessage("Character hydration failed, retrying once", "warn", {
             metadata: {
-                ids,
+                ids: dedupedIds,
                 error:
                     firstError instanceof Error
                         ? firstError.message
@@ -43,14 +85,19 @@ export async function hydrateCharacterIds(
         })
 
         try {
-            return await attemptHydration(ids, signal)
+            return await attemptHydration(dedupedIds, signal)
         } catch (secondError) {
+            if ((secondError as { name?: string })?.name === "AbortError") {
+                return null
+            }
+            if (signal?.aborted) return null
+
             logMessage(
                 "Character hydration failed after retry, keeping existing local data",
                 "warn",
                 {
                     metadata: {
-                        ids,
+                        ids: dedupedIds,
                         error:
                             secondError instanceof Error
                                 ? secondError.message

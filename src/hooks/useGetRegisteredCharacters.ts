@@ -75,21 +75,34 @@ const useGetRegisteredCharacters = ({ enabled = true }: Props = {}) => {
                 ? accessTokens
                 : []
 
-            setRegisteredCharactersCached(registeredCharactersMetadata.data)
+            const dedupedRegisteredCharactersById = new Map<number, Character>()
+            for (const character of registeredCharactersMetadata.data) {
+                if (
+                    typeof character?.id === "number" &&
+                    character.id > 0 &&
+                    !dedupedRegisteredCharactersById.has(character.id)
+                ) {
+                    dedupedRegisteredCharactersById.set(character.id, character)
+                }
+            }
+            const dedupedRegisteredCharacters = Array.from(
+                dedupedRegisteredCharactersById.values()
+            )
+
+            setRegisteredCharactersCached(dedupedRegisteredCharacters)
             setAccessTokens(validAccessTokens)
 
-            const verifiedCharactersCached =
-                registeredCharactersMetadata.data?.filter(
-                    (character: Character) =>
-                        character?.id &&
-                        validAccessTokens.some(
-                            (token) => token?.character_id === character.id
-                        )
-                ) || []
+            const verifiedCharactersCached = dedupedRegisteredCharacters.filter(
+                (character: Character) =>
+                    character?.id &&
+                    validAccessTokens.some(
+                        (token) => token?.character_id === character.id
+                    )
+            )
             setVerifiedCharactersCached(verifiedCharactersCached)
 
             // Extract and validate character IDs
-            const characterIds = registeredCharactersMetadata.data
+            const characterIds = dedupedRegisteredCharacters
                 ?.map((character: Character) => character?.id)
                 ?.filter((id): id is number => typeof id === "number" && id > 0)
 
@@ -125,19 +138,67 @@ const useGetRegisteredCharacters = ({ enabled = true }: Props = {}) => {
                         typeof character.id === "number"
                 )
 
-                setRegisteredCharacters(characters)
+                const expectedCharacterIds = new Set(characterIds)
+                const returnedCharacterIds = new Set(
+                    characters.map((character) => character.id)
+                )
+                const missingCharacterIds = characterIds.filter(
+                    (id) => !returnedCharacterIds.has(id)
+                )
+                const unexpectedCharacterIds = Array.from(
+                    returnedCharacterIds
+                ).filter((id) => !expectedCharacterIds.has(id))
+
+                if (
+                    missingCharacterIds.length > 0 ||
+                    unexpectedCharacterIds.length > 0
+                ) {
+                    logMessage(
+                        "getCharactersByIds returned mismatched character IDs",
+                        "warn",
+                        {
+                            metadata: {
+                                expectedCharacterIds: characterIds,
+                                returnedCharacterIds:
+                                    Array.from(returnedCharacterIds),
+                                missingCharacterIds,
+                                unexpectedCharacterIds,
+                            },
+                        }
+                    )
+                }
+
+                // Treat API results as partial updates so network issues don't drop existing IDs.
+                const mergedCharactersById = new Map<number, Character>()
+                for (const character of dedupedRegisteredCharacters) {
+                    if (typeof character?.id === "number") {
+                        mergedCharactersById.set(character.id, character)
+                    }
+                }
+                for (const character of characters) {
+                    mergedCharactersById.set(character.id, character)
+                }
+
+                const mergedCharacters = characterIds
+                    .map((id) => mergedCharactersById.get(id))
+                    .filter((character): character is Character =>
+                        Boolean(character)
+                    )
+
+                setRegisteredCharacters(mergedCharacters)
                 setIsLoaded(true)
 
-                const verifiedCharacters = characters.filter((character) =>
-                    validAccessTokens.some(
-                        (token) => token?.character_id === character.id
-                    )
+                const verifiedCharacters = mergedCharacters.filter(
+                    (character) =>
+                        validAccessTokens.some(
+                            (token) => token?.character_id === character.id
+                        )
                 )
                 setVerifiedCharacters(verifiedCharacters)
 
                 // Safe localStorage operation
                 try {
-                    setRegisteredCharactersInLocalStorage(characters)
+                    setRegisteredCharactersInLocalStorage(mergedCharacters)
                 } catch (localStorageError) {
                     logMessage(
                         "Failed to save registered characters to localStorage",
@@ -158,7 +219,12 @@ const useGetRegisteredCharacters = ({ enabled = true }: Props = {}) => {
                 }
 
                 logMessage("Failed to fetch registered characters", "error", {
-                    metadata: { error: error },
+                    metadata: {
+                        error:
+                            error instanceof Error
+                                ? error.message
+                                : String(error),
+                    },
                 })
                 setIsError(true)
                 setErrorMessage(

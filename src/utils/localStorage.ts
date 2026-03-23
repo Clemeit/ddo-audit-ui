@@ -216,8 +216,27 @@ function getRegisteredCharactersMetadata(): LocalStorageEntry<Character[]> {
     return getMetadata<Character[]>(REGISTERED_CHARACTERS_KEY, [])
 }
 
+function getUniqueCharactersById(characters: Character[]): Character[] {
+    const deduped = new Map<number, Character>()
+    for (const character of characters) {
+        if (
+            character &&
+            typeof character === "object" &&
+            typeof character.id === "number" &&
+            character.id > 0 &&
+            !deduped.has(character.id)
+        ) {
+            deduped.set(character.id, character)
+        }
+    }
+    return Array.from(deduped.values())
+}
+
 function setRegisteredCharacters(characters: Character[]): void {
-    setData<Character[]>(REGISTERED_CHARACTERS_KEY, characters)
+    const validCharacters = Array.isArray(characters)
+        ? getUniqueCharactersById(characters)
+        : []
+    setData<Character[]>(REGISTERED_CHARACTERS_KEY, validCharacters)
 }
 
 function addRegisteredCharacter(character: Character): void {
@@ -334,11 +353,17 @@ function getIgnoreIds(): number[] {
 
 function getRegisteredCharacterIds(): number[] {
     const characters = getData<Character[]>(REGISTERED_CHARACTERS_KEY, [])
-    return Array.isArray(characters)
-        ? characters
-              .map((c) => c.id)
-              .filter((id): id is number => typeof id === "number")
-        : []
+    if (!Array.isArray(characters)) {
+        return []
+    }
+
+    return Array.from(
+        new Set(
+            characters
+                .map((c) => c.id)
+                .filter((id): id is number => typeof id === "number" && id > 0)
+        )
+    )
 }
 
 // Areas functions
