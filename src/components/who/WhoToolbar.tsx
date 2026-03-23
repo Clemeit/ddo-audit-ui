@@ -17,6 +17,7 @@ import {
 import { ReactComponent as WarningSVG } from "../../assets/svg/warning.svg"
 import { useAreaContext } from "../../contexts/AreaContext.tsx"
 import FeaturedItem from "../global/FeaturedItem.tsx"
+import { useEffect, useState } from "react"
 
 interface Props {
     reloadCharacters: () => void
@@ -69,6 +70,25 @@ const WhoToolbar = ({
 
     const { reloadAreas } = useAreaContext()
 
+    const [localMaxRenderedCount, setLocalMaxRenderedCount] = useState<number>(
+        maximumRenderedCharacterCount
+    )
+    useEffect(() => {
+        setLocalMaxRenderedCount(maximumRenderedCharacterCount)
+    }, [maximumRenderedCharacterCount])
+    useEffect(() => {
+        const debounceTimer = setTimeout(() => {
+            if (localMaxRenderedCount !== maximumRenderedCharacterCount) {
+                setMaximumRenderedCharacterCount(localMaxRenderedCount)
+            }
+        }, 1000)
+        return () => clearTimeout(debounceTimer)
+    }, [
+        localMaxRenderedCount,
+        maximumRenderedCharacterCount,
+        setMaximumRenderedCharacterCount,
+    ])
+
     const {
         isModalOpen: showSettingsModal,
         openModal: handleOpenModal,
@@ -98,10 +118,9 @@ const WhoToolbar = ({
                         </Checkbox>
                     </FeaturedItem>
                     <label htmlFor="maxChracterRenderSlider">
-                        Display the first{" "}
-                        {maximumRenderedCharacterCount.toString()} characters
-                        {maximumRenderedCharacterCount ===
-                            DEFAULT_CHARACTER_COUNT && (
+                        Display the first {localMaxRenderedCount.toString()}{" "}
+                        characters
+                        {localMaxRenderedCount === DEFAULT_CHARACTER_COUNT && (
                             <span className="secondary-text"> (default)</span>
                         )}
                     </label>
@@ -111,11 +130,9 @@ const WhoToolbar = ({
                         min={MINIMUM_CHARACTER_COUNT}
                         max={MAXIMUM_CHARACTER_COUNT}
                         step={10}
-                        value={maximumRenderedCharacterCount}
+                        value={localMaxRenderedCount}
                         onChange={(e) =>
-                            setMaximumRenderedCharacterCount(
-                                parseInt(e.target.value)
-                            )
+                            setLocalMaxRenderedCount(Number(e.target.value))
                         }
                     />
                     {maximumRenderedCharacterCount > 200 && (
