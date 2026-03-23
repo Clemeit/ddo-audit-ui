@@ -672,6 +672,11 @@ export const UserProvider = ({ children }: Props) => {
                         type: "success",
                         ttl: 10000,
                     })
+                    logMessage("New user registered", "info", {
+                        metadata: {
+                            userId: response.data?.user?.id || "unknown",
+                        },
+                    })
                 }
                 return response
             } catch (error) {
