@@ -18,60 +18,6 @@
       <changefreq>daily</changefreq>
       <priority>0.5</priority>
    </url>
-   <!-- <url>
-      <loc>https://www.ddoaudit.com/servers/argonnessen</loc>
-      <lastmod>2025-07-19T00:00:00+00:00</lastmod>
-      <changefreq>daily</changefreq>
-      <priority>0.5</priority>
-   </url>
-   <url>
-      <loc>https://www.ddoaudit.com/servers/cannith</loc>
-      <lastmod>2025-07-19T00:00:00+00:00</lastmod>
-      <changefreq>daily</changefreq>
-      <priority>0.5</priority>
-   </url>
-   <url>
-      <loc>https://www.ddoaudit.com/servers/ghallanda</loc>
-      <lastmod>2025-07-19T00:00:00+00:00</lastmod>
-      <changefreq>daily</changefreq>
-      <priority>0.5</priority>
-   </url>
-   <url>
-      <loc>https://www.ddoaudit.com/servers/khyber</loc>
-      <lastmod>2025-07-19T00:00:00+00:00</lastmod>
-      <changefreq>daily</changefreq>
-      <priority>0.5</priority>
-   </url>
-   <url>
-      <loc>https://www.ddoaudit.com/servers/orien</loc>
-      <lastmod>2025-07-19T00:00:00+00:00</lastmod>
-      <changefreq>daily</changefreq>
-      <priority>0.5</priority>
-   </url>
-   <url>
-      <loc>https://www.ddoaudit.com/servers/sarlona</loc>
-      <lastmod>2025-07-19T00:00:00+00:00</lastmod>
-      <changefreq>daily</changefreq>
-      <priority>0.5</priority>
-   </url>
-   <url>
-      <loc>https://www.ddoaudit.com/servers/thelanis</loc>
-      <lastmod>2025-07-19T00:00:00+00:00</lastmod>
-      <changefreq>daily</changefreq>
-      <priority>0.5</priority>
-   </url>
-   <url>
-      <loc>https://www.ddoaudit.com/servers/wayfinder</loc>
-      <lastmod>2025-07-19T00:00:00+00:00</lastmod>
-      <changefreq>daily</changefreq>
-      <priority>0.5</priority>
-   </url>
-   <url>
-      <loc>https://www.ddoaudit.com/servers/hardcore</loc>
-      <lastmod>2025-07-19T00:00:00+00:00</lastmod>
-      <changefreq>daily</changefreq>
-      <priority>0.5</priority>
-   </url> -->
    <url>
       <loc>https://www.ddoaudit.com/servers/cormyr</loc>
       <lastmod>2025-10-02T00:00:00+00:00</lastmod>
@@ -102,60 +48,6 @@
       <changefreq>always</changefreq>
       <priority>1</priority>
    </url>
-   <!-- <url>
-      <loc>https://www.ddoaudit.com/grouping/argonnessen</loc>
-      <lastmod>2025-07-19T00:00:00+00:00</lastmod>
-      <changefreq>daily</changefreq>
-      <priority>1</priority>
-   </url>
-   <url>
-      <loc>https://www.ddoaudit.com/grouping/cannith</loc>
-      <lastmod>2025-07-19T00:00:00+00:00</lastmod>
-      <changefreq>daily</changefreq>
-      <priority>1</priority>
-   </url>
-   <url>
-      <loc>https://www.ddoaudit.com/grouping/ghallanda</loc>
-      <lastmod>2025-07-19T00:00:00+00:00</lastmod>
-      <changefreq>daily</changefreq>
-      <priority>1</priority>
-   </url>
-   <url>
-      <loc>https://www.ddoaudit.com/grouping/khyber</loc>
-      <lastmod>2025-07-19T00:00:00+00:00</lastmod>
-      <changefreq>daily</changefreq>
-      <priority>1</priority>
-   </url>
-   <url>
-      <loc>https://www.ddoaudit.com/grouping/orien</loc>
-      <lastmod>2025-07-19T00:00:00+00:00</lastmod>
-      <changefreq>daily</changefreq>
-      <priority>1</priority>
-   </url>
-   <url>
-      <loc>https://www.ddoaudit.com/grouping/sarlona</loc>
-      <lastmod>2025-07-19T00:00:00+00:00</lastmod>
-      <changefreq>daily</changefreq>
-      <priority>1</priority>
-   </url>
-   <url>
-      <loc>https://www.ddoaudit.com/grouping/thelanis</loc>
-      <lastmod>2025-07-19T00:00:00+00:00</lastmod>
-      <changefreq>daily</changefreq>
-      <priority>1</priority>
-   </url>
-   <url>
-      <loc>https://www.ddoaudit.com/grouping/wayfinder</loc>
-      <lastmod>2025-07-19T00:00:00+00:00</lastmod>
-      <changefreq>daily</changefreq>
-      <priority>1</priority>
-   </url>
-   <url>
-      <loc>https://www.ddoaudit.com/grouping/hardcore</loc>
-      <lastmod>2025-07-19T00:00:00+00:00</lastmod>
-      <changefreq>daily</changefreq>
-      <priority>1</priority>
-   </url> -->
    <url>
       <loc>https://www.ddoaudit.com/grouping/cormyr</loc>
       <lastmod>2025-10-02T00:00:00+00:00</lastmod>
@@ -186,60 +78,6 @@
       <changefreq>always</changefreq>
       <priority>1</priority>
    </url>
-   <!-- <url>
-      <loc>https://www.ddoaudit.com/who/argonnessen</loc>
-      <lastmod>2025-07-19T00:00:00+00:00</lastmod>
-      <changefreq>daily</changefreq>
-      <priority>1</priority>
-   </url>
-   <url>
-      <loc>https://www.ddoaudit.com/who/cannith</loc>
-      <lastmod>2025-07-19T00:00:00+00:00</lastmod>
-      <changefreq>daily</changefreq>
-      <priority>1</priority>
-   </url>
-   <url>
-      <loc>https://www.ddoaudit.com/who/ghallanda</loc>
-      <lastmod>2025-07-19T00:00:00+00:00</lastmod>
-      <changefreq>daily</changefreq>
-      <priority>1</priority>
-   </url>
-   <url>
-      <loc>https://www.ddoaudit.com/who/khyber</loc>
-      <lastmod>2025-07-19T00:00:00+00:00</lastmod>
-      <changefreq>daily</changefreq>
-      <priority>1</priority>
-   </url>
-   <url>
-      <loc>https://www.ddoaudit.com/who/orien</loc>
-      <lastmod>2025-07-19T00:00:00+00:00</lastmod>
-      <changefreq>daily</changefreq>
-      <priority>1</priority>
-   </url>
-   <url>
-      <loc>https://www.ddoaudit.com/who/sarlona</loc>
-      <lastmod>2025-07-19T00:00:00+00:00</lastmod>
-      <changefreq>daily</changefreq>
-      <priority>1</priority>
-   </url>
-   <url>
-      <loc>https://www.ddoaudit.com/who/thelanis</loc>
-      <lastmod>2025-07-19T00:00:00+00:00</lastmod>
-      <changefreq>daily</changefreq>
-      <priority>1</priority>
-   </url>
-   <url>
-      <loc>https://www.ddoaudit.com/who/wayfinder</loc>
-      <lastmod>2025-07-19T00:00:00+00:00</lastmod>
-      <changefreq>daily</changefreq>
-      <priority>1</priority>
-   </url>
-   <url>
-      <loc>https://www.ddoaudit.com/who/hardcore</loc>
-      <lastmod>2025-07-19T00:00:00+00:00</lastmod>
-      <changefreq>daily</changefreq>
-      <priority>1</priority>
-   </url> -->
    <url>
       <loc>https://www.ddoaudit.com/who/cormyr</loc>
       <lastmod>2025-10-02T00:00:00+00:00</lastmod>
@@ -264,18 +102,6 @@
       <changefreq>daily</changefreq>
       <priority>1</priority>
    </url>
-   <!-- <url>
-      <loc>https://www.ddoaudit.com/trends</loc>
-      <lastmod>2025-07-19T00:00:00+00:00</lastmod>
-      <changefreq>weekly</changefreq>
-      <priority>0.6</priority>
-   </url> -->
-   <!-- <url>
-      <loc>https://www.ddoaudit.com/quests</loc>
-      <lastmod>2025-07-19T00:00:00+00:00</lastmod>
-      <changefreq>weekly</changefreq>
-      <priority>0.4</priority>
-   </url> -->
    <url>
       <loc>https://www.ddoaudit.com/about</loc>
       <lastmod>2025-07-19T00:00:00+00:00</lastmod>
@@ -283,15 +109,15 @@
       <priority>0.8</priority>
    </url>
    <url>
+      <loc>https://www.ddoaudit.com/account</loc>
+      <lastmod>2026-03-23T00:00:00+00:00</lastmod>
+      <changefreq>monthly</changefreq>
+      <priority>0.6</priority>
+   </url>
+   <url>
       <loc>https://www.ddoaudit.com/timers</loc>
       <lastmod>2025-10-13T00:00:00+00:00</lastmod>
       <changefreq>yearly</changefreq>
       <priority>0.2</priority>
    </url>
-   <!-- <url>
-      <loc>https://www.ddoaudit.com/api</loc>
-      <lastmod>2025-07-19T00:00:00+00:00</lastmod>
-      <changefreq>yearly</changefreq>
-      <priority>0.2</priority>
-   </url> -->
 </urlset>

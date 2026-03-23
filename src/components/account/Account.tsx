@@ -140,6 +140,10 @@ const Account = () => {
                 Create an account to sync your settings and character lists
                 across all your devices.
             </p>
+            <p>
+                Register or log in to manage your DDO Audit account, update your
+                password, and control saved settings and preferences.
+            </p>
             <Stack gap="8px" style={{ marginBottom: "20px" }}>
                 <Badge type="beta" text="Beta" />
                 <span>This is a new feature and may contain bugs.</span>
@@ -191,7 +195,7 @@ const Account = () => {
             </ul>
             <br />
             <label htmlFor="data-list">Manage your data:</label>
-            <ul id="dat-list">
+            <ul id="data-list">
                 <li>
                     <FauxLink
                         style={{ color: "var(--text)" }}
@@ -273,7 +277,10 @@ const Account = () => {
     )
 
     return (
-        <Page title="Account" description="Manage Your DDO Audit Account">
+        <Page
+            title="DDO Audit Account"
+            description="Create a DDO Audit account to securely sync settings and character lists across devices, then manage your password, preferences, and saved data in one place."
+        >
             {showDeleteAccountModal && deleteAccountModal}
             {showDeleteSettingsModal && deleteSettingsModal}
             <ContentClusterGroup>
