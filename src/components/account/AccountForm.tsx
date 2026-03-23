@@ -45,10 +45,18 @@ const AccountForm = () => {
         setPassword("")
         setOldPassword("")
         setNewPassword("")
+        setConfirmPassword("")
         setErrorMessage("")
         setSuccessMessage("")
         setDidChangePassword(false)
     }, [isAccountModalOpen])
+
+    useEffect(() => {
+        setPassword("")
+        setOldPassword("")
+        setNewPassword("")
+        setConfirmPassword("")
+    }, [accountModalType])
 
     const tryLogin = useCallback(async () => {
         if (!username || !password) {
@@ -139,7 +147,7 @@ const AccountForm = () => {
                 setErrorMessage("Unable to register. Please try again.")
             }
         }
-    }, [username, password, register])
+    }, [username, password, confirmPassword, register])
 
     const tryChangePassword = useCallback(async () => {
         if (!oldPassword || !newPassword) {
@@ -222,7 +230,13 @@ const AccountForm = () => {
                 )
             }
         }
-    }, [changePassword, oldPassword, newPassword, createNotification])
+    }, [
+        changePassword,
+        oldPassword,
+        newPassword,
+        confirmPassword,
+        createNotification,
+    ])
 
     const isSubmitDisabled = isLoading
 
