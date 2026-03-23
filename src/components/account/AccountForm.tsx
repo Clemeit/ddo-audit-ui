@@ -15,6 +15,7 @@ import logMessage from "../../utils/logUtils"
 const AccountForm = () => {
     const [username, setUsername] = useState<string>("")
     const [password, setPassword] = useState<string>("")
+    const [confirmPassword, setConfirmPassword] = useState<string>("")
     const [oldPassword, setOldPassword] = useState<string>("")
     const [newPassword, setNewPassword] = useState<string>("")
     const [errorMessage, setErrorMessage] = useState<string>(null)
@@ -25,7 +26,7 @@ const AccountForm = () => {
     useEffect(() => {
         setErrorMessage("")
         setSuccessMessage("")
-    }, [username, password, oldPassword, newPassword])
+    }, [username, password, oldPassword, newPassword, confirmPassword])
 
     const {
         register,
@@ -108,6 +109,11 @@ const AccountForm = () => {
             return
         }
 
+        if (password !== confirmPassword) {
+            setErrorMessage("Passwords do not match.")
+            return
+        }
+
         try {
             await register({
                 username,
@@ -150,6 +156,11 @@ const AccountForm = () => {
             setErrorMessage(
                 "New password must be different from your current password."
             )
+            return
+        }
+
+        if (newPassword !== confirmPassword) {
+            setErrorMessage("New passwords do not match.")
             return
         }
 
@@ -277,8 +288,8 @@ const AccountForm = () => {
                                     devices.
                                 </span>
                                 <span>
-                                    Do NOT use the same login credentials that
-                                    you use for DDO.
+                                    You shouldn't use the same login credentials
+                                    that you use for DDO.
                                 </span>
                             </>
                         )}
@@ -355,6 +366,29 @@ const AccountForm = () => {
                                 }}
                                 disabled={isSubmitDisabled}
                             />
+                            {(accountModalType === "register" ||
+                                accountModalType === "change-password") && (
+                                <label htmlFor="confirm-password-field">
+                                    Confirm Password
+                                </label>
+                            )}
+                            {(accountModalType === "register" ||
+                                accountModalType === "change-password") && (
+                                <input
+                                    id="confirm-password-field"
+                                    type="password"
+                                    name="confirm-password"
+                                    value={confirmPassword}
+                                    onChange={(e) =>
+                                        setConfirmPassword(e.target.value)
+                                    }
+                                    style={{
+                                        width: "100%",
+                                        boxSizing: "border-box",
+                                    }}
+                                    disabled={isSubmitDisabled}
+                                />
+                            )}
                         </Stack>
                         {accountModalType === "change-password" && (
                             <Stack

@@ -60,10 +60,10 @@ const Directory = () => {
                 </ContentCluster>
                 <ContentCluster title="Additional Resources">
                     <NavCardCluster>
-                        {/* <NavigationCard
+                        <NavigationCard
                             type="account"
                             badge={<Badge text="Beta" type="beta" />}
-                        /> */}
+                        />
                         <NavigationCard type="about" />
                         <NavigationCard
                             type="api"
