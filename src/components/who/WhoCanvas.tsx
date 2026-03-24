@@ -581,7 +581,12 @@ const WhoCanvas = ({
     // Re-measure when filter zone content or fullscreen state changes
     useEffect(() => {
         requestAnimationFrame(measureScrollArea)
-    }, [allCharacters.length, curatedCharacters.length, isFullScreen, measureScrollArea])
+    }, [
+        allCharacters.length,
+        curatedCharacters.length,
+        isFullScreen,
+        measureScrollArea,
+    ])
 
     return (
         <div>
