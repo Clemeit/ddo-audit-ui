@@ -5,6 +5,7 @@ import {
     ReactNode,
     useEffect,
     useCallback,
+    useRef,
 } from "react"
 import {
     DEFAULT_BASE_FONT_SIZE,
@@ -544,63 +545,72 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
         setIsLoaded(true)
     }, [loadSettingsFromLocalStorage, persistentSettingsRevision])
 
+    const saveDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
     useEffect(() => {
         // Only save to localStorage after initial load to avoid overwriting with undefined values
         if (!isLoaded) return
 
-        try {
-            const settingsToSave = {
-                minLevel,
-                maxLevel,
-                filterByMyCharacters,
-                showNotEligible,
-                hideContentIDontOwn,
-                indicateContentIDontOwn,
-                ownedContent,
-                fontSize,
-                panelWidth,
-                showBoundingBoxes,
-                sortBy,
-                isDynamicWidth,
-                showRaidTimerIndicator,
-                showMemberCount,
-                showQuestGuesses,
-                showQuestTips,
-                showCharacterGuildNames,
-                trackedCharacterIds,
-                showLfmPostedTime,
-                showQuestMetrics,
-                mouseOverDelay,
-                showLfmActivity,
-                isMultiColumn,
-                showEligibleCharacters,
-                hideGroupsPostedByIgnoredCharacters,
-                hideGroupsContainingIgnoredCharacters,
-                showIndicationForGroupsPostedByFriends,
-                showIndicationForGroupsContainingFriends,
-                highlightRaids,
-                hideAllLevelGroups,
-                showEligibilityDividers,
-                onlyShowRaids,
-                hideFullGroups,
-            }
+        // Debounce saves to avoid localStorage thrashing on rapid setting changes
+        if (saveDebounceRef.current) clearTimeout(saveDebounceRef.current)
+        saveDebounceRef.current = setTimeout(() => {
+            try {
+                const settingsToSave = {
+                    minLevel,
+                    maxLevel,
+                    filterByMyCharacters,
+                    showNotEligible,
+                    hideContentIDontOwn,
+                    indicateContentIDontOwn,
+                    ownedContent,
+                    fontSize,
+                    panelWidth,
+                    showBoundingBoxes,
+                    sortBy,
+                    isDynamicWidth,
+                    showRaidTimerIndicator,
+                    showMemberCount,
+                    showQuestGuesses,
+                    showQuestTips,
+                    showCharacterGuildNames,
+                    trackedCharacterIds,
+                    showLfmPostedTime,
+                    showQuestMetrics,
+                    mouseOverDelay,
+                    showLfmActivity,
+                    isMultiColumn,
+                    showEligibleCharacters,
+                    hideGroupsPostedByIgnoredCharacters,
+                    hideGroupsContainingIgnoredCharacters,
+                    showIndicationForGroupsPostedByFriends,
+                    showIndicationForGroupsContainingFriends,
+                    highlightRaids,
+                    hideAllLevelGroups,
+                    showEligibilityDividers,
+                    onlyShowRaids,
+                    hideFullGroups,
+                }
 
-            // Validate the settings before saving
-            if (validateAndParseSettings(settingsToSave)) {
-                setLfmSettings(settingsToSave)
-            } else {
-                logMessage(
-                    "Attempted to save invalid settings to localStorage - skipping save",
-                    "warn",
-                    { metadata: { settingsToSave } }
-                )
+                // Validate the settings before saving
+                if (validateAndParseSettings(settingsToSave)) {
+                    setLfmSettings(settingsToSave)
+                } else {
+                    logMessage(
+                        "Attempted to save invalid settings to localStorage - skipping save",
+                        "warn",
+                        { metadata: { settingsToSave } }
+                    )
+                }
+            } catch (e) {
+                logMessage("Error saving settings to localStorage", "error", {
+                    metadata: {
+                        error: e instanceof Error ? e.message : String(e),
+                    },
+                })
             }
-        } catch (e) {
-            logMessage("Error saving settings to localStorage", "error", {
-                metadata: {
-                    error: e instanceof Error ? e.message : String(e),
-                },
-            })
+        }, 500)
+
+        return () => {
+            if (saveDebounceRef.current) clearTimeout(saveDebounceRef.current)
         }
     }, [
         minLevel,

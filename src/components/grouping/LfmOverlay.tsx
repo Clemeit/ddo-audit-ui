@@ -280,6 +280,18 @@ const CharacterRow: React.FC<{
     )
 }
 
+const MemoizedCharacterRow = React.memo(CharacterRow)
+
+const lengthToLengthString = (lengthInSeconds: number) => {
+    if (lengthInSeconds <= 0) return "Unknown"
+    return convertMillisecondsToPrettyString({
+        millis: lengthInSeconds * 1000,
+        commaSeparated: true,
+        useFullWords: true,
+        onlyIncludeLargest: true,
+    })
+}
+
 const LfmOverlay: React.FC<Props> = ({
     lfm,
     renderType,
@@ -361,16 +373,6 @@ const LfmOverlay: React.FC<Props> = ({
         [lfm, quest]
     )
 
-    const lengthToLengthString = (lengthInSeconds: number) => {
-        if (lengthInSeconds <= 0) return "Unknown"
-        return convertMillisecondsToPrettyString({
-            millis: lengthInSeconds * 1000,
-            commaSeparated: true,
-            useFullWords: true,
-            onlyIncludeLargest: true,
-        })
-    }
-
     // Position clamping (in CSS pixels)
     const overlayRef = useRef<HTMLDivElement>(null)
     const [clampedPos, setClampedPos] = useState<{
@@ -381,6 +383,9 @@ const LfmOverlay: React.FC<Props> = ({
     const rawPosX = Math.max(0, position.x * scaleFactor)
     const rawPosY = Math.max(0, position.y * scaleFactor)
 
+    // No dependency array: we read DOM measurements (offsetWidth/offsetHeight)
+    // that can change when overlay content changes, which isn't trackable as deps.
+    // The setClampedPos bailout prevents unnecessary re-renders.
     useLayoutEffect(() => {
         if (!overlayRef.current) return
         const overlayWidth = overlayRef.current.offsetWidth
@@ -453,7 +458,7 @@ const LfmOverlay: React.FC<Props> = ({
                                 (f) => f.id === member.id
                             )
                             return (
-                                <CharacterRow
+                                <MemoizedCharacterRow
                                     key={`${member.id}-${index}`}
                                     character={member}
                                     isFriend={isFriend}
@@ -651,7 +656,8 @@ const LfmOverlay: React.FC<Props> = ({
                     (e) => e.character?.id === b.id
                 )
                 if (aOnTimer && !bOnTimer) return -1
-                return 1
+                if (bOnTimer && !aOnTimer) return 1
+                return 0
             })
         const displayed = chars.slice(0, maxDisplay)
         const hiddenCount = chars.length - maxDisplay

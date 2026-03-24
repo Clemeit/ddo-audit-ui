@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from "react"
+import { useCallback, useMemo, useRef } from "react"
 import { Lfm } from "../models/Lfm.ts"
 import {
     LFM_HEIGHT,
@@ -48,11 +48,20 @@ const useRenderLfm = ({ lfmSprite, context, raidView = false }: Props) => {
     const questContext = useQuestContext()
     const { quests } = questContext
 
+    // Cache for text measurements to avoid redundant measureText calls
+    const textMeasureCache = useRef(
+        new Map<string, { width: number; height: number }>()
+    )
+
     function getTextWidthAndHeight(
         text: string,
         font: string,
         context: CanvasRenderingContext2D
     ) {
+        const cacheKey = `${font}|${text}`
+        const cached = textMeasureCache.current.get(cacheKey)
+        if (cached) return cached
+
         const initialFont = context.font
         context.font = font
         const measuredText = context.measureText(text)
@@ -61,10 +70,13 @@ const useRenderLfm = ({ lfmSprite, context, raidView = false }: Props) => {
             measuredText.fontBoundingBoxDescent
         const width = measuredText.width
         context.font = initialFont
-        return {
-            width,
-            height,
+        const result = { width, height }
+        // Prevent unbounded growth
+        if (textMeasureCache.current.size > 500) {
+            textMeasureCache.current.clear()
         }
+        textMeasureCache.current.set(cacheKey, result)
+        return result
     }
 
     const calculateQuestInfoYPositions = useCallback(

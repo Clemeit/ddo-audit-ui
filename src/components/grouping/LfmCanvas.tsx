@@ -408,8 +408,8 @@ const LfmCanvas: React.FC<Props> = ({
         )
     }, [image, panelWidth, borderLogicalHeight, raidView])
 
-    // Previous state for dirty-checking
-    const [previousState, setPreviousState] = useState({
+    // Previous state for dirty-checking (useRef avoids extra render cycle from setState)
+    const previousStateRef = useRef({
         lfms: [] as Lfm[],
         lfmCount: 0,
         panelWidth: 0,
@@ -438,34 +438,35 @@ const LfmCanvas: React.FC<Props> = ({
         const context = mainCanvasRef.current.getContext("2d")
         if (!context) return
 
+        const prev = previousStateRef.current
         const displaySettingsChanged =
-            previousState.showRaidTimerIndicator !== showRaidTimerIndicator ||
-            previousState.showMemberCount !== showMemberCount ||
-            previousState.showQuestGuesses !== showQuestGuesses ||
-            previousState.showQuestTips !== showQuestTips ||
-            previousState.showCharacterGuildNames !== showCharacterGuildNames ||
-            previousState.showLfmPostedTime !== showLfmPostedTime ||
-            previousState.fontSize !== fontSize ||
-            previousState.highlightRaids !== highlightRaids ||
-            previousState.raidView !== raidView ||
-            previousState.showEligibilityDividers !== showEligibilityDividers ||
-            previousState.excludedLfmCount !== excludedLfmCount ||
-            previousState.isLoading !== isLoading
+            prev.showRaidTimerIndicator !== showRaidTimerIndicator ||
+            prev.showMemberCount !== showMemberCount ||
+            prev.showQuestGuesses !== showQuestGuesses ||
+            prev.showQuestTips !== showQuestTips ||
+            prev.showCharacterGuildNames !== showCharacterGuildNames ||
+            prev.showLfmPostedTime !== showLfmPostedTime ||
+            prev.fontSize !== fontSize ||
+            prev.highlightRaids !== highlightRaids ||
+            prev.raidView !== raidView ||
+            prev.showEligibilityDividers !== showEligibilityDividers ||
+            prev.excludedLfmCount !== excludedLfmCount ||
+            prev.isLoading !== isLoading
 
         const dataChanged =
-            previousState.lfmCount !== lfms.length ||
-            previousState.panelWidth !== panelWidth ||
-            previousState.sortBy !== sortBy ||
+            prev.lfmCount !== lfms.length ||
+            prev.panelWidth !== panelWidth ||
+            prev.sortBy !== sortBy ||
             !areLfmArraysEqual(
-                previousState.lfms,
+                prev.lfms,
                 lfms,
                 adjustedFirstVisible,
                 adjustedLastVisible
             )
 
         const scrollChanged =
-            previousState.scrollOffset !== adjustedScrollOffset ||
-            previousState.viewportHeight !== adjustedViewportHeight
+            prev.scrollOffset !== adjustedScrollOffset ||
+            prev.viewportHeight !== adjustedViewportHeight
 
         if (!displaySettingsChanged && !dataChanged && !scrollChanged) return
 
@@ -533,7 +534,7 @@ const LfmCanvas: React.FC<Props> = ({
             context.fillText("Content loading...", panelWidth / 2, 150)
         }
 
-        setPreviousState({
+        previousStateRef.current = {
             lfms: [...lfms],
             lfmCount: lfms.length,
             panelWidth,
@@ -552,7 +553,7 @@ const LfmCanvas: React.FC<Props> = ({
             showEligibilityDividers,
             excludedLfmCount,
             isLoading,
-        })
+        }
     }, [
         image,
         lfms,
@@ -840,8 +841,11 @@ const LfmCanvas: React.FC<Props> = ({
 
     if (raidView) {
         // Raid view: show all raids at natural height, no scroll constraint
+        // Extra vertical buffer per LFM to account for row border/spacing in raid view
+        const RAID_ROW_SPACING_BUFFER = 4
         const raidContentHeight =
-            Math.ceil(totalLogicalHeight * scaleFactor) + lfms.length * 4
+            Math.ceil(totalLogicalHeight * scaleFactor) +
+            lfms.length * RAID_ROW_SPACING_BUFFER
 
         return (
             <div
