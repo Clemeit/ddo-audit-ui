@@ -13,6 +13,9 @@ import { notifyAuthError } from "../../utils/authNotifications"
 import logMessage from "../../utils/logUtils"
 
 const AccountForm = () => {
+    const isAlphanumericUsername = (value: string) =>
+        /^[a-zA-Z0-9]+$/.test(value)
+
     const [username, setUsername] = useState<string>("")
     const [password, setPassword] = useState<string>("")
     const [confirmPassword, setConfirmPassword] = useState<string>("")
@@ -64,6 +67,11 @@ const AccountForm = () => {
             return
         }
 
+        if (!isAlphanumericUsername(username)) {
+            setErrorMessage("Username must be alphanumeric only.")
+            return
+        }
+
         try {
             await login({
                 username,
@@ -99,6 +107,11 @@ const AccountForm = () => {
 
         if (username.length < 5) {
             setErrorMessage("Username must contain 5 characters.")
+            return
+        }
+
+        if (!isAlphanumericUsername(username)) {
+            setErrorMessage("Username must be alphanumeric only.")
             return
         }
 
