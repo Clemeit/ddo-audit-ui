@@ -80,6 +80,61 @@ interface Props {
 
 const SESSION_REHYDRATE_HINT_KEY = "v1-auth-session-hint"
 
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+    typeof value === "object" && value !== null
+
+const getApiErrorMessage = (responseData: unknown): string | null => {
+    if (typeof responseData === "string" && responseData.trim().length > 0) {
+        return responseData
+    }
+
+    if (!isRecord(responseData)) {
+        return null
+    }
+
+    const directError = responseData.error
+    if (typeof directError === "string" && directError.trim().length > 0) {
+        return directError
+    }
+
+    const message = responseData.message
+    if (typeof message === "string" && message.trim().length > 0) {
+        return message
+    }
+
+    return null
+}
+
+const getErrorMetadata = (error: unknown): Record<string, unknown> => {
+    if (axios.isAxiosError(error)) {
+        const responseData = error.response?.data
+        return {
+            error: error.message,
+            errorName: error.name,
+            stack: error.stack,
+            isAxiosError: true,
+            requestMethod: error.config?.method?.toUpperCase() ?? null,
+            requestUrl: error.config?.url ?? null,
+            status: error.response?.status ?? null,
+            statusText: error.response?.statusText ?? null,
+            apiError: getApiErrorMessage(responseData),
+            responseData: responseData ?? null,
+        }
+    }
+
+    if (error instanceof Error) {
+        return {
+            error: error.message,
+            errorName: error.name,
+            stack: error.stack,
+        }
+    }
+
+    return {
+        error: String(error),
+    }
+}
+
 export const UserProvider = ({ children }: Props) => {
     const [persistentSettingsRevision, setPersistentSettingsRevision] =
         useState<number>(0)
@@ -317,12 +372,7 @@ export const UserProvider = ({ children }: Props) => {
                     return
                 }
                 logMessage("Failed to sync settings to server", "error", {
-                    metadata: {
-                        error:
-                            error instanceof Error
-                                ? error.stack
-                                : String(error),
-                    },
+                    metadata: getErrorMetadata(error),
                 })
             }
         },
@@ -389,12 +439,7 @@ export const UserProvider = ({ children }: Props) => {
                     return
                 }
                 logMessage("Failed to sync settings to server", "error", {
-                    metadata: {
-                        error:
-                            error instanceof Error
-                                ? error.stack
-                                : String(error),
-                    },
+                    metadata: getErrorMetadata(error),
                 })
             }
         },
@@ -544,12 +589,7 @@ export const UserProvider = ({ children }: Props) => {
                     return
                 }
                 logMessage("Failed to fetch settings from server", "warn", {
-                    metadata: {
-                        error:
-                            error instanceof Error
-                                ? error.stack
-                                : String(error),
-                    },
+                    metadata: getErrorMetadata(error),
                 })
             }
         },
@@ -576,12 +616,7 @@ export const UserProvider = ({ children }: Props) => {
                 // Refresh token expired or invalid — session is over
                 if ((error as { name?: string })?.name === "AbortError") return
                 logMessage("Failed to refresh session", "warn", {
-                    metadata: {
-                        error:
-                            error instanceof Error
-                                ? error.message
-                                : String(error),
-                    },
+                    metadata: getErrorMetadata(error),
                 })
                 if (
                     axios.isAxiosError(error) &&
@@ -684,12 +719,7 @@ export const UserProvider = ({ children }: Props) => {
                     return null
                 }
                 logMessage("User registration failed", "error", {
-                    metadata: {
-                        error:
-                            error instanceof Error
-                                ? error.message
-                                : String(error),
-                    },
+                    metadata: getErrorMetadata(error),
                 })
                 throw error
             } finally {
@@ -723,12 +753,7 @@ export const UserProvider = ({ children }: Props) => {
                     return null
                 }
                 logMessage("User login failed", "error", {
-                    metadata: {
-                        error:
-                            error instanceof Error
-                                ? error.message
-                                : String(error),
-                    },
+                    metadata: getErrorMetadata(error),
                 })
                 throw error
             } finally {
@@ -761,12 +786,7 @@ export const UserProvider = ({ children }: Props) => {
                     return
                 }
                 logMessage("User logout failed", "error", {
-                    metadata: {
-                        error:
-                            error instanceof Error
-                                ? error.message
-                                : String(error),
-                    },
+                    metadata: getErrorMetadata(error),
                 })
                 // Still clear session even if logout request fails
                 clearSession()
@@ -814,12 +834,7 @@ export const UserProvider = ({ children }: Props) => {
                     return
                 }
                 logMessage("Account deletion failed", "error", {
-                    metadata: {
-                        error:
-                            error instanceof Error
-                                ? error.message
-                                : String(error),
-                    },
+                    metadata: getErrorMetadata(error),
                 })
                 throw error
             } finally {
@@ -862,12 +877,7 @@ export const UserProvider = ({ children }: Props) => {
                     return
                 }
                 logMessage("Settings deletion failed", "error", {
-                    metadata: {
-                        error:
-                            error instanceof Error
-                                ? error.message
-                                : String(error),
-                    },
+                    metadata: getErrorMetadata(error),
                 })
                 throw error
             } finally {
@@ -907,12 +917,7 @@ export const UserProvider = ({ children }: Props) => {
                     return
                 }
                 logMessage("Password change failed", "error", {
-                    metadata: {
-                        error:
-                            error instanceof Error
-                                ? error.message
-                                : String(error),
-                    },
+                    metadata: getErrorMetadata(error),
                 })
                 throw error
             } finally {

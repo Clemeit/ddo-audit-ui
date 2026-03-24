@@ -16,6 +16,41 @@ interface Props {
     enabled?: boolean
 }
 
+function summarizeGetCharactersResponse(response: unknown) {
+    const responseType = Array.isArray(response) ? "array" : typeof response
+    const responseObject =
+        response && typeof response === "object"
+            ? (response as Record<string, unknown>)
+            : null
+    const responseKeys = responseObject
+        ? Object.keys(responseObject).slice(0, 25)
+        : []
+
+    const data = responseObject?.data
+    const dataType = Array.isArray(data) ? "array" : typeof data
+    const dataObject =
+        data && typeof data === "object" && !Array.isArray(data)
+            ? (data as Record<string, unknown>)
+            : null
+    const dataKeys = dataObject ? Object.keys(dataObject) : []
+
+    return {
+        responseType,
+        responseKeys,
+        hasDataProperty: Boolean(
+            responseObject &&
+                Object.prototype.hasOwnProperty.call(responseObject, "data")
+        ),
+        dataType,
+        dataKeyCount: dataKeys.length,
+        dataKeysSample: dataKeys.slice(0, 25),
+        message:
+            typeof responseObject?.message === "string"
+                ? responseObject.message
+                : undefined,
+    }
+}
+
 const useGetRegisteredCharacters = ({ enabled = true }: Props = {}) => {
     // TODO: when on a specific server, only load characters from that server
     const [registeredCharacters, setRegisteredCharacters] = useState<
@@ -122,21 +157,151 @@ const useGetRegisteredCharacters = ({ enabled = true }: Props = {}) => {
                     }
                 )
 
+                const responseSummary =
+                    summarizeGetCharactersResponse(characterIdsResponse)
+
                 if (
-                    !characterIdsResponse?.data ||
-                    typeof characterIdsResponse.data !== "object"
+                    !characterIdsResponse ||
+                    typeof characterIdsResponse !== "object" ||
+                    Array.isArray(characterIdsResponse)
                 ) {
-                    throw new Error("Invalid API response structure")
+                    logMessage(
+                        "Invalid getCharactersByIds response envelope",
+                        "error",
+                        {
+                            metadata: {
+                                reason: "response-not-object",
+                                requestedCharacterIds: characterIds,
+                                responseSummary,
+                            },
+                        }
+                    )
+                    throw new Error(
+                        "Invalid API response structure: response envelope"
+                    )
                 }
 
-                const characters = Object.values(
-                    characterIdsResponse.data || {}
-                ).filter(
-                    (character): character is Character =>
-                        character != null &&
-                        typeof character === "object" &&
-                        typeof character.id === "number"
-                )
+                if (
+                    !Object.prototype.hasOwnProperty.call(
+                        characterIdsResponse,
+                        "data"
+                    )
+                ) {
+                    logMessage(
+                        "Invalid getCharactersByIds response envelope",
+                        "error",
+                        {
+                            metadata: {
+                                reason: "missing-data-property",
+                                requestedCharacterIds: characterIds,
+                                responseSummary,
+                            },
+                        }
+                    )
+                    throw new Error(
+                        "Invalid API response structure: missing data"
+                    )
+                }
+
+                const rawResponseData = characterIdsResponse.data
+
+                if (
+                    !rawResponseData ||
+                    typeof rawResponseData !== "object" ||
+                    Array.isArray(rawResponseData)
+                ) {
+                    logMessage(
+                        "Invalid getCharactersByIds response data payload",
+                        "error",
+                        {
+                            metadata: {
+                                reason: "data-not-object-map",
+                                requestedCharacterIds: characterIds,
+                                responseSummary,
+                            },
+                        }
+                    )
+                    throw new Error(
+                        "Invalid API response structure: data payload"
+                    )
+                }
+
+                const invalidCharacterEntries: Array<{
+                    key: string
+                    valueType: string
+                    hasId: boolean
+                    idType: string
+                }> = []
+
+                const characters: Character[] = []
+                for (const [key, value] of Object.entries(rawResponseData)) {
+                    const valueType = Array.isArray(value)
+                        ? "array"
+                        : typeof value
+                    const idType =
+                        value && typeof value === "object"
+                            ? typeof (value as Character).id
+                            : "undefined"
+
+                    if (
+                        value == null ||
+                        typeof value !== "object" ||
+                        typeof (value as Character).id !== "number"
+                    ) {
+                        if (invalidCharacterEntries.length < 25) {
+                            invalidCharacterEntries.push({
+                                key,
+                                valueType,
+                                hasId:
+                                    value != null &&
+                                    typeof value === "object" &&
+                                    Object.prototype.hasOwnProperty.call(
+                                        value,
+                                        "id"
+                                    ),
+                                idType,
+                            })
+                        }
+                        continue
+                    }
+
+                    characters.push(value as Character)
+                }
+
+                if (invalidCharacterEntries.length > 0) {
+                    logMessage(
+                        "getCharactersByIds returned invalid character entries",
+                        "warn",
+                        {
+                            metadata: {
+                                requestedCharacterIds: characterIds,
+                                invalidEntryCount:
+                                    invalidCharacterEntries.length,
+                                invalidEntrySample: invalidCharacterEntries,
+                                responseSummary,
+                            },
+                        }
+                    )
+                }
+
+                if (
+                    Object.keys(rawResponseData).length > 0 &&
+                    characters.length === 0
+                ) {
+                    logMessage(
+                        "getCharactersByIds response contains no valid character objects",
+                        "error",
+                        {
+                            metadata: {
+                                requestedCharacterIds: characterIds,
+                                responseSummary,
+                            },
+                        }
+                    )
+                    throw new Error(
+                        "Invalid API response structure: no valid characters"
+                    )
+                }
 
                 const expectedCharacterIds = new Set(characterIds)
                 const returnedCharacterIds = new Set(
