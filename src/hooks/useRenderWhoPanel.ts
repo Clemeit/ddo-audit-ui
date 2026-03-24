@@ -5,6 +5,7 @@ import {
     FONTS,
     WHO_COLORS,
     SORT_HEADER_AREA_HEIGHT,
+    SORT_HEADER_PADDING_TOP,
 } from "../constants/whoPanel.ts"
 import useRenderBox from "../utils/renderUtils.ts"
 import { BoundingBox } from "../models/Geometry.ts"
@@ -63,15 +64,15 @@ const useRenderWhoPanel = ({ sprite, context }: Props) => {
             context.fillStyle = WHO_COLORS.BLACK_BACKGROUND
             context.fillRect(
                 SPRITE_MAP.CONTENT_LEFT.width,
-                SPRITE_MAP.CONTENT_TOP.height,
+                0,
                 panelWidth -
                     SPRITE_MAP.CONTENT_LEFT.width -
                     SPRITE_MAP.CONTENT_RIGHT.width,
-                SORT_HEADER_AREA_HEIGHT - SPRITE_MAP.CONTENT_TOP.height
+                SORT_HEADER_AREA_HEIGHT
             )
 
             // render sort headers
-            const sortHeaderY = SPRITE_MAP.CONTENT_TOP.height
+            const sortHeaderY = SORT_HEADER_PADDING_TOP
             const sortHeaders = [
                 {
                     boundingBox: new BoundingBox(
