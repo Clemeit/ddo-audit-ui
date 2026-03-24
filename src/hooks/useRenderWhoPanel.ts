@@ -24,7 +24,7 @@ interface RenderWhoPanelProps {
 const useRenderWhoPanel = ({ sprite, context }: Props) => {
     const { panelWidth, sortBy } = useWhoContext()
     const fonts = useMemo(() => FONTS(0), [])
-    const { renderBox, renderSortHeader } = useRenderBox({
+    const { renderSortHeader } = useRenderBox({
         sprite,
         context,
     })

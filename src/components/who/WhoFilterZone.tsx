@@ -201,7 +201,7 @@ const WhoFilterZone = ({
     useEffect(() => {
         if (!loadedLevels.current) return
         if (fauxMinLevel === "") {
-            setMinLevel(0)
+            setMinLevel(MIN_LEVEL)
         } else {
             const parsedMin = parseInt(fauxMinLevel, 10)
             if (!isNaN(parsedMin)) {
@@ -209,7 +209,7 @@ const WhoFilterZone = ({
             }
         }
         if (fauxMaxLevel === "") {
-            setMaxLevel(0)
+            setMaxLevel(MAX_LEVEL)
         } else {
             const parsedMax = parseInt(fauxMaxLevel, 10)
             if (!isNaN(parsedMax)) {

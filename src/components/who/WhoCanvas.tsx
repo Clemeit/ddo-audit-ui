@@ -393,36 +393,50 @@ const WhoCanvas = ({
         context.rect(clipX, clipY, clipW, clipH)
         context.clip()
 
-        let colorIndex = 0
-        let currentBackgroundColor: string | undefined = undefined
-        let currentEdgeColor: string | undefined = undefined
-        let currentCharacterGroupIndex = 0
+        // Precompute per-row group metadata so the render
+        // loop only iterates visible rows — O(visible) instead
+        // of O(totalRows).
+        let groupMeta:
+            | {
+                  bg: string
+                  edge: string
+                  indexInGroup: number
+              }[]
+            | undefined = undefined
 
-        // We need to iterate from 0 to set correct group colors
+        if (isGroupView) {
+            groupMeta = []
+            let colorIndex = 0
+            let indexInGroup = 0
+            for (let i = 0; i < curatedCharacters.length; i++) {
+                if (
+                    i > 0 &&
+                    curatedCharacters[i].group_id !==
+                        curatedCharacters[i - 1].group_id
+                ) {
+                    colorIndex++
+                    indexInGroup = 0
+                }
+                indexInGroup++
+                groupMeta.push({
+                    bg: GROUP_BACKGROUND_COLORS[
+                        colorIndex % GROUP_BACKGROUND_COLORS.length
+                    ],
+                    edge: GROUP_EDGE_COLORS[
+                        colorIndex % GROUP_EDGE_COLORS.length
+                    ],
+                    indexInGroup,
+                })
+            }
+        }
+
         for (
-            let i = 0;
+            let i = adjustedFirstVisible;
             i <= adjustedLastVisible && i < curatedCharacters.length;
             i++
         ) {
             const character = curatedCharacters[i]
-            if (isGroupView) {
-                if (
-                    i > 0 &&
-                    character.group_id !== curatedCharacters[i - 1].group_id
-                ) {
-                    colorIndex++
-                    currentCharacterGroupIndex = 0
-                }
-                currentBackgroundColor =
-                    GROUP_BACKGROUND_COLORS[
-                        colorIndex % GROUP_BACKGROUND_COLORS.length
-                    ]
-                currentEdgeColor =
-                    GROUP_EDGE_COLORS[colorIndex % GROUP_EDGE_COLORS.length]
-                currentCharacterGroupIndex++
-            }
-
-            if (i < adjustedFirstVisible) continue
+            const meta = groupMeta?.[i]
 
             const characterY =
                 SORT_HEADER_AREA_HEIGHT +
@@ -433,11 +447,9 @@ const WhoCanvas = ({
             context.translate(leftBound, characterY)
             renderCharacter({
                 character,
-                backgroundColorOverride: currentBackgroundColor,
-                edgeColorOverride: currentEdgeColor,
-                characterIndex: isGroupView
-                    ? currentCharacterGroupIndex
-                    : undefined,
+                backgroundColorOverride: meta?.bg,
+                edgeColorOverride: meta?.edge,
+                characterIndex: meta?.indexInGroup,
             })
             context.restore()
         }

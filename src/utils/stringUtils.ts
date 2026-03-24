@@ -212,6 +212,11 @@ function truncateText(
     const ellipsisWidth = context.measureText("...").width
     const targetWidth = width - ellipsisWidth
 
+    if (targetWidth <= 0) {
+        context.font = previousFont
+        return ""
+    }
+
     // Binary search for the longest substring that fits
     let lo = 0
     let hi = text.length
