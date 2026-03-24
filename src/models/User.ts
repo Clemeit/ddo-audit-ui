@@ -164,7 +164,7 @@ interface WhoSetting extends SimpleSetting {
     pinFriends: boolean
     alwaysShowRegisteredCharacters: boolean
     alwaysShowFriends: boolean
-    maximumRenderedCharacterCount: number
+    hideClassFilterOnMobile: boolean
 }
 
 export type {

@@ -51,7 +51,6 @@ const WhoContainer = ({
         pinFriends,
         alwaysShowFriends,
         alwaysShowRegisteredCharacters,
-        maximumRenderedCharacterCount,
         // refreshInterval, TODO: make this work
     } = useWhoContext()
     const { registeredCharacters } = useGetRegisteredCharacters()
@@ -152,7 +151,6 @@ const WhoContainer = ({
     // Filter and sort
     const curatedCharacters = useMemo<{
         characters: Character[]
-        areResultsTruncated: boolean
     }>(() => {
         const characters = Object.values(characterData?.data ?? {})
 
@@ -343,15 +341,8 @@ const WhoContainer = ({
                 })
         }
 
-        const areResultsTruncated =
-            sortedCharacters.length > maximumRenderedCharacterCount
-
         return {
-            characters: sortedCharacters.slice(
-                0,
-                maximumRenderedCharacterCount
-            ),
-            areResultsTruncated,
+            characters: sortedCharacters,
         }
     }, [
         stringFilter,
@@ -367,7 +358,6 @@ const WhoContainer = ({
         pinFriends,
         alwaysShowFriends,
         alwaysShowRegisteredCharacters,
-        maximumRenderedCharacterCount,
         areas,
     ])
 
@@ -389,9 +379,6 @@ const WhoContainer = ({
                     <WhoCanvas
                         allCharacters={Object.values(characterData?.data ?? {})}
                         curatedCharacters={curatedCharacters.characters}
-                        areResultsTruncated={
-                            curatedCharacters.areResultsTruncated
-                        }
                         serverName={serverName}
                         isLoading={
                             characterState !== LoadingState.Loaded &&

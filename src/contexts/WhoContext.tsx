@@ -15,11 +15,8 @@ import {
 } from "../utils/settingsNormalizers.ts"
 import { getWhoSettings, setWhoSettings } from "../utils/localStorage.ts"
 import {
-    DEFAULT_CHARACTER_COUNT,
     DEFAULT_REFRESH_RATE,
     DEFAULT_WHO_PANEL_WIDTH,
-    MAXIMUM_CHARACTER_COUNT,
-    MINIMUM_CHARACTER_COUNT,
 } from "../constants/whoPanel.ts"
 import logMessage from "../utils/logUtils.ts"
 import { useNotificationContext } from "./NotificationContext.tsx"
@@ -80,10 +77,8 @@ interface WhoContextProps {
     setPinFriends: React.Dispatch<React.SetStateAction<boolean>>
     alwaysShowFriends: boolean
     setAlwaysShowFriends: React.Dispatch<React.SetStateAction<boolean>>
-    maximumRenderedCharacterCount: number
-    setMaximumRenderedCharacterCount: React.Dispatch<
-        React.SetStateAction<number>
-    >
+    hideClassFilterOnMobile: boolean
+    setHideClassFilterOnMobile: React.Dispatch<React.SetStateAction<boolean>>
     exportSettings: () => any
     importSettings: (settings: any) => boolean
 }
@@ -137,8 +132,8 @@ export const WhoProvider = ({ children }: { children: ReactNode }) => {
         useState<boolean>(false)
     const [pinFriends, setPinFriends] = useState<boolean>(true)
     const [alwaysShowFriends, setAlwaysShowFriends] = useState<boolean>(false)
-    const [maximumRenderedCharacterCount, setMaximumRenderedCharacterCount] =
-        useState<number>(DEFAULT_CHARACTER_COUNT)
+    const [hideClassFilterOnMobile, setHideClassFilterOnMobile] =
+        useState<boolean>(true)
 
     const { createNotification } = useNotificationContext()
     const { persistentSettingsRevision } = useUserContext()
@@ -163,16 +158,6 @@ export const WhoProvider = ({ children }: { children: ReactNode }) => {
             (typeof settings.maxLevel !== "number" ||
                 settings.maxLevel < MIN_LEVEL ||
                 settings.maxLevel > MAX_LEVEL)
-        ) {
-            return false
-        }
-        if (
-            settings.maximumRenderedCharacterCount !== undefined &&
-            (typeof settings.maximumRenderedCharacterCount !== "number" ||
-                settings.maximumRenderedCharacterCount <
-                    MINIMUM_CHARACTER_COUNT ||
-                settings.maximumRenderedCharacterCount >
-                    MAXIMUM_CHARACTER_COUNT)
         ) {
             return false
         }
@@ -238,7 +223,7 @@ export const WhoProvider = ({ children }: { children: ReactNode }) => {
         setAlwaysShowRegisteredCharacters(false)
         setPinFriends(true)
         setAlwaysShowFriends(false)
-        setMaximumRenderedCharacterCount(DEFAULT_CHARACTER_COUNT)
+        setHideClassFilterOnMobile(true)
     }, [])
 
     // Apply a previously validated settings object. Returns true on success.
@@ -321,11 +306,8 @@ export const WhoProvider = ({ children }: { children: ReactNode }) => {
                 setAlwaysShowFriends(
                     Boolean(settings.alwaysShowFriends ?? false)
                 )
-                setMaximumRenderedCharacterCount(
-                    parseInt(
-                        settings.maximumRenderedCharacterCount ??
-                            String(DEFAULT_CHARACTER_COUNT)
-                    )
+                setHideClassFilterOnMobile(
+                    Boolean(settings.hideClassFilterOnMobile ?? true)
                 )
                 return true
             } catch (e) {
@@ -427,7 +409,7 @@ export const WhoProvider = ({ children }: { children: ReactNode }) => {
                 pinFriends,
                 alwaysShowRegisteredCharacters,
                 alwaysShowFriends,
-                maximumRenderedCharacterCount,
+                hideClassFilterOnMobile,
             }
 
             // Validate the settings before saving
@@ -473,7 +455,7 @@ export const WhoProvider = ({ children }: { children: ReactNode }) => {
         pinFriends,
         alwaysShowRegisteredCharacters,
         alwaysShowFriends,
-        maximumRenderedCharacterCount,
+        hideClassFilterOnMobile,
     ])
 
     const exportSettings = () => {
@@ -504,7 +486,7 @@ export const WhoProvider = ({ children }: { children: ReactNode }) => {
             pinFriends,
             alwaysShowRegisteredCharacters,
             alwaysShowFriends,
-            maximumRenderedCharacterCount,
+            hideClassFilterOnMobile,
         }
     }
 
@@ -581,8 +563,8 @@ export const WhoProvider = ({ children }: { children: ReactNode }) => {
                 setPinFriends,
                 alwaysShowFriends,
                 setAlwaysShowFriends,
-                maximumRenderedCharacterCount,
-                setMaximumRenderedCharacterCount,
+                hideClassFilterOnMobile,
+                setHideClassFilterOnMobile,
                 exportSettings,
                 importSettings,
             }}
