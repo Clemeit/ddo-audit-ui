@@ -1,7 +1,7 @@
 const CACHED_CHARACTER_EXPIRY_TIME = 60 * 60 * 1000 // 1 hour
 const CACHED_AREAS_EXPIRY_TIME = 24 * 60 * 60 * 1000 // 1 day
 const CACHED_QUESTS_EXPIRY_TIME = 24 * 60 * 60 * 1000 // 1 day
-const MAX_REGISTERED_CHARACTERS = 20
+const MAX_REGISTERED_CHARACTERS = 50
 const MAX_FRIENDS = 30
 const MAX_LEVENSHTEIN_DISTANCE = 5 // Maximum distance for Levenshtein comparison
 const DEFAULT_TIMEZONE = "UTC"

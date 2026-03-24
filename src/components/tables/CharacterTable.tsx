@@ -1,5 +1,6 @@
 import React, {
     useEffect,
+    useLayoutEffect,
     useRef,
     useCallback,
     CSSProperties,
@@ -18,6 +19,7 @@ import Stack from "../global/Stack.tsx"
 import logMessage from "../../utils/logUtils.ts"
 import WebLink from "../global/WebLink.tsx"
 import { ReactComponent as OpenInNew } from "../../assets/svg/open-in-new.svg"
+import useWindowSize from "../../hooks/useWindowSize.ts"
 
 export enum ColumnType {
     STATUS,
@@ -53,6 +55,9 @@ interface Props {
     defaultSortType?: ColumnType
     defaultSortAscending?: boolean
     enableWikiLinks?: boolean
+    constrainHeight?: boolean
+    mobileContraintOffset?: number
+    desktopContraintOffset?: number
 }
 
 const CharacterTable = ({
@@ -78,6 +83,9 @@ const CharacterTable = ({
     defaultSortType = ColumnType.NAME,
     defaultSortAscending = true,
     enableWikiLinks = false,
+    constrainHeight = false,
+    mobileContraintOffset = 150,
+    desktopContraintOffset = 120,
 }: Props) => {
     const areaContext = useAreaContext()
     const { areas } = areaContext
@@ -91,16 +99,89 @@ const CharacterTable = ({
         key: defaultSortType,
         ascending: defaultSortAscending,
     })
+    const { isMobile } = useWindowSize()
 
-    const containerStyle: CSSProperties | undefined =
-        maxBodyHeight !== undefined
-            ? {
-                  maxHeight:
-                      typeof maxBodyHeight === "number"
+    const [computedMaxHeight, setComputedMaxHeight] = useState<
+        string | undefined
+    >(
+        constrainHeight
+            ? maxBodyHeight !== undefined
+                ? typeof maxBodyHeight === "number"
+                    ? `${maxBodyHeight}px`
+                    : maxBodyHeight
+                : "60vh"
+            : maxBodyHeight !== undefined
+              ? typeof maxBodyHeight === "number"
+                  ? `${maxBodyHeight}px`
+                  : maxBodyHeight
+              : undefined
+    )
+
+    useLayoutEffect(() => {
+        if (!constrainHeight) {
+            setComputedMaxHeight(
+                maxBodyHeight !== undefined
+                    ? typeof maxBodyHeight === "number"
+                        ? `${maxBodyHeight}px`
+                        : maxBodyHeight
+                    : undefined
+            )
+            return
+        }
+
+        const recompute = () => {
+            const el = containerRef.current
+            if (!el) return
+            const rect = el.getBoundingClientRect()
+            const available = Math.max(
+                250,
+                Math.floor(
+                    window.innerHeight -
+                        rect.top -
+                        (isMobile
+                            ? mobileContraintOffset
+                            : desktopContraintOffset)
+                )
+            )
+            const availableStr = `${available}px`
+            if (maxBodyHeight !== undefined) {
+                // Use the more restrictive of the two
+                el.style.maxHeight = availableStr
+                const resolvedProp =
+                    typeof maxBodyHeight === "number"
+                        ? maxBodyHeight
+                        : el.clientHeight
+                setComputedMaxHeight(
+                    available < resolvedProp
+                        ? availableStr
+                        : typeof maxBodyHeight === "number"
                           ? `${maxBodyHeight}px`
-                          : maxBodyHeight,
-              }
-            : undefined
+                          : maxBodyHeight
+                )
+                el.style.maxHeight = ""
+            } else {
+                setComputedMaxHeight(availableStr)
+            }
+        }
+
+        // Delay initial computation so the DOM has settled
+        const rafId = requestAnimationFrame(recompute)
+        window.addEventListener("resize", recompute)
+        return () => {
+            cancelAnimationFrame(rafId)
+            window.removeEventListener("resize", recompute)
+        }
+    }, [
+        constrainHeight,
+        maxBodyHeight,
+        characterRows.length,
+        isLoaded,
+        isMobile,
+    ])
+
+    const containerStyle: CSSProperties | undefined = computedMaxHeight
+        ? { maxHeight: computedMaxHeight }
+        : undefined
 
     // Function to update shadow based on scroll position
     const updateScrollShadow = useCallback(() => {

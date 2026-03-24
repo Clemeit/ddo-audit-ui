@@ -28,6 +28,7 @@ import { useWhoContext } from "../../contexts/WhoContext.tsx"
 import useTrackedCharacters from "../../hooks/useTrackedCharacters.ts"
 import Badge from "../global/Badge.tsx"
 import Link from "../global/Link.tsx"
+import { MAX_REGISTERED_CHARACTERS } from "../../constants/client.ts"
 
 const Registration = () => {
     const {
@@ -157,6 +158,11 @@ const Registration = () => {
         }
     }
 
+    const maxCharactersReached =
+        registeredCharacters.length >= MAX_REGISTERED_CHARACTERS
+    const maxCharactersExceeded =
+        registeredCharacters.length > MAX_REGISTERED_CHARACTERS
+
     return (
         <Page
             title="DDO Character Registration"
@@ -178,6 +184,7 @@ const Registration = () => {
                     <CharacterTable
                         characterRows={characterRows}
                         isLoaded={isLoaded}
+                        constrainHeight
                     />
                     <div
                         style={{
@@ -196,8 +203,16 @@ const Registration = () => {
                     <Spacer size="20px" />
                     <Stack gap="10px" width="100%" justify="space-between">
                         <div />
-                        <Button type="primary" onClick={handleOpenModal}>
-                            Add a character
+                        <Button
+                            type="primary"
+                            onClick={handleOpenModal}
+                            disabled={maxCharactersReached}
+                        >
+                            {maxCharactersExceeded
+                                ? "Limit exceeded"
+                                : maxCharactersReached
+                                  ? "Limit reached"
+                                  : "Add a character"}
                         </Button>
                     </Stack>
                 </ContentCluster>
