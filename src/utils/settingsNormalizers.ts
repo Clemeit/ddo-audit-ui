@@ -273,7 +273,7 @@ export function normalizeWhoSettings(input: unknown): NormalizedWhoSettings {
             false
         ),
         alwaysShowFriends: coerceBool(s.alwaysShowFriends, false),
-        hideClassFilterOnMobile: coerceBool(s.hideClassFilterOnMobile, false),
+        hideClassFilterOnMobile: coerceBool(s.hideClassFilterOnMobile, true),
         sortBy,
     }
 }

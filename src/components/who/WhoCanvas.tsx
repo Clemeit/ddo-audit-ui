@@ -15,6 +15,7 @@ import useRenderWhoPanel from "../../hooks/useRenderWhoPanel.ts"
 import useRenderCharacter from "../../hooks/useRenderCharacter.ts"
 import { calculateCommonFilterBoundingBoxes } from "../../utils/whoUtils.ts"
 import { useAreaContext } from "../../contexts/AreaContext.tsx"
+import { useAppContext } from "../../contexts/AppContext.tsx"
 import useCanvasViewport from "../../hooks/useCanvasViewport.ts"
 import WhoFilterZone from "./WhoFilterZone.tsx"
 
@@ -53,6 +54,7 @@ const WhoCanvas = ({
     )
 
     const { areas } = useAreaContext()
+    const { isFullScreen } = useAppContext()
 
     const {
         scrollOffset,
@@ -354,8 +356,7 @@ const WhoCanvas = ({
             isLoading ||
             previousState.onlineCharacterCount !== allCharacters.length ||
             previousState.anonymousCharacterCount !== anonymousCharacterCount ||
-            previousState.curatedCharacters.length !==
-                curatedCharacters.length ||
+            previousState.curatedCharacters !== curatedCharacters ||
             previousState.panelWidth !== panelWidth ||
             previousState.sortBy !== sortBy ||
             previousState.isGroupView !== isGroupView ||
@@ -491,7 +492,7 @@ const WhoCanvas = ({
 
         // Sort header bounding boxes are at canvas-relative positions
         // (pinned at top, not affected by scroll)
-        const sortHeaderY = 11 // CONTENT_TOP.height
+        const sortHeaderY = SPRITE_MAP.CONTENT_TOP.height
         const headers = [
             { bb: lfmHeaderBoundingBox, type: CharacterSortType.Lfm },
             { bb: nameHeaderBoundingBox, type: CharacterSortType.Name },
@@ -577,10 +578,10 @@ const WhoCanvas = ({
         return () => window.removeEventListener("resize", measureScrollArea)
     }, [measureScrollArea])
 
-    // Re-measure when filter zone content might change
+    // Re-measure when filter zone content or fullscreen state changes
     useEffect(() => {
         requestAnimationFrame(measureScrollArea)
-    }, [allCharacters.length, curatedCharacters.length, measureScrollArea])
+    }, [allCharacters.length, curatedCharacters.length, isFullScreen, measureScrollArea])
 
     return (
         <div>
