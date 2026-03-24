@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import React, { useEffect, useMemo, useRef, useState } from "react"
 import { useWhoContext } from "../../contexts/WhoContext.tsx"
 import useWindowSize from "../../hooks/useWindowSize.ts"
 import {
@@ -203,12 +203,18 @@ const WhoFilterZone = ({
         if (fauxMinLevel === "") {
             setMinLevel(0)
         } else {
-            setMinLevel(parseInt(fauxMinLevel))
+            const parsedMin = parseInt(fauxMinLevel, 10)
+            if (!isNaN(parsedMin)) {
+                setMinLevel(parsedMin)
+            }
         }
         if (fauxMaxLevel === "") {
             setMaxLevel(0)
         } else {
-            setMaxLevel(parseInt(fauxMaxLevel))
+            const parsedMax = parseInt(fauxMaxLevel, 10)
+            if (!isNaN(parsedMax)) {
+                setMaxLevel(parsedMax)
+            }
         }
     }, [fauxMinLevel, fauxMaxLevel])
 
@@ -224,19 +230,21 @@ const WhoFilterZone = ({
     }, [shouldSaveSettings, shouldSaveLevelFilter])
 
     const toggleClass = (className: string) => {
-        if (classNameFilter.includes(className)) {
-            setClassNameFilter(classNameFilter.filter((c) => c !== className))
-        } else {
-            setClassNameFilter([...classNameFilter, className])
-        }
+        setClassNameFilter((prev) => {
+            if (prev.includes(className)) {
+                return prev.filter((c) => c !== className)
+            }
+            return [...prev, className]
+        })
     }
 
     const toggleAllClasses = () => {
-        if (classNameFilter.length === CLASS_LIST_LOWER.length) {
-            setClassNameFilter([])
-        } else {
-            setClassNameFilter(CLASS_LIST_LOWER)
-        }
+        setClassNameFilter((prev) => {
+            if (prev.length === CLASS_LIST_LOWER.length) {
+                return []
+            }
+            return CLASS_LIST_LOWER
+        })
     }
 
     return (
@@ -274,6 +282,7 @@ const WhoFilterZone = ({
                                             CLASS_LIST_LOWER.length
                                         }
                                         type="normal"
+                                        sprite={spriteImage}
                                     />
                                     <span style={s.whiteText}>Any</span>
                                 </label>
@@ -290,6 +299,7 @@ const WhoFilterZone = ({
                                     )
                                     return (
                                         <button
+                                            type="button"
                                             key={className}
                                             onClick={() =>
                                                 toggleClass(
@@ -307,6 +317,7 @@ const WhoFilterZone = ({
                                             <SpriteImage
                                                 spriteData={spriteData}
                                                 selected={isSelected}
+                                                sprite={spriteImage}
                                             />
                                         </button>
                                     )
@@ -409,6 +420,7 @@ const WhoFilterZone = ({
                                     <SpriteCheckbox
                                         checked={isGroupView}
                                         type="groupView"
+                                        sprite={spriteImage}
                                     />
                                 </label>
                             </div>
@@ -423,6 +435,7 @@ const WhoFilterZone = ({
                                 <SpriteCheckbox
                                     checked={isExactMatch}
                                     type="normal"
+                                    sprite={spriteImage}
                                 />
                                 <span style={s.whiteText}>Exact Match</span>
                             </label>
@@ -458,27 +471,22 @@ const WhoFilterZone = ({
 const SpriteImage = ({
     spriteData,
     selected,
+    sprite,
 }: {
     spriteData: { x: number; y: number; width: number; height: number }
     selected: boolean
+    sprite: HTMLImageElement | null
 }) => {
     const canvasRef = useRef<HTMLCanvasElement>(null)
-    const [image, setImage] = useState<HTMLImageElement | null>(null)
 
     useEffect(() => {
-        const img = new Image()
-        img.src = LfmSprite
-        img.onload = () => setImage(img)
-    }, [])
-
-    useEffect(() => {
-        if (!image || !canvasRef.current) return
+        if (!sprite || !canvasRef.current) return
         const ctx = canvasRef.current.getContext("2d")
         if (!ctx) return
         ctx.imageSmoothingEnabled = false
         ctx.clearRect(0, 0, spriteData.width, spriteData.height)
         ctx.drawImage(
-            image,
+            sprite,
             spriteData.x,
             spriteData.y + (selected ? 29 : 0),
             spriteData.width,
@@ -488,7 +496,7 @@ const SpriteImage = ({
             spriteData.width,
             spriteData.height
         )
-    }, [image, spriteData, selected])
+    }, [sprite, spriteData, selected])
 
     return (
         <canvas
@@ -504,12 +512,13 @@ const SpriteImage = ({
 const SpriteCheckbox = ({
     checked,
     type,
+    sprite,
 }: {
     checked: boolean
     type: "normal" | "groupView"
+    sprite: HTMLImageElement | null
 }) => {
     const canvasRef = useRef<HTMLCanvasElement>(null)
-    const [image, setImage] = useState<HTMLImageElement | null>(null)
 
     const spriteSource =
         type === "groupView"
@@ -519,19 +528,13 @@ const SpriteCheckbox = ({
     const spriteData = spriteSource[variant]
 
     useEffect(() => {
-        const img = new Image()
-        img.src = LfmSprite
-        img.onload = () => setImage(img)
-    }, [])
-
-    useEffect(() => {
-        if (!image || !canvasRef.current) return
+        if (!sprite || !canvasRef.current) return
         const ctx = canvasRef.current.getContext("2d")
         if (!ctx) return
         ctx.imageSmoothingEnabled = false
         ctx.clearRect(0, 0, spriteData.width, spriteData.height)
         ctx.drawImage(
-            image,
+            sprite,
             spriteData.x,
             spriteData.y,
             spriteData.width,
@@ -541,7 +544,7 @@ const SpriteCheckbox = ({
             spriteData.width,
             spriteData.height
         )
-    }, [image, spriteData])
+    }, [sprite, spriteData])
 
     return (
         <canvas

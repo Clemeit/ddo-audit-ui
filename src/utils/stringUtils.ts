@@ -202,15 +202,31 @@ function truncateText(
 ) {
     const previousFont = context.font
     context.font = font
-    const ellipsisWidth = context.measureText("...").width
-    let truncatedText = text
-    let wasTruncated = false
-    while (context.measureText(truncatedText).width > width - ellipsisWidth) {
-        truncatedText = truncatedText.slice(0, -1)
-        wasTruncated = true
+
+    // Fast path: text fits without truncation
+    if (context.measureText(text).width <= width) {
+        context.font = previousFont
+        return text
     }
+
+    const ellipsisWidth = context.measureText("...").width
+    const targetWidth = width - ellipsisWidth
+
+    // Binary search for the longest substring that fits
+    let lo = 0
+    let hi = text.length
+    while (lo < hi) {
+        const mid = (lo + hi + 1) >>> 1
+        if (context.measureText(text.slice(0, mid)).width <= targetWidth) {
+            lo = mid
+        } else {
+            hi = mid - 1
+        }
+    }
+
     context.font = previousFont
-    return truncatedText.trim() + (wasTruncated ? "..." : "")
+    if (lo === text.length) return text
+    return text.slice(0, lo).trim() + "..."
 }
 
 function getTextSize(

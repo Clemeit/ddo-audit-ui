@@ -379,7 +379,6 @@ const WhoContainer = ({
                     <WhoCanvas
                         allCharacters={Object.values(characterData?.data ?? {})}
                         curatedCharacters={curatedCharacters.characters}
-                        serverName={serverName}
                         isLoading={
                             characterState !== LoadingState.Loaded &&
                             !hadFirstLoad

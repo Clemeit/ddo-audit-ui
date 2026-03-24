@@ -22,14 +22,12 @@ import WhoFilterZone from "./WhoFilterZone.tsx"
 interface Props {
     allCharacters: Character[]
     curatedCharacters: Character[]
-    serverName: string
     isLoading: boolean
 }
 
 const WhoCanvas = ({
     allCharacters = [],
     curatedCharacters = [],
-    serverName = "",
     isLoading,
 }: Props) => {
     const {
@@ -60,13 +58,10 @@ const WhoCanvas = ({
         scrollOffset,
         viewportHeight,
         totalLogicalHeight,
-        firstVisibleIndex,
-        lastVisibleIndex,
         scrollContainerRef,
         canvasRef: mainCanvasRef,
         canvasScaleWidth,
         canvasScaleHeight,
-        requestRender,
     } = useCanvasViewport({
         itemHeight: CHARACTER_HEIGHT,
         itemCount: curatedCharacters.length,
@@ -81,7 +76,14 @@ const WhoCanvas = ({
     const [containerWidth, setContainerWidth] = useState<number>(panelWidth)
     const scaleFactor = Math.min(1, containerWidth / panelWidth) || 1
     const adjustedViewportHeight = Math.ceil(viewportHeight / scaleFactor)
-    const adjustedScrollOffset = scrollOffset / scaleFactor
+
+    // Clamp scroll offset so we never render past the end of the list.
+    // This prevents a flash when characters decrease while scrolled to bottom:
+    // the spacer shrinks before the browser fires a scroll event to clamp scrollTop.
+    const maxScrollOffset = Math.max(0, totalLogicalHeight - viewportHeight)
+    const clampedScrollOffset = Math.min(scrollOffset, maxScrollOffset)
+
+    const adjustedScrollOffset = clampedScrollOffset / scaleFactor
     const adjustedFirstVisible = Math.max(
         0,
         Math.floor(
@@ -477,11 +479,6 @@ const WhoCanvas = ({
         isLoading,
     ])
 
-    // Trigger render when data changes (not scroll — scroll is handled by the hook)
-    useEffect(() => {
-        requestRender()
-    }, [curatedCharacters, allCharacters, isGroupView, sortBy, areas])
-
     const handleCanvasClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
         const rect = mainCanvasRef.current?.getBoundingClientRect()
         if (!rect) return
@@ -527,7 +524,8 @@ const WhoCanvas = ({
 
     // Dynamically measure available viewport space for the scroll container
     const [scrollAreaHeight, setScrollAreaHeight] = useState<number>(600)
-    const measureScrollArea = useCallback(() => {
+    const measureRafRef = useRef<number | null>(null)
+    const measureScrollAreaCore = useCallback(() => {
         const el = scrollContainerRef.current
         if (!el) return
         const top = el.getBoundingClientRect().top
@@ -572,15 +570,30 @@ const WhoCanvas = ({
         }
     }, [scrollContainerRef])
 
+    // Debounced wrapper — coalesces rapid resize/layout events into a single rAF
+    const measureScrollArea = useCallback(() => {
+        if (measureRafRef.current !== null) return
+        measureRafRef.current = requestAnimationFrame(() => {
+            measureRafRef.current = null
+            measureScrollAreaCore()
+        })
+    }, [measureScrollAreaCore])
+
     useEffect(() => {
-        measureScrollArea()
+        // Run synchronously on mount, then debounce subsequent calls
+        measureScrollAreaCore()
         window.addEventListener("resize", measureScrollArea)
-        return () => window.removeEventListener("resize", measureScrollArea)
-    }, [measureScrollArea])
+        return () => {
+            window.removeEventListener("resize", measureScrollArea)
+            if (measureRafRef.current !== null) {
+                cancelAnimationFrame(measureRafRef.current)
+            }
+        }
+    }, [measureScrollArea, measureScrollAreaCore])
 
     // Re-measure when filter zone content or fullscreen state changes
     useEffect(() => {
-        requestAnimationFrame(measureScrollArea)
+        measureScrollArea()
     }, [
         allCharacters.length,
         curatedCharacters.length,
