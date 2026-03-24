@@ -68,7 +68,7 @@ const AccountForm = () => {
         }
 
         if (!isAlphanumericUsername(username)) {
-            setErrorMessage("Username must be alphanumeric only.")
+            setErrorMessage("Username must contain letters and numbers only.")
             return
         }
 
@@ -111,7 +111,7 @@ const AccountForm = () => {
         }
 
         if (!isAlphanumericUsername(username)) {
-            setErrorMessage("Username must be alphanumeric only.")
+            setErrorMessage("Username must contain letters and numbers only.")
             return
         }
 
