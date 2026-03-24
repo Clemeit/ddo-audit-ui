@@ -15,12 +15,9 @@ import {
     MINIMUM_MOUSE_OVER_DELAY,
 } from "../constants/lfmPanel.ts"
 import {
-    DEFAULT_CHARACTER_COUNT,
     DEFAULT_REFRESH_RATE,
     DEFAULT_WHO_PANEL_WIDTH,
-    MAXIMUM_CHARACTER_COUNT,
     MAXIMUM_REFRESH_RATE,
-    MINIMUM_CHARACTER_COUNT,
     MINIMUM_REFRESH_RATE,
 } from "../constants/whoPanel.ts"
 import { MIN_LEVEL, MAX_LEVEL, CLASS_LIST_LOWER } from "../constants/game.ts"
@@ -215,7 +212,7 @@ export interface NormalizedWhoSettings {
     pinFriends: boolean
     alwaysShowRegisteredCharacters: boolean
     alwaysShowFriends: boolean
-    maximumRenderedCharacterCount: number
+    hideClassFilterOnMobile: boolean
 }
 
 export function normalizeWhoSettings(input: unknown): NormalizedWhoSettings {
@@ -255,14 +252,6 @@ export function normalizeWhoSettings(input: unknown): NormalizedWhoSettings {
             max: MAXIMUM_REFRESH_RATE,
             def: DEFAULT_REFRESH_RATE,
         }),
-        maximumRenderedCharacterCount: coerceNumber(
-            s.maximumRenderedCharacterCount,
-            {
-                min: MINIMUM_CHARACTER_COUNT,
-                max: MAXIMUM_CHARACTER_COUNT,
-                def: DEFAULT_CHARACTER_COUNT,
-            }
-        ),
         isGroupView: coerceBool(s.isGroupView, false),
         shouldIncludeRegion: coerceBool(s.shouldIncludeRegion, false),
         isExactMatch: coerceBool(s.isExactMatch, false),
@@ -284,6 +273,7 @@ export function normalizeWhoSettings(input: unknown): NormalizedWhoSettings {
             false
         ),
         alwaysShowFriends: coerceBool(s.alwaysShowFriends, false),
+        hideClassFilterOnMobile: coerceBool(s.hideClassFilterOnMobile, true),
         sortBy,
     }
 }

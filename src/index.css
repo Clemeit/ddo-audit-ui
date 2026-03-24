@@ -46,6 +46,10 @@
     --short-push-height: 175px;
 }
 
+.hide-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+
 body {
     margin: 0;
     -webkit-font-smoothing: antialiased;

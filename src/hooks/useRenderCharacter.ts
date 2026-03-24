@@ -1,4 +1,4 @@
-import { useMemo } from "react"
+import { useMemo, useRef } from "react"
 import { Character } from "../models/Character.ts"
 import { calculateCommonFilterBoundingBoxes } from "../utils/whoUtils.ts"
 import { useWhoContext } from "../contexts/WhoContext.tsx"
@@ -47,6 +47,34 @@ const useRenderCharacter = ({ sprite, context }: Props) => {
         [areaContext.areas]
     )
 
+    // Cache gradients keyed by "edgeColor|centerColor" to avoid re-creating them every row
+    const gradientCacheRef = useRef<Map<string, CanvasGradient>>(new Map())
+    const gradientCacheContextRef = useRef<CanvasRenderingContext2D | null>(
+        null
+    )
+
+    const getOrCreateGradient = (
+        edgeColor: string,
+        centerColor: string
+    ): CanvasGradient => {
+        // Invalidate cache if the context changed (e.g. canvas remounted)
+        if (gradientCacheContextRef.current !== context) {
+            gradientCacheRef.current.clear()
+            gradientCacheContextRef.current = context!
+        }
+        const key = `${edgeColor}|${centerColor}`
+        let gradient = gradientCacheRef.current.get(key)
+        if (!gradient) {
+            gradient = context!.createLinearGradient(0, 0, 0, CHARACTER_HEIGHT)
+            gradient.addColorStop(0, edgeColor)
+            gradient.addColorStop(0.25, centerColor)
+            gradient.addColorStop(0.75, centerColor)
+            gradient.addColorStop(1, edgeColor)
+            gradientCacheRef.current.set(key, gradient)
+        }
+        return gradient
+    }
+
     const renderCharacter = ({
         character,
         backgroundColorOverride,
@@ -59,25 +87,12 @@ const useRenderCharacter = ({ sprite, context }: Props) => {
 
         // render the background
         if (backgroundColorOverride && edgeColorOverride) {
-            const gradient = context.createLinearGradient(
-                0,
-                0,
-                0,
-                CHARACTER_HEIGHT
+            context.fillStyle = getOrCreateGradient(
+                edgeColorOverride,
+                backgroundColorOverride
             )
-            gradient.addColorStop(0, edgeColorOverride)
-            gradient.addColorStop(0.25, backgroundColorOverride)
-            gradient.addColorStop(0.75, backgroundColorOverride)
-            gradient.addColorStop(1, edgeColorOverride)
-            context.fillStyle = gradient
             context.fillRect(0, 0, filterZone.width, CHARACTER_HEIGHT)
         } else {
-            const gradient = context.createLinearGradient(
-                0,
-                0,
-                0,
-                CHARACTER_HEIGHT
-            )
             let edgeColor = WHO_COLORS.CHARACTER_GRADIENT_EDGE
             if (character.metadata?.isFriend) {
                 edgeColor = WHO_COLORS.FRIEND_GRADIENT_EDGE
@@ -90,11 +105,7 @@ const useRenderCharacter = ({ sprite, context }: Props) => {
             } else if (character.metadata?.isRegistered) {
                 centerColor = WHO_COLORS.REGISTERED_GRADIENT_CENTER
             }
-            gradient.addColorStop(0, edgeColor)
-            gradient.addColorStop(0.25, centerColor)
-            gradient.addColorStop(0.75, centerColor)
-            gradient.addColorStop(1, edgeColor)
-            context.fillStyle = gradient
+            context.fillStyle = getOrCreateGradient(edgeColor, centerColor)
             context.fillRect(0, 0, filterZone.width, CHARACTER_HEIGHT)
         }
 
@@ -243,12 +254,16 @@ const useRenderCharacter = ({ sprite, context }: Props) => {
         }
 
         // render classes
-        character.classes
+        const filteredClasses = character.classes
             ?.filter((classData) =>
                 CLASS_LIST_LOWER.includes(classData.name.toLowerCase())
             )
             .sort((a, b) => b.level - a.level)
-            .forEach((classData, index) => {
+
+        if (filteredClasses && filteredClasses.length > 0) {
+            // Draw all class icons first (no shadow needed)
+            for (let index = 0; index < filteredClasses.length; index++) {
+                const classData = filteredClasses[index]
                 const classIconBoundingBox = mapClassToIconBoundingBox(
                     classData.name
                 )
@@ -268,17 +283,23 @@ const useRenderCharacter = ({ sprite, context }: Props) => {
                     classIconBoundingBox.width,
                     classIconBoundingBox.height
                 )
+            }
 
-                // shadow under text
-                context.save()
-                context.shadowColor = "black"
-                context.shadowBlur = 1
-                context.shadowOffsetX = 0
-                context.shadowOffsetY = 0
-                context.textAlign = "right"
-                context.textBaseline = "bottom"
-                context.fillStyle = WHO_COLORS.WHITE_TEXT
-                context.font = fonts.MEMBER_CLASS_LEVEL
+            // Then draw all level numbers in one shadow pass
+            context.save()
+            context.shadowColor = "black"
+            context.shadowBlur = 1
+            context.shadowOffsetX = 0
+            context.shadowOffsetY = 0
+            context.textAlign = "right"
+            context.textBaseline = "bottom"
+            context.fillStyle = WHO_COLORS.WHITE_TEXT
+            context.font = fonts.MEMBER_CLASS_LEVEL
+            for (let index = 0; index < filteredClasses.length; index++) {
+                const classData = filteredClasses[index]
+                const classIconBoundingBox = mapClassToIconBoundingBox(
+                    classData.name
+                )
                 context.fillText(
                     classData.level.toString(),
                     classHeaderBoundingBox.x +
@@ -287,9 +308,9 @@ const useRenderCharacter = ({ sprite, context }: Props) => {
                     (CHARACTER_HEIGHT - classIconBoundingBox.height) / 2 +
                         classIconBoundingBox.height
                 )
-
-                context.restore()
-            })
+            }
+            context.restore()
+        }
 
         // render total level
         context.textAlign = "center"

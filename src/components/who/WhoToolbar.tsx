@@ -9,15 +9,8 @@ import Checkbox from "../global/Checkbox.tsx"
 import Modal from "../modal/Modal.tsx"
 import Link from "../global/Link.tsx"
 import { useModalNavigation } from "../../hooks/useModalNavigation.ts"
-import {
-    DEFAULT_CHARACTER_COUNT,
-    MAXIMUM_CHARACTER_COUNT,
-    MINIMUM_CHARACTER_COUNT,
-} from "../../constants/whoPanel.ts"
-import { ReactComponent as WarningSVG } from "../../assets/svg/warning.svg"
 import { useAreaContext } from "../../contexts/AreaContext.tsx"
 import FeaturedItem from "../global/FeaturedItem.tsx"
-import { useEffect, useState } from "react"
 
 interface Props {
     reloadCharacters: () => void
@@ -64,30 +57,11 @@ const WhoToolbar = ({
         setAlwaysShowFriends,
         alwaysShowRegisteredCharacters,
         setAlwaysShowRegisteredCharacters,
-        maximumRenderedCharacterCount,
-        setMaximumRenderedCharacterCount,
+        hideClassFilterOnMobile,
+        setHideClassFilterOnMobile,
     } = useWhoContext()
 
     const { reloadAreas } = useAreaContext()
-
-    const [localMaxRenderedCount, setLocalMaxRenderedCount] = useState<number>(
-        maximumRenderedCharacterCount
-    )
-    useEffect(() => {
-        setLocalMaxRenderedCount(maximumRenderedCharacterCount)
-    }, [maximumRenderedCharacterCount])
-    useEffect(() => {
-        const debounceTimer = setTimeout(() => {
-            if (localMaxRenderedCount !== maximumRenderedCharacterCount) {
-                setMaximumRenderedCharacterCount(localMaxRenderedCount)
-            }
-        }, 1000)
-        return () => clearTimeout(debounceTimer)
-    }, [
-        localMaxRenderedCount,
-        maximumRenderedCharacterCount,
-        setMaximumRenderedCharacterCount,
-    ])
 
     const {
         isModalOpen: showSettingsModal,
@@ -107,6 +81,14 @@ const WhoToolbar = ({
                     >
                         Show in-quest indicator
                     </Checkbox>
+                    <Checkbox
+                        checked={hideClassFilterOnMobile}
+                        onChange={(e) => {
+                            setHideClassFilterOnMobile(e.target.checked)
+                        }}
+                    >
+                        Hide class filter on mobile
+                    </Checkbox>
                     <FeaturedItem calloutId="who-quest-name">
                         <Checkbox
                             checked={showQuestName}
@@ -117,33 +99,6 @@ const WhoToolbar = ({
                             Show quest name next to location
                         </Checkbox>
                     </FeaturedItem>
-                    <label htmlFor="maxChracterRenderSlider">
-                        Display the first {localMaxRenderedCount.toString()}{" "}
-                        characters
-                        {localMaxRenderedCount === DEFAULT_CHARACTER_COUNT && (
-                            <span className="secondary-text"> (default)</span>
-                        )}
-                    </label>
-                    <input
-                        id="maxChracterRenderSlider"
-                        type="range"
-                        min={MINIMUM_CHARACTER_COUNT}
-                        max={MAXIMUM_CHARACTER_COUNT}
-                        step={10}
-                        value={localMaxRenderedCount}
-                        onChange={(e) =>
-                            setLocalMaxRenderedCount(Number(e.target.value))
-                        }
-                    />
-                    {maximumRenderedCharacterCount > 200 && (
-                        <span>
-                            <WarningSVG
-                                className="page-message-icon"
-                                style={{ fill: `var(--warning)` }}
-                            />
-                            This can slow down or crash your browser!
-                        </span>
-                    )}
                 </Stack>
             </ContentCluster>
             <ContentCluster title="Social">
