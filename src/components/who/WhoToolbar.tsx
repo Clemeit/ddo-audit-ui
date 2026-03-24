@@ -10,7 +10,6 @@ import Modal from "../modal/Modal.tsx"
 import Link from "../global/Link.tsx"
 import { useModalNavigation } from "../../hooks/useModalNavigation.ts"
 import { useAreaContext } from "../../contexts/AreaContext.tsx"
-import FeaturedItem from "../global/FeaturedItem.tsx"
 
 interface Props {
     reloadCharacters: () => void
@@ -89,16 +88,14 @@ const WhoToolbar = ({
                     >
                         Hide class filter on mobile
                     </Checkbox>
-                    <FeaturedItem calloutId="who-quest-name">
-                        <Checkbox
-                            checked={showQuestName}
-                            onChange={(e) => {
-                                setShowQuestName(e.target.checked)
-                            }}
-                        >
-                            Show quest name next to location
-                        </Checkbox>
-                    </FeaturedItem>
+                    <Checkbox
+                        checked={showQuestName}
+                        onChange={(e) => {
+                            setShowQuestName(e.target.checked)
+                        }}
+                    >
+                        Show quest name next to location
+                    </Checkbox>
                 </Stack>
             </ContentCluster>
             <ContentCluster title="Social">

@@ -272,26 +272,22 @@ const LfmToolbar = ({
                     >
                         Show groups I'm not eligible for
                     </Checkbox>
-                    <FeaturedItem calloutId="hide-content-i-dont-own">
-                        <Checkbox
-                            checked={hideContentIDontOwn}
-                            onChange={(e) =>
-                                setHideContentIDontOwn(e.target.checked)
-                            }
-                        >
-                            Hide content I don't own
-                        </Checkbox>
-                    </FeaturedItem>
-                    <FeaturedItem calloutId="indicate-content-i-dont-own">
-                        <Checkbox
-                            checked={indicateContentIDontOwn}
-                            onChange={(e) =>
-                                setIndicateContentIDontOwn(e.target.checked)
-                            }
-                        >
-                            Indicate content I don't own
-                        </Checkbox>
-                    </FeaturedItem>
+                    <Checkbox
+                        checked={hideContentIDontOwn}
+                        onChange={(e) =>
+                            setHideContentIDontOwn(e.target.checked)
+                        }
+                    >
+                        Hide content I don't own
+                    </Checkbox>
+                    <Checkbox
+                        checked={indicateContentIDontOwn}
+                        onChange={(e) =>
+                            setIndicateContentIDontOwn(e.target.checked)
+                        }
+                    >
+                        Indicate content I don't own
+                    </Checkbox>
                     <div
                         style={{
                             marginLeft: "20px",
@@ -370,54 +366,40 @@ const LfmToolbar = ({
                     >
                         Show raid group members in two columns
                     </Checkbox>
-                    <FeaturedItem calloutId="highlight-raids">
-                        <Checkbox
-                            checked={highlightRaids}
-                            onChange={(e) =>
-                                setHighlightRaids(e.target.checked)
-                            }
-                        >
-                            Highlight raid groups
-                        </Checkbox>
-                    </FeaturedItem>
-                    <FeaturedItem calloutId="hide-all-level-groups">
-                        <Checkbox
-                            checked={hideAllLevelGroups}
-                            onChange={(e) =>
-                                setHideAllLevelGroups(e.target.checked)
-                            }
-                        >
-                            Hide groups posting for levels 1-34
-                        </Checkbox>
-                    </FeaturedItem>
-                    <FeaturedItem calloutId="hide-full-groups">
-                        <Checkbox
-                            checked={hideFullGroups}
-                            onChange={(e) =>
-                                setHideFullGroups(e.target.checked)
-                            }
-                        >
-                            Hide groups that are likely full
-                        </Checkbox>
-                    </FeaturedItem>
-                    <FeaturedItem calloutId="grouping-eligibility-dividers">
-                        <Checkbox
-                            checked={showEligibilityDividers}
-                            onChange={(e) =>
-                                setShowEligibilityDividers(e.target.checked)
-                            }
-                        >
-                            Show dividers between eligible groups
-                        </Checkbox>
-                    </FeaturedItem>
-                    <FeaturedItem calloutId="only-show-raid-groups">
-                        <Checkbox
-                            checked={onlyShowRaids}
-                            onChange={(e) => setOnlyShowRaids(e.target.checked)}
-                        >
-                            Only show raid groups
-                        </Checkbox>
-                    </FeaturedItem>
+                    <Checkbox
+                        checked={highlightRaids}
+                        onChange={(e) => setHighlightRaids(e.target.checked)}
+                    >
+                        Highlight raid groups
+                    </Checkbox>
+                    <Checkbox
+                        checked={hideAllLevelGroups}
+                        onChange={(e) =>
+                            setHideAllLevelGroups(e.target.checked)
+                        }
+                    >
+                        Hide groups posting for levels 1-34
+                    </Checkbox>
+                    <Checkbox
+                        checked={hideFullGroups}
+                        onChange={(e) => setHideFullGroups(e.target.checked)}
+                    >
+                        Hide groups that are likely full
+                    </Checkbox>
+                    <Checkbox
+                        checked={showEligibilityDividers}
+                        onChange={(e) =>
+                            setShowEligibilityDividers(e.target.checked)
+                        }
+                    >
+                        Show dividers between eligible groups
+                    </Checkbox>
+                    <Checkbox
+                        checked={onlyShowRaids}
+                        onChange={(e) => setOnlyShowRaids(e.target.checked)}
+                    >
+                        Only show raid groups
+                    </Checkbox>
                     <Stack width="100%" justify="flex-end">
                         <Button
                             onClick={handleOpenResetDisplayModal}
@@ -529,46 +511,32 @@ const LfmToolbar = ({
                     >
                         Show character guild names
                     </Checkbox>
-                    <FeaturedItem calloutId="show-eligible-characters">
-                        <Checkbox
-                            checked={showEligibleCharacters}
-                            onChange={(e) =>
-                                setShowEligibleCharacters(e.target.checked)
-                            }
-                        >
-                            Show your eligible characters
-                        </Checkbox>
-                    </FeaturedItem>
-                    <FeaturedItem calloutId="show-lfm-activity">
-                        <Checkbox
-                            checked={showLfmActivity}
-                            onChange={(e) =>
-                                setShowLfmActivity(e.target.checked)
-                            }
-                        >
-                            Show LFM activity history
-                        </Checkbox>
-                    </FeaturedItem>
-                    <FeaturedItem calloutId="show-lfm-posted-time">
-                        <Checkbox
-                            checked={showLfmPostedTime}
-                            onChange={(e) =>
-                                setShowLfmPostedTime(e.target.checked)
-                            }
-                        >
-                            Show LFM posted time
-                        </Checkbox>
-                    </FeaturedItem>
-                    <FeaturedItem calloutId="show-quest-metrics">
-                        <Checkbox
-                            checked={showQuestMetrics}
-                            onChange={(e) =>
-                                setShowQuestMetrics(e.target.checked)
-                            }
-                        >
-                            Show quest metrics
-                        </Checkbox>
-                    </FeaturedItem>
+                    <Checkbox
+                        checked={showEligibleCharacters}
+                        onChange={(e) =>
+                            setShowEligibleCharacters(e.target.checked)
+                        }
+                    >
+                        Show your eligible characters
+                    </Checkbox>
+                    <Checkbox
+                        checked={showLfmActivity}
+                        onChange={(e) => setShowLfmActivity(e.target.checked)}
+                    >
+                        Show LFM activity history
+                    </Checkbox>
+                    <Checkbox
+                        checked={showLfmPostedTime}
+                        onChange={(e) => setShowLfmPostedTime(e.target.checked)}
+                    >
+                        Show LFM posted time
+                    </Checkbox>
+                    <Checkbox
+                        checked={showQuestMetrics}
+                        onChange={(e) => setShowQuestMetrics(e.target.checked)}
+                    >
+                        Show quest metrics
+                    </Checkbox>
                     <Stack width="100%" justify="flex-end">
                         <Button
                             onClick={handleOpenResetToolsModal}
