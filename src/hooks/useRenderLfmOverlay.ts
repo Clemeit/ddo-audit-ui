@@ -195,7 +195,7 @@ const useRenderLfmOverlay = ({ lfmSprite, context }: Props) => {
                     } else {
                         const lengthString =
                             quest.length &&
-                            !areaContext.areas[quest.area_id].is_wilderness
+                            !areaContext.areas[quest.area_id]?.is_wilderness
                                 ? lengthToLengthString(quest.length)
                                 : null
 
@@ -1111,7 +1111,7 @@ const useRenderLfmOverlay = ({ lfmSprite, context }: Props) => {
 
                         if (
                             showQuestMetrics &&
-                            !areaContext.areas[quest.area_id].is_wilderness
+                            !areaContext.areas[quest.area_id]?.is_wilderness
                         ) {
                             context.translate(0, 8)
 

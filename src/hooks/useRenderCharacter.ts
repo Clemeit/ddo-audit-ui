@@ -227,7 +227,7 @@ const useRenderCharacter = ({ sprite, context }: Props) => {
             }
             if (showQuestName) {
                 const quest = getQuestFromAreaId(character.location_id)
-                if (quest && !location.is_wilderness) {
+                if (quest && !location?.is_wilderness) {
                     locationNameWidth = context.measureText(locationName).width
                     questName = truncateText(
                         quest.name || "",
