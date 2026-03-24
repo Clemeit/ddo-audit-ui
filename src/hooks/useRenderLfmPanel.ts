@@ -49,7 +49,7 @@ const useRenderLfmPanel = ({ sprite, context, raidView = false }: Props) => {
     /** Draw sort headers and info messages. Call after LFMs. */
     const renderSortHeaders = useCallback(
         (
-            viewportHeight: number,
+            _viewportHeight: number,
             renderedLfmCount: number,
             excludedLfmCount: number,
             isLoading: boolean

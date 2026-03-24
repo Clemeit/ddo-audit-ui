@@ -304,7 +304,6 @@ const LfmOverlay: React.FC<Props> = ({
         showLfmActivity,
         showCharacterGuildNames,
         showEligibleCharacters,
-        showRaidTimerIndicator,
         isMultiColumn,
         showQuestMetrics,
     } = useLfmContext()

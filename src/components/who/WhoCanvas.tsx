@@ -618,7 +618,10 @@ const WhoCanvas = ({
         // Re-measure after short delays to catch layout settling
         const t1 = setTimeout(measureScrollAreaCore, 100)
         const t2 = setTimeout(measureScrollAreaCore, 500)
-        document.fonts?.ready?.then(measureScrollAreaCore)
+        let cancelled = false
+        document.fonts?.ready?.then(() => {
+            if (!cancelled) measureScrollAreaCore()
+        })
 
         // Re-measure when the panel's own dimensions change (e.g.
         // a secondary panel is added/removed in split view).
@@ -630,6 +633,7 @@ const WhoCanvas = ({
         }
 
         return () => {
+            cancelled = true
             window.removeEventListener("resize", measureScrollArea)
             clearTimeout(t1)
             clearTimeout(t2)
