@@ -52,8 +52,7 @@ const Live = () => {
 
     const hasCriticalError =
         serverInfoState === LoadingState.Error ||
-        (!!serverInfoError &&
-            !serverInfoError.message?.includes("CanceledError"))
+        (!!serverInfoError && serverInfoError.name !== "AbortError")
 
     const errorMessage = useMemo(
         () => serverInfoError?.message,

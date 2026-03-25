@@ -23,7 +23,11 @@ jest.mock("axios", () => {
 jest.mock("axios-retry", () => {
     const fn: any = jest.fn()
     fn.exponentialDelay = jest.fn()
-    return { __esModule: true, default: fn, exponentialDelay: fn.exponentialDelay }
+    return {
+        __esModule: true,
+        default: fn,
+        exponentialDelay: fn.exponentialDelay,
+    }
 })
 
 const mockedAxios = axios as unknown as jest.Mock
@@ -206,15 +210,19 @@ describe("apiHelper", () => {
             expect(console.error).toHaveBeenCalled()
         })
 
-        it("returns null when request is aborted (current behavior — see TODO)", async () => {
+        it("throws AbortError when request is aborted", async () => {
             const controller = new AbortController()
             controller.abort()
             const error = new Error("Aborted")
             mockedAxios.mockRejectedValue(error)
-            const result = await getRequest("endpoint", {
-                signal: controller.signal,
+            await expect(
+                getRequest("endpoint", {
+                    signal: controller.signal,
+                })
+            ).rejects.toMatchObject({
+                name: "AbortError",
+                message: "Request aborted",
             })
-            expect(result).toBeNull()
             expect(console.warn).toHaveBeenCalled()
         })
 
@@ -222,7 +230,11 @@ describe("apiHelper", () => {
             const controller = new AbortController()
             controller.abort()
             mockedAxios.mockRejectedValue(new Error("Aborted"))
-            await getRequest("endpoint", { signal: controller.signal })
+            await expect(
+                getRequest("endpoint", { signal: controller.signal })
+            ).rejects.toMatchObject({
+                name: "AbortError",
+            })
             expect(console.error).not.toHaveBeenCalled()
         })
     })
