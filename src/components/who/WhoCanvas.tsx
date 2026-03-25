@@ -563,10 +563,15 @@ const WhoCanvas = ({
             bottomSpacing += parseFloat(style.marginBottom) || 0
             // Skip sibling walk if parent is a flex row — siblings are
             // beside this element, not below it.
-            const parentDir = ancestor.parentElement
-                ? getComputedStyle(ancestor.parentElement).flexDirection
-                : ""
-            if (parentDir !== "row" && parentDir !== "row-reverse") {
+            const parentStyle = ancestor.parentElement
+                ? getComputedStyle(ancestor.parentElement)
+                : null
+            const parentDisplay = parentStyle?.display || ""
+            const parentDir = parentStyle?.flexDirection || ""
+            const isFlexRow =
+                (parentDisplay === "flex" || parentDisplay === "inline-flex") &&
+                (parentDir === "row" || parentDir === "row-reverse")
+            if (!isFlexRow) {
                 let parentSibling = ancestor.nextElementSibling
                 while (parentSibling) {
                     const pos = getComputedStyle(parentSibling).position

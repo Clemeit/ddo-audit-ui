@@ -632,9 +632,17 @@ const LfmCanvas: React.FC<Props> = ({
             if (!isHover) {
                 // Check if the mouse is over a sort header (pinned at top of viewport)
                 const sortHeaderIndex = sortHeaders.findIndex((header) => {
+                    const headerLeft =
+                        header.boundingBox.left() +
+                        SPRITE_MAP.CONTENT_LEFT.width +
+                        LFM_AREA_PADDING.left
+                    const headerRight =
+                        header.boundingBox.right() +
+                        SPRITE_MAP.CONTENT_LEFT.width +
+                        LFM_AREA_PADDING.left
                     return (
-                        x > header.boundingBox.left() &&
-                        x < header.boundingBox.right() &&
+                        x > headerLeft &&
+                        x < headerRight &&
                         y >
                             SPRITE_MAP.CONTENT_TOP.height +
                                 LFM_AREA_PADDING.top &&
@@ -760,10 +768,15 @@ const LfmCanvas: React.FC<Props> = ({
             bottomSpacing += parseFloat(style.marginBottom) || 0
             // Skip sibling walk if parent is a flex row — siblings are
             // beside this element, not below it.
-            const parentDir = ancestor.parentElement
-                ? getComputedStyle(ancestor.parentElement).flexDirection
-                : ""
-            if (parentDir !== "row" && parentDir !== "row-reverse") {
+            const parentStyle = ancestor.parentElement
+                ? getComputedStyle(ancestor.parentElement)
+                : null
+            const parentDisplay = parentStyle?.display || ""
+            const parentDir = parentStyle?.flexDirection || ""
+            const isFlexRow =
+                (parentDisplay === "flex" || parentDisplay === "inline-flex") &&
+                (parentDir === "row" || parentDir === "row-reverse")
+            if (!isFlexRow) {
                 let parentSibling = ancestor.nextElementSibling
                 while (parentSibling) {
                     const pos = getComputedStyle(parentSibling).position

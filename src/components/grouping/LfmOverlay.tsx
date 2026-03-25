@@ -382,13 +382,16 @@ const LfmOverlay: React.FC<Props> = ({
     const rawPosX = Math.max(0, position.x * scaleFactor)
     const rawPosY = Math.max(0, position.y * scaleFactor)
 
+    // Scale down overlay on mobile devices
+    const overlayScale = Math.min(1, scaleFactor + 0.2)
+
     // No dependency array: we read DOM measurements (offsetWidth/offsetHeight)
     // that can change when overlay content changes, which isn't trackable as deps.
     // The setClampedPos bailout prevents unnecessary re-renders.
     useLayoutEffect(() => {
         if (!overlayRef.current) return
-        const overlayWidth = overlayRef.current.offsetWidth
-        const overlayHeight = overlayRef.current.offsetHeight
+        const overlayWidth = overlayRef.current.offsetWidth * overlayScale
+        const overlayHeight = overlayRef.current.offsetHeight * overlayScale
 
         const newClampedX =
             rawPosX + overlayWidth > containerWidth
@@ -420,6 +423,9 @@ const LfmOverlay: React.FC<Props> = ({
                 display: "flex",
                 flexDirection: "column",
                 gap: 10,
+                transformOrigin: "top left",
+                transform:
+                    overlayScale < 1 ? `scale(${overlayScale})` : undefined,
             }}
         >
             {renderType === RenderType.LFM
