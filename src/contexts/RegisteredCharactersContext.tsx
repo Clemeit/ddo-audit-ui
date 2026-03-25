@@ -476,7 +476,8 @@ export const RegisteredCharactersProvider = ({ children }: Props) => {
     }, [reload, persistentSettingsRevision])
 
     const publishedRegisteredCharacters =
-        registeredCharacters.length === 0 && registeredCharactersCached.length !== 0
+        registeredCharacters.length === 0 &&
+        registeredCharactersCached.length !== 0
             ? registeredCharactersCached
             : registeredCharacters
 
