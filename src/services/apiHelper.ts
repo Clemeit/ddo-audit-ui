@@ -6,6 +6,13 @@ export interface ServiceRequestProps {
     signal?: AbortSignal
 }
 
+function createAbortError(error: unknown) {
+    const abortError = new Error("Request aborted")
+    abortError.name = "AbortError"
+    ;(abortError as Error & { cause?: unknown }).cause = error
+    return abortError
+}
+
 // Configure axios to use retries
 axiosRetry(axios, {
     retries: 2,
@@ -47,7 +54,7 @@ const genericRequest = async <T>(
             throw error
         } else {
             console.warn(`${method.toUpperCase()} request aborted:`, error)
-            return null // TODO: Is this legit?
+            throw createAbortError(error)
         }
     }
 }

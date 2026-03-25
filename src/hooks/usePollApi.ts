@@ -65,13 +65,16 @@ const usePollApi = <T>({
                     consecutiveErrorsRef.current = 0 // Reset error count on success
                 }
             } catch (error) {
-                const errorMessage =
-                    error instanceof Error ? error.message : String(error)
+                const isAbortError =
+                    signal.aborted ||
+                    (error instanceof Error && error.name === "AbortError")
 
-                // Common errors - early return for cancellations
-                if (errorMessage.includes("CanceledError") || signal.aborted) {
+                if (isAbortError) {
                     return
                 }
+
+                const errorMessage =
+                    error instanceof Error ? error.message : String(error)
 
                 consecutiveErrorsRef.current += 1
 

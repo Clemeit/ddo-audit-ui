@@ -10,6 +10,7 @@ import { ServiceWorkerUpdater } from "./components/global/ServiceWorkerUpdater.t
 // import bannerImage from "./assets/webp/banner_night_revels.webp"
 import logMessage from "./utils/logUtils.ts"
 import { UserProvider } from "./contexts/UserContext.tsx"
+import { RegisteredCharactersProvider } from "./contexts/RegisteredCharactersContext.tsx"
 
 // Preload the banner image for improved LCP
 // const preloadBannerImage = () => {
@@ -29,8 +30,10 @@ root.render(
         <AppProvider>
             <NotificationProvider>
                 <UserProvider>
-                    <ServiceWorkerUpdater />
-                    <RouterProvider router={browserRouter} />
+                    <RegisteredCharactersProvider>
+                        <ServiceWorkerUpdater />
+                        <RouterProvider router={browserRouter} />
+                    </RegisteredCharactersProvider>
                 </UserProvider>
             </NotificationProvider>
         </AppProvider>
