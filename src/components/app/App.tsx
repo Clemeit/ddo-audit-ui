@@ -18,7 +18,7 @@ function App() {
 
     useEffect(() => {
         setIsFullScreen(false)
-    }, [pathname])
+    }, [pathname, setIsFullScreen])
 
     return (
         <ErrorBoundary>

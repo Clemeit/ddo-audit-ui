@@ -190,6 +190,7 @@ const LfmCanvas: React.FC<Props> = ({
     const overlayData = useMemo<{ lfm: Lfm; type: RenderType } | null>(() => {
         if (
             overlayRenderIndex === null ||
+            overlayRenderType === null ||
             overlayRenderIndex < 0 ||
             overlayRenderIndex >= lfms.length
         ) {
@@ -291,7 +292,7 @@ const LfmCanvas: React.FC<Props> = ({
         const h = borderLogicalHeight
 
         // Top edge
-        for (let i = 0; i <= w / SPRITE_MAP.CONTENT_TOP.width; i++) {
+        for (let i = 0; i < Math.ceil(w / SPRITE_MAP.CONTENT_TOP.width); i++) {
             ctx.drawImage(
                 image,
                 SPRITE_MAP.CONTENT_TOP.x,
@@ -308,7 +309,11 @@ const LfmCanvas: React.FC<Props> = ({
             )
         }
         // Bottom edge
-        for (let i = 0; i <= w / SPRITE_MAP.CONTENT_BOTTOM.width; i++) {
+        for (
+            let i = 0;
+            i < Math.ceil(w / SPRITE_MAP.CONTENT_BOTTOM.width);
+            i++
+        ) {
             ctx.drawImage(
                 image,
                 SPRITE_MAP.CONTENT_BOTTOM.x,
@@ -325,7 +330,11 @@ const LfmCanvas: React.FC<Props> = ({
             )
         }
         // Left edge
-        for (let i = 0; i <= h / SPRITE_MAP.CONTENT_LEFT.height; i++) {
+        for (
+            let i = 0;
+            i < Math.ceil(h / SPRITE_MAP.CONTENT_LEFT.height);
+            i++
+        ) {
             ctx.drawImage(
                 image,
                 SPRITE_MAP.CONTENT_LEFT.x,
@@ -342,7 +351,11 @@ const LfmCanvas: React.FC<Props> = ({
             )
         }
         // Right edge
-        for (let i = 0; i <= h / SPRITE_MAP.CONTENT_RIGHT.height; i++) {
+        for (
+            let i = 0;
+            i < Math.ceil(h / SPRITE_MAP.CONTENT_RIGHT.height);
+            i++
+        ) {
             ctx.drawImage(
                 image,
                 SPRITE_MAP.CONTENT_RIGHT.x,
