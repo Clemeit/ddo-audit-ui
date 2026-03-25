@@ -67,8 +67,8 @@ const SORT_HEADER_PADDING_TOP = 5
 
 const INPUT_BOX_HEIGHT = 20
 
-// Height of the sort header area in the canvas (content top border + header + gap)
-const SORT_HEADER_AREA_HEIGHT = 35
+// Height of the sort header area in the canvas (padding + header + gap)
+const SORT_HEADER_AREA_HEIGHT = 27
 
 const FONTS = (baseFontSize: number = DEFAULT_BASE_FONT_SIZE) => ({
     MAIN_HEADER: "14px 'Trebuchet MS'",

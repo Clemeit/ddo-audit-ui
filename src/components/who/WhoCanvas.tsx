@@ -7,6 +7,7 @@ import {
     GROUP_BACKGROUND_COLORS,
     GROUP_EDGE_COLORS,
     SORT_HEADER_AREA_HEIGHT,
+    SORT_HEADER_PADDING_TOP,
     WHO_COLORS,
 } from "../../constants/whoPanel.ts"
 import { SPRITE_MAP } from "../../constants/spriteMap.ts"
@@ -501,7 +502,7 @@ const WhoCanvas = ({
 
         // Sort header bounding boxes are at canvas-relative positions
         // (pinned at top, not affected by scroll)
-        const sortHeaderY = SPRITE_MAP.CONTENT_TOP.height
+        const sortHeaderY = SORT_HEADER_PADDING_TOP
         const headers = [
             { bb: lfmHeaderBoundingBox, type: CharacterSortType.Lfm },
             { bb: nameHeaderBoundingBox, type: CharacterSortType.Name },
@@ -545,37 +546,60 @@ const WhoCanvas = ({
         if (elWidth > 0) setContainerWidth(elWidth)
         // Measure height consumed by siblings rendered after the scroll container
         let belowHeight = 0
+        let bottomSpacing = 0 // margin/padding that may overlap with nav
         let sibling = el.nextElementSibling
         while (sibling) {
-            belowHeight += sibling.getBoundingClientRect().height
+            const pos = getComputedStyle(sibling).position
+            if (pos !== "absolute" && pos !== "fixed") {
+                belowHeight += sibling.getBoundingClientRect().height
+            }
             sibling = sibling.nextElementSibling
         }
         // Walk up ancestors and sum their bottom padding/margin + trailing siblings
         let ancestor: HTMLElement | null = el.parentElement
         while (ancestor && !ancestor.classList.contains("page")) {
             const style = getComputedStyle(ancestor)
-            belowHeight += parseFloat(style.paddingBottom) || 0
-            belowHeight += parseFloat(style.marginBottom) || 0
-            let parentSibling = ancestor.nextElementSibling
-            while (parentSibling) {
-                belowHeight += parentSibling.getBoundingClientRect().height
-                parentSibling = parentSibling.nextElementSibling
+            bottomSpacing += parseFloat(style.paddingBottom) || 0
+            bottomSpacing += parseFloat(style.marginBottom) || 0
+            // Skip sibling walk if parent is a flex row — siblings are
+            // beside this element, not below it.
+            const parentStyle = ancestor.parentElement
+                ? getComputedStyle(ancestor.parentElement)
+                : null
+            const parentDisplay = parentStyle?.display || ""
+            const parentDir = parentStyle?.flexDirection || ""
+            const isFlexRow =
+                (parentDisplay === "flex" || parentDisplay === "inline-flex") &&
+                (parentDir === "row" || parentDir === "row-reverse")
+            if (!isFlexRow) {
+                let parentSibling = ancestor.nextElementSibling
+                while (parentSibling) {
+                    const pos = getComputedStyle(parentSibling).position
+                    if (pos !== "absolute" && pos !== "fixed") {
+                        belowHeight +=
+                            parentSibling.getBoundingClientRect().height
+                    }
+                    parentSibling = parentSibling.nextElementSibling
+                }
             }
             ancestor = ancestor.parentElement
         }
         // Account for the page element's own bottom padding
         if (ancestor) {
             const pageStyle = getComputedStyle(ancestor)
-            belowHeight += parseFloat(pageStyle.paddingBottom) || 0
+            bottomSpacing += parseFloat(pageStyle.paddingBottom) || 0
         }
-        // Account for fixed-position mobile nav bar at the bottom
+        // A fixed bottom nav overlaps ancestor margin/padding that was
+        // added to reserve space for it, so take the larger of the two.
         const navMenu = document.querySelector(".nav-menu")
+        let navHeight = 0
         if (navMenu) {
             const navStyle = getComputedStyle(navMenu)
             if (navStyle.position === "fixed" && navStyle.bottom === "0px") {
-                belowHeight += navMenu.getBoundingClientRect().height
+                navHeight = navMenu.getBoundingClientRect().height
             }
         }
+        belowHeight += Math.max(bottomSpacing, navHeight)
         const available = window.innerHeight - top - belowHeight
         if (available > 100) {
             setScrollAreaHeight(available)
@@ -595,23 +619,40 @@ const WhoCanvas = ({
         // Run synchronously on mount, then debounce subsequent calls
         measureScrollAreaCore()
         window.addEventListener("resize", measureScrollArea)
+
+        // Re-measure after short delays to catch layout settling
+        const t1 = setTimeout(measureScrollAreaCore, 100)
+        const t2 = setTimeout(measureScrollAreaCore, 500)
+        let cancelled = false
+        document.fonts?.ready?.then(() => {
+            if (!cancelled) measureScrollAreaCore()
+        })
+
+        // Re-measure when the panel's own dimensions change (e.g.
+        // a secondary panel is added/removed in split view).
+        const wrapper = contentWrapperRef.current
+        let ro: ResizeObserver | undefined
+        if (wrapper) {
+            ro = new ResizeObserver(measureScrollArea)
+            ro.observe(wrapper)
+        }
+
         return () => {
+            cancelled = true
             window.removeEventListener("resize", measureScrollArea)
+            clearTimeout(t1)
+            clearTimeout(t2)
+            ro?.disconnect()
             if (measureRafRef.current !== null) {
                 cancelAnimationFrame(measureRafRef.current)
             }
         }
     }, [measureScrollArea, measureScrollAreaCore])
 
-    // Re-measure when filter zone content or fullscreen state changes
+    // Re-measure when fullscreen state changes
     useEffect(() => {
         measureScrollArea()
-    }, [
-        allCharacters.length,
-        curatedCharacters.length,
-        isFullScreen,
-        measureScrollArea,
-    ])
+    }, [isFullScreen, measureScrollArea])
 
     return (
         <div>
@@ -689,6 +730,40 @@ const WhoCanvas = ({
                         onClick={handleCanvasClick}
                     />
                 </div>
+                {/* Scroll fade indicators */}
+                {clampedScrollOffset > 0 && (
+                    <div
+                        style={{
+                            position: "absolute",
+                            top:
+                                (scrollContainerRef.current?.offsetTop ?? 0) +
+                                SORT_HEADER_AREA_HEIGHT * scaleFactor,
+                            left: SPRITE_MAP.CONTENT_LEFT.width * scaleFactor,
+                            right: SPRITE_MAP.CONTENT_RIGHT.width * scaleFactor,
+                            height: 30 * scaleFactor,
+                            background:
+                                "linear-gradient(to bottom, rgba(0,0,0,0.45), transparent)",
+                            pointerEvents: "none",
+                            zIndex: 1,
+                        }}
+                    />
+                )}
+                {clampedScrollOffset < maxScrollOffset - 1 && (
+                    <div
+                        style={{
+                            position: "absolute",
+                            bottom:
+                                SPRITE_MAP.CONTENT_BOTTOM.height * scaleFactor,
+                            left: SPRITE_MAP.CONTENT_LEFT.width * scaleFactor,
+                            right: SPRITE_MAP.CONTENT_RIGHT.width * scaleFactor,
+                            height: 30 * scaleFactor,
+                            background:
+                                "linear-gradient(to top, rgba(0,0,0,0.45), transparent)",
+                            pointerEvents: "none",
+                            zIndex: 1,
+                        }}
+                    />
+                )}
             </div>
         </div>
     )
