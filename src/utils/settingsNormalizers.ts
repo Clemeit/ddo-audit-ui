@@ -208,6 +208,7 @@ export interface NormalizedWhoSettings {
     showQuestName: boolean
     refreshInterval: number
     hideIgnoredCharacters: boolean
+    pinGuildies: boolean
     pinRegisteredCharacters: boolean
     pinFriends: boolean
     alwaysShowRegisteredCharacters: boolean
@@ -266,6 +267,7 @@ export function normalizeWhoSettings(input: unknown): NormalizedWhoSettings {
         showInQuestIndicator: coerceBool(s.showInQuestIndicator, true),
         showQuestName: coerceBool(s.showQuestName, true),
         hideIgnoredCharacters: coerceBool(s.hideIgnoredCharacters, true),
+        pinGuildies: coerceBool(s.pinGuildies, false),
         pinRegisteredCharacters: coerceBool(s.pinRegisteredCharacters, true),
         pinFriends: coerceBool(s.pinFriends, true),
         alwaysShowRegisteredCharacters: coerceBool(

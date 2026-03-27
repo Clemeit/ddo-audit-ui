@@ -48,6 +48,8 @@ const WhoToolbar = ({
         setShowQuestName,
         hideIgnoredCharacters,
         setHideIgnoredCharacters,
+        pinGuildies,
+        setPinGuildies,
         pinRegisteredCharacters,
         setPinRegisteredCharacters,
         pinFriends,
@@ -101,6 +103,14 @@ const WhoToolbar = ({
             <ContentCluster title="Social">
                 <Stack direction="column" gap="20px">
                     <Stack direction="column" gap="10px">
+                        <Checkbox
+                            checked={pinGuildies}
+                            onChange={(e) => {
+                                setPinGuildies(e.target.checked)
+                            }}
+                        >
+                            Pin characters from my guild(s)
+                        </Checkbox>
                         <Checkbox
                             checked={pinRegisteredCharacters}
                             onChange={(e) => {

@@ -98,12 +98,16 @@ const useRenderCharacter = ({ sprite, context }: Props) => {
                 edgeColor = WHO_COLORS.FRIEND_GRADIENT_EDGE
             } else if (character.metadata?.isRegistered) {
                 edgeColor = WHO_COLORS.REGISTERED_GRADIENT_EDGE
+            } else if (character.metadata?.isGuildie) {
+                edgeColor = WHO_COLORS.GUILDIE_GRADIENT_EDGE
             }
             let centerColor = WHO_COLORS.CHARACTER_GRADIENT_CENTER
             if (character.metadata?.isFriend) {
                 centerColor = WHO_COLORS.FRIEND_GRADIENT_CENTER
             } else if (character.metadata?.isRegistered) {
                 centerColor = WHO_COLORS.REGISTERED_GRADIENT_CENTER
+            } else if (character.metadata?.isGuildie) {
+                centerColor = WHO_COLORS.GUILDIE_GRADIENT_CENTER
             }
             context.fillStyle = getOrCreateGradient(edgeColor, centerColor)
             context.fillRect(0, 0, filterZone.width, CHARACTER_HEIGHT)

@@ -67,6 +67,8 @@ interface WhoContextProps {
     setRefreshInterval: React.Dispatch<React.SetStateAction<number>>
     hideIgnoredCharacters: boolean
     setHideIgnoredCharacters: React.Dispatch<React.SetStateAction<boolean>>
+    pinGuildies: boolean
+    setPinGuildies: React.Dispatch<React.SetStateAction<boolean>>
     pinRegisteredCharacters: boolean
     setPinRegisteredCharacters: React.Dispatch<React.SetStateAction<boolean>>
     alwaysShowRegisteredCharacters: boolean
@@ -126,6 +128,7 @@ export const WhoProvider = ({ children }: { children: ReactNode }) => {
         useState<boolean>(false)
     const [hideIgnoredCharacters, setHideIgnoredCharacters] =
         useState<boolean>(true)
+    const [pinGuildies, setPinGuildies] = useState<boolean>(false)
     const [pinRegisteredCharacters, setPinRegisteredCharacters] =
         useState<boolean>(true)
     const [alwaysShowRegisteredCharacters, setAlwaysShowRegisteredCharacters] =
@@ -219,6 +222,7 @@ export const WhoProvider = ({ children }: { children: ReactNode }) => {
         setShouldSaveGroupView(false)
         setShouldSaveExactMatch(false)
         setHideIgnoredCharacters(true)
+        setPinGuildies(false)
         setPinRegisteredCharacters(true)
         setAlwaysShowRegisteredCharacters(false)
         setPinFriends(true)
@@ -297,6 +301,7 @@ export const WhoProvider = ({ children }: { children: ReactNode }) => {
                     Boolean(settings.hideIgnoredCharacters ?? true)
                 )
                 setPinFriends(Boolean(settings.pinFriends ?? true))
+                setPinGuildies(Boolean(settings.pinGuildies ?? false))
                 setPinRegisteredCharacters(
                     Boolean(settings.pinRegisteredCharacters ?? true)
                 )
@@ -405,6 +410,7 @@ export const WhoProvider = ({ children }: { children: ReactNode }) => {
                 showQuestName,
                 refreshInterval,
                 hideIgnoredCharacters,
+                pinGuildies,
                 pinRegisteredCharacters,
                 pinFriends,
                 alwaysShowRegisteredCharacters,
@@ -451,6 +457,7 @@ export const WhoProvider = ({ children }: { children: ReactNode }) => {
         showQuestName,
         refreshInterval,
         hideIgnoredCharacters,
+        pinGuildies,
         pinRegisteredCharacters,
         pinFriends,
         alwaysShowRegisteredCharacters,
@@ -482,6 +489,7 @@ export const WhoProvider = ({ children }: { children: ReactNode }) => {
             showQuestName,
             refreshInterval,
             hideIgnoredCharacters,
+            pinGuildies,
             pinRegisteredCharacters,
             pinFriends,
             alwaysShowRegisteredCharacters,
@@ -555,6 +563,8 @@ export const WhoProvider = ({ children }: { children: ReactNode }) => {
                 setRefreshInterval,
                 hideIgnoredCharacters,
                 setHideIgnoredCharacters,
+                pinGuildies,
+                setPinGuildies,
                 pinRegisteredCharacters,
                 setPinRegisteredCharacters,
                 alwaysShowRegisteredCharacters,

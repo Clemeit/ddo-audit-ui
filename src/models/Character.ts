@@ -29,6 +29,7 @@ interface Character {
         isFriend?: boolean
         isRegistered?: boolean
         isIgnored?: boolean
+        isGuildie?: boolean
     }
 }
 

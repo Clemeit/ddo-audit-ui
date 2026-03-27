@@ -3,6 +3,7 @@ import React, {
     useCallback,
     useContext,
     useEffect,
+    useMemo,
     useRef,
     useState,
 } from "react"
@@ -33,6 +34,7 @@ export interface RegisteredCharactersContextValue {
     reload: () => Promise<void>
     unregisterCharacter: (character: Character) => void
     lastReload: Date
+    myGuildsList: string[]
 }
 
 const RegisteredCharactersContext = createContext<
@@ -93,6 +95,16 @@ export const RegisteredCharactersProvider = ({ children }: Props) => {
     const [lastReload, setLastReload] = useState<Date>(new Date())
     const abortControllerRef = useRef<AbortController | null>(null)
     const { persistentSettingsRevision } = useUserContext()
+
+    const myGuildsList = useMemo(() => {
+        const guildsList: string[] = registeredCharacters
+            .map((character) => character.guild_name)
+            .filter(
+                (guildName): guildName is string =>
+                    typeof guildName === "string" && guildName.trim() !== ""
+            )
+        return Array.from(new Set(guildsList))
+    }, [registeredCharacters])
 
     const reload = useCallback(async () => {
         if (abortControllerRef.current) {
@@ -498,6 +510,7 @@ export const RegisteredCharactersProvider = ({ children }: Props) => {
                 reload,
                 unregisterCharacter,
                 lastReload,
+                myGuildsList,
             }}
         >
             {children}

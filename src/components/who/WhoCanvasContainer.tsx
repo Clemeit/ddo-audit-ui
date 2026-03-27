@@ -47,13 +47,14 @@ const WhoContainer = ({
         isGroupView,
         isExactMatch,
         hideIgnoredCharacters,
+        pinGuildies,
         pinRegisteredCharacters,
         pinFriends,
         alwaysShowFriends,
         alwaysShowRegisteredCharacters,
         // refreshInterval, TODO: make this work
     } = useWhoContext()
-    const { registeredCharacters } = useGetRegisteredCharacters()
+    const { registeredCharacters, myGuildsList } = useGetRegisteredCharacters()
     const [ignoreServerDown, setIgnoreServerDown] = useState<boolean>(false)
     const { friends } = useGetFriends()
     const { ignores } = useGetIgnores()
@@ -164,12 +165,16 @@ const WhoContainer = ({
             const isRegistered = registeredCharacters.some(
                 (registered) => registered.id === character.id
             )
+            const isGuildie = character.guild_name
+                ? myGuildsList.some((guild) => guild === character.guild_name)
+                : false
             return {
                 ...character,
                 metadata: {
                     isFriend,
                     isRegistered,
                     isIgnored,
+                    isGuildie,
                 },
             }
         })
@@ -294,6 +299,13 @@ const WhoContainer = ({
                             return 1
                         }
                     }
+                    if (pinGuildies) {
+                        if (a.metadata?.isGuildie) {
+                            return -1
+                        } else if (b.metadata?.isGuildie) {
+                            return 1
+                        }
+                    }
                     if (pinFriends) {
                         if (a.metadata?.isFriend) {
                             return -1
@@ -354,11 +366,16 @@ const WhoContainer = ({
         classNameFilter,
         isExactMatch,
         hideIgnoredCharacters,
+        pinGuildies,
         pinRegisteredCharacters,
         pinFriends,
         alwaysShowFriends,
         alwaysShowRegisteredCharacters,
         areas,
+        myGuildsList,
+        registeredCharacters,
+        friends,
+        ignores,
     ])
 
     return (
