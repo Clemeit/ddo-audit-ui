@@ -277,7 +277,7 @@ const WhoContainer = ({
 
         if (isGroupView) {
             sortedCharacters = filteredCharacters
-                .sort((a, b) => (a.id = b.id))
+                .sort((a, b) => a.id - b.id)
                 .sort(
                     (a, b) =>
                         (a.is_anonymous ? 1 : 0) - (b.is_anonymous ? 1 : 0)
