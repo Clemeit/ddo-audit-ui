@@ -257,6 +257,12 @@ export const UserProvider = ({ children }: Props) => {
             const controller = new AbortController()
             refreshControllerRef.current = controller
             const abortRefresh = () => controller.abort()
+            if (signal?.aborted) {
+                abortRefresh()
+                throw createAbortError(
+                    "Refresh session was cancelled before start"
+                )
+            }
             signal?.addEventListener("abort", abortRefresh, { once: true })
 
             try {
@@ -314,6 +320,20 @@ export const UserProvider = ({ children }: Props) => {
         [setSession]
     )
 
+    const getOrStartRefreshPromise = useCallback(
+        (signal?: AbortSignal): Promise<string | null> => {
+            if (refreshLockRef.current === null) {
+                refreshLockRef.current = refreshAccessSession(signal).finally(
+                    () => {
+                        refreshLockRef.current = null
+                    }
+                )
+            }
+            return refreshLockRef.current
+        },
+        [refreshAccessSession]
+    )
+
     const executeWithAuthRetry = useCallback(
         async <T,>(
             request: (authToken: string) => Promise<T>,
@@ -323,7 +343,7 @@ export const UserProvider = ({ children }: Props) => {
             try {
                 return await request(token)
             } catch (error) {
-                if ((error as { name?: string })?.name === "AbortError") {
+                if (isAbortError(error)) {
                     throw error
                 }
 
@@ -334,39 +354,9 @@ export const UserProvider = ({ children }: Props) => {
                     throw error
                 }
 
-                // If a refresh is already in progress, wait for it
-                if (refreshLockRef.current !== null) {
-                    try {
-                        const refreshedToken = await refreshLockRef.current
-                        if (!refreshedToken) {
-                            clearSession()
-                            notifySessionInvalidated()
-                            throw error
-                        }
-                        return await request(refreshedToken)
-                    } catch (refreshError) {
-                        if (
-                            (refreshError as { name?: string })?.name ===
-                            "AbortError"
-                        ) {
-                            throw refreshError
-                        }
-
-                        const refreshStatus = axios.isAxiosError(refreshError)
-                            ? refreshError.response?.status
-                            : undefined
-                        if (refreshStatus === 401 || refreshStatus === 403) {
-                            clearSession()
-                            notifySessionInvalidated()
-                        }
-                        throw refreshError
-                    }
-                }
-
-                // Start a new refresh and serialize all concurrent requests
-                refreshLockRef.current = refreshAccessSession(signal)
                 try {
-                    const refreshedToken = await refreshLockRef.current
+                    const refreshedToken =
+                        await getOrStartRefreshPromise(signal)
                     if (!refreshedToken) {
                         clearSession()
                         notifySessionInvalidated()
@@ -374,10 +364,7 @@ export const UserProvider = ({ children }: Props) => {
                     }
                     return await request(refreshedToken)
                 } catch (refreshError) {
-                    if (
-                        (refreshError as { name?: string })?.name ===
-                        "AbortError"
-                    ) {
+                    if (isAbortError(refreshError)) {
                         throw refreshError
                     }
 
@@ -389,12 +376,10 @@ export const UserProvider = ({ children }: Props) => {
                         notifySessionInvalidated()
                     }
                     throw refreshError
-                } finally {
-                    refreshLockRef.current = null
                 }
             }
         },
-        [refreshAccessSession, clearSession, notifySessionInvalidated]
+        [getOrStartRefreshPromise, clearSession, notifySessionInvalidated]
     )
 
     const isIdOnlyKey = useCallback(
@@ -718,7 +703,7 @@ export const UserProvider = ({ children }: Props) => {
         async (signal?: AbortSignal): Promise<boolean> => {
             setIsLoading(true)
             try {
-                const refreshedToken = await refreshAccessSession(signal)
+                const refreshedToken = await getOrStartRefreshPromise(signal)
                 if (!refreshedToken) {
                     clearSession()
                     notifySessionInvalidated()
@@ -740,7 +725,7 @@ export const UserProvider = ({ children }: Props) => {
             }
         },
         [
-            refreshAccessSession,
+            getOrStartRefreshPromise,
             fetchAndApplyServerSettings,
             clearSession,
             notifySessionInvalidated,
