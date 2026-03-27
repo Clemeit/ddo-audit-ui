@@ -171,6 +171,12 @@ export const UserProvider = ({ children }: Props) => {
     const syncTimeoutRef = useRef<number | null>(null)
     const isApplyingServerRef = useRef<boolean>(false)
     const keepAliveControllerRef = useRef<AbortController | null>(null)
+    const keepAliveRetryTimeoutRef = useRef<ReturnType<
+        typeof setTimeout
+    > | null>(null)
+    const refreshLockRef = useRef<Promise<string | null> | null>(null)
+    const refreshFailureCountRef = useRef<number>(0)
+    const isInCircuitBreakerRef = useRef<boolean>(false)
 
     const setSessionRehydrateHint = useCallback((enabled: boolean) => {
         try {
@@ -208,7 +214,14 @@ export const UserProvider = ({ children }: Props) => {
             window.clearTimeout(syncTimeoutRef.current)
             syncTimeoutRef.current = null
         }
+        if (keepAliveRetryTimeoutRef.current !== null) {
+            window.clearTimeout(keepAliveRetryTimeoutRef.current)
+            keepAliveRetryTimeoutRef.current = null
+        }
         syncedValueSnapshotRef.current.clear()
+        // Reset resilience tracking
+        refreshFailureCountRef.current = 0
+        isInCircuitBreakerRef.current = false
         setAccessToken(null)
         setExpiresIn(null)
         setSessionRehydrateHint(false)
@@ -225,10 +238,28 @@ export const UserProvider = ({ children }: Props) => {
 
     const refreshAccessSession = useCallback(
         async (signal?: AbortSignal): Promise<string | null> => {
-            const response = await postRefresh(signal)
-            if (!response?.data) return null
-            setSession(response.data)
-            return response.data.access_token
+            try {
+                const response = await postRefresh(signal)
+                if (!response?.data) return null
+                setSession(response.data)
+                // Reset failure tracking on success
+                refreshFailureCountRef.current = 0
+                isInCircuitBreakerRef.current = false
+                return response.data.access_token
+            } catch (error) {
+                // Increment failure count for circuit breaker
+                // After 3 consecutive failures, stop trying to avoid hammering endpoint
+                refreshFailureCountRef.current += 1
+                if (refreshFailureCountRef.current >= 3) {
+                    isInCircuitBreakerRef.current = true
+                    logMessage(
+                        "Refresh failed 3 times consecutively, activating circuit breaker",
+                        "warn",
+                        { metadata: getErrorMetadata(error) }
+                    )
+                }
+                return null
+            }
         },
         [setSession]
     )
@@ -253,8 +284,46 @@ export const UserProvider = ({ children }: Props) => {
                     throw error
                 }
 
+                // If circuit breaker is active, don't attempt refresh
+                if (isInCircuitBreakerRef.current) {
+                    clearSession()
+                    notifySessionInvalidated()
+                    throw error
+                }
+
+                // If a refresh is already in progress, wait for it
+                if (refreshLockRef.current !== null) {
+                    try {
+                        const refreshedToken = await refreshLockRef.current
+                        if (!refreshedToken) {
+                            clearSession()
+                            notifySessionInvalidated()
+                            throw error
+                        }
+                        return await request(refreshedToken)
+                    } catch (refreshError) {
+                        if (
+                            (refreshError as { name?: string })?.name ===
+                            "AbortError"
+                        ) {
+                            throw refreshError
+                        }
+
+                        const refreshStatus = axios.isAxiosError(refreshError)
+                            ? refreshError.response?.status
+                            : undefined
+                        if (refreshStatus === 401 || refreshStatus === 403) {
+                            clearSession()
+                            notifySessionInvalidated()
+                        }
+                        throw refreshError
+                    }
+                }
+
+                // Start a new refresh and serialize all concurrent requests
+                refreshLockRef.current = refreshAccessSession(signal)
                 try {
-                    const refreshedToken = await refreshAccessSession(signal)
+                    const refreshedToken = await refreshLockRef.current
                     if (!refreshedToken) {
                         clearSession()
                         notifySessionInvalidated()
@@ -277,6 +346,8 @@ export const UserProvider = ({ children }: Props) => {
                         notifySessionInvalidated()
                     }
                     throw refreshError
+                } finally {
+                    refreshLockRef.current = null
                 }
             }
         },
@@ -667,18 +738,48 @@ export const UserProvider = ({ children }: Props) => {
         }
     }, [refreshSession, shouldAttemptSessionRehydrate])
 
-    // Keep session alive
+    // Keep session alive with resilient retry logic
     useEffect(() => {
         if (!accessToken || !expiresIn) return
-        const timeout = setTimeout(
-            () => {
-                keepAliveControllerRef.current = new AbortController()
-                void refreshSession(keepAliveControllerRef.current.signal)
-            },
-            (expiresIn - 30) * 1000
-        ) // refresh 30s before expiry
+
+        const refreshMarginMs = 60 * 1000
+
+        const scheduleRefresh = (delayMs: number) => {
+            const timeout = setTimeout(
+                () => {
+                    keepAliveControllerRef.current = new AbortController()
+                    // Call refreshSession and handle success/error
+                    refreshSession(
+                        keepAliveControllerRef.current.signal
+                    ).finally(() => {
+                        // After refreshSession completes (success or error),
+                        // check if we need to retry
+                        if (!accessToken || isInCircuitBreakerRef.current) {
+                            // Already cleared or in circuit breaker, don't reschedule
+                            return
+                        }
+                        // Check if refresh failed by examining failure count
+                        if (refreshFailureCountRef.current > 0) {
+                            // Refresh failed, reschedule retry
+                            scheduleRefresh(10000) // Retry in 10s
+                        }
+                    })
+                },
+                Math.max(0, delayMs)
+            )
+            keepAliveRetryTimeoutRef.current = timeout
+            return timeout
+        }
+
+        const timeUntilExpiry = expiresIn * 1000 - refreshMarginMs
+        const timeout = scheduleRefresh(timeUntilExpiry)
+
         return () => {
             clearTimeout(timeout)
+            if (keepAliveRetryTimeoutRef.current !== null) {
+                clearTimeout(keepAliveRetryTimeoutRef.current)
+                keepAliveRetryTimeoutRef.current = null
+            }
             keepAliveControllerRef.current?.abort()
             keepAliveControllerRef.current = null
         }
