@@ -135,6 +135,15 @@ const getErrorMetadata = (error: unknown): Record<string, unknown> => {
     }
 }
 
+const isAbortError = (error: unknown): boolean =>
+    (error as { name?: string })?.name === "AbortError"
+
+const createAbortError = (message: string): Error => {
+    const abortError = new Error(message)
+    abortError.name = "AbortError"
+    return abortError
+}
+
 export const UserProvider = ({ children }: Props) => {
     const [persistentSettingsRevision, setPersistentSettingsRevision] =
         useState<number>(0)
@@ -171,12 +180,12 @@ export const UserProvider = ({ children }: Props) => {
     const syncTimeoutRef = useRef<number | null>(null)
     const isApplyingServerRef = useRef<boolean>(false)
     const keepAliveControllerRef = useRef<AbortController | null>(null)
-    const keepAliveRetryTimeoutRef = useRef<ReturnType<
-        typeof setTimeout
-    > | null>(null)
+    const refreshControllerRef = useRef<AbortController | null>(null)
+    const keepAliveRetryTimeoutRef = useRef<number | null>(null)
     const refreshLockRef = useRef<Promise<string | null> | null>(null)
     const refreshFailureCountRef = useRef<number>(0)
     const isInCircuitBreakerRef = useRef<boolean>(false)
+    const sessionGenerationRef = useRef<number>(0)
 
     const setSessionRehydrateHint = useCallback((enabled: boolean) => {
         try {
@@ -210,6 +219,7 @@ export const UserProvider = ({ children }: Props) => {
     )
 
     const clearSession = useCallback(() => {
+        sessionGenerationRef.current += 1
         if (syncTimeoutRef.current !== null) {
             window.clearTimeout(syncTimeoutRef.current)
             syncTimeoutRef.current = null
@@ -218,6 +228,11 @@ export const UserProvider = ({ children }: Props) => {
             window.clearTimeout(keepAliveRetryTimeoutRef.current)
             keepAliveRetryTimeoutRef.current = null
         }
+        keepAliveControllerRef.current?.abort()
+        keepAliveControllerRef.current = null
+        refreshControllerRef.current?.abort()
+        refreshControllerRef.current = null
+        refreshLockRef.current = null
         syncedValueSnapshotRef.current.clear()
         // Reset resilience tracking
         refreshFailureCountRef.current = 0
@@ -238,8 +253,22 @@ export const UserProvider = ({ children }: Props) => {
 
     const refreshAccessSession = useCallback(
         async (signal?: AbortSignal): Promise<string | null> => {
+            const refreshGeneration = sessionGenerationRef.current
+            const controller = new AbortController()
+            refreshControllerRef.current = controller
+            const abortRefresh = () => controller.abort()
+            signal?.addEventListener("abort", abortRefresh, { once: true })
+
             try {
-                const response = await postRefresh(signal)
+                const response = await postRefresh(controller.signal)
+                if (
+                    controller.signal.aborted ||
+                    sessionGenerationRef.current !== refreshGeneration
+                ) {
+                    throw createAbortError(
+                        "Refresh session was cancelled before completion"
+                    )
+                }
                 if (!response?.data) return null
                 setSession(response.data)
                 // Reset failure tracking on success
@@ -247,18 +276,39 @@ export const UserProvider = ({ children }: Props) => {
                 isInCircuitBreakerRef.current = false
                 return response.data.access_token
             } catch (error) {
-                // Increment failure count for circuit breaker
-                // After 3 consecutive failures, stop trying to avoid hammering endpoint
+                if (
+                    isAbortError(error) ||
+                    controller.signal.aborted ||
+                    sessionGenerationRef.current !== refreshGeneration
+                ) {
+                    throw createAbortError(
+                        "Refresh session was cancelled before completion"
+                    )
+                }
+
+                const refreshStatus = axios.isAxiosError(error)
+                    ? error.response?.status
+                    : undefined
+                if (refreshStatus === 401 || refreshStatus === 403) {
+                    return null
+                }
+
                 refreshFailureCountRef.current += 1
                 if (refreshFailureCountRef.current >= 3) {
                     isInCircuitBreakerRef.current = true
                     logMessage(
-                        "Refresh failed 3 times consecutively, activating circuit breaker",
+                        "Refresh failed repeatedly, pausing automatic keep-alive retries",
                         "warn",
                         { metadata: getErrorMetadata(error) }
                     )
                 }
-                return null
+
+                throw error
+            } finally {
+                signal?.removeEventListener("abort", abortRefresh)
+                if (refreshControllerRef.current === controller) {
+                    refreshControllerRef.current = null
+                }
             }
         },
         [setSession]
@@ -281,13 +331,6 @@ export const UserProvider = ({ children }: Props) => {
                     ? error.response?.status
                     : undefined
                 if (status !== 401 && status !== 403) {
-                    throw error
-                }
-
-                // If circuit breaker is active, don't attempt refresh
-                if (isInCircuitBreakerRef.current) {
-                    clearSession()
-                    notifySessionInvalidated()
                     throw error
                 }
 
@@ -672,47 +715,35 @@ export const UserProvider = ({ children }: Props) => {
     )
 
     const refreshSession = useCallback(
-        async (signal?: AbortSignal) => {
+        async (signal?: AbortSignal): Promise<boolean> => {
             setIsLoading(true)
             try {
-                const response = await postRefresh(signal)
-                if (response?.data) {
-                    setSession(response.data)
-                    await fetchAndApplyServerSettings(
-                        response.data.access_token,
-                        signal
-                    )
+                const refreshedToken = await refreshAccessSession(signal)
+                if (!refreshedToken) {
+                    clearSession()
+                    notifySessionInvalidated()
+                    return false
                 }
+                await fetchAndApplyServerSettings(refreshedToken, signal)
+                return true
             } catch (error) {
-                // Refresh token expired or invalid — session is over
-                if ((error as { name?: string })?.name === "AbortError") return
+                if (isAbortError(error)) {
+                    throw error
+                }
                 logMessage("Failed to refresh session", "warn", {
                     metadata: getErrorMetadata(error),
                 })
-                if (
-                    axios.isAxiosError(error) &&
-                    (error.response?.status === 401 ||
-                        error.response?.status === 403)
-                ) {
-                    clearSession()
-                    createNotification({
-                        title: "You were logged out",
-                        message:
-                            "Please log back in to continue syncing your settings.",
-                        type: "info",
-                        ttl: 6000,
-                    })
-                }
+                throw error
             } finally {
                 setIsLoading(false)
                 setFirstLoadComplete(true)
             }
         },
         [
-            setSession,
+            refreshAccessSession,
             fetchAndApplyServerSettings,
             clearSession,
-            createNotification,
+            notifySessionInvalidated,
         ]
     )
 
@@ -728,9 +759,13 @@ export const UserProvider = ({ children }: Props) => {
             setFirstLoadComplete(true)
         }, 3000) // Fallback in case rehydration hangs for some reason
 
-        void refreshSession(controller.signal).finally(() => {
-            clearTimeout(timeoutId)
-        })
+        void refreshSession(controller.signal)
+            .catch(() => {
+                // refreshSession already logs non-abort failures.
+            })
+            .finally(() => {
+                clearTimeout(timeoutId)
+            })
 
         return () => {
             controller.abort()
@@ -745,24 +780,25 @@ export const UserProvider = ({ children }: Props) => {
         const refreshMarginMs = 60 * 1000
 
         const scheduleRefresh = (delayMs: number) => {
-            const timeout = setTimeout(
+            const timeout = window.setTimeout(
                 () => {
                     keepAliveControllerRef.current = new AbortController()
-                    // Call refreshSession and handle success/error
-                    refreshSession(
+                    void refreshSession(
                         keepAliveControllerRef.current.signal
-                    ).finally(() => {
-                        // After refreshSession completes (success or error),
-                        // check if we need to retry
-                        if (!accessToken || isInCircuitBreakerRef.current) {
-                            // Already cleared or in circuit breaker, don't reschedule
+                    ).catch((error) => {
+                        if (isAbortError(error)) {
                             return
                         }
-                        // Check if refresh failed by examining failure count
-                        if (refreshFailureCountRef.current > 0) {
-                            // Refresh failed, reschedule retry
-                            scheduleRefresh(10000) // Retry in 10s
+                        if (!accessToken || isInCircuitBreakerRef.current) {
+                            return
                         }
+                        keepAliveRetryTimeoutRef.current = window.setTimeout(
+                            () => {
+                                keepAliveRetryTimeoutRef.current = null
+                                scheduleRefresh(0)
+                            },
+                            10000
+                        )
                     })
                 },
                 Math.max(0, delayMs)
