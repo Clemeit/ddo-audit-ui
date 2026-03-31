@@ -194,6 +194,7 @@ export interface NormalizedWhoSettings {
     isGroupView: boolean
     shouldIncludeRegion: boolean
     isExactMatch: boolean
+    isFilterAreaCollapsed: boolean
     sortBy: CharacterSortBy
     panelWidth: number
     isDynamicWidth: boolean
@@ -204,6 +205,7 @@ export interface NormalizedWhoSettings {
     shouldSaveSortBy: boolean
     shouldSaveGroupView: boolean
     shouldSaveExactMatch: boolean
+    shouldSaveFilterAreaCollapsed: boolean
     showInQuestIndicator: boolean
     showQuestName: boolean
     refreshInterval: number
@@ -256,6 +258,7 @@ export function normalizeWhoSettings(input: unknown): NormalizedWhoSettings {
         isGroupView: coerceBool(s.isGroupView, false),
         shouldIncludeRegion: coerceBool(s.shouldIncludeRegion, false),
         isExactMatch: coerceBool(s.isExactMatch, false),
+        isFilterAreaCollapsed: coerceBool(s.isFilterAreaCollapsed, false),
         isDynamicWidth: coerceBool(s.isDynamicWidth, false),
         shouldSaveSettings: coerceBool(s.shouldSaveSettings, false),
         shouldSaveClassFilter: coerceBool(s.shouldSaveClassFilter, false),
@@ -264,6 +267,10 @@ export function normalizeWhoSettings(input: unknown): NormalizedWhoSettings {
         shouldSaveSortBy: coerceBool(s.shouldSaveSortBy, false),
         shouldSaveGroupView: coerceBool(s.shouldSaveGroupView, false),
         shouldSaveExactMatch: coerceBool(s.shouldSaveExactMatch, false),
+        shouldSaveFilterAreaCollapsed: coerceBool(
+            s.shouldSaveFilterAreaCollapsed,
+            false
+        ),
         showInQuestIndicator: coerceBool(s.showInQuestIndicator, true),
         showQuestName: coerceBool(s.showQuestName, true),
         hideIgnoredCharacters: coerceBool(s.hideIgnoredCharacters, true),

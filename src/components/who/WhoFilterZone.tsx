@@ -35,13 +35,18 @@ const WhoFilterZone = ({
         setIsGroupView,
         isExactMatch,
         setIsExactMatch,
+        isFilterAreaCollapsed,
+        setIsFilterAreaCollapsed,
         shouldSaveLevelFilter,
         shouldSaveSettings,
         hideClassFilterOnMobile,
     } = useWhoContext()
 
-    const { isMobile } = useWindowSize()
-    const s = useMemo(() => getStyles(isMobile), [isMobile])
+    const { isMobile, isSmallishMobile } = useWindowSize()
+    const s = useMemo(
+        () => getStyles(isMobile, isFilterAreaCollapsed),
+        [isMobile, isFilterAreaCollapsed]
+    )
 
     const innerBorderRef = useRef<HTMLDivElement>(null)
     const innerBorderCanvasRef = useRef<HTMLCanvasElement>(null)
@@ -266,72 +271,76 @@ const WhoFilterZone = ({
                 {/* Shared-width wrapper so both groups match the wider one */}
                 <div style={s.sharedWidthWrapper}>
                     {/* Class filter group - left-aligned internally, centered as a group */}
-                    {!(hideClassFilterOnMobile && isMobile) && (
-                        <div style={s.centeredGroup}>
-                            <div style={s.row}>
-                                <span style={s.yellowText}>
-                                    Filter by Class:
-                                </span>
-                                <label
-                                    style={s.checkboxLabel}
-                                    onClick={toggleAllClasses}
-                                >
-                                    <SpriteCheckbox
-                                        checked={
-                                            classNameFilter.length ===
-                                            CLASS_LIST_LOWER.length
-                                        }
-                                        type="normal"
-                                        sprite={spriteImage}
-                                    />
-                                    <span style={s.whiteText}>Any</span>
-                                </label>
-                            </div>
-                            <div style={s.classFiltersRow}>
-                                {CLASS_LIST.map((className, index) => {
-                                    const filterKey = className
-                                        .replace(" ", "_")
-                                        .toUpperCase()
-                                    const spriteData =
-                                        SPRITE_MAP.CLASS_FILTER[filterKey]
-                                    const isSelected = classNameFilter.includes(
-                                        CLASS_LIST_LOWER[index]
-                                    )
-                                    return (
-                                        <button
-                                            type="button"
-                                            key={className}
-                                            onClick={() =>
-                                                toggleClass(
-                                                    CLASS_LIST_LOWER[index]
-                                                )
+                    {!isFilterAreaCollapsed &&
+                        !(hideClassFilterOnMobile && isMobile) && (
+                            <div style={s.centeredGroup}>
+                                <div style={s.row}>
+                                    <span style={s.yellowText}>
+                                        Filter by Class:
+                                    </span>
+                                    <label
+                                        style={s.checkboxLabel}
+                                        onClick={toggleAllClasses}
+                                    >
+                                        <SpriteCheckbox
+                                            checked={
+                                                classNameFilter.length ===
+                                                CLASS_LIST_LOWER.length
                                             }
-                                            style={{
-                                                ...s.classFilterButton,
-                                                outline: isSelected
-                                                    ? "2px solid #ffffff"
-                                                    : "none",
-                                            }}
-                                            title={className}
-                                        >
-                                            <SpriteImage
-                                                spriteData={spriteData}
-                                                selected={isSelected}
-                                                sprite={spriteImage}
-                                            />
-                                        </button>
-                                    )
-                                })}
+                                            type="normal"
+                                            sprite={spriteImage}
+                                        />
+                                        <span style={s.whiteText}>Any</span>
+                                    </label>
+                                </div>
+                                <div style={s.classFiltersRow}>
+                                    {CLASS_LIST.map((className, index) => {
+                                        const filterKey = className
+                                            .replace(" ", "_")
+                                            .toUpperCase()
+                                        const spriteData =
+                                            SPRITE_MAP.CLASS_FILTER[filterKey]
+                                        const isSelected =
+                                            classNameFilter.includes(
+                                                CLASS_LIST_LOWER[index]
+                                            )
+                                        return (
+                                            <button
+                                                type="button"
+                                                key={className}
+                                                onClick={() =>
+                                                    toggleClass(
+                                                        CLASS_LIST_LOWER[index]
+                                                    )
+                                                }
+                                                style={{
+                                                    ...s.classFilterButton,
+                                                    outline: isSelected
+                                                        ? "2px solid #ffffff"
+                                                        : "none",
+                                                }}
+                                                title={className}
+                                            >
+                                                <SpriteImage
+                                                    spriteData={spriteData}
+                                                    selected={isSelected}
+                                                    sprite={spriteImage}
+                                                />
+                                            </button>
+                                        )
+                                    })}
+                                </div>
                             </div>
-                        </div>
-                    )}
+                        )}
 
                     {/* Search/level/group view + exact match - left-aligned internally, centered as a group */}
                     <div style={s.centeredGroup}>
                         <div style={s.searchRow}>
                             <div style={s.searchGroup}>
                                 <span style={s.yellowText}>
-                                    Search by Name, Guild, or Location:
+                                    {isSmallishMobile
+                                        ? "Search:"
+                                        : "Search by Name, Guild, or Location:"}
                                 </span>
                                 <input
                                     type="text"
@@ -410,7 +419,11 @@ const WhoFilterZone = ({
                                 </div>
                             </div>
                             <div style={s.groupViewGroup}>
-                                <span style={s.yellowText}>Group View:</span>
+                                {!isFilterAreaCollapsed && (
+                                    <span style={s.yellowText}>
+                                        Group View:
+                                    </span>
+                                )}
                                 <label
                                     style={s.checkboxLabel}
                                     onClick={() =>
@@ -424,44 +437,73 @@ const WhoFilterZone = ({
                                     />
                                 </label>
                             </div>
+                            {isFilterAreaCollapsed && (
+                                <div style={s.expandButtonGroup}>
+                                    <button
+                                        type="button"
+                                        style={s.expandButton}
+                                        onClick={() =>
+                                            setIsFilterAreaCollapsed(false)
+                                        }
+                                        title="Show more filters"
+                                    >
+                                        ▼ More
+                                    </button>
+                                </div>
+                            )}
                         </div>
 
                         {/* Exact match and stats row */}
-                        <div style={s.row}>
-                            <label
-                                style={s.checkboxLabel}
-                                onClick={() => setIsExactMatch((prev) => !prev)}
-                            >
-                                <SpriteCheckbox
-                                    checked={isExactMatch}
-                                    type="normal"
-                                    sprite={spriteImage}
-                                />
-                                <span style={s.whiteText}>Exact Match</span>
-                            </label>
-                        </div>
+                        {!isFilterAreaCollapsed && (
+                            <div style={s.row}>
+                                <label
+                                    style={s.checkboxLabel}
+                                    onClick={() =>
+                                        setIsExactMatch((prev) => !prev)
+                                    }
+                                >
+                                    <SpriteCheckbox
+                                        checked={isExactMatch}
+                                        type="normal"
+                                        sprite={spriteImage}
+                                    />
+                                    <span style={s.whiteText}>Exact Match</span>
+                                </label>
+                            </div>
+                        )}
                     </div>
                 </div>
-                <div style={s.statsRow}>
-                    <span style={s.statPair}>
-                        <span style={s.yellowText}>Online:</span>
-                        <span style={s.whiteText}>{allCharacterCount}</span>
-                    </span>
-                    <span style={s.statSpacer} />
-                    <span style={s.statPair}>
-                        <span style={s.yellowText}>Anonymous:</span>
-                        <span style={s.whiteText}>
-                            {anonymousCharacterCount}
+                {!isFilterAreaCollapsed && (
+                    <div style={s.statsRow}>
+                        <span style={s.statPair}>
+                            <span style={s.yellowText}>Online:</span>
+                            <span style={s.whiteText}>{allCharacterCount}</span>
                         </span>
-                    </span>
-                    <span style={s.statSpacer} />
-                    <span style={s.statPair}>
-                        <span style={s.yellowText}>Displaying:</span>
-                        <span style={s.whiteText}>
-                            {displayedCharacterCount}
+                        <span style={s.statSpacer} />
+                        <span style={s.statPair}>
+                            <span style={s.yellowText}>Anonymous:</span>
+                            <span style={s.whiteText}>
+                                {anonymousCharacterCount}
+                            </span>
                         </span>
-                    </span>
-                </div>
+                        <span style={s.statSpacer} />
+                        <span style={s.statPair}>
+                            <span style={s.yellowText}>Displaying:</span>
+                            <span style={s.whiteText}>
+                                {displayedCharacterCount}
+                            </span>
+                        </span>
+                        <span style={s.statSpacer} />
+                        <button
+                            type="button"
+                            style={s.expandButton}
+                            onClick={() => setIsFilterAreaCollapsed(true)}
+                            title="Show fewer filters"
+                        >
+                            ▲ Less
+                        </button>
+                    </div>
+                )}
             </div>
         </div>
     )
@@ -556,7 +598,10 @@ const SpriteCheckbox = ({
     )
 }
 
-function getStyles(isMobile: boolean): Record<string, React.CSSProperties> {
+function getStyles(
+    isMobile: boolean,
+    isFilterAreaCollapsed: boolean = false
+): Record<string, React.CSSProperties> {
     const fontSize = isMobile ? "12px" : "16px"
     const inputFontSize = isMobile ? "12px" : "14px"
     const inputPadding = isMobile ? "1px 3px" : "2px 4px"
@@ -564,12 +609,19 @@ function getStyles(isMobile: boolean): Record<string, React.CSSProperties> {
     return {
         container: {
             background: WHO_COLORS.BLACK_BACKGROUND,
-            padding: isMobile ? "8px 8px 0px 8px" : "16px 18px 0px 18px",
+            padding:
+                isFilterAreaCollapsed || isMobile
+                    ? "8px 8px 0px 8px"
+                    : "16px 18px 0px 18px",
             fontFamily: "'Trebuchet MS', sans-serif",
         },
         innerBorder: {
             position: "relative",
-            padding: isMobile ? "10px 8px" : "20px 14px",
+            padding: isFilterAreaCollapsed
+                ? "10px 12px 12px 12px"
+                : isMobile
+                  ? "10px 8px"
+                  : "20px 14px",
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
@@ -584,11 +636,13 @@ function getStyles(isMobile: boolean): Record<string, React.CSSProperties> {
             display: "flex",
             flexDirection: "column",
             gap: isMobile ? "4px" : "6px",
+            width: isFilterAreaCollapsed ? "100%" : "unset",
         },
         centeredGroup: {
             display: "flex",
             flexDirection: "column",
             gap: isMobile ? "4px" : "6px",
+            width: isFilterAreaCollapsed ? "100%" : "unset",
         },
         classFiltersRow: {
             display: "flex",
@@ -605,16 +659,18 @@ function getStyles(isMobile: boolean): Record<string, React.CSSProperties> {
         },
         searchRow: {
             display: "flex",
-            alignItems: "flex-start",
+            alignItems: isFilterAreaCollapsed ? "flex-end" : "flex-start",
             gap: isMobile ? "10px" : "20px",
             rowGap: isMobile ? "4px" : "5px",
             flexWrap: "wrap",
+            width: isFilterAreaCollapsed ? "100%" : "unset",
         },
         searchGroup: {
             display: "flex",
             flexDirection: "column",
             gap: isMobile ? "2px" : "4px",
-            minWidth: 0,
+            minWidth: "40px",
+            flex: isFilterAreaCollapsed ? 1 : "unset",
         },
         levelGroup: {
             display: "flex",
@@ -631,6 +687,23 @@ function getStyles(isMobile: boolean): Record<string, React.CSSProperties> {
             flexDirection: "column",
             gap: isMobile ? "2px" : "4px",
         },
+        expandButtonGroup: {
+            display: "flex",
+            flexDirection: "column",
+            gap: isMobile ? "2px" : "4px",
+        },
+        expandButton: {
+            background: "none",
+            border: `1px solid ${WHO_COLORS.FADED_WHITE}`,
+            color: WHO_COLORS.YELLOW_TEXT,
+            cursor: "pointer",
+            fontSize: isMobile ? "11px" : "13px",
+            padding: isMobile ? "0px 6px" : "0px 8px",
+            height: "23px",
+            boxSizing: "border-box" as const,
+            fontFamily: "'Trebuchet MS', sans-serif",
+            whiteSpace: "nowrap" as const,
+        },
         searchInput: {
             background: "#000",
             border: `1px solid ${WHO_COLORS.FADED_WHITE}`,
@@ -639,6 +712,7 @@ function getStyles(isMobile: boolean): Record<string, React.CSSProperties> {
             fontSize: inputFontSize,
             padding: inputPadding,
             maxWidth: "100%",
+            width: isFilterAreaCollapsed ? "100%" : "unset",
             boxSizing: "border-box",
             fontFamily: "'Trebuchet MS', sans-serif",
         },
