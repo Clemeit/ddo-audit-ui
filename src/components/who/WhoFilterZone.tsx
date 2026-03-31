@@ -337,7 +337,7 @@ const WhoFilterZone = ({
                     <div style={s.centeredGroup}>
                         <div style={s.searchRow}>
                             <div style={s.searchGroup}>
-                                <span style={s.yellowText}>
+                                <span style={s.searchLabel}>
                                     {isSmallishMobile
                                         ? "Search:"
                                         : "Search by Name, Guild, or Location:"}
@@ -671,6 +671,15 @@ function getStyles(
             gap: isMobile ? "2px" : "4px",
             minWidth: "40px",
             flex: isFilterAreaCollapsed ? 1 : "unset",
+        },
+        searchLabel: {
+            color: WHO_COLORS.YELLOW_TEXT,
+            fontSize,
+            display: "block",
+            maxWidth: "100%",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
         },
         levelGroup: {
             display: "flex",

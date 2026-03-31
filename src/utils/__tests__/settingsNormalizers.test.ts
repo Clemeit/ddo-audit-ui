@@ -75,17 +75,29 @@ describe("settingsNormalizers", () => {
         })
 
         it("coerces booleans with correct defaults", () => {
-            expect(normalizeLfmSettings({ showNotEligible: "yes" }).showNotEligible).toBe(true)
-            expect(normalizeLfmSettings({ filterByMyCharacters: "yes" }).filterByMyCharacters).toBe(true)
+            expect(
+                normalizeLfmSettings({ showNotEligible: "yes" }).showNotEligible
+            ).toBe(true)
+            expect(
+                normalizeLfmSettings({ filterByMyCharacters: "yes" })
+                    .filterByMyCharacters
+            ).toBe(true)
         })
 
         it("preserves valid boolean values", () => {
-            expect(normalizeLfmSettings({ showNotEligible: false }).showNotEligible).toBe(false)
-            expect(normalizeLfmSettings({ filterByMyCharacters: true }).filterByMyCharacters).toBe(true)
+            expect(
+                normalizeLfmSettings({ showNotEligible: false }).showNotEligible
+            ).toBe(false)
+            expect(
+                normalizeLfmSettings({ filterByMyCharacters: true })
+                    .filterByMyCharacters
+            ).toBe(true)
         })
 
         it("coerces trackedCharacterIds to number array", () => {
-            const result = normalizeLfmSettings({ trackedCharacterIds: [1, "bad", 3] })
+            const result = normalizeLfmSettings({
+                trackedCharacterIds: [1, "bad", 3],
+            })
             expect(result.trackedCharacterIds).toEqual([1, 3])
         })
 
@@ -203,14 +215,19 @@ describe("settingsNormalizers", () => {
 
     describe("normalizePartialPersistentSettings", () => {
         it("returns only requested keys", () => {
-            const result = normalizePartialPersistentSettings({}, ["friends", "ignores"])
+            const result = normalizePartialPersistentSettings({}, [
+                "friends",
+                "ignores",
+            ])
             expect(result).toHaveProperty("friends")
             expect(result).toHaveProperty("ignores")
             expect(result).not.toHaveProperty("lfm-settings")
         })
 
         it("ignores keys that are not part of persistent settings", () => {
-            const result = normalizePartialPersistentSettings({}, ["nonexistent-key" as any])
+            const result = normalizePartialPersistentSettings({}, [
+                "nonexistent-key" as any,
+            ])
             expect(Object.keys(result)).toHaveLength(0)
         })
     })
