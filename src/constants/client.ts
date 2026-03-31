@@ -27,6 +27,7 @@ const getApiUrl = () => {
 const API_URL = getApiUrl()
 // const API_URL = "http://api.localtest.me"
 const BETTER_STACK_URL = "https://ddoaudit.betteruptime.com/"
+const API_DOC_URL = "https://api.ddoaudit.com/docs"
 
 export {
     CACHED_CHARACTER_EXPIRY_TIME,
@@ -40,4 +41,5 @@ export {
     BETTER_STACK_URL,
     MAX_LEVENSHTEIN_DISTANCE,
     DEFAULT_TIMEZONE,
+    API_DOC_URL,
 }

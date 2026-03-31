@@ -327,10 +327,7 @@ const GroupingContent = () => {
                     <NavCardCluster>
                         <NavigationCard type="registration" />
                         <NavigationCard type="owned-content" />
-                        <NavigationCard
-                            type="timers"
-                            badge={<Badge text="New" type="new" />}
-                        />
+                        <NavigationCard type="timers" />
                     </NavCardCluster>
                 </ContentCluster>
             </ContentClusterGroup>

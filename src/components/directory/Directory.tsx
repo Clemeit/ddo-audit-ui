@@ -5,7 +5,7 @@ import {
 } from "../global/ContentCluster.tsx"
 import Page from "../global/Page.tsx"
 import NavCardCluster from "../global/NavCardCluster.tsx"
-import { BETTER_STACK_URL } from "../../constants/client.ts"
+import { BETTER_STACK_URL, API_DOC_URL } from "../../constants/client.ts"
 import Badge from "../global/Badge.tsx"
 
 const Directory = () => {
@@ -48,14 +48,8 @@ const Directory = () => {
                 <ContentCluster title="Character Tools">
                     <NavCardCluster>
                         <NavigationCard type="registration" />
-                        <NavigationCard
-                            type="activity"
-                            badge={<Badge text="New" type="new" />}
-                        />
-                        <NavigationCard
-                            type="timers"
-                            badge={<Badge text="New" type="new" />}
-                        />
+                        <NavigationCard type="activity" />
+                        <NavigationCard type="timers" />
                     </NavCardCluster>
                 </ContentCluster>
                 <ContentCluster title="Additional Resources">
@@ -67,8 +61,8 @@ const Directory = () => {
                         <NavigationCard type="about" />
                         <NavigationCard
                             type="api"
-                            badge={<Badge text="Soon" type="soon" />}
-                            disabled
+                            badge={<Badge text="New" type="new" />}
+                            externalLink={API_DOC_URL}
                         />
                         <NavigationCard type="feedback" />
                         <NavigationCard
