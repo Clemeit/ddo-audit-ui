@@ -121,7 +121,9 @@ const CharacterSelectModal = ({
                     // If there's exactly 1 character, we're done. Otherwise,
                     // present the use with the characters and allow them to
                     // choose which one(s) to register.
-                    const localFoundCharacters = Object.values(response.data)
+                    const localFoundCharacters = Object.values(
+                        response.data
+                    ).filter((character) => !character.is_anonymous)
                     // Check to see if every character is already registered
                     if (
                         localFoundCharacters.every((character) =>

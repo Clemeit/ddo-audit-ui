@@ -29,16 +29,17 @@ const friendTableSortFunction = (
     a: CharacterTableRow,
     b: CharacterTableRow
 ): number => {
-    const aOnline = a.character.is_online ? 1 : 0
-    const bOnline = b.character.is_online ? 1 : 0
+    const aOnline = a.character.is_online && !a.character.is_anonymous ? 1 : 0
+    const bOnline = b.character.is_online && !b.character.is_anonymous ? 1 : 0
     const onlineComparison = bOnline - aOnline
     if (onlineComparison !== 0) {
         return onlineComparison
     }
 
-    if (a.character.name === b.character.name)
-        return a.character.id - b.character.id
-    return (a.character.name || "").localeCompare(b.character.name || "")
+    const aName = a.character.is_anonymous ? "" : a.character.name || ""
+    const bName = b.character.is_anonymous ? "" : b.character.name || ""
+    if (aName === bName) return a.character.id - b.character.id
+    return aName.localeCompare(bName)
 }
 
 const Friends = () => {
