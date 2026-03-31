@@ -37,6 +37,8 @@ interface WhoContextProps {
     setShouldIncludeRegion: React.Dispatch<React.SetStateAction<boolean>>
     isExactMatch: boolean
     setIsExactMatch: React.Dispatch<React.SetStateAction<boolean>>
+    isFilterAreaCollapsed: boolean
+    setIsFilterAreaCollapsed: React.Dispatch<React.SetStateAction<boolean>>
     sortBy: CharacterSortBy
     setSortBy: React.Dispatch<React.SetStateAction<CharacterSortBy>>
     panelWidth: number
@@ -59,6 +61,10 @@ interface WhoContextProps {
     setShouldSaveGroupView: React.Dispatch<React.SetStateAction<boolean>>
     shouldSaveExactMatch: boolean
     setShouldSaveExactMatch: React.Dispatch<React.SetStateAction<boolean>>
+    shouldSaveFilterAreaCollapsed: boolean
+    setShouldSaveFilterAreaCollapsed: React.Dispatch<
+        React.SetStateAction<boolean>
+    >
     showInQuestIndicator: boolean
     setShowInQuestIndicator: React.Dispatch<React.SetStateAction<boolean>>
     showQuestName: boolean
@@ -99,6 +105,8 @@ export const WhoProvider = ({ children }: { children: ReactNode }) => {
     const [shouldIncludeRegion, setShouldIncludeRegion] =
         useState<boolean>(false)
     const [isExactMatch, setIsExactMatch] = useState<boolean>(false)
+    const [isFilterAreaCollapsed, setIsFilterAreaCollapsed] =
+        useState<boolean>(false)
     const [sortBy, setSortBy] = useState<CharacterSortBy>({
         type: CharacterSortType.Level,
         ascending: true,
@@ -125,6 +133,8 @@ export const WhoProvider = ({ children }: { children: ReactNode }) => {
     const [shouldSaveGroupView, setShouldSaveGroupView] =
         useState<boolean>(false)
     const [shouldSaveExactMatch, setShouldSaveExactMatch] =
+        useState<boolean>(false)
+    const [shouldSaveFilterAreaCollapsed, setShouldSaveFilterAreaCollapsed] =
         useState<boolean>(false)
     const [hideIgnoredCharacters, setHideIgnoredCharacters] =
         useState<boolean>(true)
@@ -204,6 +214,7 @@ export const WhoProvider = ({ children }: { children: ReactNode }) => {
         setIsGroupView(false)
         setShouldIncludeRegion(false)
         setIsExactMatch(false)
+        setIsFilterAreaCollapsed(false)
         setSortBy({
             type: CharacterSortType.Level,
             ascending: true,
@@ -221,6 +232,7 @@ export const WhoProvider = ({ children }: { children: ReactNode }) => {
         setShouldSaveSortBy(false)
         setShouldSaveGroupView(false)
         setShouldSaveExactMatch(false)
+        setShouldSaveFilterAreaCollapsed(false)
         setHideIgnoredCharacters(true)
         setPinGuildies(false)
         setPinRegisteredCharacters(true)
@@ -260,6 +272,10 @@ export const WhoProvider = ({ children }: { children: ReactNode }) => {
                     )
                     if (settings.shouldSaveExactMatch)
                         setIsExactMatch(Boolean(settings.isExactMatch ?? false))
+                    if (settings.shouldSaveFilterAreaCollapsed)
+                        setIsFilterAreaCollapsed(
+                            Boolean(settings.isFilterAreaCollapsed ?? false)
+                        )
                     if (settings.shouldSaveSortBy) setSortBy(settings.sortBy)
                     setPanelWidth(
                         parseInt(
@@ -287,6 +303,9 @@ export const WhoProvider = ({ children }: { children: ReactNode }) => {
                 )
                 setShouldSaveExactMatch(
                     Boolean(settings.shouldSaveExactMatch ?? false)
+                )
+                setShouldSaveFilterAreaCollapsed(
+                    Boolean(settings.shouldSaveFilterAreaCollapsed ?? false)
                 )
                 setShowInQuestIndicator(
                     Boolean(settings.showInQuestIndicator ?? true)
@@ -396,6 +415,7 @@ export const WhoProvider = ({ children }: { children: ReactNode }) => {
                 isGroupView,
                 shouldIncludeRegion,
                 isExactMatch,
+                isFilterAreaCollapsed,
                 sortBy,
                 panelWidth,
                 isDynamicWidth,
@@ -406,6 +426,7 @@ export const WhoProvider = ({ children }: { children: ReactNode }) => {
                 shouldSaveSortBy,
                 shouldSaveGroupView,
                 shouldSaveExactMatch,
+                shouldSaveFilterAreaCollapsed,
                 showInQuestIndicator,
                 showQuestName,
                 refreshInterval,
@@ -443,6 +464,7 @@ export const WhoProvider = ({ children }: { children: ReactNode }) => {
         isGroupView,
         shouldIncludeRegion,
         isExactMatch,
+        isFilterAreaCollapsed,
         sortBy,
         panelWidth,
         isDynamicWidth,
@@ -453,6 +475,7 @@ export const WhoProvider = ({ children }: { children: ReactNode }) => {
         shouldSaveSortBy,
         shouldSaveGroupView,
         shouldSaveExactMatch,
+        shouldSaveFilterAreaCollapsed,
         showInQuestIndicator,
         showQuestName,
         refreshInterval,
@@ -475,6 +498,7 @@ export const WhoProvider = ({ children }: { children: ReactNode }) => {
             isGroupView,
             shouldIncludeRegion,
             isExactMatch,
+            isFilterAreaCollapsed,
             sortBy,
             panelWidth,
             isDynamicWidth,
@@ -485,6 +509,7 @@ export const WhoProvider = ({ children }: { children: ReactNode }) => {
             shouldSaveSortBy,
             shouldSaveGroupView,
             shouldSaveExactMatch,
+            shouldSaveFilterAreaCollapsed,
             showInQuestIndicator,
             showQuestName,
             refreshInterval,
@@ -533,6 +558,8 @@ export const WhoProvider = ({ children }: { children: ReactNode }) => {
                 setShouldIncludeRegion,
                 isExactMatch,
                 setIsExactMatch,
+                isFilterAreaCollapsed,
+                setIsFilterAreaCollapsed,
                 sortBy,
                 setSortBy,
                 panelWidth,
@@ -555,6 +582,8 @@ export const WhoProvider = ({ children }: { children: ReactNode }) => {
                 setShouldSaveGroupView,
                 shouldSaveExactMatch,
                 setShouldSaveExactMatch,
+                shouldSaveFilterAreaCollapsed,
+                setShouldSaveFilterAreaCollapsed,
                 showInQuestIndicator,
                 setShowInQuestIndicator,
                 showQuestName,

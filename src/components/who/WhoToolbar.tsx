@@ -42,6 +42,8 @@ const WhoToolbar = ({
         setShouldSaveGroupView,
         shouldSaveExactMatch,
         setShouldSaveExactMatch,
+        shouldSaveFilterAreaCollapsed,
+        setShouldSaveFilterAreaCollapsed,
         showInQuestIndicator,
         setShowInQuestIndicator,
         showQuestName,
@@ -191,7 +193,7 @@ const WhoToolbar = ({
                             setShouldSaveSettings(e.target.checked)
                         }}
                     >
-                        Save my filter settings and apply on each visit
+                        Save my filter/display settings and apply on each visit
                     </Checkbox>
                     <div
                         style={{
@@ -249,6 +251,16 @@ const WhoToolbar = ({
                                 }}
                             >
                                 Group view
+                            </Checkbox>
+                            <Checkbox
+                                checked={shouldSaveFilterAreaCollapsed}
+                                onChange={(e) => {
+                                    setShouldSaveFilterAreaCollapsed(
+                                        e.target.checked
+                                    )
+                                }}
+                            >
+                                Collapsed filter area
                             </Checkbox>
                         </Stack>
                     </div>

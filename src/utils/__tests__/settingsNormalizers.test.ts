@@ -109,6 +109,8 @@ describe("settingsNormalizers", () => {
             expect(result.minLevel).toBe(1)
             expect(result.maxLevel).toBe(34)
             expect(result.isGroupView).toBe(false)
+            expect(result.isFilterAreaCollapsed).toBe(false)
+            expect(result.shouldSaveFilterAreaCollapsed).toBe(false)
             expect(result.hideIgnoredCharacters).toBe(true)
             expect(result.pinFriends).toBe(true)
         })
@@ -128,6 +130,33 @@ describe("settingsNormalizers", () => {
             // Should default to CLASS_LIST_LOWER
             expect(result.classNameFilter.length).toBeGreaterThan(0)
             expect(result.classNameFilter).toContain("fighter")
+        })
+
+        it("preserves valid collapsed state settings", () => {
+            const result = normalizeWhoSettings({
+                isFilterAreaCollapsed: true,
+                shouldSaveFilterAreaCollapsed: true,
+            })
+
+            expect(result.isFilterAreaCollapsed).toBe(true)
+            expect(result.shouldSaveFilterAreaCollapsed).toBe(true)
+        })
+
+        it("coerces collapsed state settings with false defaults", () => {
+            const result = normalizeWhoSettings({
+                isFilterAreaCollapsed: "yes",
+                shouldSaveFilterAreaCollapsed: "yes",
+            })
+
+            expect(result.isFilterAreaCollapsed).toBe(true)
+            expect(result.shouldSaveFilterAreaCollapsed).toBe(true)
+        })
+
+        it("defaults collapsed state settings to false when missing", () => {
+            const result = normalizeWhoSettings({})
+
+            expect(result.isFilterAreaCollapsed).toBe(false)
+            expect(result.shouldSaveFilterAreaCollapsed).toBe(false)
         })
     })
 
