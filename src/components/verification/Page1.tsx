@@ -164,15 +164,17 @@ const Page1 = ({
                         found at the bottom of the Who tab in the Social Panel,
                         and click the &quot;Submit&quot; button.
                     </p>
-                    <div
-                        style={{
-                            width: "100%",
-                            display: "flex",
-                            justifyContent: "center",
-                        }}
-                    >
-                        <span>Code loading, please wait...</span>
-                    </div>
+                    {!verificationChallenge?.challenge_word && (
+                        <div
+                            style={{
+                                width: "100%",
+                                display: "flex",
+                                justifyContent: "center",
+                            }}
+                        >
+                            <span>Code loading, please wait...</span>
+                        </div>
+                    )}
                     <code className="verification-code">
                         {verificationChallenge?.challenge_word || (
                             <span>&nbsp;</span>
