@@ -2,6 +2,8 @@ import { API_URL } from "../constants/client.ts"
 import axios from "axios"
 import axiosRetry from "axios-retry"
 
+const DEFAULT_REQUEST_TIMEOUT_MS = 15000
+
 export interface ServiceRequestProps {
     signal?: AbortSignal
 }
@@ -17,6 +19,14 @@ function createAbortError(error: unknown) {
 axiosRetry(axios, {
     retries: 2,
     retryDelay: (...arg) => axiosRetry.exponentialDelay(...arg, 1000),
+    onRetry(retryCount, error, requestConfig) {
+        console.warn("Retrying request", {
+            retryCount,
+            method: requestConfig?.method,
+            url: requestConfig?.url,
+            status: error?.response?.status,
+        })
+    },
     retryCondition(error) {
         // Retry on server errors (5xx) OR network errors (no response)
         return error.response ? error.response.status >= 500 : true
@@ -31,10 +41,11 @@ const genericRequest = async <T>(
         signal?: AbortSignal
         noRetry?: boolean
         withCredentials?: boolean
+        timeout?: number
     } = {},
     version: string = "v1"
 ) => {
-    const { signal, noRetry, ...restOptions } = options
+    const { signal, noRetry, timeout, ...restOptions } = options
     try {
         const axiosConfig: any = {
             method,
@@ -42,6 +53,7 @@ const genericRequest = async <T>(
             data,
             ...restOptions,
             signal,
+            timeout: timeout ?? DEFAULT_REQUEST_TIMEOUT_MS,
         }
         if (noRetry) {
             axiosConfig["axios-retry"] = { retries: 0 }
@@ -69,6 +81,7 @@ export const getRequest = async <T>(
         params?: any
         noRetry?: boolean
         withCredentials?: boolean
+        timeout?: number
     } = {},
     version: string = "v1"
 ) => {
@@ -85,6 +98,7 @@ export const postRequest = async <T>(
         params?: any
         noRetry?: boolean
         withCredentials?: boolean
+        timeout?: number
     } = {},
     version: string = "v1"
 ) => {
@@ -100,6 +114,7 @@ export const putRequest = async <T>(
         params?: any
         noRetry?: boolean
         withCredentials?: boolean
+        timeout?: number
     } = {},
     version: string = "v1"
 ) => {
@@ -115,6 +130,7 @@ export const patchRequest = async <T>(
         params?: any
         noRetry?: boolean
         withCredentials?: boolean
+        timeout?: number
     } = {},
     version: string = "v1"
 ) => {
@@ -130,6 +146,7 @@ export const deleteRequest = async <T>(
         params?: any
         noRetry?: boolean
         withCredentials?: boolean
+        timeout?: number
     } = {},
     version: string = "v1"
 ) => {
