@@ -152,6 +152,16 @@ describe("apiHelper", () => {
     })
 
     describe("options forwarding", () => {
+        it("sets a default request timeout", async () => {
+            mockedAxios.mockResolvedValue({ data: {} })
+            await getRequest("endpoint")
+            expect(mockedAxios).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    timeout: 15000,
+                })
+            )
+        })
+
         it("passes signal to axios config", async () => {
             mockedAxios.mockResolvedValue({ data: {} })
             const controller = new AbortController()
