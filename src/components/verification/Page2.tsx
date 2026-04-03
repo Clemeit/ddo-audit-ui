@@ -7,7 +7,7 @@ import { ReactComponent as X } from "../../assets/svg/x.svg"
 import { Verification, AccessToken } from "../../models/Verification.ts"
 import { getVerificationChallengeByCharacterId } from "../../services/verificationService.ts"
 import Link from "../global/Link.tsx"
-import { addAccessToken } from "../../utils/localStorage.ts"
+import { useRegisteredCharactersContext } from "../../contexts/RegisteredCharactersContext.tsx"
 import { useNavigate } from "react-router-dom"
 import ExpandableContainer from "../global/ExpandableContainer.tsx"
 import PageMessage from "../global/PageMessage.tsx"
@@ -31,13 +31,10 @@ const Page2 = ({
     const navigate = useNavigate()
     const pollVerificationEndpointTimeout = useRef<NodeJS.Timeout | null>(null)
     const navigateToNextPageTimeout = useRef<NodeJS.Timeout | null>(null)
+    const { addAccessToken } = useRegisteredCharactersContext()
 
     const [verificationChallenge, setVerificationChallenge] =
         useState<Verification | null>(null)
-
-    function addCharacterAccessToken() {
-        if (accessToken) addAccessToken(accessToken)
-    }
 
     function pollVerificationChallenge() {
         if (Date.now() - pageLoadedTimestamp > pageTimeout) {
@@ -56,7 +53,7 @@ const Page2 = ({
                             clearInterval(
                                 pollVerificationEndpointTimeout.current
                             )
-                        addCharacterAccessToken()
+                        if (accessToken) addAccessToken(accessToken)
                         if (navigateToNextPageTimeout.current)
                             clearInterval(navigateToNextPageTimeout.current)
                         navigateToNextPageTimeout.current = setTimeout(() => {

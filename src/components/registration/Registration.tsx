@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react"
+import { useCallback, useMemo, useState } from "react"
 import useGetRegisteredCharacters from "../../hooks/useGetRegisteredCharacters.ts"
 import { Character } from "../../models/Character.ts"
 import { addRegisteredCharacter } from "../../utils/localStorage.ts"
@@ -57,63 +57,71 @@ const Registration = () => {
         closeModal: handleCloseModal,
     } = useModalNavigation()
 
-    const onUnregisterCharacter = (character: Character) => {
-        // Remove the character from tracked characters
-        if (trackedCharacterIds.includes(character.id)) {
-            setTrackedCharacterIds(
-                trackedCharacterIds.filter((id) => id !== character.id)
+    const onUnregisterCharacter = useCallback(
+        (character: Character) => {
+            // Remove the character from tracked characters
+            if (trackedCharacterIds.includes(character.id)) {
+                setTrackedCharacterIds(
+                    trackedCharacterIds.filter((id) => id !== character.id)
+                )
+            }
+            unregisterCharacter(character)
+        },
+        [trackedCharacterIds, setTrackedCharacterIds, unregisterCharacter]
+    )
+
+    const getActionCellForRow = useCallback(
+        (character: Character) => {
+            const actionCellVerified = (
+                <Stack gap="5px" justify="flex-end">
+                    <Checkmark title="Verified" />
+                    <Delete
+                        className="clickable-icon"
+                        onClick={() => {
+                            onUnregisterCharacter(character)
+                        }}
+                    />
+                </Stack>
             )
-        }
-        unregisterCharacter(character)
-    }
 
-    const getActionCellForRow = (character: Character) => {
-        const actionCellVerified = (
-            <Stack gap="5px" justify="flex-end">
-                <Checkmark title="Verified" />
-                <Delete
-                    className="clickable-icon"
-                    onClick={() => {
-                        onUnregisterCharacter(character)
-                    }}
-                />
-            </Stack>
-        )
+            const actionCellUnverified = (
+                <Stack gap="5px" justify="flex-end">
+                    <Button
+                        type="secondary"
+                        className="verify-button"
+                        small
+                        onClick={() => {
+                            navigate(`/verification?id=${character.id}`)
+                        }}
+                    >
+                        Verify
+                    </Button>
+                    <Delete
+                        className="clickable-icon"
+                        onClick={() => {
+                            onUnregisterCharacter(character)
+                        }}
+                    />
+                </Stack>
+            )
 
-        const actionCellUnverified = (
-            <Stack gap="5px" justify="flex-end">
-                <Button
-                    type="secondary"
-                    className="verify-button"
-                    small
-                    onClick={() => {
-                        navigate(`/verification?id=${character.id}`)
-                    }}
-                >
-                    Verify
-                </Button>
-                <Delete
-                    className="clickable-icon"
-                    onClick={() => {
-                        onUnregisterCharacter(character)
-                    }}
-                />
-            </Stack>
-        )
+            const isCharacterVerified = accessTokens.some(
+                (token) => token.character_id === character.id
+            )
 
-        const isCharacterVerified = accessTokens.some(
-            (token) => token.character_id === character.id
-        )
-
-        return isCharacterVerified ? actionCellVerified : actionCellUnverified
-    }
+            return isCharacterVerified
+                ? actionCellVerified
+                : actionCellUnverified
+        },
+        [accessTokens, navigate, onUnregisterCharacter]
+    )
 
     const characterRows: CharacterTableRow[] = useMemo(() => {
         return registeredCharacters.map((character) => ({
             character: character,
             actions: getActionCellForRow(character),
         }))
-    }, [registeredCharacters, accessTokens])
+    }, [registeredCharacters, getActionCellForRow])
 
     // Registering a new character:
     const [millisSinceLastReload, setMillisSinceLastReload] =
