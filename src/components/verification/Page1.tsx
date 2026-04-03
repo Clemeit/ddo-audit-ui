@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from "react"
+import { useState, useEffect, useRef, useCallback } from "react"
 import {
     ContentCluster,
     ContentClusterGroup,
@@ -39,6 +39,9 @@ const Page1 = ({
     const navigateToNextPageTimeout = useRef<NodeJS.Timeout | null>(null)
     const isPollingRef = useRef<boolean>(false)
     const [isError, setIsError] = useState<boolean>(false)
+    const characterRef = useRef(character)
+    characterRef.current = character
+    const pollRef = useRef<() => void>(() => {})
 
     const [verificationChallenge, setVerificationChallenge] =
         useState<Verification | null>(null)
@@ -54,11 +57,12 @@ const Page1 = ({
         if (isPollingRef.current) {
             return
         }
-        if (character && character.id) {
+        const char = characterRef.current
+        if (char && char.id) {
             isPollingRef.current = true
             try {
                 const response = await getVerificationChallengeByCharacterId(
-                    character.id
+                    char.id
                 )
                 const verificationResponse = response?.data
 
@@ -72,7 +76,7 @@ const Page1 = ({
                     if (pollVerificationEndpointTimeout.current) {
                         clearInterval(pollVerificationEndpointTimeout.current)
                         const accessToken: AccessToken = {
-                            character_id: character.id,
+                            character_id: char.id,
                             access_token: verificationResponse.access_token,
                         }
                         setPendingAccessToken(accessToken)
@@ -100,25 +104,21 @@ const Page1 = ({
                 isPollingRef.current = false
             }
         }
-    }, [
-        character,
-        pageLoadedTimestamp,
-        pageTimeout,
-        setPage,
-        setPendingAccessToken,
-    ])
+    }, [pageLoadedTimestamp, pageTimeout, setPage, setPendingAccessToken])
+
+    pollRef.current = pollVerificationChallenge
 
     useEffect(() => {
         if (!character) return
         if (character.id) {
-            pollVerificationChallenge()
+            pollRef.current()
 
             // start polling the verification endpoint
             if (pollVerificationEndpointTimeout.current) {
                 clearInterval(pollVerificationEndpointTimeout.current)
             }
             pollVerificationEndpointTimeout.current = setInterval(() => {
-                pollVerificationChallenge()
+                pollRef.current()
             }, 1000)
         }
 
@@ -128,7 +128,7 @@ const Page1 = ({
             if (navigateToNextPageTimeout.current)
                 clearTimeout(navigateToNextPageTimeout.current)
         }
-    }, [character, pollVerificationChallenge])
+    }, [character?.id])
 
     return (
         <ContentClusterGroup>

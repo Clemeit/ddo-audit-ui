@@ -16,6 +16,7 @@ import {
     setRegisteredCharacters as setRegisteredCharactersInLocalStorage,
     removeRegisteredCharacter as removeRegisteredCharacterFromLocalStorage,
     removeAccessToken as removeAccessTokenFromLocalStorage,
+    addAccessToken as addAccessTokenToLocalStorage,
 } from "../utils/localStorage.ts"
 import { getCharactersByIds } from "../services/characterService.ts"
 import logMessage from "../utils/logUtils.ts"
@@ -33,6 +34,7 @@ export interface RegisteredCharactersContextValue {
     errorMessage: string
     reload: () => Promise<void>
     unregisterCharacter: (character: Character) => void
+    addAccessToken: (token: AccessToken) => void
     lastReload: Date
     myGuildsList: string[]
 }
@@ -438,6 +440,28 @@ export const RegisteredCharactersProvider = ({ children }: Props) => {
         }
     }, [])
 
+    const addAccessToken = useCallback((token: AccessToken) => {
+        try {
+            addAccessTokenToLocalStorage(token)
+        } catch (error) {
+            logMessage("Failed to save access token to localStorage", "error", {
+                metadata: {
+                    error: error instanceof Error ? error.message : error,
+                },
+            })
+        }
+        setAccessTokens((prev) => {
+            const index = prev.findIndex(
+                (t) => t.character_id === token.character_id
+            )
+            if (index === -1) return [...prev, token]
+            if (prev[index].access_token === token.access_token) return prev
+            const updated = [...prev]
+            updated[index] = token
+            return updated
+        })
+    }, [])
+
     const unregisterCharacter = useCallback(
         (character: Character) => {
             if (!character?.id) {
@@ -509,6 +533,7 @@ export const RegisteredCharactersProvider = ({ children }: Props) => {
                 errorMessage,
                 reload,
                 unregisterCharacter,
+                addAccessToken,
                 lastReload,
                 myGuildsList,
             }}

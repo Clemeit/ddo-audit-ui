@@ -192,7 +192,7 @@ function setAccessTokens(tokens: AccessToken[]): void {
 }
 
 function addAccessToken(token: AccessToken): void {
-    addItem<AccessToken>(
+    upsertItem<AccessToken>(
         ACCESS_TOKENS_KEY,
         token,
         (a, b) => a.character_id === b.character_id
@@ -513,6 +513,30 @@ function addItem<T>(
         return
     }
     items.push(item)
+    const newEntry: LocalStorageEntry<T[]> = {
+        createdAt: metadata.createdAt || new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        data: items,
+    }
+    setValue(key, newEntry)
+}
+
+function upsertItem<T>(
+    key: string,
+    item: T,
+    compareFn: (a: T, b: T) => boolean
+): void {
+    const metadata = getMetadata<T>(key, [])
+    const items = metadata.data || []
+    if (!Array.isArray(items)) {
+        throw new Error(`Data for key "${key}" is not an array`)
+    }
+    const index = items.findIndex((existing) => compareFn(existing, item))
+    if (index !== -1) {
+        items[index] = item
+    } else {
+        items.push(item)
+    }
     const newEntry: LocalStorageEntry<T[]> = {
         createdAt: metadata.createdAt || new Date().toISOString(),
         updatedAt: new Date().toISOString(),
