@@ -71,6 +71,19 @@ describe("localStorage", () => {
             removeAccessToken(token)
             expect(getAccessTokens()).toEqual([])
         })
+
+        it("updates an existing token with a new access_token value", () => {
+            const token = { character_id: 1, access_token: "abc" } as any
+            addAccessToken(token)
+            const updatedToken = {
+                character_id: 1,
+                access_token: "xyz",
+            } as any
+            addAccessToken(updatedToken)
+            const tokens = getAccessTokens()
+            expect(tokens).toHaveLength(1)
+            expect(tokens[0].access_token).toBe("xyz")
+        })
     })
 
     describe("boolean flags", () => {

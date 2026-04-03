@@ -440,27 +440,68 @@ export const RegisteredCharactersProvider = ({ children }: Props) => {
         }
     }, [])
 
-    const addAccessToken = useCallback((token: AccessToken) => {
-        try {
-            addAccessTokenToLocalStorage(token)
-        } catch (error) {
-            logMessage("Failed to save access token to localStorage", "error", {
-                metadata: {
-                    error: error instanceof Error ? error.message : error,
-                },
+    const addAccessToken = useCallback(
+        (token: AccessToken) => {
+            try {
+                addAccessTokenToLocalStorage(token)
+            } catch (error) {
+                logMessage(
+                    "Failed to save access token to localStorage",
+                    "error",
+                    {
+                        metadata: {
+                            error:
+                                error instanceof Error ? error.message : error,
+                        },
+                    }
+                )
+            }
+            setAccessTokens((prev) => {
+                const index = prev.findIndex(
+                    (t) => t.character_id === token.character_id
+                )
+                if (index === -1) return [...prev, token]
+                if (prev[index].access_token === token.access_token) return prev
+                const updated = [...prev]
+                updated[index] = token
+                return updated
             })
-        }
-        setAccessTokens((prev) => {
-            const index = prev.findIndex(
-                (t) => t.character_id === token.character_id
+
+            const verifiedCharacter = registeredCharacters.find(
+                (character) => character.id === token.character_id
             )
-            if (index === -1) return [...prev, token]
-            if (prev[index].access_token === token.access_token) return prev
-            const updated = [...prev]
-            updated[index] = token
-            return updated
-        })
-    }, [])
+            if (verifiedCharacter) {
+                setVerifiedCharacters((prev) => {
+                    if (
+                        prev.some(
+                            (character) => character.id === verifiedCharacter.id
+                        )
+                    ) {
+                        return prev
+                    }
+                    return [...prev, verifiedCharacter]
+                })
+            }
+
+            const verifiedCharacterCached = registeredCharactersCached.find(
+                (character) => character.id === token.character_id
+            )
+            if (verifiedCharacterCached) {
+                setVerifiedCharactersCached((prev) => {
+                    if (
+                        prev.some(
+                            (character) =>
+                                character.id === verifiedCharacterCached.id
+                        )
+                    ) {
+                        return prev
+                    }
+                    return [...prev, verifiedCharacterCached]
+                })
+            }
+        },
+        [registeredCharacters, registeredCharactersCached]
+    )
 
     const unregisterCharacter = useCallback(
         (character: Character) => {
