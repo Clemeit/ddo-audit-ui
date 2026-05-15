@@ -26,6 +26,7 @@ import FauxLink from "../global/FauxLink.tsx"
 import logMessage from "../../utils/logUtils.ts"
 import Link from "../global/Link.tsx"
 import Stack from "../global/Stack.tsx"
+import PageMessage from "../global/PageMessage.tsx"
 
 const Timers = () => {
     const {
@@ -165,10 +166,23 @@ const Timers = () => {
         []
     )
 
+    // TODO: Temp, remove
+    const downtimeExpires = new Date((1778878800 + 66 * 60 * 60) * 1000)
+    const shouldShowMessage = new Date() < downtimeExpires
+
     return (
         <Page
             title="Raid and Quest Timers"
             description="View your raid and quest timers. See which raids you're on timer for and which quests you've ransacked."
+            pageMessages={
+                shouldShowMessage && (
+                    <PageMessage
+                        type="warning"
+                        title="DDO Audit Downtime"
+                        message="DDO Audit was offline Friday, May 15 from 6:30 am until 12:30 pm (PT). If you ran a raid during that time, it won't be tracked."
+                    />
+                )
+            }
         >
             <DeleteTimerModal
                 isOpen={isDeleteModalOpen}
