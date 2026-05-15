@@ -1,10 +1,6 @@
 import React from "react"
 import Stack from "../global/Stack.tsx"
-import {
-    DataTypeFilterEnum,
-    RangeEnum,
-    ServerFilterEnum,
-} from "../../models/Common.ts"
+import { DataTypeFilterEnum, RangeEnum } from "../../models/Common.ts"
 import { toSentenceCase } from "../../utils/stringUtils.ts"
 import { DAYS_OF_WEEK } from "../../constants/dates.ts"
 import ExpandableContainer from "../global/ExpandableContainer.tsx"
@@ -14,8 +10,6 @@ import Select from "../global/Select.tsx"
 interface Props {
     range?: RangeEnum
     setRange?: (range: RangeEnum) => void
-    serverFilter?: ServerFilterEnum
-    setServerFilter?: (filter: ServerFilterEnum) => void
     dataTypeFilter?: DataTypeFilterEnum
     setDataTypeFilter?: (filter: DataTypeFilterEnum) => void
     threshold?: number
@@ -26,6 +20,8 @@ interface Props {
     setDisplayType?: (value: string) => void
     normalized?: boolean
     setNormalized?: (value: boolean) => void
+    activityLevel?: "All" | "Active" | "Inactive"
+    setActivityLevel?: (value: "All" | "Active" | "Inactive") => void
     rangeOptions?: RangeEnum[]
     displayTypeOptions?: string[]
     scaffoldName?: string
@@ -34,8 +30,6 @@ interface Props {
 const FilterSelection = ({
     range,
     setRange,
-    serverFilter,
-    setServerFilter,
     dataTypeFilter,
     setDataTypeFilter,
     threshold,
@@ -46,11 +40,12 @@ const FilterSelection = ({
     setDisplayType,
     normalized,
     setNormalized,
+    activityLevel,
+    setActivityLevel,
     rangeOptions = Object.values(RangeEnum) as RangeEnum[],
     displayTypeOptions = ["Stacked", "Grouped"],
     scaffoldName,
 }: Props) => {
-    const SERVER_FILTER_OPTIONS = Object.values(ServerFilterEnum) as string[]
     const DATA_TYPE_FILTER_OPTIONS = Object.values(
         DataTypeFilterEnum
     ) as string[]
@@ -77,15 +72,6 @@ const FilterSelection = ({
                         setRange(e.target.value as RangeEnum),
                     options: rangeOptions,
                     optionLabel: (opt: string) => toSentenceCase(opt),
-                },
-                {
-                    label: "Server filter",
-                    id: "serverFilter",
-                    value: serverFilter,
-                    onChange: (e: React.ChangeEvent<HTMLSelectElement>) =>
-                        setServerFilter(e.target.value as ServerFilterEnum),
-                    options: SERVER_FILTER_OPTIONS,
-                    optionLabel: (opt: string) => opt,
                 },
                 {
                     label: "Data type",
@@ -126,6 +112,17 @@ const FilterSelection = ({
                     onChange: (e: React.ChangeEvent<HTMLSelectElement>) =>
                         setNormalized(e.target.value === "Yes"),
                     options: ["Yes", "No"],
+                    optionLabel: (opt: string) => opt,
+                },
+                {
+                    label: "Activity level",
+                    id: "activityLevelFilter",
+                    value: activityLevel,
+                    onChange: (e: React.ChangeEvent<HTMLSelectElement>) =>
+                        setActivityLevel(
+                            e.target.value as "All" | "Active" | "Inactive"
+                        ),
+                    options: ["Active", "All", "Inactive"],
                     optionLabel: (opt: string) => opt,
                 },
             ]

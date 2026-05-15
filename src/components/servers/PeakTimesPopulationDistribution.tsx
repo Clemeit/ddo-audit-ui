@@ -1,17 +1,10 @@
 import React, { useEffect, useMemo, useState } from "react"
 import { PopulationByHourAndDayOfWeekData } from "../../models/Population"
-import {
-    DataTypeFilterEnum,
-    RangeEnum,
-    ServerFilterEnum,
-} from "../../models/Common.ts"
+import { DataTypeFilterEnum, RangeEnum } from "../../models/Common.ts"
 import { getPopulationByHourAndDayOfWeekForRange } from "../../services/populationService"
 import FilterSelection from "../charts/FilterSelection"
 import { ResponsiveHeatMap, TooltipProps } from "@nivo/heatmap"
-import {
-    SERVERS_32_BITS_LOWER,
-    SERVERS_64_BITS_LOWER,
-} from "../../constants/servers"
+import { SERVERS_64_BITS_LOWER } from "../../constants/servers"
 import { useAppContext } from "../../contexts/AppContext"
 import TimezoneSelect from "../global/TimezoneSelect"
 import { dayOfWeekToNumber, numberToHourOfDay } from "../../utils/dateUtils"
@@ -47,9 +40,6 @@ const PeakTimesPopulationDistribution = () => {
         [RangeEnum.YEAR]: undefined,
     })
     const [range, setRange] = React.useState<RangeEnum>(RangeEnum.QUARTER)
-    const [serverFilter, setServerFilter] = useState<ServerFilterEnum>(
-        ServerFilterEnum.ONLY_64_BIT
-    )
     const [dataTypeFilter, setDataTypeFilter] = useState<DataTypeFilterEnum>(
         DataTypeFilterEnum.CHARACTERS
     )
@@ -172,12 +162,7 @@ const PeakTimesPopulationDistribution = () => {
             return res
         }
         Object.entries(data).forEach(([serverName, serverData]) => {
-            const doCalcs =
-                serverFilter === ServerFilterEnum.ALL ||
-                (serverFilter === ServerFilterEnum.ONLY_64_BIT &&
-                    SERVERS_64_BITS_LOWER.includes(serverName)) ||
-                (serverFilter === ServerFilterEnum.ONLY_32_BIT &&
-                    SERVERS_32_BITS_LOWER.includes(serverName))
+            const doCalcs = SERVERS_64_BITS_LOWER.includes(serverName)
 
             if (!doCalcs) return
 
@@ -216,7 +201,7 @@ const PeakTimesPopulationDistribution = () => {
             })
         })
         return output
-    }, [data, serverFilter, dataTypeFilter, utcToLocalMap, populationThreshold])
+    }, [data, dataTypeFilter, utcToLocalMap, populationThreshold])
 
     // Aggregated peaks per server across all days: compute average series (24h) over 7 local days
     type PeakAggregate = Record<
@@ -257,12 +242,7 @@ const PeakTimesPopulationDistribution = () => {
         const output: PeakAggregate = {}
 
         Object.entries(data).forEach(([serverName, serverData]) => {
-            const doCalcs =
-                serverFilter === ServerFilterEnum.ALL ||
-                (serverFilter === ServerFilterEnum.ONLY_64_BIT &&
-                    SERVERS_64_BITS_LOWER.includes(serverName)) ||
-                (serverFilter === ServerFilterEnum.ONLY_32_BIT &&
-                    SERVERS_32_BITS_LOWER.includes(serverName))
+            const doCalcs = SERVERS_64_BITS_LOWER.includes(serverName)
 
             if (!doCalcs) return
 
@@ -306,7 +286,7 @@ const PeakTimesPopulationDistribution = () => {
         })
 
         return output
-    }, [data, serverFilter, dataTypeFilter, utcToLocalMap, populationThreshold])
+    }, [data, dataTypeFilter, utcToLocalMap, populationThreshold])
 
     const heatmapData = useMemo(() => {
         if (dayFilter === "All") {
@@ -341,8 +321,6 @@ const PeakTimesPopulationDistribution = () => {
             <FilterSelection
                 range={range}
                 setRange={setRange}
-                serverFilter={serverFilter}
-                setServerFilter={setServerFilter}
                 dataTypeFilter={dataTypeFilter}
                 setDataTypeFilter={setDataTypeFilter}
                 threshold={populationThreshold}

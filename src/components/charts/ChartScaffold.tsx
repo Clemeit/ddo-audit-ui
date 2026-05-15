@@ -3,11 +3,7 @@ import ChartContainer from "./ChartContainer"
 import GenericLegend from "./GenericLegend"
 import TimezoneSelect from "../global/TimezoneSelect"
 import FilterSelection from "./FilterSelection"
-import {
-    RangeEnum,
-    ServerFilterEnum,
-    DataTypeFilterEnum,
-} from "../../models/Common"
+import { RangeEnum, DataTypeFilterEnum } from "../../models/Common"
 import Stack from "../global/Stack"
 
 export interface ChartScaffoldProps {
@@ -18,8 +14,6 @@ export interface ChartScaffoldProps {
     // Filters
     range: RangeEnum
     setRange: (r: RangeEnum) => void
-    serverFilter?: ServerFilterEnum
-    setServerFilter?: (f: ServerFilterEnum) => void
     dataTypeFilter?: DataTypeFilterEnum
     setDataTypeFilter?: (f: DataTypeFilterEnum) => void
     displayType?: string
@@ -27,6 +21,8 @@ export interface ChartScaffoldProps {
     displayTypeOptions?: string[]
     normalized?: boolean
     setNormalized?: (b: boolean) => void
+    activityLevel?: "All" | "Active" | "Inactive"
+    setActivityLevel?: (v: "All" | "Active" | "Inactive") => void
     rangeOptions?: RangeEnum[]
     // Legend
     showLegend?: boolean
@@ -55,8 +51,6 @@ export const ChartScaffold: React.FC<ChartScaffoldProps> = ({
     isError,
     range,
     setRange,
-    serverFilter,
-    setServerFilter,
     dataTypeFilter,
     setDataTypeFilter,
     displayType,
@@ -64,6 +58,8 @@ export const ChartScaffold: React.FC<ChartScaffoldProps> = ({
     displayTypeOptions,
     normalized,
     setNormalized,
+    activityLevel,
+    setActivityLevel,
     rangeOptions,
     showLegend,
     legendData,
@@ -80,8 +76,6 @@ export const ChartScaffold: React.FC<ChartScaffoldProps> = ({
             <FilterSelection
                 range={range}
                 setRange={setRange}
-                serverFilter={serverFilter}
-                setServerFilter={setServerFilter}
                 dataTypeFilter={dataTypeFilter}
                 setDataTypeFilter={setDataTypeFilter}
                 displayType={displayType}
@@ -89,6 +83,8 @@ export const ChartScaffold: React.FC<ChartScaffoldProps> = ({
                 displayTypeOptions={displayTypeOptions}
                 normalized={normalized}
                 setNormalized={setNormalized}
+                activityLevel={activityLevel}
+                setActivityLevel={setActivityLevel}
                 rangeOptions={rangeOptions}
                 scaffoldName={scaffoldName}
             />

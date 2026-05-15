@@ -1,9 +1,5 @@
 import { PrimaryClassDemographicApiData } from "../models/Demographics"
-import { ServerFilterEnum } from "../models/Common"
-import {
-    SERVERS_32_BITS_LOWER,
-    SERVERS_64_BITS_LOWER,
-} from "../constants/servers"
+import { SERVERS_64_BITS_LOWER } from "../constants/servers"
 import { NivoPieSlice } from "./nivoUtils"
 
 export interface PrimaryClassPieResult {
@@ -18,19 +14,12 @@ export interface PrimaryClassPieResult {
  * - Sums counts across servers.
  */
 export function buildPrimaryClassPie(
-    demographic: PrimaryClassDemographicApiData | undefined,
-    serverFilter: ServerFilterEnum
+    demographic: PrimaryClassDemographicApiData | undefined
 ): PrimaryClassPieResult {
     if (!demographic) return { data: [], total: 0 }
 
-    const includeServer = (serverName: string): boolean => {
-        const lower = serverName.toLowerCase()
-        if (serverFilter === ServerFilterEnum.ONLY_32_BIT)
-            return SERVERS_32_BITS_LOWER.includes(lower)
-        if (serverFilter === ServerFilterEnum.ONLY_64_BIT)
-            return SERVERS_64_BITS_LOWER.includes(lower)
-        return true
-    }
+    const includeServer = (serverName: string): boolean =>
+        SERVERS_64_BITS_LOWER.includes(serverName.toLowerCase())
 
     const slices: NivoPieSlice[] = []
     let total = 0

@@ -4,16 +4,9 @@ import {
     convertAveragePopulationDataToNivoFormat,
     NivoPieSlice,
 } from "../../utils/nivoUtils"
-import {
-    DataTypeFilterEnum,
-    RangeEnum,
-    ServerFilterEnum,
-} from "../../models/Common"
+import { DataTypeFilterEnum, RangeEnum } from "../../models/Common"
 import { getAveragePopulationForRange } from "../../services/populationService"
-import {
-    SERVERS_64_BITS_LOWER,
-    SERVERS_32_BITS_LOWER,
-} from "../../constants/servers"
+import { SERVERS_64_BITS_LOWER } from "../../constants/servers"
 import { useRangedDemographic } from "../../hooks/useRangedDemographic"
 import ChartScaffold from "../charts/ChartScaffold"
 import PieChartTooltip from "../charts/PieChartTooltip"
@@ -27,30 +20,18 @@ const ServerPopulationDistribution = () => {
         useRangedDemographic((r, signal) =>
             getAveragePopulationForRange(r, signal)
         )
-    const [serverFilter, setServerFilter] = useState<ServerFilterEnum>(
-        ServerFilterEnum.ONLY_64_BIT
-    )
     const [dataTypeFilter, setDataTypeFilter] = useState<DataTypeFilterEnum>(
         DataTypeFilterEnum.CHARACTERS
     )
 
     const filteredData = useMemo(() => {
         if (!currentData) return undefined
-        if (serverFilter === ServerFilterEnum.ONLY_64_BIT) {
-            return Object.fromEntries(
-                Object.entries(currentData).filter(([serverName]) =>
-                    SERVERS_64_BITS_LOWER.includes(serverName.toLowerCase())
-                )
+        return Object.fromEntries(
+            Object.entries(currentData).filter(([serverName]) =>
+                SERVERS_64_BITS_LOWER.includes(serverName.toLowerCase())
             )
-        } else if (serverFilter === ServerFilterEnum.ONLY_32_BIT) {
-            return Object.fromEntries(
-                Object.entries(currentData).filter(([serverName]) =>
-                    SERVERS_32_BITS_LOWER.includes(serverName.toLowerCase())
-                )
-            )
-        }
-        return currentData
-    }, [currentData, serverFilter])
+        )
+    }, [currentData])
 
     const nivoData: NivoPieSlice[] = useMemo(
         () =>
@@ -84,8 +65,6 @@ const ServerPopulationDistribution = () => {
             isError={isError}
             range={range}
             setRange={setRange}
-            serverFilter={serverFilter}
-            setServerFilter={setServerFilter}
             dataTypeFilter={dataTypeFilter}
             setDataTypeFilter={setDataTypeFilter}
             showLegend

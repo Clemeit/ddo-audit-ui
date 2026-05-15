@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react"
 import { GenderDemographicApiData } from "../../models/Demographics"
-import { RangeEnum, ServerFilterEnum } from "../../models/Common"
+import { RangeEnum } from "../../models/Common"
 import { getGenderDemographic } from "../../services/demographicsService"
 import ChartScaffold from "../charts/ChartScaffold"
 import { ResponsivePie } from "@nivo/pie"
@@ -12,6 +12,9 @@ import { toTitleCase } from "../../utils/stringUtils"
 import "../../styles/charts/Overlay.css"
 
 const GenderPopulationDistribution = () => {
+    const [activityLevel, setActivityLevel] = useState<
+        "All" | "Active" | "Inactive"
+    >("Active")
     const {
         range: rangeFilter,
         setRange: setRangeFilter,
@@ -19,16 +22,11 @@ const GenderPopulationDistribution = () => {
         isError,
         currentData,
     } = useRangedDemographic<GenderDemographicApiData>(
-        (r, signal) => getGenderDemographic(r, signal),
-        RangeEnum.QUARTER
+        (r, signal) => getGenderDemographic(r, activityLevel, signal),
+        RangeEnum.QUARTER,
+        activityLevel
     )
-    const [serverFilter, setServerFilter] = useState<ServerFilterEnum>(
-        ServerFilterEnum.ONLY_64_BIT
-    )
-    const nivoData = useMemo(
-        () => buildGenderPie(currentData, serverFilter),
-        [currentData, serverFilter]
-    )
+    const nivoData = useMemo(() => buildGenderPie(currentData), [currentData])
 
     return (
         <ChartScaffold
@@ -37,8 +35,8 @@ const GenderPopulationDistribution = () => {
             isError={isError}
             range={rangeFilter}
             setRange={setRangeFilter}
-            serverFilter={serverFilter}
-            setServerFilter={setServerFilter}
+            activityLevel={activityLevel}
+            setActivityLevel={setActivityLevel}
             showLegend
             legendData={nivoData.data}
             height={500}

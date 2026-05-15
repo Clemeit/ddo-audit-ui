@@ -1,0 +1,8 @@
+{
+  "servers": {
+    "ddo-dat-api": {
+      "type": "http",
+      "url": "http://localhost:5138/mcp"
+    }
+  }
+}

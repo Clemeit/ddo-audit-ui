@@ -1,9 +1,5 @@
 import { RaceDemographicApiData } from "../models/Demographics"
-import { ServerFilterEnum } from "../models/Common"
-import {
-    SERVERS_32_BITS_LOWER,
-    SERVERS_64_BITS_LOWER,
-} from "../constants/servers"
+import { SERVERS_64_BITS_LOWER } from "../constants/servers"
 import { NivoPieSlice } from "./nivoUtils"
 
 export interface RacePieResult {
@@ -18,19 +14,12 @@ export interface RacePieResult {
  * - Sums counts per race.
  */
 export function buildRacePie(
-    demographic: RaceDemographicApiData | undefined,
-    serverFilter: ServerFilterEnum
+    demographic: RaceDemographicApiData | undefined
 ): RacePieResult {
     if (!demographic) return { data: [], total: 0 }
 
-    const includeServer = (serverName: string): boolean => {
-        const lower = serverName.toLowerCase()
-        if (serverFilter === ServerFilterEnum.ONLY_32_BIT)
-            return SERVERS_32_BITS_LOWER.includes(lower)
-        if (serverFilter === ServerFilterEnum.ONLY_64_BIT)
-            return SERVERS_64_BITS_LOWER.includes(lower)
-        return true
-    }
+    const includeServer = (serverName: string): boolean =>
+        SERVERS_64_BITS_LOWER.includes(serverName.toLowerCase())
 
     const slices: NivoPieSlice[] = []
     let total = 0

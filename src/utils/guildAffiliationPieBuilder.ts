@@ -1,9 +1,5 @@
 import { GuildAffiliatedDemographicApiData } from "../models/Demographics"
-import { ServerFilterEnum } from "../models/Common"
-import {
-    SERVERS_32_BITS_LOWER,
-    SERVERS_64_BITS_LOWER,
-} from "../constants/servers"
+import { SERVERS_64_BITS_LOWER } from "../constants/servers"
 import { NivoPieSlice } from "./nivoUtils"
 
 /** Result shape for pie slice builder. */
@@ -25,24 +21,15 @@ export interface PieBuildResult {
  * inside multiple visualization components without side effects.
  */
 export function buildGuildAffiliationPie(
-    demographic: GuildAffiliatedDemographicApiData | undefined,
-    serverFilter: ServerFilterEnum
+    demographic: GuildAffiliatedDemographicApiData | undefined
 ): PieBuildResult {
     if (!demographic) return { data: [], total: 0 }
 
     const slices: NivoPieSlice[] = []
     let total = 0
 
-    const includeServer = (serverName: string): boolean => {
-        const lower = serverName.toLowerCase()
-        if (serverFilter === ServerFilterEnum.ONLY_32_BIT) {
-            return SERVERS_32_BITS_LOWER.includes(lower)
-        }
-        if (serverFilter === ServerFilterEnum.ONLY_64_BIT) {
-            return SERVERS_64_BITS_LOWER.includes(lower)
-        }
-        return true // ALL
-    }
+    const includeServer = (serverName: string): boolean =>
+        SERVERS_64_BITS_LOWER.includes(serverName.toLowerCase())
 
     Object.entries(demographic).forEach(([serverName, serverData]) => {
         if (!serverData || !includeServer(serverName)) return

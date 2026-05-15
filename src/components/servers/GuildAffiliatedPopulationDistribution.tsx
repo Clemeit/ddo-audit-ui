@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react"
-import { RangeEnum, ServerFilterEnum } from "../../models/Common"
+import { RangeEnum } from "../../models/Common"
 import { getGuildAffiliatedDemographic } from "../../services/demographicsService"
 import ChartScaffold from "../charts/ChartScaffold"
 import { ResponsivePie } from "@nivo/pie"
@@ -12,17 +12,19 @@ import { buildGuildAffiliationPie } from "../../utils/guildAffiliationPieBuilder
 import "../../styles/charts/Overlay.css"
 
 const GuildAffiliatedPopulationDistribution = () => {
+    const [activityLevel, setActivityLevel] = useState<
+        "All" | "Active" | "Inactive"
+    >("Active")
     const { range, setRange, isLoading, isError, currentData } =
         useRangedDemographic<GuildAffiliatedDemographicApiData>(
-            (r, signal) => getGuildAffiliatedDemographic(r, signal),
-            RangeEnum.QUARTER
+            (r, signal) =>
+                getGuildAffiliatedDemographic(r, activityLevel, signal),
+            RangeEnum.QUARTER,
+            activityLevel
         )
-    const [serverFilter, setServerFilter] = useState<ServerFilterEnum>(
-        ServerFilterEnum.ONLY_64_BIT
-    )
     const nivoData = useMemo(
-        () => buildGuildAffiliationPie(currentData, serverFilter),
-        [currentData, serverFilter]
+        () => buildGuildAffiliationPie(currentData),
+        [currentData]
     )
 
     return (
@@ -32,8 +34,8 @@ const GuildAffiliatedPopulationDistribution = () => {
             isError={isError}
             range={range}
             setRange={setRange}
-            serverFilter={serverFilter}
-            setServerFilter={setServerFilter}
+            activityLevel={activityLevel}
+            setActivityLevel={setActivityLevel}
             showLegend
             legendData={nivoData.data}
             height={500}

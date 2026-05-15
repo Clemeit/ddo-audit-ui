@@ -777,12 +777,16 @@ export const UserProvider = ({ children }: Props) => {
                         if (!accessToken || isInCircuitBreakerRef.current) {
                             return
                         }
+                        const backoffMs = Math.min(
+                            10000 * 2 ** (refreshFailureCountRef.current - 1),
+                            120000
+                        )
                         keepAliveRetryTimeoutRef.current = window.setTimeout(
                             () => {
                                 keepAliveRetryTimeoutRef.current = null
                                 scheduleRefresh(0)
                             },
-                            10000
+                            backoffMs
                         )
                     })
                 },

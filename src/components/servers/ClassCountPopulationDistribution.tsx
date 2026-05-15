@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react"
 import { ClassCountDemographicApiData } from "../../models/Demographics"
-import { RangeEnum, ServerFilterEnum } from "../../models/Common"
+import { RangeEnum } from "../../models/Common"
 import { getClassCountDemographic } from "../../services/demographicsService"
 import ChartScaffold from "../charts/ChartScaffold"
 import { ResponsivePie } from "@nivo/pie"
@@ -12,6 +12,9 @@ import { buildClassCountPie } from "../../utils/classCountPieBuilder"
 import "../../styles/charts/Overlay.css"
 
 const ClassCountPopulationDistribution = () => {
+    const [activityLevel, setActivityLevel] = useState<
+        "All" | "Active" | "Inactive"
+    >("Active")
     const {
         range: rangeFilter,
         setRange: setRangeFilter,
@@ -19,15 +22,13 @@ const ClassCountPopulationDistribution = () => {
         isError,
         currentData,
     } = useRangedDemographic<ClassCountDemographicApiData>(
-        (r, signal) => getClassCountDemographic(r, signal),
-        RangeEnum.QUARTER
-    )
-    const [serverFilter, setServerFilter] = useState<ServerFilterEnum>(
-        ServerFilterEnum.ONLY_64_BIT
+        (r, signal) => getClassCountDemographic(r, activityLevel, signal),
+        RangeEnum.QUARTER,
+        activityLevel
     )
     const nivoData = useMemo(
-        () => buildClassCountPie(currentData, serverFilter),
-        [currentData, serverFilter]
+        () => buildClassCountPie(currentData),
+        [currentData]
     )
 
     return (
@@ -37,8 +38,8 @@ const ClassCountPopulationDistribution = () => {
             isError={isError}
             range={rangeFilter}
             setRange={setRangeFilter}
-            serverFilter={serverFilter}
-            setServerFilter={setServerFilter}
+            activityLevel={activityLevel}
+            setActivityLevel={setActivityLevel}
             showLegend
             legendData={nivoData.data}
             height={500}

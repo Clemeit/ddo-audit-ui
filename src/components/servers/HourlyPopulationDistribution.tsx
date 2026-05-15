@@ -31,9 +31,6 @@ const HourlyPopulationDistribution: React.FC = () => {
         useRangedDemographic((r, signal) =>
             getPopulationByHourForRange(r, signal)
         )
-    const [serverFilter, setServerFilter] = useState<ServerFilterEnum>(
-        ServerFilterEnum.ONLY_64_BIT
-    )
     const [dataTypeFilter, setDataTypeFilter] = useState<DataTypeFilterEnum>(
         DataTypeFilterEnum.CHARACTERS
     )
@@ -48,11 +45,11 @@ const HourlyPopulationDistribution: React.FC = () => {
         () =>
             buildHourlyPopulationSeries(
                 currentData as any,
-                serverFilter,
+                ServerFilterEnum.ONLY_64_BIT,
                 dataTypeFilter,
                 utcHourToLocalHour
             ),
-        [currentData, serverFilter, dataTypeFilter, utcHourToLocalHour]
+        [currentData, dataTypeFilter, utcHourToLocalHour]
     )
 
     const { excluded, toggleExcluded, setHighlighted, colorFn } =
@@ -81,8 +78,6 @@ const HourlyPopulationDistribution: React.FC = () => {
             isError={isError}
             range={range}
             setRange={setRange}
-            serverFilter={serverFilter}
-            setServerFilter={setServerFilter}
             dataTypeFilter={dataTypeFilter}
             setDataTypeFilter={setDataTypeFilter}
             rangeOptions={RANGE_OPTIONS as any}

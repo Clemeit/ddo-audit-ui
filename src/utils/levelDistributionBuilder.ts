@@ -1,11 +1,7 @@
 import { MIN_LEVEL, MAX_LEVEL } from "../constants/game"
 import { TotalLevelDemographicApiData } from "../models/Demographics"
 import { NivoNumberSeries } from "./nivoUtils"
-import { ServerFilterEnum } from "../models/Common"
-import {
-    SERVERS_32_BITS_LOWER,
-    SERVERS_64_BITS_LOWER,
-} from "../constants/servers"
+import { SERVERS_64_BITS_LOWER } from "../constants/servers"
 
 /**
  * Builds line chart series for total level distribution per server.
@@ -14,7 +10,6 @@ import {
  */
 export function buildLevelDistributionSeries(
     data: TotalLevelDemographicApiData | undefined,
-    serverFilter: ServerFilterEnum,
     normalized: boolean
 ): NivoNumberSeries[] {
     if (!data) return []
@@ -23,12 +18,7 @@ export function buildLevelDistributionSeries(
 
     Object.entries(data).forEach(([serverName, serverData]) => {
         const lower = serverName.toLowerCase()
-        if (
-            (serverFilter === ServerFilterEnum.ONLY_32_BIT &&
-                !SERVERS_32_BITS_LOWER.includes(lower)) ||
-            (serverFilter === ServerFilterEnum.ONLY_64_BIT &&
-                !SERVERS_64_BITS_LOWER.includes(lower))
-        ) {
+        if (!SERVERS_64_BITS_LOWER.includes(lower)) {
             return
         }
 

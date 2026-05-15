@@ -3,18 +3,11 @@ import {
     PopulationPointInTime,
     ServerInfoApiDataModel,
 } from "../../models/Game.ts"
-import {
-    DataTypeFilterEnum,
-    RangeEnum,
-    ServerFilterEnum,
-} from "../../models/Common.ts"
+import { DataTypeFilterEnum, RangeEnum } from "../../models/Common.ts"
 import GenericLine from "../charts/GenericLine.tsx"
 import { getPopulationTimeseriesForRange } from "../../services/populationService.ts"
 import { convertToNivoFormat, NivoDateSeries } from "../../utils/nivoUtils.ts"
-import {
-    SERVERS_32_BITS_LOWER,
-    SERVERS_64_BITS_LOWER,
-} from "../../constants/servers.ts"
+import { SERVERS_64_BITS_LOWER } from "../../constants/servers.ts"
 import Stack from "../global/Stack.tsx"
 import { toSentenceCase } from "../../utils/stringUtils.ts"
 import {
@@ -59,9 +52,6 @@ const LivePopulationContent = ({ serverInfoData }: Props) => {
     const [isLoading, setIsLoading] = useState(false)
     const [isError, setIsError] = useState(false)
     const [range, setRange] = useState<RangeEnum>(RangeEnum.DAY)
-    const [serverFilter, setServerFilter] = useState<ServerFilterEnum>(
-        ServerFilterEnum.ONLY_64_BIT
-    )
     const [dataTypeFilter, setDataTypeFilter] = useState<DataTypeFilterEnum>(
         DataTypeFilterEnum.CHARACTERS
     )
@@ -145,36 +135,15 @@ const LivePopulationContent = ({ serverInfoData }: Props) => {
         } else {
             populationData = dataMap?.[lastRange.current]
         }
-        if (serverFilter === ServerFilterEnum.ONLY_64_BIT) {
-            populationData = populationData?.map((point) => {
-                return {
-                    timestamp: point.timestamp,
-                    data: {
-                        ...Object.fromEntries(
-                            Object.entries(point.data).filter(([server]) =>
-                                SERVERS_64_BITS_LOWER.includes(
-                                    server.toLowerCase()
-                                )
-                            )
-                        ),
-                    },
-                }
-            })
-        } else if (serverFilter === ServerFilterEnum.ONLY_32_BIT) {
-            populationData = populationData?.map((point) => {
-                return {
-                    timestamp: point.timestamp,
-                    data: {
-                        ...Object.fromEntries(
-                            Object.entries(point.data).filter(([server]) =>
-                                SERVERS_32_BITS_LOWER.includes(
-                                    server.toLowerCase()
-                                )
-                            )
-                        ),
-                    },
-                }
-            })
+        if (populationData) {
+            populationData = populationData?.map((point) => ({
+                timestamp: point.timestamp,
+                data: Object.fromEntries(
+                    Object.entries(point.data).filter(([server]) =>
+                        SERVERS_64_BITS_LOWER.includes(server.toLowerCase())
+                    )
+                ),
+            }))
         }
         return convertToNivoFormat(
             populationData,
@@ -182,7 +151,7 @@ const LivePopulationContent = ({ serverInfoData }: Props) => {
                 Intl.DateTimeFormat().resolvedOptions().timeZone,
             dataTypeFilter
         )
-    }, [range, serverFilter, dataMap, timezoneOverride, dataTypeFilter])
+    }, [range, dataMap, timezoneOverride, dataTypeFilter])
 
     const xScale = useMemo(() => {
         if (lastRange.current === RangeEnum.DAY) return LINE_CHART_X_SCALE
@@ -227,8 +196,6 @@ const LivePopulationContent = ({ serverInfoData }: Props) => {
             <FilterSelection
                 range={range}
                 setRange={setRange}
-                serverFilter={serverFilter}
-                setServerFilter={setServerFilter}
                 dataTypeFilter={dataTypeFilter}
                 setDataTypeFilter={setDataTypeFilter}
                 rangeOptions={[RangeEnum.DAY, RangeEnum.WEEK, RangeEnum.MONTH]}

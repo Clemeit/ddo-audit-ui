@@ -102,9 +102,6 @@ const DailyPopulationDistribution = () => {
         (r, signal) => getPopulationByHourAndDayOfWeekForRange(r, signal),
         RangeEnum.QUARTER
     )
-    const [serverFilter, setServerFilter] = useState<ServerFilterEnum>(
-        ServerFilterEnum.ONLY_64_BIT
-    )
     const [dataTypeFilter, setDataTypeFilter] = useState<DataTypeFilterEnum>(
         DataTypeFilterEnum.CHARACTERS
     )
@@ -122,8 +119,8 @@ const DailyPopulationDistribution = () => {
     )
 
     const filteredDayData = useMemo(
-        () => filterServers(dayOfWeekData, serverFilter),
-        [dayOfWeekData, serverFilter]
+        () => filterServers(dayOfWeekData, ServerFilterEnum.ONLY_64_BIT),
+        [dayOfWeekData]
     )
     const nivoData: NivoBarSlice[] = useMemo(
         () =>
@@ -170,8 +167,6 @@ const DailyPopulationDistribution = () => {
             isError={isError}
             range={range}
             setRange={setRange}
-            serverFilter={serverFilter}
-            setServerFilter={setServerFilter}
             dataTypeFilter={dataTypeFilter}
             setDataTypeFilter={setDataTypeFilter}
             displayType={displayType}

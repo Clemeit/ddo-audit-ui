@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react"
 import { PrimaryClassDemographicApiData } from "../../models/Demographics"
-import { RangeEnum, ServerFilterEnum } from "../../models/Common"
+import { RangeEnum } from "../../models/Common"
 import { getPrimaryClassDemographic } from "../../services/demographicsService"
 import ChartScaffold from "../charts/ChartScaffold"
 import { ResponsivePie } from "@nivo/pie"
@@ -12,6 +12,9 @@ import { toTitleCase } from "../../utils/stringUtils"
 import "../../styles/charts/Overlay.css"
 
 const PrimaryClassPopulationDistribution = () => {
+    const [activityLevel, setActivityLevel] = useState<
+        "All" | "Active" | "Inactive"
+    >("Active")
     const {
         range: rangeFilter,
         setRange: setRangeFilter,
@@ -19,15 +22,13 @@ const PrimaryClassPopulationDistribution = () => {
         isError,
         currentData,
     } = useRangedDemographic<PrimaryClassDemographicApiData>(
-        (r, signal) => getPrimaryClassDemographic(r, signal),
-        RangeEnum.QUARTER
-    )
-    const [serverFilter, setServerFilter] = useState<ServerFilterEnum>(
-        ServerFilterEnum.ONLY_64_BIT
+        (r, signal) => getPrimaryClassDemographic(r, activityLevel, signal),
+        RangeEnum.QUARTER,
+        activityLevel
     )
     const nivoData = useMemo(
-        () => buildPrimaryClassPie(currentData, serverFilter),
-        [currentData, serverFilter]
+        () => buildPrimaryClassPie(currentData),
+        [currentData]
     )
 
     return (
@@ -37,8 +38,8 @@ const PrimaryClassPopulationDistribution = () => {
             isError={isError}
             range={rangeFilter}
             setRange={setRangeFilter}
-            serverFilter={serverFilter}
-            setServerFilter={setServerFilter}
+            activityLevel={activityLevel}
+            setActivityLevel={setActivityLevel}
             showLegend
             legendData={nivoData.data}
             height={500}

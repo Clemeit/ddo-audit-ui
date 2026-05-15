@@ -39,7 +39,8 @@ function createEmptyMap<T>(): Record<RangeEnum, T | undefined> {
  */
 export function useRangedDemographic<T>(
     fetcher: RangedFetcher<T>,
-    initialRange: RangeEnum = RangeEnum.QUARTER
+    initialRange: RangeEnum = RangeEnum.QUARTER,
+    cacheKey?: unknown
 ): UseRangedDemographicState<T> {
     const [range, setRange] = useState<RangeEnum>(initialRange)
     const [dataMap, setDataMap] =
@@ -130,6 +131,17 @@ export function useRangedDemographic<T>(
     useEffect(() => {
         dataMapRef.current = dataMap
     }, [dataMap])
+
+    // Bust entire cache when cacheKey changes (skip on initial mount).
+    const cacheKeyRef = useRef(cacheKey)
+    useEffect(() => {
+        if (cacheKeyRef.current === cacheKey) return
+        cacheKeyRef.current = cacheKey
+        abortRef.current?.abort()
+        const fresh = createEmptyMap<T>()
+        setDataMap(fresh)
+        dataMapRef.current = fresh
+    }, [cacheKey])
 
     // Only abort on unmount.
     useEffect(() => {

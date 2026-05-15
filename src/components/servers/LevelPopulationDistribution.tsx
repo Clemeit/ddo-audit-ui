@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react"
-import { RangeEnum, ServerFilterEnum } from "../../models/Common"
+import { RangeEnum } from "../../models/Common"
 import { getTotalLevelDemographic } from "../../services/demographicsService"
 import ChartScaffold from "../charts/ChartScaffold"
 import { ResponsiveLine } from "@nivo/line"
@@ -16,26 +16,25 @@ import { NivoNumberSeries } from "../../utils/nivoUtils"
 import { useLegendFilterHighlight } from "../../hooks/useLegendFilterHighlight"
 
 const LevelPopulationDistribution = () => {
+    const [activityLevel, setActivityLevel] = useState<
+        "All" | "Active" | "Inactive"
+    >("Active")
     const {
         range: rangeFilter,
         setRange: setRangeFilter,
         currentData,
         isLoading,
         isError,
-    } = useRangedDemographic((r, signal) => getTotalLevelDemographic(r, signal))
-    const [serverFilter, setServerFilter] = useState<ServerFilterEnum>(
-        ServerFilterEnum.ONLY_64_BIT
+    } = useRangedDemographic(
+        (r, signal) => getTotalLevelDemographic(r, activityLevel, signal),
+        RangeEnum.QUARTER,
+        activityLevel
     )
     const [displayType, setDisplayType] = useState<string>("Separated")
     const [normalized, setNormalized] = useState<boolean>(false)
     const nivoData: NivoNumberSeries[] = useMemo(
-        () =>
-            buildLevelDistributionSeries(
-                currentData as any,
-                serverFilter,
-                normalized
-            ),
-        [currentData, serverFilter, normalized]
+        () => buildLevelDistributionSeries(currentData as any, normalized),
+        [currentData, normalized]
     )
 
     const { excluded, toggleExcluded, setHighlighted, colorFn } =
@@ -56,13 +55,13 @@ const LevelPopulationDistribution = () => {
             isError={isError}
             range={rangeFilter}
             setRange={setRangeFilter}
-            serverFilter={serverFilter}
-            setServerFilter={setServerFilter}
             displayType={displayType}
             setDisplayType={setDisplayType}
             displayTypeOptions={["Separated", "Stacked"]}
             normalized={normalized}
             setNormalized={setNormalized}
+            activityLevel={activityLevel}
+            setActivityLevel={setActivityLevel}
             showLegend
             legendData={nivoData}
             height={400}

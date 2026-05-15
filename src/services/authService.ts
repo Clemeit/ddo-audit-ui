@@ -34,6 +34,7 @@ function postRefresh(signal?: AbortSignal): Promise<UserAuthedResponse> {
     return postRequest(`${AUTH_ENDPOINT}/refresh`, {
         signal,
         withCredentials: true,
+        noRetry: true,
     })
 }
 
