@@ -1,6 +1,7 @@
 import { UserObject } from "./Auth"
 import { AccessToken } from "./Verification"
 import type { NormalizedPersistentSettings } from "../utils/settingsNormalizers"
+import type { CustomRaidTimer } from "./RaidTimers"
 
 interface UserSettings {
     registeredCharacterIds?: number[]
@@ -129,8 +130,13 @@ interface RaidTimerSetting extends SimpleSetting {
         hiddenTimers: {
             characterId: number
             timestamp: string
+            id?: string
         }[]
     }
+}
+
+interface CustomTimerSetting extends SimpleSetting {
+    data: CustomRaidTimer[]
 }
 
 interface TimezoneSetting extends SimpleSetting {
@@ -183,6 +189,7 @@ export type {
     LfmSetting,
     RegisteredCharacterIdListSetting,
     RaidTimerSetting,
+    CustomTimerSetting,
     TimezoneSetting,
     WhoSetting,
     DeletePersistentSettingsResponse,

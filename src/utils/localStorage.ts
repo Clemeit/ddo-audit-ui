@@ -4,7 +4,7 @@ import { LocalStorageEntry } from "../models/LocalStorage.ts"
 import { Area } from "../models/Area.ts"
 import { Quest } from "../models/Lfm.ts"
 import logMessage from "./logUtils.ts"
-import { RaidTimerStorage } from "../models/RaidTimers.ts"
+import { CustomRaidTimer, RaidTimerStorage } from "../models/RaidTimers.ts"
 import { NotificationPreferences } from "../models/Notification.ts"
 
 const VERSION_PREFIX = "v1-"
@@ -20,6 +20,7 @@ const BOOLEAN_FLAGS_KEY = "boolean-flags"
 const LFM_SETTINGS_KEY = "lfm-settings"
 const WHO_SETTINGS_KEY = "who-settings"
 const RAID_TIMER_SETTINGS_KEY = "timer-settings"
+const CUSTOM_TIMER_SETTINGS_KEY = "custom-timers"
 const TIMEZONE_KEY = "timezone"
 const UPDATE_DISMISSED_KEY = "update-dismissed"
 const UPDATE_SHOWN_KEY = "update-shown"
@@ -36,6 +37,7 @@ export const PERSISTENT_KEYS = [
     WHO_SETTINGS_KEY,
     TIMEZONE_KEY,
     RAID_TIMER_SETTINGS_KEY,
+    CUSTOM_TIMER_SETTINGS_KEY,
 ] as const
 
 export type PersistentKey = (typeof PERSISTENT_KEYS)[number]
@@ -58,6 +60,7 @@ function getPersistentDefaultValue(key: PersistentKey): unknown {
         case LFM_SETTINGS_KEY:
         case WHO_SETTINGS_KEY:
         case RAID_TIMER_SETTINGS_KEY:
+        case CUSTOM_TIMER_SETTINGS_KEY:
             return {}
         case TIMEZONE_KEY:
             return ""
@@ -78,6 +81,7 @@ function normalizePersistentValue(key: PersistentKey, value: unknown): unknown {
         case LFM_SETTINGS_KEY:
         case WHO_SETTINGS_KEY:
         case RAID_TIMER_SETTINGS_KEY:
+        case CUSTOM_TIMER_SETTINGS_KEY:
             return value && typeof value === "object" && !Array.isArray(value)
                 ? value
                 : {}
@@ -262,6 +266,30 @@ function getRaidTimerSettings(): RaidTimerStorage | null {
 
 function setRaidTimerSettings(settings: RaidTimerStorage): void {
     setData<RaidTimerStorage>(RAID_TIMER_SETTINGS_KEY, settings)
+}
+
+function getCustomTimers(): CustomRaidTimer[] {
+    return getData<CustomRaidTimer[]>(CUSTOM_TIMER_SETTINGS_KEY, [])
+}
+
+function setCustomTimers(timers: CustomRaidTimer[]): void {
+    setData<CustomRaidTimer[]>(CUSTOM_TIMER_SETTINGS_KEY, timers)
+}
+
+function addCustomTimer(timer: CustomRaidTimer): void {
+    addItem<CustomRaidTimer>(
+        CUSTOM_TIMER_SETTINGS_KEY,
+        timer,
+        (a, b) => a.id === b.id
+    )
+}
+
+function removeCustomTimer(timer: CustomRaidTimer): void {
+    removeItem<CustomRaidTimer>(
+        CUSTOM_TIMER_SETTINGS_KEY,
+        timer,
+        (a, b) => a.id === b.id
+    )
 }
 
 // Feature callouts functions
@@ -667,6 +695,10 @@ export {
     setWhoSettings,
     getRaidTimerSettings,
     setRaidTimerSettings,
+    getCustomTimers,
+    setCustomTimers,
+    addCustomTimer,
+    removeCustomTimer,
     getTimezone,
     setTimezone,
     getTrackedCharacterIds,

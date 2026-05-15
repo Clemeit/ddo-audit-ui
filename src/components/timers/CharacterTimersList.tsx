@@ -10,10 +10,12 @@ import { QuestInstances } from "../../hooks/useGetCharacterTimers.ts"
 import { RaidTimerCharacterSortEnum } from "../../models/Common.ts"
 import Link from "../global/Link.tsx"
 import TimerSortControls from "./TimerSortControls.tsx"
+import { ReactComponent as StylusSVG } from "../../assets/svg/stylus.svg"
 
 export interface HiddenTimer {
     characterId: number
     timestamp: string
+    id?: string
 }
 
 interface Props {
@@ -82,7 +84,7 @@ const CharacterTimersList = ({
         // Key format: `${characterId}|${timestamp}`
         const set = new Set<string>()
         for (const ht of hiddenTimers) {
-            set.add(`${ht.characterId}|${ht.timestamp}`)
+            set.add(ht.id || `${ht.characterId}|${ht.timestamp}`)
         }
         return set
     }, [hiddenTimers])
@@ -104,12 +106,15 @@ const CharacterTimersList = ({
             if (!character) continue
 
             const tArray = timers as QuestInstances[]
-            const filteredTimersPre = tArray.filter(
-                (t) => !hiddenKeySet.has(`${characterId}|${t.timestamp}`)
-            )
+            const visibleTimers = tArray.filter((t) => {
+                const timerKey = t.id || `${characterId}|${t.timestamp}`
+                return !hiddenKeySet.has(timerKey)
+            })
 
-            // Ensure reverse-chronological order (most recent first)
-            const sortedByTimestampDesc = filteredTimersPre
+            const serverTimers = visibleTimers.filter((t) => !t.isUserDefined)
+            const customTimers = visibleTimers.filter((t) => t.isUserDefined)
+
+            const sortedServerTimers = serverTimers
                 .slice()
                 .sort(
                     (a, b) =>
@@ -117,20 +122,27 @@ const CharacterTimersList = ({
                         new Date(a.timestamp).getTime()
                 )
 
-            // Dedupe by quest_ids set (order-insensitive): keep most recent only
+            // Dedupe only server timers by quest ids; custom timers remain fully visible.
             const seen = new Set<string>()
-            const filteredTimers: QuestInstances[] = []
-            for (const t of sortedByTimestampDesc) {
-                // Sort quest_ids to make key independent of order
+            const dedupedServerTimers: QuestInstances[] = []
+            for (const t of sortedServerTimers) {
                 const key = (t.quest_ids || [])
                     .slice()
                     .sort((a, b) => a - b)
                     .join(",")
                 if (!seen.has(key)) {
                     seen.add(key)
-                    filteredTimers.push(t)
+                    dedupedServerTimers.push(t)
                 }
             }
+
+            const filteredTimers = [...dedupedServerTimers, ...customTimers]
+                .slice()
+                .sort(
+                    (a, b) =>
+                        new Date(b.timestamp).getTime() -
+                        new Date(a.timestamp).getTime()
+                )
             if (filteredTimers.length === 0) continue
 
             // Assume timers are in reverse-chron order already; use first visible
@@ -248,9 +260,23 @@ const CharacterTimersList = ({
 
                                             return (
                                                 <tr
-                                                    key={`${characterId}-${timer.timestamp}`}
+                                                    key={`${characterId}-${timer.id || timer.timestamp}`}
                                                 >
                                                     <td>
+                                                        {timer.isUserDefined && (
+                                                            <StylusSVG
+                                                                title="User-defined timer"
+                                                                aria-label="User-defined timer"
+                                                                style={{
+                                                                    width: "14px",
+                                                                    height: "14px",
+                                                                    marginRight:
+                                                                        "6px",
+                                                                    verticalAlign:
+                                                                        "-2px",
+                                                                }}
+                                                            />
+                                                        )}
                                                         {timer.quest_ids
                                                             .map(
                                                                 (qid) =>

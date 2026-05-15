@@ -8,7 +8,11 @@ interface Props {
     character: Character | null
     timer: QuestInstances | null
     quests: { [id: number]: { name?: string } | undefined }
-    onConfirm: (payload: { characterId: number; timestamp: string }) => void
+    onConfirm: (payload: {
+        characterId: number
+        timestamp: string
+        id?: string
+    }) => void
     onClose: () => void
 }
 
@@ -35,6 +39,7 @@ const DeleteTimerModal = ({
                     onConfirm({
                         characterId: character.id,
                         timestamp: timer.timestamp,
+                        id: timer.id,
                     })
                 }
                 onClose()

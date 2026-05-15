@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import Page from "../global/Page.tsx"
 import {
     ContentCluster,
@@ -26,6 +26,18 @@ import FauxLink from "../global/FauxLink.tsx"
 import logMessage from "../../utils/logUtils.ts"
 import Link from "../global/Link.tsx"
 import Stack from "../global/Stack.tsx"
+import PageMessage from "../global/PageMessage.tsx"
+import Button from "../global/Button.tsx"
+import AddTimerModal from "./AddTimerModal"
+import { v4 as uuid } from "uuid"
+import type { CustomRaidTimer } from "../../models/RaidTimers.ts"
+import {
+    addCustomTimer,
+    getCustomTimers,
+    setCustomTimers as persistCustomTimers,
+} from "../../utils/localStorage.ts"
+import useNow from "../../hooks/useNow.ts"
+import { RAID_TIMER_MILLIS } from "../../constants/game.ts"
 
 const Timers = () => {
     const {
@@ -41,7 +53,18 @@ const Timers = () => {
     } = useGetCharacterTimers({
         registeredCharacters,
     })
+    const [customTimers, setCustomTimers] = useState<CustomRaidTimer[]>(() => {
+        try {
+            return getCustomTimers()
+        } catch (e) {
+            logMessage("Failed to load custom timers", "error", {
+                metadata: { error: e instanceof Error ? e.message : String(e) },
+            })
+            return []
+        }
+    })
     const [image, setImage] = useState<HTMLImageElement | null>(null)
+    const nowTick = useNow(MsFromMinutes(1))
     const { quests } = useQuestContext()
     const [sortCharacterBy, setSortCharacterBy] = useState<{
         type: RaidTimerCharacterSortEnum
@@ -73,7 +96,7 @@ const Timers = () => {
     const [initialTimerLoadDone, setInitialTimerLoadDone] =
         useState<boolean>(false)
     const [hiddenTimers, setHiddenTimers] = useState<
-        { characterId: number; timestamp: string }[]
+        { characterId: number; timestamp: string; id?: string }[]
     >(() => {
         try {
             return getRaidTimerSettings()?.hiddenTimers || []
@@ -151,16 +174,101 @@ const Timers = () => {
     const [selectedCharacterId, setSelectedCharacterId] = useState<
         number | null
     >(null)
+    const [isAddTimerModalOpen, setIsAddTimerModalOpen] = useState(false)
+
+    const pruneExpiredCustomTimers = useCallback(
+        (timers: CustomRaidTimer[], nowMillis: number) => {
+            return timers.filter((timer) => {
+                const completedAtMillis = new Date(timer.completedAt).getTime()
+                if (Number.isNaN(completedAtMillis)) {
+                    return false
+                }
+                return completedAtMillis + RAID_TIMER_MILLIS > nowMillis
+            })
+        },
+        []
+    )
+
+    useEffect(() => {
+        if (!customTimers.length) return
+        const nextCustomTimers = pruneExpiredCustomTimers(customTimers, nowTick)
+        if (nextCustomTimers.length === customTimers.length) return
+
+        setCustomTimers(nextCustomTimers)
+        persistCustomTimers(nextCustomTimers)
+        logMessage("Pruned expired custom timers", "info", {
+            metadata: {
+                previousCount: customTimers.length,
+                nextCount: nextCustomTimers.length,
+                removedCount: customTimers.length - nextCustomTimers.length,
+            },
+        })
+    }, [customTimers, nowTick, pruneExpiredCustomTimers])
+
+    const mergedCharacterTimers = useMemo(() => {
+        const merged = Object.entries(characterTimers || {}).reduce(
+            (acc, [characterId, timers]) => {
+                acc[Number(characterId)] = [...timers]
+                return acc
+            },
+            {} as Record<number, QuestInstances[]>
+        )
+
+        for (const timer of customTimers) {
+            if (!merged[timer.characterId]) {
+                merged[timer.characterId] = []
+            }
+            merged[timer.characterId].push({
+                timestamp: timer.completedAt,
+                quest_ids: timer.questIds,
+                id: timer.id,
+                isUserDefined: true,
+            })
+        }
+
+        return merged
+    }, [characterTimers, customTimers])
 
     const onConfirmDelete = useCallback(
         ({
             characterId,
             timestamp,
+            id,
         }: {
             characterId: number
             timestamp: string
+            id?: string
         }) => {
-            setHiddenTimers((prev) => prev.concat([{ characterId, timestamp }]))
+            setHiddenTimers((prev) =>
+                prev.concat([{ characterId, timestamp, id }])
+            )
+        },
+        []
+    )
+
+    const onCreateCustomTimer = useCallback(
+        (timer: {
+            characterId: number
+            questIds: number[]
+            questName: string
+            completedAt: string
+        }) => {
+            const nextTimer: CustomRaidTimer = {
+                id: uuid(),
+                createdAt: new Date().toISOString(),
+                ...timer,
+            }
+            addCustomTimer(nextTimer)
+            setCustomTimers((prev) => prev.concat([nextTimer]))
+            setIsAddTimerModalOpen(false)
+            logMessage("Add raid timer", "info", {
+                action: "click",
+                metadata: {
+                    characterId: timer.characterId,
+                    questIds: timer.questIds,
+                    completedAt: timer.completedAt,
+                },
+            })
         },
         []
     )
@@ -169,6 +277,13 @@ const Timers = () => {
         <Page
             title="Raid and Quest Timers"
             description="View your raid and quest timers. See which raids you're on timer for and which quests you've ransacked."
+            pageMessages={
+                <PageMessage
+                    type="warning"
+                    title="DDO Audit Downtime"
+                    message="DDO Audit was offline Friday, May 15 from 6:30 am until 12:30 pm (PT). If you ran a raid during that time, it won't be tracked below. You can add raid timers manually with the 'Add a timer' button."
+                />
+            }
         >
             <DeleteTimerModal
                 isOpen={isDeleteModalOpen}
@@ -181,6 +296,13 @@ const Timers = () => {
                 quests={quests}
                 onConfirm={onConfirmDelete}
                 onClose={() => setIsDeleteModalOpen(false)}
+            />
+            <AddTimerModal
+                isOpen={isAddTimerModalOpen}
+                registeredCharacters={registeredCharacters}
+                quests={quests}
+                onSave={onCreateCustomTimer}
+                onClose={() => setIsAddTimerModalOpen(false)}
             />
             <ContentClusterGroup>
                 <ContentCluster title="Timers">
@@ -206,7 +328,7 @@ const Timers = () => {
                         ) : (
                             <CharacterTimersList
                                 registeredCharacters={registeredCharacters}
-                                characterTimers={characterTimers}
+                                characterTimers={mergedCharacterTimers}
                                 sortCharacterBy={sortCharacterBy}
                                 hiddenTimers={hiddenTimers}
                                 quests={quests}
@@ -220,6 +342,8 @@ const Timers = () => {
                                             characterId,
                                             timestamp: timer.timestamp,
                                             questIds: timer.quest_ids,
+                                            id: timer.id,
+                                            isUserDefined: timer.isUserDefined,
                                         },
                                         action: "click",
                                     })
@@ -229,6 +353,13 @@ const Timers = () => {
                             />
                         )}
                     </>
+                    <Spacer size="20px" />
+                    <Button
+                        type="secondary"
+                        onClick={() => setIsAddTimerModalOpen(true)}
+                    >
+                        Add a timer
+                    </Button>
                     <Spacer size="20px" />
                     <Stack
                         direction="row"
