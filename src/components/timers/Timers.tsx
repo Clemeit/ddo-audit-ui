@@ -273,16 +273,22 @@ const Timers = () => {
         []
     )
 
+    // TODO: Temp, remove
+    const downtimeExpires = new Date((1778878800 + 66 * 60 * 60) * 1000)
+    const shouldShowMessage = new Date() < downtimeExpires
+
     return (
         <Page
             title="Raid and Quest Timers"
             description="View your raid and quest timers. See which raids you're on timer for and which quests you've ransacked."
             pageMessages={
-                <PageMessage
-                    type="warning"
-                    title="DDO Audit Downtime"
-                    message="DDO Audit was offline Friday, May 15 from 6:30 am until 12:30 pm (PT). If you ran a raid during that time, it won't be tracked below. You can add raid timers manually with the 'Add a timer' button."
-                />
+                shouldShowMessage && (
+                    <PageMessage
+                        type="warning"
+                        title="DDO Audit Downtime"
+                        message="DDO Audit was offline Friday, May 15 from 6:30 am until 12:30 pm (PT). If you ran a raid during that time, it won't be tracked below. You can add raid timers manually with the 'Add a timer' button."
+                    />
+                )
             }
         >
             <DeleteTimerModal
