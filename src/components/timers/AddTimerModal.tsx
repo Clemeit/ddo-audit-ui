@@ -10,6 +10,7 @@ import Select from "../global/Select.tsx"
 import Checkbox from "../global/Checkbox.tsx"
 import RadioButton from "../global/RadioButton.tsx"
 import ValidationMessage from "../global/ValidationMessage.tsx"
+import useWindowSize from "../../hooks/useWindowSize.ts"
 
 interface Props {
     isOpen: boolean
@@ -39,12 +40,14 @@ const AddTimerModal = ({
     const [questName, setQuestName] = useState("")
     const [completedJustNow, setCompletedJustNow] = useState(true)
     const [completionMode, setCompletionMode] =
-        useState<CompletionMode>("completed-at")
+        useState<CompletionMode>("remaining-time")
     const [completedAtValue, setCompletedAtValue] = useState("")
     const [remainingDays, setRemainingDays] = useState("0")
     const [remainingHours, setRemainingHours] = useState("0")
     const [remainingMinutes, setRemainingMinutes] = useState("0")
     const [error, setError] = useState<string | null>(null)
+
+    const { isMobile, isSmallishMobile } = useWindowSize()
 
     const questLookup = useMemo(() => {
         const map = new Map<string, { ids: number[]; name: string }>()
@@ -76,7 +79,7 @@ const AddTimerModal = ({
         setCharacterId(registeredCharacters[0]?.id ?? 0)
         setQuestName("")
         setCompletedJustNow(true)
-        setCompletionMode("completed-at")
+        setCompletionMode("remaining-time")
         setCompletedAtValue("")
         setRemainingDays("0")
         setRemainingHours("0")
@@ -183,6 +186,7 @@ const AddTimerModal = ({
             fullScreenOnMobile
             freezeBodyScroll
             maxWidth="720px"
+            style={{ minWidth: isMobile ? "" : "368px" }}
         >
             <ContentCluster title="Add a timer">
                 <Stack direction="column" gap="16px">
@@ -243,7 +247,14 @@ const AddTimerModal = ({
                     </Checkbox>
 
                     {!completedJustNow && (
-                        <fieldset style={{ border: 0, padding: 0, margin: 0 }}>
+                        <fieldset
+                            style={{
+                                border: 0,
+                                padding: 0,
+                                margin: 0,
+                                width: "100%",
+                            }}
+                        >
                             <legend>
                                 <strong>Choose one completion method</strong>
                             </legend>
@@ -252,34 +263,6 @@ const AddTimerModal = ({
                                 gap="12px"
                                 style={{ marginTop: "8px" }}
                             >
-                                <RadioButton
-                                    checked={completionMode === "completed-at"}
-                                    onChange={() =>
-                                        setCompletionMode("completed-at")
-                                    }
-                                >
-                                    Completed at
-                                </RadioButton>
-                                <Stack
-                                    direction="column"
-                                    gap="8px"
-                                    style={{ marginLeft: "24px" }}
-                                >
-                                    <input
-                                        type="datetime-local"
-                                        value={completedAtValue}
-                                        disabled={
-                                            completionMode !== "completed-at"
-                                        }
-                                        onChange={(event) =>
-                                            setCompletedAtValue(
-                                                event.target.value
-                                            )
-                                        }
-                                        style={{ width: "100%" }}
-                                    />
-                                </Stack>
-
                                 <RadioButton
                                     checked={
                                         completionMode === "remaining-time"
@@ -294,7 +277,6 @@ const AddTimerModal = ({
                                     direction="row"
                                     gap="8px"
                                     style={{
-                                        marginLeft: "24px",
                                         flexWrap: "wrap",
                                     }}
                                 >
@@ -356,6 +338,37 @@ const AddTimerModal = ({
                                         />
                                     </Stack>
                                 </Stack>
+
+                                <RadioButton
+                                    checked={completionMode === "completed-at"}
+                                    onChange={() =>
+                                        setCompletionMode("completed-at")
+                                    }
+                                >
+                                    Completed at
+                                </RadioButton>
+                                <Stack
+                                    direction="column"
+                                    gap="8px"
+                                    style={{ width: "100%" }}
+                                >
+                                    <input
+                                        type="datetime-local"
+                                        value={completedAtValue}
+                                        disabled={
+                                            completionMode !== "completed-at"
+                                        }
+                                        onChange={(event) =>
+                                            setCompletedAtValue(
+                                                event.target.value
+                                            )
+                                        }
+                                        style={{
+                                            width: "100%",
+                                            boxSizing: "border-box",
+                                        }}
+                                    />
+                                </Stack>
                             </Stack>
                         </fieldset>
                     )}
@@ -366,15 +379,28 @@ const AddTimerModal = ({
                         message={error || ""}
                     />
 
-                    <Stack direction="row" gap="10px">
+                    <Stack
+                        direction={isSmallishMobile ? "column" : "row"}
+                        gap="10px"
+                        style={{ width: "100%" }}
+                    >
                         <Button
                             type="primary"
                             onClick={handleSubmit}
                             disabled={!canSave}
+                            style={{
+                                width: isMobile ? "100%" : "",
+                            }}
                         >
                             Save
                         </Button>
-                        <Button type="secondary" onClick={onClose}>
+                        <Button
+                            type="secondary"
+                            onClick={onClose}
+                            style={{
+                                width: isMobile ? "100%" : "",
+                            }}
+                        >
                             Cancel
                         </Button>
                     </Stack>
