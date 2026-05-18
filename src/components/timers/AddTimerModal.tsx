@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { Character } from "../../models/Character.ts"
 import { Quest } from "../../models/Lfm.ts"
 import { RAID_TIMER_MILLIS } from "../../constants/game.ts"
