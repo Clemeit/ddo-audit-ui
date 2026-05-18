@@ -243,7 +243,20 @@ const Timers = () => {
             if (isUserDefined && id) {
                 const timerToRemove = customTimers.find((t) => t.id === id)
                 if (timerToRemove) {
-                    removeCustomTimer(timerToRemove)
+                    try {
+                        removeCustomTimer(timerToRemove)
+                    } catch (e) {
+                        logMessage("Failed to remove custom timer", "error", {
+                            metadata: {
+                                id,
+                                error:
+                                    e instanceof Error ? e.message : String(e),
+                            },
+                        })
+                        persistCustomTimers(
+                            customTimers.filter((t) => t.id !== id)
+                        )
+                    }
                     setCustomTimers((prev) => prev.filter((t) => t.id !== id))
                 }
             } else {
@@ -267,7 +280,16 @@ const Timers = () => {
                 createdAt: new Date().toISOString(),
                 ...timer,
             }
-            addCustomTimer(nextTimer)
+            try {
+                addCustomTimer(nextTimer)
+            } catch (e) {
+                logMessage("Failed to persist custom timer", "error", {
+                    metadata: {
+                        error: e instanceof Error ? e.message : String(e),
+                    },
+                })
+                persistCustomTimers([...customTimers, nextTimer])
+            }
             setCustomTimers((prev) => prev.concat([nextTimer]))
             setIsAddTimerModalOpen(false)
             logMessage("Add raid timer", "info", {

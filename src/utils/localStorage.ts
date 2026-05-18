@@ -69,6 +69,20 @@ function getPersistentDefaultValue(key: PersistentKey): unknown {
     }
 }
 
+function isValidCustomTimer(value: unknown): value is CustomRaidTimer {
+    if (!value || typeof value !== "object" || Array.isArray(value)) return false
+    const t = value as Record<string, unknown>
+    return (
+        typeof t.id === "string" &&
+        typeof t.characterId === "number" &&
+        Array.isArray(t.questIds) &&
+        (t.questIds as unknown[]).every((qid) => typeof qid === "number") &&
+        typeof t.questName === "string" &&
+        typeof t.completedAt === "string" &&
+        typeof t.createdAt === "string"
+    )
+}
+
 function normalizePersistentValue(key: PersistentKey, value: unknown): unknown {
     switch (key) {
         case ACCESS_TOKENS_KEY:
@@ -77,7 +91,9 @@ function normalizePersistentValue(key: PersistentKey, value: unknown): unknown {
         case FRIENDS_KEY:
         case IGNORES_KEY:
         case CUSTOM_TIMER_SETTINGS_KEY:
-            return Array.isArray(value) ? value : []
+            return Array.isArray(value)
+                ? value.filter(isValidCustomTimer)
+                : []
         case BOOLEAN_FLAGS_KEY:
         case LFM_SETTINGS_KEY:
         case WHO_SETTINGS_KEY:
