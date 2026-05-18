@@ -211,6 +211,39 @@ describe("settingsNormalizers", () => {
             })
             expect(result.friends).toEqual([1, 3])
         })
+
+        it("normalizes custom timers and hidden timer ids", () => {
+            const result = normalizeAllPersistentSettings({
+                "custom-timers": [
+                    {
+                        id: "timer-1",
+                        characterId: 7,
+                        questIds: [11, 12],
+                        questName: "Legendary Raid",
+                        completedAt: "2026-05-15T10:00:00.000Z",
+                        createdAt: "2026-05-15T10:00:00.000Z",
+                    },
+                    { bad: "data" },
+                ],
+                "timer-settings": {
+                    sortType: "Name",
+                    sortOrder: "asc",
+                    hiddenTimers: [
+                        {
+                            characterId: 7,
+                            timestamp: "2026-05-15T10:00:00.000Z",
+                            id: "timer-1",
+                        },
+                    ],
+                },
+            })
+
+            expect(result["custom-timers"]).toHaveLength(1)
+            expect(result["custom-timers"][0].id).toBe("timer-1")
+            expect(result["timer-settings"].hiddenTimers?.[0].id).toBe(
+                "timer-1"
+            )
+        })
     })
 
     describe("normalizePartialPersistentSettings", () => {

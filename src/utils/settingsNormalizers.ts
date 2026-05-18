@@ -4,7 +4,7 @@ import { CharacterSortType } from "../models/Character.ts"
 import type { CharacterSortBy } from "../models/Character.ts"
 import type { AccessToken } from "../models/Verification.ts"
 import { RaidTimerCharacterSortEnum } from "../models/Common.ts"
-import type { RaidTimerStorage } from "../models/RaidTimers.ts"
+import type { CustomRaidTimer, RaidTimerStorage } from "../models/RaidTimers.ts"
 import {
     DEFAULT_BASE_FONT_SIZE,
     DEFAULT_LFM_PANEL_WIDTH,
@@ -300,6 +300,7 @@ export interface NormalizedPersistentSettings {
     "registered-characters": number[]
     timezone: string
     "timer-settings": RaidTimerStorage
+    "custom-timers": CustomRaidTimer[]
 }
 
 function normalizeAccessTokens(input: unknown): AccessToken[] {
@@ -322,13 +323,35 @@ function normalizeRaidTimerSettings(input: unknown): RaidTimerStorage {
         sortOrder: typeof s.sortOrder === "string" ? s.sortOrder : "asc",
         hiddenTimers: Array.isArray(s.hiddenTimers)
             ? s.hiddenTimers.filter(
-                  (t): t is { characterId: number; timestamp: string } =>
+                  (
+                      t
+                  ): t is {
+                      characterId: number
+                      timestamp: string
+                      id?: string
+                  } =>
                       isRecord(t) &&
                       typeof t.characterId === "number" &&
-                      typeof t.timestamp === "string"
+                      typeof t.timestamp === "string" &&
+                      (typeof t.id === "string" || t.id === undefined)
               )
             : [],
     }
+}
+
+function normalizeCustomTimers(input: unknown): CustomRaidTimer[] {
+    if (!Array.isArray(input)) return []
+    return input.filter(
+        (timer): timer is CustomRaidTimer =>
+            isRecord(timer) &&
+            typeof timer.id === "string" &&
+            typeof timer.characterId === "number" &&
+            Array.isArray(timer.questIds) &&
+            timer.questIds.every((questId) => typeof questId === "number") &&
+            typeof timer.questName === "string" &&
+            typeof timer.completedAt === "string" &&
+            typeof timer.createdAt === "string"
+    )
 }
 
 export function normalizeAllPersistentSettings(
@@ -348,6 +371,7 @@ export function normalizeAllPersistentSettings(
         "registered-characters": coerceNumberArray(s["registered-characters"]),
         timezone: typeof s.timezone === "string" ? s.timezone : "",
         "timer-settings": normalizeRaidTimerSettings(s["timer-settings"]),
+        "custom-timers": normalizeCustomTimers(s["custom-timers"]),
     }
 }
 

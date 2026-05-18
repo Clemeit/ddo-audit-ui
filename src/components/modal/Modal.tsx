@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from "react"
 import { ReactComponent as CloseSVG } from "../../assets/svg/close.svg"
 import "./Modal.css"
 
-interface Props {
+interface Props extends React.HTMLAttributes<HTMLDivElement> {
     children: React.ReactNode
     onClose: () => void
     hideOverlay?: boolean
@@ -19,6 +19,7 @@ const Modal = ({
     maxWidth = "400px",
     fullScreenOnMobile = false,
     freezeBodyScroll = false,
+    ...rest
 }: Props) => {
     const modalRef = useRef<HTMLDivElement>(null)
 
@@ -50,8 +51,20 @@ const Modal = ({
                 <div className="modal-overlay" onClick={onClose} />
             )}
             <div
-                className={`modal-container ${centeredContent ? "centered-content" : ""} ${fullScreenOnMobile ? "full-screen-on-mobile" : ""}`}
-                onKeyDown={handleKeyDown}
+                {...rest}
+                className={[
+                    "modal-container",
+                    centeredContent ? "centered-content" : "",
+                    fullScreenOnMobile ? "full-screen-on-mobile" : "",
+                    rest.className ?? "",
+                ]
+                    .filter(Boolean)
+                    .join(" ")}
+                style={{ ...rest.style, maxWidth }}
+                onKeyDown={(e) => {
+                    handleKeyDown(e)
+                    rest.onKeyDown?.(e)
+                }}
                 tabIndex={-1}
                 ref={modalRef}
             >
