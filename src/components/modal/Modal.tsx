@@ -10,7 +10,6 @@ interface Props extends React.HTMLAttributes<HTMLDivElement> {
     maxWidth?: string
     fullScreenOnMobile?: boolean
     freezeBodyScroll?: boolean
-    rest?: React.HTMLAttributes<HTMLDivElement>
 }
 const Modal = ({
     children,
