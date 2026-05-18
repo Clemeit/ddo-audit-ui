@@ -191,7 +191,9 @@ const AddTimerModal = ({
             <ContentCluster title="Add a timer">
                 <Stack direction="column" gap="16px">
                     <Stack direction="column" style={{ width: "100%" }}>
-                        <strong>Character</strong>
+                        <label htmlFor="custom-timer-character">
+                            <strong>Character</strong>
+                        </label>
                         <Select
                             id="custom-timer-character"
                             value={String(characterId)}
@@ -219,8 +221,11 @@ const AddTimerModal = ({
                     </Stack>
 
                     <Stack direction="column" style={{ width: "100%" }}>
-                        <strong>Raid</strong>
+                        <label htmlFor="custom-timer-raid">
+                            <strong>Raid</strong>
+                        </label>
                         <input
+                            id="custom-timer-raid"
                             type="text"
                             list="custom-timer-quests"
                             autoComplete="off"

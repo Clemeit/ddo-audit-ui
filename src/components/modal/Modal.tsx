@@ -60,6 +60,7 @@ const Modal = ({
                 ]
                     .filter(Boolean)
                     .join(" ")}
+                style={{ ...rest.style, maxWidth }}
                 onKeyDown={(e) => {
                     handleKeyDown(e)
                     rest.onKeyDown?.(e)

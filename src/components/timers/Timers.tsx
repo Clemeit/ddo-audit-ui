@@ -17,6 +17,10 @@ import { MsFromMinutes, MsFromSeconds } from "../../utils/timeUtils.ts"
 import {
     getRaidTimerSettings,
     setRaidTimerSettings,
+    addCustomTimer,
+    getCustomTimers,
+    removeCustomTimer,
+    setCustomTimers as persistCustomTimers,
 } from "../../utils/localStorage.ts"
 import TimersHeader from "./TimersHeader.tsx"
 import CharacterTimersList from "./CharacterTimersList.tsx"
@@ -31,12 +35,6 @@ import Button from "../global/Button.tsx"
 import AddTimerModal from "./AddTimerModal.tsx"
 import { v4 as uuid } from "uuid"
 import type { CustomRaidTimer } from "../../models/RaidTimers.ts"
-import {
-    addCustomTimer,
-    getCustomTimers,
-    removeCustomTimer,
-    setCustomTimers as persistCustomTimers,
-} from "../../utils/localStorage.ts"
 import useNow from "../../hooks/useNow.ts"
 import { RAID_TIMER_MILLIS } from "../../constants/game.ts"
 
