@@ -12,6 +12,7 @@ interface Props {
         characterId: number
         timestamp: string
         id?: string
+        isUserDefined?: boolean
     }) => void
     onClose: () => void
 }
@@ -40,6 +41,7 @@ const DeleteTimerModal = ({
                         characterId: character.id,
                         timestamp: timer.timestamp,
                         id: timer.id,
+                        isUserDefined: timer.isUserDefined,
                     })
                 }
                 onClose()

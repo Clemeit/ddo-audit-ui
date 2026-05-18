@@ -51,11 +51,21 @@ const Modal = ({
                 <div className="modal-overlay" onClick={onClose} />
             )}
             <div
-                className={`modal-container ${centeredContent ? "centered-content" : ""} ${fullScreenOnMobile ? "full-screen-on-mobile" : ""}`}
-                onKeyDown={handleKeyDown}
+                {...rest}
+                className={[
+                    "modal-container",
+                    centeredContent ? "centered-content" : "",
+                    fullScreenOnMobile ? "full-screen-on-mobile" : "",
+                    rest.className ?? "",
+                ]
+                    .filter(Boolean)
+                    .join(" ")}
+                onKeyDown={(e) => {
+                    handleKeyDown(e)
+                    rest.onKeyDown?.(e)
+                }}
                 tabIndex={-1}
                 ref={modalRef}
-                {...rest}
             >
                 <div
                     className={`modal-content ${centeredContent ? "centered-content" : ""}`}

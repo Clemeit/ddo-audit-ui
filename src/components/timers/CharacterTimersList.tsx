@@ -81,7 +81,7 @@ const CharacterTimersList = ({
     }, [registeredCharacters])
 
     const hiddenKeySet = useMemo(() => {
-        // Key format: `${characterId}|${timestamp}`
+        // Key format: id for user-defined timers, `${characterId}|${timestamp}` for server timers
         const set = new Set<string>()
         for (const ht of hiddenTimers) {
             set.add(ht.id || `${ht.characterId}|${ht.timestamp}`)

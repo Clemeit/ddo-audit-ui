@@ -55,12 +55,12 @@ function getPersistentDefaultValue(key: PersistentKey): unknown {
         case DISMISSED_CALLOUTS_KEY:
         case FRIENDS_KEY:
         case IGNORES_KEY:
+        case CUSTOM_TIMER_SETTINGS_KEY:
             return []
         case BOOLEAN_FLAGS_KEY:
         case LFM_SETTINGS_KEY:
         case WHO_SETTINGS_KEY:
         case RAID_TIMER_SETTINGS_KEY:
-        case CUSTOM_TIMER_SETTINGS_KEY:
             return {}
         case TIMEZONE_KEY:
             return ""
@@ -76,12 +76,12 @@ function normalizePersistentValue(key: PersistentKey, value: unknown): unknown {
         case DISMISSED_CALLOUTS_KEY:
         case FRIENDS_KEY:
         case IGNORES_KEY:
+        case CUSTOM_TIMER_SETTINGS_KEY:
             return Array.isArray(value) ? value : []
         case BOOLEAN_FLAGS_KEY:
         case LFM_SETTINGS_KEY:
         case WHO_SETTINGS_KEY:
         case RAID_TIMER_SETTINGS_KEY:
-        case CUSTOM_TIMER_SETTINGS_KEY:
             return value && typeof value === "object" && !Array.isArray(value)
                 ? value
                 : {}

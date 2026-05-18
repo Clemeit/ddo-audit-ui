@@ -28,12 +28,13 @@ import Link from "../global/Link.tsx"
 import Stack from "../global/Stack.tsx"
 import PageMessage from "../global/PageMessage.tsx"
 import Button from "../global/Button.tsx"
-import AddTimerModal from "./AddTimerModal"
+import AddTimerModal from "./AddTimerModal.tsx"
 import { v4 as uuid } from "uuid"
 import type { CustomRaidTimer } from "../../models/RaidTimers.ts"
 import {
     addCustomTimer,
     getCustomTimers,
+    removeCustomTimer,
     setCustomTimers as persistCustomTimers,
 } from "../../utils/localStorage.ts"
 import useNow from "../../hooks/useNow.ts"
@@ -234,16 +235,26 @@ const Timers = () => {
             characterId,
             timestamp,
             id,
+            isUserDefined,
         }: {
             characterId: number
             timestamp: string
             id?: string
+            isUserDefined?: boolean
         }) => {
-            setHiddenTimers((prev) =>
-                prev.concat([{ characterId, timestamp, id }])
-            )
+            if (isUserDefined && id) {
+                const timerToRemove = customTimers.find((t) => t.id === id)
+                if (timerToRemove) {
+                    removeCustomTimer(timerToRemove)
+                    setCustomTimers((prev) => prev.filter((t) => t.id !== id))
+                }
+            } else {
+                setHiddenTimers((prev) =>
+                    prev.concat([{ characterId, timestamp, id }])
+                )
+            }
         },
-        []
+        [customTimers]
     )
 
     const onCreateCustomTimer = useCallback(
