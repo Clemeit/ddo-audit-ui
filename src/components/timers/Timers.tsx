@@ -288,7 +288,10 @@ const Timers = () => {
                         error: e instanceof Error ? e.message : String(e),
                     },
                 })
-                persistCustomTimers([...customTimers, nextTimer])
+                setCustomTimers((prev) => {
+                    persistCustomTimers([...prev, nextTimer])
+                    return prev
+                })
             }
             setCustomTimers((prev) => prev.concat([nextTimer]))
             setIsAddTimerModalOpen(false)

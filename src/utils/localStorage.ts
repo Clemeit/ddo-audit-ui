@@ -285,7 +285,8 @@ function setRaidTimerSettings(settings: RaidTimerStorage): void {
 }
 
 function getCustomTimers(): CustomRaidTimer[] {
-    return getData<CustomRaidTimer[]>(CUSTOM_TIMER_SETTINGS_KEY, [])
+    const raw = getData<unknown>(CUSTOM_TIMER_SETTINGS_KEY, [])
+    return Array.isArray(raw) ? raw.filter(isValidCustomTimer) : []
 }
 
 function setCustomTimers(timers: CustomRaidTimer[]): void {

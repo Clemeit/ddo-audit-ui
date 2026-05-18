@@ -29,6 +29,11 @@ type CompletionMode = "completed-at" | "remaining-time"
 
 const normalizeQuestName = (value: string) => value.trim().toLowerCase()
 
+const toLocalDatetimeString = (ms: number) =>
+    new Date(ms - new Date().getTimezoneOffset() * 60000)
+        .toISOString()
+        .slice(0, 16)
+
 const AddTimerModal = ({
     isOpen,
     registeredCharacters,
@@ -142,6 +147,16 @@ const AddTimerModal = ({
             }
             if (completedAtMillis === null) {
                 setError("Enter a valid completed-at date and time.")
+                return
+            }
+            if (completedAtMillis > now) {
+                setError("Completed-at time cannot be in the future.")
+                return
+            }
+            if (completedAtMillis < now - RAID_TIMER_MILLIS) {
+                setError(
+                    "Completed-at time is too far in the past to create a timer."
+                )
                 return
             }
         } else {
@@ -360,6 +375,10 @@ const AddTimerModal = ({
                                     <input
                                         type="datetime-local"
                                         value={completedAtValue}
+                                        max={toLocalDatetimeString(Date.now())}
+                                        min={toLocalDatetimeString(
+                                            Date.now() - RAID_TIMER_MILLIS
+                                        )}
                                         disabled={
                                             completionMode !== "completed-at"
                                         }
