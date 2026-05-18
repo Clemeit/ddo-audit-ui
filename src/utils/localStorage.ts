@@ -70,7 +70,8 @@ function getPersistentDefaultValue(key: PersistentKey): unknown {
 }
 
 function isValidCustomTimer(value: unknown): value is CustomRaidTimer {
-    if (!value || typeof value !== "object" || Array.isArray(value)) return false
+    if (!value || typeof value !== "object" || Array.isArray(value))
+        return false
     const t = value as Record<string, unknown>
     return (
         typeof t.id === "string" &&
@@ -90,10 +91,9 @@ function normalizePersistentValue(key: PersistentKey, value: unknown): unknown {
         case DISMISSED_CALLOUTS_KEY:
         case FRIENDS_KEY:
         case IGNORES_KEY:
+            return Array.isArray(value) ? value : []
         case CUSTOM_TIMER_SETTINGS_KEY:
-            return Array.isArray(value)
-                ? value.filter(isValidCustomTimer)
-                : []
+            return Array.isArray(value) ? value.filter(isValidCustomTimer) : []
         case BOOLEAN_FLAGS_KEY:
         case LFM_SETTINGS_KEY:
         case WHO_SETTINGS_KEY:
