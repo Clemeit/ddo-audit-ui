@@ -1,25 +1,46 @@
 import React from "react"
 import "./NavigationCard.css"
-import { ReactComponent as LiveSVG } from "../../assets/svg/live.svg"
-import { ReactComponent as TransferSVG } from "../../assets/svg/transfer.svg"
-import { ReactComponent as ServersSVG } from "../../assets/svg/servers.svg"
-import { ReactComponent as GroupingSVG } from "../../assets/svg/grouping.svg"
-import { ReactComponent as WhoSVG } from "../../assets/svg/who.svg"
-import { ReactComponent as FriendsSVG } from "../../assets/svg/friends.svg"
-import { ReactComponent as QuestsSVG } from "../../assets/svg/quests.svg"
-import { ReactComponent as TrendsSVG } from "../../assets/svg/trends.svg"
-import { ReactComponent as AboutSVG } from "../../assets/svg/about.svg"
-import { ReactComponent as ApiSVG } from "../../assets/svg/api.svg"
-import { ReactComponent as FeedbackSVG } from "../../assets/svg/feedback.svg"
-import { ReactComponent as RegistrationSVG } from "../../assets/svg/registration.svg"
-import { ReactComponent as TimerSVG } from "../../assets/svg/timer.svg"
-import { ReactComponent as Activity } from "../../assets/svg/activity.svg"
-import { ReactComponent as Health } from "../../assets/svg/health.svg"
-import { ReactComponent as Ignore } from "../../assets/svg/ignore.svg"
-import { ReactComponent as Notifications } from "../../assets/svg/notifications.svg"
-import { ReactComponent as Guild } from "../../assets/svg/guild.svg"
-import { ReactComponent as Content } from "../../assets/svg/content.svg"
-import { ReactComponent as LoginSVG } from "../../assets/svg/login.svg"
+// import { ReactComponent as LiveSVG } from "../../assets/svg/live.svg"
+// import { ReactComponent as TransferSVG } from "../../assets/svg/transfer.svg"
+// import { ReactComponent as ServersSVG } from "../../assets/svg/servers.svg"
+// import { ReactComponent as GroupingSVG } from "../../assets/svg/grouping.svg"
+// import { ReactComponent as WhoSVG } from "../../assets/svg/who.svg"
+// import { ReactComponent as FriendsSVG } from "../../assets/svg/friends.svg"
+// import { ReactComponent as QuestsSVG } from "../../assets/svg/quests.svg"
+// import { ReactComponent as TrendsSVG } from "../../assets/svg/trends.svg"
+// import { ReactComponent as AboutSVG } from "../../assets/svg/about.svg"
+// import { ReactComponent as ApiSVG } from "../../assets/svg/api.svg"
+// import { ReactComponent as FeedbackSVG } from "../../assets/svg/feedback.svg"
+// import { ReactComponent as RegistrationSVG } from "../../assets/svg/registration.svg"
+// import { ReactComponent as TimerSVG } from "../../assets/svg/timer.svg"
+// import { ReactComponent as Activity } from "../../assets/svg/activity.svg"
+// import { ReactComponent as Health } from "../../assets/svg/health.svg"
+// import { ReactComponent as Ignore } from "../../assets/svg/ignore.svg"
+// import { ReactComponent as Notifications } from "../../assets/svg/notifications.svg"
+// import { ReactComponent as Guild } from "../../assets/svg/guild.svg"
+// import { ReactComponent as Content } from "../../assets/svg/content.svg"
+// import { ReactComponent as LoginSVG } from "../../assets/svg/login.svg"
+
+// New icons
+import { ReactComponent as LiveSVG } from "../../assets/svg/new/live.svg"
+import { ReactComponent as ServersSVG } from "../../assets/svg/new/servers.svg"
+import { ReactComponent as WhoSVG } from "../../assets/svg/new/who.svg"
+import { ReactComponent as GroupingSVG } from "../../assets/svg/new/grouping.svg"
+import { ReactComponent as GuildsSVG } from "../../assets/svg/new/guilds.svg"
+import { ReactComponent as InfoSVG } from "../../assets/svg/new/info.svg"
+import { ReactComponent as AccountSVG } from "../../assets/svg/new/account.svg"
+import { ReactComponent as HistorySVG } from "../../assets/svg/new/history.svg"
+import { ReactComponent as PersonAddSVG } from "../../assets/svg/new/person_add.svg"
+import { ReactComponent as TimerSVG } from "../../assets/svg/new/timer.svg"
+import { ReactComponent as ListSVG } from "../../assets/svg/new/list.svg"
+import { ReactComponent as TrendUpSVG } from "../../assets/svg/new/trend_up.svg"
+import { ReactComponent as HeartSVG } from "../../assets/svg/new/heart.svg"
+import { ReactComponent as ApiSVG } from "../../assets/svg/new/api.svg"
+import { ReactComponent as FeedbackSVG } from "../../assets/svg/new/feedback.svg"
+import { ReactComponent as SensorsSVG } from "../../assets/svg/new/sensors.svg"
+import { ReactComponent as BlockSVG } from "../../assets/svg/new/block.svg"
+import { ReactComponent as BellSVG } from "../../assets/svg/new/bell.svg"
+import { ReactComponent as AssignmentSVG } from "../../assets/svg/new/assignment.svg"
 
 import Link from "./Link.tsx"
 import WebLink from "./WebLink.tsx"
@@ -77,26 +98,26 @@ const typeToDescriptionMap = {
 }
 
 const typeToIconMap = {
-    live: <LiveSVG className="shrinkable-icon" />,
-    servers: <ServersSVG className="shrinkable-icon" />,
-    quests: <QuestsSVG className="shrinkable-icon" />,
-    trends: <TrendsSVG className="shrinkable-icon" />,
-    grouping: <GroupingSVG className="shrinkable-icon" />,
-    who: <WhoSVG className="shrinkable-icon" />,
-    transfers: <TransferSVG className="shrinkable-icon" />,
-    friends: <FriendsSVG className="shrinkable-icon" />,
-    registration: <RegistrationSVG className="shrinkable-icon" />,
-    timers: <TimerSVG className="shrinkable-icon" />,
-    about: <AboutSVG className="shrinkable-icon" />,
-    api: <ApiSVG className="shrinkable-icon" />,
-    feedback: <FeedbackSVG className="shrinkable-icon" />,
-    activity: <Activity className="shrinkable-icon" />,
-    health: <Health className="shrinkable-icon" />,
-    ignores: <Ignore className="shrinkable-icon" />,
-    notifications: <Notifications className="shrinkable-icon" />,
-    guilds: <Guild className="shrinkable-icon" />,
-    "owned-content": <Content className="shrinkable-icon" />,
-    account: <LoginSVG className="shrinkable-icon" />,
+    live: <LiveSVG />,
+    servers: <ServersSVG />,
+    quests: <ListSVG />,
+    trends: <TrendUpSVG />,
+    grouping: <GroupingSVG />,
+    who: <WhoSVG />,
+    // transfers: <TransferSVG />,
+    friends: <HeartSVG />,
+    registration: <PersonAddSVG />,
+    timers: <TimerSVG />,
+    about: <InfoSVG />,
+    api: <ApiSVG />,
+    feedback: <FeedbackSVG />,
+    activity: <HistorySVG />,
+    health: <SensorsSVG />,
+    ignores: <BlockSVG />,
+    notifications: <BellSVG />,
+    guilds: <GuildsSVG />,
+    "owned-content": <AssignmentSVG />,
+    account: <AccountSVG />,
 }
 
 interface Props {
@@ -140,9 +161,11 @@ const NavigationCard = ({
                 disabled={disabled}
             >
                 <span className="navigation-card-title">
-                    {typeToIconMap[type]}
-                    {typeToTitleMap[type]}
-                    {badge}
+                    <div className="navigation-card-title-icon">
+                        {typeToIconMap[type]}
+                    </div>
+                    <span>{typeToTitleMap[type]}</span>
+                    <div className="navigation-card-title-badge">{badge}</div>
                 </span>
                 <p className="navigation-card-content">
                     {typeToDescriptionMap[type]}
@@ -159,9 +182,11 @@ const NavigationCard = ({
                 disabled={disabled}
             >
                 <span className="navigation-card-title">
-                    {typeToIconMap[type]}
-                    {typeToTitleMap[type]}
-                    {badge}
+                    <div className="navigation-card-title-icon">
+                        {typeToIconMap[type]}
+                    </div>
+                    <span>{typeToTitleMap[type]}</span>
+                    <div className="navigation-card-title-badge">{badge}</div>
                 </span>
                 <p className="navigation-card-content">
                     {typeToDescriptionMap[type]}
@@ -175,14 +200,16 @@ const NavigationCard = ({
             to={`/${type}`}
             className={`navigation-card ${fullWidth ? "full-width" : ""} ${disabled ? "disabled" : ""}`}
         >
-            <span className="navigation-card-title">
-                {typeToIconMap[type]}
-                {typeToTitleMap[type]}
-                {badge}
-            </span>
-            <p className="navigation-card-content">
+            <div className="navigation-card-title">
+                <div className="navigation-card-title-icon">
+                    {typeToIconMap[type]}
+                </div>
+                <span>{typeToTitleMap[type]}</span>
+                <div className="navigation-card-title-badge">{badge}</div>
+            </div>
+            <span className="navigation-card-content">
                 {typeToDescriptionMap[type]}
-            </p>
+            </span>
         </Link>
     )
 }

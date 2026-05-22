@@ -1,0 +1,145 @@
+.app-layout__icon-row {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+    overflow: hidden;
+}
+
+.app-layout__icon-row span {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    opacity: 1;
+    max-width: 250px;
+    transition: opacity 0.2s ease, max-width 0.2s ease;
+}
+
+.app-layout__logo-badge {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 5px;
+    border-radius: 5px;
+    background-color: var(--color-logo-badge);
+    pointer-events: none;
+    user-select: none;
+}
+
+.app-layout__app-name {
+    pointer-events: none;
+    user-select: none;
+}
+
+.app-layout__logo-icon {
+    width: 40px;
+    height: 40px;
+}
+
+.app-layout__item {
+    flex: 0 0 auto;
+    padding: 20px;
+}
+
+.app-layout__item--grow {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.app-layout__nav-menu-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.app-layout__nav-menu-section {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+
+.app-layout__section-header {
+    font-size: 0.9rem;
+    font-weight: 600;
+    pointer-events: none;
+    user-select: none;
+    white-space: nowrap;
+    overflow: hidden;
+    opacity: 1;
+    transition: opacity 0.15s ease 0.1s;
+}
+
+.sidebar--collapsed .app-layout__section-header {
+    opacity: 0;
+    height: 0;
+    overflow: hidden;
+    transition: none;
+}
+
+.app-layout__item-link {
+    appearance: none;
+    background: none;
+    border: none;
+    padding: 0;
+    font: inherit;
+    cursor: pointer;
+    text-decoration: none;
+    user-select: none;
+    color: var(--color-color-primary-text);
+    text-align: left;
+    padding: 6px 8px;
+    border-radius: 6px;
+}
+
+.app-layout__item-link:focus-visible {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 2px;
+}
+
+.app-layout__item-link:focus:not(:focus-visible) {
+    outline: none;
+}
+
+.app-layout__item-link.active,
+.app-layout__item-link:hover {
+    color: var(--color-primary-text);
+    background-color: var(--color-hover);
+}
+
+.app-layout__account-container {
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.app-layout__nav-menu-scroll {
+    height: 100%;
+    overflow-y: auto;
+}
+
+.app-layout__icon {
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+}
+
+.sidebar--collapsed .app-layout__icon-row {
+    justify-content: center;
+    gap: 0;
+}
+.sidebar--collapsed .app-layout__item { padding: 15px; }
+.sidebar--collapsed .app-layout__logo-icon {
+    width: 24px;
+    height: 24px;
+}
+.sidebar--collapsed .app-layout__nav-menu-container {
+    gap: 0;
+}
+.sidebar--collapsed .app-layout__item-link span {
+    opacity: 0;
+    max-width: 0;
+    transition: none;
+}
+.sidebar--collapsed .app-layout__app-name { display: none; }

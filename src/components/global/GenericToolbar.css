@@ -1,5 +1,5 @@
 .generic-toolbar-container {
-    background-color: var(--background-light);
+    background-color: var(--color-title-bar);
     height: 30px;
     max-width: 100%;
 }

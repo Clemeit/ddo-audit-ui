@@ -6,6 +6,8 @@ interface AppContextProps {
     setIsFullScreen: (fullScreen: boolean) => void
     timezoneOverride: string
     setTimezoneOverride: (timezone: string) => void
+    isSidebarCollapsed: boolean
+    setIsSidebarCollapsed: React.Dispatch<React.SetStateAction<boolean>>
 }
 
 const AppContext = createContext<AppContextProps | undefined>(undefined)
@@ -20,6 +22,7 @@ export const AppProvider = ({ children }: Props) => {
         const savedTimezone = getTimezone()
         return savedTimezone ?? ""
     })
+    const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<boolean>(true)
 
     useEffect(() => {
         setTimezone(timezoneOverride || "")
@@ -32,6 +35,8 @@ export const AppProvider = ({ children }: Props) => {
                 setIsFullScreen,
                 timezoneOverride,
                 setTimezoneOverride,
+                isSidebarCollapsed,
+                setIsSidebarCollapsed,
             }}
         >
             {children}

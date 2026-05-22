@@ -73,14 +73,14 @@ const ServerStatus = ({
 
     const lastCheckedMessage = useCallback(() => {
         if (isLoading()) {
-            return <span className="secondary-text">Loading...</span>
+            return <span className="text-muted">Loading...</span>
         }
 
         const roundedDate = new Date(
             Math.floor(mostRecentStatusCheck.getTime() / 5000) * 5000
         )
         return (
-            <span className="secondary-text">
+            <span className="text-muted">
                 Server status was last checked at{" "}
                 {roundedDate.toLocaleTimeString()}
             </span>
@@ -120,6 +120,7 @@ const ServerStatus = ({
                                 <Pending
                                     className="status-icon"
                                     title="Loading"
+                                    color="blue"
                                 />
                                 <span>{serverName}</span>
                             </div>
@@ -152,11 +153,13 @@ const ServerStatus = ({
                                     <Checkmark
                                         className="status-icon"
                                         title="Online"
+                                        color="green"
                                     />
                                 ) : (
                                     <X
                                         className="status-icon"
                                         title="Offline"
+                                        color="red"
                                     />
                                 )}
                             </span>

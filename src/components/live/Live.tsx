@@ -103,84 +103,76 @@ const Live = () => {
     )
 
     return (
-        <Page
-            title="DDO Server Status"
-            description="DDO server status, most populated server, current default server, and recent population trends."
-            pageMessages={() => {
-                const messages = []
-                if (serverInfoState === LoadingState.Haulted) {
-                    messages.push(
-                        <LiveDataHaultedPageMessage key="live-haulted" />
-                    )
-                }
-                if (hasCriticalError) {
-                    messages.push(
-                        <DataLoadingErrorPageMessage key="data-error" />
-                    )
-                }
-                return messages
-            }}
-        >
-            <ContentClusterGroup>
-                <ContentCluster title="Server Status">
-                    <ServerStatus
-                        serverInfoData={serverInfoData}
-                        serverInfoState={serverInfoState}
-                        hide32BitServers={false}
+        // <Page
+        //     title="DDO Server Status"
+        //     description="DDO server status, most populated server, current default server, and recent population trends."
+        //     pageMessages={() => {
+        //         const messages = []
+        //         if (serverInfoState === LoadingState.Haulted) {
+        //             messages.push(
+        //                 <LiveDataHaultedPageMessage key="live-haulted" />
+        //             )
+        //         }
+        //         if (hasCriticalError) {
+        //             messages.push(
+        //                 <DataLoadingErrorPageMessage key="data-error" />
+        //             )
+        //         }
+        //         return messages
+        //     }}
+        // >
+        <ContentClusterGroup>
+            <ContentCluster title="Server Status">
+                <ServerStatus
+                    serverInfoData={serverInfoData}
+                    serverInfoState={serverInfoState}
+                    hide32BitServers={false}
+                />
+            </ContentCluster>
+            <ContentCluster title="Quick Info">
+                <QuickInfo
+                    defaultServerName={defaultServerName}
+                    mostPopulatedServerThisWeek={mostPopulatedServerThisWeek}
+                    mostPopulatedServerThisMonth={mostPopulatedServerThisMonth}
+                    uniqueCharactersThisQuarter={
+                        uniqueDataThisQuarter?.data?.unique_character_count
+                    }
+                    uniqueGuildsThisQuarter={
+                        uniqueDataThisQuarter?.data?.unique_guild_count
+                    }
+                />
+            </ContentCluster>
+            <ContentCluster title="Live Population">
+                <LivePopulationContent serverInfoData={serverInfoData} />
+            </ContentCluster>
+            <ContentCluster title="DDO Audit News">
+                <NewsCluster news={news} />
+                <br />
+                <MakeASuggestionButton type="secondary" />
+            </ContentCluster>
+            <ContentCluster title="Frequently Asked Questions">
+                <FAQSection
+                    defaultServerName={defaultServerName}
+                    mostPopulatedServerThisWeek={mostPopulatedServerThisWeek}
+                    mostPopulatedServerThisMonth={mostPopulatedServerThisMonth}
+                    uniqueCharactersThisQuarter={
+                        uniqueDataThisQuarter?.data?.unique_character_count
+                    }
+                />
+            </ContentCluster>
+            <ContentCluster title="See Also...">
+                <NavCardCluster>
+                    <NavigationCard type="servers" />
+                    <NavigationCard type="guilds" />
+                    <NavigationCard
+                        type="trends"
+                        disabled
+                        badge={<Badge text="Soon" type="soon" />}
                     />
-                </ContentCluster>
-                <ContentCluster title="Quick Info">
-                    <QuickInfo
-                        defaultServerName={defaultServerName}
-                        mostPopulatedServerThisWeek={
-                            mostPopulatedServerThisWeek
-                        }
-                        mostPopulatedServerThisMonth={
-                            mostPopulatedServerThisMonth
-                        }
-                        uniqueCharactersThisQuarter={
-                            uniqueDataThisQuarter?.data?.unique_character_count
-                        }
-                        uniqueGuildsThisQuarter={
-                            uniqueDataThisQuarter?.data?.unique_guild_count
-                        }
-                    />
-                </ContentCluster>
-                <ContentCluster title="Live Population">
-                    <LivePopulationContent serverInfoData={serverInfoData} />
-                </ContentCluster>
-                <ContentCluster title="DDO Audit News">
-                    <NewsCluster news={news} />
-                    <br />
-                    <MakeASuggestionButton type="secondary" />
-                </ContentCluster>
-                <ContentCluster title="Frequently Asked Questions">
-                    <FAQSection
-                        defaultServerName={defaultServerName}
-                        mostPopulatedServerThisWeek={
-                            mostPopulatedServerThisWeek
-                        }
-                        mostPopulatedServerThisMonth={
-                            mostPopulatedServerThisMonth
-                        }
-                        uniqueCharactersThisQuarter={
-                            uniqueDataThisQuarter?.data?.unique_character_count
-                        }
-                    />
-                </ContentCluster>
-                <ContentCluster title="See Also...">
-                    <NavCardCluster>
-                        <NavigationCard type="servers" />
-                        <NavigationCard type="guilds" />
-                        <NavigationCard
-                            type="trends"
-                            disabled
-                            badge={<Badge text="Soon" type="soon" />}
-                        />
-                    </NavCardCluster>
-                </ContentCluster>
-            </ContentClusterGroup>
-        </Page>
+                </NavCardCluster>
+            </ContentCluster>
+        </ContentClusterGroup>
+        // </Page>
     )
 }
 

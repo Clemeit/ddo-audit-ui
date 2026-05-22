@@ -1,62 +1,59 @@
 <!doctype html>
 <html lang="en">
-    <head>
-        <meta charset="utf-8" />
-        <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
-        <meta
-            name="viewport"
-            content="width=device-width, initial-scale=1, shrink-to-fit=no"
-        />
-        <meta name="theme-color" content="#232323" />
-        <meta name="author" content="DDO Audit" />
-        <meta name="robots" content="index, follow" />
-        <meta name="language" content="English" />
-        <meta name="revisit-after" content="7 days" />
-        <meta name="distribution" content="web" />
-        <meta name="rating" content="general" />
-        <meta
-            name="keywords"
-            content="ddo,dungeons and dragons online,ddo population,player,count,concurrency,population,groups,lfms,cormyr,moonsea,shadowdale,thrane,argonnessen,cannith,ghallanda,khyber,orien,sarlona,thelanis,wayfinder,hardcore,live,traffic,server,status"
-        />
-        <!-- Open Graph -->
-        <meta property="og:locale" content="en_US" />
-        <meta property="og:site_name" content="DDO Audit" />
-        <meta property="og:type" content="website" />
-        <!-- Twitter Card -->
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:site" content="@ddoaudit" />
-        <meta name="twitter:creator" content="@ddoaudit" />
-        <link rel="manifest" href="/manifest.json" />
-        <link rel="apple-touch-icon" href="/icons/apple-icon-180.png" />
-        <!-- Performance optimizations -->
-        <link rel="dns-prefetch" href="//api.ddoaudit.com" />
-        <link rel="preconnect" href="https://api.ddoaudit.com" crossorigin />
-        <!-- Security -->
-        <meta http-equiv="X-Content-Type-Options" content="nosniff" />
-        <meta http-equiv="X-Frame-Options" content="DENY" />
-        <meta http-equiv="X-XSS-Protection" content="1; mode=block" />
-        <!-- Social Media Meta Tags -->
-        <meta property="og:site_name" content="DDO Audit" />
-        <meta property="og:type" content="website" />
-        <title>DDO Audit</title>
-        <meta
-            name="description"
-            content="A live summary of DDO's current player population and LFM status. View population trends, check server status, browse live grouping panels, check to see if your friends are online, and decide what server is best for you!"
-        />
-        <!-- Google Analytics (GA4) -->
-        <script
-            async
-            src="https://www.googletagmanager.com/gtag/js?id=G-YG3R94WB3B"
-        ></script>
-        <script>
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){ dataLayer.push(arguments); }
-            gtag('js', new Date());
-            // Manual SPA routing will emit page_view events; keep automatic disabled
-            gtag('config', 'G-YG3R94WB3B', { send_page_view: false });
-        </script>
-        <!-- Structured Data -->
-        <script type="application/ld+json">
+
+<head>
+    <meta charset="utf-8" />
+    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta name="theme-color" content="#232323" />
+    <meta name="author" content="DDO Audit" />
+    <meta name="robots" content="index, follow" />
+    <meta name="language" content="English" />
+    <meta name="revisit-after" content="7 days" />
+    <meta name="distribution" content="web" />
+    <meta name="rating" content="general" />
+    <meta name="keywords"
+        content="ddo,dungeons and dragons online,ddo population,player,count,concurrency,population,groups,lfms,cormyr,moonsea,shadowdale,thrane,argonnessen,cannith,ghallanda,khyber,orien,sarlona,thelanis,wayfinder,hardcore,live,traffic,server,status" />
+    <!-- Open Graph -->
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:site_name" content="DDO Audit" />
+    <meta property="og:type" content="website" />
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content="@ddoaudit" />
+    <meta name="twitter:creator" content="@ddoaudit" />
+    <link rel="manifest" href="/manifest.json" />
+    <link rel="apple-touch-icon" href="/icons/apple-icon-180.png" />
+    <!-- Performance optimizations -->
+    <link rel="dns-prefetch" href="//api.ddoaudit.com" />
+    <link rel="preconnect" href="https://api.ddoaudit.com" crossorigin />
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://googleapis.com">
+    <link rel="preconnect" href="https://gstatic.com" crossorigin>
+    <link
+        href="https://googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap"
+        rel="stylesheet">
+    <!-- Security -->
+    <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+    <meta http-equiv="X-Frame-Options" content="DENY" />
+    <meta http-equiv="X-XSS-Protection" content="1; mode=block" />
+    <!-- Social Media Meta Tags -->
+    <meta property="og:site_name" content="DDO Audit" />
+    <meta property="og:type" content="website" />
+    <title>DDO Audit</title>
+    <meta name="description"
+        content="A live summary of DDO's current player population and LFM status. View population trends, check server status, browse live grouping panels, check to see if your friends are online, and decide what server is best for you!" />
+    <!-- Google Analytics (GA4) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-YG3R94WB3B"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+        // Manual SPA routing will emit page_view events; keep automatic disabled
+        gtag('config', 'G-YG3R94WB3B', { send_page_view: false });
+    </script>
+    <!-- Structured Data -->
+    <script type="application/ld+json">
         {
             "@context": "https://schema.org",
             "@type": "WebSite",
@@ -73,9 +70,11 @@
             ]
         }
         </script>
-    </head>
-    <body>
-        <noscript>You need to enable JavaScript to run this app.</noscript>
-        <div id="root"></div>
-    </body>
+</head>
+
+<body>
+    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <div id="root"></div>
+</body>
+
 </html>

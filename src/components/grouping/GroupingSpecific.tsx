@@ -1,6 +1,3 @@
-import Page from "../global/Page.tsx"
-import { useAppContext } from "../../contexts/AppContext.tsx"
-import Spacer from "../global/Spacer.tsx"
 import useGetCurrentServer from "../../hooks/useGetCurrentServer.ts"
 import MultiPanelContainer, {
     PanelType,
@@ -14,13 +11,10 @@ const GroupingSpecific = () => {
     const {
         serverName,
         serverNameLowercase,
-        serverNamePossessiveCase,
-        serverNameSentenceCase,
         isValidServer,
         closestMatch,
         is32BitServer,
     } = useGetCurrentServer()
-    const { isFullScreen } = useAppContext()
 
     const shouldShowPanel = isValidServer && !is32BitServer
     const is404Page = !isValidServer || is32BitServer
@@ -51,32 +45,28 @@ const GroupingSpecific = () => {
             return null
         }
         return (
-            <>
-                {!isFullScreen && (
-                    <Spacer className="hide-on-mobile" size="20px" />
-                )}
-                <MultiPanelContainer
-                    serverName={serverNameLowercase}
-                    primaryType={PanelType.Grouping}
-                />
-            </>
+            <MultiPanelContainer
+                serverName={serverNameLowercase}
+                primaryType={PanelType.Grouping}
+            />
         )
     }
 
     return (
-        <Page
-            title={
-                isValidServer
-                    ? `DDO Live LFM Viewer for ${serverNameSentenceCase}`
-                    : "Server Not Found"
-            }
-            description={`Browse ${serverNamePossessiveCase} LFMs! Check the LFM panel before you login, or set up notifications and never miss raid night again!`}
-            centered
-            noPadding={shouldShowPanel}
-            contentMaxWidth={shouldShowPanel}
-            logo="/icons/grouping-192px.png"
-            is404Page={is404Page}
-        >
+        // <Page
+        //     title={
+        //         isValidServer
+        //             ? `DDO Live LFM Viewer for ${serverNameSentenceCase}`
+        //             : "Server Not Found"
+        //     }
+        //     description={`Browse ${serverNamePossessiveCase} LFMs! Check the LFM panel before you login, or set up notifications and never miss raid night again!`}
+        //     centered
+        //     noPadding={shouldShowPanel}
+        //     contentMaxWidth={shouldShowPanel}
+        //     logo="/icons/grouping-192px.png"
+        //     is404Page={is404Page}
+        // >
+        <>
             {!isValidServer && (
                 <ServerValidationMessage
                     serverName={serverName}
@@ -86,8 +76,9 @@ const GroupingSpecific = () => {
                 />
             )}
             {mainContent()}
-            <Spacer className="hide-on-mobile" size="20px" />
-        </Page>
+        </>
+        // <Spacer className="hide-on-mobile" size="20px" />
+        // </Page>
     )
 }
 

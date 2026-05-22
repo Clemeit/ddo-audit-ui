@@ -10,6 +10,11 @@ import { useUserContext } from "../../contexts/UserContext.tsx"
 import { useAppContext } from "../../contexts/AppContext.tsx"
 import Modal from "../modal/Modal.tsx"
 import AccountForm from "../account/AccountForm.tsx"
+import AppLayout from "./AppLayout.tsx"
+import {
+    ContentCluster,
+    ContentClusterGroup,
+} from "../global/ContentCluster.tsx"
 
 function App() {
     const { isAccountModalOpen, closeAccountModal } = useUserContext()
@@ -22,10 +27,21 @@ function App() {
 
     return (
         <ErrorBoundary>
-            <Header />
-            <PageViewTracker />
-            <Outlet />
-            {isAccountModalOpen && (
+            <AppLayout>
+                {/* <ContentClusterGroup>
+                    <ContentCluster title="Live Data">
+                        Some content here!
+                    </ContentCluster>
+                    <ContentCluster title="Older Data">
+                        Some older data might go right here.
+                    </ContentCluster>
+                </ContentClusterGroup> */}
+                <Outlet />
+            </AppLayout>
+            {/* <Header />
+            <PageViewTracker /> */}
+
+            {/* {isAccountModalOpen && (
                 <Modal onClose={closeAccountModal} fullScreenOnMobile={true}>
                     <AccountForm />
                 </Modal>
@@ -33,7 +49,7 @@ function App() {
             <ScrollRestoration />
             <Footer />
             <Notifications />
-            <ContentPush />
+            <ContentPush /> */}
         </ErrorBoundary>
     )
 }

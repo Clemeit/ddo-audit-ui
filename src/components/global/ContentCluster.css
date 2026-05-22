@@ -9,10 +9,10 @@
 }
 
 .content-cluster-title {
-    font-weight: 400;
+    font-weight: 600;
     margin-bottom: 1rem;
     margin-top: 0;
-    border-bottom: 1px solid var(--secondary-text);
+    border-bottom: 1px solid var(--color-border);
     padding-bottom: 0.5rem;
     display: flex;
     flex-direction: row;

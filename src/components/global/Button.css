@@ -1,7 +1,7 @@
 .button {
     background-color: white;
     padding: 10px 20px;
-    border-radius: 5px;
+    border-radius: 10px;
     border: none;
     font-size: 0.8rem;
     text-align: center;
@@ -42,9 +42,13 @@
 }
 
 .button.secondary {
-    background-color: var(--background);
-    color: white;
-    border: 1px solid white;
+    /* background-color: var(--background); */
+    /* color: white; */
+    border: 1px solid #d3d3d3;
+}
+
+.button.secondary:hover {
+    border: 1px solid #999;
 }
 
 .button.secondary.critical {
