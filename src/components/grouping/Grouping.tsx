@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react"
+import { CSSProperties, useCallback, useEffect, useMemo, useState } from "react"
 import Page from "../global/Page.tsx"
 import {
     ContentCluster,
@@ -13,6 +13,7 @@ import Link from "../global/Link.tsx"
 import { ReactComponent as Checkmark } from "../../assets/svg/checkmark.svg"
 import { ReactComponent as X } from "../../assets/svg/x.svg"
 import { ReactComponent as Pending } from "../../assets/svg/pending.svg"
+import { ReactComponent as TrendUpSVG } from "../../assets/svg/new/trend_up.svg"
 import { LoadingState } from "../../models/Api.ts"
 import GroupingCanvas from "./LfmCanvas.tsx"
 import Stack from "../global/Stack.tsx"
@@ -33,6 +34,7 @@ import "./Grouping.css"
 import Skeleton from "../global/Skeleton.tsx"
 import ComponentErrorBoundary from "../global/ComponentErrorBoundary.tsx"
 import GroupingErrorFallback from "./GroupingErrorFallback.tsx"
+import Button from "../global/Button.tsx"
 
 const Grouping = () => {
     return (
@@ -282,56 +284,446 @@ const GroupingContent = () => {
         )
     }, [serverInfoState, lfmData, getCurrentRaids, hasAllDataLoadedOnce])
 
+    const summaryCardStyle: CSSProperties = {
+        display: "flex",
+        flexDirection: "column",
+        gap: "10px",
+        border: "1px solid var(--color-border)",
+        borderRadius: "10px",
+        padding: "20px",
+        boxSizing: "border-box",
+        boxShadow: "var(--card-shadow)",
+        flex: "1 1 280px",
+        minWidth: "240px",
+    }
+
     return (
-        <Page
-            title="DDO Live LFM Viewer"
-            description="View a live LFM panel to find public groups - before you even log in! See which groups are currently looking for more players and what content is currently being run."
-            logo="/icons/grouping-192px.png"
-            pageMessages={() => {
-                const messages = []
-                if (loadingFailed())
-                    messages.push(<DataLoadingErrorPageMessage />)
-                if (lfmState === LoadingState.Haulted)
-                    messages.push(<LiveDataHaultedPageMessage />)
-                return messages
-            }}
-        >
-            <ContentClusterGroup>
-                <ContentCluster title="Select a Server">
-                    <NavCardCluster>
-                        {getServerSelectContent("64bit")}
-                    </NavCardCluster>
-                </ContentCluster>
-                <ContentCluster title="Current Raids">
-                    {getCurrentRaidsContent()}
-                </ContentCluster>
-                <ContentCluster title="Notifications">
-                    <Stack direction="row" gap="10px" align="center">
-                        <p
+        <div style={{ display: "grid", gridAutoRows: "auto 20px auto" }}>
+            <div
+                style={{
+                    display: "flex",
+                    flexDirection: "row",
+                    gap: "20px",
+                    maxWidth: "650px",
+                    flexWrap: "wrap",
+                }}
+            >
+                <div style={summaryCardStyle}>
+                    <div
+                        style={{
+                            display: "flex",
+                            flexDirection: "column",
+                            gap: "5px",
+                        }}
+                    >
+                        <span className="text-muted">Total Posted LFMs</span>
+                        <span style={{ fontSize: "2rem", fontWeight: "600" }}>
+                            83
+                        </span>
+                    </div>
+                    <div
+                        style={{
+                            display: "flex",
+                            flexDirection: "row",
+                            gap: "3px",
+                            alignItems: "center",
+                        }}
+                    >
+                        <TrendUpSVG
                             style={{
-                                textDecoration: "line-through",
-                                margin: 0,
+                                color: "var(--green-text)",
+                                width: "20px",
+                                height: "20px",
+                            }}
+                        />
+                        <span className="green-text">+12% from last hour</span>
+                    </div>
+                </div>
+                <div style={summaryCardStyle}>
+                    <div
+                        style={{
+                            display: "flex",
+                            flexDirection: "column",
+                            gap: "5px",
+                        }}
+                    >
+                        <span className="text-muted">Total Posted Raids</span>
+                        <span style={{ fontSize: "2rem", fontWeight: "600" }}>
+                            4
+                        </span>
+                    </div>
+                    <span className="text-muted">Across 2 servers</span>
+                </div>
+            </div>
+            <div />
+            <div style={{ display: "grid", gridAutoColumns: "auto auto" }}>
+                <div
+                    style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        border: "1px solid var(--color-border)",
+                        borderRadius: "10px",
+                        boxSizing: "border-box",
+                        boxShadow: "var(--card-shadow)",
+                    }}
+                >
+                    <div
+                        style={{
+                            display: "flex",
+                            flexDirection: "row",
+                            borderBottom: "1px solid var(--color-border)",
+                            padding: "20px",
+                        }}
+                    >
+                        <div style={{ fontWeight: "600" }}>Select a Server</div>
+                        <div style={{ marginLeft: "auto" }}>
+                            Sort: Most Active
+                        </div>
+                    </div>
+                    <div className="server-row">
+                        <div
+                            style={{
+                                display: "flex",
+                                flexDirection: "row",
+                                gap: "15px",
+                                alignItems: "center",
                             }}
                         >
-                            You currently have 0 notification rules set up.
-                            Configure rules on the{" "}
-                            <Link to="/notifications" disabled>
-                                notification settings
-                            </Link>{" "}
-                            page.
-                        </p>
-                        <Badge text="Soon" type="soon" />
-                    </Stack>
-                </ContentCluster>
-                <ContentCluster title="See Also...">
-                    <NavCardCluster>
-                        <NavigationCard type="registration" />
-                        <NavigationCard type="owned-content" />
-                        <NavigationCard type="timers" />
-                    </NavCardCluster>
-                </ContentCluster>
-            </ContentClusterGroup>
-        </Page>
+                            <div
+                                style={{
+                                    width: "12px",
+                                    height: "12px",
+                                    backgroundColor: "green",
+                                    borderRadius: "6px",
+                                }}
+                            />
+                            <div
+                                style={{
+                                    display: "flex",
+                                    flexDirection: "column",
+                                    gap: "7px",
+                                }}
+                            >
+                                <span style={{ fontWeight: "600" }}>
+                                    Cormyr
+                                </span>
+                                <span className="text-muted">
+                                    Status: Online
+                                </span>
+                            </div>
+                        </div>
+                        <div
+                            style={{
+                                marginLeft: "auto",
+                                display: "flex",
+                                flexDirection: "column",
+                                alignItems: "center",
+                            }}
+                        >
+                            <span
+                                style={{
+                                    fontWeight: "600",
+                                    fontSize: "1.4rem",
+                                }}
+                            >
+                                12
+                            </span>
+                            <span className="text-muted">GROUPS</span>
+                        </div>
+                        <div
+                            style={{
+                                display: "flex",
+                                flexDirection: "column",
+                                alignItems: "center",
+                            }}
+                        >
+                            <span
+                                style={{
+                                    fontWeight: "600",
+                                    fontSize: "1.4rem",
+                                }}
+                            >
+                                0
+                            </span>
+                            <span className="text-muted">RAIDS</span>
+                        </div>
+                        <div>
+                            <Button type="secondary" onClick={() => {}}>
+                                View
+                            </Button>
+                        </div>
+                    </div>
+                    <div className="server-row">
+                        <div
+                            style={{
+                                display: "flex",
+                                flexDirection: "row",
+                                gap: "15px",
+                                alignItems: "center",
+                            }}
+                        >
+                            <div
+                                style={{
+                                    width: "12px",
+                                    height: "12px",
+                                    backgroundColor: "green",
+                                    borderRadius: "6px",
+                                }}
+                            />
+                            <div
+                                style={{
+                                    display: "flex",
+                                    flexDirection: "column",
+                                    gap: "7px",
+                                }}
+                            >
+                                <span style={{ fontWeight: "600" }}>
+                                    Moonsea
+                                </span>
+                                <span className="text-muted">
+                                    Status: Online
+                                </span>
+                            </div>
+                        </div>
+                        <div
+                            style={{
+                                marginLeft: "auto",
+                                display: "flex",
+                                flexDirection: "column",
+                                alignItems: "center",
+                            }}
+                        >
+                            <span
+                                style={{
+                                    fontWeight: "600",
+                                    fontSize: "1.4rem",
+                                }}
+                            >
+                                32
+                            </span>
+                            <span className="text-muted">GROUPS</span>
+                        </div>
+                        <div
+                            style={{
+                                display: "flex",
+                                flexDirection: "column",
+                                alignItems: "center",
+                            }}
+                        >
+                            <span
+                                style={{
+                                    fontWeight: "600",
+                                    fontSize: "1.4rem",
+                                }}
+                            >
+                                2
+                            </span>
+                            <span className="text-muted">RAIDS</span>
+                        </div>
+                        <div>
+                            <Button type="secondary" onClick={() => {}}>
+                                View
+                            </Button>
+                        </div>
+                    </div>
+                    <div className="server-row">
+                        <div
+                            style={{
+                                display: "flex",
+                                flexDirection: "row",
+                                gap: "15px",
+                                alignItems: "center",
+                            }}
+                        >
+                            <div
+                                style={{
+                                    width: "12px",
+                                    height: "12px",
+                                    backgroundColor: "green",
+                                    borderRadius: "6px",
+                                }}
+                            />
+                            <div
+                                style={{
+                                    display: "flex",
+                                    flexDirection: "column",
+                                    gap: "7px",
+                                }}
+                            >
+                                <span style={{ fontWeight: "600" }}>
+                                    Shadowdale
+                                </span>
+                                <span className="text-muted">
+                                    Status: Online
+                                </span>
+                            </div>
+                        </div>
+                        <div
+                            style={{
+                                marginLeft: "auto",
+                                display: "flex",
+                                flexDirection: "column",
+                                alignItems: "center",
+                            }}
+                        >
+                            <span
+                                style={{
+                                    fontWeight: "600",
+                                    fontSize: "1.4rem",
+                                }}
+                            >
+                                21
+                            </span>
+                            <span className="text-muted">GROUPS</span>
+                        </div>
+                        <div
+                            style={{
+                                display: "flex",
+                                flexDirection: "column",
+                                alignItems: "center",
+                            }}
+                        >
+                            <span
+                                style={{
+                                    fontWeight: "600",
+                                    fontSize: "1.4rem",
+                                }}
+                            >
+                                0
+                            </span>
+                            <span className="text-muted">RAIDS</span>
+                        </div>
+                        <div>
+                            <Button type="secondary" onClick={() => {}}>
+                                View
+                            </Button>
+                        </div>
+                    </div>
+                    <div className="server-row">
+                        <div
+                            style={{
+                                display: "flex",
+                                flexDirection: "row",
+                                gap: "15px",
+                                alignItems: "center",
+                            }}
+                        >
+                            <div
+                                style={{
+                                    width: "12px",
+                                    height: "12px",
+                                    backgroundColor: "green",
+                                    borderRadius: "6px",
+                                }}
+                            />
+                            <div
+                                style={{
+                                    display: "flex",
+                                    flexDirection: "column",
+                                    gap: "7px",
+                                }}
+                            >
+                                <span style={{ fontWeight: "600" }}>
+                                    Thrane
+                                </span>
+                                <span className="text-muted">
+                                    Status: Online
+                                </span>
+                            </div>
+                        </div>
+                        <div
+                            style={{
+                                marginLeft: "auto",
+                                display: "flex",
+                                flexDirection: "column",
+                                alignItems: "center",
+                            }}
+                        >
+                            <span
+                                style={{
+                                    fontWeight: "600",
+                                    fontSize: "1.4rem",
+                                }}
+                            >
+                                18
+                            </span>
+                            <span className="text-muted">GROUPS</span>
+                        </div>
+                        <div
+                            style={{
+                                display: "flex",
+                                flexDirection: "column",
+                                alignItems: "center",
+                            }}
+                        >
+                            <span
+                                style={{
+                                    fontWeight: "600",
+                                    fontSize: "1.4rem",
+                                }}
+                            >
+                                2
+                            </span>
+                            <span className="text-muted">RAIDS</span>
+                        </div>
+                        <div>
+                            <Button type="secondary" onClick={() => {}}>
+                                View
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        // <Page
+        //     title="DDO Live LFM Viewer"
+        //     description="View a live LFM panel to find public groups - before you even log in! See which groups are currently looking for more players and what content is currently being run."
+        //     logo="/icons/grouping-192px.png"
+        //     pageMessages={() => {
+        //         const messages = []
+        //         if (loadingFailed())
+        //             messages.push(<DataLoadingErrorPageMessage />)
+        //         if (lfmState === LoadingState.Haulted)
+        //             messages.push(<LiveDataHaultedPageMessage />)
+        //         return messages
+        //     }}
+        // >
+        // <ContentClusterGroup>
+        //     <ContentCluster title="Select a Server">
+        //         <NavCardCluster>
+        //             {getServerSelectContent("64bit")}
+        //         </NavCardCluster>
+        //     </ContentCluster>
+        //     <ContentCluster title="Current Raids">
+        //         {getCurrentRaidsContent()}
+        //     </ContentCluster>
+        //     <ContentCluster title="Notifications">
+        //         <Stack direction="row" gap="10px" align="center">
+        //             <p
+        //                 style={{
+        //                     textDecoration: "line-through",
+        //                     margin: 0,
+        //                 }}
+        //             >
+        //                 You currently have 0 notification rules set up.
+        //                 Configure rules on the{" "}
+        //                 <Link to="/notifications" disabled>
+        //                     notification settings
+        //                 </Link>{" "}
+        //                 page.
+        //             </p>
+        //             <Badge text="Soon" type="soon" />
+        //         </Stack>
+        //     </ContentCluster>
+        //     <ContentCluster title="See Also...">
+        //         <NavCardCluster>
+        //             <NavigationCard type="registration" />
+        //             <NavigationCard type="owned-content" />
+        //             <NavigationCard type="timers" />
+        //         </NavCardCluster>
+        //     </ContentCluster>
+        // </ContentClusterGroup>
+        // </Page>
     )
 }
 

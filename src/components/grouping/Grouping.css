@@ -15,6 +15,21 @@
     filter: drop-shadow(2px 2px 2px var(--shadow));
 }
 
+.server-row {
+    border-bottom: 1px solid var(--color-border);
+    padding: 20px;
+    display: flex;
+    flex-direction: row;
+    gap: 50px;
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.15s;
+}
+
+.server-row:hover {
+    background-color: var(--color-hover);
+}
+
 @media (max-width: 768px) {
     .raid-card {
         padding: 5px;

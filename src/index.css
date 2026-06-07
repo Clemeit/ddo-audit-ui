@@ -47,13 +47,12 @@
 } */
 
 :root {
-    --color-bg: #f8fafc;
     --color-surface: #ffffff;
     --color-surface-l2: #e9e9e9;
     --color-title-bar: #cfdff5;
     --color-primary-text: #1a1e27;
     --color-secondary-text: #242933;
-    --color-text-muted: #475569;
+    --color-text-muted: #626c7a;
     --color-border: #d0d7e2;
     --color-hover: #e8eef6;
     --color-focus: #2563eb;
@@ -61,40 +60,63 @@
     --color-link: #2563eb;
     --color-orange: #c2410c;
     --color-blue: #1d6fb5;
+    --green1: #166534;
+    --red1: #b91c1c;
+    --green-text: var(--green1);
+    --red-text: var(--red1);
     --shadow-card-hover:
         2px 2px 4px rgba(2, 6, 23, 0.25),
         4px 4px 8px rgba(2, 6, 23, 0.15),
         8px 8px 16px rgba(2, 6, 23, 0.10),
         16px 16px 32px rgba(2, 6, 23, 0.05);
+    --card-shadow:
+        2px 2px 4px rgba(2, 6, 23, 0.15),
+        4px 4px 8px rgba(2, 6, 23, 0.01),
+        8px 8px 16px rgba(2, 6, 23, 0.01),
+        16px 16px 32px rgba(2, 6, 23, 0.01);
 }
 
 @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
-        --color-bg: #0b1220;
-        --color-surface: #2e2e30;
-        --color-surface-l2: #1e1e1f;
-        --color-primary-text: #e5e7eb;
-        --color-secondary-text: #c9ccd1;
-        --color-text-muted: #9ca3af;
-        --color-border: #393e46;
-        --color-hover: #272d36;
-        --color-focus: #60a5fa;
-        --color-logo-badge: #090f1b;
-        --color-link: #60a5fa;
-        --color-orange: #fb923c;
-        --color-blue: #60a5fa;
-        --shadow-card-hover:
-            2px 2px 4px rgba(2, 6, 23, 0.25),
-            4px 4px 8px rgba(2, 6, 23, 0.15),
-            8px 8px 16px rgba(2, 6, 23, 0.10),
-            16px 16px 32px rgba(2, 6, 23, 0.05);
+       /* Backgrounds & Surfaces (Warm, desaturated deep grays instead of pitch black) */
+        --color-surface: #121214;        /* Soft, dark charcoal canvas */
+        --color-surface-l2: #1E1E22;     /* Card background with low luminous contrast */
+        --color-surface-l3: #2A2A30;     /* Code blocks, headers, inner tabs */
+        
+        /* Typography (Subdued whites to prevent text bleeding/glare) */
+        --color-primary-text: #E4E4E7;   /* Soft zinc white (less jarring on the eyes) */
+        --color-secondary-text: #A1A1AA; /* Muted silver gray for labels and axes */
+        --color-text-muted: #6B6B72;     /* Faded text for secondary timestamps */
+        
+        /* Layout Elements */
+        --color-border: #2D2D34;         /* Soft separation lines */
+        --color-hover: #33333B;          /* Subtle feedback on hover */
+        --color-focus: #22C55E;          
+        
+        /* Brand & Accents */
+        --color-logo-badge: #0A0A0C;     
+        --color-link: #4ADE80;           /* Slightly lighter green so it remains readable on dark slate */
+        --color-orange: #F97316;         
+        --color-blue: #3B82F6;           
+        
+        /* Semantic Status Indicators */
+        --green1: #4ADE80;               /* Balanced green for status badges */
+        --red1: #F87171;                 /* Softer pastel red to prevent visual fatigue */
+        --green-text: var(--green1);
+        --red-text: var(--red1);
+        
+        /* Shadows (Soften opacity to fit the lighter background) */
+        --shadow-card-hover: 
+            0px 10px 20px rgba(0, 0, 0, 0.3),
+            0px 4px 8px rgba(0, 0, 0, 0.2);
+        --card-shadow: 
+            0px 2px 4px rgba(0, 0, 0, 0.15);
     }
 }
 
 :root[data-theme="dark"] {
-    --color-bg: #0b1220;
     --color-surface: #1e1e1f;
-        --color-surface-l2: #1e1e1f;
+    --color-surface-l2: #1e1e1f;
     --color-primary-text: #e5e7eb;
     --color-secondary-text: #c9ccd1;
     --color-text-muted: #9ca3af;
@@ -105,11 +127,20 @@
     --color-link: #60a5fa;
     --color-orange: #fb923c;
     --color-blue: #60a5fa;
+    --green1: #4ade80;
+    --red1: #f87171;
+    --green-text: var(--green1);
+    --red-text: var(--red1);
     --shadow-card-hover:
         2px 2px 4px rgba(2, 6, 23, 0.25),
         4px 4px 8px rgba(2, 6, 23, 0.15),
         8px 8px 16px rgba(2, 6, 23, 0.10),
         16px 16px 32px rgba(2, 6, 23, 0.05);
+    --card-shadow:
+        2px 2px 4px rgba(2, 6, 23, 0.15),
+        4px 4px 8px rgba(2, 6, 23, 0.01),
+        8px 8px 16px rgba(2, 6, 23, 0.01),
+        16px 16px 32px rgba(2, 6, 23, 0.01);
 }
 
 .hide-scrollbar::-webkit-scrollbar {
@@ -200,7 +231,7 @@ button.navigation-card {
 
 .green-text,
 .green-text > * {
-    color: var(--green1);
+    color: var(--green-text);
 }
 
 .secondary-text,
@@ -210,7 +241,7 @@ button.navigation-card {
 
 .red-text,
 .red-text > * {
-    color: var(--red1);
+    color: var(--red-text);
 }
 
 input,
