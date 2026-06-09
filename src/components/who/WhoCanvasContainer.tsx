@@ -84,13 +84,13 @@ const WhoContainer = ({
         enabled: !isSSEServer,
     })
 
-    const characterData: CharacterSpecificApiDataModel | null = isSSEServer
-        ? streamData
-            ? ({
-                  data: Object.fromEntries(streamData),
-              } as CharacterSpecificApiDataModel)
-            : null
-        : polledData
+    const characterData: CharacterSpecificApiDataModel | null = useMemo(() => {
+        if (!isSSEServer) return polledData
+        if (!streamData) return null
+        return {
+            data: Object.fromEntries(streamData),
+        } as CharacterSpecificApiDataModel
+    }, [isSSEServer, polledData, streamData])
 
     const characterState = isSSEServer ? streamLoadingState : polledState
     const areaContext = useAreaContext()
