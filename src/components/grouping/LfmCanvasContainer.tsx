@@ -97,11 +97,11 @@ const GroupingContainer = ({
         enabled: !isSSEServer,
     })
 
-    const lfmData: LfmSpecificApiModel | null = isSSEServer
-        ? streamData
-            ? ({ data: Object.fromEntries(streamData) } as LfmSpecificApiModel)
-            : null
-        : polledData
+const lfmData: LfmSpecificApiModel | null = useMemo(() => {
+    if (!isSSEServer) return polledData
+    if (!streamData) return null
+    return { data: Object.fromEntries(streamData) } as LfmSpecificApiModel
+}, [isSSEServer, polledData, streamData])
 
     const lfmState = isSSEServer ? streamLoadingState : polledState
 
