@@ -102,6 +102,7 @@ export interface NormalizedLfmSettings {
     showEligibilityDividers: boolean
     onlyShowRaids: boolean
     hideFullGroups: boolean
+    useSSE: boolean
 }
 
 export function normalizeLfmSettings(input: unknown): NormalizedLfmSettings {
@@ -180,6 +181,7 @@ export function normalizeLfmSettings(input: unknown): NormalizedLfmSettings {
         hideFullGroups: coerceBool(s.hideFullGroups, false),
         ownedContent: coerceStringArray(s.ownedContent),
         trackedCharacterIds: coerceNumberArray(s.trackedCharacterIds),
+        useSSE: coerceBool(s.useSSE, false),
         sortBy,
     }
 }
@@ -208,6 +210,7 @@ export interface NormalizedWhoSettings {
     shouldSaveFilterAreaCollapsed: boolean
     showInQuestIndicator: boolean
     showQuestName: boolean
+    useSSE: boolean
     refreshInterval: number
     hideIgnoredCharacters: boolean
     pinGuildies: boolean
@@ -273,6 +276,7 @@ export function normalizeWhoSettings(input: unknown): NormalizedWhoSettings {
         ),
         showInQuestIndicator: coerceBool(s.showInQuestIndicator, true),
         showQuestName: coerceBool(s.showQuestName, true),
+        useSSE: coerceBool(s.useSSE, false),
         hideIgnoredCharacters: coerceBool(s.hideIgnoredCharacters, true),
         pinGuildies: coerceBool(s.pinGuildies, false),
         pinRegisteredCharacters: coerceBool(s.pinRegisteredCharacters, true),

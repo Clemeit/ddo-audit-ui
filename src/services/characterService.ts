@@ -5,6 +5,7 @@ import {
 import { getRequest } from "./apiHelper.ts"
 
 export const CHARACTER_ENDPOINT = "characters"
+export const SSE_BASE_URL = "v2/characters/stream"
 
 function getCharacterByNameAndServer(name: string, server: string) {
     return getRequest<SingleCharacterResponseModel>(

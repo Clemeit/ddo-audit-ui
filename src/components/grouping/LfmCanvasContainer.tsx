@@ -10,6 +10,7 @@ import {
 import { useLfmContext } from "../../contexts/LfmContext.tsx"
 import LfmToolbar from "./LfmToolbar.tsx"
 import usePollApi from "../../hooks/usePollApi.ts"
+import useServerStream from "../../hooks/useServerStream.ts"
 import { ServerInfoApiDataModel } from "../../models/Game.ts"
 import { LoadingState } from "../../models/Api.ts"
 import {
@@ -31,6 +32,8 @@ import {
     MIN_LEVEL,
     RAID_TIMER_MILLIS,
 } from "../../constants/game.ts"
+import { SERVERS_64_BITS_LOWER } from "../../constants/servers.ts"
+// import { ENABLE_SSE } from "../../constants/client.ts"
 
 interface Props {
     serverName: string
@@ -68,26 +71,44 @@ const GroupingContainer = ({
         indicateContentIDontOwn,
         ownedContent,
         hideFullGroups,
+        useSSE,
     } = useLfmContext()
     const [ignoreServerDown, setIgnoreServerDown] = useState<boolean>(false)
     const { friends: friendCharacters } = useGetFriends()
     const { ignores: ignoredCharacters } = useGetIgnores()
     const { quests } = useQuestContext()
 
-    const getQuestById = (id: number): Quest => {
-        if (id == undefined) return null
-        return quests[id]
-    }
+    const isSSEServer =
+        useSSE &&
+        // ENABLE_SSE &&
+        SERVERS_64_BITS_LOWER.includes(serverName.toLowerCase())
+
+    const { data: streamData, loadingState: streamLoadingState } =
+        useServerStream<Lfm>(serverName, "lfms", { enabled: isSSEServer })
 
     const {
-        data: lfmData,
-        state: lfmState,
+        data: polledData,
+        state: polledState,
         reload: reloadLfms,
     } = usePollApi<LfmSpecificApiModel>({
         endpoint: `lfms/${serverName}`,
         interval: refreshInterval,
         lifespan: 1000 * 60 * 60 * 12, // 12 hours
+        enabled: !isSSEServer,
     })
+
+const lfmData: LfmSpecificApiModel | null = useMemo(() => {
+    if (!isSSEServer) return polledData
+    if (!streamData) return null
+    return { data: Object.fromEntries(streamData) } as LfmSpecificApiModel
+}, [isSSEServer, polledData, streamData])
+
+    const lfmState = isSSEServer ? streamLoadingState : polledState
+
+    const getQuestById = (id: number): Quest | undefined => {
+        return quests[id]
+    }
+
     const {
         data: serverInfoData,
         state: serverInfoState,
@@ -306,7 +327,7 @@ const GroupingContainer = ({
                     ) // only include activity from the last 2 hours
 
                 let selectedQuest: Quest | null = null
-                if (lfm.quest_id !== 0) {
+                if (lfm.quest_id != undefined && lfm.quest_id !== 0) {
                     const quest = getQuestById(lfm.quest_id)
                     if (quest) {
                         selectedQuest = quest
@@ -384,15 +405,18 @@ const GroupingContainer = ({
                             ) * sortDirectionModifier
                         )
                     case LfmSortType.QUEST_NAME:
+                        const aHasQuest =
+                            lfmA.quest_id != undefined && lfmA.quest_id !== 0
+                        const bHasQuest =
+                            lfmB.quest_id != undefined && lfmB.quest_id !== 0
+                        if (!aHasQuest && !bHasQuest) return 0
+                        if (!aHasQuest) return sortDirectionModifier
+                        if (!bHasQuest) return -sortDirectionModifier
+
                         const questAName =
                             getQuestById(lfmA.quest_id)?.name ?? ""
                         const questBName =
                             getQuestById(lfmB.quest_id)?.name ?? ""
-                        const aHasQuest = lfmA.quest_id !== 0
-                        const bHasQuest = lfmB.quest_id !== 0
-                        if (!aHasQuest && !bHasQuest) return 0
-                        if (!aHasQuest) return sortDirectionModifier
-                        if (!bHasQuest) return -sortDirectionModifier
                         return (
                             questAName.localeCompare(questBName) *
                             sortDirectionModifier

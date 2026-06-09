@@ -75,6 +75,8 @@ const LfmToolbar = ({
         setShowLfmPostedTime,
         showQuestMetrics,
         setShowQuestMetrics,
+        useSSE,
+        setUseSSE,
         reloadRegisteredCharacters,
         resetDisplaySettings,
         resetFilterSettings,
@@ -546,6 +548,25 @@ const LfmToolbar = ({
                             Reset all
                         </Button>
                     </Stack>
+                </Stack>
+            </ContentCluster>
+            <ContentCluster title="Experimental">
+                <Stack direction="column" gap="10px">
+                    <Checkbox
+                        checked={useSSE}
+                        onChange={(e) => setUseSSE(e.target.checked)}
+                    >
+                        Stream real-time LFM data
+                    </Checkbox>
+                    <ul
+                        style={{
+                            marginTop: "2px",
+                        }}
+                    >
+                        <li>Much faster data updates (within 1 second)</li>
+                        <li>Reduces data transfer by up to 80%</li>
+                        <li>Experimental - may contain bugs</li>
+                    </ul>
                 </Stack>
             </ContentCluster>
         </ContentClusterGroup>
