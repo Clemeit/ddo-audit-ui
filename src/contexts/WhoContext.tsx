@@ -69,6 +69,8 @@ interface WhoContextProps {
     setShowInQuestIndicator: React.Dispatch<React.SetStateAction<boolean>>
     showQuestName: boolean
     setShowQuestName: React.Dispatch<React.SetStateAction<boolean>>
+    useSSE: boolean
+    setUseSSE: React.Dispatch<React.SetStateAction<boolean>>
     refreshInterval: number
     setRefreshInterval: React.Dispatch<React.SetStateAction<number>>
     hideIgnoredCharacters: boolean
@@ -119,6 +121,7 @@ export const WhoProvider = ({ children }: { children: ReactNode }) => {
     const [showInQuestIndicator, setShowInQuestIndicator] =
         useState<boolean>(true)
     const [showQuestName, setShowQuestName] = useState<boolean>(false)
+    const [useSSE, setUseSSE] = useState<boolean>(false)
     const [refreshInterval, setRefreshInterval] =
         useState<number>(DEFAULT_REFRESH_RATE)
 
@@ -224,6 +227,7 @@ export const WhoProvider = ({ children }: { children: ReactNode }) => {
         setIsDynamicWidth(false)
         setShowInQuestIndicator(true)
         setShowQuestName(true)
+        setUseSSE(false)
         setRefreshInterval(DEFAULT_REFRESH_RATE)
         setShouldSaveSettings(false)
         setShouldSaveClassFilter(false)
@@ -311,6 +315,7 @@ export const WhoProvider = ({ children }: { children: ReactNode }) => {
                     Boolean(settings.showInQuestIndicator ?? true)
                 )
                 setShowQuestName(Boolean(settings.showQuestName ?? true))
+                setUseSSE(Boolean(settings.useSSE ?? true))
                 setRefreshInterval(
                     parseInt(
                         settings.refreshInterval ?? String(DEFAULT_REFRESH_RATE)
@@ -429,6 +434,7 @@ export const WhoProvider = ({ children }: { children: ReactNode }) => {
                 shouldSaveFilterAreaCollapsed,
                 showInQuestIndicator,
                 showQuestName,
+                useSSE,
                 refreshInterval,
                 hideIgnoredCharacters,
                 pinGuildies,
@@ -478,6 +484,7 @@ export const WhoProvider = ({ children }: { children: ReactNode }) => {
         shouldSaveFilterAreaCollapsed,
         showInQuestIndicator,
         showQuestName,
+        useSSE,
         refreshInterval,
         hideIgnoredCharacters,
         pinGuildies,
@@ -512,6 +519,7 @@ export const WhoProvider = ({ children }: { children: ReactNode }) => {
             shouldSaveFilterAreaCollapsed,
             showInQuestIndicator,
             showQuestName,
+            useSSE,
             refreshInterval,
             hideIgnoredCharacters,
             pinGuildies,
@@ -588,6 +596,8 @@ export const WhoProvider = ({ children }: { children: ReactNode }) => {
                 setShowInQuestIndicator,
                 showQuestName,
                 setShowQuestName,
+                useSSE,
+                setUseSSE,
                 refreshInterval,
                 setRefreshInterval,
                 hideIgnoredCharacters,

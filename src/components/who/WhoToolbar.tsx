@@ -62,6 +62,8 @@ const WhoToolbar = ({
         setAlwaysShowRegisteredCharacters,
         hideClassFilterOnMobile,
         setHideClassFilterOnMobile,
+        useSSE,
+        setUseSSE,
     } = useWhoContext()
 
     const { reloadAreas } = useAreaContext()
@@ -264,6 +266,25 @@ const WhoToolbar = ({
                             </Checkbox>
                         </Stack>
                     </div>
+                </Stack>
+            </ContentCluster>
+            <ContentCluster title="Experimental">
+                <Stack direction="column" gap="10px">
+                    <Checkbox
+                        checked={useSSE}
+                        onChange={(e) => setUseSSE(e.target.checked)}
+                    >
+                        Stream real-time character data
+                    </Checkbox>
+                    <ul
+                        style={{
+                            marginTop: "2px",
+                        }}
+                    >
+                        <li>Much faster data updates (within 1 second)</li>
+                        <li>Reduces data transfer by up to 95%</li>
+                        <li>Experimental - may contain bugs</li>
+                    </ul>{" "}
                 </Stack>
             </ContentCluster>
         </ContentClusterGroup>

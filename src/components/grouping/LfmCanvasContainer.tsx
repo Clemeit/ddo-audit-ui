@@ -10,6 +10,7 @@ import {
 import { useLfmContext } from "../../contexts/LfmContext.tsx"
 import LfmToolbar from "./LfmToolbar.tsx"
 import usePollApi from "../../hooks/usePollApi.ts"
+import useServerStream from "../../hooks/useServerStream.ts"
 import { ServerInfoApiDataModel } from "../../models/Game.ts"
 import { LoadingState } from "../../models/Api.ts"
 import {
@@ -31,6 +32,8 @@ import {
     MIN_LEVEL,
     RAID_TIMER_MILLIS,
 } from "../../constants/game.ts"
+import { SERVERS_64_BITS_LOWER } from "../../constants/servers.ts"
+// import { ENABLE_SSE } from "../../constants/client.ts"
 
 interface Props {
     serverName: string
@@ -68,26 +71,45 @@ const GroupingContainer = ({
         indicateContentIDontOwn,
         ownedContent,
         hideFullGroups,
+        useSSE,
     } = useLfmContext()
     const [ignoreServerDown, setIgnoreServerDown] = useState<boolean>(false)
     const { friends: friendCharacters } = useGetFriends()
     const { ignores: ignoredCharacters } = useGetIgnores()
     const { quests } = useQuestContext()
 
-    const getQuestById = (id: number): Quest => {
-        if (id == undefined) return null
-        return quests[id]
-    }
+    const isSSEServer =
+        useSSE &&
+        // ENABLE_SSE &&
+        SERVERS_64_BITS_LOWER.includes(serverName.toLowerCase())
+
+    const { data: streamData, loadingState: streamLoadingState } =
+        useServerStream<Lfm>(serverName, "lfms", { enabled: isSSEServer })
 
     const {
-        data: lfmData,
-        state: lfmState,
+        data: polledData,
+        state: polledState,
         reload: reloadLfms,
     } = usePollApi<LfmSpecificApiModel>({
         endpoint: `lfms/${serverName}`,
         interval: refreshInterval,
         lifespan: 1000 * 60 * 60 * 12, // 12 hours
+        enabled: !isSSEServer,
     })
+
+    const lfmData: LfmSpecificApiModel | null = isSSEServer
+        ? streamData
+            ? ({ data: Object.fromEntries(streamData) } as LfmSpecificApiModel)
+            : null
+        : polledData
+
+    const lfmState = isSSEServer ? streamLoadingState : polledState
+
+    const getQuestById = (id: number): Quest => {
+        if (id == undefined) return null
+        return quests[id]
+    }
+
     const {
         data: serverInfoData,
         state: serverInfoState,

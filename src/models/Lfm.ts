@@ -168,7 +168,7 @@ interface LfmApiServerModel {
 type ServerName = (typeof SERVER_NAMES_LOWER)[number]
 
 type LfmApiDataModel = {
-    [K in ServerName]?: { number: Lfm }
+    [K in ServerName]?: { [id: number]: Lfm }
 }
 
 interface LfmApiModel {
@@ -176,7 +176,7 @@ interface LfmApiModel {
 }
 
 interface LfmSpecificApiModel {
-    data?: { number: Lfm }
+    data?: { [id: number]: Lfm }
 }
 
 enum LfmSortType {

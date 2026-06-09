@@ -70,6 +70,8 @@ interface LfmContextProps {
     setShowLfmPostedTime: (show: boolean) => void
     showQuestMetrics: boolean
     setShowQuestMetrics: (show: boolean) => void
+    useSSE: boolean
+    setUseSSE: (show: boolean) => void
     mouseOverDelay: number
     setMouseOverDelay: (delay: number) => void
     showLfmActivity: boolean
@@ -172,6 +174,7 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
         useState<boolean>(true)
     const [showLfmPostedTime, setShowLfmPostedTime] = useState<boolean>(true)
     const [showQuestMetrics, setShowQuestMetrics] = useState<boolean>(true)
+    const [useSSE, setUseSSE] = useState<boolean>(false)
     const [showLfmActivity, setShowLfmActivity] = useState<boolean>(true)
     const [showEligibleCharacters, setShowEligibleCharacters] =
         useState<boolean>(false)
@@ -255,6 +258,7 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
         setTrackedCharacterIds([])
         setShowLfmPostedTime(true)
         setShowQuestMetrics(true)
+        setUseSSE(false)
         setMouseOverDelay(DEFAULT_MOUSE_OVER_DELAY)
         setShowLfmActivity(true)
         setIsMultiColumn(true)
@@ -431,6 +435,7 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
                     Boolean(settings.showLfmPostedTime ?? true)
                 )
                 setShowQuestMetrics(Boolean(settings.showQuestMetrics ?? true))
+                setUseSSE(Boolean(settings.useSSE ?? true))
                 setMouseOverDelay(
                     settings.mouseOverDelay ?? DEFAULT_MOUSE_OVER_DELAY
                 )
@@ -575,6 +580,7 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
                     trackedCharacterIds,
                     showLfmPostedTime,
                     showQuestMetrics,
+                    useSSE,
                     mouseOverDelay,
                     showLfmActivity,
                     isMultiColumn,
@@ -634,6 +640,7 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
         trackedCharacterIds,
         showLfmPostedTime,
         showQuestMetrics,
+        useSSE,
         mouseOverDelay,
         showLfmActivity,
         isMultiColumn,
@@ -672,6 +679,7 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
             trackedCharacterIds,
             showLfmPostedTime,
             showQuestMetrics,
+            useSSE,
             mouseOverDelay,
             showLfmActivity,
             isMultiColumn,
@@ -749,6 +757,8 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
                 setShowLfmPostedTime,
                 showQuestMetrics,
                 setShowQuestMetrics,
+                useSSE,
+                setUseSSE,
                 mouseOverDelay,
                 setMouseOverDelay,
                 showLfmActivity,

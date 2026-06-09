@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react"
 import usePollApi from "../../hooks/usePollApi.ts"
+import useServerStream from "../../hooks/useServerStream.ts"
 import {
     Character,
     CharacterSpecificApiDataModel,
@@ -21,6 +22,8 @@ import useGetFriends from "../../hooks/useGetFriends.ts"
 import useGetIgnores from "../../hooks/useGetIgnores.ts"
 import logMessage from "../../utils/logUtils.ts"
 import Stack from "../global/Stack.tsx"
+import { SERVERS_64_BITS_LOWER } from "../../constants/servers.ts"
+// import { ENABLE_SSE } from "../../constants/client.ts"
 
 // TODO: group_id should be null and never "0"
 
@@ -52,21 +55,44 @@ const WhoContainer = ({
         pinFriends,
         alwaysShowFriends,
         alwaysShowRegisteredCharacters,
+        useSSE,
         // refreshInterval, TODO: make this work
     } = useWhoContext()
     const { registeredCharacters, myGuildsList } = useGetRegisteredCharacters()
     const [ignoreServerDown, setIgnoreServerDown] = useState<boolean>(false)
     const { friends } = useGetFriends()
     const { ignores } = useGetIgnores()
+
+    const isSSEServer =
+        useSSE &&
+        // ENABLE_SSE &&
+        SERVERS_64_BITS_LOWER.includes(serverName.toLowerCase())
+
+    const { data: streamData, loadingState: streamLoadingState } =
+        useServerStream<Character>(serverName, "characters", {
+            enabled: isSSEServer,
+        })
+
     const {
-        data: characterData,
-        state: characterState,
+        data: polledData,
+        state: polledState,
         reload: reloadCharacters,
     } = usePollApi<CharacterSpecificApiDataModel>({
         endpoint: `characters/${serverName}`,
         interval: 3000,
         lifespan: 1000 * 60 * 60 * 12, // 12 hours
+        enabled: !isSSEServer,
     })
+
+    const characterData: CharacterSpecificApiDataModel | null = isSSEServer
+        ? streamData
+            ? ({
+                  data: Object.fromEntries(streamData),
+              } as CharacterSpecificApiDataModel)
+            : null
+        : polledData
+
+    const characterState = isSSEServer ? streamLoadingState : polledState
     const areaContext = useAreaContext()
     const { areas } = areaContext
     const { data: serverInfoData, state: serverInfoState } =
