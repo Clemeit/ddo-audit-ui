@@ -71,7 +71,6 @@ const GroupingContent = () => {
 
     const { quests } = useQuestContext()
     const getQuestById = (id: number): Quest => {
-        if (id == undefined) return null
         return quests[id]
     }
 
@@ -117,6 +116,7 @@ const GroupingContent = () => {
         const lfmCount = Object.keys(serverLfms).length
         const raidCount = Object.values(serverLfms).filter(
             (lfm) =>
+                lfm.quest_id != undefined &&
                 lfm.quest_id !== 0 &&
                 getQuestById(lfm.quest_id)?.group_size === "Raid"
         ).length
@@ -171,7 +171,10 @@ const GroupingContent = () => {
         Object.entries(lfmData?.data || {}).forEach(
             ([serverName, serverData]) => {
                 Object.values(serverData || {})
-                    ?.filter((lfm: Lfm) => lfm.quest_id !== 0)
+                    ?.filter(
+                        (lfm: Lfm) =>
+                            lfm.quest_id != undefined && lfm.quest_id !== 0
+                    )
                     ?.forEach((lfm: Lfm) => {
                         const quest = getQuestById(lfm.quest_id)
                         if (quest && quest?.group_size === "Raid") {

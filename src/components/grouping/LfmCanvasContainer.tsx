@@ -106,7 +106,6 @@ const GroupingContainer = ({
     const lfmState = isSSEServer ? streamLoadingState : polledState
 
     const getQuestById = (id: number): Quest => {
-        if (id == undefined) return null
         return quests[id]
     }
 
@@ -328,7 +327,7 @@ const GroupingContainer = ({
                     ) // only include activity from the last 2 hours
 
                 let selectedQuest: Quest | null = null
-                if (lfm.quest_id !== 0) {
+                if (lfm.quest_id != undefined && lfm.quest_id !== 0) {
                     const quest = getQuestById(lfm.quest_id)
                     if (quest) {
                         selectedQuest = quest
@@ -407,9 +406,9 @@ const GroupingContainer = ({
                         )
                     case LfmSortType.QUEST_NAME:
                         const questAName =
-                            getQuestById(lfmA.quest_id)?.name ?? ""
+                            getQuestById(lfmA.quest_id || 0)?.name ?? ""
                         const questBName =
-                            getQuestById(lfmB.quest_id)?.name ?? ""
+                            getQuestById(lfmB.quest_id || 0)?.name ?? ""
                         const aHasQuest = lfmA.quest_id !== 0
                         const bHasQuest = lfmB.quest_id !== 0
                         if (!aHasQuest && !bHasQuest) return 0

@@ -435,7 +435,7 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
                     Boolean(settings.showLfmPostedTime ?? true)
                 )
                 setShowQuestMetrics(Boolean(settings.showQuestMetrics ?? true))
-                setUseSSE(Boolean(settings.useSSE ?? true))
+                setUseSSE(Boolean(settings.useSSE ?? false))
                 setMouseOverDelay(
                     settings.mouseOverDelay ?? DEFAULT_MOUSE_OVER_DELAY
                 )

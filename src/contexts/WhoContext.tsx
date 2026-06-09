@@ -315,7 +315,7 @@ export const WhoProvider = ({ children }: { children: ReactNode }) => {
                     Boolean(settings.showInQuestIndicator ?? true)
                 )
                 setShowQuestName(Boolean(settings.showQuestName ?? true))
-                setUseSSE(Boolean(settings.useSSE ?? true))
+                setUseSSE(Boolean(settings.useSSE ?? false))
                 setRefreshInterval(
                     parseInt(
                         settings.refreshInterval ?? String(DEFAULT_REFRESH_RATE)

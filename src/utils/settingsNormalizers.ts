@@ -102,6 +102,7 @@ export interface NormalizedLfmSettings {
     showEligibilityDividers: boolean
     onlyShowRaids: boolean
     hideFullGroups: boolean
+    useSSE: boolean
 }
 
 export function normalizeLfmSettings(input: unknown): NormalizedLfmSettings {
@@ -180,6 +181,7 @@ export function normalizeLfmSettings(input: unknown): NormalizedLfmSettings {
         hideFullGroups: coerceBool(s.hideFullGroups, false),
         ownedContent: coerceStringArray(s.ownedContent),
         trackedCharacterIds: coerceNumberArray(s.trackedCharacterIds),
+        useSSE: coerceBool(s.useSSE, false),
         sortBy,
     }
 }

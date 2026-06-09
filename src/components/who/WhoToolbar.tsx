@@ -284,7 +284,7 @@ const WhoToolbar = ({
                         <li>Much faster data updates (within 1 second)</li>
                         <li>Reduces data transfer by up to 95%</li>
                         <li>Experimental - may contain bugs</li>
-                    </ul>{" "}
+                    </ul>
                 </Stack>
             </ContentCluster>
         </ContentClusterGroup>
