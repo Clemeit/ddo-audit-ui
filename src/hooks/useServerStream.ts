@@ -19,7 +19,7 @@ import {
     applyClose,
     applyError,
 } from "./serverStream/reducer.ts"
-import { StreamMetrics } from "./serverStream/metrics.ts"
+// import { StreamMetrics } from "./serverStream/metrics.ts"
 // import { checkDrift } from "./serverStream/driftDetector.ts"
 
 export type { StreamStatus }
@@ -100,16 +100,16 @@ function useServerStream<T>(
 
     // ── Metric helpers ────────────────────────────────────────────────────────
 
-    const bumpMetric = useCallback((field: keyof StreamMetrics) => {
-        // Metric logging temporarily disabled.
-        // metricsRef.current = {
-        //     ...metricsRef.current,
-        //     [field]: metricsRef.current[field] + 1,
-        // }
-        // publishToDevPanel(devKey, metricsRef.current)
-        // setMetrics({ ...metricsRef.current })
-        void field
-    }, [])
+    // const bumpMetric = useCallback((field: keyof StreamMetrics) => {
+    // Metric logging temporarily disabled.
+    // metricsRef.current = {
+    //     ...metricsRef.current,
+    //     [field]: metricsRef.current[field] + 1,
+    // }
+    // publishToDevPanel(devKey, metricsRef.current)
+    // setMetrics({ ...metricsRef.current })
+    //     void field
+    // }, [])
 
     // ── Reconnect scheduling ──────────────────────────────────────────────────
 
