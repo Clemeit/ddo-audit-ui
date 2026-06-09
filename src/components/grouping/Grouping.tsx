@@ -70,7 +70,7 @@ const GroupingContent = () => {
     }, [lfmState, serverInfoState])
 
     const { quests } = useQuestContext()
-    const getQuestById = (id: number): Quest => {
+    const getQuestById = (id: number): Quest | undefined => {
         return quests[id]
     }
 

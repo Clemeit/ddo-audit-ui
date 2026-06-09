@@ -105,7 +105,7 @@ const GroupingContainer = ({
 
     const lfmState = isSSEServer ? streamLoadingState : polledState
 
-    const getQuestById = (id: number): Quest => {
+    const getQuestById = (id: number): Quest | undefined => {
         return quests[id]
     }
 
@@ -405,15 +405,18 @@ const GroupingContainer = ({
                             ) * sortDirectionModifier
                         )
                     case LfmSortType.QUEST_NAME:
-                        const questAName =
-                            getQuestById(lfmA.quest_id || 0)?.name ?? ""
-                        const questBName =
-                            getQuestById(lfmB.quest_id || 0)?.name ?? ""
-                        const aHasQuest = lfmA.quest_id !== 0
-                        const bHasQuest = lfmB.quest_id !== 0
+                        const aHasQuest =
+                            lfmA.quest_id != undefined && lfmA.quest_id !== 0
+                        const bHasQuest =
+                            lfmB.quest_id != undefined && lfmB.quest_id !== 0
                         if (!aHasQuest && !bHasQuest) return 0
                         if (!aHasQuest) return sortDirectionModifier
                         if (!bHasQuest) return -sortDirectionModifier
+
+                        const questAName =
+                            getQuestById(lfmA.quest_id)?.name ?? ""
+                        const questBName =
+                            getQuestById(lfmB.quest_id)?.name ?? ""
                         return (
                             questAName.localeCompare(questBName) *
                             sortDirectionModifier
