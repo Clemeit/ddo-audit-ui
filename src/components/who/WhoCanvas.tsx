@@ -123,6 +123,25 @@ const WhoCanvas = ({
         y: number
     } | null>(null)
 
+    // Prevent pending timeouts from firing after unmount.
+    useEffect(() => {
+        return () => {
+            if (mouseMoveTimeoutRef.current !== null) {
+                clearTimeout(mouseMoveTimeoutRef.current)
+                mouseMoveTimeoutRef.current = null
+            }
+        }
+    }, [])
+
+    // Hide tooltip while scrolling (mousemove doesn't necessarily fire during scroll).
+    useEffect(() => {
+        if (mouseMoveTimeoutRef.current !== null) {
+            clearTimeout(mouseMoveTimeoutRef.current)
+            mouseMoveTimeoutRef.current = null
+        }
+        setHoverLabel(null)
+        setHoverMousePos(null)
+    }, [adjustedScrollOffset])
     const { renderBackground, renderOverlay } = useRenderWhoPanel({
         sprite: image,
         context: mainCanvasRef.current?.getContext("2d") ?? null,
