@@ -11,6 +11,7 @@ import {
     WHO_COLORS,
 } from "../../constants/whoPanel.ts"
 import { SPRITE_MAP } from "../../constants/spriteMap.ts"
+import { CLASS_LIST_LOWER } from "../../constants/game.ts"
 import LfmSprite from "../../assets/png/lfm_sprite_6.webp"
 import useRenderWhoPanel from "../../hooks/useRenderWhoPanel.ts"
 import useRenderCharacter from "../../hooks/useRenderCharacter.ts"
@@ -113,6 +114,14 @@ const WhoCanvas = ({
     const contentWrapperRef = useRef<HTMLDivElement>(null)
     const headerFonts = useMemo(() => FONTS(0), [])
     const [contentHeight, setContentHeight] = useState(0)
+
+    // Race/class-icon hover state
+    const mouseMoveTimeoutRef = useRef<number | null>(null)
+    const [hoverLabel, setHoverLabel] = useState<string | null>(null)
+    const [hoverMousePos, setHoverMousePos] = useState<{
+        x: number
+        y: number
+    } | null>(null)
 
     const { renderBackground, renderOverlay } = useRenderWhoPanel({
         sprite: image,
@@ -530,6 +539,130 @@ const WhoCanvas = ({
         }
     }
 
+    const handleCanvasMouseMove = useCallback(
+        (e: React.MouseEvent<HTMLCanvasElement>) => {
+            const rect = mainCanvasRef.current?.getBoundingClientRect()
+            if (!rect) return
+
+            const clientX = e.clientX
+            const clientY = e.clientY
+            const x = (clientX - rect.left) * canvasScaleWidth
+            const y = (clientY - rect.top) * canvasScaleHeight
+            const logicalY = y + adjustedScrollOffset
+
+            const charIndex = Math.floor(
+                (logicalY - SORT_HEADER_AREA_HEIGHT) / CHARACTER_HEIGHT
+            )
+            if (charIndex < 0 || charIndex >= curatedCharacters.length) {
+                if (mouseMoveTimeoutRef.current !== null) {
+                    clearTimeout(mouseMoveTimeoutRef.current)
+                }
+                setHoverLabel(null)
+                setHoverMousePos(null)
+                return
+            }
+
+            const character = curatedCharacters[charIndex]
+            const leftBound = lfmHeaderBoundingBox.x
+            const characterY =
+                SORT_HEADER_AREA_HEIGHT +
+                charIndex * CHARACTER_HEIGHT -
+                adjustedScrollOffset
+
+            // --- Race icon hit test ---
+            const RACE_ICON_SIZE = 18
+            const raceIconX = nameHeaderBoundingBox.x + 2
+            const raceIconY = characterY + 2
+            const overRace =
+                x >= raceIconX &&
+                x <= raceIconX + RACE_ICON_SIZE &&
+                y >= raceIconY &&
+                y <= raceIconY + RACE_ICON_SIZE
+
+            // --- Class icon hit test ---
+            const CLASS_ICON_SIZE = 20
+            const classIconY =
+                characterY +
+                Math.round((CHARACTER_HEIGHT - CLASS_ICON_SIZE) / 2)
+            let hoveredClassName: string | null = null
+            if (
+                !overRace &&
+                y >= classIconY &&
+                y <= classIconY + CLASS_ICON_SIZE &&
+                x >= leftBound + classHeaderBoundingBox.x &&
+                x <=
+                    leftBound +
+                        classHeaderBoundingBox.x +
+                        classHeaderBoundingBox.width
+            ) {
+                const filteredClasses = character.classes
+                    ?.filter((cls) =>
+                        CLASS_LIST_LOWER.includes(cls.name.toLowerCase())
+                    )
+                    .sort((a, b) => b.level - a.level)
+                if (filteredClasses && filteredClasses.length > 0) {
+                    for (let i = 0; i < filteredClasses.length; i++) {
+                        const classIconX =
+                            leftBound +
+                            Math.round(
+                                classHeaderBoundingBox.x +
+                                    i * (CLASS_ICON_SIZE + 1)
+                            )
+                        if (
+                            x >= classIconX &&
+                            x <= classIconX + CLASS_ICON_SIZE
+                        ) {
+                            hoveredClassName = filteredClasses[i].name
+                            break
+                        }
+                    }
+                }
+            }
+
+            const overIcon = overRace || hoveredClassName !== null
+
+            if (!overIcon) {
+                // Cursor left the icon — clear immediately, cancel any pending show
+                if (mouseMoveTimeoutRef.current !== null) {
+                    clearTimeout(mouseMoveTimeoutRef.current)
+                }
+                setHoverLabel(null)
+                setHoverMousePos(null)
+                return
+            }
+
+            // Cursor is over an icon — debounce the show so it doesn't flicker
+            // while the user sweeps across the panel
+            if (mouseMoveTimeoutRef.current !== null) {
+                clearTimeout(mouseMoveTimeoutRef.current)
+            }
+            const label = overRace
+                ? (character.race ?? "Unknown")
+                : hoveredClassName!
+            mouseMoveTimeoutRef.current = window.setTimeout(() => {
+                setHoverLabel(label)
+                setHoverMousePos({ x: clientX, y: clientY })
+            }, 250)
+        },
+        [
+            canvasScaleWidth,
+            canvasScaleHeight,
+            adjustedScrollOffset,
+            curatedCharacters,
+            lfmHeaderBoundingBox,
+            nameHeaderBoundingBox,
+            classHeaderBoundingBox,
+        ]
+    )
+
+    const handleCanvasMouseLeave = useCallback(() => {
+        if (mouseMoveTimeoutRef.current !== null) {
+            clearTimeout(mouseMoveTimeoutRef.current)
+        }
+        setHoverLabel(null)
+        setHoverMousePos(null)
+    }, [])
+
     const anonymousCount = useMemo(
         () => allCharacters.filter((c) => c.is_anonymous).length,
         [allCharacters]
@@ -728,6 +861,8 @@ const WhoCanvas = ({
                             marginTop: -scaledSpacerHeight,
                         }}
                         onClick={handleCanvasClick}
+                        onMouseMove={handleCanvasMouseMove}
+                        onMouseLeave={handleCanvasMouseLeave}
                     />
                 </div>
                 {/* Scroll fade indicators */}
@@ -765,6 +900,28 @@ const WhoCanvas = ({
                     />
                 )}
             </div>
+            {/* Race / class-name hover tooltip */}
+            {hoverLabel !== null && hoverMousePos !== null && (
+                <div
+                    style={{
+                        position: "fixed",
+                        left: hoverMousePos.x + 12,
+                        top: hoverMousePos.y + 16,
+                        background: "rgba(20, 20, 20, 0.92)",
+                        color: WHO_COLORS.WHITE_TEXT,
+                        fontSize: 14,
+                        fontFamily: "'Trebuchet MS', sans-serif",
+                        padding: "3px 7px",
+                        borderRadius: 3,
+                        border: "1px solid rgba(180,160,100,0.6)",
+                        pointerEvents: "none",
+                        zIndex: 1000,
+                        whiteSpace: "nowrap",
+                    }}
+                >
+                    {hoverLabel}
+                </div>
+            )}
         </div>
     )
 }
