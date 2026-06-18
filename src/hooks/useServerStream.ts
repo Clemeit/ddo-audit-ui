@@ -289,12 +289,13 @@ function useServerStream<T>(
 
         const reconnectOnOnline = () => {
             if (document.visibilityState !== "visible") return
+            if (status === "connected") return
             triggerReconnectNow()
         }
 
         window.addEventListener("online", reconnectOnOnline)
         return () => window.removeEventListener("online", reconnectOnOnline)
-    }, [enabled, triggerReconnectNow])
+    }, [enabled, status, triggerReconnectNow])
 
     // Guard against half-open streams that stop delivering events without a close/error.
     useEffect(() => {
