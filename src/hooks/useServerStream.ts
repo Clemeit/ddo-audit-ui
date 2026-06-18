@@ -117,8 +117,11 @@ function useServerStream<T>(
     // ── Reconnect scheduling ──────────────────────────────────────────────────
 
     const scheduleReconnect = useCallback(() => {
+        if (reconnectTimerRef.current) {
+            clearTimeout(reconnectTimerRef.current)
+            reconnectTimerRef.current = null
+        }
         if (typeof navigator !== "undefined" && !navigator.onLine) return
-        if (reconnectTimerRef.current) clearTimeout(reconnectTimerRef.current)
         const attempt = reconnectAttemptRef.current++
         const delay = jitteredBackoff(attempt)
         reconnectTimerRef.current = setTimeout(() => {
