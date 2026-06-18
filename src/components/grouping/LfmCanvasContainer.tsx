@@ -83,8 +83,11 @@ const GroupingContainer = ({
         // ENABLE_SSE &&
         SERVERS_64_BITS_LOWER.includes(serverName.toLowerCase())
 
-    const { data: streamData, loadingState: streamLoadingState } =
-        useServerStream<Lfm>(serverName, "lfms", { enabled: isSSEServer })
+    const {
+        data: streamData,
+        status: streamStatus,
+        loadingState: streamLoadingState,
+    } = useServerStream<Lfm>(serverName, "lfms", { enabled: isSSEServer })
 
     const {
         data: polledData,
@@ -104,6 +107,13 @@ const GroupingContainer = ({
     }, [isSSEServer, polledData, streamData])
 
     const lfmState = isSSEServer ? streamLoadingState : polledState
+
+    const isStreamDisconnected = useMemo(
+        () =>
+            isSSEServer &&
+            (streamStatus === "error" || streamStatus === "closed"),
+        [isSSEServer, streamStatus]
+    )
 
     const getQuestById = (id: number): Quest | undefined => {
         return quests[id]
@@ -470,10 +480,10 @@ const GroupingContainer = ({
 
     return (
         <Stack direction="column">
-            {lfmState === LoadingState.Haulted && (
+            {lfmState === LoadingState.Haulted && !isSSEServer && (
                 <LiveDataHaultedPageMessage />
             )}
-            {isDataStale && <StaleDataPageMessage />}
+            {(isDataStale || isStreamDisconnected) && <StaleDataPageMessage />}
             {isServerOffline && !ignoreServerDown ? (
                 <ServerOfflineMessage
                     handleDismiss={() => {

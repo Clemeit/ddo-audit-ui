@@ -28,6 +28,8 @@ export type { StreamStatus }
 
 const RECONNECT_BASE_MS = 1_000
 const RECONNECT_MAX_MS = 30_000
+const STALE_STREAM_TIMEOUT_MS = 120_000
+const STALE_WATCHDOG_INTERVAL_MS = 15_000
 // const DRIFT_CHECK_INTERVAL_MS = 60_000
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -93,6 +95,7 @@ function useServerStream<T>(
     // Reconnect control: increment connectionKey to tear down and recreate the EventSource.
     const reconnectAttemptRef = useRef(0)
     const reconnectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+    const lastEventAtRef = useRef(Date.now())
     const [connectionKey, setConnectionKey] = useState(0)
 
     // Stable dev-panel key
@@ -114,12 +117,22 @@ function useServerStream<T>(
     // ── Reconnect scheduling ──────────────────────────────────────────────────
 
     const scheduleReconnect = useCallback(() => {
+        if (typeof navigator !== "undefined" && !navigator.onLine) return
         if (reconnectTimerRef.current) clearTimeout(reconnectTimerRef.current)
         const attempt = reconnectAttemptRef.current++
         const delay = jitteredBackoff(attempt)
         reconnectTimerRef.current = setTimeout(() => {
             setConnectionKey((k) => k + 1)
         }, delay)
+    }, [])
+
+    const triggerReconnectNow = useCallback(() => {
+        reconnectAttemptRef.current = 0
+        if (reconnectTimerRef.current) {
+            clearTimeout(reconnectTimerRef.current)
+            reconnectTimerRef.current = null
+        }
+        setConnectionKey((k) => k + 1)
     }, [])
 
     // ── Main EventSource effect ───────────────────────────────────────────────
@@ -129,6 +142,7 @@ function useServerStream<T>(
 
         // Reset tracking state before opening a new connection.
         streamStateRef.current = applyConnecting(streamStateRef.current)
+        lastEventAtRef.current = Date.now()
         startTransition(() => {
             setData(null)
             setStatus("connecting")
@@ -137,10 +151,14 @@ function useServerStream<T>(
         const url = `${API_URL}/v2/${type}/stream/${serverName}`
         const eventSource = new EventSource(url)
         eventSourceRef.current = eventSource
+        eventSource.onopen = () => {
+            lastEventAtRef.current = Date.now()
+        }
 
         // ── snapshot ──────────────────────────────────────────────────────────
         eventSource.addEventListener("snapshot", (e: MessageEvent) => {
             try {
+                lastEventAtRef.current = Date.now()
                 const envelope = JSON.parse(e.data) as SnapshotEnvelope<T>
                 if (typeof envelope?.seq !== "number" || !envelope.epoch) return
 
@@ -166,6 +184,7 @@ function useServerStream<T>(
         // ── delta ─────────────────────────────────────────────────────────────
         eventSource.addEventListener("delta", (e: MessageEvent) => {
             try {
+                lastEventAtRef.current = Date.now()
                 const envelope = JSON.parse(e.data) as DeltaEnvelope<T>
                 if (typeof envelope?.seq !== "number") return
 
@@ -223,6 +242,8 @@ function useServerStream<T>(
                 // Browser gave up (e.g., HTTP 400/403 from server).
                 streamStateRef.current = applyError(streamStateRef.current)
                 setStatus("error")
+                // Ensure we keep retrying after hard disconnects or restart windows.
+                scheduleReconnect()
             }
             // readyState === CONNECTING: browser is auto-reconnecting with its
             // own backoff. The server will send a fresh snapshot on reconnect,
@@ -238,6 +259,61 @@ function useServerStream<T>(
             }
         }
     }, [enabled, serverName, type, connectionKey])
+
+    // Force a quick reconnect when users return to the tab while disconnected.
+    useEffect(() => {
+        if (!enabled) return
+
+        const reconnectIfDisconnected = () => {
+            if (document.visibilityState !== "visible") return
+            if (status === "connected") return
+            triggerReconnectNow()
+        }
+
+        document.addEventListener("visibilitychange", reconnectIfDisconnected)
+
+        return () => {
+            document.removeEventListener(
+                "visibilitychange",
+                reconnectIfDisconnected
+            )
+        }
+    }, [enabled, status, triggerReconnectNow])
+
+    // If the browser regains connectivity, reconnect immediately.
+    useEffect(() => {
+        if (!enabled) return
+
+        const reconnectOnOnline = () => {
+            if (document.visibilityState !== "visible") return
+            triggerReconnectNow()
+        }
+
+        window.addEventListener("online", reconnectOnOnline)
+        return () => window.removeEventListener("online", reconnectOnOnline)
+    }, [enabled, triggerReconnectNow])
+
+    // Guard against half-open streams that stop delivering events without a close/error.
+    useEffect(() => {
+        if (!enabled) return
+
+        const handle = setInterval(() => {
+            if (document.visibilityState !== "visible") return
+            if (status !== "connected") return
+
+            const streamIsStale =
+                Date.now() - lastEventAtRef.current > STALE_STREAM_TIMEOUT_MS
+            if (!streamIsStale) return
+
+            eventSourceRef.current?.close()
+            eventSourceRef.current = null
+            streamStateRef.current = applyError(streamStateRef.current)
+            setStatus("error")
+            scheduleReconnect()
+        }, STALE_WATCHDOG_INTERVAL_MS)
+
+        return () => clearInterval(handle)
+    }, [enabled, status, scheduleReconnect])
 
     // ── Dev drift detection (stripped in production builds) ───────────────────
 

@@ -68,10 +68,13 @@ const WhoContainer = ({
         // ENABLE_SSE &&
         SERVERS_64_BITS_LOWER.includes(serverName.toLowerCase())
 
-    const { data: streamData, loadingState: streamLoadingState } =
-        useServerStream<Character>(serverName, "characters", {
-            enabled: isSSEServer,
-        })
+    const {
+        data: streamData,
+        status: streamStatus,
+        loadingState: streamLoadingState,
+    } = useServerStream<Character>(serverName, "characters", {
+        enabled: isSSEServer,
+    })
 
     const {
         data: polledData,
@@ -93,6 +96,12 @@ const WhoContainer = ({
     }, [isSSEServer, polledData, streamData])
 
     const characterState = isSSEServer ? streamLoadingState : polledState
+    const isStreamDisconnected = useMemo(
+        () =>
+            isSSEServer &&
+            (streamStatus === "error" || streamStatus === "closed"),
+        [isSSEServer, streamStatus]
+    )
     const areaContext = useAreaContext()
     const { areas } = areaContext
     const { data: serverInfoData, state: serverInfoState } =
@@ -406,10 +415,10 @@ const WhoContainer = ({
 
     return (
         <Stack direction="column">
-            {characterState === LoadingState.Haulted && (
+            {characterState === LoadingState.Haulted && !isSSEServer && (
                 <LiveDataHaultedPageMessage />
             )}
-            {isDataStale && <StaleDataPageMessage />}
+            {(isDataStale || isStreamDisconnected) && <StaleDataPageMessage />}
             {!isServerOffline || ignoreServerDown ? (
                 <Stack direction="column">
                     <WhoToolbar
