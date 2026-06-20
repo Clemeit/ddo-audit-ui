@@ -17,6 +17,10 @@ import {
     getIgnoreIds,
     getTimezone,
     setTimezone,
+    getCustomTimers,
+    setCustomTimers,
+    addCustomTimer,
+    removeCustomTimer,
     subscribeToLocalStorageWrites,
     isPersistentKey,
     getPersistentDataByKeys,
@@ -44,6 +48,10 @@ describe("localStorage", () => {
 
         it("returns false for unknown keys", () => {
             expect(isPersistentKey("unknown-key")).toBe(false)
+        })
+
+        it("returns true for custom timer settings", () => {
+            expect(isPersistentKey("custom-timers")).toBe(true)
         })
     })
 
@@ -165,6 +173,55 @@ describe("localStorage", () => {
         it("sets and gets timezone", () => {
             setTimezone("America/New_York")
             expect(getTimezone()).toBe("America/New_York")
+        })
+    })
+
+    describe("custom timers", () => {
+        it("returns empty array when no custom timers stored", () => {
+            expect(getCustomTimers()).toEqual([])
+        })
+
+        it("sets and gets custom timers", () => {
+            const timers = [
+                {
+                    id: "timer-1",
+                    characterId: 2,
+                    questIds: [10],
+                    questName: "Raid Quest",
+                    completedAt: "2026-05-15T10:00:00.000Z",
+                    createdAt: "2026-05-15T10:00:00.000Z",
+                },
+            ] as any
+            setCustomTimers(timers)
+            expect(getCustomTimers()).toEqual(timers)
+        })
+
+        it("adds a custom timer without duplicates", () => {
+            const timer = {
+                id: "timer-1",
+                characterId: 2,
+                questIds: [10],
+                questName: "Raid Quest",
+                completedAt: "2026-05-15T10:00:00.000Z",
+                createdAt: "2026-05-15T10:00:00.000Z",
+            } as any
+            addCustomTimer(timer)
+            addCustomTimer(timer)
+            expect(getCustomTimers()).toHaveLength(1)
+        })
+
+        it("removes a custom timer", () => {
+            const timer = {
+                id: "timer-1",
+                characterId: 2,
+                questIds: [10],
+                questName: "Raid Quest",
+                completedAt: "2026-05-15T10:00:00.000Z",
+                createdAt: "2026-05-15T10:00:00.000Z",
+            } as any
+            addCustomTimer(timer)
+            removeCustomTimer(timer)
+            expect(getCustomTimers()).toEqual([])
         })
     })
 

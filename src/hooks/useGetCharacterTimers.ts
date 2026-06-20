@@ -10,6 +10,8 @@ interface Props {
 export interface QuestInstances {
     timestamp: string
     quest_ids: number[]
+    id?: string
+    isUserDefined?: boolean
 }
 
 interface CharacterTimerMap {

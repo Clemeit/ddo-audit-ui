@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import Page from "../global/Page.tsx"
 import {
     ContentCluster,
@@ -17,6 +17,10 @@ import { MsFromMinutes, MsFromSeconds } from "../../utils/timeUtils.ts"
 import {
     getRaidTimerSettings,
     setRaidTimerSettings,
+    addCustomTimer,
+    getCustomTimers,
+    removeCustomTimer,
+    setCustomTimers as persistCustomTimers,
 } from "../../utils/localStorage.ts"
 import TimersHeader from "./TimersHeader.tsx"
 import CharacterTimersList from "./CharacterTimersList.tsx"
@@ -27,6 +31,12 @@ import logMessage from "../../utils/logUtils.ts"
 import Link from "../global/Link.tsx"
 import Stack from "../global/Stack.tsx"
 import PageMessage from "../global/PageMessage.tsx"
+import Button from "../global/Button.tsx"
+import AddTimerModal from "./AddTimerModal.tsx"
+import { v4 as uuid } from "uuid"
+import type { CustomRaidTimer } from "../../models/RaidTimers.ts"
+import useNow from "../../hooks/useNow.ts"
+import { RAID_TIMER_MILLIS } from "../../constants/game.ts"
 
 const Timers = () => {
     const {
@@ -42,7 +52,18 @@ const Timers = () => {
     } = useGetCharacterTimers({
         registeredCharacters,
     })
+    const [customTimers, setCustomTimers] = useState<CustomRaidTimer[]>(() => {
+        try {
+            return getCustomTimers()
+        } catch (e) {
+            logMessage("Failed to load custom timers", "error", {
+                metadata: { error: e instanceof Error ? e.message : String(e) },
+            })
+            return []
+        }
+    })
     const [image, setImage] = useState<HTMLImageElement | null>(null)
+    const nowTick = useNow(MsFromMinutes(1))
     const { quests } = useQuestContext()
     const [sortCharacterBy, setSortCharacterBy] = useState<{
         type: RaidTimerCharacterSortEnum
@@ -74,7 +95,7 @@ const Timers = () => {
     const [initialTimerLoadDone, setInitialTimerLoadDone] =
         useState<boolean>(false)
     const [hiddenTimers, setHiddenTimers] = useState<
-        { characterId: number; timestamp: string }[]
+        { characterId: number; timestamp: string; id?: string }[]
     >(() => {
         try {
             return getRaidTimerSettings()?.hiddenTimers || []
@@ -152,16 +173,136 @@ const Timers = () => {
     const [selectedCharacterId, setSelectedCharacterId] = useState<
         number | null
     >(null)
+    const [isAddTimerModalOpen, setIsAddTimerModalOpen] = useState(false)
+
+    const pruneExpiredCustomTimers = useCallback(
+        (timers: CustomRaidTimer[], nowMillis: number) => {
+            return timers.filter((timer) => {
+                const completedAtMillis = new Date(timer.completedAt).getTime()
+                if (Number.isNaN(completedAtMillis)) {
+                    return false
+                }
+                return completedAtMillis + RAID_TIMER_MILLIS > nowMillis
+            })
+        },
+        []
+    )
+
+    useEffect(() => {
+        if (!customTimers.length) return
+        const nextCustomTimers = pruneExpiredCustomTimers(customTimers, nowTick)
+        if (nextCustomTimers.length === customTimers.length) return
+
+        setCustomTimers(nextCustomTimers)
+        persistCustomTimers(nextCustomTimers)
+        logMessage("Pruned expired custom timers", "info", {
+            metadata: {
+                previousCount: customTimers.length,
+                nextCount: nextCustomTimers.length,
+                removedCount: customTimers.length - nextCustomTimers.length,
+            },
+        })
+    }, [customTimers, nowTick, pruneExpiredCustomTimers])
+
+    const mergedCharacterTimers = useMemo(() => {
+        const merged = Object.entries(characterTimers || {}).reduce(
+            (acc, [characterId, timers]) => {
+                acc[Number(characterId)] = [...timers]
+                return acc
+            },
+            {} as Record<number, QuestInstances[]>
+        )
+
+        for (const timer of customTimers) {
+            if (!merged[timer.characterId]) {
+                merged[timer.characterId] = []
+            }
+            merged[timer.characterId].push({
+                timestamp: timer.completedAt,
+                quest_ids: timer.questIds,
+                id: timer.id,
+                isUserDefined: true,
+            })
+        }
+
+        return merged
+    }, [characterTimers, customTimers])
 
     const onConfirmDelete = useCallback(
         ({
             characterId,
             timestamp,
+            id,
+            isUserDefined,
         }: {
             characterId: number
             timestamp: string
+            id?: string
+            isUserDefined?: boolean
         }) => {
-            setHiddenTimers((prev) => prev.concat([{ characterId, timestamp }]))
+            if (isUserDefined && id) {
+                const timerToRemove = customTimers.find((t) => t.id === id)
+                if (timerToRemove) {
+                    try {
+                        removeCustomTimer(timerToRemove)
+                    } catch (e) {
+                        logMessage("Failed to remove custom timer", "error", {
+                            metadata: {
+                                id,
+                                error:
+                                    e instanceof Error ? e.message : String(e),
+                            },
+                        })
+                        persistCustomTimers(
+                            customTimers.filter((t) => t.id !== id)
+                        )
+                    }
+                    setCustomTimers((prev) => prev.filter((t) => t.id !== id))
+                }
+            } else {
+                setHiddenTimers((prev) =>
+                    prev.concat([{ characterId, timestamp, id }])
+                )
+            }
+        },
+        [customTimers]
+    )
+
+    const onCreateCustomTimer = useCallback(
+        (timer: {
+            characterId: number
+            questIds: number[]
+            questName: string
+            completedAt: string
+        }) => {
+            const nextTimer: CustomRaidTimer = {
+                id: uuid(),
+                createdAt: new Date().toISOString(),
+                ...timer,
+            }
+            try {
+                addCustomTimer(nextTimer)
+            } catch (e) {
+                logMessage("Failed to persist custom timer", "error", {
+                    metadata: {
+                        error: e instanceof Error ? e.message : String(e),
+                    },
+                })
+                setCustomTimers((prev) => {
+                    persistCustomTimers([...prev, nextTimer])
+                    return prev
+                })
+            }
+            setCustomTimers((prev) => prev.concat([nextTimer]))
+            setIsAddTimerModalOpen(false)
+            logMessage("Add raid timer", "info", {
+                action: "click",
+                metadata: {
+                    characterId: timer.characterId,
+                    questIds: timer.questIds,
+                    completedAt: timer.completedAt,
+                },
+            })
         },
         []
     )
@@ -179,7 +320,7 @@ const Timers = () => {
                     <PageMessage
                         type="warning"
                         title="DDO Audit Downtime"
-                        message="DDO Audit was offline Friday, May 15 from 6:30 am until 12:30 pm (PT). If you ran a raid during that time, it won't be tracked."
+                        message="DDO Audit was offline Friday, May 15 from 6:30 am until 12:30 pm (PT). If you ran a raid during that time, it won't be tracked below. You can add raid timers manually with the 'Add a timer' button."
                     />
                 )
             }
@@ -195,6 +336,13 @@ const Timers = () => {
                 quests={quests}
                 onConfirm={onConfirmDelete}
                 onClose={() => setIsDeleteModalOpen(false)}
+            />
+            <AddTimerModal
+                isOpen={isAddTimerModalOpen}
+                registeredCharacters={registeredCharacters}
+                quests={quests}
+                onSave={onCreateCustomTimer}
+                onClose={() => setIsAddTimerModalOpen(false)}
             />
             <ContentClusterGroup>
                 <ContentCluster title="Timers">
@@ -220,7 +368,7 @@ const Timers = () => {
                         ) : (
                             <CharacterTimersList
                                 registeredCharacters={registeredCharacters}
-                                characterTimers={characterTimers}
+                                characterTimers={mergedCharacterTimers}
                                 sortCharacterBy={sortCharacterBy}
                                 hiddenTimers={hiddenTimers}
                                 quests={quests}
@@ -234,6 +382,8 @@ const Timers = () => {
                                             characterId,
                                             timestamp: timer.timestamp,
                                             questIds: timer.quest_ids,
+                                            id: timer.id,
+                                            isUserDefined: timer.isUserDefined,
                                         },
                                         action: "click",
                                     })
@@ -243,6 +393,13 @@ const Timers = () => {
                             />
                         )}
                     </>
+                    <Spacer size="20px" />
+                    <Button
+                        type="secondary"
+                        onClick={() => setIsAddTimerModalOpen(true)}
+                    >
+                        Add a timer
+                    </Button>
                     <Spacer size="20px" />
                     <Stack
                         direction="row"
