@@ -23,6 +23,7 @@ import useGetIgnores from "../../hooks/useGetIgnores.ts"
 import logMessage from "../../utils/logUtils.ts"
 import Stack from "../global/Stack.tsx"
 import { SERVERS_64_BITS_LOWER } from "../../constants/servers.ts"
+import { useQuestContext } from "../../contexts/QuestContext.tsx"
 // import { ENABLE_SSE } from "../../constants/client.ts"
 
 // TODO: group_id should be null and never "0"
@@ -56,12 +57,14 @@ const WhoContainer = ({
         alwaysShowFriends,
         alwaysShowRegisteredCharacters,
         useSSE,
+        showQuestName,
         // refreshInterval, TODO: make this work
     } = useWhoContext()
     const { registeredCharacters, myGuildsList } = useGetRegisteredCharacters()
     const [ignoreServerDown, setIgnoreServerDown] = useState<boolean>(false)
     const { friends } = useGetFriends()
     const { ignores } = useGetIgnores()
+    const { getQuestFromAreaId } = useQuestContext()
 
     const isSSEServer =
         useSSE &&
@@ -231,34 +234,51 @@ const WhoContainer = ({
             let stringFilterMatch = false
             // only match on characters that are not anonymous
             if (!character.is_anonymous) {
-                const stringFilters = stringFilter.split(",")
-                stringFilters.forEach((localFilter) => {
-                    const nameMatch = compareString(
-                        character.name,
-                        localFilter,
-                        isExactMatch
-                    )
-                    const guildNameMatch = compareString(
-                        character.guild_name,
-                        localFilter,
-                        isExactMatch
-                    )
-                    const locationMatch = compareString(
-                        areas[character.location_id || 0]?.name,
-                        localFilter,
-                        isExactMatch
-                    )
-                    const unknownLocationMatch =
-                        localFilter === "aether" &&
-                        areas[character.location_id || 0] === undefined
+                if (stringFilter && stringFilter.length > 0) {
+                    const quest =
+                        showQuestName == true && character.location_id
+                            ? getQuestFromAreaId(character.location_id)
+                            : null
+                    const stringFilters = stringFilter.split(",")
+                    stringFilters.forEach((localFilter) => {
+                        const nameMatch = compareString(
+                            character.name,
+                            localFilter,
+                            isExactMatch
+                        )
+                        const guildNameMatch = compareString(
+                            character.guild_name,
+                            localFilter,
+                            isExactMatch
+                        )
+                        const locationMatch = compareString(
+                            areas[character.location_id || 0]?.name,
+                            localFilter,
+                            isExactMatch
+                        )
+                        const unknownLocationMatch =
+                            localFilter === "aether" &&
+                            areas[character.location_id || 0] === undefined
+                        let questMatch = false
+                        if (quest) {
+                            questMatch = compareString(
+                                quest.name,
+                                localFilter,
+                                isExactMatch
+                            )
+                        }
 
-                    const localMatch =
-                        nameMatch ||
-                        guildNameMatch ||
-                        locationMatch ||
-                        unknownLocationMatch
-                    stringFilterMatch = stringFilterMatch || localMatch
-                })
+                        const localMatch =
+                            nameMatch ||
+                            guildNameMatch ||
+                            locationMatch ||
+                            unknownLocationMatch ||
+                            questMatch
+                        stringFilterMatch = stringFilterMatch || localMatch
+                    })
+                } else {
+                    stringFilterMatch = true
+                }
             }
 
             const levelRangeMatch =
@@ -411,6 +431,8 @@ const WhoContainer = ({
         registeredCharacters,
         friends,
         ignores,
+        getQuestFromAreaId,
+        showQuestName,
     ])
 
     return (
