@@ -39,6 +39,7 @@ const Timers = () => {
         characterTimers,
         isLoading,
         reload: reloadCharacterTimers,
+        isError: isTimerFetchError,
     } = useGetCharacterTimers({
         registeredCharacters,
     })
@@ -166,20 +167,16 @@ const Timers = () => {
         []
     )
 
-    // TODO: Temp, remove
-    const downtimeExpires = new Date((1778878800 + 66 * 60 * 60) * 1000)
-    const shouldShowMessage = new Date() < downtimeExpires
-
     return (
         <Page
             title="Raid and Quest Timers"
             description="View your raid and quest timers. See which raids you're on timer for and which quests you've ransacked."
             pageMessages={
-                shouldShowMessage && (
+                isTimerFetchError && (
                     <PageMessage
-                        type="warning"
-                        title="DDO Audit Downtime"
-                        message="DDO Audit was offline Friday, May 15 from 6:30 am until 12:30 pm (PT). If you ran a raid during that time, it won't be tracked."
+                        type="error"
+                        title="Error Finding Timers"
+                        message="There was an error while getting your raid timers. Please try again later, or report the issue if this continues to occur."
                     />
                 )
             }
