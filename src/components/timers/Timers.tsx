@@ -27,6 +27,7 @@ import logMessage from "../../utils/logUtils.ts"
 import Link from "../global/Link.tsx"
 import Stack from "../global/Stack.tsx"
 import PageMessage from "../global/PageMessage.tsx"
+import { MAX_REGISTERED_CHARACTERS } from "../../constants/client.ts"
 
 const Timers = () => {
     const {
@@ -167,19 +168,30 @@ const Timers = () => {
         []
     )
 
+    const tooManyCharacters =
+        registeredCharacters &&
+        registeredCharacters.length > MAX_REGISTERED_CHARACTERS
+
     return (
         <Page
             title="Raid and Quest Timers"
             description="View your raid and quest timers. See which raids you're on timer for and which quests you've ransacked."
-            pageMessages={
+            pageMessages={[
                 isTimerFetchError && (
                     <PageMessage
                         type="error"
                         title="Error Finding Timers"
-                        message="There was an error while getting your raid timers. Please try again later, or report the issue if this continues to occur."
+                        message="There was an error while getting your raid timers. Please try again later, or report the issue if it persists."
                     />
-                )
-            }
+                ),
+                tooManyCharacters && (
+                    <PageMessage
+                        type="warning"
+                        title="Too Many Characters"
+                        message={`Showing raid timers for the the first ${MAX_REGISTERED_CHARACTERS} of ${registeredCharacters.length} characters. You can remove some of your registered characters on the Registration page.`}
+                    />
+                ),
+            ]}
         >
             <DeleteTimerModal
                 isOpen={isDeleteModalOpen}
@@ -199,7 +211,10 @@ const Timers = () => {
                         isError={isError}
                         isLoaded={isLoaded}
                         initialCharacterLoadDone={initialCharacterLoadDone}
-                        registeredCharactersCount={registeredCharacters.length}
+                        registeredCharactersCount={Math.min(
+                            registeredCharacters.length || 0,
+                            MAX_REGISTERED_CHARACTERS
+                        )}
                     />
                     <>
                         {isLoading && !initialTimerLoadDone ? (
