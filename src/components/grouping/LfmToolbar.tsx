@@ -24,7 +24,6 @@ import { useModalNavigation } from "../../hooks/useModalNavigation.ts"
 import GenericToolbar from "../global/GenericToolbar.tsx"
 import RadioButton from "../global/RadioButton.tsx"
 import Spacer from "../global/Spacer.tsx"
-import FeaturedItem from "../global/FeaturedItem.tsx"
 import { MAX_LEVEL } from "../../constants/game.ts"
 import { useQuestContext } from "../../contexts/QuestContext.tsx"
 import { useAreaContext } from "../../contexts/AreaContext.tsx"
@@ -380,7 +379,7 @@ const LfmToolbar = ({
                             setHideAllLevelGroups(e.target.checked)
                         }
                     >
-                        Hide groups posting for levels 1-34
+                        Hide groups posting for levels 1-{MAX_LEVEL}
                     </Checkbox>
                     <Checkbox
                         checked={hideFullGroups}
