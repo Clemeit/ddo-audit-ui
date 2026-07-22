@@ -61,6 +61,7 @@ const LfmCanvas: React.FC<Props> = ({
         highlightRaids,
         showNotEligible,
         showEligibilityDividers,
+        indicateContentIDontOwn,
     } = useLfmContext()
     const { isFullScreen } = useAppContext()
 
@@ -438,6 +439,7 @@ const LfmCanvas: React.FC<Props> = ({
         showEligibilityDividers,
         excludedLfmCount: 0,
         isLoading: false,
+        indicateContentIDontOwn,
     })
 
     // Main render effect — single-pass drawing of visible LFMs
@@ -461,7 +463,8 @@ const LfmCanvas: React.FC<Props> = ({
             prev.raidView !== raidView ||
             prev.showEligibilityDividers !== showEligibilityDividers ||
             prev.excludedLfmCount !== excludedLfmCount ||
-            prev.isLoading !== isLoading
+            prev.isLoading !== isLoading ||
+            prev.indicateContentIDontOwn != indicateContentIDontOwn
 
         const dataChanged =
             prev.lfmCount !== lfms.length ||
@@ -563,6 +566,7 @@ const LfmCanvas: React.FC<Props> = ({
             showEligibilityDividers,
             excludedLfmCount,
             isLoading,
+            indicateContentIDontOwn,
         }
     }, [
         image,
@@ -585,6 +589,7 @@ const LfmCanvas: React.FC<Props> = ({
         highlightRaids,
         showEligibilityDividers,
         showNotEligible,
+        indicateContentIDontOwn,
         renderLfm,
         renderSortHeaders,
         renderBackground,
