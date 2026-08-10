@@ -1,5 +1,5 @@
 import { ResponsiveLine } from "@nivo/line"
-import { useMemo, useState } from "react"
+import { useCallback, useMemo, useState } from "react"
 import { NivoDateSeries, NivoNumberSeries } from "../../utils/nivoUtils.ts"
 import Stack from "../global/Stack.tsx"
 import GenericLegend from "./GenericLegend.tsx"
@@ -67,7 +67,10 @@ const GenericLine = ({
         setHighlightedSeries([serverId])
     }
 
-    const getServerColor = createHighlightColorFunction(highlightedSeries)
+    const getServerColor = useMemo(
+        () => createHighlightColorFunction(highlightedSeries),
+        [highlightedSeries]
+    )
 
     const filteredData = useMemo(() => {
         return nivoData.filter(
@@ -78,18 +81,21 @@ const GenericLine = ({
     }, [nivoData, excludedSeries])
 
     // Helper to format x-axis labels with timezoneOverride
-    const formatXAxis = (value: Date | string | number) => {
-        if (!value) return ""
-        try {
-            const date = new Date(value)
-            const dateWithTimezone = date.toLocaleString("en-US", {
-                timeZone: timezoneOverride || DEFAULT_TIMEZONE,
-            })
-            return dateWithTimezone
-        } catch {
-            return value.toString()
-        }
-    }
+    const formatXAxis = useCallback(
+        (value: Date | string | number) => {
+            if (!value) return ""
+            try {
+                const date = new Date(value)
+                const dateWithTimezone = date.toLocaleString("en-US", {
+                    timeZone: timezoneOverride || DEFAULT_TIMEZONE,
+                })
+                return dateWithTimezone
+            } catch {
+                return value.toString()
+            }
+        },
+        [timezoneOverride]
+    )
 
     return (
         <Stack direction="column" gap="10px">
@@ -108,6 +114,7 @@ const GenericLine = ({
                     lineWidth={LINE_CHART_DEFAULTS.lineWidth}
                     enableSlices={LINE_CHART_DEFAULTS.enableSlices}
                     useMesh={LINE_CHART_DEFAULTS.useMesh}
+                    animate={false}
                     sliceTooltip={({ slice }) => (
                         <LineChartTooltip
                             slice={slice}
