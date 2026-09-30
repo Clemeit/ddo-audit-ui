@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from "react"
+import React, { useCallback, useEffect } from "react"
 import { Outlet, ScrollRestoration, useLocation } from "react-router-dom"
 import Header from "./Header.tsx"
 import Footer from "./Footer.tsx"
