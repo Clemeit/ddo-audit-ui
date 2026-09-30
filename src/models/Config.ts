@@ -2,6 +2,7 @@ interface ConfigEntry {
     key: string
     value: any
     description?: string
+    is_enabled?: boolean
 }
 
 interface ConfigEndpointResponse {

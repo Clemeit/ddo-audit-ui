@@ -428,6 +428,11 @@ and shown over other content */
     z-index: 1000;
 }
 
+.shrinkable-icon {
+    width: 24px;
+    height: 24px;
+}
+
 /* mobile */
 @media (max-width: 768px) {
     html {

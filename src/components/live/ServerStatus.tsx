@@ -1,9 +1,6 @@
-import React, { useCallback, useMemo } from "react"
+import { useCallback, useMemo } from "react"
 import "./ServerStatus.css"
 import { ServerInfo, ServerInfoApiDataModel } from "../../models/Game.ts"
-import { ReactComponent as Checkmark } from "../../assets/svg/checkmark.svg"
-import { ReactComponent as X } from "../../assets/svg/x.svg"
-import { ReactComponent as Pending } from "../../assets/svg/pending.svg"
 import { toSentenceCase } from "../../utils/stringUtils.ts"
 import ValidationMessage from "../global/ValidationMessage.tsx"
 import {
@@ -12,6 +9,7 @@ import {
     SERVERS_32_BITS_LOWER,
 } from "../../constants/servers.ts"
 import { LoadingState } from "../../models/Api.ts"
+import ServerStatusIcon from "../global/ServerStatusIcon.tsx"
 
 const ServerStatus = ({
     serverInfoData,
@@ -117,9 +115,9 @@ const ServerStatus = ({
                         )
                         .map((serverName) => (
                             <div key={serverName} className="server-status">
-                                <Pending
+                                <ServerStatusIcon
+                                    type="indeterminate"
                                     className="status-icon"
-                                    title="Loading"
                                 />
                                 <span>{serverName}</span>
                             </div>
@@ -149,14 +147,14 @@ const ServerStatus = ({
                         <div key={server_name} className="server-status">
                             <span>
                                 {server_data.is_online ? (
-                                    <Checkmark
+                                    <ServerStatusIcon
+                                        type="online"
                                         className="status-icon"
-                                        title="Online"
                                     />
                                 ) : (
-                                    <X
+                                    <ServerStatusIcon
+                                        type="offline"
                                         className="status-icon"
-                                        title="Offline"
                                     />
                                 )}
                             </span>
