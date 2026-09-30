@@ -6,6 +6,9 @@ import {
     GitHubButton,
     MakeASuggestionButton,
 } from "../buttons/Buttons.tsx"
+import { useMemo } from "react"
+import { getIsNightRevels } from "../../utils/configUtils.ts"
+import { useAppContext } from "../../contexts/AppContext.tsx"
 
 interface Props {
     title: string
@@ -25,9 +28,32 @@ const Banner = ({
     hideSuggestionButton = false,
 }: Props) => {
     const { isMobile } = useWindowSize()
+    const { config } = useAppContext()
+
+    const isNightRevels = useMemo(() => getIsNightRevels(config), [config])
+
+    const defaultBannerSrc = "/images/banner.webp"
+    const nightRevelsBannerSrc = "/images/banner_night_revels.webp"
+    const defaultBannerGradStart = "rgba(97, 97, 97, 0.47)"
+    const nightRevelsBannerGradStart = "rgba(97, 97, 97, 0.3)"
+
+    const bannerStyle = useMemo(() => {
+        const bannerSource = isNightRevels
+            ? nightRevelsBannerSrc
+            : defaultBannerSrc
+        const linearGradientStart = isNightRevels
+            ? nightRevelsBannerGradStart
+            : defaultBannerGradStart
+        return {
+            backgroundImage: `linear-gradient(to bottom, ${linearGradientStart}, rgba(15, 15, 15, 0.774)), url("${bannerSource}")`,
+        }
+    }, [isNightRevels])
 
     return isMobile && hideOnMobile ? null : (
-        <div className={`banner ${miniature ? "miniature" : ""}`}>
+        <div
+            className={`banner ${miniature ? "miniature" : ""}`}
+            style={bannerStyle}
+        >
             <div className="content">
                 <h1 className="title">{title}</h1>
                 <h2 className="subtitle">{subtitle}</h2>

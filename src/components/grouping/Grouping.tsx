@@ -10,9 +10,6 @@ import { Lfm, LfmApiModel, Quest } from "../../models/Lfm.ts"
 import ServerNavigationCard from "../global/ServerNavigationCard.tsx"
 import NavigationCard from "../global/NavigationCard.tsx"
 import Link from "../global/Link.tsx"
-import { ReactComponent as Checkmark } from "../../assets/svg/checkmark.svg"
-import { ReactComponent as X } from "../../assets/svg/x.svg"
-import { ReactComponent as Pending } from "../../assets/svg/pending.svg"
 import { LoadingState } from "../../models/Api.ts"
 import GroupingCanvas from "./LfmCanvas.tsx"
 import Stack from "../global/Stack.tsx"
@@ -33,6 +30,7 @@ import "./Grouping.css"
 import Skeleton from "../global/Skeleton.tsx"
 import ComponentErrorBoundary from "../global/ComponentErrorBoundary.tsx"
 import GroupingErrorFallback from "./GroupingErrorFallback.tsx"
+import ServerStatusIcon from "../global/ServerStatusIcon.tsx"
 
 const Grouping = () => {
     return (
@@ -139,11 +137,20 @@ const GroupingContent = () => {
     const cardIcon = (serverName: string) => {
         const isOnline = serverInfoData?.[serverName]?.is_online
         if (isOnline === true) {
-            return <Checkmark className="shrinkable-icon" />
+            return (
+                <ServerStatusIcon type="online" className="shrinkable-icon" />
+            )
         } else if (isOnline === false) {
-            return <X className="shrinkable-icon" />
+            return (
+                <ServerStatusIcon type="offline" className="shrinkable-icon" />
+            )
         } else {
-            return <Pending className="shrinkable-icon" />
+            return (
+                <ServerStatusIcon
+                    type="indeterminate"
+                    className="shrinkable-icon"
+                />
+            )
         }
     }
 
@@ -231,7 +238,10 @@ const GroupingContent = () => {
                         serverInfoData ? (
                             cardIcon(serverName)
                         ) : (
-                            <Pending className="shrinkable-icon" />
+                            <ServerStatusIcon
+                                type="indeterminate"
+                                className="shrinkable-icon"
+                            />
                         )
                     }
                     badge={cardBadge(serverName)}

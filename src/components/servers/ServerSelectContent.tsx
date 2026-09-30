@@ -1,12 +1,10 @@
-import { useCallback, useMemo } from "react"
+import { useCallback } from "react"
 import { ServerInfoApiDataModel } from "../../models/Game.ts"
 import {
     SERVER_NAMES_LOWER,
     SERVERS_64_BITS_LOWER,
 } from "../../constants/servers.ts"
 import { toSentenceCase } from "../../utils/stringUtils.ts"
-import { ReactComponent as Checkmark } from "../../assets/svg/checkmark.svg"
-import { ReactComponent as X } from "../../assets/svg/x.svg"
 import { ReactComponent as Pending } from "../../assets/svg/pending.svg"
 import { UniquePopulationData } from "../../models/Population"
 import Skeleton from "../global/Skeleton.tsx"
@@ -14,8 +12,7 @@ import ColoredText from "../global/ColoredText.tsx"
 import Stack from "../global/Stack.tsx"
 import ServerNavigationCard from "../global/ServerNavigationCard.tsx"
 import NavCardCluster from "../global/NavCardCluster.tsx"
-import Spacer from "../global/Spacer.tsx"
-import FauxLink from "../global/FauxLink.tsx"
+import ServerStatusIcon from "../global/ServerStatusIcon.tsx"
 
 interface Props {
     isLoading?: boolean
@@ -39,9 +36,19 @@ const ServerSelectContent = ({
 
         switch (serverInfo[serverName].is_online) {
             case true:
-                return <Checkmark />
+                return (
+                    <ServerStatusIcon
+                        type="online"
+                        className="shrinkable-icon"
+                    />
+                )
             case false:
-                return <X />
+                return (
+                    <ServerStatusIcon
+                        type="offline"
+                        className="shrinkable-icon"
+                    />
+                )
         }
     }
 
