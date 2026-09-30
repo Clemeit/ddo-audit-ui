@@ -5,7 +5,6 @@ import {
     SERVERS_64_BITS_LOWER,
 } from "../../constants/servers.ts"
 import { toSentenceCase } from "../../utils/stringUtils.ts"
-import { ReactComponent as Pending } from "../../assets/svg/pending.svg"
 import { UniquePopulationData } from "../../models/Population"
 import Skeleton from "../global/Skeleton.tsx"
 import ColoredText from "../global/ColoredText.tsx"
@@ -32,7 +31,12 @@ const ServerSelectContent = ({
         serverInfo: ServerInfoApiDataModel
     ) => {
         if (serverInfo === undefined || serverInfo[serverName] === undefined)
-            return <Pending />
+            return (
+                <ServerStatusIcon
+                    type="indeterminate"
+                    className="shrinkable-icon"
+                />
+            )
 
         switch (serverInfo[serverName].is_online) {
             case true:

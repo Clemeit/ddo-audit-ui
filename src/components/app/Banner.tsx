@@ -6,7 +6,7 @@ import {
     GitHubButton,
     MakeASuggestionButton,
 } from "../buttons/Buttons.tsx"
-import { useMemo } from "react"
+import React, { useMemo } from "react"
 import { getIsNightRevels } from "../../utils/configUtils.ts"
 import { useAppContext } from "../../contexts/AppContext.tsx"
 
