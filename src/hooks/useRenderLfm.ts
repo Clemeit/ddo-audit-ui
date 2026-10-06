@@ -18,11 +18,21 @@ import { convertMillisecondsToPrettyString } from "../utils/stringUtils.ts"
 import { SPRITE_MAP } from "../constants/spriteMap.ts"
 import { mapRaceAndGenderToRaceIconBoundingBox } from "../utils/socialUtils.ts"
 import { useQuestContext } from "../contexts/QuestContext.tsx"
+import { useAreaContext } from "../contexts/AreaContext.tsx"
 
 interface Props {
     lfmSprite?: HTMLImageElement | null
     context?: CanvasRenderingContext2D | null
     raidView?: boolean
+}
+
+const OVERLEVEL_TO_PENALTY = {
+    2: "10%",
+    3: "25%",
+    4: "50%",
+    5: "75%",
+    6: "99%",
+    7: "NO XP",
 }
 
 const useRenderLfm = ({ lfmSprite, context, raidView = false }: Props) => {
@@ -39,7 +49,10 @@ const useRenderLfm = ({ lfmSprite, context, raidView = false }: Props) => {
         showIndicationForGroupsContainingFriends,
         highlightRaids,
         indicateContentIDontOwn,
+        showQuestLevel,
+        showXpPenalty,
     } = useLfmContext()
+    const areaContext = useAreaContext()
     const { confineTextToBoundingBox } = useTextRenderer(context)
     const commonBoundingBoxes = useMemo(
         () => calculateCommonBoundingBoxes(panelWidth),
@@ -262,9 +275,58 @@ const useRenderLfm = ({ lfmSprite, context, raidView = false }: Props) => {
             } else {
                 timerNoteText = timerNoteTextOptions(false)
             }
+
+            const hasHeroicMembers =
+                lfm.leader.total_level < 20 ||
+                lfm.members?.some((member) => member.total_level < 20)
+            let usedQuestLevel = 0
+            if (quest && hasHeroicMembers && quest.heroic_normal_cr) {
+                usedQuestLevel = quest.heroic_normal_cr ?? quest.epic_normal_cr
+            } else if (quest) {
+                usedQuestLevel = quest.epic_normal_cr ?? quest.heroic_normal_cr
+            }
+
+            // over-level penalty
+            let didRenderPenalty = false
+            let penaltyText: string = ""
+            if (quest && showXpPenalty) {
+                const isWilderness =
+                    quest.area_id != null &&
+                    areaContext.areas[quest.area_id]?.is_wilderness
+                let questEffectiveLevel = usedQuestLevel
+                if (lfm.difficulty.includes("Hard")) {
+                    questEffectiveLevel += 1
+                } else if (
+                    lfm.difficulty.includes("Elite") ||
+                    lfm.difficulty.includes("Reaper")
+                ) {
+                    questEffectiveLevel += 2
+                }
+                const isHeroic = usedQuestLevel === quest.heroic_normal_cr
+                const maxMemberLevel = [lfm.leader, ...lfm.members].reduce(
+                    (m, c) => (m = Math.max(c.total_level, m)),
+                    0
+                )
+                const fullDelvingBonus =
+                    maxMemberLevel <= usedQuestLevel + (isHeroic ? 2 : 4)
+                const overLevelPenalty =
+                    maxMemberLevel > questEffectiveLevel + (isHeroic ? 3 : 99)
+                if (!isWilderness) {
+                    if (overLevelPenalty) {
+                        penaltyText = `Over-level penalty (${OVERLEVEL_TO_PENALTY[Math.min(maxMemberLevel - questEffectiveLevel, 7)]})`
+                        didRenderPenalty = true
+                    } else if (!fullDelvingBonus) {
+                        penaltyText = "Delving bonus penalty"
+                        didRenderPenalty = true
+                    }
+                }
+            }
+
             let tip: string | null = null
             if (lfm.metadata?.owned === false && indicateContentIDontOwn) {
                 tip = `Requires "${lfm.quest?.required_adventure_pack}"`
+            } else if (didRenderPenalty) {
+                tip = penaltyText
             } else if (showQuestTips) {
                 tip = lfm.quest?.tip
             }
@@ -586,6 +648,19 @@ const useRenderLfm = ({ lfmSprite, context, raidView = false }: Props) => {
             ) {
                 if (quest == undefined) return
 
+                // quest level
+                if (showQuestLevel) {
+                    context.fillStyle = LFM_COLORS.STANDARD_TEXT
+                    context.font = fonts.MEMBER_COUNT
+                    context.textBaseline = "middle"
+                    context.textAlign = "right"
+                    context.fillText(
+                        usedQuestLevel.toString(),
+                        questPanelBoundingBox.right() - 5,
+                        leaderNameBoundingBox.centerY()
+                    )
+                }
+
                 // quest name
                 context.fillStyle =
                     lfm.is_quest_guess && lfm.metadata?.isEligible
@@ -618,6 +693,8 @@ const useRenderLfm = ({ lfmSprite, context, raidView = false }: Props) => {
                 if (tip) {
                     if (!lfm.metadata.owned && indicateContentIDontOwn) {
                         context.fillStyle = LFM_COLORS.NOT_OWNED
+                    } else if (didRenderPenalty) {
+                        context.fillStyle = LFM_COLORS.XP_PENALTY
                     }
                     context.font = fonts.TIP
                     questTipTextLines.forEach((line) => {
@@ -634,13 +711,16 @@ const useRenderLfm = ({ lfmSprite, context, raidView = false }: Props) => {
                     lfm.metadata?.raidActivity?.length > 0 &&
                     showRaidTimerIndicator
                 if (showRaidTimerIcon) {
+                    const posX = showQuestLevel
+                        ? questPanelBoundingBoxWithPadding.left()
+                        : questPanelBoundingBoxWithPadding.right() - 17
                     context.drawImage(
                         lfmSprite,
                         SPRITE_MAP.TIMER.x,
                         SPRITE_MAP.TIMER.y,
                         SPRITE_MAP.TIMER.width,
                         SPRITE_MAP.TIMER.height,
-                        questPanelBoundingBoxWithPadding.right() - 17,
+                        posX,
                         questPanelBoundingBoxWithPadding.y,
                         SPRITE_MAP.TIMER.width - 6,
                         SPRITE_MAP.TIMER.height - 6
@@ -808,6 +888,8 @@ const useRenderLfm = ({ lfmSprite, context, raidView = false }: Props) => {
             fontSize,
             showRaidTimerIndicator,
             showLfmPostedTime,
+            showQuestLevel,
+            showXpPenalty,
             showMemberCount,
             showQuestGuesses,
             confineTextToBoundingBox,

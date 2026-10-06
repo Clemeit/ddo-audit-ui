@@ -104,6 +104,10 @@ interface LfmContextProps {
     setOwnedContent: (value: string[]) => void
     hideFullGroups: boolean
     setHideFullGroups: (value: boolean) => void
+    showQuestLevel: boolean
+    setShowQuestLevel: (value: boolean) => void
+    showXpPenalty: boolean
+    setShowXpPenalty: (value: boolean) => void
     resetFilterSettings: () => void
     resetDisplaySettings: () => void
     resetToolSettings: () => void
@@ -163,6 +167,8 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
         useState<boolean>(true)
     const [onlyShowRaids, setOnlyShowRaids] = useState<boolean>(false)
     const [hideFullGroups, setHideFullGroups] = useState<boolean>(false)
+    const [showQuestLevel, setShowQuestLevel] = useState<boolean>(false)
+    const [showXpPenalty, setShowXpPenalty] = useState<boolean>(false)
 
     // tools:
     const [showRaidTimerIndicator, setShowRaidTimerIndicator] =
@@ -238,6 +244,9 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
         setHideGroupsContainingIgnoredCharacters(false)
         setShowIndicationForGroupsPostedByFriends(true)
         setShowIndicationForGroupsContainingFriends(true)
+        setHideFullGroups(false)
+        setShowQuestLevel(false)
+        setShowXpPenalty(false)
         logMessage("Tool settings reset to defaults", "info")
     }
 
@@ -271,6 +280,9 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
         setHideAllLevelGroups(false)
         setShowEligibilityDividers(true)
         setOnlyShowRaids(false)
+        setHideFullGroups(false)
+        setShowQuestLevel(false)
+        setShowXpPenalty(false)
     }, [])
 
     const validateAndParseSettings = (settings: any): boolean => {
@@ -474,6 +486,9 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
                 )
                 setOnlyShowRaids(Boolean(settings.onlyShowRaids ?? false))
                 setHideFullGroups(Boolean(settings.hideFullGroups ?? false))
+                console.log(settings)
+                setShowQuestLevel(Boolean(settings.showQuestLevel ?? false))
+                setShowXpPenalty(Boolean(settings.showXpPenalty ?? false))
                 return true
             } catch (e) {
                 logMessage(
@@ -594,6 +609,8 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
                     showEligibilityDividers,
                     onlyShowRaids,
                     hideFullGroups,
+                    showQuestLevel,
+                    showXpPenalty,
                 }
 
                 // Validate the settings before saving
@@ -613,7 +630,7 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
                     },
                 })
             }
-        }, 500)
+        }, 250)
 
         return () => {
             if (saveDebounceRef.current) clearTimeout(saveDebounceRef.current)
@@ -654,6 +671,8 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
         showEligibilityDividers,
         onlyShowRaids,
         hideFullGroups,
+        showQuestLevel,
+        showXpPenalty,
     ])
 
     const exportSettings = () => {
@@ -693,6 +712,8 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
             showEligibilityDividers,
             onlyShowRaids,
             hideFullGroups,
+            showQuestLevel,
+            showXpPenalty,
         }
     }
 
@@ -791,6 +812,10 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
                 setOwnedContent,
                 hideFullGroups,
                 setHideFullGroups,
+                showQuestLevel,
+                setShowQuestLevel,
+                showXpPenalty,
+                setShowXpPenalty,
                 resetDisplaySettings,
                 resetFilterSettings,
                 resetToolSettings,

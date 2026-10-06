@@ -83,6 +83,7 @@ const LFM_COLORS = {
     GUESS_TEXT: "#D3F6F6",
     ELIGIBILITY_DIVIDER: "#f6e8d3ff",
     NOT_OWNED: "#ff5555",
+    XP_PENALTY: "#ff4444",
 }
 
 const OVERLAY_COLORS = {

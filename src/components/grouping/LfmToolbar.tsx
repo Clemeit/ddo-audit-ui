@@ -74,6 +74,10 @@ const LfmToolbar = ({
         setShowLfmPostedTime,
         showQuestMetrics,
         setShowQuestMetrics,
+        showQuestLevel,
+        setShowQuestLevel,
+        showXpPenalty,
+        setShowXpPenalty,
         useSSE,
         setUseSSE,
         reloadRegisteredCharacters,
@@ -537,6 +541,18 @@ const LfmToolbar = ({
                         onChange={(e) => setShowQuestMetrics(e.target.checked)}
                     >
                         Show quest metrics
+                    </Checkbox>
+                    <Checkbox
+                        checked={showQuestLevel}
+                        onChange={(e) => setShowQuestLevel(e.target.checked)}
+                    >
+                        Show quest level preview
+                    </Checkbox>
+                    <Checkbox
+                        checked={showXpPenalty}
+                        onChange={(e) => setShowXpPenalty(e.target.checked)}
+                    >
+                        Show potential XP penalties
                     </Checkbox>
                     <Stack width="100%" justify="flex-end">
                         <Button

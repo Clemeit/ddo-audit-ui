@@ -103,6 +103,8 @@ export interface NormalizedLfmSettings {
     onlyShowRaids: boolean
     hideFullGroups: boolean
     useSSE: boolean
+    showQuestLevel: boolean
+    showXpPenalty: boolean
 }
 
 export function normalizeLfmSettings(input: unknown): NormalizedLfmSettings {
@@ -183,6 +185,8 @@ export function normalizeLfmSettings(input: unknown): NormalizedLfmSettings {
         trackedCharacterIds: coerceNumberArray(s.trackedCharacterIds),
         useSSE: coerceBool(s.useSSE, false),
         sortBy,
+        showQuestLevel: coerceBool(s.showQuestLevel, false),
+        showXpPenalty: coerceBool(s.showXpPenalty, false),
     }
 }
 
