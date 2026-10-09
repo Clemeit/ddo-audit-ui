@@ -168,7 +168,7 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
     const [onlyShowRaids, setOnlyShowRaids] = useState<boolean>(false)
     const [hideFullGroups, setHideFullGroups] = useState<boolean>(false)
     const [showQuestLevel, setShowQuestLevel] = useState<boolean>(false)
-    const [showXpPenalty, setShowXpPenalty] = useState<boolean>(false)
+    const [showXpPenalty, setShowXpPenalty] = useState<boolean>(true)
 
     // tools:
     const [showRaidTimerIndicator, setShowRaidTimerIndicator] =
@@ -246,7 +246,7 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
         setShowIndicationForGroupsContainingFriends(true)
         setHideFullGroups(false)
         setShowQuestLevel(false)
-        setShowXpPenalty(false)
+        setShowXpPenalty(true)
         logMessage("Tool settings reset to defaults", "info")
     }
 
@@ -282,7 +282,7 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
         setOnlyShowRaids(false)
         setHideFullGroups(false)
         setShowQuestLevel(false)
-        setShowXpPenalty(false)
+        setShowXpPenalty(true)
     }, [])
 
     const validateAndParseSettings = (settings: any): boolean => {
@@ -487,7 +487,7 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
                 setOnlyShowRaids(Boolean(settings.onlyShowRaids ?? false))
                 setHideFullGroups(Boolean(settings.hideFullGroups ?? false))
                 setShowQuestLevel(Boolean(settings.showQuestLevel ?? false))
-                setShowXpPenalty(Boolean(settings.showXpPenalty ?? false))
+                setShowXpPenalty(Boolean(settings.showXpPenalty ?? true))
                 return true
             } catch (e) {
                 logMessage(

@@ -186,7 +186,7 @@ export function normalizeLfmSettings(input: unknown): NormalizedLfmSettings {
         useSSE: coerceBool(s.useSSE, false),
         sortBy,
         showQuestLevel: coerceBool(s.showQuestLevel, false),
-        showXpPenalty: coerceBool(s.showXpPenalty, false),
+        showXpPenalty: coerceBool(s.showXpPenalty, true),
     }
 }
 
