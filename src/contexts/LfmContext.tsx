@@ -486,7 +486,6 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
                 )
                 setOnlyShowRaids(Boolean(settings.onlyShowRaids ?? false))
                 setHideFullGroups(Boolean(settings.hideFullGroups ?? false))
-                console.log(settings)
                 setShowQuestLevel(Boolean(settings.showQuestLevel ?? false))
                 setShowXpPenalty(Boolean(settings.showXpPenalty ?? false))
                 return true

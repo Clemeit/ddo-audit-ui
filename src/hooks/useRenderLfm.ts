@@ -897,6 +897,7 @@ const useRenderLfm = ({ lfmSprite, context, raidView = false }: Props) => {
             highlightRaids,
             quests,
             indicateContentIDontOwn,
+            areaContext.areas,
         ]
     )
 
