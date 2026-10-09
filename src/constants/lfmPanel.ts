@@ -173,6 +173,7 @@ const HARD_EXPRESSION = /\b(hard|h|eh)\b/i
 const ELITE_EXPRESSION = /\b(elite|e|ee)\b/i
 const REAPER_EXPRESSION = /\b(reaper|r)\d?\b/i
 const SKULL_EXPRESSION = /\b(r|r |reaper|reaper )(\d+)\b(\+)?/i
+const CR_EXPRESSION = /\b(cr)\s?(\d+)\b/i
 
 export {
     DEFAULT_LFM_PANEL_WIDTH,
@@ -214,6 +215,7 @@ export {
     ELITE_EXPRESSION,
     REAPER_EXPRESSION,
     SKULL_EXPRESSION,
+    CR_EXPRESSION,
     DOUBLE_CLICK_DELAY,
     DOUBLE_CLICK_DISTANCE_THRESHOLD,
 }
