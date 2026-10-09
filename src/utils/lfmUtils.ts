@@ -6,10 +6,11 @@ import {
     REAPER_EXPRESSION,
     ELITE_EXPRESSION,
     HARD_EXPRESSION,
+    CR_EXPRESSION,
 } from "../constants/lfmPanel.ts"
 import { BoundingBox } from "../models/Geometry.ts"
 import { SPRITE_MAP } from "../constants/spriteMap.ts"
-import { MAX_SKULL_COUNT } from "../constants/game.ts"
+import { MAX_CR, MAX_SKULL_COUNT } from "../constants/game.ts"
 
 const calculateCommonBoundingBoxes = (panelWidth: number) => {
     const lfmBoundingBox = new BoundingBox(
@@ -218,7 +219,7 @@ function buildDifficultyString(lfm: Lfm): string {
 
     const reaperString = (() => {
         const skullCountMatch = comment.match(SKULL_EXPRESSION)
-        if (!skullCountMatch) return "Reaper"
+        if (!skullCountMatch) return null
 
         const rawSkullCount = parseInt(skullCountMatch[2])
         const hasPlusSymbol = !!skullCountMatch[3]
@@ -235,17 +236,32 @@ function buildDifficultyString(lfm: Lfm): string {
                 ? `${clampedSkullCount}${hasPlusSymbol ? "+" : ""}`
                 : null
 
-        return skullString ? `Reaper ${skullString}` : "Reaper"
+        const difficultyString = lfm.difficulty.includes("Reaper")
+            ? lfm.difficulty
+            : "Reaper"
+        return skullString ? `${difficultyString} ${skullString}` : null
     })()
 
+    const crString = (() => {
+        const crMatch = comment.match(CR_EXPRESSION)
+        if (!crMatch) return null
+
+        const rawCr = parseInt(crMatch[2])
+
+        const clampedCr = rawCr <= 0 ? 0 : rawCr > MAX_CR ? MAX_CR : rawCr
+
+        return `CR ${clampedCr}`
+    })()
+
+    if (reaperString !== null) return reaperString
+    if (crString !== null) return crString
+
     if (!lfm.is_quest_guess) {
-        return lfm.difficulty === "Reaper"
-            ? reaperString
-            : (lfm.difficulty ?? "Normal")
+        return lfm.difficulty
     }
 
     if (REAPER_EXPRESSION.test(lfm.comment)) {
-        return reaperString
+        return "Reaper"
     } else if (ELITE_EXPRESSION.test(lfm.comment)) {
         return "Elite"
     } else if (HARD_EXPRESSION.test(lfm.comment)) {
