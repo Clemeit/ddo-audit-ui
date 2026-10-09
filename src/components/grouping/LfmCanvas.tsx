@@ -62,6 +62,8 @@ const LfmCanvas: React.FC<Props> = ({
         showNotEligible,
         showEligibilityDividers,
         indicateContentIDontOwn,
+        showQuestLevel,
+        showXpPenalty,
     } = useLfmContext()
     const { isFullScreen } = useAppContext()
 
@@ -440,6 +442,8 @@ const LfmCanvas: React.FC<Props> = ({
         excludedLfmCount: 0,
         isLoading: false,
         indicateContentIDontOwn,
+        showQuestLevel,
+        showXpPenalty,
     })
 
     // Main render effect — single-pass drawing of visible LFMs
@@ -464,7 +468,9 @@ const LfmCanvas: React.FC<Props> = ({
             prev.showEligibilityDividers !== showEligibilityDividers ||
             prev.excludedLfmCount !== excludedLfmCount ||
             prev.isLoading !== isLoading ||
-            prev.indicateContentIDontOwn != indicateContentIDontOwn
+            prev.indicateContentIDontOwn != indicateContentIDontOwn ||
+            prev.showQuestLevel != showQuestLevel ||
+            prev.showXpPenalty != showXpPenalty
 
         const dataChanged =
             prev.lfmCount !== lfms.length ||
@@ -567,6 +573,8 @@ const LfmCanvas: React.FC<Props> = ({
             excludedLfmCount,
             isLoading,
             indicateContentIDontOwn,
+            showQuestLevel,
+            showXpPenalty,
         }
     }, [
         image,
@@ -590,6 +598,8 @@ const LfmCanvas: React.FC<Props> = ({
         showEligibilityDividers,
         showNotEligible,
         indicateContentIDontOwn,
+        showQuestLevel,
+        showXpPenalty,
         renderLfm,
         renderSortHeaders,
         renderBackground,

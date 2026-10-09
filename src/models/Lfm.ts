@@ -129,7 +129,17 @@ interface Lfm {
     quest: Quest | null
     quest_id: number | null
     is_quest_guess: boolean
-    difficulty: string
+    difficulty:
+        | "Casual"
+        | "Normal"
+        | "Hard"
+        | "Elite"
+        | "Reaper"
+        | "Epic Casual"
+        | "Epic Normal"
+        | "Epic Hard"
+        | "Epic Elite"
+        | "Epic Reaper"
     accepted_classes: string[]
     accepted_classes_count: number
     minimum_level: number
