@@ -84,6 +84,7 @@ const LFM_COLORS = {
     ELIGIBILITY_DIVIDER: "#f6e8d3ff",
     NOT_OWNED: "#ff5555",
     XP_PENALTY: "#ff4444",
+    POTENTIAL_XP_PENALTY: "#ffa244",
 }
 
 const OVERLAY_COLORS = {
