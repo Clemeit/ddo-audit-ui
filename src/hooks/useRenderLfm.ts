@@ -30,15 +30,6 @@ interface Props {
     raidView?: boolean
 }
 
-const OVERLEVEL_TO_PENALTY = {
-    2: "10%",
-    3: "25%",
-    4: "50%",
-    5: "75%",
-    6: "99%",
-    7: "NO XP",
-}
-
 const useRenderLfm = ({ lfmSprite, context, raidView = false }: Props) => {
     const {
         panelWidth,
@@ -321,39 +312,6 @@ const useRenderLfm = ({ lfmSprite, context, raidView = false }: Props) => {
                 }
                 didRenderPenalty = true
             }
-
-            // if (quest && showXpPenalty) {
-            //     const isWilderness =
-            //         quest.area_id != null &&
-            //         areaContext.areas[quest.area_id]?.is_wilderness
-            //     let questEffectiveLevel = usedQuestLevel
-            //     if (lfm.difficulty.includes("Hard")) {
-            //         questEffectiveLevel += 1
-            //     } else if (
-            //         lfm.difficulty.includes("Elite") ||
-            //         lfm.difficulty.includes("Reaper")
-            //     ) {
-            //         questEffectiveLevel += 2
-            //     }
-            //     const isHeroic = usedQuestLevel === quest.heroic_normal_cr
-            //     const maxMemberLevel = [lfm.leader, ...lfm.members].reduce(
-            //         (m, c) => (m = Math.max(c.total_level, m)),
-            //         0
-            //     )
-            //     const fullDelvingBonus =
-            //         maxMemberLevel <= usedQuestLevel + (isHeroic ? 2 : 4)
-            //     const overLevelPenalty =
-            //         maxMemberLevel > questEffectiveLevel + (isHeroic ? 3 : 99)
-            //     if (!isWilderness) {
-            //         if (overLevelPenalty) {
-            //             penaltyText = `Over-level penalty (${OVERLEVEL_TO_PENALTY[Math.min(maxMemberLevel - questEffectiveLevel, 7)]})`
-            //             didRenderPenalty = true
-            //         } else if (!fullDelvingBonus) {
-            //             penaltyText = "Delving bonus penalty"
-            //             didRenderPenalty = true
-            //         }
-            //     }
-            // }
 
             let tip: string | null = null
             if (lfm.metadata?.owned === false && indicateContentIDontOwn) {
