@@ -24,10 +24,11 @@ interface Props {
     handleClosePanel?: () => void
     panelWidth: number
     linkDestination: string
-    serverName: string
+    serverName?: string
     isSecondaryPanel?: boolean
     handleScreenshot?: () => void
     characterCount?: number
+    hideFullScreenButton?: boolean
 }
 
 const GenericToolbar = ({
@@ -38,8 +39,9 @@ const GenericToolbar = ({
     linkDestination,
     serverName = "",
     isSecondaryPanel,
-    handleScreenshot = () => {},
+    handleScreenshot,
     characterCount,
+    hideFullScreenButton = false,
 }: Props) => {
     const navigate = useNavigate()
     const { secondaryPanel } = useMultiPanelContext()
@@ -112,30 +114,34 @@ const GenericToolbar = ({
                 hideLabelOnMobile
             />
 
-            <GenericToolbarButton
-                onClick={() => {
-                    handleScreenshot()
-                    dismissCallout("grouping-screenshot-button")
-                }}
-                icon={<ScreenshotSVG className="icon" />}
-                label="Screenshot"
-                hideOnMobile
-                iconOnly={!!secondaryPanel}
-            />
+            {handleScreenshot && (
+                <GenericToolbarButton
+                    onClick={() => {
+                        handleScreenshot?.()
+                        dismissCallout("grouping-screenshot-button")
+                    }}
+                    icon={<ScreenshotSVG className="icon" />}
+                    label="Screenshot"
+                    hideOnMobile
+                    iconOnly={!!secondaryPanel}
+                />
+            )}
 
-            <GenericToolbarButton
-                onClick={() => setIsFullScreen(!isFullScreen)}
-                icon={
-                    isFullScreen ? (
-                        <FullscreenExitSVG className="icon" />
-                    ) : (
-                        <FullscreenSVG className="icon" />
-                    )
-                }
-                label="Fullscreen"
-                hideOnMobile
-                iconOnly={!!secondaryPanel}
-            />
+            {!hideFullScreenButton && (
+                <GenericToolbarButton
+                    onClick={() => setIsFullScreen(!isFullScreen)}
+                    icon={
+                        isFullScreen ? (
+                            <FullscreenExitSVG className="icon" />
+                        ) : (
+                            <FullscreenSVG className="icon" />
+                        )
+                    }
+                    label="Fullscreen"
+                    hideOnMobile
+                    iconOnly={!!secondaryPanel}
+                />
+            )}
 
             <GenericToolbarButton
                 onClick={() => {

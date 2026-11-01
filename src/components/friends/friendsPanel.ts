@@ -1,0 +1,1 @@
+export const DEFAULT_FRIENDS_PANEL_WIDTH = 848

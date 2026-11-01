@@ -20,10 +20,12 @@ import useSearchParamState, {
 import Stack from "../global/Stack.tsx"
 import Button from "../global/Button.tsx"
 import { useMultiPanelContext } from "../../contexts/MultiPanelContext.tsx"
+import FriendsCanvasContainer from "../friends/FriendsCanvasContainer.tsx"
 
 export enum PanelType {
     Grouping = "grouping",
     Who = "who",
+    Friends = "friends",
 }
 
 const VALID_PANEL_TYPES = Object.values(PanelType)
@@ -76,9 +78,12 @@ const MultiPanelContainer = ({ serverName, primaryType }: Props) => {
                 : undefined
         )
         if (
-            !SERVER_NAMES_LOWER.includes(_secondaryPanelServer) ||
-            !VALID_PANEL_TYPES.includes(_secondaryPanelType as PanelType)
+            (_secondaryPanelType as PanelType) !== PanelType.Friends &&
+            !SERVER_NAMES_LOWER.includes(_secondaryPanelServer)
         ) {
+            return
+        }
+        if (!VALID_PANEL_TYPES.includes(_secondaryPanelType as PanelType)) {
             return
         }
 
@@ -96,6 +101,12 @@ const MultiPanelContainer = ({ serverName, primaryType }: Props) => {
                 <WhoContainer
                     serverName={_secondaryPanelServer}
                     isSecondaryPanel={true}
+                    handleClosePanel={closeSecondaryPanel}
+                />
+            )
+        } else if (_secondaryPanelType === PanelType.Friends) {
+            setSecondaryPanel(
+                <FriendsCanvasContainer
                     handleClosePanel={closeSecondaryPanel}
                 />
             )
@@ -117,6 +128,28 @@ const MultiPanelContainer = ({ serverName, primaryType }: Props) => {
                         fullWidth
                         type="who"
                         onClick={() => setSecondaryType(PanelType.Who)}
+                        disabled={primaryType === PanelType.Who}
+                    />
+                    <NavigationCard
+                        noLink
+                        fullWidth
+                        type="friends"
+                        onClick={() => {
+                            setSearchParams([
+                                {
+                                    searchParamType:
+                                        SearchParamType.SECONDARY_PANEL_TYPE,
+                                    value: PanelType.Friends as string,
+                                },
+                            ])
+                            setIsModalOpen(false)
+                            setSecondaryType(PanelType.Friends)
+                            setSecondaryPanel(
+                                <FriendsCanvasContainer
+                                    handleClosePanel={closeSecondaryPanel}
+                                />
+                            )
+                        }}
                         disabled={primaryType === PanelType.Who}
                     />
                 </NavCardCluster>
