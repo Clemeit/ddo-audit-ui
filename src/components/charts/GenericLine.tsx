@@ -1,5 +1,5 @@
-import { ResponsiveLine } from "@nivo/line"
-import { useMemo, useState } from "react"
+import { ResponsiveLine, SliceTooltipProps } from "@nivo/line"
+import React, { useCallback, useMemo, useState } from "react"
 import { NivoDateSeries, NivoNumberSeries } from "../../utils/nivoUtils.ts"
 import Stack from "../global/Stack.tsx"
 import GenericLegend from "./GenericLegend.tsx"
@@ -15,8 +15,6 @@ import {
 } from "./lineChartConfig.ts"
 import "./Charts.css"
 import { SERVER_NAMES_LOWER } from "../../constants/servers.ts"
-import { useAppContext } from "../../contexts/AppContext.tsx"
-import { DEFAULT_TIMEZONE } from "../../constants/client.ts"
 import TimezoneSelect from "../global/TimezoneSelect.tsx"
 
 interface GenericLineProps {
@@ -33,6 +31,9 @@ interface GenericLineProps {
     showTimezoneDisplay?: boolean
 }
 
+// Module-level so the default is referentially stable across renders.
+const defaultYFormatter = (value: number) => value.toString()
+
 const GenericLine = ({
     nivoData,
     showLegend,
@@ -40,7 +41,7 @@ const GenericLine = ({
     axisBottom = LINE_CHART_AXIS_BOTTOM,
     margin = LINE_CHART_MARGIN,
     tooltipTitleFormatter,
-    yFormatter = (value: number) => value.toString(),
+    yFormatter = defaultYFormatter,
     spotlightSeries = [],
     showTotalInTooltip = false,
     chartHeight = "400px",
@@ -49,7 +50,6 @@ const GenericLine = ({
     const [excludedSeries, setExcludedSeries] = useState<string[]>([])
     const [highlightedSeries, setHighlightedSeries] =
         useState<string[]>(spotlightSeries)
-    const { timezoneOverride, setTimezoneOverride } = useAppContext()
 
     const handleItemClick = (serverId: string) => {
         setExcludedSeries((prev) =>
@@ -67,7 +67,10 @@ const GenericLine = ({
         setHighlightedSeries([serverId])
     }
 
-    const getServerColor = createHighlightColorFunction(highlightedSeries)
+    const getServerColor = useMemo(
+        () => createHighlightColorFunction(highlightedSeries),
+        [highlightedSeries]
+    )
 
     const filteredData = useMemo(() => {
         return nivoData.filter(
@@ -77,19 +80,29 @@ const GenericLine = ({
         )
     }, [nivoData, excludedSeries])
 
-    // Helper to format x-axis labels with timezoneOverride
-    const formatXAxis = (value: Date | string | number) => {
-        if (!value) return ""
-        try {
-            const date = new Date(value)
-            const dateWithTimezone = date.toLocaleString("en-US", {
-                timeZone: timezoneOverride || DEFAULT_TIMEZONE,
-            })
-            return dateWithTimezone
-        } catch {
-            return value.toString()
-        }
-    }
+    // Every prop handed to ResponsiveLine must be referentially stable. A new
+    // `colors` or `sliceTooltip` function makes nivo rebuild every series and
+    // re-render every line; each line re-render allocates a react-spring
+    // interpolation sized to its SVG path. Those are only released on the next
+    // animation frame, which never comes while the tab is hidden or occluded,
+    // so the 10s server-info poll on the Live page leaked ~2MB per poll.
+    const getLineColor = useCallback(
+        (series: { id: string | number }) => getServerColor(String(series.id)),
+        [getServerColor]
+    )
+
+    const sliceTooltip = useCallback(
+        ({ slice }: SliceTooltipProps<NivoDateSeries | NivoNumberSeries>) => (
+            <LineChartTooltip
+                slice={slice}
+                getServerColor={getServerColor}
+                tooltipTitleFormatter={tooltipTitleFormatter}
+                yFormatter={yFormatter}
+                showTotal={showTotalInTooltip}
+            />
+        ),
+        [getServerColor, tooltipTitleFormatter, yFormatter, showTotalInTooltip]
+    )
 
     return (
         <Stack direction="column" gap="10px">
@@ -97,10 +110,9 @@ const GenericLine = ({
                 <ResponsiveLine
                     data={filteredData}
                     margin={margin}
-                    colors={(d) => getServerColor(d.id)}
+                    colors={getLineColor}
                     yScale={LINE_CHART_Y_SCALE}
                     xScale={xScale}
-                    xFormat={formatXAxis}
                     curve={LINE_CHART_DEFAULTS.curve}
                     theme={LINE_CHART_THEME}
                     enableGridX={LINE_CHART_DEFAULTS.enableGridX}
@@ -108,15 +120,8 @@ const GenericLine = ({
                     lineWidth={LINE_CHART_DEFAULTS.lineWidth}
                     enableSlices={LINE_CHART_DEFAULTS.enableSlices}
                     useMesh={LINE_CHART_DEFAULTS.useMesh}
-                    sliceTooltip={({ slice }) => (
-                        <LineChartTooltip
-                            slice={slice}
-                            getServerColor={getServerColor}
-                            tooltipTitleFormatter={tooltipTitleFormatter}
-                            yFormatter={yFormatter}
-                            showTotal={showTotalInTooltip}
-                        />
-                    )}
+                    animate={false}
+                    sliceTooltip={sliceTooltip}
                     axisBottom={axisBottom}
                 />
             </div>
@@ -133,4 +138,6 @@ const GenericLine = ({
     )
 }
 
-export default GenericLine
+// Memoized so parent re-renders (e.g. the Live page's 10s poll) skip the chart
+// entirely when its props haven't changed.
+export default React.memo(GenericLine)

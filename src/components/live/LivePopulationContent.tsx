@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import {
     PopulationPointInTime,
     ServerInfoApiDataModel,
@@ -221,6 +221,25 @@ const LivePopulationContent = ({ serverInfoData }: Props) => {
         return "400px"
     }, [lastRange.current])
 
+    const yFormatter = useCallback(
+        (value: number) =>
+            lastRange.current === RangeEnum.DAY
+                ? value.toLocaleString()
+                : Number(value).toLocaleString(undefined, {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                  }),
+        []
+    )
+
+    const tooltipTitleFormatter = useCallback(
+        (data: any) =>
+            lastRange.current === RangeEnum.MONTH
+                ? dateToLongString(new Date(data))
+                : dateToLongStringWithTime(new Date(data)),
+        []
+    )
+
     return (
         <>
             <p>{livePopulationTitle}</p>
@@ -238,19 +257,8 @@ const LivePopulationContent = ({ serverInfoData }: Props) => {
                     <GenericLine
                         nivoData={nivoData}
                         showLegend
-                        yFormatter={(value: number) =>
-                            lastRange.current === RangeEnum.DAY
-                                ? value.toLocaleString()
-                                : Number(value).toLocaleString(undefined, {
-                                      minimumFractionDigits: 2,
-                                      maximumFractionDigits: 2,
-                                  })
-                        }
-                        tooltipTitleFormatter={(data) =>
-                            lastRange.current === RangeEnum.MONTH
-                                ? dateToLongString(new Date(data))
-                                : dateToLongStringWithTime(new Date(data))
-                        }
+                        yFormatter={yFormatter}
+                        tooltipTitleFormatter={tooltipTitleFormatter}
                         showTotalInTooltip
                         showTimezoneDisplay
                         xScale={xScale}
