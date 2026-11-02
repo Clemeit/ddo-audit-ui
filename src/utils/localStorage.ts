@@ -6,6 +6,7 @@ import { Quest } from "../models/Lfm.ts"
 import logMessage from "./logUtils.ts"
 import { RaidTimerStorage } from "../models/RaidTimers.ts"
 import { NotificationPreferences } from "../models/Notification.ts"
+import { ConfigEndpointResponse } from "../models/Config.ts"
 
 const VERSION_PREFIX = "v1-"
 
@@ -16,6 +17,7 @@ const FRIENDS_KEY = "friends"
 const IGNORES_KEY = "ignores"
 const CACHED_AREAS_KEY = "cached-areas"
 const CACHED_QUEST_KEY = "cached-quests"
+const CACHED_CONFIG_KEY = "cached-config"
 const BOOLEAN_FLAGS_KEY = "boolean-flags"
 const LFM_SETTINGS_KEY = "lfm-settings"
 const WHO_SETTINGS_KEY = "who-settings"
@@ -384,6 +386,15 @@ function setQuests(quests: Quest[]): void {
     setData<Quest[]>(CACHED_QUEST_KEY, quests)
 }
 
+// Config functions
+function getConfig(): ConfigEndpointResponse {
+    return getData<ConfigEndpointResponse>(CACHED_CONFIG_KEY, {})
+}
+
+function setConfig(config: ConfigEndpointResponse): void {
+    setData<ConfigEndpointResponse>(CACHED_CONFIG_KEY, config)
+}
+
 // Timezone functions
 function getTimezone(): string | null {
     return getData<string>(TIMEZONE_KEY, null)
@@ -654,6 +665,8 @@ export {
     setAreas,
     getQuests,
     setQuests,
+    getConfig,
+    setConfig,
     getBooleanFlags,
     setBooleanFlag,
     removeBooleanFlag,

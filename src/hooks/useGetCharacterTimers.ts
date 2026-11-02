@@ -21,6 +21,7 @@ const useGetCharacterTimers = ({ registeredCharacters }: Props) => {
         {}
     )
     const [isLoading, setIsLoading] = useState<boolean>(false)
+    const [isError, setIsError] = useState<boolean>(false)
 
     const loadTimers = useCallback(async () => {
         try {
@@ -37,6 +38,7 @@ const useGetCharacterTimers = ({ registeredCharacters }: Props) => {
                 await getCharacterRaidActivityByIds(characterIds)
             if (!raidActivity?.data?.length) {
                 setCharacterTimers([])
+                setIsError(false)
                 return
             }
             const localCharacterTimers: {
@@ -53,6 +55,7 @@ const useGetCharacterTimers = ({ registeredCharacters }: Props) => {
             })
 
             setCharacterTimers(localCharacterTimers)
+            setIsError(false)
         } catch (error) {
             logMessage("Error fetching character timers", "error", {
                 metadata: {
@@ -61,6 +64,7 @@ const useGetCharacterTimers = ({ registeredCharacters }: Props) => {
                     stack: error instanceof Error ? error.stack : undefined,
                 },
             })
+            setIsError(true)
         } finally {
             setIsLoading(false)
         }
@@ -70,7 +74,7 @@ const useGetCharacterTimers = ({ registeredCharacters }: Props) => {
         loadTimers()
     }, [registeredCharacters])
 
-    return { characterTimers, isLoading, reload: loadTimers }
+    return { characterTimers, isLoading, reload: loadTimers, isError }
 }
 
 export default useGetCharacterTimers

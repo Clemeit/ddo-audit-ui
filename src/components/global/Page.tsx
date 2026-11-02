@@ -22,6 +22,7 @@ interface Props {
         | React.ReactNode[]
         | (() => React.ReactNode | React.ReactNode[])
     is404Page?: boolean
+    noBottomMarginOnMobile?: boolean
 }
 
 const Page = ({
@@ -36,6 +37,7 @@ const Page = ({
     logo = "/icons/logo-192px.png",
     pageMessages,
     is404Page = false,
+    noBottomMarginOnMobile = false,
 }: Props) => {
     const isOnline = useNetworkStatus()
 
@@ -112,7 +114,7 @@ const Page = ({
                 className={`page ${noPadding ? "no-padding" : ""} ${hasPageMessage ? "with-messages" : ""}`}
             >
                 <div
-                    className={`page-content ${centered ? "centered" : ""} ${contentMaxWidth ? "content-max-width" : ""}`}
+                    className={`page-content ${centered ? "centered" : ""} ${contentMaxWidth ? "content-max-width" : ""} ${noBottomMarginOnMobile ? "no-bottom-margin-mobile" : ""}`}
                 >
                     {children}
                     {hasPageMessage && (

@@ -24,7 +24,6 @@ import { useModalNavigation } from "../../hooks/useModalNavigation.ts"
 import GenericToolbar from "../global/GenericToolbar.tsx"
 import RadioButton from "../global/RadioButton.tsx"
 import Spacer from "../global/Spacer.tsx"
-import FeaturedItem from "../global/FeaturedItem.tsx"
 import { MAX_LEVEL } from "../../constants/game.ts"
 import { useQuestContext } from "../../contexts/QuestContext.tsx"
 import { useAreaContext } from "../../contexts/AreaContext.tsx"
@@ -75,6 +74,12 @@ const LfmToolbar = ({
         setShowLfmPostedTime,
         showQuestMetrics,
         setShowQuestMetrics,
+        showQuestLevel,
+        setShowQuestLevel,
+        showXpPenalty,
+        setShowXpPenalty,
+        useSSE,
+        setUseSSE,
         reloadRegisteredCharacters,
         resetDisplaySettings,
         resetFilterSettings,
@@ -378,7 +383,7 @@ const LfmToolbar = ({
                             setHideAllLevelGroups(e.target.checked)
                         }
                     >
-                        Hide groups posting for levels 1-34
+                        Hide groups posting for levels 1-{MAX_LEVEL}
                     </Checkbox>
                     <Checkbox
                         checked={hideFullGroups}
@@ -537,6 +542,18 @@ const LfmToolbar = ({
                     >
                         Show quest metrics
                     </Checkbox>
+                    <Checkbox
+                        checked={showQuestLevel}
+                        onChange={(e) => setShowQuestLevel(e.target.checked)}
+                    >
+                        Show quest level preview
+                    </Checkbox>
+                    <Checkbox
+                        checked={showXpPenalty}
+                        onChange={(e) => setShowXpPenalty(e.target.checked)}
+                    >
+                        Show potential XP penalties
+                    </Checkbox>
                     <Stack width="100%" justify="flex-end">
                         <Button
                             onClick={handleOpenResetToolsModal}
@@ -546,6 +563,25 @@ const LfmToolbar = ({
                             Reset all
                         </Button>
                     </Stack>
+                </Stack>
+            </ContentCluster>
+            <ContentCluster title="Experimental">
+                <Stack direction="column" gap="10px">
+                    <Checkbox
+                        checked={useSSE}
+                        onChange={(e) => setUseSSE(e.target.checked)}
+                    >
+                        Stream real-time LFM data
+                    </Checkbox>
+                    <ul
+                        style={{
+                            marginTop: "2px",
+                        }}
+                    >
+                        <li>Much faster data updates (within 1 second)</li>
+                        <li>Reduces data transfer by up to 80%</li>
+                        <li>Experimental - may contain bugs</li>
+                    </ul>
                 </Stack>
             </ContentCluster>
         </ContentClusterGroup>

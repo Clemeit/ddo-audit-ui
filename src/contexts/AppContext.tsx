@@ -1,11 +1,14 @@
 import React, { createContext, useState, useEffect, useContext } from "react"
 import { getTimezone, setTimezone } from "../utils/localStorage"
+import { ConfigEndpointResponse } from "../models/Config"
 
 interface AppContextProps {
     isFullScreen: boolean
     setIsFullScreen: (fullScreen: boolean) => void
     timezoneOverride: string
     setTimezoneOverride: (timezone: string) => void
+    config: ConfigEndpointResponse
+    setConfig: (value: ConfigEndpointResponse) => void
 }
 
 const AppContext = createContext<AppContextProps | undefined>(undefined)
@@ -20,6 +23,7 @@ export const AppProvider = ({ children }: Props) => {
         const savedTimezone = getTimezone()
         return savedTimezone ?? ""
     })
+    const [config, setConfig] = useState<ConfigEndpointResponse>(null)
 
     useEffect(() => {
         setTimezone(timezoneOverride || "")
@@ -32,6 +36,8 @@ export const AppProvider = ({ children }: Props) => {
                 setIsFullScreen,
                 timezoneOverride,
                 setTimezoneOverride,
+                config,
+                setConfig,
             }}
         >
             {children}

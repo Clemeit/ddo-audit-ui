@@ -70,6 +70,8 @@ interface LfmContextProps {
     setShowLfmPostedTime: (show: boolean) => void
     showQuestMetrics: boolean
     setShowQuestMetrics: (show: boolean) => void
+    useSSE: boolean
+    setUseSSE: (show: boolean) => void
     mouseOverDelay: number
     setMouseOverDelay: (delay: number) => void
     showLfmActivity: boolean
@@ -102,6 +104,10 @@ interface LfmContextProps {
     setOwnedContent: (value: string[]) => void
     hideFullGroups: boolean
     setHideFullGroups: (value: boolean) => void
+    showQuestLevel: boolean
+    setShowQuestLevel: (value: boolean) => void
+    showXpPenalty: boolean
+    setShowXpPenalty: (value: boolean) => void
     resetFilterSettings: () => void
     resetDisplaySettings: () => void
     resetToolSettings: () => void
@@ -161,6 +167,8 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
         useState<boolean>(true)
     const [onlyShowRaids, setOnlyShowRaids] = useState<boolean>(false)
     const [hideFullGroups, setHideFullGroups] = useState<boolean>(false)
+    const [showQuestLevel, setShowQuestLevel] = useState<boolean>(false)
+    const [showXpPenalty, setShowXpPenalty] = useState<boolean>(true)
 
     // tools:
     const [showRaidTimerIndicator, setShowRaidTimerIndicator] =
@@ -172,6 +180,7 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
         useState<boolean>(true)
     const [showLfmPostedTime, setShowLfmPostedTime] = useState<boolean>(true)
     const [showQuestMetrics, setShowQuestMetrics] = useState<boolean>(true)
+    const [useSSE, setUseSSE] = useState<boolean>(false)
     const [showLfmActivity, setShowLfmActivity] = useState<boolean>(true)
     const [showEligibleCharacters, setShowEligibleCharacters] =
         useState<boolean>(false)
@@ -235,6 +244,9 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
         setHideGroupsContainingIgnoredCharacters(false)
         setShowIndicationForGroupsPostedByFriends(true)
         setShowIndicationForGroupsContainingFriends(true)
+        setHideFullGroups(false)
+        setShowQuestLevel(false)
+        setShowXpPenalty(true)
         logMessage("Tool settings reset to defaults", "info")
     }
 
@@ -255,6 +267,7 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
         setTrackedCharacterIds([])
         setShowLfmPostedTime(true)
         setShowQuestMetrics(true)
+        setUseSSE(false)
         setMouseOverDelay(DEFAULT_MOUSE_OVER_DELAY)
         setShowLfmActivity(true)
         setIsMultiColumn(true)
@@ -267,6 +280,9 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
         setHideAllLevelGroups(false)
         setShowEligibilityDividers(true)
         setOnlyShowRaids(false)
+        setHideFullGroups(false)
+        setShowQuestLevel(false)
+        setShowXpPenalty(true)
     }, [])
 
     const validateAndParseSettings = (settings: any): boolean => {
@@ -431,6 +447,7 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
                     Boolean(settings.showLfmPostedTime ?? true)
                 )
                 setShowQuestMetrics(Boolean(settings.showQuestMetrics ?? true))
+                setUseSSE(Boolean(settings.useSSE ?? false))
                 setMouseOverDelay(
                     settings.mouseOverDelay ?? DEFAULT_MOUSE_OVER_DELAY
                 )
@@ -469,6 +486,8 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
                 )
                 setOnlyShowRaids(Boolean(settings.onlyShowRaids ?? false))
                 setHideFullGroups(Boolean(settings.hideFullGroups ?? false))
+                setShowQuestLevel(Boolean(settings.showQuestLevel ?? false))
+                setShowXpPenalty(Boolean(settings.showXpPenalty ?? true))
                 return true
             } catch (e) {
                 logMessage(
@@ -575,6 +594,7 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
                     trackedCharacterIds,
                     showLfmPostedTime,
                     showQuestMetrics,
+                    useSSE,
                     mouseOverDelay,
                     showLfmActivity,
                     isMultiColumn,
@@ -588,6 +608,8 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
                     showEligibilityDividers,
                     onlyShowRaids,
                     hideFullGroups,
+                    showQuestLevel,
+                    showXpPenalty,
                 }
 
                 // Validate the settings before saving
@@ -607,7 +629,7 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
                     },
                 })
             }
-        }, 500)
+        }, 250)
 
         return () => {
             if (saveDebounceRef.current) clearTimeout(saveDebounceRef.current)
@@ -634,6 +656,7 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
         trackedCharacterIds,
         showLfmPostedTime,
         showQuestMetrics,
+        useSSE,
         mouseOverDelay,
         showLfmActivity,
         isMultiColumn,
@@ -647,6 +670,8 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
         showEligibilityDividers,
         onlyShowRaids,
         hideFullGroups,
+        showQuestLevel,
+        showXpPenalty,
     ])
 
     const exportSettings = () => {
@@ -672,6 +697,7 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
             trackedCharacterIds,
             showLfmPostedTime,
             showQuestMetrics,
+            useSSE,
             mouseOverDelay,
             showLfmActivity,
             isMultiColumn,
@@ -685,6 +711,8 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
             showEligibilityDividers,
             onlyShowRaids,
             hideFullGroups,
+            showQuestLevel,
+            showXpPenalty,
         }
     }
 
@@ -749,6 +777,8 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
                 setShowLfmPostedTime,
                 showQuestMetrics,
                 setShowQuestMetrics,
+                useSSE,
+                setUseSSE,
                 mouseOverDelay,
                 setMouseOverDelay,
                 showLfmActivity,
@@ -781,6 +811,10 @@ export const LfmProvider = ({ children }: { children: ReactNode }) => {
                 setOwnedContent,
                 hideFullGroups,
                 setHideFullGroups,
+                showQuestLevel,
+                setShowQuestLevel,
+                showXpPenalty,
+                setShowXpPenalty,
                 resetDisplaySettings,
                 resetFilterSettings,
                 resetToolSettings,

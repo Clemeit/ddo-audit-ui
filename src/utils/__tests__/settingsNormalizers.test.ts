@@ -50,7 +50,7 @@ describe("settingsNormalizers", () => {
         it("returns full defaults for undefined input", () => {
             const result = normalizeLfmSettings(undefined)
             expect(result.minLevel).toBe(1)
-            expect(result.maxLevel).toBe(34)
+            expect(result.maxLevel).toBe(36)
             expect(result.showNotEligible).toBe(true)
             expect(result.filterByMyCharacters).toBe(false)
             expect(result.showBoundingBoxes).toBe(false)
@@ -65,13 +65,13 @@ describe("settingsNormalizers", () => {
 
         it("coerces minLevel within bounds", () => {
             expect(normalizeLfmSettings({ minLevel: -5 }).minLevel).toBe(1)
-            expect(normalizeLfmSettings({ minLevel: 100 }).minLevel).toBe(34)
+            expect(normalizeLfmSettings({ minLevel: 100 }).minLevel).toBe(36)
             expect(normalizeLfmSettings({ minLevel: 10 }).minLevel).toBe(10)
         })
 
         it("coerces maxLevel within bounds", () => {
             expect(normalizeLfmSettings({ maxLevel: -5 }).maxLevel).toBe(1)
-            expect(normalizeLfmSettings({ maxLevel: 100 }).maxLevel).toBe(34)
+            expect(normalizeLfmSettings({ maxLevel: 100 }).maxLevel).toBe(36)
         })
 
         it("coerces booleans with correct defaults", () => {
@@ -119,7 +119,7 @@ describe("settingsNormalizers", () => {
             const result = normalizeWhoSettings(undefined)
             expect(result.stringFilter).toBe("")
             expect(result.minLevel).toBe(1)
-            expect(result.maxLevel).toBe(34)
+            expect(result.maxLevel).toBe(36)
             expect(result.isGroupView).toBe(false)
             expect(result.isFilterAreaCollapsed).toBe(false)
             expect(result.shouldSaveFilterAreaCollapsed).toBe(false)
@@ -190,7 +190,7 @@ describe("settingsNormalizers", () => {
                 "lfm-settings": { minLevel: 5 },
             })
             expect(result["lfm-settings"].minLevel).toBe(5)
-            expect(result["lfm-settings"].maxLevel).toBe(34)
+            expect(result["lfm-settings"].maxLevel).toBe(36)
         })
 
         it("filters invalid access tokens", () => {

@@ -15,9 +15,6 @@ import {
     SERVERS_64_BITS_LOWER,
 } from "../../constants/servers.ts"
 import { pluralize, toSentenceCase } from "../../utils/stringUtils.ts"
-import { ReactComponent as Checkmark } from "../../assets/svg/checkmark.svg"
-import { ReactComponent as X } from "../../assets/svg/x.svg"
-import { ReactComponent as Pending } from "../../assets/svg/pending.svg"
 import Badge from "../global/Badge.tsx"
 import {
     DataLoadingErrorPageMessage,
@@ -27,6 +24,7 @@ import NavigationCard from "../global/NavigationCard.tsx"
 import useGetRegisteredCharacters from "../../hooks/useGetRegisteredCharacters.ts"
 import useGetFriends from "../../hooks/useGetFriends.ts"
 import Skeleton from "../global/Skeleton.tsx"
+import ServerStatusIcon from "../global/ServerStatusIcon.tsx"
 
 const Who = () => {
     const { registeredCharacters } = useGetRegisteredCharacters()
@@ -88,11 +86,26 @@ const Who = () => {
         const isOnline = serverInfoData?.[serverName]?.is_online
         switch (isOnline) {
             case true:
-                return <Checkmark className="shrinkable-icon" />
+                return (
+                    <ServerStatusIcon
+                        type="online"
+                        className="shrinkable-icon"
+                    />
+                )
             case false:
-                return <X className="shrinkable-icon" />
+                return (
+                    <ServerStatusIcon
+                        type="offline"
+                        className="shrinkable-icon"
+                    />
+                )
             default:
-                return <Pending className="shrinkable-icon" />
+                return (
+                    <ServerStatusIcon
+                        type="indeterminate"
+                        className="shrinkable-icon"
+                    />
+                )
         }
     }
 

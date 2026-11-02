@@ -18,6 +18,8 @@ function mapRaceAndGenderToRaceIconBoundingBox(
             raceIconBoundingBox = SPRITE_MAP.RACES.DROW
             break
         case "dwarf":
+        case "duergar":
+        case "duergar mindcleaver":
             raceIconBoundingBox = SPRITE_MAP.RACES.DWARF
             break
         case "elf":

@@ -58,6 +58,9 @@
     .page-content {
         margin-bottom: 20px;
     }
+    .page-content.no-bottom-margin-mobile {
+        margin-bottom: 0px;
+    }
 }
 
 @media (max-width: 300px) {

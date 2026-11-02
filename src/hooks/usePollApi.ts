@@ -137,7 +137,7 @@ const usePollApi = <T>({
                 }
             }
         },
-        [endpoint, interval, lifespan, birthTime, stopOnError]
+        [endpoint, interval, lifespan, birthTime, stopOnError, enabled]
     )
 
     useEffect(() => {

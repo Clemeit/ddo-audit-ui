@@ -19,12 +19,16 @@ import { StaleWhileRevalidate } from "workbox-strategies"
 declare const self: ServiceWorkerGlobalScope
 
 // Import Firebase v9+ modular SDK
-importScripts(
-    "https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"
-)
-importScripts(
-    "https://www.gstatic.com/firebasejs/9.23.0/firebase-messaging-compat.js"
-)
+try {
+    importScripts(
+        "https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"
+    )
+    importScripts(
+        "https://www.gstatic.com/firebasejs/9.23.0/firebase-messaging-compat.js"
+    )
+} catch {
+    console.error("failed to download firebase scripts")
+}
 
 // Initialize Firebase
 // @ts-ignore

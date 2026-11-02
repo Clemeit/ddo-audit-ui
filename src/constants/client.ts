@@ -29,6 +29,9 @@ const API_URL = getApiUrl()
 const BETTER_STACK_URL = "https://ddoaudit.betteruptime.com/"
 const API_DOC_URL = "https://api.ddoaudit.com/docs"
 
+// Set REACT_APP_ENABLE_SSE=false in your .env to disable SSE and fall back to polling for all servers.
+// const ENABLE_SSE = process.env.REACT_APP_ENABLE_SSE !== "false"
+
 export {
     CACHED_CHARACTER_EXPIRY_TIME,
     DONATE_LINK,
@@ -42,4 +45,5 @@ export {
     MAX_LEVENSHTEIN_DISTANCE,
     DEFAULT_TIMEZONE,
     API_DOC_URL,
+    // ENABLE_SSE,
 }

@@ -76,6 +76,7 @@ const WhoSpecific = () => {
             contentMaxWidth={shouldShowPanel}
             logo="/icons/who-192px.png"
             is404Page={is404Page}
+            noBottomMarginOnMobile={true}
         >
             {!isValidServer && (
                 <ServerValidationMessage

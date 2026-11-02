@@ -126,7 +126,7 @@ const SPRITE_MAP = {
         height: 18,
     },
     TIMER: {
-        x: 245,
+        x: 246,
         y: 0,
         width: 24,
         height: 26,

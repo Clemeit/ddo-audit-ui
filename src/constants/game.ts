@@ -2,10 +2,11 @@ const RANSACK_HOURS = 168
 const RANSACK_THRESHOLD = 7
 const RAID_TIMER_MILLIS = 66 * 60 * 60 * 1000
 const MIN_LEVEL = 1
-const MAX_LEVEL = 34
+const MAX_LEVEL = 36
 const MAX_PARTY_SIZE = 6
 const MAX_RAID_SIZE = 12
 const MAX_SKULL_COUNT = 10
+const MAX_CR = 50
 
 const CLASS_LIST = [
     "Barbarian",
@@ -38,4 +39,5 @@ export {
     MAX_PARTY_SIZE,
     MAX_RAID_SIZE,
     MAX_SKULL_COUNT,
+    MAX_CR,
 }

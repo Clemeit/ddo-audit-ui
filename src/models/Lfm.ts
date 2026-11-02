@@ -129,7 +129,17 @@ interface Lfm {
     quest: Quest | null
     quest_id: number | null
     is_quest_guess: boolean
-    difficulty: string
+    difficulty:
+        | "Casual"
+        | "Normal"
+        | "Hard"
+        | "Elite"
+        | "Reaper"
+        | "Epic Casual"
+        | "Epic Normal"
+        | "Epic Hard"
+        | "Epic Elite"
+        | "Epic Reaper"
     accepted_classes: string[]
     accepted_classes_count: number
     minimum_level: number
@@ -168,7 +178,7 @@ interface LfmApiServerModel {
 type ServerName = (typeof SERVER_NAMES_LOWER)[number]
 
 type LfmApiDataModel = {
-    [K in ServerName]?: { number: Lfm }
+    [K in ServerName]?: { [id: number]: Lfm }
 }
 
 interface LfmApiModel {
@@ -176,7 +186,7 @@ interface LfmApiModel {
 }
 
 interface LfmSpecificApiModel {
-    data?: { number: Lfm }
+    data?: { [id: number]: Lfm }
 }
 
 enum LfmSortType {

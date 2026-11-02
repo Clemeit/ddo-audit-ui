@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react"
 import usePollApi from "../../hooks/usePollApi.ts"
+import useServerStream from "../../hooks/useServerStream.ts"
 import {
     Character,
     CharacterSpecificApiDataModel,
@@ -21,6 +22,9 @@ import useGetFriends from "../../hooks/useGetFriends.ts"
 import useGetIgnores from "../../hooks/useGetIgnores.ts"
 import logMessage from "../../utils/logUtils.ts"
 import Stack from "../global/Stack.tsx"
+import { SERVERS_64_BITS_LOWER } from "../../constants/servers.ts"
+import { useQuestContext } from "../../contexts/QuestContext.tsx"
+// import { ENABLE_SSE } from "../../constants/client.ts"
 
 // TODO: group_id should be null and never "0"
 
@@ -52,21 +56,55 @@ const WhoContainer = ({
         pinFriends,
         alwaysShowFriends,
         alwaysShowRegisteredCharacters,
+        useSSE,
+        showQuestName,
         // refreshInterval, TODO: make this work
     } = useWhoContext()
     const { registeredCharacters, myGuildsList } = useGetRegisteredCharacters()
     const [ignoreServerDown, setIgnoreServerDown] = useState<boolean>(false)
     const { friends } = useGetFriends()
     const { ignores } = useGetIgnores()
+    const { getQuestFromAreaId } = useQuestContext()
+
+    const isSSEServer =
+        useSSE &&
+        // ENABLE_SSE &&
+        SERVERS_64_BITS_LOWER.includes(serverName.toLowerCase())
+
     const {
-        data: characterData,
-        state: characterState,
+        data: streamData,
+        status: streamStatus,
+        loadingState: streamLoadingState,
+    } = useServerStream<Character>(serverName, "characters", {
+        enabled: isSSEServer,
+    })
+
+    const {
+        data: polledData,
+        state: polledState,
         reload: reloadCharacters,
     } = usePollApi<CharacterSpecificApiDataModel>({
         endpoint: `characters/${serverName}`,
         interval: 3000,
         lifespan: 1000 * 60 * 60 * 12, // 12 hours
+        enabled: !isSSEServer,
     })
+
+    const characterData: CharacterSpecificApiDataModel | null = useMemo(() => {
+        if (!isSSEServer) return polledData
+        if (!streamData) return null
+        return {
+            data: Object.fromEntries(streamData),
+        } as CharacterSpecificApiDataModel
+    }, [isSSEServer, polledData, streamData])
+
+    const characterState = isSSEServer ? streamLoadingState : polledState
+    const isStreamDisconnected = useMemo(
+        () =>
+            isSSEServer &&
+            (streamStatus === "error" || streamStatus === "closed"),
+        [isSSEServer, streamStatus]
+    )
     const areaContext = useAreaContext()
     const { areas } = areaContext
     const { data: serverInfoData, state: serverInfoState } =
@@ -196,34 +234,51 @@ const WhoContainer = ({
             let stringFilterMatch = false
             // only match on characters that are not anonymous
             if (!character.is_anonymous) {
-                const stringFilters = stringFilter.split(",")
-                stringFilters.forEach((localFilter) => {
-                    const nameMatch = compareString(
-                        character.name,
-                        localFilter,
-                        isExactMatch
-                    )
-                    const guildNameMatch = compareString(
-                        character.guild_name,
-                        localFilter,
-                        isExactMatch
-                    )
-                    const locationMatch = compareString(
-                        areas[character.location_id || 0]?.name,
-                        localFilter,
-                        isExactMatch
-                    )
-                    const unknownLocationMatch =
-                        localFilter === "aether" &&
-                        areas[character.location_id || 0] === undefined
+                if (stringFilter && stringFilter.length > 0) {
+                    const quest =
+                        showQuestName == true && character.location_id
+                            ? getQuestFromAreaId(character.location_id)
+                            : null
+                    const stringFilters = stringFilter.split(",")
+                    stringFilters.forEach((localFilter) => {
+                        const nameMatch = compareString(
+                            character.name,
+                            localFilter,
+                            isExactMatch
+                        )
+                        const guildNameMatch = compareString(
+                            character.guild_name,
+                            localFilter,
+                            isExactMatch
+                        )
+                        const locationMatch = compareString(
+                            areas[character.location_id || 0]?.name,
+                            localFilter,
+                            isExactMatch
+                        )
+                        const unknownLocationMatch =
+                            localFilter === "aether" &&
+                            areas[character.location_id || 0] === undefined
+                        let questMatch = false
+                        if (quest) {
+                            questMatch = compareString(
+                                quest.name,
+                                localFilter,
+                                isExactMatch
+                            )
+                        }
 
-                    const localMatch =
-                        nameMatch ||
-                        guildNameMatch ||
-                        locationMatch ||
-                        unknownLocationMatch
-                    stringFilterMatch = stringFilterMatch || localMatch
-                })
+                        const localMatch =
+                            nameMatch ||
+                            guildNameMatch ||
+                            locationMatch ||
+                            unknownLocationMatch ||
+                            questMatch
+                        stringFilterMatch = stringFilterMatch || localMatch
+                    })
+                } else {
+                    stringFilterMatch = true
+                }
             }
 
             const levelRangeMatch =
@@ -376,14 +431,16 @@ const WhoContainer = ({
         registeredCharacters,
         friends,
         ignores,
+        getQuestFromAreaId,
+        showQuestName,
     ])
 
     return (
         <Stack direction="column">
-            {characterState === LoadingState.Haulted && (
+            {characterState === LoadingState.Haulted && !isSSEServer && (
                 <LiveDataHaultedPageMessage />
             )}
-            {isDataStale && <StaleDataPageMessage />}
+            {(isDataStale || isStreamDisconnected) && <StaleDataPageMessage />}
             {!isServerOffline || ignoreServerDown ? (
                 <Stack direction="column">
                     <WhoToolbar

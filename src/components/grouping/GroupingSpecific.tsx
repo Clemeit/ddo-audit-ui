@@ -76,6 +76,7 @@ const GroupingSpecific = () => {
             contentMaxWidth={shouldShowPanel}
             logo="/icons/grouping-192px.png"
             is404Page={is404Page}
+            noBottomMarginOnMobile={true}
         >
             {!isValidServer && (
                 <ServerValidationMessage
