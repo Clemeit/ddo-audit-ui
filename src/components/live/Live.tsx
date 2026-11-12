@@ -126,7 +126,7 @@ const Live = () => {
                     <ServerStatus
                         serverInfoData={serverInfoData}
                         serverInfoState={serverInfoState}
-                        hide32BitServers={false}
+                        hide32BitServers={true}
                     />
                 </ContentCluster>
                 <ContentCluster title="Quick Info">
