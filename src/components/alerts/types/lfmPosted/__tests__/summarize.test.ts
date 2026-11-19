@@ -1,5 +1,6 @@
 import {
     defaultLfmPostedCriteria,
+    describeLfmPosted,
     summarizeLfmPosted,
     validateLfmPosted,
 } from "../summarize"
@@ -88,5 +89,32 @@ describe("validateLfmPosted", () => {
                 })
             )
         ).toMatch(/at most/)
+    })
+})
+
+describe("describeLfmPosted", () => {
+    it("puts quests in the title and filters in chips", () => {
+        expect(
+            describeLfmPosted(
+                criteria({
+                    quest_ids: [1, 2],
+                    server_names: ["Argonnessen"],
+                    min_level: 20,
+                    max_level: 24,
+                    difficulties: ["Elite"],
+                }),
+                questName
+            )
+        ).toEqual({
+            title: "The Pit, Tempest's Spine",
+            chips: ["Argonnessen", "Levels 20-24", "Elite"],
+        })
+    })
+
+    it("says any server when none are picked", () => {
+        expect(describeLfmPosted(criteria(), questName)).toEqual({
+            title: "The Pit",
+            chips: ["Any server"],
+        })
     })
 })

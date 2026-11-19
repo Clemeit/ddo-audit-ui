@@ -3,14 +3,15 @@
 interface NotificationPreferences {
     osNotifications: boolean
     sound: boolean
-    titleFlash: boolean
+    // The "turn on notifications" step was skipped or turned off on this device.
+    setupDismissed: boolean
 }
 
 const DEFAULT_NOTIFICATION_PREFERENCES: NotificationPreferences = Object.freeze(
     {
         osNotifications: false,
         sound: true,
-        titleFlash: true,
+        setupDismissed: false,
     }
 )
 

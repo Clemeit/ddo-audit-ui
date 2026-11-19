@@ -22,8 +22,6 @@ import {
     createOsNotificationThrottle,
     playAlertChime,
     showOsNotification,
-    startTitleFlash,
-    stopTitleFlash,
     summaryOsNotification,
 } from "../utils/alertDelivery"
 import {
@@ -35,6 +33,7 @@ import { useNotificationContext } from "./NotificationContext"
 import { useUserContext } from "./UserContext"
 import Button from "../components/global/Button"
 import usePushSubscription, { PushStatus } from "../hooks/usePushSubscription"
+import { isExpired } from "../utils/alertExpiry"
 
 const POLL_INTERVAL_MS = 15_000
 const SLOW_POLL_INTERVAL_MS = 60_000
@@ -57,6 +56,8 @@ interface AlertContextProps {
     preferences: NotificationPreferences
     setPreferences: (preferences: NotificationPreferences) => void
     isListening: boolean
+    // Enabled rules that haven't expired.
+    activeRuleCount: number
     push: {
         status: PushStatus
         enable: () => Promise<boolean>
@@ -97,7 +98,6 @@ export const AlertProvider = ({ children, navigate }: Props) => {
     const pushOnRef = useRef(false)
     pushOnRef.current = push.status === "on"
     const throttleRef = useRef(createOsNotificationThrottle())
-    const unseenCountRef = useRef(0)
     // Inbox stream ID of the last alert seen; null until seeded (seeding skips old alerts).
     const cursorRef = useRef<string | null>(null)
 
@@ -199,14 +199,6 @@ export const AlertProvider = ({ children, navigate }: Props) => {
 
             if (prefs.sound) playAlertChime()
 
-            if (document.hidden) {
-                unseenCountRef.current += 1
-                if (prefs.titleFlash) {
-                    startTitleFlash(
-                        `(${unseenCountRef.current}) ${alert.title}`
-                    )
-                }
-            }
             // A test alert shows the OS notification even in the active tab so people can see it work.
             if (document.hidden || alert.type === "test") {
                 if (prefs.osNotifications && !pushOnRef.current) {
@@ -243,20 +235,19 @@ export const AlertProvider = ({ children, navigate }: Props) => {
             navigator.serviceWorker.removeEventListener("message", onMessage)
     }, [])
 
-    useEffect(() => {
-        const onVisible = () => {
-            if (!document.hidden) unseenCountRef.current = 0
-        }
-        document.addEventListener("visibilitychange", onVisible)
-        return () => {
-            document.removeEventListener("visibilitychange", onVisible)
-            stopTitleFlash()
-        }
-    }, [])
-
     // ----- inbox polling -----
 
-    const isListening = isLoggedIn && rules.some((rule) => rule.enabled)
+    // Rules expire on the server; re-check about once a minute so this stays roughly current.
+    const [now, setNow] = useState(() => Date.now())
+    useEffect(() => {
+        if (!rules.some((rule) => rule.expires_at)) return
+        const interval = setInterval(() => setNow(Date.now()), 60_000)
+        return () => clearInterval(interval)
+    }, [rules])
+    const activeRuleCount = rules.filter(
+        (rule) => rule.enabled && !isExpired(rule.expires_at, now)
+    ).length
+    const isListening = isLoggedIn && activeRuleCount > 0
     // The test alert works even without rules, so poll briefly after sending one.
     const [testPending, setTestPending] = useState(false)
     const shouldPoll = isListening || testPending
@@ -395,6 +386,7 @@ export const AlertProvider = ({ children, navigate }: Props) => {
             preferences,
             setPreferences,
             isListening,
+            activeRuleCount,
             push,
         }),
         [
@@ -409,6 +401,7 @@ export const AlertProvider = ({ children, navigate }: Props) => {
             preferences,
             setPreferences,
             isListening,
+            activeRuleCount,
             push,
         ]
     )

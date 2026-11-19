@@ -1,8 +1,6 @@
 import {
     createOsNotificationThrottle,
     osNotificationPermission,
-    startTitleFlash,
-    stopTitleFlash,
 } from "../alertDelivery"
 
 describe("createOsNotificationThrottle", () => {
@@ -33,49 +31,6 @@ describe("createOsNotificationThrottle", () => {
         expect(decide(2)).toBe("drop")
         decide(1000) // slot freed: shown
         expect(decide(1001)).toBe("summary")
-    })
-})
-
-describe("title flash", () => {
-    let hidden = true
-
-    beforeAll(() => {
-        Object.defineProperty(document, "hidden", {
-            configurable: true,
-            get: () => hidden,
-        })
-    })
-
-    beforeEach(() => {
-        jest.useFakeTimers()
-        hidden = true
-        document.title = "DDO Audit"
-    })
-
-    afterEach(() => {
-        stopTitleFlash()
-        jest.useRealTimers()
-    })
-
-    it("alternates the title while hidden and restores it when visible", () => {
-        startTitleFlash("(1) New alert")
-        expect(document.title).toBe("(1) New alert")
-        jest.advanceTimersByTime(1000)
-        expect(document.title).toBe("DDO Audit")
-        jest.advanceTimersByTime(1000)
-        expect(document.title).toBe("(1) New alert")
-
-        hidden = false
-        document.dispatchEvent(new Event("visibilitychange"))
-        expect(document.title).toBe("DDO Audit")
-        jest.advanceTimersByTime(3000)
-        expect(document.title).toBe("DDO Audit")
-    })
-
-    it("does nothing when the tab is visible", () => {
-        hidden = false
-        startTitleFlash("(1) New alert")
-        expect(document.title).toBe("DDO Audit")
     })
 })
 

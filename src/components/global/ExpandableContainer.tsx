@@ -1,11 +1,11 @@
-import React, { useState } from "react"
+import React, { useId, useState } from "react"
 import { ReactComponent as Expand } from "../../assets/svg/expand.svg"
 import { ReactComponent as Contract } from "../../assets/svg/contract.svg"
 import "./ExpandableContainer.css"
 import Stack from "./Stack"
 
-interface Props extends React.HTMLAttributes<HTMLDivElement> {
-    title?: string
+interface Props extends Omit<React.HTMLAttributes<HTMLDivElement>, "title"> {
+    title?: React.ReactNode
     icon?: React.ReactNode
     children?: React.ReactNode
     defaultState?: boolean
@@ -23,6 +23,7 @@ const ExpandableContainer = ({
     ...rest
 }: Props) => {
     const [isOpen, setIsOpen] = useState(defaultState)
+    const contentId = useId()
 
     React.useEffect(() => {
         stateChangeCallback?.(isOpen)
@@ -33,8 +34,11 @@ const ExpandableContainer = ({
             className={`expandable-container ${className ? className : ""}`}
             {...rest}
         >
-            <div
+            <button
+                type="button"
                 className="expandable-container-header"
+                aria-expanded={isOpen}
+                aria-controls={contentId}
                 onClick={() => setIsOpen(!isOpen)}
             >
                 <Stack direction="row" align="center" gap="5px">
@@ -46,9 +50,9 @@ const ExpandableContainer = ({
                 ) : (
                     <Expand className="expandable-container-icon" />
                 )}
-            </div>
+            </button>
             {isOpen && (
-                <div>
+                <div id={contentId}>
                     <hr style={{ margin: "0px" }} />
                     <div className="expandable-container-content">
                         {children}
