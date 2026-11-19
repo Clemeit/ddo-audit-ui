@@ -34,11 +34,16 @@ import logMessage from "../utils/logUtils"
 import { useNotificationContext } from "./NotificationContext"
 import { useUserContext } from "./UserContext"
 import Button from "../components/global/Button"
+import usePushSubscription, { PushStatus } from "../hooks/usePushSubscription"
 
 const POLL_INTERVAL_MS = 15_000
 const SLOW_POLL_INTERVAL_MS = 60_000
 const SLOW_POLL_AFTER_HIDDEN_MS = 10 * 60_000
 const ALERT_TOAST_TTL_MS = 20_000
+// Sent by the service worker when a push notification is clicked (see src/service-worker.ts).
+const ALERT_NAVIGATE_MESSAGE = "ALERT_NAVIGATE"
+// Must match ALERT_PUSHED_MESSAGE in src/service-worker.ts.
+const ALERT_PUSHED_MESSAGE = "ALERT_PUSHED"
 
 interface AlertContextProps {
     rules: AlertRule[]
@@ -52,6 +57,11 @@ interface AlertContextProps {
     preferences: NotificationPreferences
     setPreferences: (preferences: NotificationPreferences) => void
     isListening: boolean
+    push: {
+        status: PushStatus
+        enable: () => Promise<boolean>
+        disable: () => Promise<void>
+    }
 }
 
 const AlertContext = createContext<AlertContextProps | undefined>(undefined)
@@ -82,6 +92,10 @@ export const AlertProvider = ({ children, navigate }: Props) => {
     navigateRef.current = navigate
     const preferencesRef = useRef(preferences)
     preferencesRef.current = preferences
+    const push = usePushSubscription({ accessToken, isLoggedIn })
+    // With push on, this device already gets an OS notification from the service worker.
+    const pushOnRef = useRef(false)
+    pushOnRef.current = push.status === "on"
     const throttleRef = useRef(createOsNotificationThrottle())
     const unseenCountRef = useRef(0)
     // Inbox stream ID of the last alert seen; null until seeded (seeding skips old alerts).
@@ -195,7 +209,7 @@ export const AlertProvider = ({ children, navigate }: Props) => {
             }
             // A test alert shows the OS notification even in the active tab so people can see it work.
             if (document.hidden || alert.type === "test") {
-                if (prefs.osNotifications) {
+                if (prefs.osNotifications && !pushOnRef.current) {
                     const decision = throttleRef.current()
                     if (decision === "show") {
                         void showOsNotification(
@@ -210,6 +224,24 @@ export const AlertProvider = ({ children, navigate }: Props) => {
         },
         [createNotification]
     )
+
+    // Clicking a push notification focuses this tab; route there without reloading.
+    useEffect(() => {
+        if (!("serviceWorker" in navigator)) return
+        const onMessage = (event: MessageEvent) => {
+            const data = event.data as { type?: string; url?: string } | null
+            if (
+                data?.type === ALERT_NAVIGATE_MESSAGE &&
+                typeof data.url === "string" &&
+                data.url.startsWith("/")
+            ) {
+                navigateRef.current(data.url)
+            }
+        }
+        navigator.serviceWorker.addEventListener("message", onMessage)
+        return () =>
+            navigator.serviceWorker.removeEventListener("message", onMessage)
+    }, [])
 
     useEffect(() => {
         const onVisible = () => {
@@ -266,7 +298,18 @@ export const AlertProvider = ({ children, navigate }: Props) => {
             return testPending && !isListening ? 5_000 : POLL_INTERVAL_MS
         }
 
+        let inFlight = false
+        let pollAgain = false
+
         const poll = async () => {
+            if (inFlight) {
+                // A push arrived mid-request; check again once this one is done.
+                pollAgain = true
+                return
+            }
+            if (timeout) clearTimeout(timeout)
+            timeout = null
+            inFlight = true
             const token = accessTokenRef.current
             if (token) {
                 try {
@@ -288,8 +331,26 @@ export const AlertProvider = ({ children, navigate }: Props) => {
                     // Expired tokens are refreshed by UserContext; try again next time.
                 }
             }
-            if (!cancelled) timeout = setTimeout(poll, nextDelay())
+            inFlight = false
+            if (cancelled) return
+            if (pollAgain) {
+                pollAgain = false
+                void poll()
+                return
+            }
+            timeout = setTimeout(poll, nextDelay())
         }
+
+        // The service worker says when a push arrives. The alert is already in the inbox (the server
+        // writes it there before pushing), so check now: the toast then shows with the push notification
+        // instead of up to a poll interval later.
+        const onServiceWorkerMessage = (event: MessageEvent) => {
+            const data = event.data as { type?: string } | null
+            if (data?.type === ALERT_PUSHED_MESSAGE) void poll()
+        }
+        const serviceWorker =
+            "serviceWorker" in navigator ? navigator.serviceWorker : null
+        serviceWorker?.addEventListener("message", onServiceWorkerMessage)
 
         const onVisibilityChange = () => {
             if (document.hidden) {
@@ -314,6 +375,10 @@ export const AlertProvider = ({ children, navigate }: Props) => {
             controller.abort()
             if (timeout) clearTimeout(timeout)
             document.removeEventListener("visibilitychange", onVisibilityChange)
+            serviceWorker?.removeEventListener(
+                "message",
+                onServiceWorkerMessage
+            )
         }
     }, [shouldPoll, isListening, testPending, deliver])
 
@@ -330,6 +395,7 @@ export const AlertProvider = ({ children, navigate }: Props) => {
             preferences,
             setPreferences,
             isListening,
+            push,
         }),
         [
             rules,
@@ -343,6 +409,7 @@ export const AlertProvider = ({ children, navigate }: Props) => {
             preferences,
             setPreferences,
             isListening,
+            push,
         ]
     )
 

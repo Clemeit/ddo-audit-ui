@@ -10,9 +10,10 @@ import { ContentCluster } from "../global/ContentCluster"
 import Checkbox from "../global/Checkbox"
 import Stack from "../global/Stack"
 import Button from "../global/Button"
+import PushSettings from "./PushSettings"
 
 const DeviceSettings = () => {
-    const { preferences, setPreferences, sendTest, isListening } =
+    const { preferences, setPreferences, sendTest, isListening, push } =
         useAlertContext()
     const { createNotification } = useNotificationContext()
     const [permission, setPermission] = useState(() =>
@@ -76,56 +77,69 @@ const DeviceSettings = () => {
     return (
         <ContentCluster
             title="This device"
-            subtitle="Alerts show up while DDO Audit is open in a tab, even if you're on another tab."
+            subtitle="How alerts reach you on this browser."
         >
-            <Stack direction="column" gap="10px">
+            <Stack direction="column" gap="16px">
                 {!isListening && (
                     <p className="secondary-text" style={{ margin: 0 }}>
                         Create an alert (or resume a paused one) to start
                         listening.
                     </p>
                 )}
-                <Checkbox
-                    checked={osChecked}
-                    disabled={
-                        permission === "unsupported" ||
-                        permission === "insecure" ||
-                        permission === "denied"
-                    }
-                    onChange={toggleOsNotifications}
-                >
-                    Show desktop notifications when DDO Audit isn't the active
-                    tab
-                </Checkbox>
-                {permission === "denied" && (
-                    <p className="secondary-text" style={{ margin: 0 }}>
-                        Your browser is blocking notifications from this site.
-                        To allow them, click the icon to the left of the address
-                        bar, allow notifications, then reload the page.
-                    </p>
-                )}
-                {permission === "insecure" && (
-                    <p className="secondary-text" style={{ margin: 0 }}>
-                        Desktop notifications need a secure (HTTPS) connection,
-                        so they aren't available on this address.
-                    </p>
-                )}
-                {permission === "unsupported" && (
-                    <p className="secondary-text" style={{ margin: 0 }}>
-                        This browser doesn't support desktop notifications.
-                    </p>
-                )}
-                <Checkbox checked={preferences.sound} onChange={toggleSound}>
-                    Play a sound
-                </Checkbox>
-                <Checkbox
-                    checked={preferences.titleFlash}
-                    onChange={() =>
-                        update({ titleFlash: !preferences.titleFlash })
-                    }
-                >
-                    Flash the tab title
-                </Checkbox>
+                <PushSettings />
+                <Stack direction="column" gap="10px">
+                    <span className="input-label">
+                        While DDO Audit is open in a tab
+                    </span>
+                    {push.status !== "on" && (
+                        <Checkbox
+                            checked={osChecked}
+                            disabled={
+                                permission === "unsupported" ||
+                                permission === "insecure" ||
+                                permission === "denied"
+                            }
+                            onChange={toggleOsNotifications}
+                        >
+                            Show desktop notifications when DDO Audit isn't the
+                            active tab
+                        </Checkbox>
+                    )}
+                    {push.status !== "on" && permission === "denied" && (
+                        <p className="secondary-text" style={{ margin: 0 }}>
+                            Your browser is blocking notifications from this
+                            site. To allow them, click the icon to the left of
+                            the address bar, allow notifications, then reload
+                            the page.
+                        </p>
+                    )}
+                    {push.status !== "on" && permission === "insecure" && (
+                        <p className="secondary-text" style={{ margin: 0 }}>
+                            Desktop notifications need a secure (HTTPS)
+                            connection, so they aren't available on this
+                            address.
+                        </p>
+                    )}
+                    {push.status !== "on" && permission === "unsupported" && (
+                        <p className="secondary-text" style={{ margin: 0 }}>
+                            This browser doesn't support desktop notifications.
+                        </p>
+                    )}
+                    <Checkbox
+                        checked={preferences.sound}
+                        onChange={toggleSound}
+                    >
+                        Play a sound
+                    </Checkbox>
+                    <Checkbox
+                        checked={preferences.titleFlash}
+                        onChange={() =>
+                            update({ titleFlash: !preferences.titleFlash })
+                        }
+                    >
+                        Flash the tab title
+                    </Checkbox>
+                </Stack>
                 <div>
                     <Button
                         type="secondary"
