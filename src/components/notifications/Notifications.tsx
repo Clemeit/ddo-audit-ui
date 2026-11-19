@@ -1,22 +1,22 @@
-import { useCallback, useMemo, useState } from "react"
+import React, { useCallback, useEffect, useMemo, useState } from "react"
 import "./Notifications.css"
 import Page from "../global/Page"
-import { ContentCluster, ContentClusterGroup } from "../global/ContentCluster"
-import Stack from "../global/Stack"
 import Button from "../global/Button"
 import PageMessage from "../global/PageMessage"
+import Skeleton from "../global/Skeleton"
 import { useUserContext } from "../../contexts/UserContext"
 import { useAlertContext } from "../../contexts/AlertContext"
 import { useNotificationContext } from "../../contexts/NotificationContext"
 import { useQuestContext } from "../../contexts/QuestContext"
 import { AlertRule } from "../../models/Alert"
-import {
-    ALERT_TYPES,
-    AlertTypeDefinition,
-    getAlertTypeDefinition,
-} from "../alerts/types"
-import RuleEditor from "./RuleEditor"
-import DeviceSettings from "./DeviceSettings"
+import { ALERT_TYPES, AlertTypeDefinition } from "../alerts/types"
+import { isExpired } from "../../utils/alertExpiry"
+import RuleEditorModal from "./RuleEditorModal"
+import RuleCard from "./RuleCard"
+import NotificationGate from "./NotificationGate"
+import DeviceBar from "./DeviceBar"
+import useDeviceNotifications from "./useDeviceNotifications"
+import { ReactComponent as AddSVG } from "../../assets/svg/add.svg"
 
 type EditorState =
     | { mode: "closed" }
@@ -28,6 +28,21 @@ function apiErrorMessage(error: unknown, fallback: string): string {
         ?.response?.data?.error
     return typeof message === "string" && message ? message : fallback
 }
+
+const STEPS = [
+    {
+        title: "Pick your quests",
+        text: "Choose the quests and raids you want, and optionally a server, level range and difficulty.",
+    },
+    {
+        title: "Turn on notifications",
+        text: "Allow notifications on each device where you want to hear about it.",
+    },
+    {
+        title: "Get alerted",
+        text: "When a matching LFM is posted, DDO Audit lets you know right away.",
+    },
+]
 
 const Notifications = () => {
     const {
@@ -47,15 +62,29 @@ const Notifications = () => {
     } = useAlertContext()
     const { createNotification } = useNotificationContext()
     const { quests } = useQuestContext()
+    const device = useDeviceNotifications()
     const [editor, setEditor] = useState<EditorState>({ mode: "closed" })
     const [busyRuleId, setBusyRuleId] = useState<number | null>(null)
 
-    const questName = useCallback((id: number) => quests[id]?.name, [quests])
+    // Re-render every minute so "Ends in …" and expired states stay current.
+    const [, setTick] = useState(0)
+    useEffect(() => {
+        if (!rules.some((rule) => rule.expires_at)) return
+        const interval = setInterval(() => setTick((t) => t + 1), 60_000)
+        return () => clearInterval(interval)
+    }, [rules])
 
-    const sortedRules = useMemo(
-        () => [...rules].sort((a, b) => a.id - b.id),
-        [rules]
+    const helpers = useMemo(
+        () => ({ questName: (id: number) => quests[id]?.name }),
+        [quests]
     )
+
+    // Active alerts first, then paused, then expired; newest first within each.
+    const sortedRules = useMemo(() => {
+        const rank = (rule: AlertRule) =>
+            isExpired(rule.expires_at) ? 2 : rule.enabled ? 0 : 1
+        return [...rules].sort((a, b) => rank(a) - rank(b) || b.id - a.id)
+    }, [rules])
 
     const notifyError = useCallback(
         (error: unknown, fallback: string) =>
@@ -98,99 +127,64 @@ const Notifications = () => {
     const saveRule = async (
         definition: AlertTypeDefinition,
         criteria: unknown,
+        expiresAt: string | null,
         existing?: AlertRule
-    ) => {
+    ): Promise<boolean> => {
         const input = {
             type: definition.type,
             criteria,
-            enabled: existing?.enabled ?? true,
-            expires_at: existing?.expires_at ?? null,
+            // Renewing an expired alert turns it back on.
+            enabled:
+                !existing || isExpired(existing.expires_at)
+                    ? true
+                    : existing.enabled,
+            expires_at: expiresAt,
         }
         try {
             if (existing) await updateRule(existing.id, input)
             else await createRule(input)
             setEditor({ mode: "closed" })
+            return true
         } catch (error) {
             notifyError(error, "Couldn't save the alert.")
+            return false
         }
     }
 
     const renderLoggedOut = () => (
-        <ContentCluster title="Get alerted">
+        <div className="notifications-intro">
+            <h2>Never miss an LFM</h2>
             <p>
-                Tell DDO Audit what you care about and it will let you know when
-                it happens. For example, get an alert when someone posts an LFM
-                for your favorite raid on your server.
+                Tell DDO Audit which quests and raids you're after, and get a
+                notification the moment someone posts an LFM for one of them,
+                even when the site is closed.
             </p>
+            <ol className="notifications-steps">
+                {STEPS.map((step, i) => (
+                    <li key={step.title}>
+                        <span className="notifications-step-number">
+                            {i + 1}
+                        </span>
+                        <div>
+                            <strong>{step.title}</strong>
+                            <p>{step.text}</p>
+                        </div>
+                    </li>
+                ))}
+            </ol>
             <p className="secondary-text">
-                Alerts are tied to your account, so you'll need to log in.
+                Alerts are saved to your account, so you'll need to log in.
             </p>
-            <Stack direction="row" gap="10px" wrap>
+            <div className="notifications-intro-actions">
                 <Button type="primary" onClick={openLoginModal}>
                     Log in
                 </Button>
                 <Button type="secondary" onClick={openRegisterModal}>
                     Create an account
                 </Button>
-            </Stack>
-        </ContentCluster>
+            </div>
+        </div>
     )
-
-    const renderRule = (rule: AlertRule) => {
-        const definition = getAlertTypeDefinition(rule.type)
-        const busy = busyRuleId === rule.id
-        return (
-            <li
-                key={rule.id}
-                className={`alert-rule ${rule.enabled ? "" : "alert-rule-disabled"}`}
-            >
-                <div className="alert-rule-text">
-                    <span className="alert-rule-type">
-                        {definition?.label ?? rule.type}
-                        {!rule.enabled && " (paused)"}
-                    </span>
-                    <span>
-                        {definition
-                            ? definition.summarize(rule.criteria, { questName })
-                            : "This alert type isn't supported on this page yet."}
-                    </span>
-                </div>
-                <Stack
-                    direction="row"
-                    gap="6px"
-                    wrap
-                    className="alert-rule-actions"
-                >
-                    <Button
-                        type="secondary"
-                        small
-                        disabled={busy}
-                        onClick={() => toggleRule(rule)}
-                    >
-                        {rule.enabled ? "Pause" : "Resume"}
-                    </Button>
-                    {definition && (
-                        <Button
-                            type="secondary"
-                            small
-                            disabled={busy}
-                            onClick={() => setEditor({ mode: "edit", rule })}
-                        >
-                            Edit
-                        </Button>
-                    )}
-                    <Button
-                        type="secondary"
-                        small
-                        disabled={busy}
-                        onClick={() => removeRule(rule)}
-                    >
-                        Delete
-                    </Button>
-                </Stack>
-            </li>
-        )
-    }
 
     const renderRules = () => {
         if (rulesError) {
@@ -207,46 +201,90 @@ const Notifications = () => {
             )
         }
         if (isLoadingRules && rules.length === 0) {
-            return <p className="secondary-text">Loading your alerts…</p>
+            return (
+                <ul className="alert-rule-list" aria-busy>
+                    {[0, 1].map((i) => (
+                        <li key={i} className="alert-rule-card">
+                            <Skeleton width="60%" height="20px" />
+                        </li>
+                    ))}
+                </ul>
+            )
         }
-        return (
-            <>
-                {sortedRules.length === 0 ? (
-                    <p className="secondary-text">
-                        You don't have any alerts yet.
+        if (sortedRules.length === 0) {
+            return (
+                <div className="alert-rules-empty">
+                    <p>
+                        <strong>No alerts yet.</strong>
                     </p>
-                ) : (
-                    <ul className="alert-rule-list">
-                        {sortedRules.map(renderRule)}
-                    </ul>
-                )}
-                {editor.mode === "closed" && (
+                    <p className="secondary-text">
+                        Create one to hear about LFMs for the quests and raids
+                        you care about.
+                    </p>
                     <Button
                         type="primary"
+                        icon={<AddSVG />}
                         onClick={() => setEditor({ mode: "create" })}
                     >
-                        New alert
+                        Create your first alert
                     </Button>
-                )}
-            </>
+                </div>
+            )
+        }
+        return (
+            <ul className="alert-rule-list">
+                {sortedRules.map((rule) => (
+                    <RuleCard
+                        key={rule.id}
+                        rule={rule}
+                        helpers={helpers}
+                        busy={busyRuleId === rule.id}
+                        onToggle={toggleRule}
+                        onEdit={(r) => setEditor({ mode: "edit", rule: r })}
+                        onDelete={removeRule}
+                    />
+                ))}
+            </ul>
         )
     }
 
-    const renderEditor = () => {
-        if (editor.mode === "closed") return null
+    const renderLoggedIn = () => {
+        const { state } = device.device
+        if (state === "gate" || state === "gate-blocked") {
+            return <NotificationGate device={device} />
+        }
         const existing = editor.mode === "edit" ? editor.rule : undefined
         return (
-            <ContentCluster title={existing ? "Edit alert" : "New alert"}>
-                <RuleEditor
-                    key={existing?.id ?? "new"}
-                    types={ALERT_TYPES}
-                    existing={existing}
-                    onSave={(definition, criteria) =>
-                        saveRule(definition, criteria, existing)
-                    }
-                    onCancel={() => setEditor({ mode: "closed" })}
-                />
-            </ContentCluster>
+            <>
+                <DeviceBar device={device} />
+                <section className="alert-rules" aria-labelledby="your-alerts">
+                    <div className="alert-rules-header">
+                        <h2 id="your-alerts">Your alerts</h2>
+                        {sortedRules.length > 0 && (
+                            <Button
+                                type="primary"
+                                small
+                                icon={<AddSVG />}
+                                onClick={() => setEditor({ mode: "create" })}
+                            >
+                                New alert
+                            </Button>
+                        )}
+                    </div>
+                    {renderRules()}
+                </section>
+                {editor.mode !== "closed" && (
+                    <RuleEditorModal
+                        key={existing?.id ?? "new"}
+                        types={ALERT_TYPES}
+                        existing={existing}
+                        onSave={(definition, criteria, expiresAt) =>
+                            saveRule(definition, criteria, expiresAt, existing)
+                        }
+                        onClose={() => setEditor({ mode: "closed" })}
+                    />
+                )}
+            </>
         )
     }
 
@@ -255,21 +293,15 @@ const Notifications = () => {
             title="Notifications"
             description="Get alerted when someone posts an LFM for your favorite quest or raid."
         >
-            <ContentClusterGroup>
+            <div className="notifications-page">
                 {isAuthLoading ? (
-                    <p className="secondary-text">Loading…</p>
+                    <Skeleton width="100%" height="120px" />
                 ) : !isLoggedIn ? (
                     renderLoggedOut()
                 ) : (
-                    <>
-                        <ContentCluster title="Your alerts">
-                            {renderRules()}
-                        </ContentCluster>
-                        {renderEditor()}
-                        <DeviceSettings />
-                    </>
+                    renderLoggedIn()
                 )}
-            </ContentClusterGroup>
+            </div>
         </Page>
     )
 }

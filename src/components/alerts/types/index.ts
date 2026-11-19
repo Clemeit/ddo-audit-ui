@@ -7,6 +7,7 @@ import { LfmPostedCriteria } from "../../../models/Alert"
 import LfmPostedCriteriaForm from "./lfmPosted/LfmPostedCriteriaForm"
 import {
     defaultLfmPostedCriteria,
+    describeLfmPosted,
     summarizeLfmPosted,
     validateLfmPosted,
 } from "./lfmPosted/summarize"
@@ -28,17 +29,25 @@ interface AlertTypeDefinition<TCriteria = any> {
     defaultCriteria: () => TCriteria
     CriteriaForm: React.ComponentType<CriteriaFormProps<TCriteria>>
     summarize: (criteria: TCriteria, helpers: SummaryHelpers) => string
+    // Card form of a rule: a title plus short filter chips.
+    describe: (
+        criteria: TCriteria,
+        helpers: SummaryHelpers
+    ) => { title: string; chips: string[] }
     validate: (criteria: TCriteria) => string | null
 }
 
 const lfmPosted: AlertTypeDefinition<LfmPostedCriteria> = {
     type: "lfm_posted",
     label: "LFM posted",
-    description: "When someone posts an LFM for one of your quests.",
+    description:
+        "Get alerted when someone posts an LFM for one of your quests.",
     defaultCriteria: defaultLfmPostedCriteria,
     CriteriaForm: LfmPostedCriteriaForm,
     summarize: (criteria, { questName }) =>
         summarizeLfmPosted(criteria, questName),
+    describe: (criteria, { questName }) =>
+        describeLfmPosted(criteria, questName),
     validate: validateLfmPosted,
 }
 

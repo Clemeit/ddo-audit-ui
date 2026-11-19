@@ -1,12 +1,18 @@
-import { useMemo, useState } from "react"
+import React, { useId, useMemo, useState } from "react"
 import { LFM_DIFFICULTIES, LfmPostedCriteria } from "../../../../models/Alert"
-import { SERVER_NAMES } from "../../../../constants/servers"
+import { Quest } from "../../../../models/Lfm"
+import { SERVERS_64_BITS } from "../../../../constants/servers"
 import { useQuestContext } from "../../../../contexts/QuestContext"
-import Checkbox from "../../../global/Checkbox"
-import Stack from "../../../global/Stack"
+import PillToggleGroup from "../../../global/PillToggleGroup"
 import type { CriteriaFormProps } from "../index"
 
-const MAX_SEARCH_RESULTS = 12
+const MAX_SEARCH_RESULTS = 10
+const MAX_QUESTS = 20
+
+// Only the 64-bit servers are still played on.
+const SERVER_OPTIONS = [...SERVERS_64_BITS]
+    .sort((a, b) => a.localeCompare(b))
+    .map((value) => ({ value }))
 
 function parseLevel(value: string): number | null {
     if (value.trim() === "") return null
@@ -14,10 +20,13 @@ function parseLevel(value: string): number | null {
     return Number.isFinite(n) ? n : null
 }
 
-function toggle<T>(list: T[], item: T): T[] {
-    return list.includes(item)
-        ? list.filter((x) => x !== item)
-        : [...list, item]
+/** "Raid · Level 20 · Epic 32", from the public quest fields. */
+function questDetails(quest: Quest): string {
+    const parts: string[] = []
+    if (quest.group_size === "Raid") parts.push("Raid")
+    if (quest.heroic_normal_cr) parts.push(`Level ${quest.heroic_normal_cr}`)
+    if (quest.epic_normal_cr) parts.push(`Epic ${quest.epic_normal_cr}`)
+    return parts.join(" · ")
 }
 
 const LfmPostedCriteriaForm = ({
@@ -26,10 +35,18 @@ const LfmPostedCriteriaForm = ({
 }: CriteriaFormProps<LfmPostedCriteria>) => {
     const { quests } = useQuestContext()
     const [query, setQuery] = useState("")
+    const [activeIndex, setActiveIndex] = useState(0)
+    const [isOpen, setIsOpen] = useState(false)
+    const listId = useId()
+
+    const set = (patch: Partial<LfmPostedCriteria>) =>
+        onChange({ ...criteria, ...patch })
+
+    const atLimit = criteria.quest_ids.length >= MAX_QUESTS
 
     const searchResults = useMemo(() => {
         const q = query.trim().toLowerCase()
-        if (q.length < 2) return []
+        if (!q) return []
         return Object.values(quests)
             .filter(
                 (quest) =>
@@ -37,109 +54,188 @@ const LfmPostedCriteriaForm = ({
                     quest.name.toLowerCase().includes(q) &&
                     !criteria.quest_ids.includes(quest.id)
             )
-            .sort((a, b) => (a.name ?? "").localeCompare(b.name ?? ""))
+            .sort((a, b) => {
+                // Names that start with the query first, then alphabetical.
+                const aStarts = a.name!.toLowerCase().startsWith(q) ? 0 : 1
+                const bStarts = b.name!.toLowerCase().startsWith(q) ? 0 : 1
+                return aStarts - bStarts || a.name!.localeCompare(b.name!)
+            })
             .slice(0, MAX_SEARCH_RESULTS)
     }, [quests, query, criteria.quest_ids])
 
-    const set = (patch: Partial<LfmPostedCriteria>) =>
-        onChange({ ...criteria, ...patch })
+    const showResults = isOpen && query.trim().length > 0 && !atLimit
+
+    const addQuest = (quest: Quest) => {
+        set({ quest_ids: [...criteria.quest_ids, quest.id] })
+        setQuery("")
+        setActiveIndex(0)
+    }
+
+    const removeQuest = (id: number) =>
+        set({ quest_ids: criteria.quest_ids.filter((q) => q !== id) })
+
+    const onSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === "ArrowDown") {
+            e.preventDefault()
+            setIsOpen(true)
+            setActiveIndex((i) =>
+                Math.min(i + 1, Math.max(searchResults.length - 1, 0))
+            )
+        } else if (e.key === "ArrowUp") {
+            e.preventDefault()
+            setActiveIndex((i) => Math.max(i - 1, 0))
+        } else if (e.key === "Enter") {
+            const quest = searchResults[activeIndex]
+            if (showResults && quest) {
+                e.preventDefault()
+                addQuest(quest)
+            }
+        } else if (e.key === "Escape" && showResults) {
+            // Close the list without closing the dialog around it.
+            e.stopPropagation()
+            setIsOpen(false)
+        } else if (
+            e.key === "Backspace" &&
+            query === "" &&
+            criteria.quest_ids.length > 0
+        ) {
+            removeQuest(criteria.quest_ids[criteria.quest_ids.length - 1])
+        }
+    }
+
+    const activeOptionId =
+        showResults && searchResults[activeIndex]
+            ? `${listId}-${searchResults[activeIndex].id}`
+            : undefined
 
     return (
-        <Stack direction="column" gap="20px" className="alert-criteria-form">
-            <Stack direction="column" gap="6px">
-                <label htmlFor="alert-quest-search" className="input-label">
-                    Quests
+        <div className="alert-form">
+            <div className="alert-field">
+                <label
+                    htmlFor={`${listId}-search`}
+                    className="alert-field-label"
+                >
+                    Quests and raids
                 </label>
-                {criteria.quest_ids.length > 0 && (
-                    <div className="alert-chips">
-                        {criteria.quest_ids.map((id) => (
-                            <button
-                                key={id}
-                                type="button"
-                                className="alert-chip"
-                                onClick={() =>
-                                    set({
-                                        quest_ids: criteria.quest_ids.filter(
-                                            (q) => q !== id
-                                        ),
-                                    })
-                                }
-                                aria-label={`Remove ${quests[id]?.name ?? `quest ${id}`}`}
-                            >
-                                {quests[id]?.name ?? `Quest #${id}`} ✕
-                            </button>
-                        ))}
-                    </div>
-                )}
-                <input
-                    id="alert-quest-search"
-                    type="text"
-                    placeholder="Search for a quest or raid"
-                    value={query}
-                    onChange={(e) => setQuery(e.target.value)}
-                    autoComplete="off"
-                    style={{ width: "100%", boxSizing: "border-box" }}
-                />
-                {searchResults.length > 0 && (
-                    <ul className="alert-search-results">
-                        {searchResults.map((quest) => (
-                            <li key={quest.id}>
-                                <button
-                                    type="button"
-                                    onClick={() => {
-                                        set({
-                                            quest_ids: [
-                                                ...criteria.quest_ids,
-                                                quest.id,
-                                            ],
-                                        })
-                                        setQuery("")
-                                    }}
-                                >
-                                    {quest.name}
-                                </button>
-                            </li>
-                        ))}
-                    </ul>
-                )}
-                {query.trim().length >= 2 && searchResults.length === 0 && (
-                    <span className="secondary-text">No matching quests.</span>
-                )}
-            </Stack>
-
-            <Stack direction="column" gap="6px">
-                <span className="input-label">
-                    Servers{" "}
-                    <span className="secondary-text">(none = any server)</span>
-                </span>
-                <div className="alert-checkbox-grid">
-                    {SERVER_NAMES.map((server) => (
-                        <Checkbox
-                            key={server}
-                            checked={criteria.server_names.includes(server)}
-                            onChange={() =>
-                                set({
-                                    server_names: toggle(
-                                        criteria.server_names,
-                                        server
-                                    ),
-                                })
-                            }
+                <div className="quest-picker">
+                    {criteria.quest_ids.length > 0 && (
+                        <ul
+                            className="alert-chips"
+                            aria-label="Selected quests"
                         >
-                            {server}
-                        </Checkbox>
-                    ))}
+                            {criteria.quest_ids.map((id) => {
+                                const name = quests[id]?.name ?? `Quest #${id}`
+                                return (
+                                    <li key={id} className="alert-chip">
+                                        {name}
+                                        <button
+                                            type="button"
+                                            className="alert-chip-remove"
+                                            onClick={() => removeQuest(id)}
+                                            aria-label={`Remove ${name}`}
+                                        >
+                                            ✕
+                                        </button>
+                                    </li>
+                                )
+                            })}
+                        </ul>
+                    )}
+                    <input
+                        id={`${listId}-search`}
+                        className="quest-picker-input"
+                        type="text"
+                        role="combobox"
+                        aria-expanded={showResults}
+                        aria-controls={listId}
+                        aria-autocomplete="list"
+                        aria-activedescendant={activeOptionId}
+                        placeholder={
+                            atLimit
+                                ? `Up to ${MAX_QUESTS} quests per alert`
+                                : criteria.quest_ids.length
+                                  ? "Add another…"
+                                  : "Search for a quest or raid"
+                        }
+                        disabled={atLimit}
+                        value={query}
+                        onChange={(e) => {
+                            setQuery(e.target.value)
+                            setActiveIndex(0)
+                            setIsOpen(true)
+                        }}
+                        onFocus={() => setIsOpen(true)}
+                        onBlur={() => setIsOpen(false)}
+                        onKeyDown={onSearchKeyDown}
+                        autoComplete="off"
+                    />
+                    {showResults && (
+                        <ul
+                            className="quest-picker-results"
+                            role="listbox"
+                            id={listId}
+                        >
+                            {searchResults.length === 0 ? (
+                                <li className="quest-picker-empty">
+                                    No matching quests.
+                                </li>
+                            ) : (
+                                searchResults.map((quest, i) => (
+                                    <li
+                                        key={quest.id}
+                                        id={`${listId}-${quest.id}`}
+                                        role="option"
+                                        aria-selected={i === activeIndex}
+                                        className={`quest-picker-option ${i === activeIndex ? "active" : ""}`}
+                                        // mousedown so the input's blur doesn't close the list first
+                                        onMouseDown={(e) => {
+                                            e.preventDefault()
+                                            addQuest(quest)
+                                        }}
+                                        onMouseEnter={() => setActiveIndex(i)}
+                                    >
+                                        <span>{quest.name}</span>
+                                        <span className="quest-picker-details">
+                                            {questDetails(quest)}
+                                        </span>
+                                    </li>
+                                ))
+                            )}
+                        </ul>
+                    )}
                 </div>
-            </Stack>
+            </div>
 
-            <Stack direction="column" gap="6px">
-                <span className="input-label">
+            <div className="alert-field">
+                <span className="alert-field-label">Servers</span>
+                <PillToggleGroup
+                    ariaLabel="Servers"
+                    anyLabel="Any server"
+                    options={SERVER_OPTIONS}
+                    selected={criteria.server_names}
+                    onChange={(server_names) => set({ server_names })}
+                />
+            </div>
+
+            <div className="alert-field">
+                <span className="alert-field-label">Difficulty</span>
+                <PillToggleGroup
+                    ariaLabel="Difficulty"
+                    anyLabel="Any"
+                    options={LFM_DIFFICULTIES.map((value) => ({
+                        value: value as string,
+                    }))}
+                    selected={criteria.difficulties}
+                    onChange={(difficulties) => set({ difficulties })}
+                />
+            </div>
+
+            <div className="alert-field">
+                <span className="alert-field-label">
                     Your level range{" "}
-                    <span className="secondary-text">
-                        (alerts when the LFM's levels overlap it)
-                    </span>
+                    <span className="alert-field-optional">(optional)</span>
                 </span>
-                <Stack direction="row" gap="10px" align="center">
+                <div className="alert-level-range">
                     <input
                         type="number"
                         aria-label="Minimum level"
@@ -150,9 +246,8 @@ const LfmPostedCriteriaForm = ({
                         onChange={(e) =>
                             set({ min_level: parseLevel(e.target.value) })
                         }
-                        style={{ width: "80px" }}
                     />
-                    <span>to</span>
+                    <span className="secondary-text">to</span>
                     <input
                         type="number"
                         aria-label="Maximum level"
@@ -163,36 +258,13 @@ const LfmPostedCriteriaForm = ({
                         onChange={(e) =>
                             set({ max_level: parseLevel(e.target.value) })
                         }
-                        style={{ width: "80px" }}
                     />
-                </Stack>
-            </Stack>
-
-            <Stack direction="column" gap="6px">
-                <span className="input-label">
-                    Difficulties{" "}
-                    <span className="secondary-text">(none = any)</span>
-                </span>
-                <div className="alert-checkbox-grid">
-                    {LFM_DIFFICULTIES.map((difficulty) => (
-                        <Checkbox
-                            key={difficulty}
-                            checked={criteria.difficulties.includes(difficulty)}
-                            onChange={() =>
-                                set({
-                                    difficulties: toggle(
-                                        criteria.difficulties,
-                                        difficulty
-                                    ),
-                                })
-                            }
-                        >
-                            {difficulty}
-                        </Checkbox>
-                    ))}
                 </div>
-            </Stack>
-        </Stack>
+                <span className="alert-field-hint">
+                    Only alert when the LFM's level range overlaps yours.
+                </span>
+            </div>
+        </div>
     )
 }
 

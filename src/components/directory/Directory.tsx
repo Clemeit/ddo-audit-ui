@@ -7,8 +7,19 @@ import Page from "../global/Page.tsx"
 import NavCardCluster from "../global/NavCardCluster.tsx"
 import { BETTER_STACK_URL, API_DOC_URL } from "../../constants/client.ts"
 import Badge from "../global/Badge.tsx"
+import { useAppContext } from "../../contexts/AppContext.tsx"
+import {
+    getIsFeatureEnabled,
+    NOTIFICATIONS_FEATURE_KEY,
+} from "../../utils/configUtils.ts"
 
 const Directory = () => {
+    const { config } = useAppContext()
+    const notificationsEnabled = getIsFeatureEnabled(
+        config,
+        NOTIFICATIONS_FEATURE_KEY
+    )
+
     return (
         <Page
             title="DDO Audit | Character Tracking and LFM Viewer"
@@ -35,10 +46,18 @@ const Directory = () => {
                         <NavigationCard type="grouping" />
                         <NavigationCard type="who" />
                         <NavigationCard type="guilds" />
-                        <NavigationCard
-                            type="notifications"
-                            badge={<Badge text="New" type="new" />}
-                        />
+                        {notificationsEnabled ? (
+                            <NavigationCard
+                                type="notifications"
+                                badge={<Badge text="New" type="new" />}
+                            />
+                        ) : (
+                            <NavigationCard
+                                type="notifications"
+                                badge={<Badge text="Soon" type="soon" />}
+                                disabled
+                            />
+                        )}
                         <NavigationCard type="friends" />
                         <NavigationCard type="ignores" />
                         <NavigationCard type="owned-content" />

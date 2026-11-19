@@ -10,15 +10,19 @@ interface Props {
     maxWidth?: string
     fullScreenOnMobile?: boolean
     freezeBodyScroll?: boolean
+    ariaLabel?: string
+    className?: string
 }
 const Modal = ({
     children,
     onClose,
     hideOverlay = false,
     centeredContent = false,
-    maxWidth = "400px",
+    maxWidth,
     fullScreenOnMobile = false,
     freezeBodyScroll = false,
+    ariaLabel,
+    className = "",
 }: Props) => {
     const modalRef = useRef<HTMLDivElement>(null)
 
@@ -50,7 +54,11 @@ const Modal = ({
                 <div className="modal-overlay" onClick={onClose} />
             )}
             <div
-                className={`modal-container ${centeredContent ? "centered-content" : ""} ${fullScreenOnMobile ? "full-screen-on-mobile" : ""}`}
+                className={`modal-container ${centeredContent ? "centered-content" : ""} ${fullScreenOnMobile ? "full-screen-on-mobile" : ""} ${className}`}
+                role="dialog"
+                aria-modal="true"
+                aria-label={ariaLabel}
+                style={maxWidth ? { maxWidth, width: "100%" } : undefined}
                 onKeyDown={handleKeyDown}
                 tabIndex={-1}
                 ref={modalRef}

@@ -18,3 +18,16 @@ export const getIsNightRevels = (config: ConfigEndpointResponse): boolean => {
         return false
     }
 }
+
+/**
+ * A feature flag from the server config table: on when the row exists and is_enabled is true.
+ * Missing rows (and no config yet) count as off.
+ */
+export const getIsFeatureEnabled = (
+    config: ConfigEndpointResponse | null | undefined,
+    key: string
+): boolean => config?.data?.[key]?.is_enabled === true
+
+// Config key that launches the notifications feature: the Directory card and the grouping page link.
+// The /notifications route itself always works, so it can be tested before launch.
+export const NOTIFICATIONS_FEATURE_KEY = "notifications_enabled"

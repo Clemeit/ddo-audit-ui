@@ -1,4 +1,4 @@
-// Showing a delivered alert on this device: OS notification, sound, title flash.
+// Showing a delivered alert on this device: OS notification and sound.
 // The in-app toast is created by AlertContext through the notification context.
 
 import { RenderedAlert } from "../models/Alert"
@@ -111,37 +111,6 @@ function summaryOsNotification(): OsNotificationOptions {
     }
 }
 
-// ----- title flash -----
-
-let flashTimer: ReturnType<typeof setInterval> | null = null
-let originalTitle: string | null = null
-
-function stopTitleFlash() {
-    if (flashTimer) clearInterval(flashTimer)
-    flashTimer = null
-    if (originalTitle !== null) document.title = originalTitle
-    originalTitle = null
-    document.removeEventListener("visibilitychange", onVisibilityChange)
-}
-
-function onVisibilityChange() {
-    if (!document.hidden) stopTitleFlash()
-}
-
-/** Alternate the tab title with `message` until the tab is visible again. */
-function startTitleFlash(message: string, intervalMs = 1000) {
-    if (typeof document === "undefined" || !document.hidden) return
-    if (flashTimer) clearInterval(flashTimer)
-    if (originalTitle === null) originalTitle = document.title
-    let showMessage = true
-    document.title = message
-    flashTimer = setInterval(() => {
-        showMessage = !showMessage
-        document.title = showMessage ? message : (originalTitle ?? "")
-    }, intervalMs)
-    document.addEventListener("visibilitychange", onVisibilityChange)
-}
-
 // ----- sound -----
 
 let audioContext: AudioContext | null = null
@@ -184,8 +153,6 @@ export {
     showOsNotification,
     alertToOsNotification,
     summaryOsNotification,
-    startTitleFlash,
-    stopTitleFlash,
     playAlertChime,
 }
 export type { ThrottleDecision, OsNotificationOptions, OsNotificationStatus }

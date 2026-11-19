@@ -34,6 +34,20 @@ function summarizeLfmPosted(
     return parts.join(" · ")
 }
 
+/** Card form of an lfm_posted rule: quest names as the title, the filters as chips. */
+function describeLfmPosted(
+    criteria: LfmPostedCriteria,
+    questName: (id: number) => string | undefined
+): { title: string; chips: string[] } {
+    const servers = criteria.server_names ?? []
+    const chips = [servers.length ? servers.join(", ") : "Any server"]
+    const levels = levelText(criteria.min_level, criteria.max_level)
+    if (levels) chips.push(levels.charAt(0).toUpperCase() + levels.slice(1))
+    if (criteria.difficulties?.length)
+        chips.push(criteria.difficulties.join(", "))
+    return { title: listQuests(criteria.quest_ids ?? [], questName), chips }
+}
+
 /** Returns a user-facing problem with the criteria, or null when it can be saved. */
 function validateLfmPosted(criteria: LfmPostedCriteria): string | null {
     if (!criteria.quest_ids?.length) return "Pick at least one quest."
@@ -61,4 +75,9 @@ function defaultLfmPostedCriteria(): LfmPostedCriteria {
     }
 }
 
-export { summarizeLfmPosted, validateLfmPosted, defaultLfmPostedCriteria }
+export {
+    summarizeLfmPosted,
+    describeLfmPosted,
+    validateLfmPosted,
+    defaultLfmPostedCriteria,
+}

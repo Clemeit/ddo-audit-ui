@@ -1,0 +1,37 @@
+.pill-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.pill {
+    font: inherit;
+    font-size: 0.85rem;
+    padding: 4px 12px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--secondary-text);
+    cursor: pointer;
+    transition:
+        background-color 120ms,
+        border-color 120ms,
+        color 120ms;
+}
+
+.pill:hover {
+    border-color: var(--secondary-text);
+    color: var(--text);
+}
+
+.pill[aria-pressed="true"],
+.pill[aria-checked="true"] {
+    background: var(--text);
+    border-color: var(--text);
+    color: var(--text-inverted);
+}
+
+.pill:focus-visible {
+    outline: 2px solid var(--blue1);
+    outline-offset: 2px;
+}
