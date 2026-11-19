@@ -21,6 +21,13 @@ import {
 } from "../global/CommonMessages.tsx"
 import { ServerInfoApiDataModel } from "../../models/Game.ts"
 import { useQuestContext } from "../../contexts/QuestContext.tsx"
+import { useUserContext } from "../../contexts/UserContext.tsx"
+import { useAlertContext } from "../../contexts/AlertContext.tsx"
+import { useAppContext } from "../../contexts/AppContext.tsx"
+import {
+    getIsFeatureEnabled,
+    NOTIFICATIONS_FEATURE_KEY,
+} from "../../utils/configUtils.ts"
 import {
     SERVER_NAMES_LOWER,
     SERVERS_64_BITS_LOWER,
@@ -68,6 +75,13 @@ const GroupingContent = () => {
     }, [lfmState, serverInfoState])
 
     const { quests } = useQuestContext()
+    const { isLoggedIn } = useUserContext()
+    const { activeRuleCount } = useAlertContext()
+    const { config } = useAppContext()
+    const notificationsEnabled = getIsFeatureEnabled(
+        config,
+        NOTIFICATIONS_FEATURE_KEY
+    )
     const getQuestById = (id: number): Quest | undefined => {
         return quests[id]
     }
@@ -319,22 +333,51 @@ const GroupingContent = () => {
                     {getCurrentRaidsContent()}
                 </ContentCluster>
                 <ContentCluster title="Notifications">
-                    <Stack direction="row" gap="10px" align="center">
-                        <p
-                            style={{
-                                textDecoration: "line-through",
-                                margin: 0,
-                            }}
-                        >
-                            You currently have 0 notification rules set up.
-                            Configure rules on the{" "}
-                            <Link to="/notifications" disabled>
-                                notification settings
-                            </Link>{" "}
-                            page.
+                    {!notificationsEnabled ? (
+                        <Stack direction="row" gap="10px" align="center">
+                            <p
+                                style={{
+                                    textDecoration: "line-through",
+                                    margin: 0,
+                                }}
+                            >
+                                You currently have 0 notification rules set up.
+                                Configure rules on the{" "}
+                                <Link to="/notifications" disabled>
+                                    notification settings
+                                </Link>{" "}
+                                page.
+                            </p>
+                            <Badge text="Soon" type="soon" />
+                        </Stack>
+                    ) : (
+                        <p style={{ margin: 0 }}>
+                            {!isLoggedIn ? (
+                                <>
+                                    Get alerted when someone posts an LFM for
+                                    your quests.{" "}
+                                    <Link to="/notifications">
+                                        Set up notifications
+                                    </Link>
+                                </>
+                            ) : activeRuleCount > 0 ? (
+                                <>
+                                    You have {activeRuleCount} active{" "}
+                                    {pluralize("alert", activeRuleCount)}.{" "}
+                                    <Link to="/notifications">
+                                        Manage alerts
+                                    </Link>
+                                </>
+                            ) : (
+                                <>
+                                    You don't have any active alerts.{" "}
+                                    <Link to="/notifications">
+                                        Set up an alert
+                                    </Link>
+                                </>
+                            )}
                         </p>
-                        <Badge text="Soon" type="soon" />
-                    </Stack>
+                    )}
                 </ContentCluster>
                 <ContentCluster title="See Also...">
                     <NavCardCluster>

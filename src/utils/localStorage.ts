@@ -5,7 +5,10 @@ import { Area } from "../models/Area.ts"
 import { Quest } from "../models/Lfm.ts"
 import logMessage from "./logUtils.ts"
 import { RaidTimerStorage } from "../models/RaidTimers.ts"
-import { NotificationPreferences } from "../models/Notification.ts"
+import {
+    DEFAULT_NOTIFICATION_PREFERENCES,
+    NotificationPreferences,
+} from "../models/Notification.ts"
 import { ConfigEndpointResponse } from "../models/Config.ts"
 
 const VERSION_PREFIX = "v1-"
@@ -416,12 +419,21 @@ function setTrackedCharacterIds(ids: number[]): void {
     setData<any>(LFM_SETTINGS_KEY, settings)
 }
 
-// Notification preferences functions
-function getNotificationPreferences(): NotificationPreferences | null {
-    return getData<NotificationPreferences | null>(
+// Notification preferences functions (per device; older saved shapes fall back to defaults)
+function getNotificationPreferences(): NotificationPreferences {
+    const saved = getData<Partial<NotificationPreferences> | null>(
         NOTIFICATION_PREFERENCES_KEY,
         null
     )
+    const preferences = { ...DEFAULT_NOTIFICATION_PREFERENCES }
+    if (saved && typeof saved === "object") {
+        for (const key of Object.keys(preferences) as Array<
+            keyof NotificationPreferences
+        >) {
+            if (typeof saved[key] === "boolean") preferences[key] = saved[key]
+        }
+    }
+    return preferences
 }
 
 function setNotificationPreferences(

@@ -12,6 +12,10 @@ const GITHUB_LINK = "https://github.com/Clemeit/ddo-audit-ui"
 
 // Determine API URL based on environment variables
 const getApiUrl = () => {
+    // Full override, e.g. REACT_APP_API_URL=http://api.localtest.me for the local dev stack.
+    const apiUrlOverride = process.env.REACT_APP_API_URL
+    if (apiUrlOverride) return apiUrlOverride.replace(/\/+$/, "")
+
     const apiPort = process.env.REACT_APP_API_PORT
     const baseUrl = "https://api.ddoaudit.com"
 
