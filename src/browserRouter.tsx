@@ -80,6 +80,22 @@ const QuestSpecific = lazy(() =>
 const Account = lazy(() =>
     lazyRetry(() => import("./components/account/Account.tsx"))
 )
+const ShardExchange = lazy(() =>
+    lazyRetry(() => import("./components/shard-exchange/ShardExchange.tsx"))
+)
+const ShardExchangeServer = lazy(() =>
+    lazyRetry(
+        () => import("./components/shard-exchange/ShardExchangeServer.tsx")
+    )
+)
+const ShardExchangeItem = lazy(() =>
+    lazyRetry(() => import("./components/shard-exchange/ShardExchangeItem.tsx"))
+)
+const ShardExchangeMyBids = lazy(() =>
+    lazyRetry(
+        () => import("./components/shard-exchange/ShardExchangeMyBids.tsx")
+    )
+)
 
 // Set up the router
 export default createBrowserRouter(
@@ -200,6 +216,12 @@ export default createBrowserRouter(
                 <Route path=":questName" element={<QuestSpecific />} />
             </Route>
             <Route path="/account" element={<Account />} />
+            <Route path="/shard-exchange" element={<Outlet />}>
+                <Route index element={<ShardExchange />} />
+                <Route path="my-bids" element={<ShardExchangeMyBids />} />
+                <Route path=":server" element={<ShardExchangeServer />} />
+                <Route path=":server/:item" element={<ShardExchangeItem />} />
+            </Route>
             <Route path="/about" element={<About />} />
             <Route path="*" element={<NotFound />} />
         </Route>

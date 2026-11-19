@@ -24,6 +24,10 @@ const Directory = () => {
                             badge={<Badge text="New" type="new" />}
                         />
                         <NavigationCard
+                            type="shard-exchange"
+                            badge={<Badge text="New" type="new" />}
+                        />
+                        <NavigationCard
                             type="trends"
                             badge={<Badge text="Soon" type="soon" />}
                             disabled
