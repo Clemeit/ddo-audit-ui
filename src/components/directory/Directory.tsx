@@ -37,8 +37,7 @@ const Directory = () => {
                         <NavigationCard type="guilds" />
                         <NavigationCard
                             type="notifications"
-                            badge={<Badge text="Soon" type="soon" />}
-                            disabled
+                            badge={<Badge text="New" type="new" />}
                         />
                         <NavigationCard type="friends" />
                         <NavigationCard type="ignores" />

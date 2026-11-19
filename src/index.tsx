@@ -11,6 +11,12 @@ import { ServiceWorkerUpdater } from "./components/global/ServiceWorkerUpdater.t
 import logMessage from "./utils/logUtils.ts"
 import { UserProvider } from "./contexts/UserContext.tsx"
 import { RegisteredCharactersProvider } from "./contexts/RegisteredCharactersContext.tsx"
+import { AlertProvider } from "./contexts/AlertContext.tsx"
+
+// AlertProvider sits outside the router, so give it the router's navigate.
+const navigateInApp = (url: string) => {
+    void browserRouter.navigate(url)
+}
 
 // Preload the banner image for improved LCP
 // const preloadBannerImage = () => {
@@ -30,10 +36,12 @@ root.render(
         <AppProvider>
             <NotificationProvider>
                 <UserProvider>
-                    <RegisteredCharactersProvider>
-                        <ServiceWorkerUpdater />
-                        <RouterProvider router={browserRouter} />
-                    </RegisteredCharactersProvider>
+                    <AlertProvider navigate={navigateInApp}>
+                        <RegisteredCharactersProvider>
+                            <ServiceWorkerUpdater />
+                            <RouterProvider router={browserRouter} />
+                        </RegisteredCharactersProvider>
+                    </AlertProvider>
                 </UserProvider>
             </NotificationProvider>
         </AppProvider>

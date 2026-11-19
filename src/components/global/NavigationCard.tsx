@@ -68,7 +68,7 @@ const typeToDescriptionMap = {
     activity: "View your verified characters' detailed activity history.",
     health: "Monitor DDO Audit's data collection, website, and API health.",
     ignores: "Hide LFMs posted by certain players or containing certain words.",
-    notifications: "Manage LFM and friend push notification preferences.",
+    notifications: "Get alerted when an LFM is posted for your favorite quests.",
     guilds: "Search for guilds, view stats, and see members of your guild.",
     "owned-content":
         "Specify which adventure packs you own to filter content appropriately.",
