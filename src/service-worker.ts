@@ -13,38 +13,9 @@ import { ExpirationPlugin } from "workbox-expiration"
 import { precacheAndRoute, createHandlerBoundToURL } from "workbox-precaching"
 import { registerRoute } from "workbox-routing"
 import { StaleWhileRevalidate } from "workbox-strategies"
+import { latePushAge } from "./utils/pushAge"
 
-// Import Firebase for messaging (v9+ modular SDK)
-/// <reference lib="webworker" />
 declare const self: ServiceWorkerGlobalScope
-
-// Import Firebase v9+ modular SDK
-try {
-    importScripts(
-        "https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"
-    )
-    importScripts(
-        "https://www.gstatic.com/firebasejs/9.23.0/firebase-messaging-compat.js"
-    )
-} catch {
-    console.error("failed to download firebase scripts")
-}
-
-// Initialize Firebase
-// @ts-ignore
-firebase.initializeApp({
-    apiKey: "AIzaSyBPQk8DKDZvO88IL5War-0k-GLFmCvqeIg",
-    authDomain: "ddoaudit.firebaseapp.com",
-    projectId: "ddoaudit",
-    storageBucket: "ddoaudit.firebasestorage.app",
-    messagingSenderId: "808002047047",
-    appId: "1:808002047047:web:251d7d87c213ffd1233562",
-    measurementId: "G-L54PGXRRZV",
-})
-
-// Get Firebase messaging instance
-// @ts-ignore
-const messaging = firebase.messaging()
 
 clientsClaim()
 
@@ -144,112 +115,98 @@ self.addEventListener("activate", (event) => {
     )
 })
 
-// Firebase messaging - handle background messages
-messaging.onBackgroundMessage(function (payload) {
-    // console.log("[service-worker] Received background message ", payload)
+// ----- Alert push notifications (Web Push, sent by the DDO Audit alert worker) -----
 
-    // Check if any client (browser tab) is currently focused
-    return self.clients
-        .matchAll({ type: "window" })
-        .then(function (clientList) {
-            let isAppInForeground = false
+const NOTIFICATION_ICON = "/icons/logo-192px.png"
+// Must match ALERT_NAVIGATE_MESSAGE in src/contexts/AlertContext.tsx.
+const ALERT_NAVIGATE_MESSAGE = "ALERT_NAVIGATE"
+// Must match ALERT_PUSHED_MESSAGE in src/contexts/AlertContext.tsx.
+const ALERT_PUSHED_MESSAGE = "ALERT_PUSHED"
 
-            // console.log("[service-worker] Found clients:", clientList.length)
+interface AlertPushPayload {
+    type?: string
+    title?: string
+    body?: string
+    url?: string
+    tag?: string
+    created_at?: string
+}
 
-            for (let i = 0; i < clientList.length; i++) {
-                // console.log(
-                //     "[service-worker] Client",
-                //     i,
-                //     "focused:",
-                //     clientList[i].focused,
-                //     "url:",
-                //     clientList[i].url
-                // )
-                if (clientList[i].focused) {
-                    isAppInForeground = true
-                    break
-                }
-            }
+function readPushPayload(event: PushEvent): AlertPushPayload {
+    try {
+        return (event.data?.json() as AlertPushPayload) ?? {}
+    } catch {
+        return { body: event.data?.text() }
+    }
+}
 
-            // console.log(
-            //     "[service-worker] App in foreground:",
-            //     isAppInForeground
-            // )
+/** Only same-site paths; anything else opens the home page. */
+function safeAppUrl(url: unknown): string {
+    if (
+        typeof url !== "string" ||
+        !url.startsWith("/") ||
+        url.startsWith("//")
+    ) {
+        return "/"
+    }
+    return url
+}
 
-            // Only show notification if app is NOT in foreground
-            if (!isAppInForeground) {
-                // console.log("[service-worker] Showing background notification")
-
-                const notificationTitle =
-                    payload.notification?.title ||
-                    payload.data?.title ||
-                    "DDO Audit"
-                const notificationBody =
-                    payload.notification?.body ||
-                    payload.data?.body ||
-                    "New notification"
-
-                const notificationOptions = {
-                    body: notificationBody,
-                    icon: "/icons/logo-192px.png",
-                    badge: "/icons/logo-192px.png",
-                    tag: "ddo-notification",
-                    data: payload.data || {},
-                    requireInteraction: true,
-                    actions: [
-                        {
-                            action: "open",
-                            title: "Open App",
-                        },
-                        {
-                            action: "dismiss",
-                            title: "Dismiss",
-                        },
-                    ],
-                }
-
-                return self.registration.showNotification(
-                    notificationTitle,
-                    notificationOptions
-                )
-            } else {
-                // console.log(
-                //     "[service-worker] App is in foreground, not showing notification"
-                // )
-            }
-        })
+self.addEventListener("push", (event: PushEvent) => {
+    const payload = readPushPayload(event)
+    // A push that waited while the browser was closed says how old it is, so it isn't mistaken for new.
+    // (The server sends every alert under one push topic, so at most one waits per device.)
+    const age = latePushAge(payload.created_at)
+    const body = payload.body || ""
+    // Browsers require every push to show a notification, even if a tab is open (the tab also shows
+    // its own toast). The tag makes repeats for the same thing replace each other.
+    event.waitUntil(
+        Promise.all([
+            self.registration.showNotification(payload.title || "DDO Audit", {
+                body: age ? `${age} · ${body}` : body,
+                tag: payload.tag || undefined,
+                icon: NOTIFICATION_ICON,
+                badge: NOTIFICATION_ICON,
+                data: { url: safeAppUrl(payload.url) },
+            }),
+            notifyOpenTabs(),
+        ])
+    )
 })
 
-// Handle notification click
-self.addEventListener("notificationclick", function (event) {
-    // console.log("[service-worker] Notification click received.")
+/** Tell open DDO Audit tabs to check their alert inbox now, so their toast shows with this push. */
+async function notifyOpenTabs() {
+    const windows = await self.clients.matchAll({ type: "window" })
+    windows.forEach((client) =>
+        client.postMessage({ type: ALERT_PUSHED_MESSAGE })
+    )
+}
 
+self.addEventListener("notificationclick", (event: NotificationEvent) => {
     event.notification.close()
+    const path = safeAppUrl(event.notification.data?.url)
 
-    if (event.action === "open" || !event.action) {
-        // Open the app
-        event.waitUntil(
-            self.clients
-                .matchAll({ type: "window", includeUncontrolled: true })
-                .then(function (clientList) {
-                    // If the app is already open, focus it
-                    for (let i = 0; i < clientList.length; i++) {
-                        const client = clientList[i]
-                        if (
-                            client.url.includes(self.location.origin) &&
-                            "focus" in client
-                        ) {
-                            return client.focus()
-                        }
-                    }
-                    // If the app is not open, open it
-                    if (self.clients.openWindow) {
-                        return self.clients.openWindow("/")
-                    }
+    event.waitUntil(
+        (async () => {
+            const windows = await self.clients.matchAll({
+                type: "window",
+                includeUncontrolled: true,
+            })
+            const appWindow = windows.find(
+                (client) => new URL(client.url).origin === self.location.origin
+            )
+            if (appWindow) {
+                // Let the page route in-app (no reload), then bring it forward.
+                appWindow.postMessage({
+                    type: ALERT_NAVIGATE_MESSAGE,
+                    url: path,
                 })
-        )
-    }
-    // Dismiss action just closes the notification (already done above)
+                await appWindow.focus()
+                return
+            }
+            await self.clients.openWindow(path)
+        })()
+    )
 })
 
 // Any other custom service worker logic can go here.
