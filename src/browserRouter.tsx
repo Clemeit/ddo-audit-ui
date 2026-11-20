@@ -88,12 +88,12 @@ const ShardExchangeServer = lazy(() =>
         () => import("./components/shard-exchange/ShardExchangeServer.tsx")
     )
 )
-const ShardExchangeItem = lazy(() =>
-    lazyRetry(() => import("./components/shard-exchange/ShardExchangeItem.tsx"))
-)
-const ShardExchangeMyBids = lazy(() =>
+const ShardExchangeMyBidsRedirect = lazy(() =>
     lazyRetry(
-        () => import("./components/shard-exchange/ShardExchangeMyBids.tsx")
+        () =>
+            import(
+                "./components/shard-exchange/ShardExchangeMyBidsRedirect.tsx"
+            )
     )
 )
 
@@ -218,9 +218,11 @@ export default createBrowserRouter(
             <Route path="/account" element={<Account />} />
             <Route path="/shard-exchange" element={<Outlet />}>
                 <Route index element={<ShardExchange />} />
-                <Route path="my-bids" element={<ShardExchangeMyBids />} />
+                <Route
+                    path="my-bids"
+                    element={<ShardExchangeMyBidsRedirect />}
+                />
                 <Route path=":server" element={<ShardExchangeServer />} />
-                <Route path=":server/:item" element={<ShardExchangeItem />} />
             </Route>
             <Route path="/about" element={<About />} />
             <Route path="*" element={<NotFound />} />

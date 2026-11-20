@@ -4,190 +4,18 @@
     margin: 0 0 12px 0;
 }
 
-.sx-layout {
-    display: grid;
-    grid-template-columns: minmax(200px, 250px) minmax(0, 1fr);
-    gap: 16px;
-    align-items: start;
-}
-
-.sx-layout > * {
-    min-width: 0;
-}
-
-.sx-main {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    min-width: 0;
-}
-
 .sx-subtext {
     color: var(--secondary-text);
     font-size: 0.85em;
-}
-
-.sx-bids summary {
-    cursor: pointer;
-}
-
-.sx-bid-list {
-    list-style: none;
-    margin: 2px 0 0 0;
-    padding: 0;
 }
 
 .sx-note {
     margin: 4px 0 0 0;
 }
 
-.sx-nowrap {
-    white-space: nowrap;
-}
-
-/* Category tree */
-
-.sx-sidebar-details > summary {
-    cursor: pointer;
-    font-weight: bold;
-    margin-bottom: 6px;
-    list-style: none;
-}
-
-.sx-sidebar-details > summary::-webkit-details-marker {
-    display: none;
-}
-
-.sx-category-tree {
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 6px 4px;
-    max-height: 70vh;
-    overflow-y: auto;
-    background-color: var(--background-light);
-}
-
-.sx-category-tree ul {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-}
-
-.sx-category-row {
-    display: flex;
-    align-items: center;
-    gap: 2px;
-    border-radius: 4px;
-}
-
-.sx-category-row:hover {
-    background-color: var(--soft-highlight);
-}
-
-.sx-category-row.selected {
-    background-color: var(--highlight);
-}
-
-.sx-category-row.empty .sx-category-name {
-    color: var(--secondary-text);
-}
-
-.sx-category-toggle,
-.sx-category-name {
-    background: none;
-    border: none;
-    color: inherit;
-    font: inherit;
-    cursor: pointer;
-    padding: 3px 4px;
-    text-align: left;
-}
-
-.sx-category-toggle,
-.sx-category-toggle-spacer {
-    flex: 0 0 18px;
-    width: 18px;
-    padding: 3px 0;
-    text-align: center;
-}
-
-.sx-category-name {
-    flex: 1 1 auto;
-    min-width: 0;
-}
-
-.sx-category-row.selected .sx-category-name {
-    font-weight: bold;
-}
-
-.sx-category-count {
-    color: var(--secondary-text);
-    font-size: 0.8em;
-    padding-right: 6px;
-}
-
-/* Filters */
-
-.sx-filters {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: flex-end;
-    gap: 10px 16px;
-}
-
-.sx-filter {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    margin: 0;
-    padding: 0;
-    border: none;
-    /* fieldsets otherwise refuse to shrink below their content */
-    min-width: 0;
-}
-
-.sx-filter-label {
-    font-size: 0.85em;
-    color: var(--secondary-text);
-    padding: 0;
-}
-
-.sx-filter-search {
-    flex: 1 1 220px;
-}
-
-.sx-filter-search input {
-    width: 100%;
-    box-sizing: border-box;
-}
-
-.sx-filter-level {
-    flex-direction: row;
-    flex-wrap: wrap;
-    align-items: center;
-}
-
-.sx-filter-level legend {
-    width: 100%;
-    margin-bottom: 4px;
-}
-
-.sx-filter-level input {
-    width: 4.5em;
-}
-
-.sx-filter-buyout {
-    padding-bottom: 6px;
-}
-
-/* Results */
-
-.sx-results-bar {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    gap: 4px 16px;
-    font-size: 0.9em;
+/* Full screen: just the window, with a small gap to the browser's edges */
+.sx-fullscreen {
+    padding: 8px;
 }
 
 .sx-freshness {
@@ -196,120 +24,6 @@
 
 .sx-freshness.stale {
     color: var(--warning);
-}
-
-.sx-error {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.sx-listings-table.loading tbody {
-    opacity: 0.5;
-}
-
-.sx-listings-table th.sx-col-number,
-.sx-listings-table td.sx-col-number {
-    text-align: right;
-}
-
-.sx-listings-table th.sx-col-number .sx-sort-button {
-    justify-content: flex-end;
-}
-
-.sx-sort-button {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    width: 100%;
-    background: none;
-    border: none;
-    padding: 0;
-    color: inherit;
-    font: inherit;
-    font-weight: bold;
-    cursor: pointer;
-}
-
-.sx-sort-button svg {
-    width: 16px;
-    height: 16px;
-    flex: 0 0 auto;
-}
-
-.sx-item-cell {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 4px 8px;
-    min-width: 180px;
-}
-
-.sx-tag {
-    font-size: 0.75em;
-    padding: 1px 6px;
-    border-radius: 8px;
-    border: 1px solid var(--border);
-    color: var(--secondary-text);
-    white-space: nowrap;
-}
-
-.sx-pagination {
-    align-self: center;
-}
-
-/* Item page */
-
-.sx-stats {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px 32px;
-}
-
-.sx-stat {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-}
-
-.sx-stat-label {
-    font-size: 0.85em;
-    color: var(--secondary-text);
-}
-
-.sx-stat-value {
-    font-size: 1.4em;
-    font-weight: bold;
-}
-
-.sx-range-buttons {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-}
-
-@media (max-width: 768px) {
-    .sx-layout {
-        grid-template-columns: minmax(0, 1fr);
-    }
-
-    .sx-category-tree {
-        max-height: 50vh;
-    }
-
-    .sx-filter-search {
-        flex-basis: 100%;
-    }
-}
-
-.sx-my-bid.leading {
-    color: var(--green-text);
-    border-color: var(--green-text);
-}
-
-.sx-my-bid.outbid {
-    color: var(--orange-text);
-    border-color: var(--orange-text);
 }
 
 .sx-outbid-list {
@@ -344,9 +58,142 @@
     margin-top: 6px;
 }
 
-.sx-mine-toolbar {
+/* Landing page: a card per server with its summary */
+.sx-server-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 10px;
+}
+
+/* Raised, bordered panels that light up on hover, so they read as buttons */
+.sx-server-cards .server-navigation-card {
+    width: auto;
+    padding: 12px 16px;
+    justify-content: flex-start;
+    background-color: var(--background-light);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    transition:
+        background-color 150ms,
+        border-color 150ms,
+        transform 150ms,
+        box-shadow 150ms;
+}
+
+.sx-server-cards .server-navigation-card:hover {
+    background-color: var(--highlight);
+    border-color: var(--link-blue);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px var(--shadow);
+    filter: none;
+}
+
+.sx-server-cards .server-navigation-card:active {
+    transform: translateY(0);
+    box-shadow: none;
+}
+
+.sx-server-cards .server-navigation-card:focus-visible {
+    outline: 2px solid var(--link-blue);
+    outline-offset: 2px;
+}
+
+/* The summary fills the card, so every card's action line sits at its bottom */
+.sx-server-cards .server-navigation-card-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.sx-card-action {
+    margin-top: auto;
+    padding-top: 8px;
+    border-top: 1px solid var(--border);
+    color: var(--link-blue);
+    font-size: 0.9rem;
+}
+
+.sx-server-cards .server-navigation-card:hover .sx-card-action {
+    text-decoration: underline;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .sx-server-cards .server-navigation-card,
+    .sx-server-cards .server-navigation-card:hover {
+        transition: none;
+        transform: none;
+    }
+}
+
+.sx-summary {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 0.9rem;
+}
+
+.sx-summary-headline {
     display: flex;
     flex-wrap: wrap;
-    align-items: center;
-    gap: 8px 16px;
+    gap: 2px 14px;
+    color: var(--text);
+    font-size: 1rem;
+}
+
+.sx-summary-headline b {
+    font-weight: 600;
+}
+
+.sx-trend {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-top: 2px;
+}
+
+.sx-trend-chart {
+    display: block;
+    width: 100%;
+    height: 28px;
+    overflow: visible;
+}
+
+.sx-trend-line {
+    fill: none;
+    stroke: var(--blue-text);
+    stroke-width: 1.5;
+    stroke-linejoin: round;
+    vector-effect: non-scaling-stroke;
+}
+
+.sx-trend-area {
+    fill: var(--blue-text);
+    opacity: 0.15;
+}
+
+.sx-summary-activity,
+.sx-trend-caption {
+    color: var(--secondary-text);
+}
+
+.sx-summary-activity > span {
+    white-space: nowrap;
+}
+
+.sx-trend-caption {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.75rem;
+}
+
+.sx-summary .sx-freshness {
+    font-size: 0.8rem;
+}
+
+@media (max-width: 768px) {
+    .sx-server-cards {
+        grid-template-columns: 1fr;
+    }
 }

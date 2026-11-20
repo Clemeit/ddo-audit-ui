@@ -82,6 +82,30 @@ export interface ShardExchangeItemResponse {
     data: ShardExchangePricePoint[]
 }
 
+export interface ShardExchangeServerSummary {
+    server: string
+    updated_at: string | null
+    listings: number
+    ending_soon: number
+    last_day: {
+        new_listings: number
+        ended: number
+        // Listings known to have sold: a lower bound
+        sold: number
+        bids: number
+    }
+    // Listing counts over the trend window, oldest first
+    trend: { time: string; listings: number }[]
+}
+
+export interface ShardExchangeServerSummariesResponse {
+    activity_hours: number
+    ending_soon_minutes: number
+    trend_days: number
+    trend_bucket_hours: number
+    data: ShardExchangeServerSummary[]
+}
+
 export type ShardExchangeBidStatus = "leading" | "outbid" | "ended"
 
 export interface ShardExchangeMyBid extends ShardExchangeListing {
@@ -114,6 +138,11 @@ export type ShardExchangeSort = (typeof SHARD_EXCHANGE_SORTS)[number]
 
 export type SortDirection = "asc" | "desc"
 
+// The side tabs of the Shard Exchange window
+export const SHARD_EXCHANGE_TABS = ["auctions", "bids", "post"] as const
+
+export type ShardExchangeTab = (typeof SHARD_EXCHANGE_TABS)[number]
+
 export interface ShardExchangeListingQuery {
     q: string
     category: string | null
@@ -124,4 +153,17 @@ export interface ShardExchangeListingQuery {
     sort: ShardExchangeSort
     dir: SortDirection
     page: number
+    // Window state, not sent to the API
+    tab: ShardExchangeTab
+    // The listing (ref) whose details are expanded
+    open: string | null
+    // The item (slug) whose price history is open, the server it is on when that isn't
+    // this page's, and the days of history shown
+    history: string | null
+    historyServer: string | null
+    days: ShardExchangeHistoryRange
 }
+
+export const SHARD_EXCHANGE_HISTORY_RANGES = [7, 30, 90, 180] as const
+export type ShardExchangeHistoryRange =
+    (typeof SHARD_EXCHANGE_HISTORY_RANGES)[number]

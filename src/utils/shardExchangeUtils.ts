@@ -1,11 +1,24 @@
+import { SERVERS_64_BITS_LOWER } from "../constants/servers.ts"
 import {
+    SHARD_EXCHANGE_HISTORY_RANGES,
     SHARD_EXCHANGE_SORTS,
+    SHARD_EXCHANGE_TABS,
     ShardExchangeCategory,
+    ShardExchangeHistoryRange,
     ShardExchangeListing,
     ShardExchangeListingQuery,
     ShardExchangeMyBid,
+    ShardExchangePriceBucket,
+    ShardExchangePricePoint,
     ShardExchangeSort,
+    ShardExchangeTab,
 } from "../models/ShardExchange.ts"
+
+// The servers whose Shard Exchange is scanned: the 64-bit ones
+export const SHARD_EXCHANGE_SERVERS: readonly string[] = SERVERS_64_BITS_LOWER
+
+export const isShardExchangeServer = (server: string | null | undefined) =>
+    server != null && SHARD_EXCHANGE_SERVERS.includes(server)
 
 export const SHARD_EXCHANGE_MAX_LEVEL = 100
 
@@ -19,10 +32,20 @@ export const DEFAULT_LISTING_QUERY: ShardExchangeListingQuery = Object.freeze({
     sort: "name",
     dir: "asc",
     page: 1,
+    tab: "auctions",
+    open: null,
+    history: null,
+    historyServer: null,
+    days: 30,
 })
 
 // URL search parameter names for the browse page
 const PARAM = {
+    tab: "tab",
+    open: "open",
+    history: "history",
+    historyServer: "hserver",
+    days: "days",
     q: "q",
     category: "category",
     minLevel: "min",
@@ -35,6 +58,48 @@ const PARAM = {
 } as const
 
 const CATEGORY_PATTERN = /^[a-z0-9-]+(\.[a-z0-9-]+)*$/
+// Listing refs are opaque; this only keeps junk out of the URL state
+const REF_PATTERN = /^[A-Za-z0-9_:.-]{1,128}$/
+
+// Item slugs: lowercase words joined by hyphens
+export const ITEM_SLUG_PATTERN = /^[a-z0-9]+(-[a-z0-9]+)*$/
+
+export function isItemSlug(value: string | null | undefined): value is string {
+    return value != null && value.length <= 200 && ITEM_SLUG_PATTERN.test(value)
+}
+
+// Days of price history from the URL; anything else is the default (30)
+export function parseHistoryRange(
+    value: string | null
+): ShardExchangeHistoryRange {
+    const days = Number(value)
+    return (SHARD_EXCHANGE_HISTORY_RANGES as readonly number[]).includes(days)
+        ? (days as ShardExchangeHistoryRange)
+        : DEFAULT_LISTING_QUERY.days
+}
+
+// Hourly points for a week, daily ones beyond that
+export const historyBucket = (
+    days: ShardExchangeHistoryRange
+): ShardExchangePriceBucket => (days <= 7 ? "hour" : "day")
+
+// The median of the points' median buyouts (null when none have one)
+export function medianBuyout(points: ShardExchangePricePoint[]): number | null {
+    const values = points
+        .map((p) => p.median_buyout_unit)
+        .filter((v): v is number => v != null && !Number.isNaN(v))
+        .sort((a, b) => a - b)
+    if (!values.length) return null
+    const mid = Math.floor(values.length / 2)
+    return values.length % 2 ? values[mid] : (values[mid - 1] + values[mid]) / 2
+}
+
+function isTab(value: string | null): value is ShardExchangeTab {
+    return (
+        value != null &&
+        (SHARD_EXCHANGE_TABS as readonly string[]).includes(value)
+    )
+}
 
 function parseLevel(value: string | null): number | null {
     if (value == null || value.trim() === "") return null
@@ -58,6 +123,10 @@ export function parseListingQuery(
     const category = (params.get(PARAM.category) || "").toLowerCase()
     const sort = params.get(PARAM.sort)
     const page = Number(params.get(PARAM.page))
+    const tab = params.get(PARAM.tab)
+    const open = params.get(PARAM.open)
+    const history = (params.get(PARAM.history) || "").toLowerCase()
+    const historyServer = (params.get(PARAM.historyServer) || "").toLowerCase()
     let minLevel = parseLevel(params.get(PARAM.minLevel))
     let maxLevel = parseLevel(params.get(PARAM.maxLevel))
     if (minLevel != null && maxLevel != null && minLevel > maxLevel) {
@@ -73,6 +142,14 @@ export function parseListingQuery(
         sort: isSort(sort) ? sort : DEFAULT_LISTING_QUERY.sort,
         dir: params.get(PARAM.dir) === "desc" ? "desc" : "asc",
         page: Number.isInteger(page) && page >= 1 ? page : 1,
+        tab: isTab(tab) ? tab : DEFAULT_LISTING_QUERY.tab,
+        open: open && REF_PATTERN.test(open) ? open : null,
+        history: isItemSlug(history) ? history : null,
+        historyServer:
+            isItemSlug(history) && isShardExchangeServer(historyServer)
+                ? historyServer
+                : null,
+        days: parseHistoryRange(params.get(PARAM.days)),
     }
 }
 
@@ -93,6 +170,16 @@ export function listingQueryToSearchParams(
     if (query.dir !== DEFAULT_LISTING_QUERY.dir)
         params.set(PARAM.dir, query.dir)
     if (query.page !== 1) params.set(PARAM.page, `${query.page}`)
+    if (query.tab !== DEFAULT_LISTING_QUERY.tab)
+        params.set(PARAM.tab, query.tab)
+    if (query.open) params.set(PARAM.open, query.open)
+    if (query.history) {
+        params.set(PARAM.history, query.history)
+        if (query.historyServer)
+            params.set(PARAM.historyServer, query.historyServer)
+        if (query.days !== DEFAULT_LISTING_QUERY.days)
+            params.set(PARAM.days, `${query.days}`)
+    }
     return params
 }
 
@@ -146,6 +233,35 @@ export function unitPrice(
 ): number | null {
     if (price == null || quantity == null || quantity <= 1) return null
     return price / quantity
+}
+
+// Time left the way the game writes it: "2 days 3 hours", "1 day 19 hours", "5 hours 12 minutes"
+export function formatTimeLeftLong(
+    expiresAt: string | null,
+    now: number
+): string {
+    if (!expiresAt) return "Unknown"
+    const expires = Date.parse(expiresAt)
+    if (Number.isNaN(expires)) return "Unknown"
+    const left = expires - now
+    if (left <= 0) return "Ending"
+    const plural = (n: number, unit: string) =>
+        `${n} ${unit}${n === 1 ? "" : "s"}`
+    if (left >= DAY) {
+        const hours = Math.ceil(left / HOUR)
+        const days = Math.floor(hours / 24)
+        const rest = hours % 24
+        return rest
+            ? `${plural(days, "day")} ${plural(rest, "hour")}`
+            : plural(days, "day")
+    }
+    const minutes = Math.ceil(left / MINUTE)
+    const hours = Math.floor(minutes / 60)
+    const rest = minutes % 60
+    if (!hours) return plural(rest, "minute")
+    return rest
+        ? `${plural(hours, "hour")} ${plural(rest, "minute")}`
+        : plural(hours, "hour")
 }
 
 // "just now", "12 minutes ago", "3 hours ago", "2 days ago"
@@ -214,9 +330,12 @@ export function categoryLabel(
     return trail.length ? trail.map((c) => c.name).join(" › ") : null
 }
 
+// A server's Shard Exchange; with an item, opened on that item's price history
 export function shardExchangePath(server: string, itemSlug?: string | null) {
     const base = `/shard-exchange/${encodeURIComponent(server.toLowerCase())}`
-    return itemSlug ? `${base}/${encodeURIComponent(itemSlug)}` : base
+    return itemSlug
+        ? `${base}?${PARAM.history}=${encodeURIComponent(itemSlug)}`
+        : base
 }
 
 function units(listing: ShardExchangeListing): number {

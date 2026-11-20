@@ -5,6 +5,7 @@ import {
     ShardExchangeListingsResponse,
     ShardExchangeMyBidsResponse,
     ShardExchangePriceBucket,
+    ShardExchangeServerSummariesResponse,
 } from "../models/ShardExchange.ts"
 import { getRequest, postRequest } from "./apiHelper.ts"
 
@@ -77,6 +78,13 @@ function getItem(
     )
 }
 
+function getServerSummaries(signal?: AbortSignal) {
+    return getRequest<ShardExchangeServerSummariesResponse>(
+        `${SHARD_EXCHANGE_ENDPOINT}/servers`,
+        { signal }
+    )
+}
+
 function getMyBids(accessTokens: string[], signal?: AbortSignal) {
     return postRequest<ShardExchangeMyBidsResponse>(
         `${SHARD_EXCHANGE_ENDPOINT}/my-bids`,
@@ -84,4 +92,4 @@ function getMyBids(accessTokens: string[], signal?: AbortSignal) {
     )
 }
 
-export { getListings, getCategories, getItem, getMyBids }
+export { getListings, getCategories, getItem, getMyBids, getServerSummaries }

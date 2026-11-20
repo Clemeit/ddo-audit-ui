@@ -50,6 +50,11 @@ describe("shardExchangeService", () => {
                         sort: "unit_buyout",
                         dir: "desc",
                         page: 3,
+                        tab: "bids",
+                        open: "abc",
+                        history: "other-item",
+                        historyServer: null,
+                        days: 90,
                     },
                     { item: "test-item", limit: 50 }
                 )

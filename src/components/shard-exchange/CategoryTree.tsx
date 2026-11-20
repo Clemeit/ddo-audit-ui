@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react"
 import { ShardExchangeCategory } from "../../models/ShardExchange.ts"
 import { categoryTrail } from "../../utils/shardExchangeUtils.ts"
-import Skeleton from "../global/Skeleton.tsx"
 
 interface Props {
     categories: ShardExchangeCategory[]
@@ -11,6 +10,15 @@ interface Props {
     isLoading?: boolean
 }
 
+const countTitle = (name: string, count?: number) =>
+    count == null
+        ? name
+        : `${name}: ${count.toLocaleString()} listing${count === 1 ? "" : "s"}`
+
+/**
+ * The category list on the left of the window: ALL ITEMS, then each category, with a +/− box
+ * on the ones that have subcategories. The selected category is green.
+ */
 const CategoryTree = ({
     categories,
     total,
@@ -40,11 +48,6 @@ const CategoryTree = ({
         })
     }
 
-    const renderCount = (count?: number) =>
-        count == null ? null : (
-            <span className="sx-category-count">{count.toLocaleString()}</span>
-        )
-
     const renderCategory = (category: ShardExchangeCategory, depth: number) => {
         const hasChildren = category.children.length > 0
         const isOpen = expanded.has(category.slug)
@@ -53,26 +56,25 @@ const CategoryTree = ({
         return (
             <li key={category.slug}>
                 <div
-                    className={`sx-category-row${isSelected ? " selected" : ""}${isEmpty ? " empty" : ""}`}
-                    style={{ paddingLeft: `${depth * 14}px` }}
+                    className={`sxw-tree-row${isSelected ? " selected" : ""}${isEmpty ? " empty" : ""}`}
+                    style={{ paddingLeft: `${depth * 10}px` }}
                 >
                     {hasChildren ? (
                         <button
                             type="button"
-                            className="sx-category-toggle"
+                            className={`sxw-tree-toggle${isOpen ? " open" : ""}`}
                             aria-expanded={isOpen}
                             aria-label={`${isOpen ? "Collapse" : "Expand"} ${category.name}`}
                             onClick={() => toggle(category.slug)}
-                        >
-                            {isOpen ? "▾" : "▸"}
-                        </button>
+                        />
                     ) : (
-                        <span className="sx-category-toggle-spacer" />
+                        depth === 0 && <span className="sxw-tree-spacer" />
                     )}
                     <button
                         type="button"
-                        className="sx-category-name"
+                        className="sxw-tree-name"
                         aria-current={isSelected ? "true" : undefined}
+                        title={countTitle(category.name, category.count)}
                         onClick={() => {
                             onSelect(category.slug)
                             if (hasChildren && !isOpen) toggle(category.slug)
@@ -80,7 +82,6 @@ const CategoryTree = ({
                     >
                         {category.name}
                     </button>
-                    {renderCount(category.count)}
                 </div>
                 {hasChildren && isOpen && (
                     <ul>
@@ -93,38 +94,35 @@ const CategoryTree = ({
         )
     }
 
-    if (isLoading && categories.length === 0) {
-        return (
-            <div className="sx-category-tree">
-                {Array.from({ length: 12 }).map((_, i) => (
-                    <Skeleton key={i} height="22px" variant="text" />
-                ))}
-            </div>
-        )
-    }
-
     return (
-        <nav className="sx-category-tree" aria-label="Item categories">
+        <nav
+            className="sxw-tree"
+            aria-label="Item categories"
+            aria-busy={isLoading}
+        >
             <ul>
                 <li>
                     <div
-                        className={`sx-category-row${selected === null ? " selected" : ""}`}
+                        className={`sxw-tree-row${selected === null ? " selected" : ""}`}
                     >
-                        <span className="sx-category-toggle-spacer" />
                         <button
                             type="button"
-                            className="sx-category-name"
+                            className="sxw-tree-name sxw-tree-all"
                             aria-current={
                                 selected === null ? "true" : undefined
                             }
+                            title={countTitle("All items", total)}
                             onClick={() => onSelect(null)}
                         >
-                            All items
+                            ALL ITEMS
                         </button>
-                        {renderCount(total)}
                     </div>
                 </li>
-                {categories.map((category) => renderCategory(category, 0))}
+                {isLoading && categories.length === 0 ? (
+                    <li className="sxw-tree-loading">Loading…</li>
+                ) : (
+                    categories.map((category) => renderCategory(category, 0))
+                )}
             </ul>
         </nav>
     )
