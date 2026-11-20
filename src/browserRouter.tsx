@@ -6,6 +6,8 @@ import {
     Route,
 } from "react-router-dom"
 import { lazyRetry } from "./utils/routerUtils.ts"
+import FeatureGate from "./components/app/FeatureGate.tsx"
+import { SHARD_EXCHANGE_ENABLED_FEATURE_KEY } from "./utils/configUtils.ts"
 
 // Import common pages
 import App from "./components/app/App.tsx"
@@ -223,7 +225,14 @@ export default createBrowserRouter(
                 <Route path=":questName" element={<QuestSpecific />} />
             </Route>
             <Route path="/account" element={<Account />} />
-            <Route path="/shard-exchange" element={<Outlet />}>
+            <Route
+                path="/shard-exchange"
+                element={
+                    <FeatureGate featureKey={SHARD_EXCHANGE_ENABLED_FEATURE_KEY}>
+                        <Outlet />
+                    </FeatureGate>
+                }
+            >
                 <Route index element={<ShardExchange />} />
                 <Route
                     path="my-bids"

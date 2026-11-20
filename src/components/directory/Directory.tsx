@@ -11,6 +11,7 @@ import { useAppContext } from "../../contexts/AppContext.tsx"
 import {
     getIsFeatureEnabled,
     NOTIFICATIONS_FEATURE_KEY,
+    SHARD_EXCHANGE_FEATURE_KEY,
 } from "../../utils/configUtils.ts"
 
 const Directory = () => {
@@ -18,6 +19,10 @@ const Directory = () => {
     const notificationsEnabled = getIsFeatureEnabled(
         config,
         NOTIFICATIONS_FEATURE_KEY
+    )
+    const shardExchangeEnabled = getIsFeatureEnabled(
+        config,
+        SHARD_EXCHANGE_FEATURE_KEY
     )
 
     return (
@@ -34,10 +39,12 @@ const Directory = () => {
                             type="quests"
                             badge={<Badge text="New" type="new" />}
                         />
-                        <NavigationCard
-                            type="shard-exchange"
-                            badge={<Badge text="New" type="new" />}
-                        />
+                        {shardExchangeEnabled && (
+                            <NavigationCard
+                                type="shard-exchange"
+                                badge={<Badge text="New" type="new" />}
+                            />
+                        )}
                         <NavigationCard
                             type="trends"
                             badge={<Badge text="Soon" type="soon" />}

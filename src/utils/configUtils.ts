@@ -31,3 +31,6 @@ export const getIsFeatureEnabled = (
 // Config key that launches the notifications feature: the Directory card and the grouping page link.
 // The /notifications route itself always works, so it can be tested before launch.
 export const NOTIFICATIONS_FEATURE_KEY = "notifications_enabled"
+
+export const SHARD_EXCHANGE_FEATURE_KEY = "shard_exchange_shown"
+export const SHARD_EXCHANGE_ENABLED_FEATURE_KEY = "shard_exchange_enabled"
