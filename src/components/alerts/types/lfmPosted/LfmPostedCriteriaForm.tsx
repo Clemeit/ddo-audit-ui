@@ -1,18 +1,13 @@
 import React, { useId, useMemo, useState } from "react"
 import { LFM_DIFFICULTIES, LfmPostedCriteria } from "../../../../models/Alert"
 import { Quest } from "../../../../models/Lfm"
-import { SERVERS_64_BITS } from "../../../../constants/servers"
 import { useQuestContext } from "../../../../contexts/QuestContext"
 import PillToggleGroup from "../../../global/PillToggleGroup"
+import ServerPills from "../../shared/ServerPills"
 import type { CriteriaFormProps } from "../index"
 
 const MAX_SEARCH_RESULTS = 10
 const MAX_QUESTS = 20
-
-// Only the 64-bit servers are still played on.
-const SERVER_OPTIONS = [...SERVERS_64_BITS]
-    .sort((a, b) => a.localeCompare(b))
-    .map((value) => ({ value }))
 
 function parseLevel(value: string): number | null {
     if (value.trim() === "") return null
@@ -206,16 +201,10 @@ const LfmPostedCriteriaForm = ({
                 </div>
             </div>
 
-            <div className="alert-field">
-                <span className="alert-field-label">Servers</span>
-                <PillToggleGroup
-                    ariaLabel="Servers"
-                    anyLabel="Any server"
-                    options={SERVER_OPTIONS}
-                    selected={criteria.server_names}
-                    onChange={(server_names) => set({ server_names })}
-                />
-            </div>
+            <ServerPills
+                selected={criteria.server_names}
+                onChange={(server_names) => set({ server_names })}
+            />
 
             <div className="alert-field">
                 <span className="alert-field-label">Difficulty</span>

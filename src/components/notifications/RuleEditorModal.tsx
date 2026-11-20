@@ -1,6 +1,10 @@
 import React, { useState } from "react"
 import { AlertRule } from "../../models/Alert"
-import { AlertTypeDefinition } from "../alerts/types"
+import {
+    ALERT_GROUPS,
+    AlertTypeDefinition,
+    getAlertTypeDefinition,
+} from "../alerts/types"
 import Modal from "../modal/Modal"
 import Button from "../global/Button"
 import ValidationMessage from "../global/ValidationMessage"
@@ -13,7 +17,11 @@ import {
 } from "../../utils/alertExpiry"
 
 interface Props {
+    // The types to offer when creating (the picker shows when there is more than one).
     types: AlertTypeDefinition[]
+    // A type to start on, and criteria to start with (e.g. from a link to /notifications).
+    initialType?: string
+    initialCriteria?: unknown
     existing?: AlertRule
     onSave: (
         definition: AlertTypeDefinition,
@@ -30,14 +38,32 @@ const EXPIRY_OPTIONS: { value: ExpiryPreset; label: string }[] = [
     { value: "7d", label: "In 7 days" },
 ]
 
-const RuleEditorModal = ({ types, existing, onSave, onClose }: Props) => {
+const RuleEditorModal = ({
+    types,
+    initialType,
+    initialCriteria,
+    existing,
+    onSave,
+    onClose,
+}: Props) => {
     const [typeName, setTypeName] = useState<string>(
-        existing?.type ?? types[0]?.type
+        existing?.type ??
+            (types.some((t) => t.type === initialType)
+                ? initialType!
+                : types[0]?.type)
     )
-    const definition = types.find((t) => t.type === typeName) ?? types[0]
-    const [criteria, setCriteria] = useState<unknown>(() =>
-        existing ? existing.criteria : definition.defaultCriteria()
-    )
+    // An existing rule keeps its own type even if that type isn't offered for new alerts.
+    const definition =
+        (existing && getAlertTypeDefinition(existing.type)) ||
+        types.find((t) => t.type === typeName) ||
+        types[0]
+    const [criteria, setCriteria] = useState<unknown>(() => {
+        if (existing) return existing.criteria
+        const defaults = definition.defaultCriteria()
+        return initialCriteria && definition.type === initialType
+            ? { ...defaults, ...(initialCriteria as object) }
+            : defaults
+    })
     // An unexpired end time can be kept as-is; an expired rule needs a new one.
     const canKeepExpiry =
         !!existing?.expires_at && !isExpired(existing.expires_at)
@@ -95,26 +121,48 @@ const RuleEditorModal = ({ types, existing, onSave, onClose }: Props) => {
             <div className="alert-editor">
                 <h2 className="alert-editor-title">{title}</h2>
                 {!existing && types.length > 1 && (
-                    <div className="alert-field">
-                        <span className="alert-field-label">
+                    <fieldset className="alert-field alert-type-picker">
+                        <legend className="alert-field-label">
                             Alert me when…
-                        </span>
-                        <PillRadioGroup
-                            ariaLabel="Alert type"
-                            options={types.map((t) => ({
-                                value: t.type,
-                                label: t.label,
-                            }))}
-                            value={typeName}
-                            onChange={(name) => {
-                                const next = types.find((t) => t.type === name)
-                                if (!next) return
-                                setTypeName(name)
-                                setCriteria(next.defaultCriteria())
-                                setShowErrors(false)
-                            }}
-                        />
-                    </div>
+                        </legend>
+                        {ALERT_GROUPS.map((group) => {
+                            const groupTypes = types.filter(
+                                (t) => t.group === group.name
+                            )
+                            if (!groupTypes.length) return null
+                            return (
+                                <div
+                                    key={group.name}
+                                    className="alert-type-group"
+                                >
+                                    <span className="alert-type-group-title">
+                                        {group.title}
+                                    </span>
+                                    {groupTypes.map((t) => (
+                                        <label
+                                            key={t.type}
+                                            className={`alert-type-option ${t.type === typeName ? "selected" : ""}`}
+                                        >
+                                            <input
+                                                type="radio"
+                                                name="alert-type"
+                                                value={t.type}
+                                                checked={t.type === typeName}
+                                                onChange={() => {
+                                                    setTypeName(t.type)
+                                                    setCriteria(
+                                                        t.defaultCriteria()
+                                                    )
+                                                    setShowErrors(false)
+                                                }}
+                                            />
+                                            {t.pickerLabel}
+                                        </label>
+                                    ))}
+                                </div>
+                            )
+                        })}
+                    </fieldset>
                 )}
                 <p className="alert-editor-description">
                     {definition.description}

@@ -82,6 +82,17 @@ export interface ShardExchangeItemResponse {
     data: ShardExchangePricePoint[]
 }
 
+// An item as the name search returns it (for pickers).
+export interface ShardExchangeItemSearchResult {
+    slug: string
+    name: string
+    category: string | null
+}
+
+export interface ShardExchangeItemSearchResponse {
+    data: ShardExchangeItemSearchResult[]
+}
+
 export interface ShardExchangeServerSummary {
     server: string
     updated_at: string | null

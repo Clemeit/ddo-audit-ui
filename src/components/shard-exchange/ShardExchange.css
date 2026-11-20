@@ -26,38 +26,6 @@
     color: var(--warning);
 }
 
-.sx-outbid-list {
-    margin: 6px 0 0;
-    padding-left: 0;
-    list-style: none;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-
-.sx-outbid-list li {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 4px 8px;
-}
-
-.sx-dismiss-button {
-    background: none;
-    border: none;
-    padding: 0 4px;
-    color: var(--secondary-text);
-    font: inherit;
-    cursor: pointer;
-}
-
-.sx-outbid-actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-    margin-top: 6px;
-}
-
 /* Landing page: a card per server with its summary */
 .sx-server-cards {
     display: grid;

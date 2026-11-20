@@ -46,7 +46,6 @@ import {
     isShardExchangeServer,
 } from "../../utils/shardExchangeUtils.ts"
 import CategoryTree from "./CategoryTree.tsx"
-import OutbidNotice, { useOutbids } from "./OutbidNotice.tsx"
 import {
     getShardExchangePerUnit,
     rememberShardExchangeServer,
@@ -120,7 +119,6 @@ const ShardExchangeServer = () => {
     const { registeredCharacters, isLoaded, isError } =
         useGetRegisteredCharacters()
     const myBids = useMyShardExchangeBids()
-    const { outbids, dismiss } = useOutbids(myBids)
 
     const listingsKey =
         isValidServer && tab === "auctions"
@@ -206,13 +204,13 @@ const ShardExchangeServer = () => {
         return (
             <Page
                 title="DDO Audit | Shard Exchange"
-                description="Browse the Shard Exchange on DDO's 64-bit servers."
+                description="Browse the Shard Exchange on DDO's servers."
             >
                 <ContentClusterGroup>
                     <ContentCluster title="Shard Exchange">
                         <p>
                             {SERVER_NAMES_LOWER.includes(server)
-                                ? `We don't have Shard Exchange data for ${serverName}. Only the 64-bit servers are tracked.`
+                                ? `We don't have Shard Exchange data for ${serverName}.`
                                 : `There's no server named "${serverParam}".`}{" "}
                             <Link to="/shard-exchange">Choose a server</Link>.
                         </p>
@@ -500,16 +498,6 @@ const ShardExchangeServer = () => {
         )
     }
 
-    const outbidNotice =
-        outbids.length > 0 ? (
-            <OutbidNotice
-                outbids={outbids}
-                dismiss={dismiss}
-                characterName={myBids.characterName}
-                now={now}
-            />
-        ) : null
-
     const exchangeWindow = (
         <ShardExchangeWindow
             isFullScreen={isFullScreen}
@@ -567,7 +555,6 @@ const ShardExchangeServer = () => {
             <Page
                 title={pageTitle}
                 description={pageDescription}
-                pageMessages={outbidNotice}
                 noPadding
                 contentMaxWidth
                 noBottomMarginOnMobile
@@ -582,7 +569,6 @@ const ShardExchangeServer = () => {
         <Page
             title={pageTitle}
             description={pageDescription}
-            pageMessages={outbidNotice}
         >
             <ContentClusterGroup>
                 <ContentCluster

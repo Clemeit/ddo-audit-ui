@@ -12,30 +12,6 @@ export function rememberShardExchangeServer(server: string) {
     }
 }
 
-const DISMISSED_OUTBIDS_KEY = "shard-exchange-dismissed-outbids"
-
-export function getDismissedOutbids(): string[] {
-    try {
-        const parsed = JSON.parse(
-            localStorage.getItem(DISMISSED_OUTBIDS_KEY) || "[]"
-        )
-        return Array.isArray(parsed)
-            ? parsed.filter((v): v is string => typeof v === "string")
-            : []
-    } catch {
-        return []
-    }
-}
-
-export function setDismissedOutbids(keys: string[]) {
-    try {
-        if (keys.length === 0) localStorage.removeItem(DISMISSED_OUTBIDS_KEY)
-        else localStorage.setItem(DISMISSED_OUTBIDS_KEY, JSON.stringify(keys))
-    } catch {
-        // ignore
-    }
-}
-
 // The window always fills the page's width. Its height fits the browser window; a height the
 // user drags to lasts only until the page is left or reloaded.
 export const WINDOW_MIN_WIDTH = 760
@@ -63,9 +39,11 @@ export function fitWindowHeight(
 }
 
 // Earlier versions saved a dragged height here. It isn't kept any more; clear what's left.
+// Also the old outbid notice's dismissals (outbid alerts now live on /notifications).
 const OLD_WINDOW_SIZE_KEYS = [
     "shard-exchange-window-height",
     "shard-exchange-window-size",
+    "shard-exchange-dismissed-outbids",
 ]
 
 export function forgetStoredWindowHeight() {

@@ -2,9 +2,6 @@ import {
     DEFAULT_LISTING_QUERY,
     filterAndSortListings,
     groupMyBids,
-    outbidEventKey,
-    pruneDismissed,
-    undismissedOutbids,
 } from "../shardExchangeUtils"
 import { ShardExchangeMyBid } from "../../models/ShardExchange"
 
@@ -116,31 +113,5 @@ describe("groupMyBids", () => {
         expect(groups.leading.map((b) => b.ref)).toEqual(["soon", "late"])
         expect(groups.outbid.map((b) => b.ref)).toEqual(["out"])
         expect(groups.ended.map((b) => b.ref)).toEqual(["new", "old"])
-    })
-})
-
-describe("outbid dismissals", () => {
-    const outbid = bid({ ref: "x", status: "outbid" })
-
-    it("hides a dismissed outbid", () => {
-        expect(undismissedOutbids([outbid, bid()], [])).toEqual([outbid])
-        expect(undismissedOutbids([outbid], [outbidEventKey(outbid)])).toEqual(
-            []
-        )
-    })
-
-    it("shows it again after a new bid is outbid", () => {
-        const rebid = { ...outbid, my_bid: { ...outbid.my_bid, at: at(0) } }
-        expect(undismissedOutbids([rebid], [outbidEventKey(outbid)])).toEqual([
-            rebid,
-        ])
-    })
-
-    it("forgets dismissals that no longer match an outbid", () => {
-        const leading = { ...outbid, status: "leading" as const }
-        expect(
-            pruneDismissed([outbidEventKey(outbid), "gone:1"], [outbid])
-        ).toEqual([outbidEventKey(outbid)])
-        expect(pruneDismissed([outbidEventKey(outbid)], [leading])).toEqual([])
     })
 })
