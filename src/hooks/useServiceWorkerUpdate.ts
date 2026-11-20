@@ -2,75 +2,54 @@ import React, { useCallback } from "react"
 import { useNotificationContext } from "../contexts/NotificationContext"
 import { UpdateNotificationActions } from "../components/global/UpdateNotificationActions"
 import logMessage from "../utils/logUtils"
-import { MsFromDays, MsFromSeconds } from "../utils/timeUtils"
-import {
-    getUpdateDismissed,
-    setUpdateDismissed,
-    getUpdateShown,
-    setUpdateShown,
-} from "../utils/localStorage"
+
+// Session-only prompt state. The waiting worker is reported both on load and when
+// update checks find it again, so the prompt is shown at most once per page load.
+// "Later" lasts until the next page load; the update then gets offered again.
+let promptHandled = false
+let refreshing = false
 
 export const useServiceWorkerUpdate = () => {
     const { createNotification, dismissNotification } = useNotificationContext()
 
-    const onDismissNotification = useCallback((notificationId: string) => {
-        try {
-            setUpdateDismissed(new Date().toISOString())
-        } catch (error) {
-            logMessage(
-                "Failed to set update dismissal time in localStorage",
-                "error",
-                {
-                    metadata: {
-                        error:
-                            error instanceof Error
-                                ? error.message
-                                : String(error),
-                    },
-                }
-            )
-        }
-        dismissNotification(notificationId)
-    }, [])
-
     const handleServiceWorkerUpdate = useCallback(
         (registration: ServiceWorkerRegistration) => {
+            if (promptHandled) {
+                return
+            }
+            promptHandled = true
+
             const reloadPage = (notificationId: string) => {
+                dismissNotification(notificationId)
+                const waiting = registration.waiting
+                if (!waiting) {
+                    window.location.reload()
+                    return
+                }
+
+                let fallbackTimer: ReturnType<typeof setTimeout> | undefined
+                const reloadOnce = () => {
+                    if (refreshing) return
+                    refreshing = true
+                    if (fallbackTimer) clearTimeout(fallbackTimer)
+                    window.location.reload()
+                }
+
                 try {
-                    if (registration.waiting) {
-                        // Set up the listener BEFORE posting the message
-                        const handleControllerChange = () => {
-                            navigator.serviceWorker.removeEventListener(
-                                "controllerchange",
-                                handleControllerChange
-                            )
-                            // Force a hard reload to bypass any caching issues
-                            window.location.reload()
-                        }
-
-                        navigator.serviceWorker.addEventListener(
-                            "controllerchange",
-                            handleControllerChange
+                    // Listen before posting so the controller change can't be missed.
+                    navigator.serviceWorker.addEventListener(
+                        "controllerchange",
+                        reloadOnce,
+                        { once: true }
+                    )
+                    waiting.postMessage({ type: "SKIP_WAITING" })
+                    // If the new worker never takes control, reload anyway.
+                    fallbackTimer = setTimeout(() => {
+                        console.warn(
+                            "Service worker update timeout, forcing reload"
                         )
-
-                        // Tell the new service worker to skip waiting
-                        registration.waiting.postMessage({
-                            type: "SKIP_WAITING",
-                        })
-
-                        // Fallback: if controllerchange doesn't fire within 5 seconds, force reload
-                        setTimeout(() => {
-                            console.warn(
-                                "Service worker update timeout, forcing reload"
-                            )
-                            window.location.reload()
-                        }, 5000)
-                    } else {
-                        // Fallback: just reload
-                        window.location.reload()
-                    }
-
-                    dismissNotification(notificationId)
+                        reloadOnce()
+                    }, 5000)
                 } catch (error) {
                     logMessage(
                         "Failed to skip waiting for service worker",
@@ -84,65 +63,20 @@ export const useServiceWorkerUpdate = () => {
                             },
                         }
                     )
-                    dismissNotification(notificationId)
-                    // Force reload on error
-                    window.location.reload()
+                    reloadOnce()
                 }
             }
 
-            const lastDismissal = getUpdateDismissed()
-            if (lastDismissal) {
-                const lastDismissalDate = new Date(lastDismissal)
-                const now = new Date()
-                const timeSinceLastDismissal =
-                    now.getTime() - lastDismissalDate.getTime()
-
-                if (timeSinceLastDismissal < MsFromDays(2)) {
-                    return
-                }
-            }
-
-            const lastDisplay = getUpdateShown()
-            if (lastDisplay) {
-                const lastDisplayDate = new Date(lastDisplay)
-                const now = new Date()
-                const timeSinceLastDisplay =
-                    now.getTime() - lastDisplayDate.getTime()
-
-                if (timeSinceLastDisplay < MsFromDays(2)) {
-                    return
-                }
-            }
-
-            try {
-                setUpdateShown(new Date().toISOString())
-            } catch (error) {
-                logMessage(
-                    "Failed to set update display time in localStorage",
-                    "error",
-                    {
-                        metadata: {
-                            error:
-                                error instanceof Error
-                                    ? error.message
-                                    : String(error),
-                        },
-                    }
-                )
-            }
-
-            // Create a notification ID for dismissal
             const notificationId = `sw-update-${Date.now()}`
-
+            // No ttl: the prompt stays until the user picks Refresh or Later.
             createNotification({
                 id: notificationId,
                 title: "Update Available",
                 message: "A new version of DDO Audit is available.",
                 type: "info",
-                ttl: MsFromSeconds(10),
                 actions: React.createElement(UpdateNotificationActions, {
                     onRefresh: () => reloadPage(notificationId),
-                    onDismiss: () => onDismissNotification(notificationId),
+                    onDismiss: () => dismissNotification(notificationId),
                 }),
             })
         },
