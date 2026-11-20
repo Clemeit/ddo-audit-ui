@@ -37,9 +37,9 @@ const NotificationGate = ({ device }: Props) => {
             <BellSVG className="notification-gate-icon" aria-hidden />
             <h2>Turn on notifications</h2>
             <p>
-                DDO Audit can tell you the moment someone posts an LFM for the
-                quests you care about. First, allow notifications on this
-                device.
+                DDO Audit can tell you the moment something you care about
+                happens, like an LFM for your favorite raid or a friend logging
+                in. First, allow notifications on this device.
             </p>
             <div className="notification-gate-actions">
                 <Button type="primary" onClick={turnOn}>

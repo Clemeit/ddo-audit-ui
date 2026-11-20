@@ -1,6 +1,7 @@
 import {
     ShardExchangeCategoriesResponse,
     ShardExchangeItemResponse,
+    ShardExchangeItemSearchResponse,
     ShardExchangeListingQuery,
     ShardExchangeListingsResponse,
     ShardExchangeMyBidsResponse,
@@ -92,4 +93,18 @@ function getMyBids(accessTokens: string[], signal?: AbortSignal) {
     )
 }
 
-export { getListings, getCategories, getItem, getMyBids, getServerSummaries }
+function searchItems(query: string, signal?: AbortSignal) {
+    return getRequest<ShardExchangeItemSearchResponse>(
+        `${SHARD_EXCHANGE_ENDPOINT}/items`,
+        { params: { q: query, limit: 10 }, signal }
+    )
+}
+
+export {
+    getListings,
+    getCategories,
+    getItem,
+    getMyBids,
+    getServerSummaries,
+    searchItems,
+}

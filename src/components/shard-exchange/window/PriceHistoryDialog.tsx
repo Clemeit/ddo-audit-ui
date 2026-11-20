@@ -12,6 +12,7 @@ import {
 import GameDialog from "../../game-ui/GameDialog.tsx"
 import { GameButton, ShardAmount } from "../../game-ui/GameControls.tsx"
 import PriceHistoryChart from "../PriceHistoryChart.tsx"
+import Link from "../../global/Link.tsx"
 
 interface Props {
     // The name to show until the history has loaded (from the row it was opened from)
@@ -154,6 +155,19 @@ const PriceHistoryDialog = ({
                     generated loot, for example) are shown together, so their
                     prices are mixed.
                 </p>
+                {item.data?.slug && (
+                    <p className="sxh-note">
+                        <Link
+                            to={`/notifications?${new URLSearchParams({
+                                new: "shard_exchange_listed",
+                                item: item.data.slug,
+                                name: item.data.name,
+                            }).toString()}`}
+                        >
+                            Alert me when this is listed
+                        </Link>
+                    </p>
+                )}
             </div>
         </GameDialog>
     )

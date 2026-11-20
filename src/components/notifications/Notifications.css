@@ -327,7 +327,115 @@
     border-radius: 8px;
 }
 
+/* sections of the rule list (Groups, Servers, Friends, Shard Exchange) */
+
+.alert-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.alert-group + .alert-group {
+    margin-top: 10px;
+}
+
+.alert-group-title {
+    margin: 0;
+    font-size: 0.85rem;
+    font-weight: bold;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--secondary-text);
+}
+
+.alert-group-empty {
+    margin: 0;
+    padding: 12px 14px;
+    border: 1px dashed var(--border);
+    border-radius: 8px;
+}
+
+.alert-group-add {
+    padding: 0;
+    border: none;
+    background: none;
+    font: inherit;
+    color: var(--link-blue);
+    text-decoration: underline;
+    cursor: pointer;
+}
+
 /* ----- editor dialog ----- */
+
+/* type picker: "Alert me when…", grouped */
+
+.alert-type-picker {
+    margin: 0;
+    padding: 0;
+    border: none;
+    min-width: 0;
+}
+
+.alert-type-picker legend {
+    padding: 0;
+    margin-bottom: 8px;
+}
+
+.alert-type-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.alert-type-group + .alert-type-group {
+    margin-top: 10px;
+}
+
+.alert-type-group-title {
+    font-size: 0.8rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--secondary-text);
+}
+
+.alert-type-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.alert-type-option.selected {
+    border-color: var(--text);
+    background: var(--background-light);
+}
+
+.alert-type-option input {
+    margin: 0;
+}
+
+/* Shard Exchange listing price limits */
+
+.alert-price-limits {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.alert-price-limits label {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.alert-price-limits input {
+    width: 140px;
+    box-sizing: border-box;
+    padding: 6px 8px;
+}
 
 .alert-editor-modal .modal-content {
     padding: 0;

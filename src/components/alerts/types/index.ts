@@ -1,9 +1,20 @@
 // Registry of alert types the UI knows how to create and describe. Mirrors the backend registry
 // (ddo-audit-service sanic/business/alerts). To add a type: add a folder next to lfmPosted with its
-// form and summary, then register it below.
+// form and summary, then register it below (in a group, so it gets a section on /notifications).
 
 import React from "react"
-import { LfmPostedCriteria } from "../../../models/Alert"
+import {
+    FriendLoginCriteria,
+    LfmPostedCriteria,
+    ServerStatusCriteria,
+    ShardExchangeListedCriteria,
+    ShardExchangeOutbidCriteria,
+} from "../../../models/Alert"
+import { ConfigEndpointResponse } from "../../../models/Config"
+import {
+    getIsFeatureEnabled,
+    SHARD_EXCHANGE_ENABLED_FEATURE_KEY,
+} from "../../../utils/configUtils"
 import LfmPostedCriteriaForm from "./lfmPosted/LfmPostedCriteriaForm"
 import {
     defaultLfmPostedCriteria,
@@ -11,6 +22,34 @@ import {
     summarizeLfmPosted,
     validateLfmPosted,
 } from "./lfmPosted/summarize"
+import ServerStatusCriteriaForm from "./serverStatus/ServerStatusCriteriaForm"
+import {
+    defaultServerStatusCriteria,
+    describeServerStatus,
+    summarizeServerStatus,
+    validateServerStatus,
+} from "./serverStatus/summarize"
+import FriendLoginCriteriaForm from "./friendLogin/FriendLoginCriteriaForm"
+import {
+    defaultFriendLoginCriteria,
+    describeFriendLogin,
+    summarizeFriendLogin,
+    validateFriendLogin,
+} from "./friendLogin/summarize"
+import ShardExchangeListedCriteriaForm from "./shardExchangeListed/ShardExchangeListedCriteriaForm"
+import {
+    defaultShardExchangeListedCriteria,
+    describeShardExchangeListed,
+    summarizeShardExchangeListed,
+    validateShardExchangeListed,
+} from "./shardExchangeListed/summarize"
+import ShardExchangeOutbidCriteriaForm from "./shardExchangeOutbid/ShardExchangeOutbidCriteriaForm"
+import {
+    defaultShardExchangeOutbidCriteria,
+    describeShardExchangeOutbid,
+    summarizeShardExchangeOutbid,
+    validateShardExchangeOutbid,
+} from "./shardExchangeOutbid/summarize"
 
 interface CriteriaFormProps<TCriteria> {
     criteria: TCriteria
@@ -19,13 +58,53 @@ interface CriteriaFormProps<TCriteria> {
 
 interface SummaryHelpers {
     questName: (id: number) => string | undefined
+    // A friend's or verified character's name, when this browser knows it.
+    characterName: (id: number) => string | undefined
 }
+
+type AlertGroupName = "groups" | "servers" | "friends" | "shard_exchange"
+
+interface AlertGroup {
+    name: AlertGroupName
+    title: string
+    // Shown when the section has no alerts yet, before the "Add one" link.
+    emptyText: string
+}
+
+// Sections of the notifications page, in order.
+const ALERT_GROUPS: AlertGroup[] = [
+    {
+        name: "groups",
+        title: "Groups",
+        emptyText: "No LFM alerts yet.",
+    },
+    {
+        name: "servers",
+        title: "Servers",
+        emptyText: "No server alerts yet.",
+    },
+    {
+        name: "friends",
+        title: "Friends",
+        emptyText: "No friend alerts yet.",
+    },
+    {
+        name: "shard_exchange",
+        title: "Shard Exchange",
+        emptyText: "No Shard Exchange alerts yet.",
+    },
+]
 
 // The registry holds definitions with different criteria types, hence the `any` default.
 interface AlertTypeDefinition<TCriteria = any> {
     type: string
+    group: AlertGroupName
     label: string
+    // The type picker's "Alert me when…" choice.
+    pickerLabel: string
     description: string
+    // Only offered while this server feature flag is on (existing rules still show).
+    featureKey?: string
     defaultCriteria: () => TCriteria
     CriteriaForm: React.ComponentType<CriteriaFormProps<TCriteria>>
     summarize: (criteria: TCriteria, helpers: SummaryHelpers) => string
@@ -39,7 +118,9 @@ interface AlertTypeDefinition<TCriteria = any> {
 
 const lfmPosted: AlertTypeDefinition<LfmPostedCriteria> = {
     type: "lfm_posted",
+    group: "groups",
     label: "LFM posted",
+    pickerLabel: "An LFM is posted for a quest or raid",
     description:
         "Get alerted when someone posts an LFM for one of your quests.",
     defaultCriteria: defaultLfmPostedCriteria,
@@ -51,11 +132,98 @@ const lfmPosted: AlertTypeDefinition<LfmPostedCriteria> = {
     validate: validateLfmPosted,
 }
 
-const ALERT_TYPES: AlertTypeDefinition[] = [lfmPosted]
+const serverStatus: AlertTypeDefinition<ServerStatusCriteria> = {
+    type: "server_status",
+    group: "servers",
+    label: "Server status",
+    pickerLabel: "A server goes offline or comes back online",
+    description:
+        "Get alerted when a server goes down, or when it's back up and you can log in.",
+    defaultCriteria: defaultServerStatusCriteria,
+    CriteriaForm: ServerStatusCriteriaForm,
+    summarize: (criteria) => summarizeServerStatus(criteria),
+    describe: (criteria) => describeServerStatus(criteria),
+    validate: validateServerStatus,
+}
+
+const friendLogin: AlertTypeDefinition<FriendLoginCriteria> = {
+    type: "friend_login",
+    group: "friends",
+    label: "Friend logged in",
+    pickerLabel: "A friend logs in",
+    description: "Get alerted when someone on your friends list logs in.",
+    defaultCriteria: defaultFriendLoginCriteria,
+    CriteriaForm: FriendLoginCriteriaForm,
+    summarize: (criteria, { characterName }) =>
+        summarizeFriendLogin(criteria, characterName),
+    describe: (criteria, { characterName }) =>
+        describeFriendLogin(criteria, characterName),
+    validate: validateFriendLogin,
+}
+
+const shardExchangeListed: AlertTypeDefinition<ShardExchangeListedCriteria> = {
+    type: "shard_exchange_listed",
+    group: "shard_exchange",
+    label: "Item listed",
+    pickerLabel: "An item is listed on the Shard Exchange",
+    description:
+        "Get alerted when an item you want is put up on the Shard Exchange, optionally under a price.",
+    featureKey: SHARD_EXCHANGE_ENABLED_FEATURE_KEY,
+    defaultCriteria: defaultShardExchangeListedCriteria,
+    CriteriaForm: ShardExchangeListedCriteriaForm,
+    summarize: (criteria) => summarizeShardExchangeListed(criteria),
+    describe: (criteria) => describeShardExchangeListed(criteria),
+    validate: validateShardExchangeListed,
+}
+
+const shardExchangeOutbid: AlertTypeDefinition<ShardExchangeOutbidCriteria> = {
+    type: "shard_exchange_outbid",
+    group: "shard_exchange",
+    label: "Outbid",
+    pickerLabel: "One of my characters is outbid",
+    description:
+        "Get alerted when someone outbids one of your verified characters on the Shard Exchange.",
+    featureKey: SHARD_EXCHANGE_ENABLED_FEATURE_KEY,
+    defaultCriteria: defaultShardExchangeOutbidCriteria,
+    CriteriaForm: ShardExchangeOutbidCriteriaForm,
+    summarize: (criteria, { characterName }) =>
+        summarizeShardExchangeOutbid(criteria, characterName),
+    describe: (criteria, { characterName }) =>
+        describeShardExchangeOutbid(criteria, characterName),
+    validate: validateShardExchangeOutbid,
+}
+
+const ALERT_TYPES: AlertTypeDefinition[] = [
+    lfmPosted,
+    serverStatus,
+    friendLogin,
+    shardExchangeListed,
+    shardExchangeOutbid,
+]
 
 function getAlertTypeDefinition(type: string): AlertTypeDefinition | undefined {
     return ALERT_TYPES.find((t) => t.type === type)
 }
 
-export { ALERT_TYPES, getAlertTypeDefinition }
-export type { AlertTypeDefinition, CriteriaFormProps, SummaryHelpers }
+/** The types users can create right now (feature-flagged ones only while their flag is on). */
+function getVisibleAlertTypes(
+    config: ConfigEndpointResponse | null | undefined
+): AlertTypeDefinition[] {
+    return ALERT_TYPES.filter(
+        (t) => !t.featureKey || getIsFeatureEnabled(config, t.featureKey)
+    )
+}
+
+export {
+    ALERT_TYPES,
+    ALERT_GROUPS,
+    getAlertTypeDefinition,
+    getVisibleAlertTypes,
+}
+export type {
+    AlertGroup,
+    AlertGroupName,
+    AlertTypeDefinition,
+    CriteriaFormProps,
+    SummaryHelpers,
+}

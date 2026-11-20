@@ -19,7 +19,6 @@ import { getServerSummaries } from "../../services/shardExchangeService.ts"
 import { LoadingState } from "../../models/Api.ts"
 import useMyShardExchangeBids from "../../hooks/useMyShardExchangeBids.ts"
 import { getRememberedShardExchangeServer } from "./shardExchangeStorage.ts"
-import OutbidNotice, { useOutbids } from "./OutbidNotice.tsx"
 import ServerSummary from "./ServerSummary.tsx"
 import "./ShardExchange.css"
 
@@ -27,7 +26,6 @@ const ShardExchange = () => {
     const lastServer = useMemo(() => getRememberedShardExchangeServer(), [])
     const now = useNow(30 * 1000)
     const myBids = useMyShardExchangeBids()
-    const { outbids, dismiss } = useOutbids(myBids)
     const summaries = useAbortableRequest("server-summaries", (signal) =>
         getServerSummaries(signal)
     )
@@ -71,30 +69,26 @@ const ShardExchange = () => {
     return (
         <Page
             title="DDO Audit | Shard Exchange"
-            description="Search the Shard Exchange on DDO's 64-bit servers: what's for sale, current bids, buyout prices, time left, and price history."
-            pageMessages={
-                outbids.length > 0 ? (
-                    <OutbidNotice
-                        outbids={outbids}
-                        dismiss={dismiss}
-                        characterName={myBids.characterName}
-                        now={now}
-                    />
-                ) : null
-            }
+            description="Search the Shard Exchange on DDO's servers: what's for sale, current bids, buyout prices, time left, and price history."
         >
             <ContentClusterGroup>
                 <ContentCluster
                     title="Shard Exchange"
                     subtitle="Browse what's for sale on each server's Shard Exchange, with buyout prices and price history. Listings refresh about once an hour."
                 >
-                    {myBids.hasVerified && (
-                        <p className="sx-server-switch">
-                            <Link to="/shard-exchange/my-bids">
-                                View my bids
-                            </Link>
-                        </p>
-                    )}
+                    <p className="sx-server-switch">
+                        {myBids.hasVerified && (
+                            <>
+                                <Link to="/shard-exchange/my-bids">
+                                    View my bids
+                                </Link>
+                                {" · "}
+                            </>
+                        )}
+                        <Link to="/notifications?new=shard_exchange_outbid">
+                            Get notified when you&rsquo;re outbid
+                        </Link>
+                    </p>
                     <div className="sx-server-cards">
                         {SHARD_EXCHANGE_SERVERS.map((server) => (
                             <ServerNavigationCard

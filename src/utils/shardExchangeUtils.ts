@@ -14,7 +14,7 @@ import {
     ShardExchangeTab,
 } from "../models/ShardExchange.ts"
 
-// The servers whose Shard Exchange is scanned: the 64-bit ones
+// The servers whose Shard Exchange is scanned
 export const SHARD_EXCHANGE_SERVERS: readonly string[] = SERVERS_64_BITS_LOWER
 
 export const isShardExchangeServer = (server: string | null | undefined) =>
@@ -442,26 +442,3 @@ export function groupMyBids(bids: ShardExchangeMyBid[]): GroupedMyBids {
     }
 }
 
-export function outbidEventKey(bid: ShardExchangeMyBid): string {
-    return `${bid.ref}:${bid.my_bid.at ?? ""}`
-}
-
-export function undismissedOutbids(
-    bids: ShardExchangeMyBid[],
-    dismissed: string[]
-): ShardExchangeMyBid[] {
-    const hidden = new Set(dismissed)
-    return bids.filter(
-        (bid) => bid.status === "outbid" && !hidden.has(outbidEventKey(bid))
-    )
-}
-
-export function pruneDismissed(
-    dismissed: string[],
-    bids: ShardExchangeMyBid[]
-): string[] {
-    const current = new Set(
-        bids.filter((b) => b.status === "outbid").map(outbidEventKey)
-    )
-    return dismissed.filter((key) => current.has(key))
-}
