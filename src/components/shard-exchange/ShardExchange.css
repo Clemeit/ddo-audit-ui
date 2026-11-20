@@ -1,0 +1,199 @@
+/* Shard Exchange pages */
+
+.sx-server-switch {
+    margin: 0 0 12px 0;
+}
+
+.sx-subtext {
+    color: var(--secondary-text);
+    font-size: 0.85em;
+}
+
+.sx-note {
+    margin: 4px 0 0 0;
+}
+
+/* Full screen: just the window, with a small gap to the browser's edges */
+.sx-fullscreen {
+    padding: 8px;
+}
+
+.sx-freshness {
+    color: var(--secondary-text);
+}
+
+.sx-freshness.stale {
+    color: var(--warning);
+}
+
+.sx-outbid-list {
+    margin: 6px 0 0;
+    padding-left: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.sx-outbid-list li {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 8px;
+}
+
+.sx-dismiss-button {
+    background: none;
+    border: none;
+    padding: 0 4px;
+    color: var(--secondary-text);
+    font: inherit;
+    cursor: pointer;
+}
+
+.sx-outbid-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 6px;
+}
+
+/* Landing page: a card per server with its summary */
+.sx-server-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 10px;
+}
+
+/* Raised, bordered panels that light up on hover, so they read as buttons */
+.sx-server-cards .server-navigation-card {
+    width: auto;
+    padding: 12px 16px;
+    justify-content: flex-start;
+    background-color: var(--background-light);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    transition:
+        background-color 150ms,
+        border-color 150ms,
+        transform 150ms,
+        box-shadow 150ms;
+}
+
+.sx-server-cards .server-navigation-card:hover {
+    background-color: var(--highlight);
+    border-color: var(--link-blue);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px var(--shadow);
+    filter: none;
+}
+
+.sx-server-cards .server-navigation-card:active {
+    transform: translateY(0);
+    box-shadow: none;
+}
+
+.sx-server-cards .server-navigation-card:focus-visible {
+    outline: 2px solid var(--link-blue);
+    outline-offset: 2px;
+}
+
+/* The summary fills the card, so every card's action line sits at its bottom */
+.sx-server-cards .server-navigation-card-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.sx-card-action {
+    margin-top: auto;
+    padding-top: 8px;
+    border-top: 1px solid var(--border);
+    color: var(--link-blue);
+    font-size: 0.9rem;
+}
+
+.sx-server-cards .server-navigation-card:hover .sx-card-action {
+    text-decoration: underline;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .sx-server-cards .server-navigation-card,
+    .sx-server-cards .server-navigation-card:hover {
+        transition: none;
+        transform: none;
+    }
+}
+
+.sx-summary {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 0.9rem;
+}
+
+.sx-summary-headline {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px 14px;
+    color: var(--text);
+    font-size: 1rem;
+}
+
+.sx-summary-headline b {
+    font-weight: 600;
+}
+
+.sx-trend {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-top: 2px;
+}
+
+.sx-trend-chart {
+    display: block;
+    width: 100%;
+    height: 28px;
+    overflow: visible;
+}
+
+.sx-trend-line {
+    fill: none;
+    stroke: var(--blue-text);
+    stroke-width: 1.5;
+    stroke-linejoin: round;
+    vector-effect: non-scaling-stroke;
+}
+
+.sx-trend-area {
+    fill: var(--blue-text);
+    opacity: 0.15;
+}
+
+.sx-summary-activity,
+.sx-trend-caption {
+    color: var(--secondary-text);
+}
+
+.sx-summary-activity > span {
+    white-space: nowrap;
+}
+
+.sx-trend-caption {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.75rem;
+}
+
+.sx-summary .sx-freshness {
+    font-size: 0.8rem;
+}
+
+@media (max-width: 768px) {
+    .sx-server-cards {
+        grid-template-columns: 1fr;
+    }
+}

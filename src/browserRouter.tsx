@@ -6,6 +6,8 @@ import {
     Route,
 } from "react-router-dom"
 import { lazyRetry } from "./utils/routerUtils.ts"
+import FeatureGate from "./components/app/FeatureGate.tsx"
+import { SHARD_EXCHANGE_ENABLED_FEATURE_KEY } from "./utils/configUtils.ts"
 
 // Import common pages
 import App from "./components/app/App.tsx"
@@ -79,6 +81,22 @@ const QuestSpecific = lazy(() =>
 )
 const Account = lazy(() =>
     lazyRetry(() => import("./components/account/Account.tsx"))
+)
+const ShardExchange = lazy(() =>
+    lazyRetry(() => import("./components/shard-exchange/ShardExchange.tsx"))
+)
+const ShardExchangeServer = lazy(() =>
+    lazyRetry(
+        () => import("./components/shard-exchange/ShardExchangeServer.tsx")
+    )
+)
+const ShardExchangeMyBidsRedirect = lazy(() =>
+    lazyRetry(
+        () =>
+            import(
+                "./components/shard-exchange/ShardExchangeMyBidsRedirect.tsx"
+            )
+    )
 )
 
 // Set up the router
@@ -207,6 +225,21 @@ export default createBrowserRouter(
                 <Route path=":questName" element={<QuestSpecific />} />
             </Route>
             <Route path="/account" element={<Account />} />
+            <Route
+                path="/shard-exchange"
+                element={
+                    <FeatureGate featureKey={SHARD_EXCHANGE_ENABLED_FEATURE_KEY}>
+                        <Outlet />
+                    </FeatureGate>
+                }
+            >
+                <Route index element={<ShardExchange />} />
+                <Route
+                    path="my-bids"
+                    element={<ShardExchangeMyBidsRedirect />}
+                />
+                <Route path=":server" element={<ShardExchangeServer />} />
+            </Route>
             <Route path="/about" element={<About />} />
             <Route path="*" element={<NotFound />} />
         </Route>

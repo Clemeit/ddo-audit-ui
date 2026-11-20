@@ -11,6 +11,7 @@ interface Props extends React.HTMLAttributes<HTMLAnchorElement> {
     disabled?: boolean
     silentDisabled?: boolean
     newTab?: boolean
+    state?: unknown
 }
 
 const Link = ({
@@ -21,6 +22,7 @@ const Link = ({
     disabled,
     silentDisabled = false,
     newTab = false,
+    state,
     ...rest
 }: Props) => {
     const handleClick = () => {
@@ -34,6 +36,7 @@ const Link = ({
     return (
         <ReactLink
             to={to}
+            state={state}
             className={`link ${className ? className : ""} ${disabled ? "disabled" : ""} ${silentDisabled ? "silent-disabled" : ""}`}
             onClick={handleClick}
             style={{

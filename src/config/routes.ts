@@ -114,6 +114,12 @@ const bannerRouteMapping = {
         miniature: true,
         showButtons: false,
     },
+    "shard-exchange": {
+        title: "Shard Exchange",
+        subtitle: "Listings, Buyouts, and Price History",
+        miniature: true,
+        showButtons: false,
+    },
 }
 
 export { bannerRouteMapping }

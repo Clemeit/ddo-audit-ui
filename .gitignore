@@ -22,3 +22,6 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+src/assets/png/shard_exchange_full.png
+src/assets/png/shard_exchange_rows.png
+src/assets/png/shard_exchange_stripped.png

@@ -1,0 +1,921 @@
+/*
+ * Game-styled UI primitives. Everything is drawn with CSS (gradients, layered borders, an
+ * SVG noise texture) to look like a fantasy MMO window, without using any of the game's art.
+ * Sizes follow the in-game window at 100% scale.
+ */
+@import url("https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Marcellus&display=swap");
+
+.gw {
+    --gw-gold-hi: #e2d6a8;
+    --gw-gold: #c9bb95;
+    --gw-gold-mid: #a08c5c;
+    --gw-gold-dark: #483d23;
+    --gw-gold-deep: #2a2414;
+    --gw-red-hi: #8a0d08;
+    --gw-red: #5a0503;
+    --gw-red-dark: #2f0000;
+    --gw-red-deep: #170503;
+    --gw-stone: #0d0e0c;
+    --gw-panel: #050505;
+    --gw-line: #6d6463;
+    --gw-text: #f2f2f2;
+    --gw-text-dim: #b9b9b3;
+    --gw-text-gold: #e8d873;
+    --gw-text-label: #ece0a4;
+    --gw-text-green: #2ee83e;
+    --gw-text-blue: #8ec9f0;
+    --gw-font-body: Verdana, Tahoma, "DejaVu Sans", sans-serif;
+    --gw-font-label: "Marcellus", "Palatino Linotype", Georgia, serif;
+    --gw-font-title: "Cinzel", "Trajan Pro", Georgia, serif;
+    --gw-noise: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.9 -0.35'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+    --gw-leather: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='l'><feTurbulence type='fractalNoise' baseFrequency='0.09' numOctaves='3' seed='7' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  1.1 0 0 0 -0.32'/></filter><rect width='100%' height='100%' filter='url(%23l)'/></svg>");
+
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    color: var(--gw-text);
+    font-family: var(--gw-font-body);
+    font-size: 11px;
+    line-height: 1.25;
+    user-select: none;
+    -webkit-font-smoothing: antialiased;
+    filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.6));
+}
+
+.gw *,
+.gw *::before,
+.gw *::after {
+    box-sizing: border-box;
+    /* The site sets a font on every element (`*`); take the window's instead */
+    font-family: inherit;
+}
+
+.gw :focus-visible {
+    outline: 2px solid var(--gw-gold-hi);
+    outline-offset: 1px;
+}
+
+/* ---------- Title bar ---------- */
+
+/* One rounded, gold-rimmed red bar (the plate) sitting on the frame's top rail, with a gold
+   cap and red gem at its left end */
+.gw-titlebar {
+    position: relative;
+    flex: 0 0 28px;
+    height: 28px;
+    margin-bottom: -3px;
+    z-index: 2;
+}
+
+/* Squared gold plates at both ends: the bar's rounded ends sit on them, and they fill the
+   window's top corners square. The right one holds the title bar buttons. */
+.gw-title-end {
+    position: absolute;
+    top: 0;
+    height: 30px;
+    border: 1px solid #1d1608;
+    background: var(--gw-noise),
+        linear-gradient(
+            180deg,
+            #d9cb98 0,
+            #b6a26a 40%,
+            #8a7643 75%,
+            #6a5a30 100%
+        );
+    background-blend-mode: soft-light, normal;
+    box-shadow:
+        inset 1px 1px 0 #efe4b8,
+        inset -1px -1px 0 #4e4222,
+        inset 0 0 0 3px rgba(0, 0, 0, 0.12);
+}
+
+/* 1px past the window's edges, to line up with the frame rail's outer dark line (drawn just
+   outside the frame) */
+.gw-title-end.left {
+    left: -1px;
+    width: 45px;
+}
+
+.gw-title-end.right {
+    right: -1px;
+    width: 43px;
+}
+
+.gw-titlebar.has-extra-button .gw-title-end.right {
+    width: 66px;
+}
+
+/* Red gem set into the left plate */
+.gw-title-end.left::after {
+    content: "";
+    position: absolute;
+    left: 7px;
+    top: 7px;
+    width: 16px;
+    height: 14px;
+    background: radial-gradient(
+        circle at 45% 40%,
+        #ffb0a0 0,
+        #e2301f 30%,
+        #8e0b05 70%,
+        #3c0101 100%
+    );
+    clip-path: polygon(0 100%, 50% 0, 100% 100%);
+    filter: drop-shadow(0 1px 0 #2a1d08);
+}
+
+.gw-title-plate {
+    position: absolute;
+    left: 28px;
+    right: 26px;
+    top: 1px;
+    height: 27px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid transparent;
+    border-radius: 14px;
+    background:
+        linear-gradient(
+                180deg,
+                rgba(0, 0, 0, 0.35) 0,
+                rgba(255, 60, 40, 0.08) 45%,
+                rgba(0, 0, 0, 0.45) 100%
+            )
+            padding-box,
+        repeating-linear-gradient(125deg, #8c0805 0 3px, #6a0402 3px 6px)
+            padding-box,
+        linear-gradient(180deg, #ede0ad 0, #b9a467 45%, #6e5b2c 100%) border-box;
+    box-shadow:
+        0 0 0 1px #1d1608,
+        inset 0 1px 2px rgba(0, 0, 0, 0.6);
+    z-index: 1;
+}
+
+/* Brass studs at both ends of the bar */
+.gw-title-plate::before,
+.gw-title-plate::after {
+    content: "";
+    position: absolute;
+    top: 8px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: radial-gradient(
+        circle at 35% 30%,
+        #fff2c0,
+        #c09b45 45%,
+        #4a3510 100%
+    );
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.6);
+}
+
+.gw-title-plate::before {
+    left: 8px;
+}
+
+.gw-title-plate::after {
+    right: 8px;
+}
+
+.gw-title {
+    margin: 0;
+    padding: 0 22px;
+    font-family: var(--gw-font-title);
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: #faf6ea;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-shadow:
+        0 0 1px #000,
+        1px 1px 0 #000,
+        -1px -1px 0 #1a0000,
+        1px -1px 0 #1a0000,
+        -1px 1px 0 #1a0000;
+}
+
+.gw-close {
+    position: absolute;
+    right: 3px;
+    top: 4px;
+    z-index: 2;
+    width: 20px;
+    height: 20px;
+    padding: 0;
+    border: 1px solid #1b170c;
+    border-radius: 1px;
+    background: linear-gradient(180deg, #b3a67c 0, #847856 55%, #5d5439 100%);
+    box-shadow:
+        inset 1px 1px 0 #ddd3ad,
+        inset -1px -1px 0 #463e27;
+    color: #f7f3e6;
+    font-family: var(--gw-font-title);
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 18px;
+    text-align: center;
+    text-shadow: 1px 1px 0 #2a2414;
+    cursor: pointer;
+}
+
+.gw-close:hover {
+    filter: brightness(1.15);
+}
+
+.gw-close:active {
+    box-shadow:
+        inset -1px -1px 0 #ddd3ad,
+        inset 1px 1px 0 #463e27;
+}
+
+/* A second title bar button, left of the close button */
+.gw-fullscreen {
+    right: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.gw-fullscreen svg {
+    filter: drop-shadow(1px 1px 0 #2a2414);
+}
+
+.gw-titlebar.has-extra-button .gw-title-plate {
+    right: 49px;
+}
+
+/* ---------- Frame and body ---------- */
+
+/* Dark leather inside one thick, bevelled gold rail. The title bar's lower rim rests on the
+   rail's top edge, and the rail runs unbroken down both sides and along the bottom. */
+.gw-frame {
+    position: relative;
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    padding: 6px 7px 9px 5px;
+    border: 13px solid transparent;
+    border-top-width: 8px;
+    background:
+        var(--gw-noise) padding-box,
+        radial-gradient(ellipse at 30% 40%, #171815, var(--gw-stone) 70%)
+            padding-box,
+        var(--gw-noise) border-box,
+        linear-gradient(#161712, #0c0d0a) border-box;
+    background-blend-mode: soft-light, normal, soft-light, normal;
+}
+
+.gw-frame::before {
+    content: "";
+    position: absolute;
+    inset: -13px;
+    top: -8px;
+    pointer-events: none;
+    /* One colour on every side, so the corners join cleanly, edged in dark on both sides */
+    border: 4px solid #c4b383;
+    box-shadow:
+        0 0 0 1px #15110a,
+        inset 0 0 0 1px #15110a,
+        inset 0 0 6px rgba(0, 0, 0, 0.7);
+}
+
+.gw-body {
+    position: relative;
+    flex: 1 1 auto;
+    min-width: 0;
+    min-height: 0;
+    display: flex;
+}
+
+/* ---------- Resize grip ---------- */
+
+.gw-resize {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    width: 18px;
+    height: 18px;
+    padding: 0;
+    border: 0;
+    background: linear-gradient(
+        135deg,
+        transparent 0 45%,
+        var(--gw-gold-mid) 45% 52%,
+        transparent 52% 62%,
+        var(--gw-gold-mid) 62% 69%,
+        transparent 69% 79%,
+        var(--gw-gold-mid) 79% 86%,
+        transparent 86%
+    );
+    cursor: ns-resize;
+    touch-action: none;
+    z-index: 5;
+    opacity: 0.85;
+}
+
+.gw-resize:hover {
+    opacity: 1;
+    filter: brightness(1.3);
+}
+
+.gw.is-resizing,
+.gw.is-resizing * {
+    cursor: ns-resize !important;
+}
+
+/* ---------- Gold-bordered content area ---------- */
+
+.gw-content {
+    position: relative;
+    flex: 1 1 auto;
+    min-width: 0;
+    min-height: 0;
+    padding: 5px;
+    border: 2px solid var(--gw-gold-dark);
+    box-shadow:
+        inset 0 0 0 1px var(--gw-gold),
+        inset 0 0 0 3px var(--gw-gold-dark);
+    background: rgba(0, 0, 0, 0.18);
+}
+
+/* ---------- Inset panel (tree, list, filter boxes) ---------- */
+
+.gw-panel {
+    position: relative;
+    border: 1px solid var(--gw-line);
+    box-shadow:
+        inset 0 0 0 4px var(--gw-red-deep),
+        inset 0 0 0 5px #000;
+    background: var(--gw-noise), var(--gw-panel);
+    background-blend-mode: soft-light, normal;
+}
+
+/* ---------- Buttons ---------- */
+
+.gw-button {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-width: 64px;
+    height: 26px;
+    padding: 0 12px;
+    border: 1px solid #0f0c05;
+    border-radius: 1px;
+    background: var(--gw-noise),
+        radial-gradient(
+            ellipse at 50% 50%,
+            #5c0605 0,
+            #3a0101 70%,
+            #2a0000 100%
+        );
+    background-blend-mode: soft-light, normal;
+    box-shadow:
+        inset 0 0 0 1px #d2bb8d,
+        inset 0 0 0 2px #4a3d20,
+        inset 0 0 0 3px #8a7646,
+        inset 0 0 0 4px #1b1306,
+        inset 0 6px 6px -4px rgba(255, 255, 255, 0.08);
+    color: var(--gw-text-label);
+    font-family: var(--gw-font-label);
+    font-size: 15px;
+    line-height: 1;
+    letter-spacing: 0.02em;
+    text-shadow:
+        1px 1px 0 #000,
+        0 0 2px #000;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.gw-button.small {
+    height: 21px;
+    font-size: 14px;
+    padding: 0 8px;
+}
+
+.gw-button:hover:not(:disabled) {
+    background: var(--gw-noise),
+        radial-gradient(
+            ellipse at 50% 50%,
+            #760a07 0,
+            #4a0201 70%,
+            #300000 100%
+        );
+    color: #fff6c8;
+}
+
+.gw-button:active:not(:disabled) {
+    transform: translateY(1px);
+    box-shadow:
+        inset 0 0 0 1px #8a7646,
+        inset 0 0 0 2px #4a3d20,
+        inset 0 0 0 3px #d2bb8d,
+        inset 0 0 0 4px #1b1306,
+        inset 0 3px 6px rgba(0, 0, 0, 0.6);
+}
+
+/* Disabled and secondary buttons are grey, as the game shows unavailable actions */
+.gw-button:disabled,
+.gw-button.grey {
+    background: var(--gw-noise),
+        linear-gradient(180deg, #5f5f5f 0, #4a4a4a 50%, #3c3c3c 100%);
+    background-blend-mode: soft-light, normal;
+    box-shadow:
+        inset 0 0 0 1px #8f8360,
+        inset 0 0 0 2px #3a3424,
+        inset 0 0 0 3px #6e6449,
+        inset 0 0 0 4px #1b1a16;
+    color: #cfcfcf;
+}
+
+.gw-button:disabled {
+    cursor: default;
+    color: #a9a9a9;
+}
+
+.gw-button.grey:hover:not(:disabled) {
+    background: var(--gw-noise),
+        linear-gradient(180deg, #6c6c6c 0, #555 50%, #444 100%);
+    color: #fff;
+}
+
+/* ---------- Text fields ---------- */
+
+/* Small square box: the level range inputs */
+.gw-box {
+    width: 34px;
+    height: 20px;
+    padding: 0 2px;
+    margin: 0;
+    border: 1px solid var(--gw-line);
+    border-radius: 0;
+    box-shadow:
+        inset 0 0 0 1px #000,
+        inset 0 0 0 3px var(--gw-red-deep);
+    background: #020202;
+    color: var(--gw-text);
+    font: 13px var(--gw-font-body);
+    text-align: center;
+    -moz-appearance: textfield;
+    appearance: textfield;
+}
+
+.gw-box::-webkit-outer-spin-button,
+.gw-box::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.gw-box::placeholder {
+    color: #6b6b66;
+}
+
+/* Rounded pill with a brass rim: the search box */
+.gw-search {
+    position: relative;
+    display: flex;
+    align-items: center;
+    height: 29px;
+    border-radius: 15px;
+    padding: 2px;
+    background: linear-gradient(180deg, #ddd5b1 0, #a1956b 45%, #6f6141 100%);
+    box-shadow:
+        0 0 0 1px #1a160b,
+        0 2px 2px rgba(0, 0, 0, 0.6);
+}
+
+.gw-search input {
+    flex: 1 1 auto;
+    min-width: 0;
+    height: 100%;
+    margin: 0;
+    padding: 0 8px 0 12px;
+    border: 0;
+    border-radius: 13px 0 0 13px;
+    background: linear-gradient(180deg, #2e2d2e 0, #121212 45%, #050505 100%);
+    box-shadow: inset 0 2px 3px rgba(0, 0, 0, 0.9);
+    color: var(--gw-text);
+    font: 13px var(--gw-font-body);
+    outline-offset: -3px;
+}
+
+.gw-search input::-webkit-search-cancel-button {
+    display: none;
+}
+
+.gw-search-clear {
+    flex: 0 0 25px;
+    height: 100%;
+    margin: 0;
+    padding: 0 2px 0 0;
+    border: 0;
+    border-left: 1px solid #1a160b;
+    border-radius: 0 13px 13px 0;
+    background: radial-gradient(
+        circle at 40% 40%,
+        #8c7a48 0,
+        #5a4b25 55%,
+        #2e2610 100%
+    );
+    color: #e6dcc0;
+    font: 700 13px var(--gw-font-title);
+    text-shadow: 1px 1px 0 #1a160b;
+    cursor: pointer;
+}
+
+.gw-search-clear:disabled {
+    cursor: default;
+    color: #a29775;
+}
+
+/* Dark pill readout: "Bid Amount", "Current Balance" */
+.gw-readout {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 76px;
+    height: 21px;
+    padding: 0 10px;
+    border-radius: 11px;
+    background: linear-gradient(180deg, #171717 0, #0b0b0b 60%, #050505 100%);
+    box-shadow:
+        inset 0 1px 2px #000,
+        0 1px 0 rgba(255, 255, 255, 0.06);
+    color: var(--gw-text-blue);
+    font: 12px var(--gw-font-body);
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+}
+
+/* ---------- Checkbox ---------- */
+
+.gw-check {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--gw-text);
+    font: 13px var(--gw-font-body);
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.gw-check input {
+    appearance: none;
+    -webkit-appearance: none;
+    flex: 0 0 16px;
+    width: 16px;
+    height: 16px;
+    min-height: 16px;
+    max-height: 16px;
+    padding: 0;
+    margin: 0;
+    border-radius: 0;
+    border: 1px solid #120f06;
+    background:
+        linear-gradient(var(--gw-red-deep), var(--gw-red-deep)) 3px 3px / 8px
+            8px no-repeat,
+        linear-gradient(135deg, #e3d39b 0, #b39b5b 45%, #6a5a2c 100%);
+    box-shadow: inset 0 0 0 2px transparent;
+    cursor: pointer;
+}
+
+.gw-check input:checked {
+    background:
+        url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'><path d='M1 4.2 L3.2 6.3 L7 1.6' fill='none' stroke='%23f2e3a2' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/></svg>")
+            3px 3px / 8px 8px no-repeat,
+        linear-gradient(var(--gw-red-deep), var(--gw-red-deep)) 3px 3px / 8px
+            8px no-repeat,
+        linear-gradient(135deg, #e3d39b 0, #b39b5b 45%, #6a5a2c 100%);
+}
+
+.gw-check input:disabled,
+.gw-check input:disabled + span {
+    opacity: 0.5;
+    cursor: default;
+}
+
+/* ---------- Side tabs ---------- */
+
+.gw-tabs {
+    position: relative;
+    /* Nudged toward the frame's left edge; only the tabs move, not the content */
+    left: -5px;
+    flex: 0 0 86px;
+    width: 86px;
+    margin: 9px -8px 0 0;
+    display: flex;
+    flex-direction: column;
+    /* Right edges line up; the selected tab grows to the left */
+    align-items: flex-end;
+    gap: 5px;
+    z-index: 1;
+}
+
+/* Red leather plate with a gold rim, rounded on the outer side */
+.gw-tab {
+    position: relative;
+    width: 86px;
+    height: 107px;
+    padding: 9px 4px 0 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    border: 0;
+    border-radius: 9px 0 0 9px;
+    background: var(--gw-leather),
+        radial-gradient(
+            ellipse 80% 70% at 45% 45%,
+            #5c0907 0,
+            #3f0504 60%,
+            #230201 100%
+        );
+    box-shadow:
+        inset 0 0 0 1px #0c0700,
+        inset 0 0 0 3px #a38f5a,
+        inset 0 0 0 4px #251805,
+        inset 0 0 12px 4px rgba(0, 0, 0, 0.55),
+        2px 2px 4px rgba(0, 0, 0, 0.6);
+    color: #b89a3e;
+    font-family: var(--gw-font-label);
+    font-size: 18px;
+    line-height: 20px;
+    text-shadow:
+        1px 1px 0 #000,
+        0 0 3px #000;
+    cursor: pointer;
+}
+
+/* The site colours every span; the label takes the tab's gold instead */
+.gw-tab > span {
+    color: inherit;
+}
+
+.gw-tab svg {
+    filter: brightness(0.88) drop-shadow(1px 2px 1px rgba(0, 0, 0, 0.85));
+}
+
+.gw-tab:hover:not([aria-selected="true"]) {
+    color: #d8b955;
+}
+
+.gw-tab:hover:not([aria-selected="true"]) svg {
+    filter: brightness(1) drop-shadow(1px 2px 1px rgba(0, 0, 0, 0.85));
+}
+
+.gw-tab[aria-selected="true"] {
+    z-index: 2;
+    width: 94px;
+    margin-left: -8px;
+    background: var(--gw-leather),
+        radial-gradient(
+            ellipse 80% 70% at 45% 45%,
+            #860f0b 0,
+            #5e0806 55%,
+            #300302 100%
+        );
+    box-shadow:
+        inset 0 0 0 1px #0c0700,
+        inset 0 0 0 3px #d4c18a,
+        inset 0 0 0 4px #2b1d08,
+        inset 0 0 12px 4px rgba(0, 0, 0, 0.45),
+        -2px 2px 4px rgba(0, 0, 0, 0.6);
+    color: #e8c95c;
+    cursor: default;
+}
+
+.gw-tab[aria-selected="true"] svg {
+    filter: drop-shadow(1px 2px 1px rgba(0, 0, 0, 0.85));
+}
+
+/* ---------- Scrollbars ---------- */
+
+.gw-scroll {
+    /* Positioned, so absolutely positioned content (screen-reader text) stays inside and
+       can't make the page taller */
+    position: relative;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-color: #5a1a0e #120202;
+}
+
+.gw-scroll::-webkit-scrollbar {
+    width: 21px;
+}
+
+.gw-scroll::-webkit-scrollbar-track {
+    background: linear-gradient(
+            90deg,
+            #6d5b34 0 1px,
+            transparent 1px calc(100% - 1px),
+            #6d5b34 calc(100% - 1px)
+        ),
+        linear-gradient(90deg, #070101, #1a0403 50%, #070101);
+}
+
+.gw-scroll::-webkit-scrollbar-thumb {
+    min-height: 24px;
+    border: 4px solid transparent;
+    border-radius: 0;
+    background:
+        linear-gradient(90deg, #2b0805, #4a0f08 50%, #2b0805) padding-box,
+        linear-gradient(180deg, #c3ad74, #6d5b34) border-box;
+    box-shadow: inset 0 0 0 1px #000;
+}
+
+.gw-scroll::-webkit-scrollbar-thumb:hover {
+    background:
+        linear-gradient(90deg, #3d0b07, #66150b 50%, #3d0b07) padding-box,
+        linear-gradient(180deg, #e0cb92, #8a7444) border-box;
+}
+
+.gw-scroll::-webkit-scrollbar-button:single-button {
+    display: block;
+    height: 12px;
+    background-color: #1b1810;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 9px 5px;
+    border: 1px solid #8f7c4c;
+}
+
+.gw-scroll::-webkit-scrollbar-button:single-button:vertical:decrement {
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 9 5'><path d='M0 5 L4.5 0 L9 5 Z' fill='%23b8b8b0'/></svg>");
+}
+
+.gw-scroll::-webkit-scrollbar-button:single-button:vertical:increment {
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 9 5'><path d='M0 0 L4.5 5 L9 0 Z' fill='%23b8b8b0'/></svg>");
+}
+
+.gw-scroll::-webkit-scrollbar-button:single-button:hover {
+    background-color: #2c2719;
+}
+
+/* ---------- Small helpers ---------- */
+
+.gw-shard-amount {
+    display: inline-flex;
+    align-items: flex-start;
+    gap: 2px;
+    white-space: nowrap;
+}
+
+.gw-shard-amount svg {
+    margin-top: -3px;
+    flex: 0 0 auto;
+}
+
+.gw-label {
+    font-family: var(--gw-font-label);
+    color: var(--gw-text-label);
+    text-shadow: 1px 1px 0 #000;
+}
+
+.gw-visually-hidden {
+    position: absolute !important;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .gw * {
+        transition: none !important;
+        animation: none !important;
+    }
+}
+
+/* ---------- Dialog ---------- */
+
+/* A smaller window over the page, which is dimmed behind it */
+.gw-dialog-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    background: rgba(0, 0, 0, 0.65);
+    animation: gw-fade-in 120ms ease-out;
+}
+
+.gw-dialog {
+    display: flex;
+    width: min(720px, 100%);
+    height: min(460px, 100%);
+    outline: none;
+}
+
+.gw-dialog > .gw {
+    flex: 1 1 auto;
+    height: 100%;
+}
+
+@keyframes gw-fade-in {
+    from {
+        opacity: 0;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .gw-dialog-overlay {
+        animation: none;
+    }
+}
+
+/* Phones: the dialog fills the screen */
+@media (max-width: 600px) {
+    .gw-dialog-overlay {
+        padding: 0;
+    }
+
+    .gw-dialog {
+        width: 100%;
+        height: 100%;
+    }
+}
+
+/* ---------- Tooltip ---------- */
+
+.gw-tooltip {
+    min-width: 170px;
+    padding: 6px 8px;
+    border: 1px solid #c4b383;
+    box-shadow:
+        0 0 0 1px #15110a,
+        0 4px 10px rgba(0, 0, 0, 0.6);
+    background: rgba(8, 8, 7, 0.95);
+    color: #f2f2f2;
+    font:
+        11px Verdana,
+        Tahoma,
+        "DejaVu Sans",
+        sans-serif;
+    white-space: nowrap;
+}
+
+.gw-tooltip-title {
+    margin-bottom: 4px;
+    color: #ece0a4;
+    font-weight: bold;
+}
+
+.gw-tooltip-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    line-height: 1.6;
+}
+
+.gw-tooltip-row b {
+    margin-left: auto;
+    padding-left: 12px;
+}
+
+/* ---------- Toggle buttons ---------- */
+
+/* A set of choices, one picked: every option stays red (grey would read as disabled).
+   The others are a little muted; the picked one is brighter with a vivid gold rim. */
+.gw-button.gw-toggle[aria-pressed="false"] {
+    filter: saturate(0.75) brightness(0.95);
+    color: #d9cfae;
+}
+
+.gw-button.gw-toggle[aria-pressed="false"]:hover {
+    filter: none;
+}
+
+.gw-button.gw-toggle[aria-pressed="true"] {
+    background: var(--gw-noise),
+        radial-gradient(
+            ellipse at 50% 50%,
+            #8c0d09 0,
+            #560302 70%,
+            #380000 100%
+        );
+    background-blend-mode: soft-light, normal;
+    box-shadow:
+        inset 0 0 0 1px #dfc97b,
+        inset 0 0 0 2px #6b5418,
+        inset 0 0 0 3px #d8bb54,
+        inset 0 0 0 4px #1b1306,
+        0 0 5px rgba(232, 201, 92, 0.45);
+    color: #fff6c8;
+    cursor: default;
+}
+
+.gw-button.gw-toggle[aria-pressed="true"]:active {
+    transform: none;
+}
