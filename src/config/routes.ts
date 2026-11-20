@@ -78,8 +78,8 @@ const bannerRouteMapping = {
         showButtons: false,
     },
     notifications: {
-        title: "LFM Notifications",
-        subtitle: "Set Up and Manage Notifications",
+        title: "Notifications",
+        subtitle: "Get Alerted About What You Care About",
         miniature: true,
         showButtons: false,
     },

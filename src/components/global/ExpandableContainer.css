@@ -14,6 +14,20 @@
     cursor: pointer;
     font-weight: 700;
     padding: 10px;
+    /* reset <button> styles so the header looks like the rest of the container */
+    width: 100%;
+    border: none;
+    border-radius: 5px;
+    background: none;
+    color: inherit;
+    font-family: inherit;
+    font-size: inherit;
+    text-align: left;
+}
+
+.expandable-container-header:focus-visible {
+    outline: 2px solid var(--blue1);
+    outline-offset: -2px;
 }
 
 .expandable-container-content {

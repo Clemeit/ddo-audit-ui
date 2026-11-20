@@ -40,9 +40,9 @@ const Activity = lazy(() =>
 const NotFound = lazy(() =>
     lazyRetry(() => import("./components/app/NotFound.tsx"))
 )
-// const Notifications = lazy(
-//     () => lazyRetry(() => import("./components/notifications/Notifications.tsx"))
-// )
+const Notifications = lazy(() =>
+    lazyRetry(() => import("./components/notifications/Notifications.tsx"))
+)
 const Timers = lazy(() =>
     lazyRetry(() => import("./components/timers/Timers.tsx"))
 )
@@ -152,7 +152,14 @@ export default createBrowserRouter(
                 <Route index element={<Who />} />
                 <Route path=":id" element={<WhoSpecific />} />
             </Route>
-            {/* <Route path="/notifications" element={<Notifications />} /> */}
+            <Route
+                path="/notifications"
+                element={
+                    <QuestProvider>
+                        <Notifications />
+                    </QuestProvider>
+                }
+            />
             <Route
                 path="/timers"
                 element={
