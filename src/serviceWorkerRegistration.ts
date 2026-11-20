@@ -62,12 +62,42 @@ export function register(config?: Config) {
     }
 }
 
+const UPDATE_CHECK_INTERVAL_MS = 60 * 60 * 1000
+const UPDATE_CHECK_MIN_GAP_MS = 5 * 60 * 1000
+let lastUpdateCheck = 0
+
+function checkForUpdate(registration: ServiceWorkerRegistration) {
+    const now = Date.now()
+    if (now - lastUpdateCheck < UPDATE_CHECK_MIN_GAP_MS) {
+        return
+    }
+    lastUpdateCheck = now
+    // update() rejects when offline or when the script can't be fetched; that's fine.
+    registration.update().catch(() => {})
+}
+
 function registerValidSW(swUrl: string, config?: Config) {
     navigator.serviceWorker
         .register(swUrl)
         .then((registration) => {
-            // Check for updates every time the app loads (cache busting)
-            registration.update()
+            // A worker that finished installing on an earlier visit is already waiting.
+            // It won't fire updatefound again, so prompt for it now.
+            if (registration.waiting && navigator.serviceWorker.controller) {
+                config?.onUpdate?.(registration)
+            }
+
+            // Check for updates on load, periodically, and when the tab comes back
+            // into view, so long-lived tabs and installed PWAs notice new releases.
+            checkForUpdate(registration)
+            setInterval(
+                () => checkForUpdate(registration),
+                UPDATE_CHECK_INTERVAL_MS
+            )
+            document.addEventListener("visibilitychange", () => {
+                if (document.visibilityState === "visible") {
+                    checkForUpdate(registration)
+                }
+            })
 
             // Listen for new service worker waiting
             registration.addEventListener("updatefound", () => {

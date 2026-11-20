@@ -26,8 +26,6 @@ const LFM_SETTINGS_KEY = "lfm-settings"
 const WHO_SETTINGS_KEY = "who-settings"
 const RAID_TIMER_SETTINGS_KEY = "timer-settings"
 const TIMEZONE_KEY = "timezone"
-const UPDATE_DISMISSED_KEY = "update-dismissed"
-const UPDATE_SHOWN_KEY = "update-shown"
 const NOTIFICATION_PREFERENCES_KEY = "notification-preferences"
 
 export const PERSISTENT_KEYS = [
@@ -276,24 +274,6 @@ function getDismissedFeatureCallouts(): string[] {
 
 function addDismissedFeatureCallout(callout: string): void {
     addItem<string>(DISMISSED_CALLOUTS_KEY, callout, (a, b) => a === b)
-}
-
-// Update dismissed functions
-function setUpdateDismissed(timestamp: string): void {
-    setData<string>(UPDATE_DISMISSED_KEY, timestamp)
-}
-
-function getUpdateDismissed(): string | null {
-    return getData<string>(UPDATE_DISMISSED_KEY, null)
-}
-
-// Update shown functions
-function setUpdateShown(timestamp: string): void {
-    setData<string>(UPDATE_SHOWN_KEY, timestamp)
-}
-
-function getUpdateShown(): string | null {
-    return getData<string>(UPDATE_SHOWN_KEY, null)
 }
 
 // Friends functions
@@ -696,10 +676,6 @@ export {
     setTimezone,
     getTrackedCharacterIds,
     setTrackedCharacterIds,
-    getUpdateDismissed,
-    setUpdateDismissed,
-    getUpdateShown,
-    setUpdateShown,
     getNotificationPreferences,
     setNotificationPreferences,
     getPersistentDataByKeys,
