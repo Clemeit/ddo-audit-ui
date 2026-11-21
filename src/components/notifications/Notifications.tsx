@@ -26,6 +26,8 @@ import RuleEditorModal from "./RuleEditorModal"
 import RuleCard from "./RuleCard"
 import NotificationGate from "./NotificationGate"
 import DeviceBar from "./DeviceBar"
+import QuietHours from "./QuietHours"
+import useQuietHours from "./useQuietHours"
 import useDeviceNotifications from "./useDeviceNotifications"
 import { ReactComponent as AddSVG } from "../../assets/svg/add.svg"
 
@@ -90,6 +92,7 @@ const Notifications = () => {
         useRegisteredCharactersContext()
     const [searchParams, setSearchParams] = useSearchParams()
     const device = useDeviceNotifications()
+    const quietHours = useQuietHours()
     const [editor, setEditor] = useState<EditorState>({ mode: "closed" })
     const [busyRuleId, setBusyRuleId] = useState<number | null>(null)
 
@@ -396,6 +399,7 @@ const Notifications = () => {
         return (
             <>
                 <DeviceBar device={device} />
+                <QuietHours quietHours={quietHours} />
                 <section className="alert-rules" aria-labelledby="your-alerts">
                     <div className="alert-rules-header">
                         <h2 id="your-alerts">Your alerts</h2>

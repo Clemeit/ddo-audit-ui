@@ -1,5 +1,7 @@
 import {
     AlertInboxResponse,
+    AlertPreferences,
+    AlertPreferencesResponse,
     AlertRuleInput,
     AlertRuleResponse,
     AlertRulesResponse,
@@ -87,7 +89,34 @@ function sendTestAlert(
     })
 }
 
+function getAlertPreferences(
+    accessToken: string,
+    signal?: AbortSignal
+): Promise<AlertPreferencesResponse> {
+    return getRequest<AlertPreferencesResponse>(
+        `${ALERTS_ENDPOINT}/preferences`,
+        authed(accessToken, signal)
+    )
+}
+
+function putAlertPreferences(
+    accessToken: string,
+    preferences: AlertPreferences,
+    signal?: AbortSignal
+): Promise<AlertPreferencesResponse> {
+    const { quiet_enabled, quiet_start, quiet_end, timezone } = preferences
+    return putRequest<AlertPreferencesResponse>(
+        `${ALERTS_ENDPOINT}/preferences`,
+        {
+            ...authed(accessToken, signal),
+            data: { quiet_enabled, quiet_start, quiet_end, timezone },
+        }
+    )
+}
+
 export {
+    getAlertPreferences,
+    putAlertPreferences,
     getAlertRules,
     createAlertRule,
     updateAlertRule,

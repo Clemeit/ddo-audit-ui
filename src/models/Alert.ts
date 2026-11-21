@@ -53,6 +53,21 @@ interface AlertRuleResponse {
     data: AlertRule
 }
 
+// Account-wide quiet hours: alerts that fire inside the window are skipped, not delayed.
+// Times are "HH:MM" (24-hour) in `timezone` (an IANA name); the window may cross midnight.
+interface AlertPreferences {
+    quiet_enabled: boolean
+    quiet_start: string
+    quiet_end: string
+    timezone: string
+    // False until the user has saved preferences once.
+    saved?: boolean
+}
+
+interface AlertPreferencesResponse {
+    data: AlertPreferences
+}
+
 const LFM_DIFFICULTIES = [
     "Casual",
     "Normal",
@@ -111,6 +126,8 @@ export type {
     AlertInboxResponse,
     AlertRulesResponse,
     AlertRuleResponse,
+    AlertPreferences,
+    AlertPreferencesResponse,
     LfmPostedCriteria,
 }
 export { LFM_DIFFICULTIES }
