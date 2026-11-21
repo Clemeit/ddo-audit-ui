@@ -635,23 +635,13 @@
 
 /* ----- quiet hours ----- */
 
-.quiet-hours {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
+/* The card itself reuses the device bar styles (.device-bar). */
 
-.quiet-hours-header {
+.quiet-hours-switch {
     display: flex;
     align-items: center;
-    justify-content: space-between;
     gap: 10px;
-}
-
-.quiet-hours-note,
-.quiet-hours-timezone {
     font-size: 0.9rem;
-    color: var(--secondary-text);
 }
 
 .quiet-hours-times {
