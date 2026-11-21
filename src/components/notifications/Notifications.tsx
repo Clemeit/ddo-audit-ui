@@ -8,7 +8,7 @@ import { useUserContext } from "../../contexts/UserContext"
 import { useAlertContext } from "../../contexts/AlertContext"
 import { useNotificationContext } from "../../contexts/NotificationContext"
 import { useQuestContext } from "../../contexts/QuestContext"
-import { useSearchParams } from "react-router-dom"
+import { Link, useSearchParams } from "react-router-dom"
 import { useAppContext } from "../../contexts/AppContext"
 import { useRegisteredCharactersContext } from "../../contexts/RegisteredCharactersContext"
 import { AlertRule } from "../../models/Alert"
@@ -20,7 +20,11 @@ import {
     getVisibleAlertTypes,
     SummaryHelpers,
 } from "../alerts/types"
-import { getFriends } from "../../utils/localStorage"
+import { BOOLEAN_FLAGS, getFriends } from "../../utils/localStorage"
+import {
+    getIsFeatureEnabled,
+    SHARD_EXCHANGE_FEATURE_KEY,
+} from "../../utils/configUtils"
 import { isExpired } from "../../utils/alertExpiry"
 import RuleEditorModal from "./RuleEditorModal"
 import RuleCard from "./RuleCard"
@@ -29,6 +33,7 @@ import DeviceBar from "./DeviceBar"
 import useQuietHours from "./useQuietHours"
 import useDeviceNotifications from "./useDeviceNotifications"
 import { ReactComponent as AddSVG } from "../../assets/svg/add.svg"
+import useBooleanFlag from "../../hooks/useBooleanFlags"
 
 type EditorState =
     | { mode: "closed" }
@@ -53,10 +58,12 @@ function apiErrorMessage(error: unknown, fallback: string): string {
     return typeof message === "string" && message ? message : fallback
 }
 
-const STEPS = [
+const getSteps = (showShardExchange: boolean) => [
     {
         title: "Choose what to watch",
-        text: "LFMs for your quests and raids, servers going down or coming back, friends logging in, or Shard Exchange listings and bids.",
+        text: showShardExchange
+            ? "LFMs for your quests and raids, servers going down or coming back, friends logging in, or Shard Exchange listings and bids."
+            : "LFMs for your quests and raids, servers going down or coming back, or friends logging in.",
     },
     {
         title: "Turn on notifications",
@@ -84,6 +91,10 @@ const Notifications = () => {
         updateRule,
         deleteRule,
     } = useAlertContext()
+    const [
+        hideNotificationsNewFeatureMessage,
+        setHideNotificationsNewFeatureMessage,
+    ] = useBooleanFlag(BOOLEAN_FLAGS.hideNotificationsNewFeatureMessage, false)
     const { createNotification } = useNotificationContext()
     const { quests } = useQuestContext()
     const { config } = useAppContext()
@@ -104,6 +115,10 @@ const Notifications = () => {
     }, [rules])
 
     const visibleTypes = useMemo(() => getVisibleAlertTypes(config), [config])
+    const showShardExchange = getIsFeatureEnabled(
+        config,
+        SHARD_EXCHANGE_FEATURE_KEY
+    )
 
     const helpers: SummaryHelpers = useMemo(() => {
         const names = new Map<number, string>()
@@ -235,13 +250,15 @@ const Notifications = () => {
         <div className="notifications-intro">
             <h2>Never miss a thing</h2>
             <p>
-                Tell DDO Audit what you care about and get a notification the
-                moment it happens: an LFM for your favorite raid, a server
-                coming back online, a friend logging in, or an item showing up
-                on the Shard Exchange.
+                Get notified for the events that are important to you: an LFM
+                for your favorite raid, a server coming back online, a friend
+                logging in
+                {showShardExchange
+                    ? ", or an item showing up on the Shard Exchange."
+                    : ", and more."}
             </p>
             <ol className="notifications-steps">
-                {STEPS.map((step, i) => (
+                {getSteps(showShardExchange).map((step, i) => (
                     <li key={step.title}>
                         <span className="notifications-step-number">
                             {i + 1}
@@ -444,9 +461,33 @@ const Notifications = () => {
     return (
         <Page
             title="Notifications"
-            description="Get alerted about LFMs for your favorite quests, servers going offline or online, friends logging in, and the Shard Exchange."
+            description="Get alerted about LFMs for your favorite quests, servers going offline or online, friends logging in, and more!"
         >
             <div className="notifications-page">
+                {!hideNotificationsNewFeatureMessage && (
+                    <PageMessage
+                        type="info"
+                        title="New Feature"
+                        message={
+                            <>
+                                <span>
+                                    Please let me know if you encounter any
+                                    bugs, or if there are additional features
+                                    you'd like to see added.
+                                </span>
+                                <Link
+                                    to="/feedback"
+                                    style={{ color: "var(--secondary-text)" }}
+                                >
+                                    Submit feedback
+                                </Link>
+                            </>
+                        }
+                        onDismiss={() =>
+                            setHideNotificationsNewFeatureMessage(true)
+                        }
+                    />
+                )}
                 {isAuthLoading ? (
                     <Skeleton width="100%" height="120px" />
                 ) : !isLoggedIn ? (

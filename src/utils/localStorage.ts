@@ -94,6 +94,8 @@ function normalizePersistentValue(key: PersistentKey, value: unknown): unknown {
 export const BOOLEAN_FLAGS = {
     bankToonsDisclaimer: "bank-toons-disclaimer",
     hideSelfFromPartyList: "hide-self-from-party-list",
+    hideNotificationsNewFeatureMessage:
+        "hide-notifications-new-feature-message",
 }
 
 type LocalStorageWriteEvent = {
