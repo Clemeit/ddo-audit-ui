@@ -35,10 +35,7 @@ const Directory = () => {
                     <NavCardCluster>
                         <NavigationCard type="live" />
                         <NavigationCard type="servers" />
-                        <NavigationCard
-                            type="quests"
-                            badge={<Badge text="New" type="new" />}
-                        />
+                        <NavigationCard type="quests" />
                         {shardExchangeEnabled && (
                             <NavigationCard
                                 type="shard-exchange"
@@ -83,16 +80,9 @@ const Directory = () => {
                 </ContentCluster>
                 <ContentCluster title="Additional Resources">
                     <NavCardCluster>
-                        <NavigationCard
-                            type="account"
-                            badge={<Badge text="Beta" type="beta" />}
-                        />
+                        <NavigationCard type="account" />
                         <NavigationCard type="about" />
-                        <NavigationCard
-                            type="api"
-                            badge={<Badge text="New" type="new" />}
-                            externalLink={API_DOC_URL}
-                        />
+                        <NavigationCard type="api" externalLink={API_DOC_URL} />
                         <NavigationCard type="feedback" />
                         <NavigationCard
                             type="health"
