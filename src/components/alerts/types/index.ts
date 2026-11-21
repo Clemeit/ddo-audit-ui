@@ -4,6 +4,7 @@
 
 import React from "react"
 import {
+    AlertRule,
     FriendLoginCriteria,
     LfmPostedCriteria,
     ServerStatusCriteria,
@@ -114,6 +115,8 @@ interface AlertTypeDefinition<TCriteria = any> {
         helpers: SummaryHelpers
     ) => { title: string; chips: string[] }
     validate: (criteria: TCriteria) => string | null
+    // Criteria fields the server fills in for display only; ignored when spotting duplicates.
+    displayOnlyFields?: (keyof TCriteria & string)[]
 }
 
 const lfmPosted: AlertTypeDefinition<LfmPostedCriteria> = {
@@ -174,6 +177,7 @@ const shardExchangeListed: AlertTypeDefinition<ShardExchangeListedCriteria> = {
     summarize: (criteria) => summarizeShardExchangeListed(criteria),
     describe: (criteria) => describeShardExchangeListed(criteria),
     validate: validateShardExchangeListed,
+    displayOnlyFields: ["item_name"],
 }
 
 const shardExchangeOutbid: AlertTypeDefinition<ShardExchangeOutbidCriteria> = {
@@ -214,9 +218,60 @@ function getVisibleAlertTypes(
     )
 }
 
+function canonical(value: unknown): unknown {
+    if (Array.isArray(value)) {
+        // Every list in a rule's criteria is a set (servers, quests, characters): order doesn't count.
+        return value
+            .map(canonical)
+            .sort((a, b) => (JSON.stringify(a) < JSON.stringify(b) ? -1 : 1))
+    }
+    if (value && typeof value === "object") {
+        return Object.fromEntries(
+            Object.keys(value)
+                .sort()
+                .map((k) => [
+                    k,
+                    canonical((value as Record<string, unknown>)[k]),
+                ])
+        )
+    }
+    return value
+}
+
+/** Same idea as the server's AlertType.criteria_key: equal keys alert on exactly the same things. */
+function criteriaKey(
+    definition: AlertTypeDefinition,
+    criteria: unknown
+): string {
+    const ignored = new Set<string>(definition.displayOnlyFields ?? [])
+    const trimmed = Object.fromEntries(
+        Object.entries((criteria ?? {}) as Record<string, unknown>).filter(
+            ([k]) => !ignored.has(k)
+        )
+    )
+    return JSON.stringify(canonical(trimmed))
+}
+
+/** Another of the user's rules with this type and criteria, if there is one. */
+function findDuplicateRule(
+    rules: AlertRule[],
+    definition: AlertTypeDefinition,
+    criteria: unknown,
+    excludeRuleId?: number
+): AlertRule | undefined {
+    const key = criteriaKey(definition, criteria)
+    return rules.find(
+        (r) =>
+            r.id !== excludeRuleId &&
+            r.type === definition.type &&
+            criteriaKey(definition, r.criteria) === key
+    )
+}
+
 export {
     ALERT_TYPES,
     ALERT_GROUPS,
+    findDuplicateRule,
     getAlertTypeDefinition,
     getVisibleAlertTypes,
 }

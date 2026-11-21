@@ -367,28 +367,18 @@
 
 /* ----- editor dialog ----- */
 
-/* type picker: "Alert me when…", grouped */
+/* step 1: type picker, grouped */
 
 .alert-type-picker {
-    margin: 0;
-    padding: 0;
-    border: none;
-    min-width: 0;
-}
-
-.alert-type-picker legend {
-    padding: 0;
-    margin-bottom: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
 }
 
 .alert-type-group {
     display: flex;
     flex-direction: column;
-    gap: 4px;
-}
-
-.alert-type-group + .alert-type-group {
-    margin-top: 10px;
+    gap: 6px;
 }
 
 .alert-type-group-title {
@@ -401,20 +391,55 @@
 .alert-type-option {
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 8px 10px;
+    gap: 12px;
+    width: 100%;
+    padding: 10px 12px;
     border: 1px solid var(--border);
     border-radius: 6px;
+    background: none;
+    color: inherit;
+    font: inherit;
+    text-align: left;
     cursor: pointer;
+    transition:
+        border-color 0.15s,
+        background-color 0.15s;
 }
 
+.alert-type-option:hover,
+.alert-type-option:focus-visible,
 .alert-type-option.selected {
     border-color: var(--text);
     background: var(--background-light);
 }
 
-.alert-type-option input {
-    margin: 0;
+.alert-type-option-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.alert-type-option-label {
+    font-weight: bold;
+}
+
+.alert-type-option-description {
+    font-size: 0.85rem;
+    color: var(--secondary-text);
+}
+
+.alert-type-option-chevron {
+    flex: 0 0 auto;
+    font-size: 1.4rem;
+    line-height: 1;
+    color: var(--secondary-text);
+    transition: transform 0.15s;
+}
+
+.alert-type-option:hover .alert-type-option-chevron {
+    transform: translateX(3px);
 }
 
 /* Shard Exchange listing price limits */
@@ -437,6 +462,11 @@
     padding: 6px 8px;
 }
 
+/* The step slide briefly pushes content past the edge; don't let that show a scrollbar. */
+.alert-editor-modal {
+    overflow-x: hidden;
+}
+
 .alert-editor-modal .modal-content {
     padding: 0;
 }
@@ -448,15 +478,73 @@
     padding: 24px 24px 0 24px;
 }
 
+/* Each step remounts (keyed on the step), so these play on every step change. */
+.alert-editor-step-forward {
+    animation: alert-editor-in-forward 0.22s ease-out;
+}
+
+.alert-editor-step-back {
+    animation: alert-editor-in-back 0.22s ease-out;
+}
+
+@keyframes alert-editor-in-forward {
+    from {
+        opacity: 0;
+        transform: translateX(28px);
+    }
+}
+
+@keyframes alert-editor-in-back {
+    from {
+        opacity: 0;
+        transform: translateX(-28px);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .alert-editor-step-forward,
+    .alert-editor-step-back {
+        animation-name: alert-editor-fade;
+    }
+
+    @keyframes alert-editor-fade {
+        from {
+            opacity: 0;
+        }
+    }
+}
+
+.alert-editor-heading {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding-right: 32px;
+}
+
+.alert-editor-step {
+    font-size: 0.8rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--secondary-text);
+}
+
 .alert-editor-title {
     margin: 0;
-    padding-right: 32px;
     font-size: 1.3rem;
 }
 
+.alert-editor-title:focus {
+    outline: none;
+}
+
 .alert-editor-description {
-    margin: -12px 0 0 0;
+    margin: 0;
     color: var(--secondary-text);
+}
+
+/* Back sits on the left, apart from Cancel / Create. */
+.alert-editor-back {
+    margin-right: auto;
 }
 
 .alert-editor-footer {

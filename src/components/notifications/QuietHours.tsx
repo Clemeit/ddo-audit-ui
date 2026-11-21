@@ -17,7 +17,9 @@ interface Props {
 }
 
 /** "11:00 PM to 7:00 AM" while quiet hours are on and usable, otherwise null. For the collapsed card title. */
-function activeQuietWindow(preferences: AlertPreferences | null): string | null {
+function activeQuietWindow(
+    preferences: AlertPreferences | null
+): string | null {
     if (
         !preferences ||
         !preferences.quiet_enabled ||
@@ -67,8 +69,8 @@ const QuietHours = ({ quietHours }: Props) => {
             {heading}
             <p className="device-bar-status">
                 {quietWindow
-                    ? `No alerts from ${quietWindow} (${timezone}). Alerts that happen then are skipped, not delayed.`
-                    : "Skip alerts during certain hours, like overnight. Alerts that happen during quiet hours are skipped, not delayed."}
+                    ? `No alerts from ${quietWindow} (${timezone}).`
+                    : "Silence alerts during certain hours, like overnight."}
             </p>
             <div className="quiet-hours-switch">
                 <Switch

@@ -162,11 +162,8 @@ const Notifications = () => {
 
     const openCreateForGroup = (group: AlertGroup) => {
         const groupTypes = visibleTypes.filter((t) => t.group === group.name)
-        setEditor({
-            mode: "create",
-            types: groupTypes,
-            initialType: groupTypes[0]?.type,
-        })
+        // No initialType: a group with several types opens on the type picker.
+        setEditor({ mode: "create", types: groupTypes })
     }
 
     const notifyError = useCallback(
@@ -417,6 +414,7 @@ const Notifications = () => {
                 {editor.mode !== "closed" && (
                     <RuleEditorModal
                         key={existing?.id ?? "new"}
+                        rules={rules}
                         types={
                             editor.mode === "create" && editor.types?.length
                                 ? editor.types
