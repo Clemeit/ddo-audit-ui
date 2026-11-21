@@ -31,6 +31,7 @@ import {
 import logMessage from "../utils/logUtils"
 import { useNotificationContext } from "./NotificationContext"
 import { useUserContext } from "./UserContext"
+import { isNotLoggedIn } from "../services/authSession"
 import Button from "../components/global/Button"
 import usePushSubscription, { PushStatus } from "../hooks/usePushSubscription"
 import { isExpired } from "../utils/alertExpiry"
@@ -78,7 +79,7 @@ function errorMessage(error: unknown): string {
 }
 
 export const AlertProvider = ({ children, navigate }: Props) => {
-    const { isLoggedIn, accessToken } = useUserContext()
+    const { isLoggedIn, authedRequest, logoutReason } = useUserContext()
     const { createNotification } = useNotificationContext()
 
     const [rules, setRules] = useState<AlertRule[]>([])
@@ -87,13 +88,17 @@ export const AlertProvider = ({ children, navigate }: Props) => {
     const [preferences, setPreferencesState] =
         useState<NotificationPreferences>(() => getNotificationPreferences())
 
-    const accessTokenRef = useRef(accessToken)
-    accessTokenRef.current = accessToken
+    const isLoggedInRef = useRef(isLoggedIn)
+    isLoggedInRef.current = isLoggedIn
     const navigateRef = useRef(navigate)
     navigateRef.current = navigate
     const preferencesRef = useRef(preferences)
     preferencesRef.current = preferences
-    const push = usePushSubscription({ accessToken, isLoggedIn })
+    const push = usePushSubscription({
+        authedRequest,
+        isLoggedIn,
+        logoutReason,
+    })
     // With push on, this device already gets an OS notification from the service worker.
     const pushOnRef = useRef(false)
     pushOnRef.current = push.status === "on"
@@ -101,23 +106,20 @@ export const AlertProvider = ({ children, navigate }: Props) => {
     // Inbox stream ID of the last alert seen; null until seeded (seeding skips old alerts).
     const cursorRef = useRef<string | null>(null)
 
-    const requireToken = useCallback(() => {
-        const token = accessTokenRef.current
-        if (!token) throw new Error("Not logged in")
-        return token
-    }, [])
-
     // ----- rules -----
 
     const reloadRules = useCallback(async () => {
-        const token = accessTokenRef.current
-        if (!token) return
+        if (!isLoggedInRef.current) return
         setIsLoadingRules(true)
         try {
-            const response = await getAlertRules(token)
+            const response = await authedRequest((token) =>
+                getAlertRules(token)
+            )
             setRules(response?.data ?? [])
             setRulesError(false)
         } catch (error) {
+            // Session ended mid-request: the logged-out state clears the rules.
+            if (isNotLoggedIn(error)) return
             setRulesError(true)
             logMessage("Failed to load alert rules", "error", {
                 metadata: { error: errorMessage(error) },
@@ -125,7 +127,7 @@ export const AlertProvider = ({ children, navigate }: Props) => {
         } finally {
             setIsLoadingRules(false)
         }
-    }, [])
+    }, [authedRequest])
 
     useEffect(() => {
         if (isLoggedIn) {
@@ -139,35 +141,39 @@ export const AlertProvider = ({ children, navigate }: Props) => {
 
     const createRule = useCallback(
         async (rule: AlertRuleInput) => {
-            const response = await createAlertRule(requireToken(), rule)
+            const response = await authedRequest((token) =>
+                createAlertRule(token, rule)
+            )
             setRules((prev) => [...prev, response.data])
             return response.data
         },
-        [requireToken]
+        [authedRequest]
     )
 
     const updateRule = useCallback(
         async (id: number, rule: AlertRuleInput) => {
-            const response = await updateAlertRule(requireToken(), id, rule)
+            const response = await authedRequest((token) =>
+                updateAlertRule(token, id, rule)
+            )
             setRules((prev) =>
                 prev.map((r) => (r.id === id ? response.data : r))
             )
             return response.data
         },
-        [requireToken]
+        [authedRequest]
     )
 
     const deleteRule = useCallback(
         async (id: number) => {
-            await deleteAlertRule(requireToken(), id)
+            await authedRequest((token) => deleteAlertRule(token, id))
             setRules((prev) => prev.filter((r) => r.id !== id))
         },
-        [requireToken]
+        [authedRequest]
     )
 
     const sendTest = useCallback(async () => {
-        await sendTestAlert(requireToken())
-    }, [requireToken])
+        await authedRequest((token) => sendTestAlert(token))
+    }, [authedRequest])
 
     const setPreferences = useCallback((next: NotificationPreferences) => {
         setNotificationPreferences(next)
@@ -255,12 +261,14 @@ export const AlertProvider = ({ children, navigate }: Props) => {
     const sendTestAndListen = useCallback(async () => {
         // Seed first so the test alert is not mistaken for an old one.
         if (cursorRef.current === null) {
-            const response = await getAlertInbox(requireToken())
+            const response = await authedRequest((token) =>
+                getAlertInbox(token)
+            )
             cursorRef.current = response.data.latest_id
         }
         await sendTest()
         setTestPending(true)
-    }, [requireToken, sendTest])
+    }, [authedRequest, sendTest])
 
     useEffect(() => {
         if (!testPending) return
@@ -301,13 +309,14 @@ export const AlertProvider = ({ children, navigate }: Props) => {
             if (timeout) clearTimeout(timeout)
             timeout = null
             inFlight = true
-            const token = accessTokenRef.current
-            if (token) {
+            if (isLoggedInRef.current) {
                 try {
-                    const response = await getAlertInbox(
-                        token,
-                        cursorRef.current ?? undefined,
-                        controller.signal
+                    const response = await authedRequest((token) =>
+                        getAlertInbox(
+                            token,
+                            cursorRef.current ?? undefined,
+                            controller.signal
+                        )
                     )
                     if (cancelled) return
                     const { alerts, latest_id } = response.data
@@ -319,7 +328,7 @@ export const AlertProvider = ({ children, navigate }: Props) => {
                     }
                 } catch {
                     if (cancelled) return
-                    // Expired tokens are refreshed by UserContext; try again next time.
+                    // authedRequest already refreshed/retried; try again next poll.
                 }
             }
             inFlight = false
@@ -371,7 +380,7 @@ export const AlertProvider = ({ children, navigate }: Props) => {
                 onServiceWorkerMessage
             )
         }
-    }, [shouldPoll, isListening, testPending, deliver])
+    }, [shouldPoll, isListening, testPending, deliver, authedRequest])
 
     const value = useMemo(
         () => ({

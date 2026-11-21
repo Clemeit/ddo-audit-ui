@@ -11,47 +11,36 @@ import {
     UpdatePasswordPayload,
 } from "../models/User"
 
+/**
+ * User-service calls bound to the current session. Each goes through authedRequest, so
+ * an access token that is about to expire (or was just rejected) is refreshed first.
+ * Rejects with NotLoggedInError when there is no session.
+ */
 const useAuthedUserService = () => {
-    const { accessToken } = useUserContext()
+    const { authedRequest } = useUserContext()
 
     const getProfile = useCallback(
-        async (signal?: AbortSignal) => {
-            if (!accessToken) {
-                throw new Error("No access token available")
-            }
-            return usGetProfile(accessToken, signal)
-        },
-        [accessToken]
+        (signal?: AbortSignal) =>
+            authedRequest((token) => usGetProfile(token, signal)),
+        [authedRequest]
     )
 
     const updatePassword = useCallback(
-        async (payload: UpdatePasswordPayload, signal?: AbortSignal) => {
-            if (!accessToken) {
-                throw new Error("No access token available")
-            }
-            return usUpdatePassword(accessToken, payload, signal)
-        },
-        [accessToken]
+        (payload: UpdatePasswordPayload, signal?: AbortSignal) =>
+            authedRequest((token) => usUpdatePassword(token, payload, signal)),
+        [authedRequest]
     )
 
     const persistSettings = useCallback(
-        async (payload: PersistentSettingsPayload, signal?: AbortSignal) => {
-            if (!accessToken) {
-                throw new Error("No access token available")
-            }
-            return usPersistSettings(accessToken, payload, signal)
-        },
-        [accessToken]
+        (payload: PersistentSettingsPayload, signal?: AbortSignal) =>
+            authedRequest((token) => usPersistSettings(token, payload, signal)),
+        [authedRequest]
     )
 
     const getSettings = useCallback(
-        async (signal?: AbortSignal) => {
-            if (!accessToken) {
-                throw new Error("No access token available")
-            }
-            return usGetSettings(accessToken, signal)
-        },
-        [accessToken]
+        (signal?: AbortSignal) =>
+            authedRequest((token) => usGetSettings(token, signal)),
+        [authedRequest]
     )
 
     return { getProfile, updatePassword, persistSettings, getSettings }
