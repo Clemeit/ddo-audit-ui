@@ -2,6 +2,18 @@ import { SERVER_NAMES_LOWER } from "../constants/servers"
 import { ActivityEvent } from "./Activity"
 import { Character } from "./Character"
 
+export const OVER_LEVEL_BUFFER = 3
+export const getDelvingBonusBuffer = (isQuestHeroic: boolean) =>
+    isQuestHeroic ? 2 : 4
+export const OVERLEVEL_TO_PENALTY = {
+    2: "10%",
+    3: "25%",
+    4: "50%",
+    5: "75%",
+    6: "99%",
+    7: "NO XP",
+}
+
 interface QuestLevel {
     heroic_normal: number
     heroic_hard: number
@@ -159,7 +171,22 @@ interface Lfm {
         includesFriend?: boolean
         owned?: boolean
         isFull?: boolean
+        overLevelPenaltyStatus?: OverLevelPenaltyStatus
+        delvingBonusPenaltyStatus?: DelvingBonusPenaltyStatus
+        overLevelPenaltyPenalty?: string
     }
+}
+
+enum OverLevelPenaltyStatus {
+    None,
+    Potential,
+    Confirmed,
+}
+
+enum DelvingBonusPenaltyStatus {
+    None,
+    Potential,
+    Confirmed,
 }
 
 enum LfmActivityType {
@@ -250,4 +277,10 @@ export type {
     QuestAnalyticsApiData,
 }
 
-export { LfmActivityType, constructUnknownQuest, LfmSortType }
+export {
+    LfmActivityType,
+    constructUnknownQuest,
+    LfmSortType,
+    OverLevelPenaltyStatus,
+    DelvingBonusPenaltyStatus,
+}

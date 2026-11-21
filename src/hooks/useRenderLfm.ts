@@ -1,5 +1,9 @@
 import { useCallback, useMemo, useRef } from "react"
-import { Lfm } from "../models/Lfm.ts"
+import {
+    DelvingBonusPenaltyStatus,
+    Lfm,
+    OverLevelPenaltyStatus,
+} from "../models/Lfm.ts"
 import {
     LFM_HEIGHT,
     LFM_COLORS,
@@ -24,15 +28,6 @@ interface Props {
     lfmSprite?: HTMLImageElement | null
     context?: CanvasRenderingContext2D | null
     raidView?: boolean
-}
-
-const OVERLEVEL_TO_PENALTY = {
-    2: "10%",
-    3: "25%",
-    4: "50%",
-    5: "75%",
-    6: "99%",
-    7: "NO XP",
 }
 
 const useRenderLfm = ({ lfmSprite, context, raidView = false }: Props) => {
@@ -289,37 +284,33 @@ const useRenderLfm = ({ lfmSprite, context, raidView = false }: Props) => {
             // over-level penalty
             let didRenderPenalty = false
             let penaltyText: string = ""
-            if (quest && showXpPenalty) {
-                const isWilderness =
-                    quest.area_id != null &&
-                    areaContext.areas[quest.area_id]?.is_wilderness
-                let questEffectiveLevel = usedQuestLevel
-                if (lfm.difficulty.includes("Hard")) {
-                    questEffectiveLevel += 1
-                } else if (
-                    lfm.difficulty.includes("Elite") ||
-                    lfm.difficulty.includes("Reaper")
+
+            if (
+                lfm.metadata.overLevelPenaltyStatus !==
+                OverLevelPenaltyStatus.None
+            ) {
+                if (
+                    lfm.metadata.overLevelPenaltyStatus ===
+                    OverLevelPenaltyStatus.Confirmed
                 ) {
-                    questEffectiveLevel += 2
+                    penaltyText = `Over-level penalty (${lfm.metadata.overLevelPenaltyPenalty})`
+                } else {
+                    penaltyText = `Potential over-level penalty (${lfm.metadata.overLevelPenaltyPenalty})`
                 }
-                const isHeroic = usedQuestLevel === quest.heroic_normal_cr
-                const maxMemberLevel = [lfm.leader, ...lfm.members].reduce(
-                    (m, c) => (m = Math.max(c.total_level, m)),
-                    0
-                )
-                const fullDelvingBonus =
-                    maxMemberLevel <= usedQuestLevel + (isHeroic ? 2 : 4)
-                const overLevelPenalty =
-                    maxMemberLevel > questEffectiveLevel + (isHeroic ? 3 : 99)
-                if (!isWilderness) {
-                    if (overLevelPenalty) {
-                        penaltyText = `Over-level penalty (${OVERLEVEL_TO_PENALTY[Math.min(maxMemberLevel - questEffectiveLevel, 7)]})`
-                        didRenderPenalty = true
-                    } else if (!fullDelvingBonus) {
-                        penaltyText = "Delving bonus penalty"
-                        didRenderPenalty = true
-                    }
+                didRenderPenalty = true
+            } else if (
+                lfm.metadata.delvingBonusPenaltyStatus !==
+                DelvingBonusPenaltyStatus.None
+            ) {
+                if (
+                    lfm.metadata.delvingBonusPenaltyStatus ===
+                    DelvingBonusPenaltyStatus.Confirmed
+                ) {
+                    penaltyText = "Delving bonus penalty"
+                } else {
+                    penaltyText = "Potential delving bonus penalty"
                 }
+                didRenderPenalty = true
             }
 
             let tip: string | null = null
@@ -694,7 +685,11 @@ const useRenderLfm = ({ lfmSprite, context, raidView = false }: Props) => {
                     if (!lfm.metadata.owned && indicateContentIDontOwn) {
                         context.fillStyle = LFM_COLORS.NOT_OWNED
                     } else if (didRenderPenalty) {
-                        context.fillStyle = LFM_COLORS.XP_PENALTY
+                        if (penaltyText.startsWith("Potential")) {
+                            context.fillStyle = LFM_COLORS.POTENTIAL_XP_PENALTY
+                        } else {
+                            context.fillStyle = LFM_COLORS.XP_PENALTY
+                        }
                     }
                     context.font = fonts.TIP
                     questTipTextLines.forEach((line) => {

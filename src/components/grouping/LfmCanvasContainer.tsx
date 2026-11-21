@@ -2,9 +2,14 @@ import { useEffect, useMemo, useState } from "react"
 import LfmCanvas from "./LfmCanvas.tsx"
 import {
     constructUnknownQuest,
+    DelvingBonusPenaltyStatus,
+    getDelvingBonusBuffer,
     Lfm,
     LfmSortType,
     LfmSpecificApiModel,
+    OVER_LEVEL_BUFFER,
+    OVERLEVEL_TO_PENALTY,
+    OverLevelPenaltyStatus,
     Quest,
 } from "../../models/Lfm.ts"
 import { useLfmContext } from "../../contexts/LfmContext.tsx"
@@ -33,6 +38,8 @@ import {
     RAID_TIMER_MILLIS,
 } from "../../constants/game.ts"
 import { SERVERS_64_BITS_LOWER } from "../../constants/servers.ts"
+import { useAreaContext } from "../../contexts/AreaContext.tsx"
+import { Character } from "../../models/Character.ts"
 // import { ENABLE_SSE } from "../../constants/client.ts"
 
 interface Props {
@@ -72,7 +79,9 @@ const GroupingContainer = ({
         ownedContent,
         hideFullGroups,
         useSSE,
+        showXpPenalty,
     } = useLfmContext()
+    const areaContext = useAreaContext()
     const [ignoreServerDown, setIgnoreServerDown] = useState<boolean>(false)
     const { friends: friendCharacters } = useGetFriends()
     const { ignores: ignoredCharacters } = useGetIgnores()
@@ -371,6 +380,100 @@ const GroupingContainer = ({
                     isFull = true
                 }
 
+                let overLevelPenaltyStatus = OverLevelPenaltyStatus.None
+                let delvingBonusPenaltyStatus = DelvingBonusPenaltyStatus.None
+                let overLevelPenaltyPenalty: string = ""
+
+                if (showXpPenalty && selectedQuest !== null) {
+                    const questArea =
+                        selectedQuest.area_id !== null
+                            ? areaContext.areas[selectedQuest.area_id ?? 0]
+                            : null
+                    const isWilderness = questArea?.is_wilderness
+                    const hasHeroicMembers =
+                        lfm.leader.total_level < 20 ||
+                        lfm.members?.some((member) => member.total_level < 20)
+                    const isQuestHeroic = hasHeroicMembers
+                    let questLevel = 0
+                    if (isQuestHeroic && selectedQuest.heroic_normal_cr) {
+                        questLevel =
+                            selectedQuest.heroic_normal_cr ??
+                            selectedQuest.epic_normal_cr
+                    } else {
+                        questLevel =
+                            selectedQuest.epic_normal_cr ??
+                            selectedQuest.heroic_normal_cr
+                    }
+                    let maxCharacterLevelInParty = 0
+                    let maxCharacterLevelInQuest = 0
+                    for (const character of [lfm.leader, ...lfm.members]) {
+                        maxCharacterLevelInParty = Math.max(
+                            maxCharacterLevelInParty,
+                            character.total_level
+                        )
+                        if (
+                            questArea !== null &&
+                            !questArea.is_public &&
+                            character.location_id === questArea.id
+                        ) {
+                            maxCharacterLevelInQuest = Math.max(
+                                maxCharacterLevelInQuest,
+                                character.total_level
+                            )
+                        }
+                    }
+
+                    // Over-level penalty
+                    if (
+                        !isWilderness &&
+                        isQuestHeroic &&
+                        maxCharacterLevelInQuest >
+                            questLevel + OVER_LEVEL_BUFFER
+                    ) {
+                        overLevelPenaltyStatus =
+                            OverLevelPenaltyStatus.Confirmed
+                        overLevelPenaltyPenalty =
+                            OVERLEVEL_TO_PENALTY[
+                                Math.min(
+                                    maxCharacterLevelInQuest - questLevel,
+                                    7
+                                )
+                            ]
+                    } else if (
+                        !isWilderness &&
+                        isQuestHeroic &&
+                        maxCharacterLevelInParty >
+                            questLevel + OVER_LEVEL_BUFFER
+                    ) {
+                        overLevelPenaltyStatus =
+                            OverLevelPenaltyStatus.Potential
+                        overLevelPenaltyPenalty =
+                            OVERLEVEL_TO_PENALTY[
+                                Math.min(
+                                    maxCharacterLevelInParty - questLevel,
+                                    7
+                                )
+                            ]
+                    }
+
+                    // Delving bonus penalty
+                    if (
+                        !isWilderness &&
+                        maxCharacterLevelInQuest >
+                            questLevel + getDelvingBonusBuffer(isQuestHeroic)
+                    ) {
+                        delvingBonusPenaltyStatus =
+                            DelvingBonusPenaltyStatus.Confirmed
+                    } else if (
+                        !isWilderness &&
+                        maxCharacterLevelInParty >
+                            questLevel + getDelvingBonusBuffer(isQuestHeroic)
+                    ) {
+                        delvingBonusPenaltyStatus =
+                            DelvingBonusPenaltyStatus.Potential
+                    }
+                }
+
                 return {
                     ...lfm,
                     quest: selectedQuest,
@@ -383,6 +486,9 @@ const GroupingContainer = ({
                         raidActivity: activity,
                         owned,
                         isFull,
+                        overLevelPenaltyStatus,
+                        delvingBonusPenaltyStatus,
+                        overLevelPenaltyPenalty,
                     },
                 }
             })
@@ -476,6 +582,8 @@ const GroupingContainer = ({
         indicateContentIDontOwn,
         hideFullGroups,
         ownedContent,
+        showXpPenalty,
+        areaContext.areas,
     ])
 
     return (
