@@ -1,10 +1,10 @@
 import React from "react"
-import ExpandableContainer from "../global/ExpandableContainer"
 import Switch from "../global/Switch"
 import Button from "../global/Button"
 import Skeleton from "../global/Skeleton"
 import ValidationMessage from "../global/ValidationMessage"
 import { useAppContext } from "../../contexts/AppContext"
+import { AlertPreferences } from "../../models/Alert"
 import {
     describeQuietWindow,
     effectiveTimezone,
@@ -16,61 +16,58 @@ interface Props {
     quietHours: QuietHoursState
 }
 
-/** Account-wide quiet hours: a collapsed one-line card (like the device card) that expands into the settings. */
+/** "11:00 PM to 7:00 AM" while quiet hours are on and usable, otherwise null. For the collapsed card title. */
+function activeQuietWindow(preferences: AlertPreferences | null): string | null {
+    if (
+        !preferences ||
+        !preferences.quiet_enabled ||
+        !isValidQuietWindow(preferences.quiet_start, preferences.quiet_end)
+    ) {
+        return null
+    }
+    return describeQuietWindow(preferences.quiet_start, preferences.quiet_end)
+}
+
+/** The quiet-hours controls: account-wide, so shown as their own section inside the notifications card. */
 const QuietHours = ({ quietHours }: Props) => {
     const { timezoneOverride } = useAppContext()
     const { preferences, isLoading, loadFailed, isInvalid, update, reload } =
         quietHours
 
-    if (!preferences && !loadFailed) {
-        return isLoading ? <Skeleton width="100%" height="40px" /> : null
-    }
-
-    const renderCard = (
-        title: string,
-        isOn: boolean,
-        panel: React.ReactNode
-    ) => (
-        <ExpandableContainer
-            className={`device-bar quiet-hours-card device-bar-${isOn ? "on" : "off"}`}
-            aria-label="Quiet hours"
-            icon={<span className="device-bar-dot" aria-hidden />}
-            title={title}
-        >
-            <div className="device-bar-panel">{panel}</div>
-        </ExpandableContainer>
-    )
+    const heading = <h3 className="device-bar-heading">Quiet hours</h3>
 
     if (!preferences) {
-        return renderCard(
-            "Quiet hours",
-            false,
-            <p className="device-bar-status">
-                Couldn't load your quiet hours.{" "}
-                <Button type="text" small onClick={() => void reload()}>
-                    Try again
-                </Button>
-            </p>
-        )
+        if (loadFailed) {
+            return (
+                <div className="device-bar-section">
+                    {heading}
+                    <p className="device-bar-status">
+                        Couldn't load your quiet hours.{" "}
+                        <Button type="text" small onClick={() => void reload()}>
+                            Try again
+                        </Button>
+                    </p>
+                </div>
+            )
+        }
+        return isLoading ? (
+            <div className="device-bar-section">
+                {heading}
+                <Skeleton width="100%" height="40px" />
+            </div>
+        ) : null
     }
 
     const { quiet_enabled, quiet_start, quiet_end, timezone } = preferences
     const currentTimezone = effectiveTimezone(timezoneOverride)
-    const validWindow = isValidQuietWindow(quiet_start, quiet_end)
-    const isActive = quiet_enabled && validWindow
+    const quietWindow = activeQuietWindow(preferences)
 
-    return renderCard(
-        isActive
-            ? `Quiet hours: ${describeQuietWindow(quiet_start, quiet_end)}`
-            : "Quiet hours are off",
-        isActive,
-        <>
+    return (
+        <div className="device-bar-section">
+            {heading}
             <p className="device-bar-status">
-                {isActive
-                    ? `No alerts from ${describeQuietWindow(
-                          quiet_start,
-                          quiet_end
-                      )} (${timezone}). Alerts that happen then are skipped, not delayed.`
+                {quietWindow
+                    ? `No alerts from ${quietWindow} (${timezone}). Alerts that happen then are skipped, not delayed.`
                     : "Skip alerts during certain hours, like overnight. Alerts that happen during quiet hours are skipped, not delayed."}
             </p>
             <div className="quiet-hours-switch">
@@ -129,8 +126,9 @@ const QuietHours = ({ quietHours }: Props) => {
                     </p>
                 </>
             )}
-        </>
+        </div>
     )
 }
 
 export default QuietHours
+export { activeQuietWindow }

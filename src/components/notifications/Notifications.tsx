@@ -26,7 +26,6 @@ import RuleEditorModal from "./RuleEditorModal"
 import RuleCard from "./RuleCard"
 import NotificationGate from "./NotificationGate"
 import DeviceBar from "./DeviceBar"
-import QuietHours from "./QuietHours"
 import useQuietHours from "./useQuietHours"
 import useDeviceNotifications from "./useDeviceNotifications"
 import { ReactComponent as AddSVG } from "../../assets/svg/add.svg"
@@ -398,8 +397,7 @@ const Notifications = () => {
         const existing = editor.mode === "edit" ? editor.rule : undefined
         return (
             <>
-                <DeviceBar device={device} />
-                <QuietHours quietHours={quietHours} />
+                <DeviceBar device={device} quietHours={quietHours} />
                 <section className="alert-rules" aria-labelledby="your-alerts">
                     <div className="alert-rules-header">
                         <h2 id="your-alerts">Your alerts</h2>

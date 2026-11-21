@@ -635,7 +635,22 @@
 
 /* ----- quiet hours ----- */
 
-/* The card itself reuses the device bar styles (.device-bar). */
+.device-bar-section {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+}
+
+.device-bar-heading {
+    margin: 0;
+    font-size: 0.95rem;
+}
+
+.device-bar-quiet {
+    color: var(--secondary-text);
+}
 
 .quiet-hours-switch {
     display: flex;

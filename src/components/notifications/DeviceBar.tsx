@@ -6,10 +6,13 @@ import {
     BLOCKED_REASON_TEXT,
     BlockedReason,
 } from "../../utils/deviceNotificationState"
+import QuietHours, { activeQuietWindow } from "./QuietHours"
 import type { DeviceNotifications } from "./useDeviceNotifications"
+import type { QuietHours as QuietHoursState } from "./useQuietHours"
 
 interface Props {
     device: DeviceNotifications
+    quietHours: QuietHoursState
 }
 
 const SHORT_BLOCKED_TEXT: Record<BlockedReason, string> = {
@@ -19,8 +22,11 @@ const SHORT_BLOCKED_TEXT: Record<BlockedReason, string> = {
     "ios-needs-install": "add DDO Audit to your Home Screen for notifications",
 }
 
-/** Notifications on this device, once the first step is done: a one-line status that expands into the controls. */
-const DeviceBar = ({ device }: Props) => {
+/**
+ * Notifications, once the first step is done: a one-line status that expands into the controls for this
+ * device and for the account's quiet hours.
+ */
+const DeviceBar = ({ device, quietHours }: Props) => {
     const {
         device: state,
         pushStatus,
@@ -119,12 +125,24 @@ const DeviceBar = ({ device }: Props) => {
             return null
     }
 
+    const quietWindow = activeQuietWindow(quietHours.preferences)
+
     return (
         <ExpandableContainer
             className={`device-bar device-bar-${tone}`}
-            aria-label="Notifications on this device"
+            aria-label="Notifications"
             icon={<span className="device-bar-dot" aria-hidden />}
-            title={headline}
+            title={
+                <>
+                    {headline}
+                    {quietWindow && (
+                        <span className="device-bar-quiet">
+                            {" "}
+                            · Quiet hours {quietWindow}
+                        </span>
+                    )}
+                </>
+            }
         >
             <div className="device-bar-panel">
                 <p className="device-bar-status">{status}</p>
@@ -142,6 +160,7 @@ const DeviceBar = ({ device }: Props) => {
                         Sound
                     </Checkbox>
                 </div>
+                <QuietHours quietHours={quietHours} />
             </div>
         </ExpandableContainer>
     )
