@@ -51,6 +51,22 @@ export function coerceNumberArray(value: unknown): number[] {
         : []
 }
 
+/**
+ * Character ID lists (friends, ignores, registered characters). Accepts bare IDs and,
+ * for copies saved by early builds that uploaded whole Character objects, objects
+ * with a numeric `id`, so those lists aren't read as empty.
+ */
+export function coerceCharacterIdArray(value: unknown): number[] {
+    if (!Array.isArray(value)) return []
+    const ids: number[] = []
+    for (const item of value) {
+        if (typeof item === "number") ids.push(item)
+        else if (isRecord(item) && typeof item.id === "number")
+            ids.push(item.id)
+    }
+    return ids
+}
+
 function coerceStringArray(value: unknown, def: string[] = []): string[] {
     return Array.isArray(value)
         ? value.filter((s): s is string => typeof s === "string")
@@ -351,9 +367,11 @@ export function normalizeAllPersistentSettings(
         "dismissed-feature-callouts": coerceStringArray(
             s["dismissed-feature-callouts"]
         ),
-        friends: coerceNumberArray(s.friends),
-        ignores: coerceNumberArray(s.ignores),
-        "registered-characters": coerceNumberArray(s["registered-characters"]),
+        friends: coerceCharacterIdArray(s.friends),
+        ignores: coerceCharacterIdArray(s.ignores),
+        "registered-characters": coerceCharacterIdArray(
+            s["registered-characters"]
+        ),
         timezone: typeof s.timezone === "string" ? s.timezone : "",
         "timer-settings": normalizeRaidTimerSettings(s["timer-settings"]),
     }

@@ -1,6 +1,7 @@
 import {
     isRecord,
     coerceNumberArray,
+    coerceCharacterIdArray,
     normalizeLfmSettings,
     normalizeWhoSettings,
     normalizeAllPersistentSettings,
@@ -43,6 +44,19 @@ describe("settingsNormalizers", () => {
 
         it("returns empty array for empty array", () => {
             expect(coerceNumberArray([])).toEqual([])
+        })
+    })
+
+    describe("coerceCharacterIdArray", () => {
+        it("accepts bare IDs and objects with a numeric id", () => {
+            expect(
+                coerceCharacterIdArray([1, { id: 2 }, "3", { id: "4" }, null])
+            ).toEqual([1, 2])
+        })
+
+        it("returns empty array for non-array input", () => {
+            expect(coerceCharacterIdArray({ id: 1 })).toEqual([])
+            expect(coerceCharacterIdArray(undefined)).toEqual([])
         })
     })
 
@@ -210,6 +224,17 @@ describe("settingsNormalizers", () => {
                 friends: [1, "bad", 3],
             })
             expect(result.friends).toEqual([1, 3])
+        })
+
+        it("keeps IDs from legacy character-object lists instead of emptying them", () => {
+            const result = normalizeAllPersistentSettings({
+                friends: [{ id: 1, name: "One" }, 2, { name: "no id" }],
+                ignores: [{ id: 7 }],
+                "registered-characters": [{ id: 9, name: "Mine" }],
+            })
+            expect(result.friends).toEqual([1, 2])
+            expect(result.ignores).toEqual([7])
+            expect(result["registered-characters"]).toEqual([9])
         })
     })
 

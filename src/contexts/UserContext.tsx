@@ -59,6 +59,7 @@ import {
 } from "../services/userService"
 import logMessage from "../utils/logUtils"
 import { UpdatePasswordPayload } from "../models/User"
+import { Character } from "../models/Character"
 import { useNotificationContext } from "./NotificationContext"
 import { API_URL } from "../constants/client"
 import Button from "../components/global/Button"
@@ -490,75 +491,156 @@ export const UserProvider = ({ children }: Props) => {
             skipKeys: Set<string>,
             signal?: AbortSignal
         ) => {
-            isApplyingServerRef.current = true
-            try {
-                const normalized = normalizeAllPersistentSettings(
-                    serverSettings
-                ) as unknown as Record<string, unknown>
-                // Local edits that haven't reached the server yet win over server values.
-                for (const key of Array.from(skipKeys)) delete normalized[key]
-                const {
-                    friends: friendIds,
-                    ignores: ignoreIds,
-                    "registered-characters": registeredIds,
-                    ...nonCharSettings
-                } = normalized
-                setPersistentData(nonCharSettings as Record<string, any>)
-                const [friendsResult, ignoresResult, registeredResult] =
-                    await Promise.all([
-                        friendIds === undefined
-                            ? Promise.resolve(undefined)
-                            : hydrateCharacterIds(friendIds as number[], signal),
-                        ignoreIds === undefined
-                            ? Promise.resolve(undefined)
-                            : hydrateCharacterIds(ignoreIds as number[], signal),
-                        registeredIds === undefined
-                            ? Promise.resolve(undefined)
-                            : hydrateCharacterIds(
-                                  registeredIds as number[],
-                                  signal
-                              ),
-                    ])
-                if (friendsResult) {
-                    setFriends(friendsResult)
-                } else if (friendsResult === null) {
-                    logMessage(
-                        "Character hydration failed for friends; existing local data preserved",
-                        "warn",
-                        {}
-                    )
+            const raw: Record<string, unknown> =
+                isRecord(serverSettings) && !Array.isArray(serverSettings)
+                    ? serverSettings
+                    : {}
+            const normalized = normalizeAllPersistentSettings(
+                raw
+            ) as unknown as Record<string, unknown>
+
+            // The normalizer fills every key with a default, but a key the server copy
+            // lacks (or holds in an unusable shape) says nothing about this device's
+            // value. Applying the default would wipe it, e.g. friends -> []. Keep the
+            // local value and upload it so the server copy fills in.
+            const missingKeys: string[] = []
+            for (const key of Object.keys(normalized)) {
+                const absent =
+                    !(key in raw) ||
+                    raw[key] === null ||
+                    (isIdOnlyKey(key) && !Array.isArray(raw[key]))
+                if (absent) {
+                    delete normalized[key]
+                    missingKeys.push(key)
                 }
-                if (ignoresResult) {
-                    setIgnores(ignoresResult)
-                } else if (ignoresResult === null) {
-                    logMessage(
-                        "Character hydration failed for ignores; existing local data preserved",
-                        "warn",
-                        {}
-                    )
-                }
-                if (registeredResult) {
-                    setRegisteredCharacters(registeredResult)
-                } else if (registeredResult === null) {
-                    logMessage(
-                        "Character hydration failed for registered characters; existing local data preserved",
-                        "warn",
-                        {}
-                    )
-                }
-                for (const key of Object.keys(normalized)) {
-                    if (!isPersistentKey(key)) continue
-                    syncedValueSnapshotRef.current.set(
-                        key,
-                        serializeComparable(key, normalized[key])
-                    )
-                }
-                setPersistentSettingsRevision((prev) => prev + 1)
-            } finally {
-                isApplyingServerRef.current = false
             }
+
+            // Local edits that haven't reached the server yet win over server values.
+            for (const key of Array.from(skipKeys)) delete normalized[key]
+
+            /** Write server values to localStorage without marking them as local edits. */
+            const writeServerValues = (write: () => void) => {
+                isApplyingServerRef.current = true
+                try {
+                    write()
+                } finally {
+                    isApplyingServerRef.current = false
+                }
+            }
+            const recordSynced = (key: string) => {
+                if (!isPersistentKey(key)) return
+                syncedValueSnapshotRef.current.set(
+                    key,
+                    serializeComparable(key, normalized[key])
+                )
+            }
+
+            // Plain settings apply right away.
+            const {
+                friends: friendIds,
+                ignores: ignoreIds,
+                "registered-characters": registeredIds,
+                ...nonCharSettings
+            } = normalized
+            writeServerValues(() => {
+                setPersistentData(nonCharSettings as Record<string, any>)
+                for (const key of Object.keys(nonCharSettings))
+                    recordSynced(key)
+            })
+            setPersistentSettingsRevision((prev) => prev + 1)
+
+            // Character lists need a lookup first, which can take a while. Write
+            // tracking stays on meanwhile, so a list edited during the lookup counts
+            // as a local edit (marked dirty, then flushed). Note each list's IDs now
+            // to spot such edits afterwards.
+            const characterKeys = Object.keys(normalized).filter(isIdOnlyKey)
+            const idsBeforeLookups = new Map<string, string | null>()
+            for (const key of characterKeys) {
+                idsBeforeLookups.set(key, serializePersistentValue(key))
+            }
+
+            const [friendsResult, ignoresResult, registeredResult] =
+                await Promise.all([
+                    friendIds === undefined
+                        ? Promise.resolve(undefined)
+                        : hydrateCharacterIds(friendIds as number[], signal),
+                    ignoreIds === undefined
+                        ? Promise.resolve(undefined)
+                        : hydrateCharacterIds(ignoreIds as number[], signal),
+                    registeredIds === undefined
+                        ? Promise.resolve(undefined)
+                        : hydrateCharacterIds(
+                              registeredIds as number[],
+                              signal
+                          ),
+                ])
+
+            const applyCharacterList = (
+                key: string,
+                label: string,
+                result: Character[] | null | undefined,
+                save: (characters: Character[]) => void
+            ) => {
+                // Missing on the server: keep the local list (uploaded below).
+                if (!(key in normalized)) return
+                // Edited locally during the lookup: the local edit wins.
+                if (
+                    serializePersistentValue(key) !== idsBeforeLookups.get(key)
+                ) {
+                    return
+                }
+                if (result) {
+                    save(result)
+                } else if (result === null) {
+                    logMessage(
+                        `Character hydration failed for ${label}; existing local data preserved`,
+                        "warn",
+                        {}
+                    )
+                }
+                recordSynced(key)
+            }
+            writeServerValues(() => {
+                applyCharacterList(
+                    "friends",
+                    "friends",
+                    friendsResult,
+                    setFriends
+                )
+                applyCharacterList(
+                    "ignores",
+                    "ignores",
+                    ignoresResult,
+                    setIgnores
+                )
+                applyCharacterList(
+                    "registered-characters",
+                    "registered characters",
+                    registeredResult,
+                    setRegisteredCharacters
+                )
+            })
+            if (characterKeys.length > 0) {
+                setPersistentSettingsRevision((prev) => prev + 1)
+            }
+
+            // Fill in what the server copy was missing, and flush edits made during
+            // the lookups. Dropping the snapshot forces the upload even when it
+            // happens to match what this tab last synced (e.g. after the server
+            // copy was deleted).
+            for (const key of missingKeys) {
+                if (!isPersistentKey(key)) continue
+                syncedValueSnapshotRef.current.delete(key)
+                dirtyKeysRef.current.add(key)
+            }
+            scheduleDebouncedSync()
         },
-        [serializeComparable]
+        [
+            isIdOnlyKey,
+            scheduleDebouncedSync,
+            serializeComparable,
+            serializePersistentValue,
+        ]
     )
 
     /**
