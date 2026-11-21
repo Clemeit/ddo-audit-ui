@@ -15,6 +15,7 @@ import logMessage from "../../utils/logUtils"
 import Badge from "../global/Badge"
 import useWindowSize from "../../hooks/useWindowSize"
 import PageMessage from "../global/PageMessage"
+import axios from "axios"
 
 const Account = () => {
     const {
@@ -23,7 +24,7 @@ const Account = () => {
         openLoginModal,
         openChangePasswordModal,
         isLoading: isAuthLoading,
-        accessToken,
+        authedRequest,
         logout,
         deleteAccount,
         deleteSettings,
@@ -42,16 +43,22 @@ const Account = () => {
         useState<boolean>(false)
     const [showDeleteSettingsModal, setShowDeleteSettingsModal] =
         useState<boolean>(false)
+    const [deletePassword, setDeletePassword] = useState<string>("")
+    const [deleteAccountError, setDeleteAccountError] = useState<string>("")
 
     const fetchUserProfile = useCallback(
-        async (accessToken: string, signal: AbortSignal) => {
+        async (signal: AbortSignal) => {
             setIsUserProfileLoading(true)
             try {
-                const profileData = await getProfile(accessToken, signal)
+                const profileData = await authedRequest((token) =>
+                    getProfile(token, signal)
+                )
                 setUserProfileData(profileData?.data)
                 setIsUserProfileError(false)
             } catch (error) {
-                if ((error as { name?: string })?.name === "AbortError") {
+                const name = (error as { name?: string })?.name
+                // Aborted, or the session ended (the logged-out view takes over).
+                if (name === "AbortError" || name === "NotLoggedInError") {
                     return
                 }
                 logMessage("Failed to fetch user profile", "error", {
@@ -67,16 +74,23 @@ const Account = () => {
                 setIsUserProfileLoading(false)
             }
         },
-        []
+        [authedRequest]
     )
 
+    // Once per login, not on every access-token refresh.
     useEffect(() => {
-        if (!accessToken || !isLoggedIn) return
+        if (!isLoggedIn) return
         const controller = new AbortController()
-        fetchUserProfile(accessToken, controller.signal)
+        void fetchUserProfile(controller.signal)
 
         return () => controller.abort()
-    }, [accessToken, isLoggedIn, fetchUserProfile])
+    }, [isLoggedIn, fetchUserProfile])
+
+    const closeDeleteAccountModal = useCallback(() => {
+        setShowDeleteAccountModal(false)
+        setDeletePassword("")
+        setDeleteAccountError("")
+    }, [])
 
     const handleLogout = useCallback(async () => {
         try {
@@ -93,10 +107,24 @@ const Account = () => {
     }, [logout, createNotification])
 
     const handleDeleteAccount = useCallback(async () => {
+        if (!deletePassword) {
+            setDeleteAccountError("Enter your password to confirm.")
+            return
+        }
         try {
-            await deleteAccount()
-            setShowDeleteAccountModal(false)
+            await deleteAccount(deletePassword)
+            closeDeleteAccountModal()
         } catch (error) {
+            if (axios.isAxiosError(error) && error.response?.status === 400) {
+                setDeleteAccountError("That password is incorrect.")
+                return
+            }
+            if (axios.isAxiosError(error) && error.response?.status === 429) {
+                setDeleteAccountError(
+                    "Too many attempts. Please try again later."
+                )
+                return
+            }
             logMessage(
                 "Account deletion from Account component failed",
                 "error",
@@ -111,7 +139,7 @@ const Account = () => {
             )
             notifyAuthError(createNotification, "delete-account")
         }
-    }, [deleteAccount, createNotification])
+    }, [deleteAccount, deletePassword, closeDeleteAccountModal, createNotification])
 
     const handleDeleteSettings = useCallback(async () => {
         try {
@@ -250,13 +278,41 @@ const Account = () => {
     const deleteAccountModal = (
         <YesNoModal
             onYes={() => void handleDeleteAccount()}
-            onNo={() => setShowDeleteAccountModal(false)}
+            onNo={closeDeleteAccountModal}
             title="Delete Account"
             critical
             fullScreenOnMobile
         >
             <p>Are you sure you want to delete your account?</p>
             <p>This action cannot be undone.</p>
+            <form
+                onSubmit={(e) => {
+                    e.preventDefault()
+                    void handleDeleteAccount()
+                }}
+                style={{ marginBottom: "15px" }}
+            >
+                <label htmlFor="delete-account-password">
+                    Enter your password to confirm:
+                </label>
+                <input
+                    id="delete-account-password"
+                    type="password"
+                    name="password"
+                    autoComplete="current-password"
+                    value={deletePassword}
+                    onChange={(e) => {
+                        setDeletePassword(e.target.value)
+                        setDeleteAccountError("")
+                    }}
+                    style={{ width: "100%", boxSizing: "border-box" }}
+                />
+                {deleteAccountError && (
+                    <p role="alert" style={{ color: "var(--error)" }}>
+                        {deleteAccountError}
+                    </p>
+                )}
+            </form>
         </YesNoModal>
     )
 

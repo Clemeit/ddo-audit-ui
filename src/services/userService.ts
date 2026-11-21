@@ -54,11 +54,14 @@ function putUpdatePassword(
     payload: UpdatePasswordPayload,
     signal?: AbortSignal
 ): Promise<UserAuthedResponse> {
+    // Not retried: after a lost success response the retry would fail with "current
+    // password is incorrect" while the old session has already been revoked.
     return putRequest(`${USER_ENDPOINT}/profile/password`, {
         headers: { Authorization: `Bearer ${accessToken}` },
         data: payload,
         signal,
         withCredentials: true,
+        noRetry: true,
     })
 }
 

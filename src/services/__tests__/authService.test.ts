@@ -59,6 +59,12 @@ describe("authService", () => {
             const callArgs = mockedPostRequest.mock.calls[0][1]
             expect(callArgs.data).toBeUndefined()
         })
+
+        it("never passes an abort signal (an abandoned rotation loses the cookie)", async () => {
+            mockedPostRequest.mockResolvedValue({})
+            await postRefresh()
+            expect(mockedPostRequest.mock.calls[0][1].signal).toBeUndefined()
+        })
     })
 
     describe("postLogout", () => {
@@ -70,16 +76,34 @@ describe("authService", () => {
                 withCredentials: true,
             }))
         })
+
+        it("works without an access token (the server uses the refresh cookie)", async () => {
+            mockedPostRequest.mockResolvedValue({})
+            await postLogout(null)
+            const callArgs = mockedPostRequest.mock.calls[0][1]
+            expect(callArgs.headers).toBeUndefined()
+            expect(callArgs.withCredentials).toBe(true)
+        })
     })
 
     describe("deleteAccount", () => {
-        it("calls deleteRequest with auth/account endpoint", async () => {
+        it("sends the password and is not retried", async () => {
             mockedDeleteRequest.mockResolvedValue({})
-            await deleteAccount(token)
+            await deleteAccount(token, "Secret1!")
             expect(mockedDeleteRequest).toHaveBeenCalledWith("auth/account", expect.objectContaining({
                 headers: { Authorization: `Bearer ${token}` },
+                data: { password: "Secret1!" },
                 withCredentials: true,
+                noRetry: true,
             }))
+        })
+    })
+
+    describe("postRegister", () => {
+        it("is not retried (a retry after a lost response reports 'username taken')", async () => {
+            mockedPostRequest.mockResolvedValue({})
+            await postRegister(payload)
+            expect(mockedPostRequest.mock.calls[0][1].noRetry).toBe(true)
         })
     })
 })

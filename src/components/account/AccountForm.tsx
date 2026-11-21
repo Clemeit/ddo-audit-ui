@@ -85,7 +85,13 @@ const AccountForm = () => {
                         status: 429,
                     },
                 })
+            } else if (
+                axios.isAxiosError(error) &&
+                error.response?.status === 401
+            ) {
+                setErrorMessage("Invalid username or password.")
             } else {
+                // Network or server trouble: don't tell them their password is wrong.
                 logMessage("User login failed", "error", {
                     metadata: {
                         error:
@@ -94,7 +100,9 @@ const AccountForm = () => {
                                 : String(error),
                     },
                 })
-                setErrorMessage("Invalid username or password.")
+                setErrorMessage(
+                    "Unable to log in right now. Please try again in a moment."
+                )
             }
         }
     }, [username, password, login])
@@ -141,7 +149,14 @@ const AccountForm = () => {
                 password,
             })
         } catch (error) {
-            if (axios.isAxiosError(error) && error.response?.status === 429) {
+            if (axios.isAxiosError(error) && error.response?.status === 409) {
+                setErrorMessage(
+                    "That username is already taken. Please choose another."
+                )
+            } else if (
+                axios.isAxiosError(error) &&
+                error.response?.status === 429
+            ) {
                 setErrorMessage("Too many attempts. Please try again later.")
                 logMessage("User registration rate limited", "warn", {
                     metadata: {
@@ -211,21 +226,24 @@ const AccountForm = () => {
                 axios.isAxiosError(error) &&
                 error.response?.status === 400
             ) {
-                setErrorMessage("Current password is incorrect.")
-                logMessage(
-                    "Password change failed: incorrect current password",
-                    "warn",
-                    {
-                        metadata: {
-                            status: 400,
-                        },
-                    }
-                )
-                notifyAuthError(
-                    createNotification,
-                    "change-password",
-                    "Current password is incorrect."
-                )
+                // The server says which rule failed (wrong current password, same as
+                // the old one, invalid characters...).
+                const serverMessage = (
+                    error.response?.data as { error?: unknown } | undefined
+                )?.error
+                const message =
+                    typeof serverMessage === "string" && serverMessage
+                        ? serverMessage.endsWith(".")
+                            ? serverMessage
+                            : `${serverMessage}.`
+                        : "Current password is incorrect."
+                setErrorMessage(message)
+                logMessage("Password change rejected", "warn", {
+                    metadata: {
+                        status: 400,
+                    },
+                })
+                notifyAuthError(createNotification, "change-password", message)
             } else {
                 logMessage("Password change failed", "error", {
                     metadata: {

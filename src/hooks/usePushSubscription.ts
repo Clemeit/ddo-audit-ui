@@ -11,6 +11,7 @@ import {
     urlBase64ToUint8Array,
 } from "../utils/pushSupport"
 import logMessage from "../utils/logUtils"
+import type { SessionEndReason } from "../services/authSession"
 
 type PushStatus =
     | Exclude<PushSupport, "supported">
@@ -39,21 +40,30 @@ async function getRegistration(): Promise<ServiceWorkerRegistration | null> {
 }
 
 interface Props {
-    accessToken: string | null
+    authedRequest: <T>(request: (accessToken: string) => Promise<T>) => Promise<T>
     isLoggedIn: boolean
+    /** Why the last session ended; only an explicit logout ("user") turns push off. */
+    logoutReason: SessionEndReason | null
 }
 
 /**
  * This browser's Web Push subscription for the logged-in user: turning it on/off, re-saving it on login
- * (so the server knows which user this browser belongs to), and unsubscribing on logout.
+ * (so the server knows which user this browser belongs to), and unsubscribing when the user logs out.
+ * A session that merely expired keeps the subscription, so push comes back on when they log in again.
  */
-const usePushSubscription = ({ accessToken, isLoggedIn }: Props) => {
+const usePushSubscription = ({
+    authedRequest,
+    isLoggedIn,
+    logoutReason,
+}: Props) => {
     const support = useMemo(() => getPushSupport(), [])
     const [status, setStatus] = useState<PushStatus>(
         support === "supported" ? "checking" : support
     )
-    const tokenRef = useRef(accessToken)
-    tokenRef.current = accessToken
+    const isLoggedInRef = useRef(isLoggedIn)
+    isLoggedInRef.current = isLoggedIn
+    const logoutReasonRef = useRef(logoutReason)
+    logoutReasonRef.current = logoutReason
     const publicKeyRef = useRef<string | null>(null)
     const wasLoggedInRef = useRef(isLoggedIn)
 
@@ -68,7 +78,10 @@ const usePushSubscription = ({ accessToken, isLoggedIn }: Props) => {
     // Work out the current state, and re-save an existing subscription for the logged-in user.
     useEffect(() => {
         if (support !== "supported") return
-        const loggedOut = wasLoggedInRef.current && !isLoggedIn
+        const loggedOut =
+            wasLoggedInRef.current &&
+            !isLoggedIn &&
+            logoutReasonRef.current === "user"
         wasLoggedInRef.current = isLoggedIn
         let cancelled = false
 
@@ -114,10 +127,11 @@ const usePushSubscription = ({ accessToken, isLoggedIn }: Props) => {
                 if (!cancelled) setStatus("off")
                 return
             }
-            const token = tokenRef.current
-            if (token) {
+            if (isLoggedInRef.current) {
                 try {
-                    await savePushSubscription(token, subscription.toJSON())
+                    await authedRequest((token) =>
+                        savePushSubscription(token, subscription.toJSON())
+                    )
                 } catch (error) {
                     logMessage("Failed to re-save push subscription", "warn", {
                         metadata: { error: errorMessage(error) },
@@ -130,12 +144,11 @@ const usePushSubscription = ({ accessToken, isLoggedIn }: Props) => {
         return () => {
             cancelled = true
         }
-    }, [support, isLoggedIn, getPublicKey])
+    }, [support, isLoggedIn, getPublicKey, authedRequest])
 
     /** Ask for permission (only call this from a click), subscribe and save. Returns true when on. */
     const enable = useCallback(async (): Promise<boolean> => {
-        const token = tokenRef.current
-        if (support !== "supported" || !token) return false
+        if (support !== "supported" || !isLoggedInRef.current) return false
         setStatus("working")
         try {
             let permission = Notification.permission
@@ -170,7 +183,10 @@ const usePushSubscription = ({ accessToken, isLoggedIn }: Props) => {
                         .buffer as ArrayBuffer,
                 })
             }
-            await savePushSubscription(token, subscription.toJSON())
+            const saved = subscription
+            await authedRequest((token) =>
+                savePushSubscription(token, saved.toJSON())
+            )
             setStatus("on")
             return true
         } catch (error) {
@@ -180,7 +196,7 @@ const usePushSubscription = ({ accessToken, isLoggedIn }: Props) => {
             setStatus(Notification.permission === "denied" ? "denied" : "off")
             throw error
         }
-    }, [support, getPublicKey])
+    }, [support, getPublicKey, authedRequest])
 
     const disable = useCallback(async () => {
         setStatus("working")
@@ -189,11 +205,9 @@ const usePushSubscription = ({ accessToken, isLoggedIn }: Props) => {
             const subscription =
                 await registration?.pushManager.getSubscription()
             if (subscription) {
-                const token = tokenRef.current
-                if (token) {
-                    await deletePushSubscription(
-                        token,
-                        subscription.endpoint
+                if (isLoggedInRef.current) {
+                    await authedRequest((token) =>
+                        deletePushSubscription(token, subscription.endpoint)
                     ).catch(() => undefined)
                 }
                 await subscription.unsubscribe()
@@ -201,7 +215,7 @@ const usePushSubscription = ({ accessToken, isLoggedIn }: Props) => {
         } finally {
             setStatus("off")
         }
-    }, [])
+    }, [authedRequest])
 
     return useMemo(
         () => ({ status, enable, disable }),

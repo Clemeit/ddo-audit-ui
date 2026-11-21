@@ -10,11 +10,29 @@ import axios from "axios"
 import {
     postLogin,
     postLogout,
-    postRefresh,
     postRegister,
     deleteAccount as deleteAccountRequest,
 } from "../services/authService"
 import { UserAccountObject, UserAuthedResponse } from "../models/Auth"
+import {
+    AuthEvent,
+    AuthSession,
+    AuthSnapshot,
+    InvalidationCode,
+    NotLoggedInError,
+    SessionEndReason,
+    createAuthSession,
+    isNotLoggedIn,
+} from "../services/authSession"
+import {
+    LOGGED_OUT_NOTICE_KEY,
+    getLoggedOutNotice,
+    hasPendingLogout,
+    hasSessionHint,
+    setLoggedOutNotice,
+    setPendingLogout,
+    setSessionHint,
+} from "../utils/authStorage"
 import {
     getPersistentDataByKeys,
     isPersistentKey,
@@ -42,11 +60,21 @@ import {
 import logMessage from "../utils/logUtils"
 import { UpdatePasswordPayload } from "../models/User"
 import { useNotificationContext } from "./NotificationContext"
+import { API_URL } from "../constants/client"
+import Button from "../components/global/Button"
 
 interface UserContextProps {
     isLoggedIn: boolean
     accessToken: string
     persistentSettingsRevision: number
+    /** Why the last session ended ("user" = they logged out); null while logged in. */
+    logoutReason: SessionEndReason | null
+    /**
+     * Run an authenticated request with a valid access token, refreshing first if it is
+     * about to expire and once more if the server answers 401. Throws NotLoggedInError
+     * when there is no session.
+     */
+    authedRequest: <T>(request: (accessToken: string) => Promise<T>) => Promise<T>
     register: (
         payload: UserAccountObject,
         signal?: AbortSignal
@@ -59,8 +87,8 @@ interface UserContextProps {
         payload: UpdatePasswordPayload,
         signal?: AbortSignal
     ) => Promise<UserAuthedResponse>
-    logout: (signal?: AbortSignal) => Promise<void>
-    deleteAccount: (signal?: AbortSignal) => Promise<void>
+    logout: () => Promise<void>
+    deleteAccount: (password: string, signal?: AbortSignal) => Promise<void>
     deleteSettings: (signal?: AbortSignal) => Promise<void>
     isAccountModalOpen: boolean
     openLoginModal: () => void
@@ -78,7 +106,34 @@ interface Props {
     children: React.ReactNode
 }
 
-const SESSION_REHYDRATE_HINT_KEY = "v1-auth-session-hint"
+const LOGGED_OUT_NOTICE_ID = "auth-logged-out-notice"
+/** Re-pull server settings when a tab comes back after being hidden this long. */
+const SETTINGS_PULL_AFTER_HIDDEN_MS = 15 * 60 * 1000
+const LOGOUT_FLUSH_BUDGET_MS = 2000
+/** Browsers cap keepalive request bodies at 64KB in total. */
+const KEEPALIVE_BODY_LIMIT = 60_000
+const MAX_SYNC_RETRY_AFTER_MS = 60 * 60 * 1000
+
+const LOGGED_OUT_NOTICE_COPY: Record<
+    InvalidationCode,
+    { title: string; message: string }
+> = {
+    session_expired: {
+        title: "Your session expired",
+        message:
+            "For your security, you're asked to log in again every 90 days. Log back in to keep syncing your settings and alerts.",
+    },
+    session_revoked: {
+        title: "You were logged out",
+        message:
+            "Your session was ended, for example because your password was changed or you logged out on another device. Log back in to keep syncing your settings and alerts.",
+    },
+    invalid: {
+        title: "You were logged out",
+        message:
+            "Log back in to keep syncing your settings and alerts across devices.",
+    },
+}
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
     typeof value === "object" && value !== null
@@ -138,19 +193,29 @@ const getErrorMetadata = (error: unknown): Record<string, unknown> => {
 const isAbortError = (error: unknown): boolean =>
     (error as { name?: string })?.name === "AbortError"
 
-const createAbortError = (message: string): Error => {
-    const abortError = new Error(message)
-    abortError.name = "AbortError"
-    return abortError
-}
+const getStatus = (error: unknown): number | undefined =>
+    axios.isAxiosError(error) ? error.response?.status : undefined
+
+/** The session is gone or was refused; the auth session already handled the logout. */
+const isSessionError = (error: unknown): boolean =>
+    isNotLoggedIn(error) || getStatus(error) === 401
+
+const withTimeout = <T,>(promise: Promise<T>, ms: number): Promise<T | void> =>
+    Promise.race([
+        promise,
+        new Promise<void>((resolve) => window.setTimeout(resolve, ms)),
+    ])
 
 export const UserProvider = ({ children }: Props) => {
     const [persistentSettingsRevision, setPersistentSettingsRevision] =
         useState<number>(0)
-    const { createNotification } = useNotificationContext()
+    const { createNotification, dismissNotification, removeNotification } =
+        useNotificationContext()
 
     const [accessToken, setAccessToken] = useState<string>(null)
-    const [expiresIn, setExpiresIn] = useState<number>(null)
+    const [logoutReason, setLogoutReason] = useState<SessionEndReason | null>(
+        null
+    )
     const [isAccountModalOpen, setIsAccountModalOpen] = useState(false)
     const [accountModalType, setAccountModalType] = useState<
         "login" | "register" | "change-password"
@@ -175,212 +240,43 @@ export const UserProvider = ({ children }: Props) => {
         []
     )
 
+    const sessionRef = useRef<AuthSession | null>(null)
     const dirtyKeysRef = useRef<Set<string>>(new Set())
     const syncedValueSnapshotRef = useRef<Map<string, string>>(new Map())
     const syncTimeoutRef = useRef<number | null>(null)
     const isApplyingServerRef = useRef<boolean>(false)
-    const keepAliveControllerRef = useRef<AbortController | null>(null)
-    const refreshControllerRef = useRef<AbortController | null>(null)
-    const keepAliveRetryTimeoutRef = useRef<number | null>(null)
-    const refreshLockRef = useRef<Promise<string | null> | null>(null)
-    const refreshFailureCountRef = useRef<number>(0)
-    const isInCircuitBreakerRef = useRef<boolean>(false)
-    const sessionGenerationRef = useRef<number>(0)
+    /** Settled when the settings pull started by a restored/remote session finishes. */
+    const sessionSyncPromiseRef = useRef<Promise<void> | null>(null)
 
-    const setSessionRehydrateHint = useCallback((enabled: boolean) => {
-        try {
-            if (enabled) {
-                window.localStorage.setItem(SESSION_REHYDRATE_HINT_KEY, "1")
-            } else {
-                window.localStorage.removeItem(SESSION_REHYDRATE_HINT_KEY)
-            }
-        } catch {
-            // Ignore storage failures and fall back to current in-memory session only.
+    const getSession = useCallback((): AuthSession => {
+        if (!sessionRef.current) {
+            sessionRef.current = createAuthSession()
         }
+        return sessionRef.current
     }, [])
 
-    const shouldAttemptSessionRehydrate = useCallback((): boolean => {
-        try {
-            return (
-                window.localStorage.getItem(SESSION_REHYDRATE_HINT_KEY) === "1"
-            )
-        } catch {
-            return false
-        }
-    }, [])
-
-    const setSession = useCallback(
-        (data: UserAuthedResponse["data"]) => {
-            setAccessToken(data.access_token)
-            setExpiresIn(data.expires_in)
-            setSessionRehydrateHint(true)
-        },
-        [setSessionRehydrateHint]
+    const isSessionActive = useCallback(
+        () => !!sessionRef.current?.getState().accessToken,
+        []
     )
 
-    const clearSession = useCallback(() => {
-        sessionGenerationRef.current += 1
+    const authedRequest = useCallback(
+        <T,>(request: (token: string) => Promise<T>): Promise<T> => {
+            const session = sessionRef.current
+            if (!session) return Promise.reject(new NotLoggedInError())
+            return session.authedRequest(request)
+        },
+        []
+    )
+
+    const clearSyncTimeout = useCallback(() => {
         if (syncTimeoutRef.current !== null) {
             window.clearTimeout(syncTimeoutRef.current)
             syncTimeoutRef.current = null
         }
-        if (keepAliveRetryTimeoutRef.current !== null) {
-            window.clearTimeout(keepAliveRetryTimeoutRef.current)
-            keepAliveRetryTimeoutRef.current = null
-        }
-        keepAliveControllerRef.current?.abort()
-        keepAliveControllerRef.current = null
-        refreshControllerRef.current?.abort()
-        refreshControllerRef.current = null
-        refreshLockRef.current = null
-        syncedValueSnapshotRef.current.clear()
-        // Reset resilience tracking
-        refreshFailureCountRef.current = 0
-        isInCircuitBreakerRef.current = false
-        setAccessToken(null)
-        setExpiresIn(null)
-        setSessionRehydrateHint(false)
-    }, [setSessionRehydrateHint])
+    }, [])
 
-    const notifySessionInvalidated = useCallback(() => {
-        createNotification({
-            title: "You were logged out",
-            message: "Please log back in to continue syncing your settings.",
-            type: "info",
-            ttl: 6000,
-        })
-    }, [createNotification])
-
-    const refreshAccessSession = useCallback(
-        async (signal?: AbortSignal): Promise<string | null> => {
-            const refreshGeneration = sessionGenerationRef.current
-            const controller = new AbortController()
-            refreshControllerRef.current = controller
-            const abortRefresh = () => controller.abort()
-            if (signal?.aborted) {
-                abortRefresh()
-                throw createAbortError(
-                    "Refresh session was cancelled before start"
-                )
-            }
-            signal?.addEventListener("abort", abortRefresh, { once: true })
-
-            try {
-                const response = await postRefresh(controller.signal)
-                if (
-                    controller.signal.aborted ||
-                    sessionGenerationRef.current !== refreshGeneration
-                ) {
-                    throw createAbortError(
-                        "Refresh session was cancelled before completion"
-                    )
-                }
-                if (!response?.data) return null
-                setSession(response.data)
-                // Reset failure tracking on success
-                refreshFailureCountRef.current = 0
-                isInCircuitBreakerRef.current = false
-                return response.data.access_token
-            } catch (error) {
-                if (
-                    isAbortError(error) ||
-                    controller.signal.aborted ||
-                    sessionGenerationRef.current !== refreshGeneration
-                ) {
-                    throw createAbortError(
-                        "Refresh session was cancelled before completion"
-                    )
-                }
-
-                const refreshStatus = axios.isAxiosError(error)
-                    ? error.response?.status
-                    : undefined
-                if (refreshStatus === 401 || refreshStatus === 403) {
-                    return null
-                }
-
-                refreshFailureCountRef.current += 1
-                if (refreshFailureCountRef.current >= 3) {
-                    isInCircuitBreakerRef.current = true
-                    logMessage(
-                        "Refresh failed repeatedly, pausing automatic keep-alive retries",
-                        "warn",
-                        { metadata: getErrorMetadata(error) }
-                    )
-                }
-
-                throw error
-            } finally {
-                signal?.removeEventListener("abort", abortRefresh)
-                if (refreshControllerRef.current === controller) {
-                    refreshControllerRef.current = null
-                }
-            }
-        },
-        [setSession]
-    )
-
-    const getOrStartRefreshPromise = useCallback(
-        (signal?: AbortSignal): Promise<string | null> => {
-            if (refreshLockRef.current === null) {
-                refreshLockRef.current = refreshAccessSession(signal).finally(
-                    () => {
-                        refreshLockRef.current = null
-                    }
-                )
-            }
-            return refreshLockRef.current
-        },
-        [refreshAccessSession]
-    )
-
-    const executeWithAuthRetry = useCallback(
-        async <T,>(
-            request: (authToken: string) => Promise<T>,
-            token: string,
-            signal?: AbortSignal
-        ): Promise<T> => {
-            try {
-                return await request(token)
-            } catch (error) {
-                if (isAbortError(error)) {
-                    throw error
-                }
-
-                const status = axios.isAxiosError(error)
-                    ? error.response?.status
-                    : undefined
-                if (status !== 401 && status !== 403) {
-                    throw error
-                }
-
-                try {
-                    const refreshedToken =
-                        await getOrStartRefreshPromise(signal)
-                    if (!refreshedToken) {
-                        clearSession()
-                        notifySessionInvalidated()
-                        throw error
-                    }
-                    return await request(refreshedToken)
-                } catch (refreshError) {
-                    if (isAbortError(refreshError)) {
-                        throw refreshError
-                    }
-
-                    const refreshStatus = axios.isAxiosError(refreshError)
-                        ? refreshError.response?.status
-                        : undefined
-                    if (refreshStatus === 401 || refreshStatus === 403) {
-                        clearSession()
-                        notifySessionInvalidated()
-                    }
-                    throw refreshError
-                }
-            }
-        },
-        [getOrStartRefreshPromise, clearSession, notifySessionInvalidated]
-    )
+    // ----- settings sync -----
 
     const isIdOnlyKey = useCallback(
         (key: string) =>
@@ -437,23 +333,39 @@ export const UserProvider = ({ children }: Props) => {
         [serializeComparable]
     )
 
+    /** Dirty keys whose value really differs from what the server last had. */
+    const collectChangedDirtyKeys = useCallback((): string[] => {
+        const keysToFlush = Array.from(dirtyKeysRef.current)
+        const changedKeys = keysToFlush.filter((key) => {
+            const currentSerialized = serializePersistentValue(key)
+            const previousSerialized =
+                syncedValueSnapshotRef.current.get(key) ?? null
+            return (
+                currentSerialized !== null &&
+                currentSerialized !== previousSerialized
+            )
+        })
+        // Keys marked dirty but already in sync need no flush.
+        for (const key of keysToFlush) {
+            if (!changedKeys.includes(key)) {
+                dirtyKeysRef.current.delete(key)
+            }
+        }
+        return changedKeys
+    }, [serializePersistentValue])
+
     const flushAllLocalSettingsToServer = useCallback(
-        async (token: string, signal?: AbortSignal) => {
-            if (!token) return
+        async (signal?: AbortSignal) => {
             const allData = getPersistentDataByKeys(PERSISTENT_KEYS)
             const normalizedAllData = normalizeAllPersistentSettings(allData)
             try {
-                await executeWithAuthRetry(
-                    (authToken) =>
-                        putPersistentSettings(
-                            authToken,
-                            { settings: normalizedAllData },
-                            signal
-                        ),
-                    token,
-                    signal
+                await authedRequest((token) =>
+                    putPersistentSettings(
+                        token,
+                        { settings: normalizedAllData },
+                        signal
+                    )
                 )
-                // After successful sync:
                 dirtyKeysRef.current.clear()
                 for (const key of Object.keys(normalizedAllData)) {
                     if (!isPersistentKey(key)) continue
@@ -463,44 +375,33 @@ export const UserProvider = ({ children }: Props) => {
                     )
                 }
             } catch (error) {
-                if (
-                    axios.isAxiosError(error) &&
-                    (error.response?.status === 401 ||
-                        error.response?.status === 403)
-                ) {
-                    return
-                }
+                if (isAbortError(error) || isSessionError(error)) return
                 logMessage("Failed to sync settings to server", "error", {
                     metadata: getErrorMetadata(error),
                 })
             }
         },
-        [executeWithAuthRetry, serializeComparable]
+        [authedRequest, serializeComparable]
+    )
+
+    // Declared before flushDirtyKeysToServer, which reschedules itself on 429.
+    const flushDirtyRef = useRef<() => Promise<void>>(async () => {})
+
+    const scheduleFlush = useCallback(
+        (delayMs: number) => {
+            clearSyncTimeout()
+            syncTimeoutRef.current = window.setTimeout(() => {
+                syncTimeoutRef.current = null
+                void flushDirtyRef.current()
+            }, delayMs)
+        },
+        [clearSyncTimeout]
     )
 
     const flushDirtyKeysToServer = useCallback(
-        async (token: string, signal?: AbortSignal) => {
-            if (!token) return
-            const keysToFlush = Array.from(dirtyKeysRef.current)
-            if (keysToFlush.length === 0) return
-
-            const changedKeys = keysToFlush.filter((key) => {
-                const currentSerialized = serializePersistentValue(key)
-                const previousSerialized =
-                    syncedValueSnapshotRef.current.get(key) ?? null
-                return (
-                    currentSerialized !== null &&
-                    currentSerialized !== previousSerialized
-                )
-            })
-
-            // Clear keys that were marked dirty but are already in-sync.
-            for (const key of keysToFlush) {
-                if (!changedKeys.includes(key)) {
-                    dirtyKeysRef.current.delete(key)
-                }
-            }
-
+        async (signal?: AbortSignal) => {
+            if (!isSessionActive()) return
+            const changedKeys = collectChangedDirtyKeys()
             if (changedKeys.length === 0) return
 
             const data = getPersistentDataByKeys(changedKeys)
@@ -509,15 +410,12 @@ export const UserProvider = ({ children }: Props) => {
                 changedKeys
             )
             try {
-                await executeWithAuthRetry(
-                    (authToken) =>
-                        patchPersistentSettings(
-                            authToken,
-                            { settings: normalized },
-                            signal
-                        ),
-                    token,
-                    signal
+                await authedRequest((token) =>
+                    patchPersistentSettings(
+                        token,
+                        { settings: normalized },
+                        signal
+                    )
                 )
                 // Only clear keys included in this successful flush.
                 for (const key of changedKeys) {
@@ -530,11 +428,21 @@ export const UserProvider = ({ children }: Props) => {
                     }
                 }
             } catch (error) {
-                if (
-                    axios.isAxiosError(error) &&
-                    (error.response?.status === 401 ||
-                        error.response?.status === 403)
-                ) {
+                if (isAbortError(error) || isSessionError(error)) return
+                if (getStatus(error) === 429) {
+                    // Keep the keys dirty and try again once the limit resets.
+                    const retryAfterSeconds = Number(
+                        axios.isAxiosError(error)
+                            ? error.response?.headers?.["retry-after"]
+                            : NaN
+                    )
+                    const delayMs = Number.isFinite(retryAfterSeconds)
+                        ? Math.min(
+                              retryAfterSeconds * 1000,
+                              MAX_SYNC_RETRY_AFTER_MS
+                          )
+                        : 60_000
+                    scheduleFlush(delayMs)
                     return
                 }
                 logMessage("Failed to sync settings to server", "error", {
@@ -542,43 +450,31 @@ export const UserProvider = ({ children }: Props) => {
                 })
             }
         },
-        [executeWithAuthRetry, serializeComparable, serializePersistentValue]
+        [
+            authedRequest,
+            collectChangedDirtyKeys,
+            isSessionActive,
+            scheduleFlush,
+            serializeComparable,
+        ]
     )
+    flushDirtyRef.current = () => flushDirtyKeysToServer()
 
     const scheduleDebouncedSync = useCallback(() => {
-        if (!accessToken) return
+        if (!isSessionActive()) return
         if (isApplyingServerRef.current) return
         if (dirtyKeysRef.current.size === 0) return
-
-        if (syncTimeoutRef.current !== null) {
-            window.clearTimeout(syncTimeoutRef.current)
-        }
-
-        syncTimeoutRef.current = window.setTimeout(() => {
-            syncTimeoutRef.current = null
-            void flushDirtyKeysToServer(accessToken)
-        }, 1000)
-    }, [accessToken, flushDirtyKeysToServer])
+        scheduleFlush(1000)
+    }, [isSessionActive, scheduleFlush])
 
     useEffect(() => {
         if (!accessToken) {
             syncedValueSnapshotRef.current.clear()
-            return
         }
-
-        const current = getPersistentDataByKeys(PERSISTENT_KEYS)
-        for (const key of Object.keys(current)) {
-            if (!isPersistentKey(key)) continue
-            syncedValueSnapshotRef.current.set(
-                key,
-                serializeComparable(key, current[key])
-            )
-        }
-    }, [accessToken, serializeComparable])
+    }, [accessToken])
 
     useEffect(() => {
         const unsubscribe = subscribeToLocalStorageWrites(({ key }) => {
-            // filter for syncable keys, auth state, server-apply suppression, etc.
             if (isPersistentKey(key) && !isApplyingServerRef.current) {
                 dirtyKeysRef.current.add(key)
                 scheduleDebouncedSync()
@@ -589,11 +485,18 @@ export const UserProvider = ({ children }: Props) => {
     }, [scheduleDebouncedSync])
 
     const applyServerSettingsToLocal = useCallback(
-        async (serverSettings: unknown, signal?: AbortSignal) => {
+        async (
+            serverSettings: unknown,
+            skipKeys: Set<string>,
+            signal?: AbortSignal
+        ) => {
             isApplyingServerRef.current = true
             try {
-                const normalized =
-                    normalizeAllPersistentSettings(serverSettings)
+                const normalized = normalizeAllPersistentSettings(
+                    serverSettings
+                ) as unknown as Record<string, unknown>
+                // Local edits that haven't reached the server yet win over server values.
+                for (const key of Array.from(skipKeys)) delete normalized[key]
                 const {
                     friends: friendIds,
                     ignores: ignoreIds,
@@ -603,46 +506,51 @@ export const UserProvider = ({ children }: Props) => {
                 setPersistentData(nonCharSettings as Record<string, any>)
                 const [friendsResult, ignoresResult, registeredResult] =
                     await Promise.all([
-                        hydrateCharacterIds(friendIds, signal),
-                        hydrateCharacterIds(ignoreIds, signal),
-                        hydrateCharacterIds(registeredIds, signal),
+                        friendIds === undefined
+                            ? Promise.resolve(undefined)
+                            : hydrateCharacterIds(friendIds as number[], signal),
+                        ignoreIds === undefined
+                            ? Promise.resolve(undefined)
+                            : hydrateCharacterIds(ignoreIds as number[], signal),
+                        registeredIds === undefined
+                            ? Promise.resolve(undefined)
+                            : hydrateCharacterIds(
+                                  registeredIds as number[],
+                                  signal
+                              ),
                     ])
-                if (friendsResult !== null) {
+                if (friendsResult) {
                     setFriends(friendsResult)
-                } else {
+                } else if (friendsResult === null) {
                     logMessage(
                         "Character hydration failed for friends; existing local data preserved",
                         "warn",
                         {}
                     )
                 }
-                if (ignoresResult !== null) {
+                if (ignoresResult) {
                     setIgnores(ignoresResult)
-                } else {
+                } else if (ignoresResult === null) {
                     logMessage(
                         "Character hydration failed for ignores; existing local data preserved",
                         "warn",
                         {}
                     )
                 }
-                if (registeredResult !== null) {
+                if (registeredResult) {
                     setRegisteredCharacters(registeredResult)
-                } else {
+                } else if (registeredResult === null) {
                     logMessage(
                         "Character hydration failed for registered characters; existing local data preserved",
                         "warn",
                         {}
                     )
                 }
-                const normalizedByKey = normalized as unknown as Record<
-                    string,
-                    unknown
-                >
                 for (const key of Object.keys(normalized)) {
                     if (!isPersistentKey(key)) continue
                     syncedValueSnapshotRef.current.set(
                         key,
-                        serializeComparable(key, normalizedByKey[key])
+                        serializeComparable(key, normalized[key])
                     )
                 }
                 setPersistentSettingsRevision((prev) => prev + 1)
@@ -653,13 +561,17 @@ export const UserProvider = ({ children }: Props) => {
         [serializeComparable]
     )
 
+    /**
+     * Pull the account's settings into localStorage. Pending local edits are pushed
+     * first and never overwritten; an empty server copy is seeded from this device.
+     */
     const fetchAndApplyServerSettings = useCallback(
-        async (token: string, signal?: AbortSignal) => {
+        async (signal?: AbortSignal) => {
             try {
-                const response = await executeWithAuthRetry(
-                    (authToken) => getPersistentSettings(authToken, signal),
-                    token,
-                    signal
+                clearSyncTimeout()
+                await flushDirtyKeysToServer(signal)
+                const response = await authedRequest((token) =>
+                    getPersistentSettings(token, signal)
                 )
                 const serverSettings = response?.data?.settings
                 if (
@@ -667,24 +579,18 @@ export const UserProvider = ({ children }: Props) => {
                     typeof serverSettings !== "object" ||
                     Object.keys(serverSettings).length === 0
                 ) {
-                    await flushAllLocalSettingsToServer(token, signal)
+                    await flushAllLocalSettingsToServer(signal)
                     return
                 }
-                await applyServerSettingsToLocal(serverSettings, signal)
+                await applyServerSettingsToLocal(
+                    serverSettings,
+                    new Set(dirtyKeysRef.current),
+                    signal
+                )
             } catch (error: unknown) {
-                if ((error as { name?: string })?.name === "AbortError") return
-                if (
-                    axios.isAxiosError(error) &&
-                    error.response?.status === 404
-                ) {
-                    await flushAllLocalSettingsToServer(token, signal)
-                    return
-                }
-                if (
-                    axios.isAxiosError(error) &&
-                    (error.response?.status === 401 ||
-                        error.response?.status === 403)
-                ) {
+                if (isAbortError(error) || isSessionError(error)) return
+                if (getStatus(error) === 404) {
+                    await flushAllLocalSettingsToServer(signal)
                     return
                 }
                 logMessage("Failed to fetch settings from server", "warn", {
@@ -694,134 +600,255 @@ export const UserProvider = ({ children }: Props) => {
         },
         [
             applyServerSettingsToLocal,
-            executeWithAuthRetry,
+            authedRequest,
+            clearSyncTimeout,
             flushAllLocalSettingsToServer,
+            flushDirtyKeysToServer,
         ]
     )
 
-    const refreshSession = useCallback(
-        async (signal?: AbortSignal): Promise<boolean> => {
-            setIsLoading(true)
-            try {
-                const refreshedToken = await getOrStartRefreshPromise(signal)
-                if (!refreshedToken) {
-                    clearSession()
-                    notifySessionInvalidated()
-                    return false
-                }
-                await fetchAndApplyServerSettings(refreshedToken, signal)
-                return true
-            } catch (error) {
-                if (isAbortError(error)) {
-                    throw error
-                }
-                logMessage("Failed to refresh session", "warn", {
-                    metadata: getErrorMetadata(error),
-                })
-                throw error
-            } finally {
-                setIsLoading(false)
-                setFirstLoadComplete(true)
-            }
-        },
-        [
-            getOrStartRefreshPromise,
-            fetchAndApplyServerSettings,
-            clearSession,
-            notifySessionInvalidated,
-        ]
-    )
+    // ----- logged-out notice -----
 
-    // Rehydrate session on mount
-    useEffect(() => {
-        if (!shouldAttemptSessionRehydrate()) {
-            setFirstLoadComplete(true)
+    const syncLoggedOutNotice = useCallback(() => {
+        const notice = getLoggedOutNotice()
+        if (!notice || isSessionActive()) {
+            removeNotification(LOGGED_OUT_NOTICE_ID)
             return
         }
+        const copy =
+            LOGGED_OUT_NOTICE_COPY[notice.code] ?? LOGGED_OUT_NOTICE_COPY.invalid
+        createNotification({
+            id: LOGGED_OUT_NOTICE_ID,
+            title: copy.title,
+            message: copy.message,
+            type: "warning",
+            // No ttl: it stays (across visits too) until they log in or dismiss it.
+            onDismiss: () => setLoggedOutNotice(null),
+            actions: (
+                <>
+                    <Button type="primary" small onClick={openLoginModal}>
+                        Log In
+                    </Button>
+                    <Button
+                        type="secondary"
+                        small
+                        onClick={() => dismissNotification(LOGGED_OUT_NOTICE_ID)}
+                    >
+                        Dismiss
+                    </Button>
+                </>
+            ),
+        })
+    }, [
+        createNotification,
+        dismissNotification,
+        isSessionActive,
+        openLoginModal,
+        removeNotification,
+    ])
 
-        const controller = new AbortController()
-        const timeoutId = setTimeout(() => {
-            setFirstLoadComplete(true)
-        }, 3000) // Fallback in case rehydration hangs for some reason
-
-        void refreshSession(controller.signal)
-            .catch(() => {
-                // refreshSession already logs non-abort failures.
-            })
-            .finally(() => {
-                clearTimeout(timeoutId)
-            })
-
-        return () => {
-            controller.abort()
-            clearTimeout(timeoutId)
-        }
-    }, [refreshSession, shouldAttemptSessionRehydrate])
-
-    // Keep session alive with resilient retry logic
+    // Another tab dismissed or raised the notice.
     useEffect(() => {
-        if (!accessToken || !expiresIn) return
+        const onStorage = (event: StorageEvent) => {
+            if (event.key === LOGGED_OUT_NOTICE_KEY) syncLoggedOutNotice()
+        }
+        window.addEventListener("storage", onStorage)
+        return () => window.removeEventListener("storage", onStorage)
+    }, [syncLoggedOutNotice])
 
-        const refreshMarginMs = 60 * 1000
+    useEffect(() => {
+        if (firstLoadComplete) syncLoggedOutNotice()
+    }, [firstLoadComplete, accessToken, syncLoggedOutNotice])
 
-        const scheduleRefresh = (delayMs: number) => {
-            const timeout = window.setTimeout(
-                () => {
-                    keepAliveControllerRef.current = new AbortController()
-                    void refreshSession(
-                        keepAliveControllerRef.current.signal
-                    ).catch((error) => {
-                        if (isAbortError(error)) {
-                            return
-                        }
-                        if (!accessToken || isInCircuitBreakerRef.current) {
-                            return
-                        }
-                        keepAliveRetryTimeoutRef.current = window.setTimeout(
-                            () => {
-                                keepAliveRetryTimeoutRef.current = null
-                                scheduleRefresh(0)
-                            },
-                            10000
-                        )
+    // ----- session events -----
+
+    const resetSyncState = useCallback(() => {
+        clearSyncTimeout()
+        syncedValueSnapshotRef.current.clear()
+    }, [clearSyncTimeout])
+
+    const handleAuthEvent = useCallback(
+        (snapshot: AuthSnapshot, event: AuthEvent) => {
+            setAccessToken(snapshot.accessToken)
+            if (event.type === "session-started") {
+                setSessionHint(true)
+                setLoggedOutNotice(null)
+                setLogoutReason(null)
+                if (event.origin !== "local") {
+                    // Restored on load, or logged in from another tab: pull settings here
+                    // too (login/register do their own pull).
+                    sessionSyncPromiseRef.current = fetchAndApplyServerSettings()
+                }
+            } else if (event.type === "session-ended") {
+                resetSyncState()
+                setSessionHint(false)
+                setLogoutReason(event.reason)
+                if (event.reason === "invalidated" && event.origin === "local") {
+                    setLoggedOutNotice({
+                        code: event.code ?? "invalid",
+                        at: Date.now(),
                     })
-                },
-                Math.max(0, delayMs)
-            )
-            keepAliveRetryTimeoutRef.current = timeout
-            return timeout
+                    logMessage("Session ended by the server", "info", {
+                        metadata: { code: event.code ?? "invalid" },
+                    })
+                }
+                syncLoggedOutNotice()
+            }
+        },
+        [fetchAndApplyServerSettings, resetSyncState, syncLoggedOutNotice]
+    )
+    const handleAuthEventRef = useRef(handleAuthEvent)
+    handleAuthEventRef.current = handleAuthEvent
+
+    // Own the auth session for this provider's lifetime, and resume any existing session.
+    useEffect(() => {
+        const session = getSession()
+        const unsubscribe = session.subscribe((snapshot, event) =>
+            handleAuthEventRef.current(snapshot, event)
+        )
+        let cancelled = false
+
+        const startup = async () => {
+            if (hasPendingLogout()) {
+                // The last logout never reached the server; finish it before anything else.
+                try {
+                    await postLogout(null)
+                    setPendingLogout(false)
+                } catch {
+                    // Still unreachable: keep the flag and try again next visit.
+                }
+                setSessionHint(false)
+                return
+            }
+            if (!hasSessionHint()) return
+
+            setIsLoading(true)
+            const fallback = window.setTimeout(() => {
+                // Don't hold the login button hostage to a slow network.
+                if (!cancelled) setFirstLoadComplete(true)
+            }, 3000)
+            try {
+                const outcome = await session.restore()
+                if (outcome === "ok" && sessionSyncPromiseRef.current) {
+                    await sessionSyncPromiseRef.current
+                }
+            } catch (error) {
+                logMessage("Failed to restore session", "warn", {
+                    metadata: getErrorMetadata(error),
+                })
+            } finally {
+                window.clearTimeout(fallback)
+                if (!cancelled) setIsLoading(false)
+            }
         }
 
-        const timeUntilExpiry = expiresIn * 1000 - refreshMarginMs
-        const timeout = scheduleRefresh(timeUntilExpiry)
+        void startup().finally(() => {
+            if (!cancelled) setFirstLoadComplete(true)
+        })
 
         return () => {
-            clearTimeout(timeout)
-            if (keepAliveRetryTimeoutRef.current !== null) {
-                clearTimeout(keepAliveRetryTimeoutRef.current)
-                keepAliveRetryTimeoutRef.current = null
-            }
-            keepAliveControllerRef.current?.abort()
-            keepAliveControllerRef.current = null
+            cancelled = true
+            unsubscribe()
+            session.dispose()
+            if (sessionRef.current === session) sessionRef.current = null
         }
-    }, [accessToken, expiresIn, refreshSession])
+    }, [getSession])
 
-    // Account lifecycle functions
+    // Flush pending edits when the page is hidden or unloaded, and pull fresh settings
+    // when a long-hidden tab comes back.
+    useEffect(() => {
+        let hiddenSince: number | null = document.hidden ? Date.now() : null
+
+        const onVisibilityChange = () => {
+            if (document.hidden) {
+                hiddenSince = Date.now()
+                if (syncTimeoutRef.current !== null) {
+                    clearSyncTimeout()
+                    void flushDirtyKeysToServer()
+                }
+                return
+            }
+            const hiddenFor = hiddenSince === null ? 0 : Date.now() - hiddenSince
+            hiddenSince = null
+            if (isSessionActive() && hiddenFor >= SETTINGS_PULL_AFTER_HIDDEN_MS) {
+                void fetchAndApplyServerSettings()
+            }
+        }
+
+        const onPageHide = () => {
+            const token = sessionRef.current?.getState().accessToken
+            if (!token || dirtyKeysRef.current.size === 0) return
+            const changedKeys = collectChangedDirtyKeys()
+            if (changedKeys.length === 0) return
+            const settings = normalizePartialPersistentSettings(
+                getPersistentDataByKeys(changedKeys),
+                changedKeys
+            )
+            const body = JSON.stringify({ settings })
+            if (body.length > KEEPALIVE_BODY_LIMIT) return
+            try {
+                // keepalive lets the request outlive the page; axios can't do that.
+                void fetch(`${API_URL}/v1/user/settings/persistent`, {
+                    method: "PATCH",
+                    keepalive: true,
+                    credentials: "include",
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        "Content-Type": "application/json",
+                    },
+                    body,
+                }).catch(() => undefined)
+            } catch {
+                // Best effort only.
+            }
+        }
+
+        document.addEventListener("visibilitychange", onVisibilityChange)
+        window.addEventListener("pagehide", onPageHide)
+        return () => {
+            document.removeEventListener("visibilitychange", onVisibilityChange)
+            window.removeEventListener("pagehide", onPageHide)
+        }
+    }, [
+        clearSyncTimeout,
+        collectChangedDirtyKeys,
+        fetchAndApplyServerSettings,
+        flushDirtyKeysToServer,
+        isSessionActive,
+    ])
+
+    // ----- account lifecycle -----
+
+    /** Finish a logout that never reached the server before starting a new session. */
+    const settlePendingLogout = useCallback(async () => {
+        if (!hasPendingLogout()) return
+        try {
+            await postLogout(null)
+        } catch {
+            // The new login replaces this browser's cookie anyway.
+        }
+        setPendingLogout(false)
+    }, [])
+
+    const beginSession = useCallback(
+        async (data: UserAuthedResponse["data"], signal?: AbortSignal) => {
+            // Edits made while logged out don't belong to this account; the server wins.
+            dirtyKeysRef.current.clear()
+            getSession().startSession(data)
+            closeAccountModal()
+            await fetchAndApplyServerSettings(signal)
+        },
+        [closeAccountModal, fetchAndApplyServerSettings, getSession]
+    )
 
     const register = useCallback(
         async (payload: UserAccountObject, signal?: AbortSignal) => {
             setIsLoading(true)
             try {
+                await settlePendingLogout()
                 const response = await postRegister(payload, signal)
                 if (response?.data) {
-                    setSession(response.data)
-                    closeAccountModal()
-                    await fetchAndApplyServerSettings(
-                        response.data.access_token,
-                        signal
-                    )
-                }
-                if (response?.data) {
+                    await beginSession(response.data, signal)
                     createNotification({
                         title: "Registration Successful",
                         message:
@@ -837,165 +864,158 @@ export const UserProvider = ({ children }: Props) => {
                 }
                 return response
             } catch (error) {
-                if ((error as { name?: string })?.name === "AbortError") {
+                if (isAbortError(error)) {
                     return null
                 }
-                logMessage("User registration failed", "error", {
-                    metadata: getErrorMetadata(error),
-                })
+                if (getStatus(error) !== 409) {
+                    logMessage("User registration failed", "error", {
+                        metadata: getErrorMetadata(error),
+                    })
+                }
                 throw error
             } finally {
                 setIsLoading(false)
             }
         },
-        [
-            setSession,
-            closeAccountModal,
-            fetchAndApplyServerSettings,
-            createNotification,
-        ]
+        [beginSession, createNotification, settlePendingLogout]
     )
 
     const login = useCallback(
         async (payload: UserAccountObject, signal?: AbortSignal) => {
             setIsLoading(true)
             try {
+                await settlePendingLogout()
                 const response = await postLogin(payload, signal)
                 if (response?.data) {
-                    setSession(response.data)
-                    closeAccountModal()
-                    await fetchAndApplyServerSettings(
-                        response.data.access_token,
-                        signal
-                    )
+                    await beginSession(response.data, signal)
                 }
                 return response
             } catch (error) {
-                if ((error as { name?: string })?.name === "AbortError") {
+                if (isAbortError(error)) {
                     return null
                 }
-                logMessage("User login failed", "error", {
-                    metadata: getErrorMetadata(error),
-                })
+                const status = getStatus(error)
+                if (status !== 401 && status !== 429) {
+                    logMessage("User login failed", "error", {
+                        metadata: getErrorMetadata(error),
+                    })
+                }
                 throw error
             } finally {
                 setIsLoading(false)
             }
         },
-        [setSession, closeAccountModal, fetchAndApplyServerSettings]
+        [beginSession, settlePendingLogout]
     )
 
-    const logout = useCallback(
-        async (signal?: AbortSignal) => {
-            setIsLoading(true)
+    const logout = useCallback(async () => {
+        setIsLoading(true)
+        try {
+            clearSyncTimeout()
+            // Give unsynced edits a moment to reach the account before leaving it.
+            await withTimeout(
+                flushDirtyKeysToServer().catch(() => undefined),
+                LOGOUT_FLUSH_BUDGET_MS
+            )
+            const token = sessionRef.current?.getState().accessToken ?? null
+            let reachedServer = true
             try {
-                if (syncTimeoutRef.current !== null) {
-                    window.clearTimeout(syncTimeoutRef.current)
-                    syncTimeoutRef.current = null
-                }
-                if (accessToken) {
-                    await postLogout(accessToken, signal)
-                }
-                clearSession()
-                createNotification({
-                    title: "Logged Out",
-                    message: "You have been logged out successfully.",
-                    type: "success",
-                    ttl: 5000,
-                })
+                await postLogout(token)
+                setPendingLogout(false)
             } catch (error) {
-                if ((error as { name?: string })?.name === "AbortError") {
-                    return
-                }
-                logMessage("User logout failed", "error", {
+                reachedServer = false
+                setPendingLogout(true)
+                logMessage("Logout request failed; will retry next visit", "warn", {
                     metadata: getErrorMetadata(error),
                 })
-                // Still clear session even if logout request fails
-                clearSession()
-            } finally {
-                setIsLoading(false)
             }
-        },
-        [accessToken, clearSession, createNotification]
-    )
+            dirtyKeysRef.current.clear()
+            setLoggedOutNotice(null)
+            getSession().endSession("user")
+            createNotification(
+                reachedServer
+                    ? {
+                          title: "Logged Out",
+                          message: "You have been logged out successfully.",
+                          type: "success",
+                          ttl: 5000,
+                      }
+                    : {
+                          title: "Logged Out",
+                          message:
+                              "You're logged out on this device. We couldn't reach the server to end the session, so we'll finish that on your next visit.",
+                          type: "warning",
+                          ttl: 10000,
+                      }
+            )
+        } finally {
+            setIsLoading(false)
+        }
+    }, [clearSyncTimeout, createNotification, flushDirtyKeysToServer, getSession])
 
     const deleteAccount = useCallback(
-        async (signal?: AbortSignal) => {
+        async (password: string, signal?: AbortSignal) => {
             setIsLoading(true)
             try {
-                if (syncTimeoutRef.current !== null) {
-                    window.clearTimeout(syncTimeoutRef.current)
-                    syncTimeoutRef.current = null
-                }
-                if (accessToken) {
-                    const response = await deleteAccountRequest(
-                        accessToken,
-                        signal
+                clearSyncTimeout()
+                try {
+                    await authedRequest((token) =>
+                        deleteAccountRequest(token, password, signal)
                     )
-                    if (
-                        response?.data?.message ===
-                        "Account deleted successfully"
-                    ) {
-                        createNotification({
-                            title: "Account Deleted",
-                            message:
-                                "Your account has been deleted successfully.",
-                            type: "success",
-                            ttl: 10000,
-                        })
-                        clearSession()
-                    } else {
-                        throw new Error(
-                            "Unexpected response from server: " +
-                                JSON.stringify(response)
-                        )
-                    }
+                } catch (error) {
+                    // 404: an earlier attempt already deleted it (its response was lost).
+                    if (getStatus(error) !== 404) throw error
                 }
+                dirtyKeysRef.current.clear()
+                setLoggedOutNotice(null)
+                setPendingLogout(false)
+                getSession().endSession("user")
+                createNotification({
+                    title: "Account Deleted",
+                    message: "Your account has been deleted successfully.",
+                    type: "success",
+                    ttl: 10000,
+                })
             } catch (error) {
-                if ((error as { name?: string })?.name === "AbortError") {
+                if (isAbortError(error)) {
                     return
                 }
-                logMessage("Account deletion failed", "error", {
-                    metadata: getErrorMetadata(error),
-                })
+                if (getStatus(error) !== 400) {
+                    logMessage("Account deletion failed", "error", {
+                        metadata: getErrorMetadata(error),
+                    })
+                }
                 throw error
             } finally {
                 setIsLoading(false)
             }
         },
-        [accessToken, clearSession, createNotification]
+        [authedRequest, clearSyncTimeout, createNotification, getSession]
     )
 
     const deleteSettings = useCallback(
         async (signal?: AbortSignal) => {
             setIsLoading(true)
             try {
-                if (syncTimeoutRef.current !== null) {
-                    window.clearTimeout(syncTimeoutRef.current)
-                    syncTimeoutRef.current = null
-                }
-                if (accessToken) {
-                    const response = await deletePersistentSettings(
-                        accessToken,
-                        signal
+                clearSyncTimeout()
+                const response = await authedRequest((token) =>
+                    deletePersistentSettings(token, signal)
+                )
+                if (response?.data?.deleted) {
+                    createNotification({
+                        title: "Settings Deleted",
+                        message: "Your settings have been deleted successfully.",
+                        type: "success",
+                        ttl: 10000,
+                    })
+                } else {
+                    throw new Error(
+                        "Unexpected response from server: " +
+                            JSON.stringify(response)
                     )
-                    if (response?.data?.deleted) {
-                        createNotification({
-                            title: "Settings Deleted",
-                            message:
-                                "Your settings have been deleted successfully.",
-                            type: "success",
-                            ttl: 10000,
-                        })
-                    } else {
-                        throw new Error(
-                            "Unexpected response from server: " +
-                                JSON.stringify(response)
-                        )
-                    }
                 }
             } catch (error) {
-                if ((error as { name?: string })?.name === "AbortError") {
+                if (isAbortError(error)) {
                     return
                 }
                 logMessage("Settings deletion failed", "error", {
@@ -1006,24 +1026,19 @@ export const UserProvider = ({ children }: Props) => {
                 setIsLoading(false)
             }
         },
-        [accessToken]
+        [authedRequest, clearSyncTimeout, createNotification]
     )
 
     const changePassword = useCallback(
         async (payload: UpdatePasswordPayload, signal?: AbortSignal) => {
-            if (!accessToken) {
-                throw new Error("No access token available")
-            }
-
             setIsLoading(true)
             try {
-                const response = await putUpdatePassword(
-                    accessToken,
-                    payload,
-                    signal
+                const response = await authedRequest((token) =>
+                    putUpdatePassword(token, payload, signal)
                 )
                 if (response?.data) {
-                    setSession(response.data)
+                    // A new server session; other tabs pick the token up from the broadcast.
+                    getSession().startSession(response.data)
                     closeAccountModal()
                     createNotification({
                         title: "Password updated!",
@@ -1035,18 +1050,20 @@ export const UserProvider = ({ children }: Props) => {
                 }
                 return response
             } catch (error) {
-                if ((error as { name?: string })?.name === "AbortError") {
+                if (isAbortError(error)) {
                     return
                 }
-                logMessage("Password change failed", "error", {
-                    metadata: getErrorMetadata(error),
-                })
+                if (getStatus(error) !== 400) {
+                    logMessage("Password change failed", "error", {
+                        metadata: getErrorMetadata(error),
+                    })
+                }
                 throw error
             } finally {
                 setIsLoading(false)
             }
         },
-        [accessToken, setSession, closeAccountModal, createNotification]
+        [authedRequest, closeAccountModal, createNotification, getSession]
     )
 
     return (
@@ -1055,6 +1072,8 @@ export const UserProvider = ({ children }: Props) => {
                 isLoggedIn: !!accessToken,
                 accessToken,
                 persistentSettingsRevision,
+                logoutReason,
+                authedRequest,
                 register,
                 login,
                 changePassword,

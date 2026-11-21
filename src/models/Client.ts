@@ -9,6 +9,8 @@ interface Notification {
     type?: "info" | "success" | "warning" | "error"
     icon?: React.ReactNode
     actions?: React.ReactNode
+    /** Runs when the user dismisses it (close button, Escape), not when its ttl expires. */
+    onDismiss?: () => void
 }
 
 export type { Notification }
