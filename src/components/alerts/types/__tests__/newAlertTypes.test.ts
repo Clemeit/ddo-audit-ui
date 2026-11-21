@@ -45,7 +45,7 @@ import {
     getAlertTypeDefinition,
     getVisibleAlertTypes,
 } from "../index"
-import { SHARD_EXCHANGE_ENABLED_FEATURE_KEY } from "../../../../utils/configUtils"
+import { SHARD_EXCHANGE_FEATURE_KEY } from "../../../../utils/configUtils"
 import { ConfigEndpointResponse } from "../../../../models/Config"
 
 const names: Record<number, string> = { 1: "Alpha", 2: "Bravo", 3: "Charlie" }
@@ -168,8 +168,8 @@ describe("registry", () => {
 
         const config: ConfigEndpointResponse = {
             data: {
-                [SHARD_EXCHANGE_ENABLED_FEATURE_KEY]: {
-                    key: SHARD_EXCHANGE_ENABLED_FEATURE_KEY,
+                [SHARD_EXCHANGE_FEATURE_KEY]: {
+                    key: SHARD_EXCHANGE_FEATURE_KEY,
                     value: "",
                     is_enabled: true,
                 },

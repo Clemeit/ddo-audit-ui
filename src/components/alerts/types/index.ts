@@ -14,7 +14,7 @@ import {
 import { ConfigEndpointResponse } from "../../../models/Config"
 import {
     getIsFeatureEnabled,
-    SHARD_EXCHANGE_ENABLED_FEATURE_KEY,
+    SHARD_EXCHANGE_FEATURE_KEY,
 } from "../../../utils/configUtils"
 import LfmPostedCriteriaForm from "./lfmPosted/LfmPostedCriteriaForm"
 import {
@@ -171,7 +171,7 @@ const shardExchangeListed: AlertTypeDefinition<ShardExchangeListedCriteria> = {
     pickerLabel: "An item is listed on the Shard Exchange",
     description:
         "Get alerted when an item you want is put up on the Shard Exchange, optionally under a price.",
-    featureKey: SHARD_EXCHANGE_ENABLED_FEATURE_KEY,
+    featureKey: SHARD_EXCHANGE_FEATURE_KEY,
     defaultCriteria: defaultShardExchangeListedCriteria,
     CriteriaForm: ShardExchangeListedCriteriaForm,
     summarize: (criteria) => summarizeShardExchangeListed(criteria),
@@ -187,7 +187,7 @@ const shardExchangeOutbid: AlertTypeDefinition<ShardExchangeOutbidCriteria> = {
     pickerLabel: "One of my characters is outbid",
     description:
         "Get alerted when someone outbids one of your verified characters on the Shard Exchange.",
-    featureKey: SHARD_EXCHANGE_ENABLED_FEATURE_KEY,
+    featureKey: SHARD_EXCHANGE_FEATURE_KEY,
     defaultCriteria: defaultShardExchangeOutbidCriteria,
     CriteriaForm: ShardExchangeOutbidCriteriaForm,
     summarize: (criteria, { characterName }) =>
