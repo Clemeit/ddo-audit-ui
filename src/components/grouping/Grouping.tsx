@@ -76,7 +76,7 @@ const GroupingContent = () => {
 
     const { quests } = useQuestContext()
     const { isLoggedIn } = useUserContext()
-    const { activeRuleCount } = useAlertContext()
+    const { activeLfmRuleCount } = useAlertContext()
     const { config } = useAppContext()
     const notificationsEnabled = getIsFeatureEnabled(
         config,
@@ -360,10 +360,10 @@ const GroupingContent = () => {
                                         Set up notifications
                                     </Link>
                                 </>
-                            ) : activeRuleCount > 0 ? (
+                            ) : activeLfmRuleCount > 0 ? (
                                 <>
-                                    You have {activeRuleCount} active{" "}
-                                    {pluralize("alert", activeRuleCount)}.{" "}
+                                    You have {activeLfmRuleCount} active LFM{" "}
+                                    {pluralize("alert", activeLfmRuleCount)}.{" "}
                                     <Link to="/notifications">
                                         Manage alerts
                                     </Link>
