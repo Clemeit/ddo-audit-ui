@@ -370,7 +370,7 @@ const GroupingContent = () => {
                                 </>
                             ) : (
                                 <>
-                                    You don't have any active alerts.{" "}
+                                    You don't have any active LFM alerts.{" "}
                                     <Link to="/notifications">
                                         Set up an alert
                                     </Link>
