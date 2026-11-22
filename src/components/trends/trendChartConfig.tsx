@@ -43,12 +43,30 @@ const TICKS: Record<
     },
 }
 
+// "All" grows over time, so its tick spacing follows the span instead of being fixed.
+function allRangeTicks(spanMonths: number) {
+    if (spanMonths <= 15)
+        return {
+            desktop: "every 1 month",
+            mobile: "every 3 months",
+            format: "%b %Y",
+        }
+    if (spanMonths <= 36)
+        return {
+            desktop: "every 3 months",
+            mobile: "every 6 months",
+            format: "%b %Y",
+        }
+    return { desktop: "every 1 year", mobile: "every 1 year", format: "%Y" }
+}
+
 export function trendAxisBottom(
     range: TrendsRange,
     bucket: TrendsBucket,
-    isMobile: boolean
+    isMobile: boolean,
+    spanMonths = 0
 ) {
-    const ticks = TICKS[range]
+    const ticks = range === "all" ? allRangeTicks(spanMonths) : TICKS[range]
     return {
         ...LINE_CHART_AXIS_BOTTOM,
         tickValues: isMobile ? ticks.mobile : ticks.desktop,

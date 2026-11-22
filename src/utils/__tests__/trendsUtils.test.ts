@@ -10,6 +10,7 @@ import {
     maxValue,
     percentChange,
     rollingMean,
+    spanInMonths,
     toChartDate,
     visibleServers,
 } from "../trendsUtils"
@@ -208,5 +209,71 @@ describe("formatting and math", () => {
         const { series, band } = buildTotalSeries(dayData, "players", "UTC")
         expect(maxValue([series], band)).toBe(800)
         expect(maxValue([series])).toBe(400)
+    })
+})
+
+describe("smoothing", () => {
+    // Four complete days, then today's partial day with a misleading value.
+    const smoothData: PopulationTrendsData = {
+        range: "month",
+        bucket: "day",
+        start: "2026-11-01T00:00:00Z",
+        end: "2026-11-05T12:00:00Z",
+        series: {
+            thrane: [
+                serverPoint("2026-11-01T00:00:00Z", 100),
+                serverPoint("2026-11-02T00:00:00Z", 200),
+                serverPoint("2026-11-03T00:00:00Z", 300),
+                serverPoint("2026-11-04T00:00:00Z", 400),
+                serverPoint("2026-11-05T00:00:00Z", 10, 0, { partial: true }),
+            ],
+        },
+        total: [
+            totalPoint("2026-11-01T00:00:00Z", 100, 0),
+            totalPoint("2026-11-02T00:00:00Z", 200, 0),
+            totalPoint("2026-11-03T00:00:00Z", 300, 0),
+            totalPoint("2026-11-04T00:00:00Z", 400, 0),
+            totalPoint("2026-11-05T00:00:00Z", 10, 0, { partial: true }),
+        ],
+    }
+
+    it("leaves the in-progress bucket out of smoothed lines", () => {
+        const [thrane] = buildServerSeries(smoothData, "players", "UTC", 2)
+        expect(thrane.data.map((d) => d.y)).toEqual([100, 150, 250, 350, null])
+        const raw = buildServerSeries(smoothData, "players", "UTC")
+        expect(raw[0].data[4].y).toBe(10)
+    })
+
+    it("smooths the band with the line so the line stays inside it", () => {
+        const { series, band } = buildTotalSeries(
+            smoothData,
+            "players",
+            "UTC",
+            2
+        )
+        // totalPoint: min = avg / 2, max = avg * 2
+        expect(band.map((b) => [b.min, b.max])).toEqual([
+            [50, 200],
+            [75, 300],
+            [125, 500],
+            [175, 700],
+            [null, null],
+        ])
+        series.data.forEach((d, i) => {
+            if (d.y === null) return
+            expect(d.y).toBeGreaterThanOrEqual(band[i].min as number)
+            expect(d.y).toBeLessThanOrEqual(band[i].max as number)
+        })
+    })
+})
+
+describe("spanInMonths", () => {
+    it("counts whole calendar months", () => {
+        expect(
+            spanInMonths("2025-05-01T00:00:00Z", "2026-11-22T03:00:00Z")
+        ).toBe(18)
+        expect(
+            spanInMonths("2026-11-01T00:00:00Z", "2026-11-22T00:00:00Z")
+        ).toBe(0)
     })
 })

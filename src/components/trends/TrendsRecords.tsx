@@ -19,10 +19,20 @@ const formatUtcHourOn = (iso: string) =>
 const formatUtcHourOfDay = (hour: number, timezone: string) => {
     const utc = `${String(hour).padStart(2, "0")}:00 UTC`
     if (timezone === "UTC") return utc
-    const local = new Date(Date.UTC(2026, 0, 1, hour)).toLocaleTimeString(
-        "en-US",
-        { hour: "numeric", minute: "2-digit", timeZone: timezone }
-    )
+    // Convert using today's date so the offset reflects current DST, not January's.
+    const now = new Date()
+    const local = new Date(
+        Date.UTC(
+            now.getUTCFullYear(),
+            now.getUTCMonth(),
+            now.getUTCDate(),
+            hour
+        )
+    ).toLocaleTimeString("en-US", {
+        hour: "numeric",
+        minute: "2-digit",
+        timeZone: timezone,
+    })
     return `${utc} (${local} your time)`
 }
 
@@ -99,8 +109,9 @@ const TrendsRecords = ({ summary, loading, timezone }: Props) => {
                 ))}
             </dl>
             <p className="trends-note">
-                Player counts are combined across all servers and averaged over
-                each hour.
+                The busiest-hour, day and time-of-day rows use player counts
+                combined across all servers and averaged over each hour. The
+                single-server record is that server's highest 5-minute snapshot.
             </p>
         </>
     )

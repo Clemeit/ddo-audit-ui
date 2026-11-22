@@ -92,6 +92,12 @@ const ComparisonTile = ({ label, comparison, previousLabel }: TileProps) => {
                     </>
                 )}
             </span>
+            {current.coverage < LOW_COVERAGE && (
+                <span className="trends-tile-detail">
+                    This period only has data for{" "}
+                    {Math.round(current.coverage * 100)}% of its hours.
+                </span>
+            )}
             {previous && previous.coverage < LOW_COVERAGE && (
                 <span className="trends-tile-detail">
                     The comparison period only has data for{" "}

@@ -7,6 +7,7 @@ import {
     buildTotalSeries,
     formatBucketTitle,
     maxValue,
+    spanInMonths,
     TRENDS_DEFAULT_BUCKET,
     TRENDS_RANGE_OPTIONS,
 } from "../../utils/trendsUtils.ts"
@@ -120,9 +121,10 @@ const PopulationTrendChart = ({
         [series, band, showBand]
     )
 
+    const spanMonths = data ? spanInMonths(data.start, data.end) : 0
     const axisBottom = useMemo(
-        () => trendAxisBottom(range, bucket, isMobile),
-        [range, bucket, isMobile]
+        () => trendAxisBottom(range, bucket, isMobile, spanMonths),
+        [range, bucket, isMobile, spanMonths]
     )
     const xScale = useMemo(() => trendXScale(bucket), [bucket])
 
@@ -138,11 +140,12 @@ const PopulationTrendChart = ({
             if (!point || point.min === null || point.max === null) return null
             return (
                 <div className="trends-tooltip-band">
-                    Hourly low {formatY(point.min)} · high {formatY(point.max)}
+                    {smoothing ? `${SMOOTHING_DAYS}-day avg hourly` : "Hourly"}{" "}
+                    low {formatY(point.min)} · high {formatY(point.max)}
                 </div>
             )
         },
-        [showBand, bandByTime]
+        [showBand, bandByTime, smoothing]
     )
 
     const metricLabel = metric === "players" ? "players online" : "LFMs posted"
@@ -161,7 +164,7 @@ const PopulationTrendChart = ({
         )
     } else if (loading || !data) {
         chart = <Skeleton variant="rectangular" height={CHART_HEIGHT} />
-    } else if (series.length === 0) {
+    } else if (data.total.length === 0 || series.length === 0) {
         chart = (
             <div
                 className="trends-chart-status"
@@ -259,7 +262,11 @@ const PopulationTrendChart = ({
                     ? "Times are in your timezone."
                     : "Days are UTC days."}
                 {showBand &&
-                    ` The shaded band spans the quietest and busiest hour in each ${bucket}.`}{" "}
+                    (smoothing
+                        ? ` The shaded band spans the quietest and busiest hour in each ${bucket}, averaged over the same ${SMOOTHING_DAYS} days.`
+                        : ` The shaded band spans the quietest and busiest hour in each ${bucket}.`)}
+                {smoothing &&
+                    " Today's partial day is left out of the average."}{" "}
                 Gaps mean no data was collected.
             </p>
         </div>

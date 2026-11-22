@@ -156,6 +156,32 @@ export function rollingMean(
     })
 }
 
+/**
+ * Values to plot for a metric. With smoothing, the in-progress bucket is left out entirely: it
+ * only covers part of its day, so it would pull the newest smoothed point around depending on
+ * when you look.
+ */
+function plotValues(
+    points: ({ partial?: boolean } | null)[],
+    value: (index: number) => number | null,
+    smoothingWindow: number
+): (number | null)[] {
+    const values = points.map((_, i) => value(i))
+    if (smoothingWindow <= 1) return values
+    const complete = values.map((v, i) => (points[i]?.partial ? null : v))
+    return rollingMean(complete, smoothingWindow)
+}
+
+/** Whole months between two ISO timestamps (for picking axis tick spacing). */
+export function spanInMonths(start: string, end: string): number {
+    const a = new Date(start)
+    const b = new Date(end)
+    return (
+        (b.getUTCFullYear() - a.getUTCFullYear()) * 12 +
+        (b.getUTCMonth() - a.getUTCMonth())
+    )
+}
+
 function alignTo<P extends { t: string }>(
     data: PopulationTrendsData,
     points: P[]
@@ -176,8 +202,11 @@ export function buildServerSeries(
     const starts = bucketStarts(data.start, data.end, data.bucket)
     return visibleServers(data.series).map((server) => {
         const aligned = alignTo(data, data.series[server])
-        let values = aligned.map((p) => (p ? p[metric].avg : null))
-        if (smoothingWindow > 1) values = rollingMean(values, smoothingWindow)
+        const values = plotValues(
+            aligned,
+            (i) => aligned[i]?.[metric].avg ?? null,
+            smoothingWindow
+        )
         return {
             id: server,
             data: starts.map((t, i) => ({
@@ -188,7 +217,10 @@ export function buildServerSeries(
     })
 }
 
-/** The all-servers line plus its hourly low/high band. */
+/**
+ * The all-servers line plus its hourly low/high band. With smoothing, the band's edges are
+ * smoothed over the same window as the line, so the line always sits inside its band.
+ */
 export function buildTotalSeries(
     data: PopulationTrendsData,
     metric: TrendsMetric,
@@ -197,19 +229,28 @@ export function buildTotalSeries(
 ): { series: NivoGappedDateSeries; band: BandPoint[] } {
     const starts = bucketStarts(data.start, data.end, data.bucket)
     const aligned = alignTo(data, data.total)
-    let values = aligned.map((p) => (p ? p[metric].avg : null))
-    if (smoothingWindow > 1) values = rollingMean(values, smoothingWindow)
+    const values = plotValues(
+        aligned,
+        (i) => aligned[i]?.[metric].avg ?? null,
+        smoothingWindow
+    )
+    const mins = plotValues(
+        aligned,
+        (i) => aligned[i]?.[metric].min ?? null,
+        smoothingWindow
+    )
+    const maxes = plotValues(
+        aligned,
+        (i) => aligned[i]?.[metric].max ?? null,
+        smoothingWindow
+    )
     const xs = starts.map((t) => toChartDate(t, data.bucket, timezone))
     return {
         series: {
             id: TOTAL_SERIES_ID,
             data: xs.map((x, i) => ({ x, y: values[i] })),
         },
-        band: xs.map((x, i) => ({
-            x,
-            min: aligned[i] ? aligned[i]![metric].min : null,
-            max: aligned[i] ? aligned[i]![metric].max : null,
-        })),
+        band: xs.map((x, i) => ({ x, min: mins[i], max: maxes[i] })),
     }
 }
 

@@ -6,6 +6,7 @@ import {
     buildServerSeries,
     buildShareSeries,
     formatBucketTitle,
+    spanInMonths,
 } from "../../utils/trendsUtils.ts"
 import { NivoGappedDateSeries } from "../../utils/nivoUtils.ts"
 import GenericLine from "../charts/GenericLine.tsx"
@@ -49,8 +50,14 @@ const TrendLine = ({
         [data.bucket, notes]
     )
     const axisBottom = useMemo(
-        () => trendAxisBottom(data.range, data.bucket, isMobile),
-        [data.range, data.bucket, isMobile]
+        () =>
+            trendAxisBottom(
+                data.range,
+                data.bucket,
+                isMobile,
+                spanInMonths(data.start, data.end)
+            ),
+        [data.range, data.bucket, data.start, data.end, isMobile]
     )
     const xScale = useMemo(() => trendXScale(data.bucket), [data.bucket])
     const yScale = useMemo(() => trendYScale(), [])
