@@ -32,5 +32,8 @@ export const getIsFeatureEnabled = (
 // The /notifications route itself always works, so it can be tested before launch.
 export const NOTIFICATIONS_FEATURE_KEY = "notifications_enabled"
 
+// Config key that turns on the /trends route (404 until the row exists and is enabled).
+export const TRENDS_FEATURE_KEY = "trends_enabled"
+
 export const SHARD_EXCHANGE_FEATURE_KEY = "shard_exchange_shown"
 export const SHARD_EXCHANGE_ENABLED_FEATURE_KEY = "shard_exchange_enabled"

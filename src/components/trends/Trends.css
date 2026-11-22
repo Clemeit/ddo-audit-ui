@@ -1,0 +1,125 @@
+.trends-tiles {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 12px;
+}
+
+.trends-tile {
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    background-color: var(--background-light);
+    padding: 12px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+}
+
+.trends-tile-label {
+    color: var(--secondary-text);
+    font-size: 0.9rem;
+}
+
+.trends-tile-value {
+    font-size: 2rem;
+    line-height: 1.1;
+    font-variant-numeric: tabular-nums;
+}
+
+.trends-tile-unit {
+    color: var(--secondary-text);
+    font-size: 0.9rem;
+}
+
+.trends-tile-detail {
+    font-size: 0.9rem;
+    color: var(--secondary-text);
+}
+
+.trends-delta {
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.trends-delta.up,
+.trends-delta.up > * {
+    color: var(--green-text);
+}
+
+.trends-delta.down,
+.trends-delta.down > * {
+    color: var(--red-text);
+}
+
+.trends-delta.flat,
+.trends-delta.flat > * {
+    color: var(--secondary-text);
+}
+
+.trends-controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px 24px;
+    margin-bottom: 10px;
+}
+
+.trends-control-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.trends-control-label {
+    color: var(--secondary-text);
+    font-size: 0.85rem;
+    font-weight: bolder;
+}
+
+.trends-note {
+    color: var(--secondary-text);
+    font-size: 0.85rem;
+    margin: 6px 0 0 0;
+}
+
+.trends-chart-status {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--secondary-text);
+    border: 1px dashed var(--border);
+    border-radius: 5px;
+}
+
+.trends-records {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: 8px 20px;
+    margin: 0;
+}
+
+.trends-records dt {
+    color: var(--secondary-text);
+}
+
+.trends-records dd {
+    margin: 0;
+    font-variant-numeric: tabular-nums;
+}
+
+.trends-tooltip-band {
+    color: var(--secondary-text);
+    font-size: 0.85rem;
+    margin-top: 6px;
+}
+
+@media (max-width: 600px) {
+    .trends-records {
+        grid-template-columns: 1fr;
+        gap: 2px;
+    }
+
+    .trends-records dd {
+        margin-bottom: 8px;
+    }
+}

@@ -19,6 +19,13 @@ export interface NivoDateSeries {
     data: { x: Date; y: number }[]
 }
 
+// A date series where `y: null` marks a missing bucket; nivo breaks the line there
+// instead of drawing across the gap.
+export interface NivoGappedDateSeries {
+    id: string
+    data: { x: Date; y: number | null }[]
+}
+
 export interface NivoNumberSeries {
     id: string
     data: { x: number; y: number }[]

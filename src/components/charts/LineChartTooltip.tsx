@@ -3,15 +3,20 @@ import Stack from "../global/Stack.tsx"
 import { dateToLongStringWithTime } from "../../utils/dateUtils.ts"
 import { toSentenceCase } from "../../utils/stringUtils.ts"
 import { SliceData } from "@nivo/line"
-import { NivoDateSeries, NivoNumberSeries } from "../../utils/nivoUtils.ts"
+import {
+    NivoDateSeries,
+    NivoGappedDateSeries,
+    NivoNumberSeries,
+} from "../../utils/nivoUtils.ts"
 import "./GenericTooltip.css"
 
 interface LineChartTooltipProps {
-    slice: SliceData<NivoDateSeries | NivoNumberSeries>
+    slice: SliceData<NivoDateSeries | NivoGappedDateSeries | NivoNumberSeries>
     getServerColor: (serverId: string) => string
     tooltipTitleFormatter?: (data: any) => string
     yFormatter?: (value: number) => string
     showTotal?: boolean
+    footer?: (x: Date | number) => React.ReactNode
 }
 
 const TOOLTIP_WIDTH = 300
@@ -64,6 +69,7 @@ const LineChartTooltip: React.FC<LineChartTooltipProps> = ({
         dateToLongStringWithTime(new Date(data)),
     yFormatter = (value: number) => value.toString(),
     showTotal = false,
+    footer,
 }) => {
     const viewportWidth = window.innerWidth
     const mouseX = slice.points[0].x
@@ -123,6 +129,7 @@ const LineChartTooltip: React.FC<LineChartTooltipProps> = ({
                         </Stack>
                     </>
                 )}
+                {footer?.(slice.points[0].data.x as Date | number)}
             </div>
         </div>
     )

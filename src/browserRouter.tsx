@@ -7,7 +7,10 @@ import {
 } from "react-router-dom"
 import { lazyRetry } from "./utils/routerUtils.ts"
 import FeatureGate from "./components/app/FeatureGate.tsx"
-import { SHARD_EXCHANGE_ENABLED_FEATURE_KEY } from "./utils/configUtils.ts"
+import {
+    SHARD_EXCHANGE_ENABLED_FEATURE_KEY,
+    TRENDS_FEATURE_KEY,
+} from "./utils/configUtils.ts"
 
 // Import common pages
 import App from "./components/app/App.tsx"
@@ -72,7 +75,9 @@ const OwnedContent = lazy(() =>
 const Donated = lazy(() =>
     lazyRetry(() => import("./components/app/donated/Donated.tsx"))
 )
-// const Trends = lazy(() => lazyRetry(() => import("./components/trends/Trends.tsx")))
+const Trends = lazy(() =>
+    lazyRetry(() => import("./components/trends/Trends.tsx"))
+)
 const Quests = lazy(() =>
     lazyRetry(() => import("./components/quests/Quests.tsx"))
 )
@@ -191,7 +196,14 @@ export default createBrowserRouter(
                     </SocialDataProvider>
                 }
             />
-            {/* <Route path="/trends" element={<Trends />} /> */}
+            <Route
+                path="/trends"
+                element={
+                    <FeatureGate featureKey={TRENDS_FEATURE_KEY}>
+                        <Trends />
+                    </FeatureGate>
+                }
+            />
             <Route path="/guilds" element={<Outlet />}>
                 <Route
                     index

@@ -24,9 +24,16 @@ import { findMostPopulatedServer } from "../../utils/gameUtils.ts"
 import { useNotificationContext } from "../../contexts/NotificationContext.tsx"
 import logMessage from "../../utils/logUtils.ts"
 import Badge from "../global/Badge.tsx"
+import { useAppContext } from "../../contexts/AppContext.tsx"
+import {
+    getIsFeatureEnabled,
+    TRENDS_FEATURE_KEY,
+} from "../../utils/configUtils.ts"
 import LivePopulationContent from "./LivePopulationContent.tsx"
 
 const Live = () => {
+    const { config } = useAppContext()
+    const trendsEnabled = getIsFeatureEnabled(config, TRENDS_FEATURE_KEY)
     const errorNotificationShownRef = React.useRef<string | null>(null)
 
     const {
@@ -172,11 +179,15 @@ const Live = () => {
                     <NavCardCluster>
                         <NavigationCard type="servers" />
                         <NavigationCard type="guilds" />
-                        <NavigationCard
-                            type="trends"
-                            disabled
-                            badge={<Badge text="Soon" type="soon" />}
-                        />
+                        {trendsEnabled ? (
+                            <NavigationCard type="trends" />
+                        ) : (
+                            <NavigationCard
+                                type="trends"
+                                disabled
+                                badge={<Badge text="Soon" type="soon" />}
+                            />
+                        )}
                     </NavCardCluster>
                 </ContentCluster>
             </ContentClusterGroup>

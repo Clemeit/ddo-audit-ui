@@ -13,12 +13,19 @@ import { ReactComponent as LoginSVG } from "../../assets/svg/login.svg"
 import LoginButtonContainer from "./LoginButtonContainer.tsx"
 import { useUserContext } from "../../contexts/UserContext.tsx"
 import useWindowSize from "../../hooks/useWindowSize.ts"
+import { useAppContext } from "../../contexts/AppContext.tsx"
+import {
+    getIsFeatureEnabled,
+    TRENDS_FEATURE_KEY,
+} from "../../utils/configUtils.ts"
 
 const NavMenu = () => {
     const location = useLocation()
     const { isMobile, isSmallWeb } = useWindowSize()
     const [scrollPosition, setScrollPosition] = useState(0)
     const { isLoggedIn, openLoginModal } = useUserContext()
+    const { config } = useAppContext()
+    const trendsEnabled = getIsFeatureEnabled(config, TRENDS_FEATURE_KEY)
 
     useEffect(() => {
         const handleScroll = () => setScrollPosition(window.scrollY)
@@ -68,7 +75,7 @@ const NavMenu = () => {
             <Link
                 to="/trends"
                 className={`nav-item hide-on-mobile ${location.pathname.startsWith("/trends") ? "active" : ""}`}
-                disabled
+                disabled={!trendsEnabled}
             >
                 <TrendsSVG className="nav-icon" />
                 <span>Trends</span>

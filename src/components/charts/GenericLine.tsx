@@ -1,6 +1,16 @@
-import { ResponsiveLine, SliceTooltipProps } from "@nivo/line"
+import {
+    CommonLineProps,
+    LineLayerId,
+    LineSvgLayer,
+    ResponsiveLine,
+    SliceTooltipProps,
+} from "@nivo/line"
 import React, { useCallback, useMemo, useState } from "react"
-import { NivoDateSeries, NivoNumberSeries } from "../../utils/nivoUtils.ts"
+import {
+    NivoDateSeries,
+    NivoGappedDateSeries,
+    NivoNumberSeries,
+} from "../../utils/nivoUtils.ts"
 import Stack from "../global/Stack.tsx"
 import GenericLegend from "./GenericLegend.tsx"
 import LineChartTooltip from "./LineChartTooltip.tsx"
@@ -17,8 +27,25 @@ import "./Charts.css"
 import { SERVER_NAMES_LOWER } from "../../constants/servers.ts"
 import TimezoneSelect from "../global/TimezoneSelect.tsx"
 
+export type GenericLineSeries =
+    | NivoDateSeries
+    | NivoGappedDateSeries
+    | NivoNumberSeries
+type LineSeries = GenericLineSeries
+
+// nivo's default layer order; extra layers are drawn after the grid/axes, below the lines.
+const LAYERS_BEFORE_LINES: LineLayerId[] = ["grid", "markers", "axes", "areas"]
+const LAYERS_FROM_LINES: LineLayerId[] = [
+    "crosshair",
+    "lines",
+    "points",
+    "slices",
+    "mesh",
+    "legends",
+]
+
 interface GenericLineProps {
-    nivoData: NivoDateSeries[] | NivoNumberSeries[]
+    nivoData: NivoDateSeries[] | NivoGappedDateSeries[] | NivoNumberSeries[]
     showLegend?: boolean
     xScale?: any
     axisBottom?: any
@@ -29,6 +56,14 @@ interface GenericLineProps {
     showTotalInTooltip?: boolean
     chartHeight?: string
     showTimezoneDisplay?: boolean
+    // Overrides the default 0..auto linear y scale (e.g. to fit a band drawn by extraLayers).
+    yScale?: CommonLineProps<LineSeries>["yScale"]
+    // Custom SVG layers drawn beneath the lines. Must be referentially stable.
+    extraLayers?: LineSvgLayer<LineSeries>[]
+    // When false, series that aren't server names (e.g. "Total") are kept.
+    restrictToServers?: boolean
+    // Extra content at the bottom of the tooltip for the hovered x value.
+    tooltipFooter?: (x: Date | number) => React.ReactNode
 }
 
 // Module-level so the default is referentially stable across renders.
@@ -46,6 +81,10 @@ const GenericLine = ({
     showTotalInTooltip = false,
     chartHeight = "400px",
     showTimezoneDisplay = false,
+    yScale = LINE_CHART_Y_SCALE,
+    extraLayers,
+    restrictToServers = true,
+    tooltipFooter,
 }: GenericLineProps) => {
     const [excludedSeries, setExcludedSeries] = useState<string[]>([])
     const [highlightedSeries, setHighlightedSeries] =
@@ -73,12 +112,21 @@ const GenericLine = ({
     )
 
     const filteredData = useMemo(() => {
-        return nivoData.filter(
+        return (nivoData as LineSeries[]).filter(
             (series) =>
                 !excludedSeries.includes(series.id) &&
-                SERVER_NAMES_LOWER.includes(series.id.toLowerCase())
+                (!restrictToServers ||
+                    SERVER_NAMES_LOWER.includes(series.id.toLowerCase()))
         )
-    }, [nivoData, excludedSeries])
+    }, [nivoData, excludedSeries, restrictToServers])
+
+    const layers = useMemo(
+        () =>
+            extraLayers
+                ? [...LAYERS_BEFORE_LINES, ...extraLayers, ...LAYERS_FROM_LINES]
+                : undefined,
+        [extraLayers]
+    )
 
     // Every prop handed to ResponsiveLine must be referentially stable. A new
     // `colors` or `sliceTooltip` function makes nivo rebuild every series and
@@ -92,16 +140,23 @@ const GenericLine = ({
     )
 
     const sliceTooltip = useCallback(
-        ({ slice }: SliceTooltipProps<NivoDateSeries | NivoNumberSeries>) => (
+        ({ slice }: SliceTooltipProps<LineSeries>) => (
             <LineChartTooltip
                 slice={slice}
                 getServerColor={getServerColor}
                 tooltipTitleFormatter={tooltipTitleFormatter}
                 yFormatter={yFormatter}
                 showTotal={showTotalInTooltip}
+                footer={tooltipFooter}
             />
         ),
-        [getServerColor, tooltipTitleFormatter, yFormatter, showTotalInTooltip]
+        [
+            getServerColor,
+            tooltipTitleFormatter,
+            yFormatter,
+            showTotalInTooltip,
+            tooltipFooter,
+        ]
     )
 
     return (
@@ -111,7 +166,7 @@ const GenericLine = ({
                     data={filteredData}
                     margin={margin}
                     colors={getLineColor}
-                    yScale={LINE_CHART_Y_SCALE}
+                    yScale={yScale}
                     xScale={xScale}
                     curve={LINE_CHART_DEFAULTS.curve}
                     theme={LINE_CHART_THEME}
@@ -123,6 +178,7 @@ const GenericLine = ({
                     animate={false}
                     sliceTooltip={sliceTooltip}
                     axisBottom={axisBottom}
+                    {...(layers ? { layers } : {})}
                 />
             </div>
             {showLegend && (
