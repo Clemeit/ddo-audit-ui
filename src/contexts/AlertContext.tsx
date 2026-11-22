@@ -59,6 +59,7 @@ interface AlertContextProps {
     isListening: boolean
     // Enabled rules that haven't expired.
     activeRuleCount: number
+    activeLfmRuleCount: number
     push: {
         status: PushStatus
         enable: () => Promise<boolean>
@@ -250,8 +251,12 @@ export const AlertProvider = ({ children, navigate }: Props) => {
         const interval = setInterval(() => setNow(Date.now()), 60_000)
         return () => clearInterval(interval)
     }, [rules])
-    const activeRuleCount = rules.filter(
+    const activeRules = rules.filter(
         (rule) => rule.enabled && !isExpired(rule.expires_at, now)
+    )
+    const activeRuleCount = activeRules.length
+    const activeLfmRuleCount = activeRules.filter(
+        (rule) => rule.type === "lfm_posted"
     ).length
     const isListening = isLoggedIn && activeRuleCount > 0
     // The test alert works even without rules, so poll briefly after sending one.
@@ -396,6 +401,7 @@ export const AlertProvider = ({ children, navigate }: Props) => {
             setPreferences,
             isListening,
             activeRuleCount,
+            activeLfmRuleCount,
             push,
         }),
         [
@@ -411,6 +417,7 @@ export const AlertProvider = ({ children, navigate }: Props) => {
             setPreferences,
             isListening,
             activeRuleCount,
+            activeLfmRuleCount,
             push,
         ]
     )
