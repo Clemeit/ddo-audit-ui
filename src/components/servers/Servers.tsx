@@ -7,6 +7,11 @@ import NavCardCluster from "../global/NavCardCluster.tsx"
 import useServersData from "./useServersData.tsx"
 import NavigationCard from "../global/NavigationCard.tsx"
 import Badge from "../global/Badge.tsx"
+import { useAppContext } from "../../contexts/AppContext.tsx"
+import {
+    getIsFeatureEnabled,
+    TRENDS_FEATURE_KEY,
+} from "../../utils/configUtils.ts"
 import ServerSelectContent from "./ServerSelectContent.tsx"
 import ColoredText from "../global/ColoredText.tsx"
 import Spacer from "../global/Spacer.tsx"
@@ -25,6 +30,8 @@ import ClassCountPopulationDistribution from "./ClassCountPopulationDistribution
 import GuildAffiliatedPopulationDistribution from "./GuildAffiliatedPopulationDistribution.tsx"
 
 const Servers = () => {
+    const { config } = useAppContext()
+    const trendsEnabled = getIsFeatureEnabled(config, TRENDS_FEATURE_KEY)
     const { isLoading, isError, serverInfo, uniqueData } = useServersData()
 
     const [showBankToonDisclaimer, setShowBankToonDisclaimer] = useBooleanFlag(
@@ -134,11 +141,15 @@ const Servers = () => {
                     <NavCardCluster>
                         <NavigationCard type="live" />
                         <NavigationCard type="guilds" />
-                        <NavigationCard
-                            type="trends"
-                            disabled
-                            badge={<Badge text="Soon" type="soon" />}
-                        />
+                        {trendsEnabled ? (
+                            <NavigationCard type="trends" />
+                        ) : (
+                            <NavigationCard
+                                type="trends"
+                                disabled
+                                badge={<Badge text="Soon" type="soon" />}
+                            />
+                        )}
                     </NavCardCluster>
                 </ContentCluster>
             </ContentClusterGroup>

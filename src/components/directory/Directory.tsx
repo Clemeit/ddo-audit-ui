@@ -12,6 +12,7 @@ import {
     getIsFeatureEnabled,
     NOTIFICATIONS_FEATURE_KEY,
     SHARD_EXCHANGE_FEATURE_KEY,
+    TRENDS_FEATURE_KEY,
 } from "../../utils/configUtils.ts"
 
 const Directory = () => {
@@ -24,6 +25,7 @@ const Directory = () => {
         config,
         SHARD_EXCHANGE_FEATURE_KEY
     )
+    const trendsEnabled = getIsFeatureEnabled(config, TRENDS_FEATURE_KEY)
 
     return (
         <Page
@@ -42,11 +44,18 @@ const Directory = () => {
                                 badge={<Badge text="New" type="new" />}
                             />
                         )}
-                        <NavigationCard
-                            type="trends"
-                            badge={<Badge text="Soon" type="soon" />}
-                            disabled
-                        />
+                        {trendsEnabled ? (
+                            <NavigationCard
+                                type="trends"
+                                badge={<Badge text="New" type="new" />}
+                            />
+                        ) : (
+                            <NavigationCard
+                                type="trends"
+                                badge={<Badge text="Soon" type="soon" />}
+                                disabled
+                            />
+                        )}
                     </NavCardCluster>
                 </ContentCluster>
                 <ContentCluster title="Social Tools">
