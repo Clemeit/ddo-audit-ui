@@ -17,6 +17,20 @@ const SERVER_NAMES_LOWER = Object.freeze(
     SERVER_NAMES.map((server) => server.toLowerCase())
 )
 
+// Servers that are gone from the game but still appear in long-term population history.
+// Kept out of SERVER_NAMES so they don't show up on live pages, pickers, etc.
+const RETIRED_SERVER_NAMES: readonly string[] = Object.freeze(["Hardcore"])
+
+// Every server a history view (e.g. Trends) may chart: current servers plus retired ones.
+const HISTORICAL_SERVER_NAMES: readonly string[] = Object.freeze([
+    ...SERVER_NAMES,
+    ...RETIRED_SERVER_NAMES,
+])
+
+const HISTORICAL_SERVER_NAMES_LOWER: readonly string[] = Object.freeze(
+    HISTORICAL_SERVER_NAMES.map((server) => server.toLowerCase())
+)
+
 const VIP_SERVER_NAMES: readonly string[] = Object.freeze([])
 
 const VIP_SERVER_NAMES_LOWER = VIP_SERVER_NAMES.map((server) =>
@@ -49,6 +63,9 @@ const getServerIndex = (serverName: string): number => {
 export {
     SERVER_NAMES,
     SERVER_NAMES_LOWER,
+    RETIRED_SERVER_NAMES,
+    HISTORICAL_SERVER_NAMES,
+    HISTORICAL_SERVER_NAMES_LOWER,
     VIP_SERVER_NAMES,
     VIP_SERVER_NAMES_LOWER,
     SERVERS_64_BITS,

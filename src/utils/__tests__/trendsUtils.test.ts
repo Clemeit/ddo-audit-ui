@@ -127,6 +127,25 @@ describe("visibleServers", () => {
     it("drops unknown servers and servers that never had anyone", () => {
         expect(visibleServers(dayData.series)).toEqual(["cormyr", "thrane"])
     })
+
+    it("keeps retired servers that had players in the period", () => {
+        const series = {
+            ...dayData.series,
+            hardcore: [serverPoint("2026-11-01T00:00:00Z", 900)],
+        }
+        expect(visibleServers(series)).toEqual(["cormyr", "hardcore", "thrane"])
+    })
+
+    it("hides retired servers outside the seasons they ran", () => {
+        const series = {
+            ...dayData.series,
+            hardcore: [serverPoint("2026-11-01T00:00:00Z", 0)].map((p) => ({
+                ...p,
+                players: stat(0),
+            })),
+        }
+        expect(visibleServers(series)).toEqual(["cormyr", "thrane"])
+    })
 })
 
 describe("rollingMean", () => {

@@ -13,6 +13,7 @@ import {
 } from "../../utils/trendsUtils.ts"
 import { NivoGappedDateSeries } from "../../utils/nivoUtils.ts"
 import GenericLine from "../charts/GenericLine.tsx"
+import { HISTORICAL_SERVER_NAMES_LOWER } from "../../constants/servers.ts"
 import { PillRadioGroup } from "../global/PillToggleGroup.tsx"
 import Checkbox from "../global/Checkbox.tsx"
 import Skeleton from "../global/Skeleton.tsx"
@@ -179,6 +180,7 @@ const PopulationTrendChart = ({
                 nivoData={series}
                 showLegend={view === "servers"}
                 restrictToServers={view === "servers"}
+                allowedServers={HISTORICAL_SERVER_NAMES_LOWER}
                 xScale={xScale}
                 axisBottom={axisBottom}
                 margin={TREND_CHART_MARGIN}

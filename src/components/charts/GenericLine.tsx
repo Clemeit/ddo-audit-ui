@@ -62,6 +62,9 @@ interface GenericLineProps {
     extraLayers?: LineSvgLayer<LineSeries>[]
     // When false, series that aren't server names (e.g. "Total") are kept.
     restrictToServers?: boolean
+    // Lowercase server names restrictToServers keeps. History views pass
+    // HISTORICAL_SERVER_NAMES_LOWER so retired servers still chart. Must be referentially stable.
+    allowedServers?: readonly string[]
     // Extra content at the bottom of the tooltip for the hovered x value.
     tooltipFooter?: (x: Date | number) => React.ReactNode
 }
@@ -84,6 +87,7 @@ const GenericLine = ({
     yScale = LINE_CHART_Y_SCALE,
     extraLayers,
     restrictToServers = true,
+    allowedServers = SERVER_NAMES_LOWER,
     tooltipFooter,
 }: GenericLineProps) => {
     const [excludedSeries, setExcludedSeries] = useState<string[]>([])
@@ -116,9 +120,9 @@ const GenericLine = ({
             (series) =>
                 !excludedSeries.includes(series.id) &&
                 (!restrictToServers ||
-                    SERVER_NAMES_LOWER.includes(series.id.toLowerCase()))
+                    allowedServers.includes(series.id.toLowerCase()))
         )
-    }, [nivoData, excludedSeries, restrictToServers])
+    }, [nivoData, excludedSeries, restrictToServers, allowedServers])
 
     const layers = useMemo(
         () =>

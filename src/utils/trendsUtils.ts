@@ -1,4 +1,4 @@
-import { SERVER_NAMES_LOWER } from "../constants/servers.ts"
+import { HISTORICAL_SERVER_NAMES_LOWER } from "../constants/servers.ts"
 import {
     PopulationTrendsData,
     TrendsBucket,
@@ -129,14 +129,17 @@ export function toChartDate(
     return toWallClock(new Date(iso), bucket === "hour" ? timezone : "UTC")
 }
 
-/** Known servers that reported anyone at all in the period (hides retired/always-offline ones). */
+/**
+ * Known servers, current or retired, that reported anyone at all in the period. Retired servers
+ * (e.g. Hardcore) only show up for ranges that reach back to when they were running.
+ */
 export function visibleServers(
     series: Record<string, TrendsServerPoint[]>
 ): string[] {
     return Object.keys(series)
         .filter(
             (name) =>
-                SERVER_NAMES_LOWER.includes(name.toLowerCase()) &&
+                HISTORICAL_SERVER_NAMES_LOWER.includes(name.toLowerCase()) &&
                 series[name].some((p) => p.players.max > 0 || p.lfms.max > 0)
         )
         .sort()

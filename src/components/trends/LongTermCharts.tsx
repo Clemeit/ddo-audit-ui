@@ -10,6 +10,7 @@ import {
 } from "../../utils/trendsUtils.ts"
 import { NivoGappedDateSeries } from "../../utils/nivoUtils.ts"
 import GenericLine from "../charts/GenericLine.tsx"
+import { HISTORICAL_SERVER_NAMES_LOWER } from "../../constants/servers.ts"
 import Skeleton from "../global/Skeleton.tsx"
 import useWindowSize from "../../hooks/useWindowSize.ts"
 import { usePopulationTrends } from "./useTrendsData.tsx"
@@ -67,6 +68,7 @@ const TrendLine = ({
             nivoData={series}
             showLegend={showLegend}
             restrictToServers={showLegend}
+            allowedServers={HISTORICAL_SERVER_NAMES_LOWER}
             xScale={xScale}
             axisBottom={axisBottom}
             margin={TREND_CHART_MARGIN}

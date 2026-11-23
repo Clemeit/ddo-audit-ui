@@ -35,4 +35,10 @@ const SERVER_COLORS = [
     "hsl(120, 100%, 50%)",
 ]
 
-export { SERVER_COLORS }
+// Retired servers aren't in SERVER_NAMES, so they can't take a slot in SERVER_COLORS.
+// Keyed by lowercase name. Hardcore keeps the yellow it had before it was retired.
+const RETIRED_SERVER_COLORS: Readonly<Record<string, string>> = Object.freeze({
+    hardcore: "hsl(60, 70%, 44%)",
+})
+
+export { SERVER_COLORS, RETIRED_SERVER_COLORS }
