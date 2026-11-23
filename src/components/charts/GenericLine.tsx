@@ -191,6 +191,7 @@ const GenericLine = ({
                     onItemClick={handleItemClick}
                     onItemHover={handleItemHover}
                     excludedSeries={excludedSeries}
+                    serverNames={allowedServers}
                 />
             )}
             {showTimezoneDisplay && <TimezoneSelect />}

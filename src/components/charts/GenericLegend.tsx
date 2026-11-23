@@ -22,6 +22,9 @@ interface GenericLegendProps {
     onItemClick?: (serverId: string) => void
     onItemHover?: (serverId: string | null) => void
     scaffoldName?: string
+    // Lowercase server names to list, in display order. History views pass
+    // HISTORICAL_SERVER_NAMES_LOWER so retired servers get an entry. Must be referentially stable.
+    serverNames?: readonly string[]
 }
 
 const GenericLegend = ({
@@ -30,11 +33,12 @@ const GenericLegend = ({
     onItemClick,
     onItemHover,
     scaffoldName,
+    serverNames = SERVER_NAMES_LOWER,
 }: GenericLegendProps) => {
     const legendItems = useMemo(() => {
         if (!nivoData || nivoData.length === 0) return []
 
-        return SERVER_NAMES_LOWER.map((serverName) => {
+        return serverNames.map((serverName) => {
             const series = nivoData.find(
                 (s) => String(s.id).toLowerCase() === serverName
             )
@@ -51,7 +55,7 @@ const GenericLegend = ({
                     excludedSeries?.includes(String(series.id)) || false,
             }
         }).filter(Boolean)
-    }, [nivoData, excludedSeries])
+    }, [nivoData, excludedSeries, serverNames])
 
     const handleItemClick = (serverId: string) => {
         onItemClick?.(serverId)
